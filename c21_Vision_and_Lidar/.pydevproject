@@ -29,7 +29,6 @@
 <path>/opt/ros/fuerte/stacks/pluginlib/lib</path>
 <path>/opt/ros/fuerte/stacks/bond_core/bond/src</path>
 <path>/home/userws3/git/robil/c21_Vision_and_Lidar/src</path>
-<path>/home/userws3/git/robil/c21_Vision_and_Lidar/lib</path>
 <path>/opt/ros/fuerte/share/ros/core/mk</path>
 <path>/opt/ros/fuerte/lib/python2.7/dist-packages</path>
 <path>/home/userws3/git/robil/c21_Vision_and_Lidar</path>
