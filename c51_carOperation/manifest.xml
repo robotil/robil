@@ -1,5 +1,5 @@
 <package>
-  <description brief="c21_Vision_and_Lidar">
+  <description brief="c51_carOperation">
 
      c21_Vision_and_Lidar
 
@@ -7,7 +7,7 @@
   <author>Lar</author>
   <license>BSD</license>
   <review status="unreviewed" notes=""/>
-  <url>http://ros.org/wiki/c21_Vision_and_Lidar</url>
+  <url>http://ros.org/wiki/c51_carOperation</url>
   <depend package="roscpp"/>
   <depend package="std_msgs"/>
   <depend package="rospy"/>
