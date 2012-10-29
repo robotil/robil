@@ -6,7 +6,7 @@
   </description>
   <author>Lar</author>
   <license>BSD</license>
-  <review status="unreviewed" notes=""/>
+  <review status="unreviewed" notes="blablabla"/>
   <url>http://ros.org/wiki/c51_carOperation</url>
   <depend package="roscpp"/>
   <depend package="std_msgs"/>
