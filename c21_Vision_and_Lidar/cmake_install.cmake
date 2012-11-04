@@ -1,4 +1,4 @@
-# Install script for directory: /home/lar/Desktop/rosworkspace/c21_Vision_and_Lidar
+# Install script for directory: /home/userws3/git/robil/c21_Vision_and_Lidar
 
 # Set the install prefix
 IF(NOT DEFINED CMAKE_INSTALL_PREFIX)
@@ -38,7 +38,13 @@ ELSE(CMAKE_INSTALL_COMPONENT)
   SET(CMAKE_INSTALL_MANIFEST "install_manifest.txt")
 ENDIF(CMAKE_INSTALL_COMPONENT)
 
+<<<<<<< HEAD
 FILE(WRITE "/home/lar/Desktop/rosworkspace/c21_Vision_and_Lidar/${CMAKE_INSTALL_MANIFEST}" "")
 FOREACH(file ${CMAKE_INSTALL_MANIFEST_FILES})
   FILE(APPEND "/home/lar/Desktop/rosworkspace/c21_Vision_and_Lidar/${CMAKE_INSTALL_MANIFEST}" "${file}\n")
+=======
+FILE(WRITE "/home/userws3/git/robil/c21_Vision_and_Lidar/${CMAKE_INSTALL_MANIFEST}" "")
+FOREACH(file ${CMAKE_INSTALL_MANIFEST_FILES})
+  FILE(APPEND "/home/userws3/git/robil/c21_Vision_and_Lidar/${CMAKE_INSTALL_MANIFEST}" "${file}\n")
+>>>>>>> 84c0fe8ae1f9bf917edb5b67b0e9bf9812372f79
 ENDFOREACH(file)

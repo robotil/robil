@@ -1,3 +1,8 @@
+# Eclipse files
+.cproject
+.project
+.pydevproject
+
 # Compiled Object files
 *.slo
 *.lo
@@ -10,3 +15,5 @@
 *.lai
 *.la
 *.a
+
+*~
