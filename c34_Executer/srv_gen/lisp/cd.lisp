@@ -1,7 +1,7 @@
 ; Auto-generated. Do not edit!
 
 
-(cl:in-package Executer-srv)
+(cl:in-package c34_Executer-srv)
 
 
 ;//! \htmlinclude cd-request.msg.html
@@ -20,11 +20,11 @@
 (cl:defmethod cl:initialize-instance :after ((m <cd-request>) cl:&rest args)
   (cl:declare (cl:ignorable args))
   (cl:unless (cl:typep m 'cd-request)
-    (roslisp-msg-protocol:msg-deprecation-warning "using old message class name Executer-srv:<cd-request> is deprecated: use Executer-srv:cd-request instead.")))
+    (roslisp-msg-protocol:msg-deprecation-warning "using old message class name c34_Executer-srv:<cd-request> is deprecated: use c34_Executer-srv:cd-request instead.")))
 
 (cl:ensure-generic-function 'path-val :lambda-list '(m))
 (cl:defmethod path-val ((m <cd-request>))
-  (roslisp-msg-protocol:msg-deprecation-warning "Using old-style slot reader Executer-srv:path-val is deprecated.  Use Executer-srv:path instead.")
+  (roslisp-msg-protocol:msg-deprecation-warning "Using old-style slot reader c34_Executer-srv:path-val is deprecated.  Use c34_Executer-srv:path instead.")
   (path m))
 (cl:defmethod roslisp-msg-protocol:serialize ((msg <cd-request>) ostream)
   "Serializes a message object of type '<cd-request>"
@@ -49,10 +49,10 @@
 )
 (cl:defmethod roslisp-msg-protocol:ros-datatype ((msg (cl:eql '<cd-request>)))
   "Returns string type for a service object of type '<cd-request>"
-  "Executer/cdRequest")
+  "c34_Executer/cdRequest")
 (cl:defmethod roslisp-msg-protocol:ros-datatype ((msg (cl:eql 'cd-request)))
   "Returns string type for a service object of type 'cd-request"
-  "Executer/cdRequest")
+  "c34_Executer/cdRequest")
 (cl:defmethod roslisp-msg-protocol:md5sum ((type (cl:eql '<cd-request>)))
   "Returns md5sum for a message object of type '<cd-request>"
   "384058fb0d9614cd7c9170628fd63f12")
@@ -90,11 +90,11 @@
 (cl:defmethod cl:initialize-instance :after ((m <cd-response>) cl:&rest args)
   (cl:declare (cl:ignorable args))
   (cl:unless (cl:typep m 'cd-response)
-    (roslisp-msg-protocol:msg-deprecation-warning "using old message class name Executer-srv:<cd-response> is deprecated: use Executer-srv:cd-response instead.")))
+    (roslisp-msg-protocol:msg-deprecation-warning "using old message class name c34_Executer-srv:<cd-response> is deprecated: use c34_Executer-srv:cd-response instead.")))
 
 (cl:ensure-generic-function 'location-val :lambda-list '(m))
 (cl:defmethod location-val ((m <cd-response>))
-  (roslisp-msg-protocol:msg-deprecation-warning "Using old-style slot reader Executer-srv:location-val is deprecated.  Use Executer-srv:location instead.")
+  (roslisp-msg-protocol:msg-deprecation-warning "Using old-style slot reader c34_Executer-srv:location-val is deprecated.  Use c34_Executer-srv:location instead.")
   (location m))
 (cl:defmethod roslisp-msg-protocol:serialize ((msg <cd-response>) ostream)
   "Serializes a message object of type '<cd-response>"
@@ -119,10 +119,10 @@
 )
 (cl:defmethod roslisp-msg-protocol:ros-datatype ((msg (cl:eql '<cd-response>)))
   "Returns string type for a service object of type '<cd-response>"
-  "Executer/cdResponse")
+  "c34_Executer/cdResponse")
 (cl:defmethod roslisp-msg-protocol:ros-datatype ((msg (cl:eql 'cd-response)))
   "Returns string type for a service object of type 'cd-response"
-  "Executer/cdResponse")
+  "c34_Executer/cdResponse")
 (cl:defmethod roslisp-msg-protocol:md5sum ((type (cl:eql '<cd-response>)))
   "Returns md5sum for a message object of type '<cd-response>"
   "384058fb0d9614cd7c9170628fd63f12")
@@ -150,4 +150,4 @@
   'cd-response)
 (cl:defmethod roslisp-msg-protocol:ros-datatype ((msg (cl:eql 'cd)))
   "Returns string type for a service object of type '<cd>"
-  "Executer/cd")
+  "c34_Executer/cd")

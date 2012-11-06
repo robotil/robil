@@ -1,0 +1,31 @@
+10
+
+dir
+129
+svn+ssh://ariy@10.0.0.5/var/lib/svn/ROBIL/RobilTask/include
+svn+ssh://ariy@10.0.0.5/var/lib/svn/ROBIL
+
+
+
+2012-10-09T14:53:33.500208Z
+125
+yeda
+
+
+svn:special svn:externals svn:needs-lock
+
+
+
+
+
+
+
+
+
+
+
+f4324cd1-31b7-4009-a8f1-a90d45b028a1
+
+RobilTask
+dir
+
