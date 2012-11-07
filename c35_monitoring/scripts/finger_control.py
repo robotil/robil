@@ -31,30 +31,56 @@ class _GetchUnix:
         return ch
 
 
-class _GetchWindows:
-    def __init__(self):
-        import msvcrt
-
-    def __call__(self):
-        import msvcrt
-        return msvcrt.getch()
-
 
 getch = _Getch()
 
 def finger_command():
     # Setup the publishers for each joint
-    r_arm_elx = rospy.Publisher('/r_arm_elx_position_controller/command', Float64)
-    r_arm_ely = rospy.Publisher('/r_arm_ely_position_controller/command', Float64)
+    r_f0_j0 = rospy.Publisher('/r_f0_j0_position_controller/command', Float64)
+    r_f0_j1 = rospy.Publisher('/r_f0_j1_position_controller/command', Float64)
+    r_f0_j2 = rospy.Publisher('/r_f0_j2_position_controller/command', Float64)
+    r_f1_j0 = rospy.Publisher('/r_f1_j0_position_controller/command', Float64)
+    r_f1_j1 = rospy.Publisher('/r_f1_j1_position_controller/command', Float64)
+    r_f1_j2 = rospy.Publisher('/r_f1_j2_position_controller/command', Float64)
+    r_f2_j0 = rospy.Publisher('/r_f2_j0_position_controller/command', Float64)
+    r_f2_j1 = rospy.Publisher('/r_f2_j1_position_controller/command', Float64)
+    r_f2_j2 = rospy.Publisher('/r_f2_j2_position_controller/command', Float64)
+    r_f3_j0 = rospy.Publisher('/r_f3_j0_position_controller/command', Float64)
+    r_f3_j1 = rospy.Publisher('/r_f3_j1_position_controller/command', Float64)
+    r_f3_j2 = rospy.Publisher('/r_f3_j2_position_controller/command', Float64)
+    
 
     # Initialize the node
     rospy.init_node('joint_control')
 
     #Initial pose
-    r_arm_elx.publish(-1.17)
-    r_arm_ely.publish(0.4)
-    elbow_x = -1.17
-    elbow_y = 0.4
+    r_f0_j0.publish(-0.25)
+    r_f0_j1.publish(0.08)
+    r_f0_j2.publish(0)
+    r_f1_j0.publish(-0.24)
+    r_f1_j1.publish(0.08)
+    r_f1_j2.publish(0)
+    r_f2_j0.publish(-0.22)
+    r_f2_j1.publish(0.08)
+    r_f2_j2.publish(0)
+    r_f3_j0.publish(0.64)
+    r_f3_j1.publish(-0.02)
+    r_f3_j2.publish(0.07)
+    
+    r_f0_j0_pos=-0.25
+    r_f0_j1_pos=0.08
+    r_f0_j2_pos=0
+    r_f1_j0_pos=-0.24
+    r_f1_j1_pos=0.08
+    r_f1_j2_pos=0
+    r_f2_j0_pos=-0.22
+    r_f2_j1_pos=0.08
+    r_f2_j2_pos=0
+    r_f3_j0_pos=0.64
+    r_f3_j1_pos=-0.02
+    r_f3_j2_pos=0.07
+    
+
     # Sleep for 1 second to wait for the home position
     rospy.sleep(1)
     print 'Press a key'
@@ -63,13 +89,50 @@ def finger_command():
     for i in xrange(sys.maxint):
       k=inkey()
       if k<'a' or k>'z':break
-      if k=='q':elbow_x = elbow_x + 0.1
-      if k=='a':elbow_x = elbow_x - 0.1
-      if k=='w':elbow_y = elbow_y + 0.1
-      if k=='s':elbow_y = elbow_y - 0.1
-      print 'you pressed ',k
-      r_arm_elx.publish(elbow_x)
-      r_arm_ely.publish(elbow_y)
+      if k=='q':
+		#r_f0_j0_pos = r_f0_j0_pos + 0.02
+		#r_f1_j0_pos = r_f1_j0_pos + 0.02
+		#r_f2_j0_pos = r_f2_j0_pos + 0.02
+		r_f3_j0_pos = r_f3_j0_pos + 0.02
+      if k=='a':
+		#r_f0_j0_pos = r_f0_j0_pos - 0.02
+		#r_f1_j0_pos = r_f1_j0_pos - 0.02
+		#r_f2_j0_pos = r_f2_j0_pos - 0.02
+		r_f3_j0_pos = r_f3_j0_pos - 0.02
+      if k=='w':
+		r_f0_j1_pos = r_f0_j1_pos + 0.02
+		r_f1_j1_pos = r_f1_j1_pos + 0.02
+		r_f2_j1_pos = r_f2_j1_pos + 0.02
+		r_f3_j1_pos = r_f3_j1_pos + 0.02
+      if k=='s':
+		r_f0_j1_pos = r_f0_j1_pos - 0.02
+		r_f1_j1_pos = r_f1_j1_pos - 0.02
+		r_f2_j1_pos = r_f2_j1_pos - 0.02
+		r_f3_j1_pos = r_f3_j1_pos - 0.02
+      if k=='e':
+		r_f0_j2_pos = r_f0_j2_pos + 0.02
+		r_f1_j2_pos = r_f1_j2_pos + 0.02
+		r_f2_j2_pos = r_f2_j2_pos + 0.02
+		r_f3_j2_pos = r_f3_j2_pos + 0.02
+      if k=='d':
+		r_f0_j2_pos = r_f0_j2_pos - 0.02
+		r_f1_j2_pos = r_f1_j2_pos - 0.02
+		r_f2_j2_pos = r_f2_j2_pos - 0.02
+		r_f3_j2_pos = r_f3_j2_pos - 0.02
+      
+      
+      r_f0_j0.publish(r_f0_j0_pos)
+      r_f0_j1.publish(r_f0_j1_pos)
+      r_f0_j2.publish(r_f0_j2_pos)
+      r_f1_j0.publish(r_f1_j0_pos)
+      r_f1_j1.publish(r_f1_j1_pos)
+      r_f1_j2.publish(r_f1_j2_pos)
+      r_f2_j0.publish(r_f2_j0_pos)
+      r_f2_j1.publish(r_f2_j1_pos)
+      r_f2_j2.publish(r_f2_j2_pos)
+      r_f3_j0.publish(r_f3_j0_pos)
+      r_f3_j1.publish(r_f3_j1_pos)
+      r_f3_j2.publish(r_f3_j2_pos)
 
     #This while loop will continue until ROS tells it to shutdown
 #    while not rospy.is_shutdown():
