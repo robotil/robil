@@ -90,8 +90,8 @@ CMakeFiles/ROSBUILD_gensrv_lisp: ../srv_gen/lisp/_package_pause.lisp
 ../srv_gen/lisp/stop.lisp: /opt/ros/fuerte/share/rostest/manifest.xml
 ../srv_gen/lisp/stop.lisp: /opt/ros/fuerte/share/actionlib_msgs/manifest.xml
 ../srv_gen/lisp/stop.lisp: /opt/ros/fuerte/share/actionlib/manifest.xml
-../srv_gen/lisp/stop.lisp: /home/ariy/robil/RobilTask/manifest.xml
-../srv_gen/lisp/stop.lisp: /home/ariy/robil/RobilTask/msg_gen/generated
+../srv_gen/lisp/stop.lisp: /home/ariy/robil/c0_RobilTask/manifest.xml
+../srv_gen/lisp/stop.lisp: /home/ariy/robil/c0_RobilTask/msg_gen/generated
 	$(CMAKE_COMMAND) -E cmake_progress_report /home/ariy/robil/c34_Executer/build/CMakeFiles $(CMAKE_PROGRESS_1)
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --blue --bold "Generating ../srv_gen/lisp/stop.lisp, ../srv_gen/lisp/_package.lisp, ../srv_gen/lisp/_package_stop.lisp"
 	/opt/ros/fuerte/share/roslisp/rosbuild/scripts/genmsg_lisp.py /home/ariy/robil/c34_Executer/srv/stop.srv
@@ -111,8 +111,8 @@ CMakeFiles/ROSBUILD_gensrv_lisp: ../srv_gen/lisp/_package_pause.lisp
 ../srv_gen/lisp/help_msg.lisp: /opt/ros/fuerte/share/rostest/manifest.xml
 ../srv_gen/lisp/help_msg.lisp: /opt/ros/fuerte/share/actionlib_msgs/manifest.xml
 ../srv_gen/lisp/help_msg.lisp: /opt/ros/fuerte/share/actionlib/manifest.xml
-../srv_gen/lisp/help_msg.lisp: /home/ariy/robil/RobilTask/manifest.xml
-../srv_gen/lisp/help_msg.lisp: /home/ariy/robil/RobilTask/msg_gen/generated
+../srv_gen/lisp/help_msg.lisp: /home/ariy/robil/c0_RobilTask/manifest.xml
+../srv_gen/lisp/help_msg.lisp: /home/ariy/robil/c0_RobilTask/msg_gen/generated
 	$(CMAKE_COMMAND) -E cmake_progress_report /home/ariy/robil/c34_Executer/build/CMakeFiles $(CMAKE_PROGRESS_2)
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --blue --bold "Generating ../srv_gen/lisp/help_msg.lisp, ../srv_gen/lisp/_package.lisp, ../srv_gen/lisp/_package_help_msg.lisp"
 	/opt/ros/fuerte/share/roslisp/rosbuild/scripts/genmsg_lisp.py /home/ariy/robil/c34_Executer/srv/help_msg.srv
@@ -132,8 +132,8 @@ CMakeFiles/ROSBUILD_gensrv_lisp: ../srv_gen/lisp/_package_pause.lisp
 ../srv_gen/lisp/pwd.lisp: /opt/ros/fuerte/share/rostest/manifest.xml
 ../srv_gen/lisp/pwd.lisp: /opt/ros/fuerte/share/actionlib_msgs/manifest.xml
 ../srv_gen/lisp/pwd.lisp: /opt/ros/fuerte/share/actionlib/manifest.xml
-../srv_gen/lisp/pwd.lisp: /home/ariy/robil/RobilTask/manifest.xml
-../srv_gen/lisp/pwd.lisp: /home/ariy/robil/RobilTask/msg_gen/generated
+../srv_gen/lisp/pwd.lisp: /home/ariy/robil/c0_RobilTask/manifest.xml
+../srv_gen/lisp/pwd.lisp: /home/ariy/robil/c0_RobilTask/msg_gen/generated
 	$(CMAKE_COMMAND) -E cmake_progress_report /home/ariy/robil/c34_Executer/build/CMakeFiles $(CMAKE_PROGRESS_3)
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --blue --bold "Generating ../srv_gen/lisp/pwd.lisp, ../srv_gen/lisp/_package.lisp, ../srv_gen/lisp/_package_pwd.lisp"
 	/opt/ros/fuerte/share/roslisp/rosbuild/scripts/genmsg_lisp.py /home/ariy/robil/c34_Executer/srv/pwd.srv
@@ -153,8 +153,8 @@ CMakeFiles/ROSBUILD_gensrv_lisp: ../srv_gen/lisp/_package_pause.lisp
 ../srv_gen/lisp/show_table_msg.lisp: /opt/ros/fuerte/share/rostest/manifest.xml
 ../srv_gen/lisp/show_table_msg.lisp: /opt/ros/fuerte/share/actionlib_msgs/manifest.xml
 ../srv_gen/lisp/show_table_msg.lisp: /opt/ros/fuerte/share/actionlib/manifest.xml
-../srv_gen/lisp/show_table_msg.lisp: /home/ariy/robil/RobilTask/manifest.xml
-../srv_gen/lisp/show_table_msg.lisp: /home/ariy/robil/RobilTask/msg_gen/generated
+../srv_gen/lisp/show_table_msg.lisp: /home/ariy/robil/c0_RobilTask/manifest.xml
+../srv_gen/lisp/show_table_msg.lisp: /home/ariy/robil/c0_RobilTask/msg_gen/generated
 	$(CMAKE_COMMAND) -E cmake_progress_report /home/ariy/robil/c34_Executer/build/CMakeFiles $(CMAKE_PROGRESS_4)
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --blue --bold "Generating ../srv_gen/lisp/show_table_msg.lisp, ../srv_gen/lisp/_package.lisp, ../srv_gen/lisp/_package_show_table_msg.lisp"
 	/opt/ros/fuerte/share/roslisp/rosbuild/scripts/genmsg_lisp.py /home/ariy/robil/c34_Executer/srv/show_table_msg.srv
@@ -174,8 +174,8 @@ CMakeFiles/ROSBUILD_gensrv_lisp: ../srv_gen/lisp/_package_pause.lisp
 ../srv_gen/lisp/run.lisp: /opt/ros/fuerte/share/rostest/manifest.xml
 ../srv_gen/lisp/run.lisp: /opt/ros/fuerte/share/actionlib_msgs/manifest.xml
 ../srv_gen/lisp/run.lisp: /opt/ros/fuerte/share/actionlib/manifest.xml
-../srv_gen/lisp/run.lisp: /home/ariy/robil/RobilTask/manifest.xml
-../srv_gen/lisp/run.lisp: /home/ariy/robil/RobilTask/msg_gen/generated
+../srv_gen/lisp/run.lisp: /home/ariy/robil/c0_RobilTask/manifest.xml
+../srv_gen/lisp/run.lisp: /home/ariy/robil/c0_RobilTask/msg_gen/generated
 	$(CMAKE_COMMAND) -E cmake_progress_report /home/ariy/robil/c34_Executer/build/CMakeFiles $(CMAKE_PROGRESS_5)
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --blue --bold "Generating ../srv_gen/lisp/run.lisp, ../srv_gen/lisp/_package.lisp, ../srv_gen/lisp/_package_run.lisp"
 	/opt/ros/fuerte/share/roslisp/rosbuild/scripts/genmsg_lisp.py /home/ariy/robil/c34_Executer/srv/run.srv
@@ -195,8 +195,8 @@ CMakeFiles/ROSBUILD_gensrv_lisp: ../srv_gen/lisp/_package_pause.lisp
 ../srv_gen/lisp/resume.lisp: /opt/ros/fuerte/share/rostest/manifest.xml
 ../srv_gen/lisp/resume.lisp: /opt/ros/fuerte/share/actionlib_msgs/manifest.xml
 ../srv_gen/lisp/resume.lisp: /opt/ros/fuerte/share/actionlib/manifest.xml
-../srv_gen/lisp/resume.lisp: /home/ariy/robil/RobilTask/manifest.xml
-../srv_gen/lisp/resume.lisp: /home/ariy/robil/RobilTask/msg_gen/generated
+../srv_gen/lisp/resume.lisp: /home/ariy/robil/c0_RobilTask/manifest.xml
+../srv_gen/lisp/resume.lisp: /home/ariy/robil/c0_RobilTask/msg_gen/generated
 	$(CMAKE_COMMAND) -E cmake_progress_report /home/ariy/robil/c34_Executer/build/CMakeFiles $(CMAKE_PROGRESS_6)
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --blue --bold "Generating ../srv_gen/lisp/resume.lisp, ../srv_gen/lisp/_package.lisp, ../srv_gen/lisp/_package_resume.lisp"
 	/opt/ros/fuerte/share/roslisp/rosbuild/scripts/genmsg_lisp.py /home/ariy/robil/c34_Executer/srv/resume.srv
@@ -216,8 +216,8 @@ CMakeFiles/ROSBUILD_gensrv_lisp: ../srv_gen/lisp/_package_pause.lisp
 ../srv_gen/lisp/lookup.lisp: /opt/ros/fuerte/share/rostest/manifest.xml
 ../srv_gen/lisp/lookup.lisp: /opt/ros/fuerte/share/actionlib_msgs/manifest.xml
 ../srv_gen/lisp/lookup.lisp: /opt/ros/fuerte/share/actionlib/manifest.xml
-../srv_gen/lisp/lookup.lisp: /home/ariy/robil/RobilTask/manifest.xml
-../srv_gen/lisp/lookup.lisp: /home/ariy/robil/RobilTask/msg_gen/generated
+../srv_gen/lisp/lookup.lisp: /home/ariy/robil/c0_RobilTask/manifest.xml
+../srv_gen/lisp/lookup.lisp: /home/ariy/robil/c0_RobilTask/msg_gen/generated
 	$(CMAKE_COMMAND) -E cmake_progress_report /home/ariy/robil/c34_Executer/build/CMakeFiles $(CMAKE_PROGRESS_7)
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --blue --bold "Generating ../srv_gen/lisp/lookup.lisp, ../srv_gen/lisp/_package.lisp, ../srv_gen/lisp/_package_lookup.lisp"
 	/opt/ros/fuerte/share/roslisp/rosbuild/scripts/genmsg_lisp.py /home/ariy/robil/c34_Executer/srv/lookup.srv
@@ -237,8 +237,8 @@ CMakeFiles/ROSBUILD_gensrv_lisp: ../srv_gen/lisp/_package_pause.lisp
 ../srv_gen/lisp/step.lisp: /opt/ros/fuerte/share/rostest/manifest.xml
 ../srv_gen/lisp/step.lisp: /opt/ros/fuerte/share/actionlib_msgs/manifest.xml
 ../srv_gen/lisp/step.lisp: /opt/ros/fuerte/share/actionlib/manifest.xml
-../srv_gen/lisp/step.lisp: /home/ariy/robil/RobilTask/manifest.xml
-../srv_gen/lisp/step.lisp: /home/ariy/robil/RobilTask/msg_gen/generated
+../srv_gen/lisp/step.lisp: /home/ariy/robil/c0_RobilTask/manifest.xml
+../srv_gen/lisp/step.lisp: /home/ariy/robil/c0_RobilTask/msg_gen/generated
 	$(CMAKE_COMMAND) -E cmake_progress_report /home/ariy/robil/c34_Executer/build/CMakeFiles $(CMAKE_PROGRESS_8)
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --blue --bold "Generating ../srv_gen/lisp/step.lisp, ../srv_gen/lisp/_package.lisp, ../srv_gen/lisp/_package_step.lisp"
 	/opt/ros/fuerte/share/roslisp/rosbuild/scripts/genmsg_lisp.py /home/ariy/robil/c34_Executer/srv/step.srv
@@ -258,8 +258,8 @@ CMakeFiles/ROSBUILD_gensrv_lisp: ../srv_gen/lisp/_package_pause.lisp
 ../srv_gen/lisp/btstack.lisp: /opt/ros/fuerte/share/rostest/manifest.xml
 ../srv_gen/lisp/btstack.lisp: /opt/ros/fuerte/share/actionlib_msgs/manifest.xml
 ../srv_gen/lisp/btstack.lisp: /opt/ros/fuerte/share/actionlib/manifest.xml
-../srv_gen/lisp/btstack.lisp: /home/ariy/robil/RobilTask/manifest.xml
-../srv_gen/lisp/btstack.lisp: /home/ariy/robil/RobilTask/msg_gen/generated
+../srv_gen/lisp/btstack.lisp: /home/ariy/robil/c0_RobilTask/manifest.xml
+../srv_gen/lisp/btstack.lisp: /home/ariy/robil/c0_RobilTask/msg_gen/generated
 	$(CMAKE_COMMAND) -E cmake_progress_report /home/ariy/robil/c34_Executer/build/CMakeFiles $(CMAKE_PROGRESS_9)
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --blue --bold "Generating ../srv_gen/lisp/btstack.lisp, ../srv_gen/lisp/_package.lisp, ../srv_gen/lisp/_package_btstack.lisp"
 	/opt/ros/fuerte/share/roslisp/rosbuild/scripts/genmsg_lisp.py /home/ariy/robil/c34_Executer/srv/btstack.srv
@@ -279,8 +279,8 @@ CMakeFiles/ROSBUILD_gensrv_lisp: ../srv_gen/lisp/_package_pause.lisp
 ../srv_gen/lisp/cd.lisp: /opt/ros/fuerte/share/rostest/manifest.xml
 ../srv_gen/lisp/cd.lisp: /opt/ros/fuerte/share/actionlib_msgs/manifest.xml
 ../srv_gen/lisp/cd.lisp: /opt/ros/fuerte/share/actionlib/manifest.xml
-../srv_gen/lisp/cd.lisp: /home/ariy/robil/RobilTask/manifest.xml
-../srv_gen/lisp/cd.lisp: /home/ariy/robil/RobilTask/msg_gen/generated
+../srv_gen/lisp/cd.lisp: /home/ariy/robil/c0_RobilTask/manifest.xml
+../srv_gen/lisp/cd.lisp: /home/ariy/robil/c0_RobilTask/msg_gen/generated
 	$(CMAKE_COMMAND) -E cmake_progress_report /home/ariy/robil/c34_Executer/build/CMakeFiles $(CMAKE_PROGRESS_10)
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --blue --bold "Generating ../srv_gen/lisp/cd.lisp, ../srv_gen/lisp/_package.lisp, ../srv_gen/lisp/_package_cd.lisp"
 	/opt/ros/fuerte/share/roslisp/rosbuild/scripts/genmsg_lisp.py /home/ariy/robil/c34_Executer/srv/cd.srv
@@ -300,8 +300,8 @@ CMakeFiles/ROSBUILD_gensrv_lisp: ../srv_gen/lisp/_package_pause.lisp
 ../srv_gen/lisp/ls.lisp: /opt/ros/fuerte/share/rostest/manifest.xml
 ../srv_gen/lisp/ls.lisp: /opt/ros/fuerte/share/actionlib_msgs/manifest.xml
 ../srv_gen/lisp/ls.lisp: /opt/ros/fuerte/share/actionlib/manifest.xml
-../srv_gen/lisp/ls.lisp: /home/ariy/robil/RobilTask/manifest.xml
-../srv_gen/lisp/ls.lisp: /home/ariy/robil/RobilTask/msg_gen/generated
+../srv_gen/lisp/ls.lisp: /home/ariy/robil/c0_RobilTask/manifest.xml
+../srv_gen/lisp/ls.lisp: /home/ariy/robil/c0_RobilTask/msg_gen/generated
 	$(CMAKE_COMMAND) -E cmake_progress_report /home/ariy/robil/c34_Executer/build/CMakeFiles $(CMAKE_PROGRESS_11)
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --blue --bold "Generating ../srv_gen/lisp/ls.lisp, ../srv_gen/lisp/_package.lisp, ../srv_gen/lisp/_package_ls.lisp"
 	/opt/ros/fuerte/share/roslisp/rosbuild/scripts/genmsg_lisp.py /home/ariy/robil/c34_Executer/srv/ls.srv
@@ -321,8 +321,8 @@ CMakeFiles/ROSBUILD_gensrv_lisp: ../srv_gen/lisp/_package_pause.lisp
 ../srv_gen/lisp/pause.lisp: /opt/ros/fuerte/share/rostest/manifest.xml
 ../srv_gen/lisp/pause.lisp: /opt/ros/fuerte/share/actionlib_msgs/manifest.xml
 ../srv_gen/lisp/pause.lisp: /opt/ros/fuerte/share/actionlib/manifest.xml
-../srv_gen/lisp/pause.lisp: /home/ariy/robil/RobilTask/manifest.xml
-../srv_gen/lisp/pause.lisp: /home/ariy/robil/RobilTask/msg_gen/generated
+../srv_gen/lisp/pause.lisp: /home/ariy/robil/c0_RobilTask/manifest.xml
+../srv_gen/lisp/pause.lisp: /home/ariy/robil/c0_RobilTask/msg_gen/generated
 	$(CMAKE_COMMAND) -E cmake_progress_report /home/ariy/robil/c34_Executer/build/CMakeFiles $(CMAKE_PROGRESS_12)
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --blue --bold "Generating ../srv_gen/lisp/pause.lisp, ../srv_gen/lisp/_package.lisp, ../srv_gen/lisp/_package_pause.lisp"
 	/opt/ros/fuerte/share/roslisp/rosbuild/scripts/genmsg_lisp.py /home/ariy/robil/c34_Executer/srv/pause.srv

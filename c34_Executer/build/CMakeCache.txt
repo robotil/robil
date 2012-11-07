@@ -146,8 +146,8 @@ CMAKE_SKIP_RPATH:BOOL=NO
 //Path to a program.
 CMAKE_STRIP:FILEPATH=/usr/bin/strip
 
-//No help, variable specified on the command line.
-CMAKE_TOOLCHAIN_FILE:UNINITIALIZED=/opt/ros/fuerte/share/ros/core/rosbuild/rostoolchain.cmake
+//The CMake toolchain file
+CMAKE_TOOLCHAIN_FILE:FILEPATH=/opt/ros/fuerte/share/ros/core/rosbuild/rostoolchain.cmake
 
 //If true, cmake will use relative paths in makefiles and projects.
 CMAKE_USE_RELATIVE_PATHS:BOOL=OFF
@@ -329,17 +329,17 @@ FIND_PACKAGE_MESSAGE_DETAILS_PythonInterp:INTERNAL=[/usr/bin/python][v2.7.3()]
 //ADVANCED property for variable: PYTHON_EXECUTABLE
 PYTHON_EXECUTABLE-ADVANCED:INTERNAL=1
 _rosbuild_EXPORTS:INTERNAL=
-_rosbuild_cached_flag_time:INTERNAL=1352242654.9
+_rosbuild_cached_flag_time:INTERNAL=1352295288.02
 _roslang_LANGS:INTERNAL=roscpp;rospy;roslisp
-_rospack_deps_manifests_invoke_result:INTERNAL=/opt/ros/fuerte/share/roslib/manifest.xml;/opt/ros/fuerte/share/roslang/manifest.xml;/opt/ros/fuerte/share/roscpp/manifest.xml;/opt/ros/fuerte/share/rospy/manifest.xml;/opt/ros/fuerte/share/rostest/manifest.xml;/opt/ros/fuerte/share/actionlib_msgs/manifest.xml;/opt/ros/fuerte/share/actionlib/manifest.xml;/home/ariy/robil/RobilTask/manifest.xml
-_rospack_msgsrv_gen_invoke_result:INTERNAL=/home/ariy/robil/RobilTask/msg_gen/generated
+_rospack_deps_manifests_invoke_result:INTERNAL=/opt/ros/fuerte/share/roslib/manifest.xml;/opt/ros/fuerte/share/roslang/manifest.xml;/opt/ros/fuerte/share/roscpp/manifest.xml;/opt/ros/fuerte/share/rospy/manifest.xml;/opt/ros/fuerte/share/rostest/manifest.xml;/opt/ros/fuerte/share/actionlib_msgs/manifest.xml;/opt/ros/fuerte/share/actionlib/manifest.xml;/home/ariy/robil/c0_RobilTask/manifest.xml
+_rospack_msgsrv_gen_invoke_result:INTERNAL=/home/ariy/robil/c0_RobilTask/msg_gen/generated
 c34_Executer_CFLAGS_OTHER:INTERNAL=
 c34_Executer_INCLUDEDIR:INTERNAL=
-c34_Executer_INCLUDE_DIRS:INTERNAL=/opt/ros/fuerte/include;/opt/ros/fuerte/share/actionlib/include;/home/ariy/robil/RobilTask/include;/home/ariy/robil/RobilTask/msg_gen/cpp/include
+c34_Executer_INCLUDE_DIRS:INTERNAL=/opt/ros/fuerte/include;/opt/ros/fuerte/share/actionlib/include;/home/ariy/robil/c0_RobilTask/include;/home/ariy/robil/c0_RobilTask/msg_gen/cpp/include
 c34_Executer_LDFLAGS_OTHER:INTERNAL=-Wl,-rpath,/opt/ros/fuerte/share/actionlib/lib
 c34_Executer_LIBRARIES:INTERNAL=roslib;roscpp;rostime;rosconsole;roscpp_serialization;xmlrpcpp;actionlib
 c34_Executer_LIBRARY_DIRS:INTERNAL=/opt/ros/fuerte/lib;/opt/ros/fuerte/share/actionlib/lib
-c34_Executer_cached_manifest_list:INTERNAL=/home/ariy/robil/c34_Executer/manifest.xml;/opt/ros/fuerte/share/roslib/manifest.xml;/opt/ros/fuerte/share/roslang/manifest.xml;/opt/ros/fuerte/share/roscpp/manifest.xml;/opt/ros/fuerte/share/rospy/manifest.xml;/opt/ros/fuerte/share/rostest/manifest.xml;/opt/ros/fuerte/share/actionlib_msgs/manifest.xml;/opt/ros/fuerte/share/actionlib/manifest.xml;/home/ariy/robil/RobilTask/manifest.xml;/home/ariy/robil/RobilTask/msg_gen/generated
+c34_Executer_cached_manifest_list:INTERNAL=/home/ariy/robil/c34_Executer/manifest.xml;/opt/ros/fuerte/share/roslib/manifest.xml;/opt/ros/fuerte/share/roslang/manifest.xml;/opt/ros/fuerte/share/roscpp/manifest.xml;/opt/ros/fuerte/share/rospy/manifest.xml;/opt/ros/fuerte/share/rostest/manifest.xml;/opt/ros/fuerte/share/actionlib_msgs/manifest.xml;/opt/ros/fuerte/share/actionlib/manifest.xml;/home/ariy/robil/c0_RobilTask/manifest.xml;/home/ariy/robil/c0_RobilTask/msg_gen/generated
 c34_Executer_temp:INTERNAL=-Wl,-rpath,/opt/ros/fuerte/share/actionlib/lib
 roscpp_CMAKE:INTERNAL=/opt/ros/fuerte/share/roscpp/rosbuild/roscpp.cmake
 roslib_path:INTERNAL=/opt/ros/fuerte/share/roslib

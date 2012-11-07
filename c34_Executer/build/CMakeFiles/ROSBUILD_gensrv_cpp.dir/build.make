@@ -67,8 +67,8 @@ CMakeFiles/ROSBUILD_gensrv_cpp: ../srv_gen/cpp/include/c34_Executer/pause.h
 ../srv_gen/cpp/include/c34_Executer/stop.h: /opt/ros/fuerte/share/rostest/manifest.xml
 ../srv_gen/cpp/include/c34_Executer/stop.h: /opt/ros/fuerte/share/actionlib_msgs/manifest.xml
 ../srv_gen/cpp/include/c34_Executer/stop.h: /opt/ros/fuerte/share/actionlib/manifest.xml
-../srv_gen/cpp/include/c34_Executer/stop.h: /home/ariy/robil/RobilTask/manifest.xml
-../srv_gen/cpp/include/c34_Executer/stop.h: /home/ariy/robil/RobilTask/msg_gen/generated
+../srv_gen/cpp/include/c34_Executer/stop.h: /home/ariy/robil/c0_RobilTask/manifest.xml
+../srv_gen/cpp/include/c34_Executer/stop.h: /home/ariy/robil/c0_RobilTask/msg_gen/generated
 	$(CMAKE_COMMAND) -E cmake_progress_report /home/ariy/robil/c34_Executer/build/CMakeFiles $(CMAKE_PROGRESS_1)
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --blue --bold "Generating ../srv_gen/cpp/include/c34_Executer/stop.h"
 	/opt/ros/fuerte/share/roscpp/rosbuild/scripts/gensrv_cpp.py /home/ariy/robil/c34_Executer/srv/stop.srv
@@ -85,8 +85,8 @@ CMakeFiles/ROSBUILD_gensrv_cpp: ../srv_gen/cpp/include/c34_Executer/pause.h
 ../srv_gen/cpp/include/c34_Executer/help_msg.h: /opt/ros/fuerte/share/rostest/manifest.xml
 ../srv_gen/cpp/include/c34_Executer/help_msg.h: /opt/ros/fuerte/share/actionlib_msgs/manifest.xml
 ../srv_gen/cpp/include/c34_Executer/help_msg.h: /opt/ros/fuerte/share/actionlib/manifest.xml
-../srv_gen/cpp/include/c34_Executer/help_msg.h: /home/ariy/robil/RobilTask/manifest.xml
-../srv_gen/cpp/include/c34_Executer/help_msg.h: /home/ariy/robil/RobilTask/msg_gen/generated
+../srv_gen/cpp/include/c34_Executer/help_msg.h: /home/ariy/robil/c0_RobilTask/manifest.xml
+../srv_gen/cpp/include/c34_Executer/help_msg.h: /home/ariy/robil/c0_RobilTask/msg_gen/generated
 	$(CMAKE_COMMAND) -E cmake_progress_report /home/ariy/robil/c34_Executer/build/CMakeFiles $(CMAKE_PROGRESS_2)
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --blue --bold "Generating ../srv_gen/cpp/include/c34_Executer/help_msg.h"
 	/opt/ros/fuerte/share/roscpp/rosbuild/scripts/gensrv_cpp.py /home/ariy/robil/c34_Executer/srv/help_msg.srv
@@ -103,8 +103,8 @@ CMakeFiles/ROSBUILD_gensrv_cpp: ../srv_gen/cpp/include/c34_Executer/pause.h
 ../srv_gen/cpp/include/c34_Executer/pwd.h: /opt/ros/fuerte/share/rostest/manifest.xml
 ../srv_gen/cpp/include/c34_Executer/pwd.h: /opt/ros/fuerte/share/actionlib_msgs/manifest.xml
 ../srv_gen/cpp/include/c34_Executer/pwd.h: /opt/ros/fuerte/share/actionlib/manifest.xml
-../srv_gen/cpp/include/c34_Executer/pwd.h: /home/ariy/robil/RobilTask/manifest.xml
-../srv_gen/cpp/include/c34_Executer/pwd.h: /home/ariy/robil/RobilTask/msg_gen/generated
+../srv_gen/cpp/include/c34_Executer/pwd.h: /home/ariy/robil/c0_RobilTask/manifest.xml
+../srv_gen/cpp/include/c34_Executer/pwd.h: /home/ariy/robil/c0_RobilTask/msg_gen/generated
 	$(CMAKE_COMMAND) -E cmake_progress_report /home/ariy/robil/c34_Executer/build/CMakeFiles $(CMAKE_PROGRESS_3)
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --blue --bold "Generating ../srv_gen/cpp/include/c34_Executer/pwd.h"
 	/opt/ros/fuerte/share/roscpp/rosbuild/scripts/gensrv_cpp.py /home/ariy/robil/c34_Executer/srv/pwd.srv
@@ -121,8 +121,8 @@ CMakeFiles/ROSBUILD_gensrv_cpp: ../srv_gen/cpp/include/c34_Executer/pause.h
 ../srv_gen/cpp/include/c34_Executer/show_table_msg.h: /opt/ros/fuerte/share/rostest/manifest.xml
 ../srv_gen/cpp/include/c34_Executer/show_table_msg.h: /opt/ros/fuerte/share/actionlib_msgs/manifest.xml
 ../srv_gen/cpp/include/c34_Executer/show_table_msg.h: /opt/ros/fuerte/share/actionlib/manifest.xml
-../srv_gen/cpp/include/c34_Executer/show_table_msg.h: /home/ariy/robil/RobilTask/manifest.xml
-../srv_gen/cpp/include/c34_Executer/show_table_msg.h: /home/ariy/robil/RobilTask/msg_gen/generated
+../srv_gen/cpp/include/c34_Executer/show_table_msg.h: /home/ariy/robil/c0_RobilTask/manifest.xml
+../srv_gen/cpp/include/c34_Executer/show_table_msg.h: /home/ariy/robil/c0_RobilTask/msg_gen/generated
 	$(CMAKE_COMMAND) -E cmake_progress_report /home/ariy/robil/c34_Executer/build/CMakeFiles $(CMAKE_PROGRESS_4)
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --blue --bold "Generating ../srv_gen/cpp/include/c34_Executer/show_table_msg.h"
 	/opt/ros/fuerte/share/roscpp/rosbuild/scripts/gensrv_cpp.py /home/ariy/robil/c34_Executer/srv/show_table_msg.srv
@@ -139,8 +139,8 @@ CMakeFiles/ROSBUILD_gensrv_cpp: ../srv_gen/cpp/include/c34_Executer/pause.h
 ../srv_gen/cpp/include/c34_Executer/run.h: /opt/ros/fuerte/share/rostest/manifest.xml
 ../srv_gen/cpp/include/c34_Executer/run.h: /opt/ros/fuerte/share/actionlib_msgs/manifest.xml
 ../srv_gen/cpp/include/c34_Executer/run.h: /opt/ros/fuerte/share/actionlib/manifest.xml
-../srv_gen/cpp/include/c34_Executer/run.h: /home/ariy/robil/RobilTask/manifest.xml
-../srv_gen/cpp/include/c34_Executer/run.h: /home/ariy/robil/RobilTask/msg_gen/generated
+../srv_gen/cpp/include/c34_Executer/run.h: /home/ariy/robil/c0_RobilTask/manifest.xml
+../srv_gen/cpp/include/c34_Executer/run.h: /home/ariy/robil/c0_RobilTask/msg_gen/generated
 	$(CMAKE_COMMAND) -E cmake_progress_report /home/ariy/robil/c34_Executer/build/CMakeFiles $(CMAKE_PROGRESS_5)
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --blue --bold "Generating ../srv_gen/cpp/include/c34_Executer/run.h"
 	/opt/ros/fuerte/share/roscpp/rosbuild/scripts/gensrv_cpp.py /home/ariy/robil/c34_Executer/srv/run.srv
@@ -157,8 +157,8 @@ CMakeFiles/ROSBUILD_gensrv_cpp: ../srv_gen/cpp/include/c34_Executer/pause.h
 ../srv_gen/cpp/include/c34_Executer/resume.h: /opt/ros/fuerte/share/rostest/manifest.xml
 ../srv_gen/cpp/include/c34_Executer/resume.h: /opt/ros/fuerte/share/actionlib_msgs/manifest.xml
 ../srv_gen/cpp/include/c34_Executer/resume.h: /opt/ros/fuerte/share/actionlib/manifest.xml
-../srv_gen/cpp/include/c34_Executer/resume.h: /home/ariy/robil/RobilTask/manifest.xml
-../srv_gen/cpp/include/c34_Executer/resume.h: /home/ariy/robil/RobilTask/msg_gen/generated
+../srv_gen/cpp/include/c34_Executer/resume.h: /home/ariy/robil/c0_RobilTask/manifest.xml
+../srv_gen/cpp/include/c34_Executer/resume.h: /home/ariy/robil/c0_RobilTask/msg_gen/generated
 	$(CMAKE_COMMAND) -E cmake_progress_report /home/ariy/robil/c34_Executer/build/CMakeFiles $(CMAKE_PROGRESS_6)
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --blue --bold "Generating ../srv_gen/cpp/include/c34_Executer/resume.h"
 	/opt/ros/fuerte/share/roscpp/rosbuild/scripts/gensrv_cpp.py /home/ariy/robil/c34_Executer/srv/resume.srv
@@ -175,8 +175,8 @@ CMakeFiles/ROSBUILD_gensrv_cpp: ../srv_gen/cpp/include/c34_Executer/pause.h
 ../srv_gen/cpp/include/c34_Executer/lookup.h: /opt/ros/fuerte/share/rostest/manifest.xml
 ../srv_gen/cpp/include/c34_Executer/lookup.h: /opt/ros/fuerte/share/actionlib_msgs/manifest.xml
 ../srv_gen/cpp/include/c34_Executer/lookup.h: /opt/ros/fuerte/share/actionlib/manifest.xml
-../srv_gen/cpp/include/c34_Executer/lookup.h: /home/ariy/robil/RobilTask/manifest.xml
-../srv_gen/cpp/include/c34_Executer/lookup.h: /home/ariy/robil/RobilTask/msg_gen/generated
+../srv_gen/cpp/include/c34_Executer/lookup.h: /home/ariy/robil/c0_RobilTask/manifest.xml
+../srv_gen/cpp/include/c34_Executer/lookup.h: /home/ariy/robil/c0_RobilTask/msg_gen/generated
 	$(CMAKE_COMMAND) -E cmake_progress_report /home/ariy/robil/c34_Executer/build/CMakeFiles $(CMAKE_PROGRESS_7)
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --blue --bold "Generating ../srv_gen/cpp/include/c34_Executer/lookup.h"
 	/opt/ros/fuerte/share/roscpp/rosbuild/scripts/gensrv_cpp.py /home/ariy/robil/c34_Executer/srv/lookup.srv
@@ -193,8 +193,8 @@ CMakeFiles/ROSBUILD_gensrv_cpp: ../srv_gen/cpp/include/c34_Executer/pause.h
 ../srv_gen/cpp/include/c34_Executer/step.h: /opt/ros/fuerte/share/rostest/manifest.xml
 ../srv_gen/cpp/include/c34_Executer/step.h: /opt/ros/fuerte/share/actionlib_msgs/manifest.xml
 ../srv_gen/cpp/include/c34_Executer/step.h: /opt/ros/fuerte/share/actionlib/manifest.xml
-../srv_gen/cpp/include/c34_Executer/step.h: /home/ariy/robil/RobilTask/manifest.xml
-../srv_gen/cpp/include/c34_Executer/step.h: /home/ariy/robil/RobilTask/msg_gen/generated
+../srv_gen/cpp/include/c34_Executer/step.h: /home/ariy/robil/c0_RobilTask/manifest.xml
+../srv_gen/cpp/include/c34_Executer/step.h: /home/ariy/robil/c0_RobilTask/msg_gen/generated
 	$(CMAKE_COMMAND) -E cmake_progress_report /home/ariy/robil/c34_Executer/build/CMakeFiles $(CMAKE_PROGRESS_8)
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --blue --bold "Generating ../srv_gen/cpp/include/c34_Executer/step.h"
 	/opt/ros/fuerte/share/roscpp/rosbuild/scripts/gensrv_cpp.py /home/ariy/robil/c34_Executer/srv/step.srv
@@ -211,8 +211,8 @@ CMakeFiles/ROSBUILD_gensrv_cpp: ../srv_gen/cpp/include/c34_Executer/pause.h
 ../srv_gen/cpp/include/c34_Executer/btstack.h: /opt/ros/fuerte/share/rostest/manifest.xml
 ../srv_gen/cpp/include/c34_Executer/btstack.h: /opt/ros/fuerte/share/actionlib_msgs/manifest.xml
 ../srv_gen/cpp/include/c34_Executer/btstack.h: /opt/ros/fuerte/share/actionlib/manifest.xml
-../srv_gen/cpp/include/c34_Executer/btstack.h: /home/ariy/robil/RobilTask/manifest.xml
-../srv_gen/cpp/include/c34_Executer/btstack.h: /home/ariy/robil/RobilTask/msg_gen/generated
+../srv_gen/cpp/include/c34_Executer/btstack.h: /home/ariy/robil/c0_RobilTask/manifest.xml
+../srv_gen/cpp/include/c34_Executer/btstack.h: /home/ariy/robil/c0_RobilTask/msg_gen/generated
 	$(CMAKE_COMMAND) -E cmake_progress_report /home/ariy/robil/c34_Executer/build/CMakeFiles $(CMAKE_PROGRESS_9)
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --blue --bold "Generating ../srv_gen/cpp/include/c34_Executer/btstack.h"
 	/opt/ros/fuerte/share/roscpp/rosbuild/scripts/gensrv_cpp.py /home/ariy/robil/c34_Executer/srv/btstack.srv
@@ -229,8 +229,8 @@ CMakeFiles/ROSBUILD_gensrv_cpp: ../srv_gen/cpp/include/c34_Executer/pause.h
 ../srv_gen/cpp/include/c34_Executer/cd.h: /opt/ros/fuerte/share/rostest/manifest.xml
 ../srv_gen/cpp/include/c34_Executer/cd.h: /opt/ros/fuerte/share/actionlib_msgs/manifest.xml
 ../srv_gen/cpp/include/c34_Executer/cd.h: /opt/ros/fuerte/share/actionlib/manifest.xml
-../srv_gen/cpp/include/c34_Executer/cd.h: /home/ariy/robil/RobilTask/manifest.xml
-../srv_gen/cpp/include/c34_Executer/cd.h: /home/ariy/robil/RobilTask/msg_gen/generated
+../srv_gen/cpp/include/c34_Executer/cd.h: /home/ariy/robil/c0_RobilTask/manifest.xml
+../srv_gen/cpp/include/c34_Executer/cd.h: /home/ariy/robil/c0_RobilTask/msg_gen/generated
 	$(CMAKE_COMMAND) -E cmake_progress_report /home/ariy/robil/c34_Executer/build/CMakeFiles $(CMAKE_PROGRESS_10)
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --blue --bold "Generating ../srv_gen/cpp/include/c34_Executer/cd.h"
 	/opt/ros/fuerte/share/roscpp/rosbuild/scripts/gensrv_cpp.py /home/ariy/robil/c34_Executer/srv/cd.srv
@@ -247,8 +247,8 @@ CMakeFiles/ROSBUILD_gensrv_cpp: ../srv_gen/cpp/include/c34_Executer/pause.h
 ../srv_gen/cpp/include/c34_Executer/ls.h: /opt/ros/fuerte/share/rostest/manifest.xml
 ../srv_gen/cpp/include/c34_Executer/ls.h: /opt/ros/fuerte/share/actionlib_msgs/manifest.xml
 ../srv_gen/cpp/include/c34_Executer/ls.h: /opt/ros/fuerte/share/actionlib/manifest.xml
-../srv_gen/cpp/include/c34_Executer/ls.h: /home/ariy/robil/RobilTask/manifest.xml
-../srv_gen/cpp/include/c34_Executer/ls.h: /home/ariy/robil/RobilTask/msg_gen/generated
+../srv_gen/cpp/include/c34_Executer/ls.h: /home/ariy/robil/c0_RobilTask/manifest.xml
+../srv_gen/cpp/include/c34_Executer/ls.h: /home/ariy/robil/c0_RobilTask/msg_gen/generated
 	$(CMAKE_COMMAND) -E cmake_progress_report /home/ariy/robil/c34_Executer/build/CMakeFiles $(CMAKE_PROGRESS_11)
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --blue --bold "Generating ../srv_gen/cpp/include/c34_Executer/ls.h"
 	/opt/ros/fuerte/share/roscpp/rosbuild/scripts/gensrv_cpp.py /home/ariy/robil/c34_Executer/srv/ls.srv
@@ -265,8 +265,8 @@ CMakeFiles/ROSBUILD_gensrv_cpp: ../srv_gen/cpp/include/c34_Executer/pause.h
 ../srv_gen/cpp/include/c34_Executer/pause.h: /opt/ros/fuerte/share/rostest/manifest.xml
 ../srv_gen/cpp/include/c34_Executer/pause.h: /opt/ros/fuerte/share/actionlib_msgs/manifest.xml
 ../srv_gen/cpp/include/c34_Executer/pause.h: /opt/ros/fuerte/share/actionlib/manifest.xml
-../srv_gen/cpp/include/c34_Executer/pause.h: /home/ariy/robil/RobilTask/manifest.xml
-../srv_gen/cpp/include/c34_Executer/pause.h: /home/ariy/robil/RobilTask/msg_gen/generated
+../srv_gen/cpp/include/c34_Executer/pause.h: /home/ariy/robil/c0_RobilTask/manifest.xml
+../srv_gen/cpp/include/c34_Executer/pause.h: /home/ariy/robil/c0_RobilTask/msg_gen/generated
 	$(CMAKE_COMMAND) -E cmake_progress_report /home/ariy/robil/c34_Executer/build/CMakeFiles $(CMAKE_PROGRESS_12)
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --blue --bold "Generating ../srv_gen/cpp/include/c34_Executer/pause.h"
 	/opt/ros/fuerte/share/roscpp/rosbuild/scripts/gensrv_cpp.py /home/ariy/robil/c34_Executer/srv/pause.srv

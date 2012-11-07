@@ -10,14 +10,14 @@
 #include <iostream>
 #define PRINT(X) std::cout<<"TaskProxyConnectionByActionLib: "<<X<<std::endl;
 
-#include <RobilTask/RobilTaskAction.h>
+#include <c0_RobilTask/RobilTaskAction.h>
 #include <actionlib/client/simple_action_client.h>
-#include <RobilTask/RobilTask.h>
+#include <c0_RobilTask/RobilTask.h>
 
 namespace TaskProxyConnectionByActionLib{
 
-typedef actionlib::SimpleActionClient<RobilTask::RobilTaskAction> Client;
-using namespace RobilTask;
+typedef actionlib::SimpleActionClient<c0_RobilTask::RobilTaskAction> Client;
+using namespace c0_RobilTask;
 
 class RobilTaskProxy:public BTTask{
 private:

@@ -10,8 +10,8 @@
 
 namespace TaskProxyConnectionByActionLib{
 
-typedef actionlib::SimpleActionClient<RobilTask::RobilTaskAction> Client;
-using namespace RobilTask;
+typedef actionlib::SimpleActionClient<c0_RobilTask::RobilTaskAction> Client;
+using namespace c0_RobilTask;
 
 
 	RobilTaskProxy::RobilTaskProxy(std::string taskName):
@@ -26,7 +26,7 @@ using namespace RobilTask;
 	}
 	void RobilTaskProxy::setGoal (const BTTaskGoal& goal){
 		client.waitForServer();
-		RobilTask::RobilTaskGoal msg_goal;
+		c0_RobilTask::RobilTaskGoal msg_goal;
 		msg_goal.name = goal.name;
 		msg_goal.uid = goal.uid;
 		msg_goal.parameters = goal.parameters;
