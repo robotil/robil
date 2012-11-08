@@ -87,21 +87,21 @@ def leg_command():
       for i in xrange(sys.maxint):
 	k=inkey()
 	if k=='q':
-		  l_leg_kny_pos = l_leg_kny_pos + 0.25
+		  l_leg_kny_pos = l_leg_kny_pos + 0.05
 	if k=='a':
-		  l_leg_kny_pos = l_leg_kny_pos - 0.25
+		  l_leg_kny_pos = l_leg_kny_pos - 0.05
 	if k=='w':
-		  l_leg_lax_pos = l_leg_lax_pos + 0.01
+		  l_leg_lax_pos = l_leg_lax_pos + 0.05
 	if k=='s':
-		  l_leg_lax_pos = l_leg_lax_pos - 0.01
+		  l_leg_lax_pos = l_leg_lax_pos - 0.05
 	if k=='e':
 		  l_leg_lhy_pos = l_leg_lhy_pos + 0.05
 	if k=='d':
 		  l_leg_lhy_pos = l_leg_lhy_pos - 0.05
 	if k=='r':
-		  l_leg_mhx_pos = l_leg_mhx_pos + 0.1
+		  l_leg_mhx_pos = l_leg_mhx_pos + 0.05
 	if k=='f':
-		  l_leg_mhx_pos = l_leg_mhx_pos - 0.1
+		  l_leg_mhx_pos = l_leg_mhx_pos - 0.05
 	if k=='t':
 		  l_leg_uay_pos = l_leg_uay_pos + 0.05
 	if k=='g':
