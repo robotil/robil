@@ -10,6 +10,7 @@
 
 # Compiled Dynamic libraries
 *.so
+!libBTExecuter.so
 
 # Compiled Static libraries
 *.lai
