@@ -1,0 +1,23 @@
+Interfaces changed:
+N/A
+
+How to Check:
+============
+See c21_installation instructions.pdf
+
+
+
+
+
+Known Bugs:
+==========
+
+
+
+Known Limitations:
+=================
+It runs with the gazebo simulation (and not with the drcsim)
+
+
+
+
