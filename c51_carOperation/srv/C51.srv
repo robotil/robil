@@ -1,7 +1,0 @@
-c51_carOperation/C0C51_CL car_class
-c51_carOperation/C0C51_ST start_stop_car
-c51_carOperation/C0C51_PAR velocity_parameters
-c51_carOperation/C0C51_TRA travel_parameters
----
-c51_carOperation/C51C0_NOR Normal_abnormal_travel
-c51_carOperation/C51C0_OPO Car_Position
