@@ -1,0 +1,22 @@
+<package>
+  <description brief="RobilTask">
+
+     RobilTask
+
+  </description>
+  <author>dan</author>
+  <license>BSD</license>
+  <review status="unreviewed" notes=""/>
+  <url>http://ros.org/wiki/RobilTask</url>
+  <depend package="roslib"/>
+  <depend package="roscpp"/>
+  <depend package="actionlib"/>
+  <depend package="actionlib_msgs"/>
+  
+  <export>
+    <cpp cflags="-I${prefix}/include" />
+  </export>
+
+</package>
+
+
