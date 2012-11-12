@@ -6,7 +6,7 @@
 [PASS] /home/ariy/robil/C23_ObjectRecognition
 [PASS] /home/ariy/robil/C24_ObstacleDetection
 [PASS] /home/ariy/robil/C25_GlobalPosition
-[Error] /home/ariy/robil/C34_Executer
+[PASS] /home/ariy/robil/C34_Executer
 [PASS] /home/ariy/robil/C41_BodyControl
 [PASS] /home/ariy/robil/C42_LocomotionAndStability
 [PASS] /home/ariy/robil/C43_LocalBodyPVA
