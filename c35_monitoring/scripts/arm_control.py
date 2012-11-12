@@ -86,34 +86,34 @@ def armControl():
 	mode = getch()
 	#move arm x
 	if mode=='q':
-	  mov_arm_x=mov_arm_x+0.1
+	  mov_arm_x=mov_arm_x+0.01
 	elif mode=='a':
-	  mov_arm_x=mov_arm_x-0.1
+	  mov_arm_x=mov_arm_x-0.01
 	#move arm y 
 	elif mode=='w':
-	  mov_arm_y=mov_arm_y+0.1
+	  mov_arm_y=mov_arm_y+0.01
 	elif mode=='s':
-	  mov_arm_y=mov_arm_y-0.1
+	  mov_arm_y=mov_arm_y-0.01
 	#move mwx - SHORESH CAF HAYAD  
 	elif mode=='e':
-	  mov_arm_mwx=mov_arm_mwx+0.1
+	  mov_arm_mwx=mov_arm_mwx+0.01
 	elif mode=='d':
-	  mov_arm_mwx=mov_arm_mwx-0.1
+	  mov_arm_mwx=mov_arm_mwx-0.01
 	#move sholder x  
 	elif mode=='r':
-	  mov_arm_shx=mov_arm_shx+0.1
+	  mov_arm_shx=mov_arm_shx+0.01
 	elif mode=='f':
-	  mov_arm_shx=mov_arm_shx-0.1
+	  mov_arm_shx=mov_arm_shx-0.01
 	#move sholder  
 	elif mode=='t':
-	  mov_arm_usy=mov_arm_usy+0.1
+	  mov_arm_usy=mov_arm_usy+0.01
 	elif mode=='g':
-	  mov_arm_usy=mov_arm_usy-0.1
+	  mov_arm_usy=mov_arm_usy-0.01
 	#move upper limb Rotation
 	elif mode=='y':
-	  mov_arm_uwy=mov_arm_uwy+0.1
+	  mov_arm_uwy=mov_arm_uwy+0.01
 	elif mode=='h':
-	  mov_arm_uwy=mov_arm_uwy-0.1
+	  mov_arm_uwy=mov_arm_uwy-0.01
 	elif mode=='\x03':
 	  print "\n"
 	  break;
