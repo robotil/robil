@@ -64,8 +64,8 @@ def finger_command():
     r_f2_j1.publish(0.08)
     r_f2_j2.publish(0)
     r_f3_j0.publish(0.64)
-    r_f3_j1.publish(-0.02)
-    r_f3_j2.publish(0.07)
+    r_f3_j1.publish(0.08)
+    r_f3_j2.publish(0)
     
     r_f0_j0_pos=-0.25
     r_f0_j1_pos=0.08
@@ -77,8 +77,8 @@ def finger_command():
     r_f2_j1_pos=0.08
     r_f2_j2_pos=0
     r_f3_j0_pos=0.64
-    r_f3_j1_pos=-0.02
-    r_f3_j2_pos=0.07
+    r_f3_j1_pos=0.08
+    r_f3_j2_pos=0
     
 
     # Sleep for 1 second to wait for the home position
@@ -133,6 +133,8 @@ def finger_command():
       r_f3_j0.publish(r_f3_j0_pos)
       r_f3_j1.publish(r_f3_j1_pos)
       r_f3_j2.publish(r_f3_j2_pos)
+
+      print 'Positions: r_f0_j1=%f,r_f0_j2=%f' % (r_f0_j1_pos,r_f0_j2_pos)
 
     #This while loop will continue until ROS tells it to shutdown
 #    while not rospy.is_shutdown():
