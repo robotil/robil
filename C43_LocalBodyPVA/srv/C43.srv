@@ -1,0 +1,7 @@
+C43_LocalBodyPVA/C0C43_SJ Selected_joint_msg
+C43_LocalBodyPVA/C0C43_SL Selected_link_msg
+C43_LocalBodyPVA/C0C43_SI Selected_information_msg
+C43_LocalBodyPVA/C0C43_SLI Selected_link_information_msg
+---
+C43_LocalBodyPVA/C43C0_JPVA PVA_of_requested_joint_msg
+C43_LocalBodyPVA/C43C0_LPVA PVA_of_requested_link_local_ref_frame_msg
