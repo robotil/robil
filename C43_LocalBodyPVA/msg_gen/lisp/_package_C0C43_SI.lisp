@@ -1,8 +1,0 @@
-(cl:in-package C43_LocalBodyPVA-msg)
-(cl:export '(SELECTED_POSITION-VAL
-          SELECTED_POSITION
-          SELECTED_VELOCITY-VAL
-          SELECTED_VELOCITY
-          SELECTED_ACCELERATION-VAL
-          SELECTED_ACCELERATION
-))
