@@ -1,0 +1,8 @@
+int32 search_object
+int32 WHEEL=0
+int32 DOOR=1
+int32 BREAK_PEDAL=2
+int32 STAIR=3
+int32 LADDER=4
+int32 VALVE=5
+int32 TOOL=6

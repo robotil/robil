@@ -1,0 +1,6 @@
+<plan>
+   <par name="Mission"> 
+         <tsk name="moveHand" />
+         <tsk name="moveLeg" />
+   </par>
+</plan>
