@@ -3,6 +3,7 @@
 #scripts folder
 
 CURR_WD=$PWD
+rm log.txt
 cd ..
 ROS_WD=$PWD
 for dir in "$ROS_WD"/*; do

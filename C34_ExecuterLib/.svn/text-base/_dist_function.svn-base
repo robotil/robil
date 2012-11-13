@@ -1,0 +1,1 @@
+function dist { echo "go to BTExecuter"; cd ~/workspace/ROBIL/BTExecuter; pwd; echo "Remove tars"; rm -v *tgz; echo "Create distr"; ./distribute.sh; echo "copy distr to Executer"; cp -v *tgz ~/workspace/ROBIL/ros_test/Executer; echo "go to Executer"; cd ~/workspace/ROBIL/ros_test/Executer; pwd; echo "extract tar"; tar xzfv $(ls *tgz|tail -1); }
