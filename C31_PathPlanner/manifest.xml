@@ -1,0 +1,16 @@
+<package>
+  <description brief="C31_PathPlanner">
+
+     PathPlanner
+
+  </description>
+  <author>dan</author>
+  <license>BSD</license>
+  <review status="unreviewed" notes=""/>
+  <url>http://ros.org/wiki/C31_PathPlanner</url>
+  <depend package="roslib"/>
+  <depend package="roscpp"/>
+
+</package>
+
+
