@@ -1,3 +1,4 @@
+[Error] /home/ariy/robil/C0_BTDesigner
 [PASS] /home/ariy/robil/C0_RobilTask
 [Error] /home/ariy/robil/C0_Scripts
 [PASS] /home/ariy/robil/C11_OperatorControl

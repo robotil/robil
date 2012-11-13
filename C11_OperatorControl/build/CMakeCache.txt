@@ -152,8 +152,8 @@ CMAKE_SKIP_RPATH:BOOL=NO
 //Path to a program.
 CMAKE_STRIP:FILEPATH=/usr/bin/strip
 
-//No help, variable specified on the command line.
-CMAKE_TOOLCHAIN_FILE:UNINITIALIZED=/opt/ros/fuerte/share/ros/core/rosbuild/rostoolchain.cmake
+//The CMake toolchain file
+CMAKE_TOOLCHAIN_FILE:FILEPATH=/opt/ros/fuerte/share/ros/core/rosbuild/rostoolchain.cmake
 
 //If true, cmake will use relative paths in makefiles and projects.
 CMAKE_USE_RELATIVE_PATHS:BOOL=OFF
@@ -337,7 +337,7 @@ FIND_PACKAGE_MESSAGE_DETAILS_PythonInterp:INTERNAL=[/usr/bin/python][v2.7.3()]
 //ADVANCED property for variable: PYTHON_EXECUTABLE
 PYTHON_EXECUTABLE-ADVANCED:INTERNAL=1
 _rosbuild_EXPORTS:INTERNAL=
-_rosbuild_cached_flag_time:INTERNAL=1352722949.01
+_rosbuild_cached_flag_time:INTERNAL=1352757348.03
 _roslang_LANGS:INTERNAL=roscpp;rospy;roslisp
 _rospack_deps_manifests_invoke_result:INTERNAL=/opt/ros/fuerte/share/roslang/manifest.xml;/opt/ros/fuerte/share/roscpp/manifest.xml;/opt/ros/fuerte/share/std_msgs/manifest.xml;/opt/ros/fuerte/share/rospy/manifest.xml
 _rospack_msgsrv_gen_invoke_result:INTERNAL=
