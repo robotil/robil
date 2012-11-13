@@ -1,0 +1,16 @@
+<package>
+  <description brief="C11_OperatorControl">
+
+     C11_OperatorControl
+
+  </description>
+  <author>Lar</author>
+  <license>BSD</license>
+  <review status="unreviewed" notes=""/>
+  <url>http://ros.org/wiki/C11_OperatorControl</url>
+  <depend package="roscpp"/>
+  <depend package="std_msgs"/>
+  <depend package="rospy"/>
+</package>
+
+

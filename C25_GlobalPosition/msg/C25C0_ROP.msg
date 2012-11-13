@@ -1,0 +1,2 @@
+C25_GlobalPosition/UTM min_dimensions
+

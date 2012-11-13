@@ -1,0 +1,7 @@
+C23_ObjectRecognition/C0C23_SEC search_mode
+C23_ObjectRecognition/C0C23_SAR search_area
+C23_ObjectRecognition/C0C23_SEOB search_object
+---
+C23_ObjectRecognition/C23C0_OD objectDetected
+C23_ObjectRecognition/C23C0_OPO objectPossition
+C23_ObjectRecognition/C23C0_ODIM objectDimensions

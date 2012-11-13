@@ -1,0 +1,8 @@
+C21_VisionAndLidar/C0C21_AZI azimuth_msg
+C21_VisionAndLidar/C0C21_CAM camera_sample_rate_msg
+C21_VisionAndLidar/C0C21_LAZ laser_sample_rate_msg
+C21_VisionAndLidar/C0C21_SIZ output_image_size_msg
+C21_VisionAndLidar/C0C21_RES required_resolution_msg
+---
+C21_VisionAndLidar/C21C0_3DF scene_full_resolution_msg
+C21_VisionAndLidar/C21C0_3DR scene_reduced_resolution_msg
