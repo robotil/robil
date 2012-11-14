@@ -1,0 +1,5 @@
+<launch>
+  <include file="$(find C11_OperatorControl)/launch/C11.launch"/>
+  <include file="$(find C21_VisionAndLidar)/launch/C21.launch"/>
+  <include file="$(find C34_Executer)/launch/C34.launch"/>
+</launch>
