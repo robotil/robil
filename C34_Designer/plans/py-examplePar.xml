@@ -1,0 +1,6 @@
+<plan>
+   <par name="Mission" x="78.2543859649118" y="31.622807017543753" id="b2613652-28c1-4a07-9ad5-c643393f5950"> 
+         <tsk name="moveHand" x="16.254385964911805" y="139.62280701754375" dbg_time="0" dbg_result="true" id="fd5cb389-7f1b-48b6-942c-8db655dafaa1" />
+         <tsk name="moveLeg" x="168.2543859649118" y="132.62280701754375" dbg_time="0" dbg_result="true" id="156c21e8-6baf-4623-b436-16f4e06d3237" />
+   </par>
+</plan>
