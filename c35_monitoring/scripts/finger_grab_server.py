@@ -9,6 +9,7 @@ import actionlib
 
 from std_msgs.msg import Float64
 
+
 class FingerGrabAction(object):
   # create messages that are used to publish feedback/result
   _feedback = c35_monitoring.msg.finger_grabFeedback()
@@ -76,7 +77,7 @@ class FingerGrabAction(object):
 	self._as.set_preempted()
 	success = False
 	break
-      if i < 200:
+      if i < 2000:
 	j1_pos = j1_pos + 0.001
       else:
 	j2_pos = j2_pos + 0.001
@@ -92,9 +93,12 @@ class FingerGrabAction(object):
       r_f3_j1.publish(j1_pos)
       r_f3_j2.publish(j2_pos)
 
-      self._feedback.percent_done = (3500 / i) * 100
-      # publish the feedback
-      self._as.publish_feedback(self._feedback)
+      percent = (i / 3500.0) * 100.0
+      
+      if int(percent) > self._feedback.percent_done : 
+	self._feedback.percent_done = percent
+	# publish the feedback
+	self._as.publish_feedback(self._feedback)
 	
       if success:
 	self._result.final_location = j1_pos
