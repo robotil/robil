@@ -1,0 +1,39 @@
+<plan>
+   <par name="event3" x="359.5" y="36.5" id="83828891-c7d7-48da-867f-72f3f15cb960"> 
+         <par name="perception" x="178.5" y="130.5" id="ac1a5217-449b-412b-ba1e-587b424aad5d"> 
+               <tsk name="LocalizationTrack" x="43.5" y="167.5" dbg_time="0" dbg_result="true" id="a8cbffaf-f5ea-486a-9bf7-d79f14b50508" />
+               <tsk name="TrackObject(target=A)" x="51.5" y="203.5" dbg_time="0" dbg_result="true" id="cb8c9b0b-8768-4a92-83c3-a7864819f87b" />
+               <tsk name="TrackObject(target=B)" x="103.5" y="242.5" dbg_time="0" dbg_result="true" id="f8b73abd-429d-4bbb-95c5-c66026761d55" />
+               <tsk name="ObstacleDetection" x="144.5" y="277.5" dbg_time="0" dbg_result="true" id="f9699205-292e-4d6a-869e-4272c2c89d56" />
+               <tsk name="PathPlanning" x="194.5" y="314.5" dbg_time="0" dbg_result="true" id="ac96e849-318c-47d2-afcc-c01d590b8f2f" />
+         </par>
+         <par name="ProgressControl" x="441.5" y="108.5" id="f10af216-6f4c-4361-9974-59a2fef0b681"> 
+               <tsk name="Monitor(target=LiveLock)" x="352.5" y="162.5" dbg_time="0" dbg_result="true" id="0a64c093-4c1a-46c1-a32d-9abbb2c72079" />
+               <seq name="mission" x="576.5" y="174.5" id="8002a72b-760f-49b1-b91b-f7a67c6c3bec"> 
+                     <tsk name="RobotBody(pose=standUp)" x="428.5" y="246.5" dbg_time="0" dbg_result="true" id="50b4f751-04a5-4ef2-aa07-38bc128ccc2d" />
+                     <seq name="objectAFlow" x="633.5" y="245.5" id="c19bda81-5d25-4c63-acff-0c11d4030344"> 
+                           <tsk name="TurnTo(target=A)" x="520.5" y="316.5" dbg_time="0" dbg_result="true" id="2b1a72a0-e3db-4fe6-b4d2-6754beacc045" />
+                           <par name="safe" x="691.5" y="347.5" id="2518f615-d94c-43d5-8e25-dc9424acd565"> 
+                              <dec name="L" x="649.5" y="406.5"> 
+                                    <seq name="Stabilization" x="620.5" y="457.5" id="e2431913-1286-4690-9a28-da3f66e15e97"> 
+                                          <tsk name="Monitor(target=Stable)" x="447.5" y="504.5" dbg_time="0" dbg_result="true" id="34f602cd-9797-462c-a86b-5d44b11dac2e" />
+                                          <tsk name="RobotBody(pose=stabilize)" x="627.5" y="507.5" dbg_time="0" dbg_result="true" id="6c49cdfe-9de7-4ee6-934a-cb0959a54ff6" />
+                                    </seq>
+                              </dec>
+                                 <par name="TimeControl" x="883.5" y="524.5" id="df211792-d525-4806-b9de-ffb665940413"> 
+                                       <seq name="OperatorRequest" x="758.5" y="583.5" id="3fa4b07c-910e-4ee4-8922-0005ad9f0d44"> 
+                                             <tsk name="PushHMI(data=panoramic_image)" x="580.5" y="646.5" dbg_time="0" dbg_result="true" id="8a8f498b-098c-45a2-b2cc-04133f19e2e1" />
+                                             <tsk name="PushHMI(data=occupancy_grid)" x="678.5" y="681.5" dbg_time="0" dbg_result="true" id="c3bb5602-32e6-4a59-906e-bfb96dd9f924" />
+                                             <tsk name="PushHMI(data=path)" x="777.5" y="721.5" dbg_time="0" dbg_result="true" id="8e647d01-781a-4992-853e-b26cc61be56a" />
+                                             <tsk name="HMIResponse" x="863.5" y="653.5" dbg_time="0" dbg_result="true" id="7dcbaf63-c292-443c-af20-235e104426c9" />
+                                       </seq>
+                                       <tsk name="Monitor(target=Timeout)" x="952.5" y="576.5" dbg_time="0" dbg_result="true" id="e9b2dcdb-0af6-45b4-83aa-7ea3e31ec56a" />
+                                 </par>
+                           </par>
+                           <tsk name="FollowPath" x="821.5" y="319.5" dbg_time="0" dbg_result="true" id="29ddebd3-cadc-4898-a03b-6f166bb6914d" />
+                           <tsk name="PickUp(target=A)" x="926.5" y="318.5" dbg_time="0" dbg_result="true" id="d632a4dc-2775-4519-a63e-69d05517f60b" />
+                     </seq>
+               </seq>
+         </par>
+   </par>
+</plan>
