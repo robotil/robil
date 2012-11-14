@@ -1,5 +1,0 @@
-<lookup>
-  <task name="B" type="local" planner="file" file-name="/tmp/B" />
-  <task name="C" type="local" planner="file" file-name="/tmp/C" />
-  
-</lookup>
