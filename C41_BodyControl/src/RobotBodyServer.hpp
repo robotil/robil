@@ -32,7 +32,7 @@ public:
     void task(const GOAL &goal){
         int32_t success = PLAN;
         string plan ="";
-        
+        print "Called"
         /* GET TASK PARAMETERS */
         ROS_INFO("%s: Start: task name = %s", _name.c_str(), goal->name.c_str());
         ROS_INFO("%s: Start: task id = %s", _name.c_str(), goal->uid.c_str());
