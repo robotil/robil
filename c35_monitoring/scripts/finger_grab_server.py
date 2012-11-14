@@ -73,7 +73,7 @@ class FingerGrabAction(object):
     for i in xrange(1, 3500):
     # check that preempt has not been requested by the client
       if self._as.is_preempt_requested():
-	rospy.loginfo('%s: Preempted' % self._action_name)
+	#rospy.loginfo('%s: Preempted' % self._action_name)
 	self._as.set_preempted()
 	success = False
 	break
@@ -102,7 +102,7 @@ class FingerGrabAction(object):
 	
       if success:
 	self._result.final_location = j1_pos
-	rospy.loginfo('%s: Succeeded' % self._action_name)
+	#rospy.loginfo('%s: Succeeded' % self._action_name)
 	self._as.set_succeeded(self._result)
       
 if __name__ == '__main__':
