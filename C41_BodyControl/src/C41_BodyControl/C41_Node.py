@@ -1,4 +1,4 @@
-#! /usr/bin/env python
+#!/usr/bin/env python
 
 import roslib; roslib.load_manifest('C41_BodyControl')
 import rospy, math

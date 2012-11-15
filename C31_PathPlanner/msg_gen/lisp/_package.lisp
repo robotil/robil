@@ -1,0 +1,23 @@
+(cl:defpackage C31_PathPlanner-msg
+  (:use )
+  (:export
+   "<PPREQUIREMENTS>"
+   "PPREQUIREMENTS"
+   "<PPCHARGE>"
+   "PPCHARGE"
+   "<PPLOCATION>"
+   "PPLOCATION"
+   "<PPCONSTRAINTS>"
+   "PPCONSTRAINTS"
+   "<PPWAYPOINTS>"
+   "PPWAYPOINTS"
+   "<PPMAP>"
+   "PPMAP"
+   "<PPPOSITION>"
+   "PPPOSITION"
+   "<PPCORRIDOR>"
+   "PPCORRIDOR"
+   "<PPROBOTDIMENSION>"
+   "PPROBOTDIMENSION"
+  ))
+

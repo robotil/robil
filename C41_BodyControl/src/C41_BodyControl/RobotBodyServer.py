@@ -38,27 +38,25 @@ class RobotBodyServer(object):
 
     #### HERE PROCESS TASK PARAMETERS ####
 
-    neck_ay = rospy.Publisher('/r_arm_ely_position_controller/command', Float64)
+    _neck_ay = rospy.Publisher('/r_arm_ely_position_controller/command', Float64)
     #### DEFINE SLEEP DURATION BETWEEN TASK LOOP ITERATIONS ####
     r = rospy.Rate(100)
 
     #### SET NUMBER OF TASK LOOP ITERATIONS ####
     for i in xrange(1000): 
         if self._as.is_preempt_requested() or rospy.is_shutdown():
-        
-	    t = 6 * rospy.get_time()
-            neck_ay_v =  0.4 + 0.4 * math.sin(t)
-            _neck_ay.publish(neck_ay_v)
-            
-	    #### HERE PROICESS PREEMTION OR INTERAPT #####
+            #### HERE PROICESS PREEMTION OR INTERAPT #####
    
             rospy.loginfo('%s: Preempted' % self._action_name)
             self._as.set_preempted()
             task_success = False
             break
             
-            #### HERE PROCESS TASK ####
-            
+    	#### HERE PROCESS TASK ####
+   	t = 6 * rospy.get_time()
+    	neck_ay_v =  0.4 + 0.4 * math.sin(t)
+    	_neck_ay.publish(neck_ay_v)
+             
         r.sleep()
   
     if task_success:
