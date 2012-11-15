@@ -1,3 +1,0 @@
-<launch>
-  <node name="executer" pkg="C34_Executer" type="executer" />
-</launch>
