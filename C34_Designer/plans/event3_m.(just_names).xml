@@ -1,0 +1,39 @@
+<plan>
+   <par name="event3"> 
+         <par name="perception"> 
+               <tsk name="LocalizationTrack" />
+               <tsk name="TrackObject(target=A)" />
+               <tsk name="TrackObject(target=B)" />
+               <tsk name="ObstacleDetection" />
+               <tsk name="PathPlanning" />
+         </par>
+         <par name="ProgressControl"> 
+               <tsk name="Monitor(target=LiveLock)" />
+               <seq name="mission"> 
+                     <tsk name="BodyControl(pose=standUp)" />
+                     <seq name="objectAFlow"> 
+                           <tsk name="TurnTo(target=A)" />
+                           <par name="safe"> 
+                              <dec name="L"> 
+                                    <seq name="Stabilization"> 
+                                          <tsk name="Monitor(target=Stable)" />
+                                          <tsk name="BodyControl(pose=stabilize)" />
+                                    </seq>
+                              </dec>
+                                 <par name="TimeControl"> 
+                                       <seq name="OperatorRequest"> 
+                                             <tsk name="PushHMI(data=panoramic_image)" />
+                                             <tsk name="PushHMI(data=occupancy_grid)" />
+                                             <tsk name="PushHMI(data=path)" />
+                                             <tsk name="HMIResponse" />
+                                       </seq>
+                                       <tsk name="Monitor(target=Timeout)" />
+                                 </par>
+                           </par>
+                           <tsk name="FollowPath" />
+                           <tsk name="PickUp(target=A)" />
+                     </seq>
+               </seq>
+         </par>
+   </par>
+</plan>

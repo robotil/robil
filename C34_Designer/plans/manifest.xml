@@ -1,17 +1,18 @@
 <package>
-  <description brief="C34_Designer">
+  <description brief="C0_BTDesigner">
 
-     C34_Designer
+     C0_BTDesigner
 
   </description>
   <author>dan</author>
   <license>BSD</license>
   <review status="unreviewed" notes=""/>
-  <url>http://ros.org/wiki/C34_Designer</url>
+  <url>http://ros.org/wiki/C0_BTDesigner</url>
   <depend package="roslib"/>
   <depend package="roscpp"/>
   <depend package="actionlib"/>
   <depend package="actionlib_msgs"/>
+
 </package>
 
 
