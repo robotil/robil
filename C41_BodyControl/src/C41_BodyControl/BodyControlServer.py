@@ -13,14 +13,14 @@ TASK_RESULT_REJECT=0
 TASK_RESULT_OK=1
 TASK_RESULT_PLAN=2
 
-class RobotBodyServer(object):
+class BodyControlServer(object):
   # create messages that are used to publish feedback/result
   _feedback = C0_RobilTask.msg.RobilTaskFeedback()
   _result   = C0_RobilTask.msg.RobilTaskResult()
   
     
   def __init__(self):
-    self._action_name = "/RobotBody"
+    self._action_name = "/BodyControl"
     self._as = actionlib.SimpleActionServer(self._action_name, C0_RobilTask.msg.RobilTaskAction, execute_cb=self.task)
     self._as.start()
 
@@ -38,7 +38,7 @@ class RobotBodyServer(object):
 
     #### HERE PROCESS TASK PARAMETERS ####
 
-    _neck_ay = rospy.Publisher('/r_arm_ely_position_controller/command', Float64)
+    _arm = rospy.Publisher('/r_arm_ely_position_controller/command', Float64)
     #### DEFINE SLEEP DURATION BETWEEN TASK LOOP ITERATIONS ####
     r = rospy.Rate(100)
 
@@ -54,8 +54,8 @@ class RobotBodyServer(object):
             
     	#### HERE PROCESS TASK ####
    	t = 6 * rospy.get_time()
-    	neck_ay_v =  0.4 + 0.4 * math.sin(t)
-    	_neck_ay.publish(neck_ay_v)
+    	next_pos =  0.4 + 0.4 * math.sin(t)
+    	_arm.publish(next_pos)
              
         r.sleep()
   
