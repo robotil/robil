@@ -1,5 +1,0 @@
-<plan>
-   <seq name="mission"> 
-         <tsk name="RobotBody(param=MoveArm)" />
-   </seq>
-</plan>

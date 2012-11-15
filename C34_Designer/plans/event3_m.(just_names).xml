@@ -10,14 +10,14 @@
          <par name="ProgressControl"> 
                <tsk name="Monitor(target=LiveLock)" />
                <seq name="mission"> 
-                     <tsk name="RobotBody(pose=standUp)" />
+                     <tsk name="BodyControl(pose=standUp)" />
                      <seq name="objectAFlow"> 
                            <tsk name="TurnTo(target=A)" />
                            <par name="safe"> 
                               <dec name="L"> 
                                     <seq name="Stabilization"> 
                                           <tsk name="Monitor(target=Stable)" />
-                                          <tsk name="RobotBody(pose=stabilize)" />
+                                          <tsk name="BodyControl(pose=stabilize)" />
                                     </seq>
                               </dec>
                                  <par name="TimeControl"> 

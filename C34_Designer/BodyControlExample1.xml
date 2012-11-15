@@ -1,5 +1,0 @@
-<plan>
-   <seq name="mission" x="143.5" y="47.5" id="b26af94b-b424-4689-9708-d3f7d8315b20"> 
-         <tsk name="RobotBody(param=MoveArm)" x="99.5" y="125.5" dbg_time="0" dbg_result="true" id="3a1cc4b4-2b2e-437b-9a95-9380d5fcef59" />
-   </seq>
-</plan>
