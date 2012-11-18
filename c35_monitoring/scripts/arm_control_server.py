@@ -6,17 +6,17 @@ import rospy, math
 
 import actionlib
 
-import arm_control.msg
+import c35_monitoring.msg
 from std_msgs.msg import Float64
 
 class ArmControlAction(object):
   # create messages that are used to publish feedback/result
-  _feedback = arm_control.msg.arm_controlFeedback()
-  _result   = arm_control.msg.arm_controlResult()
+  _feedback = c35_monitoring.msg.arm_controlFeedback()
+  _result   = c35_monitoring.msg.arm_controlResult()
 
   def __init__(self, name):
     self._action_name = name
-    self._as = actionlib.SimpleActionServer(self._action_name, arm_control.msg.arm_controlAction, execute_cb=self.execute_cb)
+    self._as = actionlib.SimpleActionServer(self._action_name, c35_monitoring.msg.arm_controlAction, execute_cb=self.execute_cb)
     self._as.start()
     
   def moveToLoc(self, rng, topic, newLoc, percent):
@@ -35,8 +35,6 @@ class ArmControlAction(object):
       self._feedback.progress = self._feedback.progress + percent
       ## publish the feedback
       self._as.publish_feedback(self._feedback)
-      ## this step is not necessary, the sequence is computed at 1 Hz for demonstration purposes
-      #r.sleep()
       rospy.sleep(0.001)
       rospy.loginfo('%f percent done' %(self._feedback.progress)) 
     
@@ -50,7 +48,7 @@ class ArmControlAction(object):
     left = True
     
     # initial value for the feedback parameter
-    self._feedback.progress = 5
+    self._feedback.progress = 0
     
     # publish info to the console for the user
     rospy.loginfo('%s: Executing, creating a movment  %i in this progress %i' % (self._action_name, goal.hand, self._feedback.progress))
@@ -78,7 +76,7 @@ class ArmControlAction(object):
     l_arm_uwy = rospy.Publisher('/l_arm_uwy_position_controller/command', Float64)
 
     # Initialize the node
-    rospy.init_node('arm_control')
+    rospy.init_node('c35_monitoring')
     
     mov_arm_x= 0
     mov_arm_y= 0
@@ -101,15 +99,6 @@ class ArmControlAction(object):
     l_arm_usy.publish(mov_arm_usy)
     l_arm_uwy.publish(mov_arm_uwy)
     
-    
-    
-    #previos - right arm
-    #arm_x= 5.500000
-    #arm_y= -6.200000
-    #arm_mwx= -0.100000
-    #arm_shx= -0.500000
-    #arm_usy= 1.300000
-    #arm_uwy= -1.900000
     
     # start executing the action
     
@@ -161,6 +150,6 @@ class ArmControlAction(object):
       self._as.set_succeeded(self._result)
       
 if __name__ == '__main__':
-  rospy.init_node('arm_control')
+  rospy.init_node('c35_monitoring')
   ArmControlAction(rospy.get_name())
   rospy.spin()

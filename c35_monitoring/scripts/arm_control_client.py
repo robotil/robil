@@ -1,7 +1,7 @@
  
 #! /usr/bin/env python
 
-import roslib; roslib.load_manifest('arm_control')
+import roslib; roslib.load_manifest('c35_monitoring')
 import rospy, math
 
 # Brings in the SimpleActionClient
@@ -9,16 +9,12 @@ import actionlib
 from std_msgs.msg import Float64
 # Brings in the messages used by the fibonacci action, including the
 # goal message and the result message.
-import arm_control.msg
-
-def feedbackCb(feedback):
-
-    rospy.loginfo("Got Feedback  %d", feedback)
+import c35_monitoring.msg
 
 
 def arm_control_client():
     # Creates the SimpleActionClient, passing the type of the action (arm_controlAction) to the constructor.
-    client = actionlib.SimpleActionClient('arm_control', arm_control.msg.arm_controlAction)
+    client = actionlib.SimpleActionClient('c35_monitoring', c35_monitoring.msg.arm_controlAction)
     
     #get input from user
     hand = int(raw_input("please choose which hand to activate, 1 for right, 2 for left, 3 for both  "))
@@ -27,12 +23,11 @@ def arm_control_client():
     client.wait_for_server()
 
     # Creates a goal to send to the action server.
-    goal = arm_control.msg.arm_controlGoal(hand)
-    feedback = arm_control.msg.arm_controlFeedback()
-    feedback1 = feedbackCb(feedback.progress)
+    goal = c35_monitoring.msg.arm_controlGoal(hand)
+   
     # Sends the goal to the action server.
-    client.send_goal(goal, feedback_cb=feedback1)
-    #print "feedback %f" %feedback.progress
+    client.send_goal(goal)
+
     # Waits for the server to finish performing the action.
     client.wait_for_result(rospy.Duration.from_sec(5.0))
     
