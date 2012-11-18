@@ -26,11 +26,9 @@ public class PropertiesEditorAction implements ActionListener {
 
 	public void actionPerformed(ActionEvent a) {
 
-		switch (a.getActionCommand()) {
-		case "open_properties_dialog":
+		if (a.getActionCommand().equals("open_properties_dialog")) {
 			PropertiesEditor.show(PropertiesXmlHandler.lastPath);
-			break;
-		case "load_properties":
+		} else if (a.getActionCommand().equals("load_properties")) {
 			try {
 				String path = Dialogs.openFile("Load Properties File", "xml", ".");
 				
@@ -45,8 +43,7 @@ public class PropertiesEditorAction implements ActionListener {
 				JOptionPane.showMessageDialog(null, "Error loading file", "Load properties",
 						JOptionPane.ERROR_MESSAGE);
 			}
-			break;
-		case "save_properties":
+		} else if (a.getActionCommand().equals("save_properties")) {
 			try {
 				String path = Dialogs.saveFile("Save Properties", "xml");
 				
@@ -63,10 +60,8 @@ public class PropertiesEditorAction implements ActionListener {
 						JOptionPane.ERROR_MESSAGE);
 			}
 
-			break;
-		case "cancel_properties":
+		} else if (a.getActionCommand().equals("cancel_properties")) {
 			frame.dispose();
-			break;
 		}
 	}
 	
