@@ -1,7 +1,7 @@
  
 #! /usr/bin/env python
 
-import roslib; roslib.load_manifest('arm_control')
+import roslib; roslib.load_manifest('c35_monitoring')
 import rospy, math
 
 import actionlib
