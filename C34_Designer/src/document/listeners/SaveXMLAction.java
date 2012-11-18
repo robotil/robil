@@ -23,16 +23,12 @@ public class SaveXMLAction implements ActionListener {
 	@Override
 	public void actionPerformed(ActionEvent e) {
 		String fileName = null;
-		switch (e.getActionCommand()) {
-		case "file_save_as":
-			
+		
+		if (e.getActionCommand().equals("file_save_as")) {
 			fileName = Dialogs.saveFile("Save XML", "xml", "plan.xml", Parameters.path_to_plans);
 			
-			break;
-		
-		case "file_save":
+		} else if (e.getActionCommand().equals("file_save")) {
 			fileName = document.getAbsoluteFilePath();
-			break;
 		}
 		
 		if (fileName == null) {

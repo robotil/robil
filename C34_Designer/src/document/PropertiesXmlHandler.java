@@ -52,25 +52,19 @@ public class PropertiesXmlHandler {
 			String key = n.getNodeName().trim();
 			String value = n.getAttributes().getNamedItem("value")
 					.getTextContent();
-			switch (key) {
-			case "dbg_time":
+			if (key.equals("dbg_time")) {
 				Parameters.dbg_time = Integer.parseInt(value);
-				break;
-			case "dbg_result":
+				
+			} else if (key.equals("dbg_result")) {
 				Parameters.dbg_result = Boolean.parseBoolean(value);
-				break;
-			case "path_to_plans":
+			} else if (key.equals("path_to_plans")) {
 				Parameters.path_to_plans = new String(value);
-				break;
-			case "path_to_images":
+			} else if (key.equals("path_to_images")) {
 				Parameters.path_to_images = new String(value);
-				break;
-			case "executer_service":
+			} else if (key.equals("executer_service")) {
 				Parameters.executer_service = new String(value);
-				break;
-			default:
+			} else {
 				System.err.println("Error: unknown field in " + path);
-				break;
 			}
 		}
 	}
@@ -141,22 +135,16 @@ public class PropertiesXmlHandler {
 			String name = Parameters.class.getFields()[i].getName();
 			String value = map.get(name);
 
-			switch (name) {
-			case "dbg_time":
+			if (name.equals("dbg_time")) {
 				Parameters.dbg_time = Integer.parseInt(value);
-				break;
-			case "dbg_result":
+			} else if (name.equals("dbg_result")) {
 				Parameters.dbg_result = Boolean.parseBoolean(value);
-				break;
-			case "path_to_plans":
+			} else if (name.equals("path_to_plans")) {
 				Parameters.path_to_plans = new String(value);
-				break;
-			case "path_to_images":
+			} else if (name.equals("path_to_images")) {
 				Parameters.path_to_images = new String(value);
-				break;
-			case "executer_service":
+			} else if (name.equals("executer_service")) {
 				Parameters.executer_service = new String(value);
-				break;
 			}
 		}
 	}
