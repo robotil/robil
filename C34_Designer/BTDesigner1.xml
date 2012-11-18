@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<parameters>
+<path_to_images value="./images"/>
+<dbg_time value="1"/>
+<executer_service value="/executer"/>
+<path_to_plans value="./plans"/>
+<dbg_result value="true"/>
+</parameters>
