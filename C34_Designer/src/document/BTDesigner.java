@@ -3,62 +3,74 @@ package document;
 import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.Image;
+import java.awt.event.ActionEvent;
+import java.awt.event.KeyEvent;
 import java.io.File;
 import java.io.IOException;
 
-
 import javax.swing.ImageIcon;
 import javax.swing.JFrame;
+import javax.swing.JMenu;
+import javax.swing.JMenuBar;
+import javax.swing.JMenuItem;
+import javax.swing.JPanel;
+
+import javax.swing.KeyStroke;
 import javax.xml.parsers.DocumentBuilderFactory;
 
 import org.w3c.dom.Element;
 import org.xml.sax.SAXException;
 
+public class BTDesigner extends JFrame {
 
-public class BTDesigner extends JFrame{
-
-	public final static String VERSION= "0.1.1";
+	public final static String VERSION = "0.1.1";
 
 	Document document = new Document(this);
 	Toolbar toolbar = new Toolbar(document);
 	
-	public BTDesigner(){
-		
-		this.setTitle("Cogniteam BTDesigner "+BTDesigner.VERSION);
-		
+
+	
+
+	public BTDesigner() {
+
+		this.setTitle("Cogniteam BTDesigner " + BTDesigner.VERSION);
+
 		setLocation(200, 50);
-		setSize(new Dimension(1000,700));
-		ImageIcon icon = new ImageIcon(getClass().getClassLoader().getResource("icons/CogniTeam.gif"));
+		setSize(new Dimension(1000, 700));
+		ImageIcon icon = new ImageIcon(getClass().getClassLoader().getResource(
+				"icons/CogniTeam.gif"));
 		this.setIconImage(icon.getImage());
 		setLayout(new BorderLayout());
-		add(toolbar, BorderLayout.NORTH);
-		add(document, BorderLayout.CENTER);
+
+		Menubar menuBar = new Menubar(document, toolbar);
+		JPanel panel = new JPanel(new BorderLayout());
+		panel.add(menuBar, BorderLayout.NORTH);
+		panel.add(toolbar, BorderLayout.SOUTH);
+//		add(menuBar, BorderLayout.NORTH);
+		add(panel, BorderLayout.NORTH);
 		
+//		 add(toolbar, BorderLayout.SOUTH);
+		add(document, BorderLayout.CENTER);
+		this.setJMenuBar(menuBar);
 	}
-	
-	
+
 	public static void main(String[] args) {
 		org.w3c.dom.Document doc = null;
-		try{
-			doc = 
-				DocumentBuilderFactory
-					.newInstance()
-						.newDocumentBuilder()
-							.parse(new File("BTDesigner.xml"));
-		}catch(javax.xml.parsers.ParserConfigurationException ex){
+		try {
+			doc = DocumentBuilderFactory.newInstance().newDocumentBuilder()
+					.parse(new File("BTDesigner.xml"));
+		} catch (javax.xml.parsers.ParserConfigurationException ex) {
 			ex.printStackTrace();
 		} catch (SAXException ex) {
 			ex.printStackTrace();
 		} catch (IOException ex) {
 			ex.printStackTrace();
 		}
-		Element el = (Element)(doc.getElementsByTagName("dbg_time").item(0));
+		Element el = (Element) (doc.getElementsByTagName("dbg_time").item(0));
 		Parameters.dbg_time = Integer.parseInt(el.getAttribute("value"));
-		el = (Element)(doc.getElementsByTagName("dbg_result").item(0));
+		el = (Element) (doc.getElementsByTagName("dbg_result").item(0));
 		Parameters.dbg_result = Boolean.parseBoolean(el.getAttribute("value"));
-		
-		
-		
+
 		BTDesigner btd = new BTDesigner();
 		btd.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		btd.setVisible(true);

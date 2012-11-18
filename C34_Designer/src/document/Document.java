@@ -414,6 +414,14 @@ public class Document extends JPanel {
 	public JLabel tip = null;
 	public final boolean cleanToolSelectionAfterUse = false;
 	private String absoluteFilePath = "plan.xml";
+	
+	public String getAbsoluteFilePath() {
+		if (absoluteFilePath == null) {
+			return null;
+		}
+		return new String(absoluteFilePath);
+	}
+
 	public void toolSelectionClean(){
 		creator = null;
 		removeElement = false;
@@ -645,7 +653,7 @@ public class Document extends JPanel {
 		return true;
 	}
 
-	private void setCurrentWorkingFile(String absoluteFilePath) {
+	public void setCurrentWorkingFile(String absoluteFilePath) {
 		this.absoluteFilePath = absoluteFilePath;
 		mainWindow.setTitle("Cogniteam BTDesigner "+BTDesigner.VERSION+": "+absoluteFilePath);
 	}
