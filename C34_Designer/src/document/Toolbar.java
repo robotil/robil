@@ -1,5 +1,7 @@
 package document;
 
+import document.listeners.*;
+
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
@@ -26,6 +28,8 @@ import javax.swing.JTextField;
 import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
 import javax.swing.border.TitledBorder;
+
+import document.listeners.OpenFileAction;
 
 import elements.Arrow;
 import elements.Joint;
@@ -96,11 +100,11 @@ public class Toolbar extends JPanel {
 		JButton btn = new JButton();
 
 		btn.setText("Open");
-		btn.addActionListener(new OpenAction());
+		btn.addActionListener(new OpenFileAction(doc));
 		buttons.add(btn);
 		btn = new JButton();
 		btn.setText("Image");
-		btn.addActionListener(new ImageAction());
+		btn.addActionListener(new SaveImageAction(doc));//(new ImageAction());
 		buttons.add(btn);
 		btn = new JButton();
 		btn.setText("Compile");
@@ -153,42 +157,42 @@ public class Toolbar extends JPanel {
 			tip.setText(c.toolTip());
 		}	
 	}
-	public class OpenAction implements ActionListener {
-		public void actionPerformed(ActionEvent a) {
+//	public class OpenAction implements ActionListener {
+//		public void actionPerformed(ActionEvent a) {
+//
+//
+//			JFileChooser fc = new JFileChooser(new File("."));
+//
+//			// Show open dialog; this method does not return until the dialog is closed
+//			fc.showOpenDialog(Toolbar.this);
+//			File selFile = fc.getSelectedFile();
+//			document.loadPlan(selFile.getAbsolutePath());
+//			
+//		}	
+//	}
 
-
-			JFileChooser fc = new JFileChooser(new File("."));
-
-			// Show open dialog; this method does not return until the dialog is closed
-			fc.showOpenDialog(Toolbar.this);
-			File selFile = fc.getSelectedFile();
-			document.loadPlan(selFile.getAbsolutePath());
-			
-		}	
-	}
-
-	public class ImageAction implements ActionListener {
-		public void actionPerformed(ActionEvent a) {
-			FileDialog fileDialog = new FileDialog(new Frame(), "Save", FileDialog.SAVE);
-			fileDialog.setFilenameFilter(new FilenameFilter() {
-				@Override
-				public boolean accept(File dir, String name) {
-					return name.endsWith(".png");
-				}
-			});
-			fileDialog.setFile("plan.png");
-			fileDialog.setVisible(true);
-			System.out.println("File: " + fileDialog.getFile());
-			try {
-				
-				getSaveSnapShot( document,fileDialog.getFile());
-			} catch (Exception e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-
-		}	
-	}
+//	public class ImageAction implements ActionListener {
+//		public void actionPerformed(ActionEvent a) {
+//			FileDialog fileDialog = new FileDialog(new Frame(), "Save", FileDialog.SAVE);
+//			fileDialog.setFilenameFilter(new FilenameFilter() {
+//				@Override
+//				public boolean accept(File dir, String name) {
+//					return name.endsWith(".png");
+//				}
+//			});
+//			fileDialog.setFile("plan.png");
+//			fileDialog.setVisible(true);
+//			System.out.println("File: " + fileDialog.getFile());
+//			try {
+//				
+//				getSaveSnapShot( document,fileDialog.getFile());
+//			} catch (Exception e) {
+//				// TODO Auto-generated catch block
+//				e.printStackTrace();
+//			}
+//
+//		}	
+//	}
 	public class RemoveAction implements ActionListener {
 		public void actionPerformed(ActionEvent a) {
 			document.toolSelectionClean();
