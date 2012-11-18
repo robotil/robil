@@ -9,24 +9,30 @@ import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 import javax.swing.KeyStroke;
 
+import document.listeners.CompileAction;
 import document.listeners.LoadAndOpenAction;
+import document.listeners.ModifyAction;
 import document.listeners.OpenFileAction;
 import document.listeners.OpenTerminalAction;
+import document.listeners.PointAction;
 import document.listeners.PropertiesAction;
+import document.listeners.RemoveAction;
+import document.listeners.RunAction;
 import document.listeners.SaveImageAction;
 import document.listeners.SaveXMLAction;
+import document.listeners.ToolAction;
 
 public class Menubar extends JMenuBar {
 
-	public Menubar(Document document) {
+	public Menubar(Document document, Toolbar toolbar) {
 		add(buildFileMenu(document));
-		add(buildEditMenu(document));
+		add(buildEditMenu(document, toolbar));
 		add(buildWindowMenu(document));
 	}
-	
+
 	private JMenu buildFileMenu(Document document) {
 		/* build File Menu */
-		
+
 		JMenu menuFile = new JMenu("File");
 
 		menuFile.setMnemonic(KeyEvent.VK_F);
@@ -57,7 +63,7 @@ public class Menubar extends JMenuBar {
 		menuItemSave.setToolTipText("save file");
 		menuItemSave.setActionCommand("file_save");
 		menuItemSave.addActionListener(new SaveXMLAction());
-//		menuItemSave.addActionListener(listener);
+		// menuItemSave.addActionListener(listener);
 		menuFile.add(menuItemSave);
 
 		// save as
@@ -69,7 +75,6 @@ public class Menubar extends JMenuBar {
 		menuItemSaveAs.addActionListener(new SaveXMLAction());
 		menuFile.add(menuItemSaveAs);
 
-		
 		// save image
 		JMenuItem menuItemSaveImage = new JMenuItem("Save Image", KeyEvent.VK_I);
 		menuItemSaveImage.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_5,
@@ -79,14 +84,14 @@ public class Menubar extends JMenuBar {
 		menuItemSaveImage.setActionCommand("file_save_image");
 		menuItemSaveImage.addActionListener(new SaveImageAction(document));
 		menuFile.add(menuItemSaveImage);
-		
+
 		// compile
 		JMenuItem menuItemCompile = new JMenuItem("Compile", KeyEvent.VK_C);
 		menuItemCompile.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_6,
 				ActionEvent.ALT_MASK));
 		menuItemCompile
 				.setToolTipText("validates current plan and if plan is valid, saves it");
-//		menuItemCompile.addActionListener(listener);
+		menuItemCompile.addActionListener(new CompileAction(document));
 		menuFile.add(menuItemCompile);
 
 		// compile and upload
@@ -96,7 +101,7 @@ public class Menubar extends JMenuBar {
 				KeyEvent.VK_7, ActionEvent.ALT_MASK));
 		menuItemCompileAndUpload
 				.setToolTipText("validates current plan and if plan is valid uploads it to remote host (C34_Executer’s host)");
-//		menuItemCompileAndUpload.addActionListener(listener);
+		// menuItemCompileAndUpload.addActionListener(listener);
 		menuFile.add(menuItemCompileAndUpload);
 
 		// run
@@ -105,7 +110,7 @@ public class Menubar extends JMenuBar {
 				ActionEvent.ALT_MASK));
 		menuItemRun
 				.setToolTipText("validates current plan, uploads it to temporal remote file on C34_Executer’s host and runs it");
-//		menuItemRun.addActionListener(listener);
+		menuItemRun.addActionListener(new RunAction(document));
 		menuFile.add(menuItemRun);
 
 		// test
@@ -114,10 +119,9 @@ public class Menubar extends JMenuBar {
 				ActionEvent.ALT_MASK));
 		menuItemTest
 				.setToolTipText("validates current plan, saves it to a temporal local file and runs it in mode of logic simulation");
-//		menuItemTest.addActionListener(listener);
+		// menuItemTest.addActionListener(listener);
 		menuFile.add(menuItemTest);
-		
-		
+
 		// properties
 		JMenuItem menuItemProperties = new JMenuItem("Properties",
 				KeyEvent.VK_P);
@@ -127,21 +131,21 @@ public class Menubar extends JMenuBar {
 		menuItemProperties.setActionCommand("open_properties_dialog");
 		menuItemProperties.addActionListener(new PropertiesAction());
 		menuFile.add(menuItemProperties);
-		
+
 		return menuFile;
 	}
 
-	private JMenu buildEditMenu(Document document) {
+	private JMenu buildEditMenu(Document document, Toolbar toolbar) {
 		JMenu menu = new JMenu("Edit");
 
 		menu.setMnemonic(KeyEvent.VK_E);
-		menu.add(buildToolsMenu(document));
-		menu.add(buildElementsCreatorMenu(document));
+		menu.add(buildToolsMenu(document, toolbar));
+		menu.add(buildElementsCreatorMenu(document, toolbar));
 
 		return menu;
 	}
 
-	private JMenu buildToolsMenu(Document document) {
+	private JMenu buildToolsMenu(Document document, Toolbar toolbar) {
 		JMenu menu = new JMenu("Tools");
 		menu.setMnemonic(KeyEvent.VK_T);
 
@@ -150,26 +154,29 @@ public class Menubar extends JMenuBar {
 		menuItemRemove.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_1,
 				ActionEvent.ALT_MASK));
 		menuItemRemove.setToolTipText("sets mode of selector to remove");
+		menuItemRemove.addActionListener(new RemoveAction(document, toolbar));
 		menu.add(menuItemRemove);
 
-		// remove
+		// modify
 		JMenuItem menuItemModify = new JMenuItem("Modify", KeyEvent.VK_M);
 		menuItemModify.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_2,
 				ActionEvent.ALT_MASK));
 		menuItemModify.setToolTipText("sets mode of selector to modify");
+		menuItemModify.addActionListener(new ModifyAction(document, toolbar));
 		menu.add(menuItemModify);
 
-		// remove
+		// move
 		JMenuItem menuItemMove = new JMenuItem("Move", KeyEvent.VK_V);
 		menuItemMove.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_3,
 				ActionEvent.ALT_MASK));
 		menuItemMove.setToolTipText("sets mode of selector to move");
+		menuItemMove.addActionListener(new PointAction(document, toolbar));
 		menu.add(menuItemMove);
 
 		return menu;
 	}
 
-	private JMenu buildElementsCreatorMenu(Document document) {
+	private JMenu buildElementsCreatorMenu(Document document, Toolbar toolbar) {
 		JMenu menu = new JMenu("Elements Creator");
 		menu.setMnemonic(KeyEvent.VK_C);
 
@@ -178,6 +185,8 @@ public class Menubar extends JMenuBar {
 		menuItemTask.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_1,
 				ActionEvent.ALT_MASK));
 		menuItemTask.setToolTipText("sets mode of selector to create tasks");
+		menuItemTask.addActionListener(new ToolAction(document, toolbar,
+				toolbar.creators.get(0)));
 		menu.add(menuItemTask);
 
 		// arrow
@@ -185,6 +194,8 @@ public class Menubar extends JMenuBar {
 		menuItemArrow.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_2,
 				ActionEvent.ALT_MASK));
 		menuItemArrow.setToolTipText("sets mode of selector to create arrows");
+		menuItemArrow.addActionListener(new ToolAction(document, toolbar,
+				toolbar.creators.get(1)));
 		menu.add(menuItemArrow);
 
 		// decorator
@@ -193,6 +204,8 @@ public class Menubar extends JMenuBar {
 				ActionEvent.ALT_MASK));
 		menuItemDecorator
 				.setToolTipText("sets mode of selector to create decorators");
+		menuItemDecorator.addActionListener(new ToolAction(document, toolbar,
+				toolbar.creators.get(2)));
 		menu.add(menuItemDecorator);
 
 		// joint
@@ -201,6 +214,8 @@ public class Menubar extends JMenuBar {
 				ActionEvent.ALT_MASK));
 		menuItemJoint
 				.setToolTipText("sets mode of selector to create joint points on arrows");
+		menuItemJoint.addActionListener(new ToolAction(document, toolbar,
+				toolbar.creators.get(3)));
 		menu.add(menuItemJoint);
 
 		return menu;

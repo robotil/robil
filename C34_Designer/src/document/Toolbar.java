@@ -68,6 +68,9 @@ public class Toolbar extends JPanel {
 	static public final String TIP_modify = "Select element for modification (change text, type, etc)";
 	public JLabel tip = new JLabel(TIP_move);
 
+	public void setTipText(String msg) {
+		tip.setText(msg);
+	}
 
 	public Toolbar(Document doc){
 		document = doc;
@@ -108,11 +111,11 @@ public class Toolbar extends JPanel {
 		buttons.add(btn);
 		btn = new JButton();
 		btn.setText("Compile");
-		btn.addActionListener(new CompileAction());
+		btn.addActionListener(new CompileAction(doc));
 		buttons.add(btn);
 		btn = new JButton();
 		btn.setText("Run");
-		btn.addActionListener(new RunAction());
+		btn.addActionListener(new RunAction(doc));
 		buttons.add(btn);
 		pnl = new JPanel();
 		pnl.setPreferredSize(new Dimension(15,0));
@@ -120,15 +123,15 @@ public class Toolbar extends JPanel {
 		
 		btn = new JButton();
 		btn.setText("Remove");
-		btn.addActionListener(new RemoveAction());
+		btn.addActionListener(new RemoveAction(doc, this));
 		buttons.add(btn);
 		btn = new JButton();
 		btn.setText("Modify");
-		btn.addActionListener(new ModifyAction());
+		btn.addActionListener(new ModifyAction(doc, this));
 		buttons.add(btn);
 		btn = new JButton();
 		btn.setText("Move");
-		btn.addActionListener(new PointAction());
+		btn.addActionListener(new PointAction(doc, this));
 		buttons.add(btn);
 		pnl = new JPanel();
 		pnl.setPreferredSize(new Dimension(15,0));
@@ -137,7 +140,7 @@ public class Toolbar extends JPanel {
 		for(GElement.Creator c : creators){
 			btn = new JButton();
 			btn.setText(c.getToolbarName());
-			btn.addActionListener(new ToolAction(c));
+			btn.addActionListener(new ToolAction(doc, this, c));
 			buttons.add(btn);
 		}
 
@@ -148,15 +151,15 @@ public class Toolbar extends JPanel {
 	}
 
 
-	public class ToolAction implements ActionListener {
-		public ToolAction(GElement.Creator c){ this.c=c; }
-		GElement.Creator c = null;
-		public void actionPerformed(ActionEvent a) {
-			document.toolSelectionClean();
-			document.creator = c;
-			tip.setText(c.toolTip());
-		}	
-	}
+//	public class ToolAction implements ActionListener {
+//		public ToolAction(GElement.Creator c){ this.c=c; }
+//		GElement.Creator c = null;
+//		public void actionPerformed(ActionEvent a) {
+//			document.toolSelectionClean();
+//			document.creator = c;
+//			tip.setText(c.toolTip());
+//		}	
+//	}
 //	public class OpenAction implements ActionListener {
 //		public void actionPerformed(ActionEvent a) {
 //
@@ -193,37 +196,6 @@ public class Toolbar extends JPanel {
 //
 //		}	
 //	}
-	public class RemoveAction implements ActionListener {
-		public void actionPerformed(ActionEvent a) {
-			document.toolSelectionClean();
-			document.removeElement = true;
-			tip.setText(TIP_remove);
-		}	
-	}
-	public class PointAction implements ActionListener {
-		public void actionPerformed(ActionEvent a) {
-			document.toolSelectionClean();
-			tip.setText(TIP_move);
-		}	
-	}
-	public class ModifyAction implements ActionListener {
-		public void actionPerformed(ActionEvent a) {
-			document.toolSelectionClean();
-			document.modifier= new Modifier();
-			tip.setText(TIP_modify);
-		}	
-	}
-	public class CompileAction implements ActionListener {
-		public void actionPerformed(ActionEvent a) {
-			document.compile();
-		}	
-	}
-	
-	public class RunAction implements ActionListener {
-		public void actionPerformed(ActionEvent a) {
-			document.run();
-		}	
-	}
 
 	public static BufferedImage getScreenShot(Component component) {
 

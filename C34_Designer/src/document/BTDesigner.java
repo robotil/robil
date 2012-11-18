@@ -42,7 +42,7 @@ public class BTDesigner extends JFrame {
 		this.setIconImage(icon.getImage());
 		setLayout(new BorderLayout());
 
-		Menubar menuBar = new Menubar(document);
+		Menubar menuBar = new Menubar(document, toolbar);
 		JPanel panel = new JPanel(new BorderLayout());
 		panel.add(menuBar, BorderLayout.NORTH);
 		panel.add(toolbar, BorderLayout.SOUTH);
