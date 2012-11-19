@@ -19,6 +19,10 @@ class ArmControlAction(object):
     self._as = actionlib.SimpleActionServer(self._action_name, c35_monitoring.msg.arm_controlAction, execute_cb=self.execute_cb)
     self._as.start()
     
+    
+  #move robot's joint to a new location and count the percent of progress
+  #rng - where to move, topic - which joint to move, newLoc - initial location, percent - percent of progress
+  
   def moveToLoc(self, rng, topic, newLoc, percent):
     
     for i in range(int(math.fabs(rng*10))):
@@ -102,14 +106,15 @@ class ArmControlAction(object):
     
     # start executing the action
     
-    #right arm
+    
     if goal.hand ==1:
       left = False
     if goal.hand ==2:
       right = False
       
+    
+    #right arm 
     if right:
-    #moveToLoc(self, rng, interval, topic, newLoc):
       arm_x= 5.600000
       arm_y= -6.100000
       arm_mwx= -0.100000
