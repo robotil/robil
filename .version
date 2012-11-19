@@ -1,19 +1,18 @@
-V0.0.0.6
-======================
-C0_BTDesigner        		- 0.1
-C0_RobilTask        	 	- 0.2
-C0_Scripts           		- 0.2
-C11_OperatorControl  		- 0.2
-C21_VisionAndLidar   		- 0.3
-C22_GroundRecognitionAndMapping - 0.1
-C23_ObjectRecognition           - 0.1
-C24_ObstacleDetection	 	- 0.1
-C25_GlobalPosition		- 0.1
-C31_PathPlanner        		- 0.1
-C34_Designer         		- 0.1
-C34_Executer         		- 0.2
-C34_ExecuterLib         	- 0.1
-C41_BodyControl   		- 0.1
-C42_LocomotionAndStability	- 0.1
-C43_LocalBodyPVA  		- 0.1
-C44_ClimbLadder			- 0.1
+V0.0.0.8
+==============================================
+C0_RobilTask     			0.2
+C0_Scripts     				0.2
+C11_OperatorControl     		0.1
+C21_VisionAndLidar     			0.3
+C22_GroundRecognitionAndMapping     	0.1
+C23_ObjectRecognition     		0.1
+C24_ObstacleDetection     		0.1
+C25_GlobalPosition     			0.1
+C31_PathPlanner     			0.1
+C34_Designer     			0.2
+C34_Executer     			0.3
+C34_ExecuterLib     			0.1
+C41_BodyControl     			0.2
+C42_LocomotionAndStability     		0.1
+C43_LocalBodyPVA     			0.1
+C44_ClimbLadder     			0.1

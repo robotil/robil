@@ -1,0 +1,6 @@
+<launch> 
+	<node pkg="C34_Designer" name="C34_Designer" type="run.sh" output="screen"> </node> 
+</launch>
+
+
+

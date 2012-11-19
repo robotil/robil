@@ -1,28 +1,27 @@
-
 #! /usr/bin/env python
 
 import roslib; 
-#roslib.load_manifest('NAME OF PROJECT')
+roslib.load_manifest('C41_BodyControl')
 
 import rospy, math
 import actionlib
 
-import RobilTask.msg
+import C0_RobilTask.msg
 from std_msgs.msg import Float64
 
 TASK_RESULT_REJECT=0
 TASK_RESULT_OK=1
 TASK_RESULT_PLAN=2
 
-class RobotBodyServer(object):
+class BodyControlServer(object):
   # create messages that are used to publish feedback/result
-  _feedback = RobilTask.msg.RobilTaskFeedback()
-  _result   = RobilTask.msg.RobilTaskResult()
+  _feedback = C0_RobilTask.msg.RobilTaskFeedback()
+  _result   = C0_RobilTask.msg.RobilTaskResult()
   
     
   def __init__(self):
-    self._action_name = "/RobotBody"
-    self._as = actionlib.SimpleActionServer(self._action_name, RobilTask.msg.RobilTaskAction, execute_cb=self.task)
+    self._action_name = "/BodyControl"
+    self._as = actionlib.SimpleActionServer(self._action_name, C0_RobilTask.msg.RobilTaskAction, execute_cb=self.task)
     self._as.start()
 
   def task(self, goal):
@@ -31,6 +30,7 @@ class RobotBodyServer(object):
     task_plan = ""
 
     # start executing the action
+
     #### GET TASK PARAMETERS ####
     rospy.loginfo("%s: Start: task name = %s",self._action_name, goal.name);
     rospy.loginfo("%s: Start: task id = %s", self._action_name, goal.uid);
@@ -38,22 +38,25 @@ class RobotBodyServer(object):
 
     #### HERE PROCESS TASK PARAMETERS ####
 
+    _arm = rospy.Publisher('/r_arm_ely_position_controller/command', Float64)
     #### DEFINE SLEEP DURATION BETWEEN TASK LOOP ITERATIONS ####
     r = rospy.Rate(100)
 
     #### SET NUMBER OF TASK LOOP ITERATIONS ####
     for i in xrange(1000): 
         if self._as.is_preempt_requested() or rospy.is_shutdown():
-        
             #### HERE PROICESS PREEMTION OR INTERAPT #####
-    
+   
             rospy.loginfo('%s: Preempted' % self._action_name)
             self._as.set_preempted()
             task_success = False
             break
             
-            #### HERE PROCESS TASK ####
-            
+    	#### HERE PROCESS TASK ####
+   	t = 6 * rospy.get_time()
+    	next_pos =  0.4 + 0.4 * math.sin(t)
+    	_arm.publish(next_pos)
+             
         r.sleep()
   
     if task_success:
