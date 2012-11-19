@@ -217,11 +217,11 @@ public class Document extends JPanel {
 						lastX = nge.getProperty().loc.x = lastX+20;
 						lastY = nge.getProperty().loc.y = lastY;
 					}
-					if(e.hasAttribute("dbg_time")){	
-						nge.getProperty().dbg_time = Integer.parseInt( e.getAttribute("dbg_time") );
+					if(e.hasAttribute("test_time")){	
+						nge.getProperty().test_time = Integer.parseInt( e.getAttribute("test_time") );
 					}
-					if(e.hasAttribute("dbg_result")){	
-						nge.getProperty().dbg_result = Boolean.parseBoolean( e.getAttribute("dbg_result") );
+					if(e.hasAttribute("test_result")){	
+						nge.getProperty().test_result = Boolean.parseBoolean( e.getAttribute("test_result") );
 					}
 					if(e.hasAttribute("id")){	
 						nge.id = UUID.fromString( e.getAttribute("id") );
@@ -284,11 +284,11 @@ public class Document extends JPanel {
 						lastX = nge.getProperty().loc.x = lastX+20;
 						lastY = nge.getProperty().loc.y = lastY;
 					}
-					if(e.hasAttribute("dbg_time")){	
-						nge.getProperty().dbg_time = Integer.parseInt( e.getAttribute("dbg_time") );
+					if(e.hasAttribute("test_time")){	
+						nge.getProperty().test_time = Integer.parseInt( e.getAttribute("test_time") );
 					}
-					if(e.hasAttribute("dbg_result")){	
-						nge.getProperty().dbg_result = Boolean.parseBoolean( e.getAttribute("dbg_result") );
+					if(e.hasAttribute("test_result")){	
+						nge.getProperty().test_result = Boolean.parseBoolean( e.getAttribute("test_result") );
 					}
 					if(e.hasAttribute("id")){	
 						nge.id = UUID.fromString( e.getAttribute("id") );

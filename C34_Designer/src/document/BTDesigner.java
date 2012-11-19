@@ -66,10 +66,10 @@ public class BTDesigner extends JFrame {
 		} catch (IOException ex) {
 			ex.printStackTrace();
 		}
-		Element el = (Element) (doc.getElementsByTagName("dbg_time").item(0));
-		Parameters.dbg_time = Integer.parseInt(el.getAttribute("value"));
-		el = (Element) (doc.getElementsByTagName("dbg_result").item(0));
-		Parameters.dbg_result = Boolean.parseBoolean(el.getAttribute("value"));
+		Element el = (Element) (doc.getElementsByTagName("test_time").item(0));
+		Parameters.test_time = Integer.parseInt(el.getAttribute("value"));
+		el = (Element) (doc.getElementsByTagName("test_result").item(0));
+		Parameters.test_result = Boolean.parseBoolean(el.getAttribute("value"));
 
 		BTDesigner btd = new BTDesigner();
 		btd.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);

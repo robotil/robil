@@ -11,8 +11,8 @@ public class GProperty {
 	public Vec size = new Vec(0,0);
 	public boolean selected = false;
 	
-	public int dbg_time=Parameters.dbg_time;
-	public boolean dbg_result=Parameters.dbg_result;
+	public int test_time=Parameters.test_time;
+	public boolean test_result=Parameters.test_result;
 	
 	public boolean running=false;
 
@@ -30,7 +30,7 @@ public class GProperty {
 	}
 	public String toStringForTask(View v){
 		Vec l = loc.add(v.loc.scale(1/v.zoom));
-		return "x=\""+l.x+"\" y=\""+l.y+"\""+" dbg_time=\""+dbg_time+"\" dbg_result=\""+(dbg_result?"true":"false")+"\"";
+		return "x=\""+l.x+"\" y=\""+l.y+"\""+" test_time=\""+test_time+"\" test_result=\""+(test_result?"true":"false")+"\"";
 	}
 	public String toStringForSTask(View v){
 		Vec l = loc.add(v.loc.scale(1/v.zoom));

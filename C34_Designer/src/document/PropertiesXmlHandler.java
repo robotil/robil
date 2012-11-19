@@ -52,11 +52,11 @@ public class PropertiesXmlHandler {
 			String key = n.getNodeName().trim();
 			String value = n.getAttributes().getNamedItem("value")
 					.getTextContent();
-			if (key.equals("dbg_time")) {
-				Parameters.dbg_time = Integer.parseInt(value);
+			if (key.equals("test_time")) {
+				Parameters.test_time = Integer.parseInt(value);
 				
-			} else if (key.equals("dbg_result")) {
-				Parameters.dbg_result = Boolean.parseBoolean(value);
+			} else if (key.equals("test_result")) {
+				Parameters.test_result = Boolean.parseBoolean(value);
 			} else if (key.equals("path_to_plans")) {
 				Parameters.path_to_plans = new String(value);
 			} else if (key.equals("path_to_images")) {
@@ -135,10 +135,10 @@ public class PropertiesXmlHandler {
 			String name = Parameters.class.getFields()[i].getName();
 			String value = map.get(name);
 
-			if (name.equals("dbg_time")) {
-				Parameters.dbg_time = Integer.parseInt(value);
-			} else if (name.equals("dbg_result")) {
-				Parameters.dbg_result = Boolean.parseBoolean(value);
+			if (name.equals("test_time")) {
+				Parameters.test_time = Integer.parseInt(value);
+			} else if (name.equals("test_result")) {
+				Parameters.test_result = Boolean.parseBoolean(value);
 			} else if (name.equals("path_to_plans")) {
 				Parameters.path_to_plans = new String(value);
 			} else if (name.equals("path_to_images")) {
