@@ -4,6 +4,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 
+import javax.swing.ImageIcon;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
@@ -35,18 +36,25 @@ public class Menubar extends JMenuBar {
 
 		JMenu menuFile = new JMenu("File");
 
+		ImageIcon icon;
+		
 		menuFile.setMnemonic(KeyEvent.VK_F);
 
 		// open file
+		icon = new ImageIcon(getClass().getClassLoader().getResource(
+				"icons/open.png"));
 		JMenuItem menuItemOpen = new JMenuItem("Open", KeyEvent.VK_O);
 		menuItemOpen.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_1,
 				ActionEvent.ALT_MASK));
 		menuItemOpen.setToolTipText("open file");
 		menuItemOpen.setActionCommand("file_open");
+		menuItemOpen.setIcon(icon);
 		menuItemOpen.addActionListener(new OpenFileAction(document));
 		menuFile.add(menuItemOpen);
 
 		// load and open
+		icon = new ImageIcon(getClass().getClassLoader().getResource(
+				"icons/load_open.png"));
 		JMenuItem menuItemLoadAndOpen = new JMenuItem("Load and Open",
 				KeyEvent.VK_L);
 		menuItemLoadAndOpen.setAccelerator(KeyStroke.getKeyStroke(
@@ -54,14 +62,18 @@ public class Menubar extends JMenuBar {
 		menuItemLoadAndOpen.setToolTipText("load and open file");
 		menuItemLoadAndOpen.setActionCommand("file_load_and_open");
 		menuItemLoadAndOpen.addActionListener(new LoadAndOpenAction(document));
+		menuItemLoadAndOpen.setIcon(icon);
 		menuFile.add(menuItemLoadAndOpen);
 
 		// save
+		icon = new ImageIcon(getClass().getClassLoader().getResource(
+				"icons/save.png"));
 		JMenuItem menuItemSave = new JMenuItem("Save", KeyEvent.VK_S);
 		menuItemSave.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_3,
 				ActionEvent.ALT_MASK));
 		menuItemSave.setToolTipText("save file");
 		menuItemSave.setActionCommand("file_save");
+		menuItemSave.setIcon(icon);
 		menuItemSave.addActionListener(new SaveXMLAction());
 		// menuItemSave.addActionListener(listener);
 		menuFile.add(menuItemSave);
@@ -76,22 +88,29 @@ public class Menubar extends JMenuBar {
 		menuFile.add(menuItemSaveAs);
 
 		// save image
+		icon = new ImageIcon(getClass().getClassLoader().getResource(
+				"icons/save_image.png"));
 		JMenuItem menuItemSaveImage = new JMenuItem("Save Image", KeyEvent.VK_I);
 		menuItemSaveImage.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_5,
 				ActionEvent.ALT_MASK));
 		menuItemSaveImage
 				.setToolTipText("creates PNG image and saves it locally");
 		menuItemSaveImage.setActionCommand("file_save_image");
+		menuItemSaveImage.setIcon(icon);
 		menuItemSaveImage.addActionListener(new SaveImageAction(document));
 		menuFile.add(menuItemSaveImage);
 
 		// compile
-		JMenuItem menuItemCompile = new JMenuItem("Compile", KeyEvent.VK_C);
+		icon = new ImageIcon(getClass().getClassLoader().getResource(
+				"icons/compile.png"));
+		JMenuItem menuItemCompile = new JMenuItem("Compile");
+		menuItemCompile.setMnemonic(KeyEvent.VK_C);
 		menuItemCompile.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_6,
 				ActionEvent.ALT_MASK));
 		menuItemCompile
 				.setToolTipText("validates current plan and if plan is valid, saves it");
 		menuItemCompile.addActionListener(new CompileAction(document));
+		menuItemCompile.setIcon(icon);
 		menuFile.add(menuItemCompile);
 
 		// compile and upload
@@ -105,24 +124,32 @@ public class Menubar extends JMenuBar {
 		menuFile.add(menuItemCompileAndUpload);
 
 		// run
+		icon = new ImageIcon(getClass().getClassLoader().getResource(
+				"icons/play.png"));
 		JMenuItem menuItemRun = new JMenuItem("Run", KeyEvent.VK_R);
 		menuItemRun.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_8,
 				ActionEvent.ALT_MASK));
+		menuItemRun.setIcon(icon);
 		menuItemRun
 				.setToolTipText("validates current plan, uploads it to temporal remote file on C34_Executer’s host and runs it");
 		menuItemRun.addActionListener(new RunAction(document));
 		menuFile.add(menuItemRun);
 
 		// test
+		icon = new ImageIcon(getClass().getClassLoader().getResource(
+				"icons/test.png"));
 		JMenuItem menuItemTest = new JMenuItem("Test", KeyEvent.VK_T);
 		menuItemTest.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_9,
 				ActionEvent.ALT_MASK));
+		menuItemTest.setIcon(icon);
 		menuItemTest
 				.setToolTipText("validates current plan, saves it to a temporal local file and runs it in mode of logic simulation");
 		// menuItemTest.addActionListener(listener);
 		menuFile.add(menuItemTest);
 
 		// properties
+		icon = new ImageIcon(getClass().getClassLoader().getResource(
+				"icons/settings.png"));
 		JMenuItem menuItemProperties = new JMenuItem("Properties",
 				KeyEvent.VK_P);
 		menuItemProperties.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_P,
@@ -130,6 +157,7 @@ public class Menubar extends JMenuBar {
 		menuItemProperties.setToolTipText("open properties dialog");
 		menuItemProperties.setActionCommand("open_properties_dialog");
 		menuItemProperties.addActionListener(new PropertiesAction());
+		menuItemProperties.setIcon(icon);
 		menuFile.add(menuItemProperties);
 
 		return menuFile;

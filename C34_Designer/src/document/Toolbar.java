@@ -18,6 +18,8 @@ import java.io.FilenameFilter;
 import java.util.ArrayList;
 
 import javax.imageio.ImageIO;
+import javax.swing.BorderFactory;
+import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JDialog;
 import javax.swing.JFileChooser;
@@ -101,7 +103,6 @@ public class Toolbar extends JPanel {
 		buttons.add(pnl);
 
 		JButton btn = new JButton();
-
 		btn.setText("Open");
 		btn.addActionListener(new OpenFileAction(doc));
 		buttons.add(btn);
