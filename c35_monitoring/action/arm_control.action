@@ -1,0 +1,9 @@
+ 
+#goal definition
+int32 hand
+---
+#result definition
+float32 finalLocation
+---
+#feedback
+int32 progress
