@@ -3,23 +3,24 @@ package document.listeners;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
+import document.BTDesigner;
 import document.Document;
 import document.Toolbar;
 
-public class ModifyAction implements ActionListener {
-
-	private Document document;
-	private Toolbar toolbar;
+public class ModifyAction extends AbstractDesignerAction implements ActionListener {
 	
-	public ModifyAction(Document document, Toolbar toolbar) {
-		this.document = document;
-		this.toolbar = toolbar;
+	public ModifyAction(BTDesigner designer) {
+		super(designer);
 	}
 
 	@Override
 	public void actionPerformed(ActionEvent a) {
+		
+		Document document = getActiveDocument();
+		
 		document.toolSelectionClean();
 		document.modifier= new elements.Modifier();
-		toolbar.setTipText(Toolbar.TIP_modify);
+				
+		designer.toolbar.setTipText(Toolbar.TIP_modify);
 	}
 }

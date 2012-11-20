@@ -655,7 +655,6 @@ public class Document extends JPanel {
 
 	public void setCurrentWorkingFile(String absoluteFilePath) {
 		this.absoluteFilePath = absoluteFilePath;
-		mainWindow.setTitle("Cogniteam BTDesigner "+BTDesigner.VERSION+": "+absoluteFilePath);
 	}
 	
 	private String getCurrentWorkingFile() {

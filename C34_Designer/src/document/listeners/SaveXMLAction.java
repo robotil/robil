@@ -6,12 +6,11 @@ import java.awt.event.ActionListener;
 import javax.swing.JDialog;
 import javax.swing.JOptionPane;
 
+import document.BTDesigner;
 import document.Document;
 import document.Parameters;
 
-public class SaveXMLAction implements ActionListener {
-	
-	private Document document;
+public class SaveXMLAction extends AbstractDesignerAction implements ActionListener {
 	
 	private void savePlan(String path) {
 		JOptionPane.showMessageDialog(null, "Error: not implemented", "Save Plan",
@@ -28,6 +27,7 @@ public class SaveXMLAction implements ActionListener {
 			fileName = Dialogs.saveFile("Save XML", "xml", "plan.xml", Parameters.path_to_plans);
 			
 		} else if (e.getActionCommand().equals("file_save")) {
+			Document document = getActiveDocument();
 			fileName = document.getAbsoluteFilePath();
 		}
 		
@@ -38,7 +38,7 @@ public class SaveXMLAction implements ActionListener {
 		
 	}
 
-	public void SaveFileActionListener(Document document){
-		this.document = document;
+	public SaveXMLAction(BTDesigner designer){
+		super(designer);
 	}	
 }

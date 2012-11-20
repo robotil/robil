@@ -7,6 +7,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 
 import javax.swing.ImageIcon;
 import javax.swing.JFrame;
@@ -14,6 +15,7 @@ import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 import javax.swing.JPanel;
+import javax.swing.JTabbedPane;
 
 import javax.swing.KeyStroke;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -25,15 +27,35 @@ public class BTDesigner extends JFrame {
 
 	public final static String VERSION = "0.1.1";
 
-	Document document = new Document(this);
-	Toolbar toolbar = new Toolbar(document);
+	ArrayList<Document> documents = new ArrayList<Document>();
+	Document activeDocument;
 	
+	public Document getActiveDocument() {
+		
+		if (activeDocument == null) {
+			addNewDocumentTab();
+			toolbar.setActiveDocument();
+		}
+		
+		return activeDocument;
+	}
+	
+	public int getNumberOfDocuments() {
+		return documents.size();
+	}
+
+	public Toolbar toolbar;
+	public JTabbedPane tabbedPane = new JTabbedPane();
 
 	
 
 	public BTDesigner() {
 
 		this.setTitle("Cogniteam BTDesigner " + BTDesigner.VERSION);
+
+		addNewDocumentTab();
+
+		toolbar = new Toolbar(this);
 
 		setLocation(200, 50);
 		setSize(new Dimension(1000, 700));
@@ -42,16 +64,43 @@ public class BTDesigner extends JFrame {
 		this.setIconImage(icon.getImage());
 		setLayout(new BorderLayout());
 
-		Menubar menuBar = new Menubar(document, toolbar);
-		JPanel panel = new JPanel(new BorderLayout());
-		panel.add(menuBar, BorderLayout.NORTH);
-		panel.add(toolbar, BorderLayout.SOUTH);
-//		add(menuBar, BorderLayout.NORTH);
-		add(panel, BorderLayout.NORTH);
-		
-//		 add(toolbar, BorderLayout.SOUTH);
-		add(document, BorderLayout.CENTER);
+		Menubar menuBar = new Menubar(this);
+		JPanel panelMenus = new JPanel(new BorderLayout());
+		panelMenus.add(menuBar, BorderLayout.NORTH);
+		panelMenus.add(toolbar, BorderLayout.SOUTH);
+		// add(menuBar, BorderLayout.NORTH);
+		add(panelMenus, BorderLayout.NORTH);
+
+
+		add(tabbedPane, BorderLayout.CENTER);
+		// add(toolbar, BorderLayout.SOUTH);
+
+		// add(document, BorderLayout.CENTER);
 		this.setJMenuBar(menuBar);
+	}
+
+	public void addNewDocumentTab() {
+		int numOfTabs = tabbedPane.getTabCount();
+		JPanel panelDoc = new JPanel(new BorderLayout());
+
+		// add new document
+		activeDocument = new Document(this);
+		documents.add(activeDocument);
+
+		panelDoc.add(activeDocument, BorderLayout.CENTER);
+		tabbedPane.addTab("New", panelDoc);
+		tabbedPane.setTabComponentAt(numOfTabs, new ButtonTabComponent(
+				tabbedPane, this));
+	}
+	
+	public void setTabName(int index, String name) {
+
+		// validate index
+		if (index < 0 || index >= tabbedPane.getTabCount()) {
+			return;
+		}
+
+		tabbedPane.setTitleAt(index, name);
 	}
 
 	public static void main(String[] args) {

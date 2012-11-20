@@ -1,5 +1,6 @@
 package document.listeners;
 
+import document.BTDesigner;
 import document.ChooseRemotePlanDialog;
 import document.Document;
 import document.Parameters;
@@ -19,12 +20,10 @@ import terminal.communication.RosPipe;
 import terminal.communication.RosPipe.RosTargets;
 import terminal.lineprocessors.BatchLineProcessor;
 
-public class LoadAndOpenAction implements ActionListener {
+public class LoadAndOpenAction extends AbstractDesignerAction implements ActionListener {
 
-	private Document document;
-
-	public LoadAndOpenAction(Document document) {
-		this.document = document;
+	public LoadAndOpenAction(BTDesigner designer) {
+		super(designer);
 	}
 
 	public void actionPerformed(ActionEvent a) {
@@ -82,7 +81,8 @@ public class LoadAndOpenAction implements ActionListener {
 
 		}
 
-		document.loadPlan(selectedPlan);
+//		Document document = super.getActiveDocument();
+//		document.loadPlan(selectedPlan);
 
 	}
 

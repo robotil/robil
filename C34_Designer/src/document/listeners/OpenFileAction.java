@@ -1,5 +1,6 @@
 package document.listeners;
 
+import document.BTDesigner;
 import document.Document;
 import document.Parameters;
 
@@ -11,23 +12,36 @@ import java.io.File;
 import java.io.FilenameFilter;
 
 import javax.swing.JFileChooser;
+import javax.swing.JOptionPane;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
-public class OpenFileAction implements ActionListener {
+public class OpenFileAction extends AbstractDesignerAction implements
+		ActionListener {
 
-	private Document document;
-	
-	public OpenFileAction(Document document) {
-		this.document = document;
+	public OpenFileAction(BTDesigner designer) {
+		super(designer);
 	}
-	
+
 	public void actionPerformed(ActionEvent a) {
 
-		String fileName = Dialogs.openFile("Open XML", "xml", Parameters.path_to_plans);
+		if (designer.getNumberOfDocuments() == 0) {
+			JOptionPane.showMessageDialog(null, "Please open a new window",
+					"Open Plan", JOptionPane.INFORMATION_MESSAGE);
+			return;
+		}
+
+		String fileName = Dialogs.openFile("Open XML", "xml",
+				Parameters.path_to_plans);
 		if (fileName == null) {
 			return;
 		}
+
+		Document document = super.getActiveDocument();
 		
-		document.loadPlan(fileName);		
+		document.loadPlan(fileName);
+
+		String[] splitted = fileName.split("/");
+		String shortName = splitted[splitted.length - 1];
+		designer.setTabName(designer.tabbedPane.getSelectedIndex(), shortName);
 	}
 }

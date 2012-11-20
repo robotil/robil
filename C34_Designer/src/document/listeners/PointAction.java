@@ -3,22 +3,20 @@ package document.listeners;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
+import document.BTDesigner;
 import document.Document;
 import document.Toolbar;
 
-public class PointAction implements ActionListener {
-
-	private Document document;
-	private Toolbar toolbar;
+public class PointAction extends AbstractDesignerAction implements ActionListener {
 	
-	public PointAction(Document document, Toolbar toolbar) {
-		this.document = document;
-		this.toolbar = toolbar;
+	public PointAction(BTDesigner designer) {
+		super(designer);
 	}
 
 	public void actionPerformed(ActionEvent a) {
-		document.toolSelectionClean();
-		toolbar.setTipText(Toolbar.TIP_move);
+		Document doc = getActiveDocument();
+		doc.toolSelectionClean();
+		designer.toolbar.setTipText(Toolbar.TIP_move);
 	}
 
 }

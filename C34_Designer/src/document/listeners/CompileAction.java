@@ -3,17 +3,16 @@ package document.listeners;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
+import document.BTDesigner;
 import document.Document;
 
-public class CompileAction implements ActionListener {
+public class CompileAction extends AbstractDesignerAction implements ActionListener {
 	
-	private Document document;
-	
-	public CompileAction(Document document) {
-		this.document = document;
+	public CompileAction(BTDesigner designer) {
+		super(designer);
 	}
 	
 	public void actionPerformed(ActionEvent a) {
-		document.compile();
+		getActiveDocument().compile();
 	}	
 }

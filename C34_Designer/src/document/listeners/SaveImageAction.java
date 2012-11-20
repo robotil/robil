@@ -3,13 +3,12 @@ package document.listeners;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
+import document.BTDesigner;
 import document.Document;
 import document.Parameters;
 import document.Toolbar;
 
-public class SaveImageAction implements ActionListener {
-	
-	private Document document;
+public class SaveImageAction extends AbstractDesignerAction implements ActionListener {
 	
 	@Override
 	public void actionPerformed(ActionEvent e) {
@@ -17,6 +16,8 @@ public class SaveImageAction implements ActionListener {
 		if (fileName == null) {
 			return;
 		}
+		
+		Document document = getActiveDocument();
 		
 		try {	
 			Toolbar.getSaveSnapShot( document, fileName);			
@@ -26,7 +27,7 @@ public class SaveImageAction implements ActionListener {
 		}
 	}
 
-	public SaveImageAction(Document document) {
-		this.document = document;
+	public SaveImageAction(BTDesigner designer) {
+		super(designer);
 	}	
 }
