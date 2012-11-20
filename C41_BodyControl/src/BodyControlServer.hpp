@@ -6,7 +6,7 @@
 using namespace std;
 using namespace RobilTask;
 
-class RobotBodyServer{
+class BodyControlServer{
 
     typedef RobilTask::RobilTaskGoalConstPtr GOAL;
     typedef RobilTask::RobilTaskFeedback FEEDBACK;
@@ -23,16 +23,16 @@ protected:
 public:
     RobotBodyServer():
         _server(_node, name, boost::bind(&SimpleTaskServer::task, this, _1), false),
-        _name("/RobotBody")
+        _name("/BodyControl")
     {
         _server.start();
-        ROS_INFO("instance of RobotBodyServer started.");
+        ROS_INFO("instance of BodyControlServer started.");
     }
 
     void task(const GOAL &goal){
         int32_t success = PLAN;
         string plan ="";
-        
+        print "Called"
         /* GET TASK PARAMETERS */
         ROS_INFO("%s: Start: task name = %s", _name.c_str(), goal->name.c_str());
         ROS_INFO("%s: Start: task id = %s", _name.c_str(), goal->uid.c_str());
