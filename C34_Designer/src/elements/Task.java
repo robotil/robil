@@ -183,7 +183,7 @@ public class Task extends GElement implements View.ChangesListener{
 			g.setPaint(Color.black);
 			g.drawRect(x, y, w, h);
 
-			if(getProperty().dbg_result==false){
+			if(getProperty().test_result==false){
 				GraphProp gp = new GraphProp(g);
 				g.setPaint(Color.red);
 				g.drawRect(x-1, y-1, w+2, h+2);
@@ -288,9 +288,9 @@ public class Task extends GElement implements View.ChangesListener{
 	    	txtName = new JTextField(text); txtName.selectAll();
 	    	cType = new JComboBox(new String[]{TYPE_sequenser,TYPE_selector,TYPE_task, TYPE_parallel});
 	    	cType.setSelectedItem(type);
-	    	txtDbgTime = new JTextField(""+getProperty().dbg_time); 
+	    	txtDbgTime = new JTextField(""+getProperty().test_time); 
 	    	txtDbgResult = new JComboBox(new String[]{"true","false"});
-	    	txtDbgResult.setSelectedItem(""+getProperty().dbg_result);
+	    	txtDbgResult.setSelectedItem(""+getProperty().test_result);
 	    	
         
 	        JButton close = new JButton("Close");
@@ -308,8 +308,8 @@ public class Task extends GElement implements View.ChangesListener{
 	        		text = txtName.getText();
 	        		type = (String) cType.getSelectedItem();
 	        		try{
-	        			getProperty().dbg_time = Integer.parseInt(txtDbgTime.getText());
-	        			getProperty().dbg_result = Boolean.parseBoolean((String) txtDbgResult.getSelectedItem());
+	        			getProperty().test_time = Integer.parseInt(txtDbgTime.getText());
+	        			getProperty().test_result = Boolean.parseBoolean((String) txtDbgResult.getSelectedItem());
 	        		}catch(Exception e){
 	        			e.printStackTrace();
 	        		}

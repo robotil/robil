@@ -1,4 +1,4 @@
-package document.listeners;
+package document.actions;
 
 import document.PropertiesEditor;
 import document.PropertiesXmlHandler;

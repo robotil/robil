@@ -1,6 +1,6 @@
 package document;
 
-import document.listeners.*;
+import document.actions.*;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
@@ -18,6 +18,8 @@ import java.io.FilenameFilter;
 import java.util.ArrayList;
 
 import javax.imageio.ImageIO;
+import javax.swing.BorderFactory;
+import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JDialog;
 import javax.swing.JFileChooser;
@@ -29,7 +31,6 @@ import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
 import javax.swing.border.TitledBorder;
 
-import document.listeners.OpenFileAction;
 
 import elements.Arrow;
 import elements.Joint;
@@ -58,8 +59,9 @@ public class Toolbar extends JPanel {
 		}
 	}
 	
-	public Document document = null;
-
+	private Document document = null;
+	public BTDesigner designer = null;
+	
 	public ArrayList<GElement.Creator> creators = new ArrayList<GElement.Creator>();
 
 
@@ -72,9 +74,15 @@ public class Toolbar extends JPanel {
 		tip.setText(msg);
 	}
 
-	public Toolbar(Document doc){
-		document = doc;
+	public void setActiveDocument(Document doc) {
+		document = doc;//designer.getActiveTab().doc;
 		document.tip = tip;
+	}
+	
+	public Toolbar(BTDesigner designer){
+		this.designer = designer;
+//		document = doc;
+//		document.tip = tip;
 
 		
 		setBorder(new TitledBorder("Toolbar"));
@@ -101,21 +109,21 @@ public class Toolbar extends JPanel {
 		buttons.add(pnl);
 
 		JButton btn = new JButton();
-
 		btn.setText("Open");
-		btn.addActionListener(new OpenFileAction(doc));
+		btn.addActionListener(new OpenFileAction(designer));
 		buttons.add(btn);
 		btn = new JButton();
 		btn.setText("Image");
-		btn.addActionListener(new SaveImageAction(doc));//(new ImageAction());
+		btn.addActionListener(new SaveImageAction(designer));
 		buttons.add(btn);
 		btn = new JButton();
 		btn.setText("Compile");
-		btn.addActionListener(new CompileAction(doc));
+		btn.addActionListener(new CompileAction(designer));
 		buttons.add(btn);
 		btn = new JButton();
 		btn.setText("Run");
-		btn.addActionListener(new RunAction(doc));
+		btn.setActionCommand("run_run_plan");
+		btn.addActionListener(new RunAction(designer));
 		buttons.add(btn);
 		pnl = new JPanel();
 		pnl.setPreferredSize(new Dimension(15,0));
@@ -123,15 +131,15 @@ public class Toolbar extends JPanel {
 		
 		btn = new JButton();
 		btn.setText("Remove");
-		btn.addActionListener(new RemoveAction(doc, this));
+		btn.addActionListener(new RemoveAction(designer));
 		buttons.add(btn);
 		btn = new JButton();
 		btn.setText("Modify");
-		btn.addActionListener(new ModifyAction(doc, this));
+		btn.addActionListener(new ModifyAction(designer));
 		buttons.add(btn);
 		btn = new JButton();
 		btn.setText("Move");
-		btn.addActionListener(new PointAction(doc, this));
+		btn.addActionListener(new PointAction(designer));
 		buttons.add(btn);
 		pnl = new JPanel();
 		pnl.setPreferredSize(new Dimension(15,0));
@@ -140,7 +148,7 @@ public class Toolbar extends JPanel {
 		for(GElement.Creator c : creators){
 			btn = new JButton();
 			btn.setText(c.getToolbarName());
-			btn.addActionListener(new ToolAction(doc, this, c));
+			btn.addActionListener(new ToolAction(designer, c));
 			buttons.add(btn);
 		}
 
