@@ -422,6 +422,19 @@ public class Document extends JPanel {
 		return new String(absoluteFilePath);
 	}
 
+	public String getShortFilePath() {
+		if (absoluteFilePath == null) {
+			return null;
+		}
+		
+		String[] splitted = absoluteFilePath.split("/");
+		if (splitted.length == 0) {
+			return null;
+		}
+		
+		return new String(splitted[splitted.length - 1]);
+	}
+	
 	public void toolSelectionClean(){
 		creator = null;
 		removeElement = false;
@@ -704,7 +717,7 @@ public class Document extends JPanel {
 	}
 
 	Process BTExecuter=null;
-	public void run() {
+	public void test() {
 		if(BTExecuter!=null){
 			BTExecuter.destroy();
 			return;

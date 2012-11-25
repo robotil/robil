@@ -1,4 +1,4 @@
-package document.listeners;
+package document.actions;
 
 import document.BTDesigner;
 import document.Document;
@@ -36,12 +36,11 @@ public class OpenFileAction extends AbstractDesignerAction implements
 			return;
 		}
 
-		Document document = super.getActiveDocument();
+		Document document = super.getActiveTab().doc;
 		
 		document.loadPlan(fileName);
 
-		String[] splitted = fileName.split("/");
-		String shortName = splitted[splitted.length - 1];
+		String shortName = document.getShortFilePath();
 		designer.setTabName(designer.tabbedPane.getSelectedIndex(), shortName);
 	}
 }

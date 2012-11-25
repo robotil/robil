@@ -1,4 +1,4 @@
-package document.listeners;
+package document.actions;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -13,6 +13,6 @@ public class CompileAction extends AbstractDesignerAction implements ActionListe
 	}
 	
 	public void actionPerformed(ActionEvent a) {
-		getActiveDocument().compile();
+		getActiveTab().doc.compile(); 
 	}	
 }

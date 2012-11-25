@@ -1,4 +1,4 @@
-package document.listeners;
+package document.actions;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -14,7 +14,7 @@ public class PointAction extends AbstractDesignerAction implements ActionListene
 	}
 
 	public void actionPerformed(ActionEvent a) {
-		Document doc = getActiveDocument();
+		Document doc = getActiveTab().doc;
 		doc.toolSelectionClean();
 		designer.toolbar.setTipText(Toolbar.TIP_move);
 	}

@@ -19,6 +19,7 @@ public abstract class RosCommand extends Command {
 	public void initPipe(RosTargets target, LineProcessor processor, String... args){
 		pipe = new RosPipe(thread, target, processor, args);
 	}
+
 	
 	public boolean isAlreadyRunning(){
 		return pipe!=null && pipe.isAlreadyRunning();

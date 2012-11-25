@@ -151,17 +151,20 @@ public class ServiceCaller extends RosCommand {
 
 		String cmdArguments = "";
 		String spacer = "";
-		for (int i = 0; i < args.length; i++) {
-			cmdArguments += spacer + args[i];
-			spacer = " ";
+		String[] newargs = new String[args.length+2];
+		newargs[0]="call";
+		newargs[1]=serviceName;
+		for (int i = 0, j=2; i < args.length; i++,j++) {
+			newargs[j] = args[i];
 		}
 
 		this.thread = new Thread();
 
 		try {
 			BatchLineProcessor processor = new BatchLineProcessor();
-			initPipe(RosTargets.Service, processor, "call",
-					serviceName, cmdArguments);
+//			initPipe(RosTargets.Service, processor, "call",
+//					serviceName, cmdArguments);
+			initPipe(RosTargets.Service, processor, newargs);			
 			pipe.sendAndReceive();
 			ret.addAll(processor.getLines());
 		} catch (IOException ex) {

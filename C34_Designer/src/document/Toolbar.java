@@ -1,6 +1,6 @@
 package document;
 
-import document.listeners.*;
+import document.actions.*;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
@@ -31,7 +31,6 @@ import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
 import javax.swing.border.TitledBorder;
 
-import document.listeners.OpenFileAction;
 
 import elements.Arrow;
 import elements.Joint;
@@ -75,8 +74,8 @@ public class Toolbar extends JPanel {
 		tip.setText(msg);
 	}
 
-	public void setActiveDocument() {
-		document = designer.getActiveDocument();
+	public void setActiveDocument(Document doc) {
+		document = doc;//designer.getActiveTab().doc;
 		document.tip = tip;
 	}
 	
@@ -123,6 +122,7 @@ public class Toolbar extends JPanel {
 		buttons.add(btn);
 		btn = new JButton();
 		btn.setText("Run");
+		btn.setActionCommand("run_run_plan");
 		btn.addActionListener(new RunAction(designer));
 		buttons.add(btn);
 		pnl = new JPanel();

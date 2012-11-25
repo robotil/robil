@@ -1,4 +1,4 @@
-package document.listeners;
+package document.actions;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -17,7 +17,7 @@ public class SaveImageAction extends AbstractDesignerAction implements ActionLis
 			return;
 		}
 		
-		Document document = getActiveDocument();
+		Document document = getActiveTab().doc;
 		
 		try {	
 			Toolbar.getSaveSnapShot( document, fileName);			

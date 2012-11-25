@@ -1,4 +1,4 @@
-package document.listeners;
+package document.actions;
 
 import java.awt.FileDialog;
 import java.awt.Frame;
@@ -11,6 +11,13 @@ import document.Parameters;
 
 public abstract class Dialogs {
 
+	/**
+	 * Shows an open file dialog
+	 * @param title dialog title
+	 * @param filter show only files according to the given filter (i.e. "xml") 
+	 * @param path initial dialog path
+	 * @return
+	 */
 	public static String openFile(String title, final String filter, String path) {
 		FileDialog fileDialog = new FileDialog(new Frame(), title, FileDialog.LOAD);
 		fileDialog.setDirectory(path);
@@ -33,6 +40,14 @@ public abstract class Dialogs {
 		return saveFile(title, filter, null, ".");
 	};
 	
+	/**
+	 * Shows a save file dialog
+	 * @param title dialog title
+	 * @param filter show only files according to the given filter (i.e. "xml")
+	 * @param defaultFileName default file name to save
+	 * @param path initial dialog path
+	 * @return
+	 */
 	public static String saveFile(String title, final String filter, String defaultFileName, String path) {
 		FileDialog fileDialog = new FileDialog(new Frame(), title, FileDialog.SAVE);
 		fileDialog.setDirectory(path);

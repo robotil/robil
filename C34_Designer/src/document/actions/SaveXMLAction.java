@@ -1,4 +1,4 @@
-package document.listeners;
+package document.actions;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -27,7 +27,7 @@ public class SaveXMLAction extends AbstractDesignerAction implements ActionListe
 			fileName = Dialogs.saveFile("Save XML", "xml", "plan.xml", Parameters.path_to_plans);
 			
 		} else if (e.getActionCommand().equals("file_save")) {
-			Document document = getActiveDocument();
+			Document document = getActiveTab().doc;
 			fileName = document.getAbsoluteFilePath();
 		}
 		

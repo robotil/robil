@@ -1,4 +1,4 @@
-package document.listeners;
+package document.actions;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -19,7 +19,7 @@ public class ToolAction extends AbstractDesignerAction implements
 	}
 
 	public void actionPerformed(ActionEvent a) {
-		Document document = getActiveDocument();
+		Document document = getActiveTab().doc;
 		document.toolSelectionClean();
 		document.creator = c;
 		designer.toolbar.setTipText(c.toolTip());

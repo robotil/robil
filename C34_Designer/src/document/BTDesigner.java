@@ -23,39 +23,77 @@ import javax.xml.parsers.DocumentBuilderFactory;
 import org.w3c.dom.Element;
 import org.xml.sax.SAXException;
 
+import terminal.communication.RosExecutor;
+
 public class BTDesigner extends JFrame {
+
+	public class DesignerTab {
+		public Document doc;
+		public String executionID;
+
+		public DesignerTab(Document doc, String executionID) {
+			this.doc = doc;
+			this.executionID = executionID;
+		}
+
+		public void clearID() {
+			executionID = null;
+		}
+
+		public void setID(String id) {
+			executionID = new String(id);
+		}
+		
+		public String getID() {
+			return executionID;
+		}
+	}
 
 	public final static String VERSION = "0.1.1";
 
-	ArrayList<Document> documents = new ArrayList<Document>();
-	Document activeDocument;
-	
-	public Document getActiveDocument() {
-		
-		if (activeDocument == null) {
-			addNewDocumentTab();
-			toolbar.setActiveDocument();
+	ArrayList<DesignerTab> tabs = new ArrayList<DesignerTab>();
+	DesignerTab activeTab;
+	public RosExecutor rosExecutor = new RosExecutor(this);
+
+	public Document getDocumentOfRunningPlan(String id) {
+		for (DesignerTab tab : tabs) {
+			if (tab.getID() != null && tab.getID().equals(id)) {
+				return tab.doc;
+			}
 		}
 		
-		return activeDocument;
+		return null;
 	}
 	
+	public DesignerTab getActiveTab() {
+
+//		if (activeTab == null) {
+		if (tabbedPane.getTabCount() == 0) {
+			addNewDocumentTab();
+		}
+
+		int index = tabbedPane.getSelectedIndex();
+		
+		activeTab = tabs.get(index);
+		toolbar.setActiveDocument(activeTab.doc);
+		return activeTab;
+	}
+
 	public int getNumberOfDocuments() {
-		return documents.size();
+		return tabs.size();
 	}
 
 	public Toolbar toolbar;
 	public JTabbedPane tabbedPane = new JTabbedPane();
 
-	
-
 	public BTDesigner() {
 
 		this.setTitle("Cogniteam BTDesigner " + BTDesigner.VERSION);
 
-		addNewDocumentTab();
-
+//		addNewDocumentTab();
+		
 		toolbar = new Toolbar(this);
+//		getActiveTab();
 
 		setLocation(200, 50);
 		setSize(new Dimension(1000, 700));
@@ -71,7 +109,6 @@ public class BTDesigner extends JFrame {
 		// add(menuBar, BorderLayout.NORTH);
 		add(panelMenus, BorderLayout.NORTH);
 
-
 		add(tabbedPane, BorderLayout.CENTER);
 		// add(toolbar, BorderLayout.SOUTH);
 
@@ -84,15 +121,15 @@ public class BTDesigner extends JFrame {
 		JPanel panelDoc = new JPanel(new BorderLayout());
 
 		// add new document
-		activeDocument = new Document(this);
-		documents.add(activeDocument);
+		activeTab = new DesignerTab(new Document(this), null);
+		tabs.add(activeTab);
 
-		panelDoc.add(activeDocument, BorderLayout.CENTER);
+		panelDoc.add(activeTab.doc, BorderLayout.CENTER);
 		tabbedPane.addTab("New", panelDoc);
 		tabbedPane.setTabComponentAt(numOfTabs, new ButtonTabComponent(
 				tabbedPane, this));
 	}
-	
+
 	public void setTabName(int index, String name) {
 
 		// validate index

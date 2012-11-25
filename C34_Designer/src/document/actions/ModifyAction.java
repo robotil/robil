@@ -1,4 +1,4 @@
-package document.listeners;
+package document.actions;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -16,7 +16,7 @@ public class ModifyAction extends AbstractDesignerAction implements ActionListen
 	@Override
 	public void actionPerformed(ActionEvent a) {
 		
-		Document document = getActiveDocument();
+		Document document = getActiveTab().doc;
 		
 		document.toolSelectionClean();
 		document.modifier= new elements.Modifier();
