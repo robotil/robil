@@ -1,0 +1,5 @@
+<tasks>
+  <task name="t2" address="SimpleTask" />
+  <task name="moveHand" address="PySimpleTaskHand" />
+  <task name="moveLeg" address="PySimpleTaskLeg" />
+</tasks>

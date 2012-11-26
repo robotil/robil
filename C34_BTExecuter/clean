@@ -1,0 +1,8 @@
+#!/bin/bash
+
+d=$(pwd)
+for f in bin_*; do
+  cd $f
+  make clean
+  cd $d
+done
