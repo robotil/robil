@@ -44,6 +44,7 @@ public:
 	virtual void terminate()=0;
 	virtual bool isActive()=0;
 	virtual std::string address()const=0;
+	virtual BTTask::Ref clone()const=0;
 };
 class TaskProxyTable{
 protected:

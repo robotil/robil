@@ -106,20 +106,21 @@ inline bool endWith(const std::string& line, const std::string& t){
 	return true;
 }
 
+typedef std::map<std::string,std::string> Arguments;
 struct Function{
 private:
 	bool undef;
 public:
 	string name;
 	string suffix;
-	map<string,string> values;
+	Arguments args;
 	Function():undef(true),name(""){}
 	string str(){
 		if(undef) return "undefined";
 		stringstream out;
 		out<<name<<"(";
 		string d = "";
-		for(map<string,string>::iterator i=values.begin();i!=values.end();i++){
+		for(map<string,string>::iterator i=args.begin();i!=args.end();i++){
 			out<<d<<i->first<<"="<<i->second; d=",";
 		}
 		out<<")"<<suffix;
@@ -143,11 +144,26 @@ static Function parse(std::string line){
 		vector<string> pair;
 		int c = split(vars[i], pair, "=");
 		trimAll(pair);
-		if(c==1){ stringstream s; s<<"#"<<i; f.values[s.str()] = pair[0]; }
-		else if(c==2){ f.values[pair[0]]=pair[1]; }
+		if(c==1){ stringstream s; s<<"#"<<i; f.args[s.str()] = pair[0]; }
+		else if(c==2){ f.args[pair[0]]=pair[1]; }
 		else continue;
 	}
 	return f;
+}
+
+static Arguments parse_arguments(std::string line){
+	std::map<std::string,std::string> args;
+	vector<string> vars = split(line,",");
+	for(size_t i=0;i<vars.size();i++){
+		if(trim(vars[i])=="") continue;
+		vector<string> pair;
+		int c = split(vars[i], pair, "=");
+		trimAll(pair);
+		if(c==1){ stringstream s; s<<"#"<<i; args[s.str()] = pair[0]; }
+		else if(c==2){ args[pair[0]]=pair[1]; }
+		else continue;
+	}
+	return args;
 }
 
 }

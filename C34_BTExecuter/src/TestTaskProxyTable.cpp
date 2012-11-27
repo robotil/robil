@@ -69,6 +69,8 @@ public:
 		return active;
 	}
 	virtual std::string address()const{ std::stringstream s; s<< "TestTask(pref_c="<<predef_c<<",pref_res="<<predef_res<<")";  return s.str();}
+
+	virtual BTTask::Ref clone()const {return BTTask::Ref(new TestTask(predef_c, predef_res)); }
 };
 
 

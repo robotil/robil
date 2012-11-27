@@ -62,7 +62,7 @@ Result::Ref Task::run(){
 		IF_DEBUG log<<"tsk["<<bt.getRootName()<<"]: search proxy for task";
 		if(taskproxy_contains_this_task){
 			IF_DEBUG log<<"tsk["<<bt.getRootName()<<"]: proxy found.";
-			BTTask::Ref proxy = taskproxy->get(tname);
+			BTTask::Ref proxy = taskproxy->get(tname)->clone();
 			BTTaskGoal goal;
 			goal.name = tname;
 			goal.uid = bt.getID();
