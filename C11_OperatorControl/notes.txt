@@ -1,9 +1,10 @@
-To be able to make this package you should have the next packages to be installed:
+To be able to make this package you should have the next packages installed beforehand:
 ros-fuerte-qt-ros
 ros-fuerte-qt-gui-core
-You may installed them using: sudo apt-get install
+You may install them using: sudo apt-get install
 
 //CHECK INSTRUCTIONS:
 1. Run the bin/C11
 2. You should see the basic HMI window.
-2. Check with rxgraph the C11 node exists.
+3. Check with rxgraph the C11 node exists.
+
