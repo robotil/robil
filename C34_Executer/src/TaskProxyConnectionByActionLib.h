@@ -35,6 +35,7 @@ public:
 	virtual void terminate();
 	virtual bool isActive();
 	virtual std::string address()const;
+	virtual Ref clone()const{return new Ref( new RobilTaskProxy(tname) ); }
 };
 
 class RobilTaskProxyCreator:public BTTaskProxyCreator{

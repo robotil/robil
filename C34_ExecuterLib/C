@@ -1,8 +1,0 @@
-<plan>
-  <seq name="s3">
-    <tsk name="t100" dbg_time="100" dbg_result="true" />
-    <tsk name="t200" dbg_time="100" dbg_result="true" />
-    <tsk name="t300" dbg_time="100" dbg_result="true" />
-    <tsk name="t400" dbg_time="100" dbg_result="true" />    
-  </seq>
-</plan>

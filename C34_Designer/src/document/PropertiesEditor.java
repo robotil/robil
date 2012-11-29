@@ -7,7 +7,7 @@ import javax.swing.event.ListSelectionListener;
 
 import org.xml.sax.SAXException;
 
-import document.listeners.PropertiesEditorAction;
+import document.actions.PropertiesEditorAction;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;

@@ -4,65 +4,82 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 
+import javax.management.Descriptor;
+import javax.swing.ImageIcon;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 import javax.swing.KeyStroke;
 
-import document.listeners.CompileAction;
-import document.listeners.LoadAndOpenAction;
-import document.listeners.ModifyAction;
-import document.listeners.OpenFileAction;
-import document.listeners.OpenTerminalAction;
-import document.listeners.PointAction;
-import document.listeners.PropertiesAction;
-import document.listeners.RemoveAction;
-import document.listeners.RunAction;
-import document.listeners.SaveImageAction;
-import document.listeners.SaveXMLAction;
-import document.listeners.ToolAction;
+import document.actions.CompileAction;
+import document.actions.LoadAndOpenAction;
+import document.actions.LogConsoleAction;
+import document.actions.ModifyAction;
+import document.actions.NewWindowAction;
+import document.actions.OpenFileAction;
+import document.actions.OpenTerminalAction;
+import document.actions.PointAction;
+import document.actions.PropertiesAction;
+import document.actions.RemoveAction;
+import document.actions.RunAction;
+import document.actions.SaveImageAction;
+import document.actions.SaveXMLAction;
+import document.actions.TestAction;
+import document.actions.ToolAction;
 
 public class Menubar extends JMenuBar {
 
-	public Menubar(Document document, Toolbar toolbar) {
-		add(buildFileMenu(document));
-		add(buildEditMenu(document, toolbar));
-		add(buildWindowMenu(document));
+	public Menubar(BTDesigner designer) {
+		add(buildFileMenu(designer));
+		add(buildEditMenu(designer));
+		add(buildRunMenu(designer));
+		add(buildWindowMenu(designer));
 	}
 
-	private JMenu buildFileMenu(Document document) {
+	private JMenu buildFileMenu(BTDesigner designer) {
 		/* build File Menu */
 
 		JMenu menuFile = new JMenu("File");
 
+		ImageIcon icon;
+
 		menuFile.setMnemonic(KeyEvent.VK_F);
 
 		// open file
+		icon = new ImageIcon(getClass().getClassLoader().getResource(
+				"icons/open.png"));
 		JMenuItem menuItemOpen = new JMenuItem("Open", KeyEvent.VK_O);
 		menuItemOpen.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_1,
 				ActionEvent.ALT_MASK));
 		menuItemOpen.setToolTipText("open file");
 		menuItemOpen.setActionCommand("file_open");
-		menuItemOpen.addActionListener(new OpenFileAction(document));
+		menuItemOpen.setIcon(icon);
+		menuItemOpen.addActionListener(new OpenFileAction(designer));
 		menuFile.add(menuItemOpen);
 
 		// load and open
+		icon = new ImageIcon(getClass().getClassLoader().getResource(
+				"icons/load_open.png"));
 		JMenuItem menuItemLoadAndOpen = new JMenuItem("Load and Open",
 				KeyEvent.VK_L);
 		menuItemLoadAndOpen.setAccelerator(KeyStroke.getKeyStroke(
 				KeyEvent.VK_2, ActionEvent.ALT_MASK));
 		menuItemLoadAndOpen.setToolTipText("load and open file");
 		menuItemLoadAndOpen.setActionCommand("file_load_and_open");
-		menuItemLoadAndOpen.addActionListener(new LoadAndOpenAction(document));
+		menuItemLoadAndOpen.addActionListener(new LoadAndOpenAction(designer));
+		menuItemLoadAndOpen.setIcon(icon);
 		menuFile.add(menuItemLoadAndOpen);
 
 		// save
+		icon = new ImageIcon(getClass().getClassLoader().getResource(
+				"icons/save.png"));
 		JMenuItem menuItemSave = new JMenuItem("Save", KeyEvent.VK_S);
 		menuItemSave.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_3,
 				ActionEvent.ALT_MASK));
 		menuItemSave.setToolTipText("save file");
 		menuItemSave.setActionCommand("file_save");
-		menuItemSave.addActionListener(new SaveXMLAction());
+		menuItemSave.setIcon(icon);
+		menuItemSave.addActionListener(new SaveXMLAction(designer));
 		// menuItemSave.addActionListener(listener);
 		menuFile.add(menuItemSave);
 
@@ -72,26 +89,33 @@ public class Menubar extends JMenuBar {
 				ActionEvent.ALT_MASK));
 		menuItemSaveAs.setToolTipText("save file as");
 		menuItemSaveAs.setActionCommand("file_save_as");
-		menuItemSaveAs.addActionListener(new SaveXMLAction());
+		menuItemSaveAs.addActionListener(new SaveXMLAction(designer));
 		menuFile.add(menuItemSaveAs);
 
 		// save image
+		icon = new ImageIcon(getClass().getClassLoader().getResource(
+				"icons/save_image.png"));
 		JMenuItem menuItemSaveImage = new JMenuItem("Save Image", KeyEvent.VK_I);
 		menuItemSaveImage.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_5,
 				ActionEvent.ALT_MASK));
 		menuItemSaveImage
 				.setToolTipText("creates PNG image and saves it locally");
 		menuItemSaveImage.setActionCommand("file_save_image");
-		menuItemSaveImage.addActionListener(new SaveImageAction(document));
+		menuItemSaveImage.setIcon(icon);
+		menuItemSaveImage.addActionListener(new SaveImageAction(designer));
 		menuFile.add(menuItemSaveImage);
 
 		// compile
-		JMenuItem menuItemCompile = new JMenuItem("Compile", KeyEvent.VK_C);
+		icon = new ImageIcon(getClass().getClassLoader().getResource(
+				"icons/compile.png"));
+		JMenuItem menuItemCompile = new JMenuItem("Compile");
+		menuItemCompile.setMnemonic(KeyEvent.VK_C);
 		menuItemCompile.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_6,
 				ActionEvent.ALT_MASK));
 		menuItemCompile
 				.setToolTipText("validates current plan and if plan is valid, saves it");
-		menuItemCompile.addActionListener(new CompileAction(document));
+		menuItemCompile.addActionListener(new CompileAction(designer));
+		menuItemCompile.setIcon(icon);
 		menuFile.add(menuItemCompile);
 
 		// compile and upload
@@ -104,25 +128,34 @@ public class Menubar extends JMenuBar {
 		// menuItemCompileAndUpload.addActionListener(listener);
 		menuFile.add(menuItemCompileAndUpload);
 
-		// run
-		JMenuItem menuItemRun = new JMenuItem("Run", KeyEvent.VK_R);
-		menuItemRun.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_8,
-				ActionEvent.ALT_MASK));
-		menuItemRun
-				.setToolTipText("validates current plan, uploads it to temporal remote file on C34_Executer’s host and runs it");
-		menuItemRun.addActionListener(new RunAction(document));
-		menuFile.add(menuItemRun);
+		// // run
+		// icon = new ImageIcon(getClass().getClassLoader().getResource(
+		// "icons/play.png"));
+		// JMenuItem menuItemRun = new JMenuItem("Run", KeyEvent.VK_R);
+		// menuItemRun.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_8,
+		// ActionEvent.ALT_MASK));
+		// menuItemRun.setIcon(icon);
+		// menuItemRun
+		// .setToolTipText("validates current plan, uploads it to temporal remote file on C34_Executer’s host and runs it");
+		// menuItemRun.addActionListener(new RunAction(designer));
+		// menuFile.add(menuItemRun);
 
 		// test
+		icon = new ImageIcon(getClass().getClassLoader().getResource(
+				"icons/test.png"));
 		JMenuItem menuItemTest = new JMenuItem("Test", KeyEvent.VK_T);
 		menuItemTest.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_9,
 				ActionEvent.ALT_MASK));
+		menuItemTest.setIcon(icon);
+		menuItemTest.addActionListener(new TestAction(designer));
 		menuItemTest
 				.setToolTipText("validates current plan, saves it to a temporal local file and runs it in mode of logic simulation");
 		// menuItemTest.addActionListener(listener);
 		menuFile.add(menuItemTest);
 
 		// properties
+		icon = new ImageIcon(getClass().getClassLoader().getResource(
+				"icons/settings.png"));
 		JMenuItem menuItemProperties = new JMenuItem("Properties",
 				KeyEvent.VK_P);
 		menuItemProperties.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_P,
@@ -130,39 +163,46 @@ public class Menubar extends JMenuBar {
 		menuItemProperties.setToolTipText("open properties dialog");
 		menuItemProperties.setActionCommand("open_properties_dialog");
 		menuItemProperties.addActionListener(new PropertiesAction());
+		menuItemProperties.setIcon(icon);
 		menuFile.add(menuItemProperties);
 
 		return menuFile;
 	}
 
-	private JMenu buildEditMenu(Document document, Toolbar toolbar) {
+	private JMenu buildEditMenu(BTDesigner designer) {
 		JMenu menu = new JMenu("Edit");
 
 		menu.setMnemonic(KeyEvent.VK_E);
-		menu.add(buildToolsMenu(document, toolbar));
-		menu.add(buildElementsCreatorMenu(document, toolbar));
+		menu.add(buildToolsMenu(designer));
+		menu.add(buildElementsCreatorMenu(designer));
 
 		return menu;
 	}
 
-	private JMenu buildToolsMenu(Document document, Toolbar toolbar) {
+	private JMenu buildToolsMenu(BTDesigner designer) {
 		JMenu menu = new JMenu("Tools");
 		menu.setMnemonic(KeyEvent.VK_T);
 
 		// remove
+		ImageIcon icon = new ImageIcon(getClass().getClassLoader().getResource(
+				"icons/remove.png"));
 		JMenuItem menuItemRemove = new JMenuItem("Remove", KeyEvent.VK_R);
 		menuItemRemove.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_1,
 				ActionEvent.ALT_MASK));
 		menuItemRemove.setToolTipText("sets mode of selector to remove");
-		menuItemRemove.addActionListener(new RemoveAction(document, toolbar));
+		menuItemRemove.setIcon(icon);
+		menuItemRemove.addActionListener(new RemoveAction(designer));
 		menu.add(menuItemRemove);
 
 		// modify
+		icon = new ImageIcon(getClass().getClassLoader().getResource(
+				"icons/modify.png"));
 		JMenuItem menuItemModify = new JMenuItem("Modify", KeyEvent.VK_M);
 		menuItemModify.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_2,
 				ActionEvent.ALT_MASK));
 		menuItemModify.setToolTipText("sets mode of selector to modify");
-		menuItemModify.addActionListener(new ModifyAction(document, toolbar));
+		menuItemModify.setIcon(icon);
+		menuItemModify.addActionListener(new ModifyAction(designer));
 		menu.add(menuItemModify);
 
 		// move
@@ -170,13 +210,13 @@ public class Menubar extends JMenuBar {
 		menuItemMove.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_3,
 				ActionEvent.ALT_MASK));
 		menuItemMove.setToolTipText("sets mode of selector to move");
-		menuItemMove.addActionListener(new PointAction(document, toolbar));
+		menuItemMove.addActionListener(new PointAction(designer));
 		menu.add(menuItemMove);
 
 		return menu;
 	}
 
-	private JMenu buildElementsCreatorMenu(Document document, Toolbar toolbar) {
+	private JMenu buildElementsCreatorMenu(BTDesigner designer) {
 		JMenu menu = new JMenu("Elements Creator");
 		menu.setMnemonic(KeyEvent.VK_C);
 
@@ -185,8 +225,8 @@ public class Menubar extends JMenuBar {
 		menuItemTask.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_1,
 				ActionEvent.ALT_MASK));
 		menuItemTask.setToolTipText("sets mode of selector to create tasks");
-		menuItemTask.addActionListener(new ToolAction(document, toolbar,
-				toolbar.creators.get(0)));
+		menuItemTask.addActionListener(new ToolAction(designer,
+				designer.toolbar.creators.get(0)));
 		menu.add(menuItemTask);
 
 		// arrow
@@ -194,8 +234,8 @@ public class Menubar extends JMenuBar {
 		menuItemArrow.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_2,
 				ActionEvent.ALT_MASK));
 		menuItemArrow.setToolTipText("sets mode of selector to create arrows");
-		menuItemArrow.addActionListener(new ToolAction(document, toolbar,
-				toolbar.creators.get(1)));
+		menuItemArrow.addActionListener(new ToolAction(designer,
+				designer.toolbar.creators.get(1)));
 		menu.add(menuItemArrow);
 
 		// decorator
@@ -204,8 +244,8 @@ public class Menubar extends JMenuBar {
 				ActionEvent.ALT_MASK));
 		menuItemDecorator
 				.setToolTipText("sets mode of selector to create decorators");
-		menuItemDecorator.addActionListener(new ToolAction(document, toolbar,
-				toolbar.creators.get(2)));
+		menuItemDecorator.addActionListener(new ToolAction(designer,
+				designer.toolbar.creators.get(2)));
 		menu.add(menuItemDecorator);
 
 		// joint
@@ -214,30 +254,39 @@ public class Menubar extends JMenuBar {
 				ActionEvent.ALT_MASK));
 		menuItemJoint
 				.setToolTipText("sets mode of selector to create joint points on arrows");
-		menuItemJoint.addActionListener(new ToolAction(document, toolbar,
-				toolbar.creators.get(3)));
+		menuItemJoint.addActionListener(new ToolAction(designer,
+				designer.toolbar.creators.get(3)));
 		menu.add(menuItemJoint);
 
 		return menu;
 	}
 
-	private JMenu buildWindowMenu(Document document) {
+	private JMenu buildWindowMenu(BTDesigner designer) {
 		JMenu menu = new JMenu("Window");
 		menu.setMnemonic(KeyEvent.VK_W);
 
+		ImageIcon icon;
+
 		// new
+		icon = new ImageIcon(getClass().getClassLoader().getResource(
+				"icons/new_tab.png"));
 		JMenuItem menuItemNew = new JMenuItem("New", KeyEvent.VK_N);
 		menuItemNew.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_1,
 				ActionEvent.ALT_MASK));
 		menuItemNew.setToolTipText("creates new instance of BTDesigner");
+		menuItemNew.addActionListener(new NewWindowAction(designer));
+		menuItemNew.setIcon(icon);
 		menu.add(menuItemNew);
 
 		// open terminal
+		icon = new ImageIcon(getClass().getClassLoader().getResource(
+				"icons/terminal.png"));
 		JMenuItem menuItemOpenTerminal = new JMenuItem("Open Terminal",
 				KeyEvent.VK_T);
 		menuItemOpenTerminal.setAccelerator(KeyStroke.getKeyStroke(
 				KeyEvent.VK_2, ActionEvent.ALT_MASK));
 		menuItemOpenTerminal.setToolTipText("opens ROS terminal window");
+		menuItemOpenTerminal.setIcon(icon);
 		menuItemOpenTerminal.addActionListener(new OpenTerminalAction());
 		menu.add(menuItemOpenTerminal);
 
@@ -247,14 +296,73 @@ public class Menubar extends JMenuBar {
 		menuItemOpenLogConsole.setAccelerator(KeyStroke.getKeyStroke(
 				KeyEvent.VK_3, ActionEvent.ALT_MASK));
 		menuItemOpenLogConsole.setToolTipText("opens log history dialog");
+		menuItemOpenLogConsole.addActionListener(new LogConsoleAction());
 		menu.add(menuItemOpenLogConsole);
 
-		// help
-		JMenuItem menuItemHelp = new JMenuItem("Help", KeyEvent.VK_H);
-		menuItemHelp.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_4,
+		// about
+		JMenuItem menuItemAbout = new JMenuItem("About", KeyEvent.VK_B);
+		menuItemAbout.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_4,
 				ActionEvent.ALT_MASK));
-		menuItemHelp.setToolTipText("opens help dialog");
-		menu.add(menuItemHelp);
+		menuItemAbout.setToolTipText("About the software");
+		menu.add(menuItemAbout);
+
+		return menu;
+	}
+
+	private JMenu buildRunMenu(BTDesigner designer) {
+		JMenu menu = new JMenu("Run");
+		menu.setMnemonic(KeyEvent.VK_R);
+
+		ImageIcon icon;
+		JMenuItem menuItem;
+
+		// Run plan
+		icon = new ImageIcon(getClass().getClassLoader().getResource(
+				"icons/robot.png"));
+		menuItem = new JMenuItem("Run", KeyEvent.VK_R);
+		menuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_1,
+				ActionEvent.ALT_MASK));
+		menuItem.setToolTipText("Runs current plan");
+		menuItem.addActionListener(new RunAction(designer));
+		menuItem.setActionCommand("run_run_plan");
+		menuItem.setIcon(icon);
+		menu.add(menuItem);
+
+		// Resume
+		icon = new ImageIcon(getClass().getClassLoader().getResource(
+				"icons/play.png"));
+		menuItem = new JMenuItem("Resume", KeyEvent.VK_E);
+		menuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_2,
+				ActionEvent.ALT_MASK));
+		menuItem.setToolTipText("Resumes current execution");
+		menuItem.addActionListener(new RunAction(designer));
+		menuItem.setActionCommand("run_resume_plan");
+		menuItem.setIcon(icon);
+		menu.add(menuItem);
+
+		// pause
+		icon = new ImageIcon(getClass().getClassLoader().getResource(
+				"icons/pause.png"));
+		menuItem = new JMenuItem("Pause", KeyEvent.VK_P);
+		menuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_3,
+				ActionEvent.ALT_MASK));
+		menuItem.setToolTipText("Pauses current execution");
+		menuItem.addActionListener(new RunAction(designer));
+		menuItem.setActionCommand("run_pause_plan");
+		menuItem.setIcon(icon);
+		menu.add(menuItem);
+
+		// stop
+		icon = new ImageIcon(getClass().getClassLoader().getResource(
+				"icons/stop.png"));
+		menuItem = new JMenuItem("Stop", KeyEvent.VK_S);
+		menuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_4,
+				ActionEvent.ALT_MASK));
+		menuItem.setToolTipText("Stops current execution");
+		menuItem.addActionListener(new RunAction(designer));
+		menuItem.setActionCommand("run_stop_plan");
+		menuItem.setIcon(icon);
+		menu.add(menuItem);
 
 		return menu;
 	}

@@ -217,11 +217,11 @@ public class Document extends JPanel {
 						lastX = nge.getProperty().loc.x = lastX+20;
 						lastY = nge.getProperty().loc.y = lastY;
 					}
-					if(e.hasAttribute("dbg_time")){	
-						nge.getProperty().dbg_time = Integer.parseInt( e.getAttribute("dbg_time") );
+					if(e.hasAttribute("test_time")){	
+						nge.getProperty().test_time = Integer.parseInt( e.getAttribute("test_time") );
 					}
-					if(e.hasAttribute("dbg_result")){	
-						nge.getProperty().dbg_result = Boolean.parseBoolean( e.getAttribute("dbg_result") );
+					if(e.hasAttribute("test_result")){	
+						nge.getProperty().test_result = Boolean.parseBoolean( e.getAttribute("test_result") );
 					}
 					if(e.hasAttribute("id")){	
 						nge.id = UUID.fromString( e.getAttribute("id") );
@@ -284,11 +284,11 @@ public class Document extends JPanel {
 						lastX = nge.getProperty().loc.x = lastX+20;
 						lastY = nge.getProperty().loc.y = lastY;
 					}
-					if(e.hasAttribute("dbg_time")){	
-						nge.getProperty().dbg_time = Integer.parseInt( e.getAttribute("dbg_time") );
+					if(e.hasAttribute("test_time")){	
+						nge.getProperty().test_time = Integer.parseInt( e.getAttribute("test_time") );
 					}
-					if(e.hasAttribute("dbg_result")){	
-						nge.getProperty().dbg_result = Boolean.parseBoolean( e.getAttribute("dbg_result") );
+					if(e.hasAttribute("test_result")){	
+						nge.getProperty().test_result = Boolean.parseBoolean( e.getAttribute("test_result") );
 					}
 					if(e.hasAttribute("id")){	
 						nge.id = UUID.fromString( e.getAttribute("id") );
@@ -422,6 +422,19 @@ public class Document extends JPanel {
 		return new String(absoluteFilePath);
 	}
 
+	public String getShortFilePath() {
+		if (absoluteFilePath == null) {
+			return null;
+		}
+		
+		String[] splitted = absoluteFilePath.split("/");
+		if (splitted.length == 0) {
+			return null;
+		}
+		
+		return new String(splitted[splitted.length - 1]);
+	}
+	
 	public void toolSelectionClean(){
 		creator = null;
 		removeElement = false;
@@ -655,7 +668,6 @@ public class Document extends JPanel {
 
 	public void setCurrentWorkingFile(String absoluteFilePath) {
 		this.absoluteFilePath = absoluteFilePath;
-		mainWindow.setTitle("Cogniteam BTDesigner "+BTDesigner.VERSION+": "+absoluteFilePath);
 	}
 	
 	private String getCurrentWorkingFile() {
@@ -705,7 +717,7 @@ public class Document extends JPanel {
 	}
 
 	Process BTExecuter=null;
-	public void run() {
+	public void test() {
 		if(BTExecuter!=null){
 			BTExecuter.destroy();
 			return;
