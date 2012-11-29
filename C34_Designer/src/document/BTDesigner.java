@@ -89,8 +89,6 @@ public class BTDesigner extends JFrame {
 	public BTDesigner() {
 
 		this.setTitle("Cogniteam BTDesigner " + BTDesigner.VERSION);
-
-//		addNewDocumentTab();
 		
 		toolbar = new Toolbar(this);
 //		getActiveTab();
@@ -114,6 +112,10 @@ public class BTDesigner extends JFrame {
 
 		// add(document, BorderLayout.CENTER);
 		this.setJMenuBar(menuBar);
+		
+		// add new tab
+		addNewDocumentTab();
+		toolbar.setActiveDocument(tabs.get(0).doc);
 	}
 
 	public void addNewDocumentTab() {
