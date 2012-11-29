@@ -35,11 +35,16 @@ public:
 	virtual void terminate();
 	virtual bool isActive();
 	virtual std::string address()const;
-	virtual Ref clone()const{return new Ref( new RobilTaskProxy(tname) ); }
+	virtual Ref clone()const{return Ref( new RobilTaskProxy(tname) ); }
 };
 
 class RobilTaskProxyCreator:public BTTaskProxyCreator{
-public: virtual BTTask* create(std::string TNAME){ return new RobilTaskProxy(TNAME); }
+public:
+	virtual std::string nameOfCreator(){return "RobilTask";}
+	virtual BTTask* create(std::string TNAME){
+		if(TNAME=="TEST"||TNAME=="test") return BTTask::Ref().get();
+		return new RobilTaskProxy(TNAME);
+	}
 };
 
 }using namespace TaskProxyConnectionByActionLib;

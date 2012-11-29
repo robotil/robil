@@ -22,7 +22,11 @@
 #include "C34_Executer/resume.h"
 #include "C34_Executer/btstack.h"
 #include "C34_Executer/help_msg.h"
+#include "C34_Executer/whoIsRunning.h"
 #include "C34_Executer/show_table_msg.h"
+#include "C34_Executer/version.h"
+#include "C34_Executer/save_file.h"
+#include "C34_Executer/read_file.h"
 
 #include "std_msgs/String.h"
 
@@ -48,6 +52,27 @@ bool command_show_address(show_table_msg::Request& req, show_table_msg::Response
 bool command_pwd(pwd::Request& req, pwd::Response& res){
 	if(!actions) return false;
 	res.location = actions->pwd();
+	return true;
+}
+bool command_read_file(read_file::Request& req, read_file::Response& res){
+	if(!actions) return false;
+	res.content = std::string("\n") + actions->readFile(req.filename);
+	return true;
+}
+bool command_save_file(save_file::Request& req, save_file::Response& res){
+	if(!actions) return false;
+	actions->saveFile(req.filename, req.content);
+	return true;
+}
+bool command_version(version::Request& req, version::Response& res){
+	if(!actions) return false;
+	res.version = actions->version();
+	return true;
+}
+bool command_whoIsRunning(whoIsRunning::Request& req, whoIsRunning::Response& res){
+	if(!actions) return false;
+	//std::cout<<"command_whoIsRunning"<<std::endl;
+	res.runningList = actions->whoIsRunning();
 	return true;
 }
 
@@ -211,6 +236,7 @@ int main(int argc, char** argv){
 #define RUN_SERVICE(N) ros::ServiceServer ss_##N = n.advertiseService("executer/"#N, command_##N);
 	RUN_SERVICE(help)
 	RUN_SERVICE(pwd)
+	RUN_SERVICE(whoIsRunning)
 	RUN_SERVICE(cd)
 	RUN_SERVICE(ls)
 	RUN_SERVICE(lookup)
@@ -224,6 +250,9 @@ int main(int argc, char** argv){
 	RUN_SERVICE(dump)
 	RUN_SERVICE(show_lookup)
 	RUN_SERVICE(show_address)
+	RUN_SERVICE(version)
+	RUN_SERVICE(read_file)
+	RUN_SERVICE(save_file)
 #undef RUN_SERVICE
 
 	if(params.contains("help")){
