@@ -65,6 +65,6 @@ public abstract class Dialogs {
 		
 		fileDialog.setVisible(true);
 		
-		return fileDialog.getFile();			
+		return fileDialog.getDirectory() + fileDialog.getFile();			
 	}
 }
