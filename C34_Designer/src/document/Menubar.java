@@ -140,25 +140,12 @@ public class Menubar extends JMenuBar {
 		// menuItemRun.addActionListener(new RunAction(designer));
 		// menuFile.add(menuItemRun);
 
-		// test
-		icon = new ImageIcon(getClass().getClassLoader().getResource(
-				"icons/test.png"));
-		JMenuItem menuItemTest = new JMenuItem("Test", KeyEvent.VK_T);
-		menuItemTest.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_9,
-				ActionEvent.ALT_MASK));
-		menuItemTest.setIcon(icon);
-		menuItemTest.addActionListener(new TestAction(designer));
-		menuItemTest
-				.setToolTipText("validates current plan, saves it to a temporal local file and runs it in mode of logic simulation");
-		// menuItemTest.addActionListener(listener);
-		menuFile.add(menuItemTest);
-
 		// properties
 		icon = new ImageIcon(getClass().getClassLoader().getResource(
 				"icons/settings.png"));
 		JMenuItem menuItemProperties = new JMenuItem("Properties",
 				KeyEvent.VK_P);
-		menuItemProperties.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_P,
+		menuItemProperties.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_8,
 				ActionEvent.ALT_MASK));
 		menuItemProperties.setToolTipText("open properties dialog");
 		menuItemProperties.setActionCommand("open_properties_dialog");
@@ -315,12 +302,13 @@ public class Menubar extends JMenuBar {
 
 		ImageIcon icon;
 		JMenuItem menuItem;
+		int shortcutKey = KeyEvent.VK_1;
 
 		// Run plan
 		icon = new ImageIcon(getClass().getClassLoader().getResource(
 				"icons/robot.png"));
 		menuItem = new JMenuItem("Run", KeyEvent.VK_R);
-		menuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_1,
+		menuItem.setAccelerator(KeyStroke.getKeyStroke(shortcutKey++,
 				ActionEvent.ALT_MASK));
 		menuItem.setToolTipText("Runs current plan");
 		menuItem.addActionListener(new RunAction(designer));
@@ -332,7 +320,7 @@ public class Menubar extends JMenuBar {
 		icon = new ImageIcon(getClass().getClassLoader().getResource(
 				"icons/play.png"));
 		menuItem = new JMenuItem("Resume", KeyEvent.VK_E);
-		menuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_2,
+		menuItem.setAccelerator(KeyStroke.getKeyStroke(shortcutKey++,
 				ActionEvent.ALT_MASK));
 		menuItem.setToolTipText("Resumes current execution");
 		menuItem.addActionListener(new RunAction(designer));
@@ -344,7 +332,7 @@ public class Menubar extends JMenuBar {
 		icon = new ImageIcon(getClass().getClassLoader().getResource(
 				"icons/pause.png"));
 		menuItem = new JMenuItem("Pause", KeyEvent.VK_P);
-		menuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_3,
+		menuItem.setAccelerator(KeyStroke.getKeyStroke(shortcutKey++,
 				ActionEvent.ALT_MASK));
 		menuItem.setToolTipText("Pauses current execution");
 		menuItem.addActionListener(new RunAction(designer));
@@ -352,16 +340,40 @@ public class Menubar extends JMenuBar {
 		menuItem.setIcon(icon);
 		menu.add(menuItem);
 
+		// step
+		icon = new ImageIcon(getClass().getClassLoader().getResource(
+				"icons/step.png"));
+		menuItem = new JMenuItem("Step", KeyEvent.VK_S);
+		menuItem.setAccelerator(KeyStroke.getKeyStroke(shortcutKey++,
+				ActionEvent.ALT_MASK));
+		menuItem.setToolTipText("Steps current execution");
+		menuItem.addActionListener(new RunAction(designer));
+		menuItem.setActionCommand("run_step_plan");
+		menuItem.setIcon(icon);
+		menu.add(menuItem);
+
 		// stop
 		icon = new ImageIcon(getClass().getClassLoader().getResource(
 				"icons/stop.png"));
-		menuItem = new JMenuItem("Stop", KeyEvent.VK_S);
-		menuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_4,
+		menuItem = new JMenuItem("Stop", KeyEvent.VK_O);
+		menuItem.setAccelerator(KeyStroke.getKeyStroke(shortcutKey++,
 				ActionEvent.ALT_MASK));
 		menuItem.setToolTipText("Stops current execution");
 		menuItem.addActionListener(new RunAction(designer));
 		menuItem.setActionCommand("run_stop_plan");
 		menuItem.setIcon(icon);
+		menu.add(menuItem);
+
+		// test
+		icon = new ImageIcon(getClass().getClassLoader().getResource(
+				"icons/test.png"));
+		menuItem = new JMenuItem("Test", KeyEvent.VK_T);
+		menuItem.setAccelerator(KeyStroke.getKeyStroke(shortcutKey++,
+				ActionEvent.ALT_MASK));
+		menuItem.setIcon(icon);
+		menuItem.addActionListener(new TestAction(designer));
+		menuItem.setToolTipText("validates current plan, saves it to a temporal local file and runs it in mode of logic simulation");
+		// menuItemTest.addActionListener(listener);
 		menu.add(menuItem);
 
 		return menu;

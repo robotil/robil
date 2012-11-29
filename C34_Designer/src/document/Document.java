@@ -612,7 +612,9 @@ public class Document extends JPanel {
 		return xml;
 	}
 
-	public void compile() {
+	public void compile(String destination) {
+		setCurrentWorkingFile(destination);
+		
 		toolSelectionClean();
 		ArrayList<GElement> root = getRoot();
 		if(root.size()!=1){
@@ -647,6 +649,10 @@ public class Document extends JPanel {
 		
 		boolean saved = saveXmlToFile(xml, getCurrentWorkingFile(), true);
 		if(saved) saveXmlToFile(createXml(rootTask, tabulation, true), getCurrentWorkingFileForXmlWithJustNames(), false);
+	}
+	
+	public void compile() {
+		compile(getCurrentWorkingFile());
 	}
 	
 	private boolean saveXmlToFile(String xml, String filen, boolean withNotifications){

@@ -16,6 +16,10 @@ public class RunAction extends AbstractDesignerAction implements ActionListener 
 		super(designer);
 	}
 
+	private void runPlanXML(String id, String xml) {
+		designer.rosExecutor.runBehaviorTree(id, xml);
+	}
+	
 	private void runPlan() {
 		Document doc = getActiveTab().doc;
 		String fileName = doc.getShortFilePath();
@@ -41,6 +45,16 @@ public class RunAction extends AbstractDesignerAction implements ActionListener 
 		String id = getActiveTab().getID();
 		designer.rosExecutor.resumeBehaviorTree(id);
 	}
+	
+	private void stepPlan() {
+		String id = getActiveTab().getID();
+		designer.rosExecutor.stepBehaviorTree(id);
+	}
+	
+	private void pausePlan() {
+		String id = getActiveTab().getID();
+		designer.rosExecutor.pauseBehaviorTree(id);
+	}
 
 	private void stopPlan() {
 		String id = getActiveTab().getID();
@@ -49,13 +63,15 @@ public class RunAction extends AbstractDesignerAction implements ActionListener 
 	
 	public void actionPerformed(ActionEvent a) {
 		if (a.getActionCommand().equals("run_run_plan")) {
-			runPlan();
+			runPlanXML("matan", "<plan><tsk name=\"Noname\" x=\"274.5\" y=\"95.5\" test_time=\"0\" test_result=\"true\" id=\"03ccc501-6dec-4afc-b0c5-d76d3bed6970\" /></plan>");//runPlan();
 		} else if (a.getActionCommand().equals("run_resume_plan")) {
 			resumePlan();
 		} else if (a.getActionCommand().equals("run_stop_plan")) {
 			stopPlan();
 		} else if (a.getActionCommand().equals("run_pause_plan")) {
-			
+			pausePlan();
+		} else if (a.getActionCommand().equals("run_step_plan")) {
+			stepPlan();
 		}
 
 	}
