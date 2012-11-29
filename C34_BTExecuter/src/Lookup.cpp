@@ -38,12 +38,14 @@ Lookup::Lookup(std::string fname){
 	ptree pt;
 	read_xml(fname, pt);
 	_parseXml(pt);
+	source = fname;
 }
 
 Lookup::Lookup(std::istream& stream){
 	ptree pt;
 	read_xml(stream, pt);
 	_parseXml(pt);
+	source = "---";
 }
 
 void Lookup::_parseXml(boost::property_tree::ptree& pt){

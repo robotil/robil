@@ -9,6 +9,7 @@ CPP_SRCS += \
 ../src/Dec.cpp \
 ../src/ExeEnergy.cpp \
 ../src/ExeStack.cpp \
+../src/ExecuterStatus.cpp \
 ../src/Info.cpp \
 ../src/Logger.cpp \
 ../src/Lookup.cpp \
@@ -30,6 +31,7 @@ OBJS += \
 ./src/Dec.o \
 ./src/ExeEnergy.o \
 ./src/ExeStack.o \
+./src/ExecuterStatus.o \
 ./src/Info.o \
 ./src/Logger.o \
 ./src/Lookup.o \
@@ -51,6 +53,7 @@ CPP_DEPS += \
 ./src/Dec.d \
 ./src/ExeEnergy.d \
 ./src/ExeStack.d \
+./src/ExecuterStatus.d \
 ./src/Info.d \
 ./src/Logger.d \
 ./src/Lookup.d \

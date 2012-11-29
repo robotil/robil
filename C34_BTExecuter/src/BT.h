@@ -24,6 +24,7 @@ class BT{
 public:
 	ptree pt;
 	std::string type;
+	std::string source;
 
 	static BT load(std::string fname){
 		return BT(fname);
@@ -32,6 +33,7 @@ public:
 		read_xml(stream, pt);
 		pt = pt.get_child("plan");
 		type = "plan";
+		source = "---";
 	}
 	BT(std::string fname){
 		if(
@@ -42,15 +44,17 @@ public:
 			std::stringstream xml; xml << fname;
 			read_xml(xml, pt);
 			std::cout<<"BT created"<<std::endl;
+			source = fname;
 		}else{
 			std::cout<<"BT: load and run xml from file "<<fname<<std::endl;
 			read_xml(fname, pt);
 			std::cout<<"BT created"<<std::endl;
+			source = fname;
 		}
 		pt = pt.get_child("plan");
 		type = "plan";
 	}
-	BT(std::string type, ptree pt):pt(pt),type(type){
+	BT(std::string type, ptree pt):pt(pt),type(type),source("---"){
 
 	}
 	BT(){

@@ -13,6 +13,7 @@
 #include "Node.h"
 #include "BT.h"
 #include "Result.h"
+#include "ExecuterStatus.h"
 
 #include "ExeStack.h"
 #include "ExeEnergy.h"
@@ -66,6 +67,8 @@ public:
 	TaskProxyTable::Ref taskproxy;
 	bool debug;
 
+	ExecuterStatus::Ref executerStatus;
+
 	FINISH_CALLBACK finish_callback;
 
 public:
@@ -104,6 +107,7 @@ public:
 	void step(string id);
 	void stack(string id);
 	void dump(string id);
+	std::string whoIsRunning();
 };
 
 class ServerActions{
@@ -116,6 +120,8 @@ public:
 	std::string ls();
 	void lookup(std::string filename);
 	void address(std::string filename, BTTaskProxyCreator::Ref creator);
+	void saveFile(std::string filename, std::string filetext);
+	std::string readFile(std::string filename);
 	void run(std::string id, std::string filename);
 	std::string stop(std::string id);
 	void pause(std::string id);
@@ -126,6 +132,8 @@ public:
 	std::string help();
 	std::string show_lookup();
 	std::string show_address();
+	std::string whoIsRunning();
+	std::string version();
 };
 
 

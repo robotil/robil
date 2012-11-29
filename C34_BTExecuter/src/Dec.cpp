@@ -42,27 +42,46 @@ bool Dec::doit(){
 	return true;
 }
 bool Dec::done(Result::Ref res){
-	if(bt_name=="!") return true;
-	else
-	if(bt_name=="L" || bt_name=="L!"){
-		if(res->value()) return false;
+	if(bt_name=="!"){
 		return true;
-	}else
+	}
+
+	if(bt_name=="L" || bt_name=="L!"){
+		if(res->value()==true) return false;
+		return true;
+	}
 	if(bt_name=="!L!" || bt_name=="!L"){
 		if(res->value()==false) return false;
 		return true;
 	}
+
+	if(bt_name=="T" || bt_name=="F"){
+		return true;
+	}
+
 	return true;
 }
 Result::Ref Dec::result(Result::Ref res){
-	if(bt_name=="!") return Result::New(!res->value(), info(), res);
-	else
+	if(bt_name=="!"){
+		return Result::New(!res->value(), info(), res);
+	}
+
 	if(bt_name=="L"||bt_name=="!L"){
 		return Result::New(false, info(), res);
 	}
+
 	if(bt_name=="!L!"||bt_name=="L!"){
 		return Result::New(true, info(), res);
 	}
+
+	if(bt_name=="T"){
+		return Result::New(true, info(), res);
+	}
+
+	if(bt_name=="F"){
+		return Result::New(false, info(), res);
+	}
+
 	return Result::New(res->value(), info(), res);
 }
 

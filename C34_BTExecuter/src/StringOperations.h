@@ -166,6 +166,54 @@ static Arguments parse_arguments(std::string line){
 	return args;
 }
 
+static int month(char m[]){
+	switch(m[0]){
+	case 'J':
+		switch(m[1]){
+		case 'a' : return 1;
+		case 'u' :
+			switch(m[2]){
+			case 'n' : return 6;
+			case 'l' : return 7;
+			};
+			return 0;
+		};
+		return 0;
+	case 'F': return 2;
+	case 'M':
+		switch(m[2]){
+		case 'r' : return 3;
+		case 'y' : return 5;
+		};
+		return 0;
+	case 'A':
+		switch(m[1]){
+		case 'p' : return 4;
+		case 'u' : return 8;
+		};
+		return 0;
+	case 'S': return 9;
+	case 'O': return 10;
+	case 'N': return 11;
+	case 'D': return 12;
+	};
+	return 0;
+}
+static long buildNumber(){
+	std::stringstream d; d<<__DATE__;
+	std::stringstream t; t<<__TIME__;
+	char s;
+	char mon[3]; d>>mon[0]>>mon[1]>>mon[2];
+	d>>s;
+	long day; d>>day;
+	d>>s;
+	long yr; d>>yr;
+	long h; t>>h; t>>s;
+	long m; t>>m; t>>s;
+	long sec; t>>sec;
+	return sec+60*(m+60*(h+24*(day+31*(month(mon)+12*yr))));
+}
+
 }
 
 #endif /* STRINGOPERATIONS_H_ */
