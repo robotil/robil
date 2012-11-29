@@ -13,9 +13,10 @@ import document.Parameters;
 public class SaveXMLAction extends AbstractDesignerAction implements ActionListener {
 	
 	private void savePlan(String path) {
-		JOptionPane.showMessageDialog(null, "Error: not implemented", "Save Plan",
-				JOptionPane.ERROR_MESSAGE);
-		return;
+//		JOptionPane.showMessageDialog(null, "Error: not implemented", "Save Plan",
+//				JOptionPane.ERROR_MESSAGE);
+//		return;
+		getActiveTab().doc.compile(path);
 //		document.setCurrentWorkingFile(path);
 	}
 	
