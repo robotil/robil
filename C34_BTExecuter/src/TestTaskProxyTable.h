@@ -15,6 +15,8 @@ public:
 	TestTaskProxyTable();
 	virtual ~TestTaskProxyTable();
 
+	virtual std::string source(){ return "TestTaskProxyTable" ;}
+
 
 //	virtual void add(std::string taskname, BTTask::Ref taskaccess);
 //	virtual bool contains(std::string tn);

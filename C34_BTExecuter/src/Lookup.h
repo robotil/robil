@@ -93,7 +93,10 @@ private:
 	typedef std::map<std::string, ItemRef> planners_t;
 	planners_t planners;
 	boost::mutex mtx;
+
+
 public:
+	std::string source;
 
 	Lookup();
 	Lookup(std::string fname);

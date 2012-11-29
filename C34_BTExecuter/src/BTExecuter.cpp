@@ -5,10 +5,13 @@
  *      Author: dan
  */
 
+#define VERSION "1.1.2"
+#define COMPILATION_TIME __DATE__ " " __TIME__
+
 #include "BTExecuter.h"
 #include "StringOperations.h"
 #include "TaskProxyTableXML.h"
-
+#include <fstream>
 
 	Params::Params(int n, char** v){
 		std::string key="";
@@ -29,11 +32,12 @@
 
 
 	BTExecuter::BTExecuter(int an, char** av)
-	:params(an,av), name("console"), stack(new ExeStack("plan")), finish_callback(0)
+	:params(an,av), name("console"), stack(new ExeStack("plan")), finish_callback(0), executerStatus(new ExecuterStatus())
 	{
 		std::string & _executer_id = name;
 		if(params.contains("bt")==false){
 			log<<"BTExecuter: there is no -bt parameter";
+			executerStatus->updateState(ExecuterStatus::ST_ERROR);
 			return;
 		}
 
@@ -42,6 +46,7 @@
 			if(params.contains("lu")){
 				log<<"LOOKUP="<<params.get<std::string>("lu");
 			}
+			executerStatus->updateState(ExecuterStatus::ST_ERROR);
 			return;
 		}
 
@@ -54,9 +59,12 @@
 		std::string bt_file;
 		bt_file = params.get<std::string>("bt");
 
+		executerStatus->setBTSource(bt_file);
+
 		BT bt( bt_file );
 		if(params.contains("lu")){
 			lookup= Lookup::Ref(new Lookup(params.get<std::string>("lu")));
+			executerStatus->setLookupSource(lookup->source);
 		}else{
 			lookup= Lookup::Ref(new Lookup());
 		}
@@ -75,11 +83,12 @@
 	}
 
 	BTExecuter::BTExecuter(int an, char** av, TaskProxyTable::Ref tp)
-	:params(an,av), name("console"), stack(new ExeStack("plan")), finish_callback(0)
+	:params(an,av), name("console"), stack(new ExeStack("plan")), finish_callback(0), executerStatus(new ExecuterStatus())
 	{
 		std::string & _executer_id = name;
 		if(params.contains("bt")==false){
 			log<<"BTExecuter: there is no -bt parameter";
+			executerStatus->updateState(ExecuterStatus::ST_ERROR);
 			return;
 		}
 
@@ -88,6 +97,7 @@
 			if(params.contains("lu")){
 				log<<"LOOKUP="<<params.get<std::string>("lu");
 			}
+			executerStatus->updateState(ExecuterStatus::ST_ERROR);
 			return;
 		}
 
@@ -100,11 +110,18 @@
 		std::string bt_file;
 		bt_file = params.get<std::string>("bt");
 
+		executerStatus->setBTSource(bt_file);
+
 		BT bt( bt_file );
 		if(params.contains("lu")){
 			lookup= Lookup::Ref(new Lookup(params.get<std::string>("lu")));
+			executerStatus->setLookupSource(lookup->source);
 		}else{
 			lookup= Lookup::Ref(new Lookup());
+		}
+
+		if(tp.get()){
+			executerStatus->setAddressSource(tp->source());
 		}
 
 		debug = true;
@@ -122,8 +139,10 @@
 	}
 
 	BTExecuter::BTExecuter(double e, double te, Lookup::Ref l, TaskProxyTable::Ref tp, BT bt, std::string name)
-	:params(0,0), name(name), stack(new ExeStack("plan")), finish_callback(0)
+	:params(0,0), name(name), stack(new ExeStack("plan")), finish_callback(0), executerStatus(new ExecuterStatus())
 	{
+		executerStatus->setBTSource(bt.source);
+
 		std::string & _executer_id = name;
 		energy=ExeEnergy::Ref( new ExeEnergy() );
 		energy->setContinuously(e);
@@ -134,6 +153,19 @@
 
 		lookup = l;
 		taskproxy = tp;
+
+		if(taskproxy.get()){
+			std::cout<<"ADDRESS DEFINED : ["<<taskproxy->source()<<"]"<<std::endl;
+			executerStatus->setAddressSource(taskproxy->source());
+		}else{
+			std::cout<<"ADDRESS IS NOT DEFINED"<<std::endl;
+		}
+		if(lookup.get()){
+			std::cout<<"LOOKUP DEFINED : ["<<lookup->source<<"]"<<std::endl;
+			executerStatus->setLookupSource(lookup->source);
+		}else{
+			std::cout<<"LOOKUP IS NOT DEFINED"<<std::endl;
+		}
 
 		node = Node::createNode(lookup, bt);
 		node->setExecuterId(name);
@@ -152,7 +184,10 @@
 	}
 
 	void BTExecuter::run(){
+		if(executerStatus->getState() == ExecuterStatus::ST_STOPPED)
+			executerStatus->updateState(ExecuterStatus::ST_RUNNING);
 		result = node->run();
+		executerStatus->updateState(ExecuterStatus::ST_FINISHED);
 		node->removeFromStack();
 		{Logger l(name); l<<"BT "<< name <<" is finished \n";
 		stack->printDown(l);}
@@ -184,8 +219,24 @@ using namespace std;
 		executers[id]=BTExecuter::Ref( new BTExecuter(100,0, lookup, taskproxy, file, id) );
 		if(finishCallback) executers[id]->finish_callback = finishCallback;
 		if(stackCallback ) executers[id]->stack->setOnChangeNotification(id, stackCallback);
+
+		/*----------------------------------------------------------------------*/
+		std::cout<<"WARNING: BT PAUSED. DEBUG MODE"<<std::endl;
 		executers[id]->energy->setStepMode();/*<<<<< for debuging */
+		executers[id]->executerStatus->updateState(ExecuterStatus::ST_PAUSED);
+		/*----------------------------------------------------------------------*/
+
 		executers[id]->start();
+	}
+	std::string BTServer::whoIsRunning(){
+		typedef map<string,BTExecuter::Ref> MAP;
+		std::stringstream out;
+		//std::cout<<"BTServer::whoIsRunning"<<std::endl;
+		out<<std::endl;
+		for(MAP::iterator i = executers.begin();i!=executers.end();i++){
+			out << i->first << "\t" << i->second->executerStatus->str()<< std::endl;
+		}
+		return out.str();
 	}
 	void BTServer::stop(string id){
 		if(!exists(id)) return;
@@ -199,11 +250,13 @@ using namespace std;
 	void BTServer::pause(string id){
 		if(!exists(id)) return;
 		executers[id]->energy->setStepMode();
+		executers[id]->executerStatus->updateState(ExecuterStatus::ST_PAUSED);
 		{logID(id)<<"pause of "<<id;}
 	}
 	void BTServer::resume(string id){
 		if(!exists(id)) return;
 		{logID(id)<<"resume "<<id;}
+		executers[id]->executerStatus->updateState(ExecuterStatus::ST_RUNNING);
 		executers[id]->energy->setContinuously(100);
 		executers[id]->energy->wake();
 	}
@@ -225,6 +278,7 @@ using namespace std;
 
 
 ServerActions::ServerActions(BTServer& serv):server(serv){
+	std::cout<<"EXECUTER VERSION "<<VERSION<<" COMPILED AT "<<COMPILATION_TIME<<std::endl;
 	cdir=boost::filesystem::initial_path();
 }
 
@@ -236,6 +290,8 @@ std::string ServerActions::help(){
 	s<<"\n\t"<<"ls - list of file in current directory";
 	s<<"\n\t"<<"lookup FILE - load lookup file";
 	s<<"\n\t"<<"address FILE - load file with <task name, task address> map";
+	s<<"\n\t"<<"ps - list of active BT with running status (running, stopped, paused, etc) and source";
+	s<<"\n\t"<<"whoIsRunning - see ps";
 	s<<"\n\t"<<"run ID FILE - run BT in FILE with ID";
 	s<<"\n\t"<<"pause ID - pause BT execution";
 	s<<"\n\t"<<"resume ID - continue execution of BT";
@@ -245,6 +301,10 @@ std::string ServerActions::help(){
 	s<<"\n\t"<<"stack ID - print stack state of BT";
 	s<<"\n\t"<<"show_lookup - print content of lookup table";
 	s<<"\n\t"<<"show_address - print content of task name-address association table";
+	s<<"\n\t"<<"save_file FILENAME FILECONTENT - save FILECONTENT to FILENAME";
+	s<<"\n\t"<<"save - see save_file";
+	s<<"\n\t"<<"read_file FILENAME - read content of FILENAME";
+	s<<"\n\t"<<"cat - see read_file";
 	s<<"\n";
 	//s<<"\t"<<"-------------\n\t Copyright Cogniteam @ 2012 for ROBIL project\n";
 	return s.str();
@@ -298,15 +358,18 @@ std::string ServerActions::ls(){
 	      else{
 	    	  stringstream err;
 	    	  err << p << " exists, but is neither a regular file nor a directory";
+              std::cerr<<err.str()<<std::endl;
 	    	  throw err.str();
 	      }
 	    }
 	    else{
 	    	stringstream err;
 	    	err << p << " does not exist";
+			std::cerr<<err.str()<<std::endl;
 	    	throw err.str();
 	    }
 	}catch (const filesystem_error& ex){
+		std::cerr<<ex.what()<<std::endl;
 		throw std::string(ex.what());
 	}
 	return cout.str();
@@ -318,14 +381,17 @@ void ServerActions::lookup(std::string filename){
 	using namespace fs;
 	if(string_operations::startWith(filename, "<lookup") || string_operations::startWith(filename, "<?xml")){
 		std::stringstream xml; xml << filename;
+		std::cout<<"SET LOOKUP: code: "<<xml<<std::endl;
 		server.lookup = Lookup::Ref(new Lookup(xml));
 	}else{
 		path p(filename);
 		if(filename[0]!='/') p = cdir / p;
 		if(exists(p)==false || is_regular_file(p)==false){
 			stringstream err; err<<"error: "<<p<<" is not file";
+			std::cerr<<err.str()<<std::endl;
 			throw err.str();
 		}
+		std::cout<<"SET LOOKUP: file: "<<p.string()<<std::endl;
 		server.lookup = Lookup::Ref(new Lookup(p.string()));
 	}
 }
@@ -337,18 +403,80 @@ void ServerActions::address(std::string filename, BTTaskProxyCreator::Ref creato
 	if(string_operations::startWith(filename, "<tasks") || string_operations::startWith(filename, "<?xml")){
 		std::cout<<"--- ServerActions::address. from stream ---"<<std::endl;
 		std::stringstream xml; xml << filename;
+		std::cout<<"SET ADDRESS: code: "<<xml<<std::endl;
 		server.taskproxy = TaskProxyTable::Ref(new TaskProxyTableXML(xml, creator));
 	}else{
-		std::cout<<"--- ServerActions::address. from file ---"<<std::endl;
+		std::cout<<"--- ServerActions::address. from file "<<filename<<" ---"<<std::endl;
 		path p(filename);
 		if(filename[0]!='/') p = cdir / p;
 		if(exists(p)==false || is_regular_file(p)==false){
 			stringstream err; err<<"error: "<<p<<" is not file";
+			std::cerr<<err.str()<<std::endl;
 			throw err.str();
 		}
+		std::cout<<"SET ADDRESS: file: "<<p.string()<<std::endl;
 		server.taskproxy = TaskProxyTable::Ref(new TaskProxyTableXML(p.string(), creator));
 	}
 }
+
+void ServerActions::saveFile(std::string filename, std::string filetext){
+	namespace fs = boost::filesystem;
+	using namespace std;
+	using namespace fs;
+	std::cout<<"--- ServerActions::saveFile. to file "<<filename<<" ---"<<std::endl;
+	path p(filename);
+	if(filename[0]!='/') p = cdir / p;
+	if(exists(p) && is_regular_file(p)==false){
+		stringstream err; err<<"error: "<<p<<" exists, but it is not a file";
+		std::cerr<<err.str()<<std::endl;
+		throw err.str();
+	}
+	stringstream sft;
+	ofstream file (p.string().c_str());
+	if (file.is_open())
+	{
+		file << filetext;
+		file.close();
+	}
+	else{
+		stringstream err; err<<"error: Unable to open file "<<p;
+		std::cerr<<err.str()<<std::endl;
+		throw err.str();
+	}
+}
+std::string ServerActions::readFile(std::string filename){
+	namespace fs = boost::filesystem;
+	using namespace std;
+	using namespace fs;
+	std::cout<<"--- ServerActions::readFile. from file "<<filename<<" ---"<<std::endl;
+	path p(filename);
+	if(filename[0]!='/') p = cdir / p;
+	if(exists(p)==false || is_regular_file(p)==false){
+		stringstream err; err<<"error: "<<p<<" is not file";
+		std::cerr<<err.str()<<std::endl;
+		throw err.str();
+	}
+	stringstream sft;
+	ifstream file (p.string().c_str());
+	if (file.is_open())
+	{
+		string line;
+		while ( file.good() )
+		{
+			getline (file,line);
+			sft << line << endl;
+		}
+		file.close();
+	}
+	else{
+		stringstream err; err<<"error: Unable to open file "<<p;
+		std::cerr<<err.str()<<std::endl;
+		throw err.str();
+	}
+	return sft.str();
+}
+
+
 
 std::string ServerActions::show_lookup(){
 	if(server.lookup.get()){
@@ -374,10 +502,19 @@ void ServerActions::run(std::string id, std::string filename){
 		if(filename[0]!='/') p = cdir / p;
 		if(exists(p)==false || is_regular_file(p)==false){
 			stringstream err; err<<"error: "<<p<<" is not file";
+			std::cerr<<err.str()<<std::endl;
 			throw err.str();
 		}
 		server.run(id,p.string());
 	}
+}
+std::string  ServerActions::whoIsRunning(){
+	using namespace std;
+	//std::cout<<"ServerActions::whoIsRunning"<<std::endl;
+	return server.whoIsRunning();
+}
+std::string  ServerActions::version(){
+	return std::string("EXECUTER VERSION ")+VERSION+" COMPILED AT "+std::string(COMPILATION_TIME);
 }
 
 std::string ServerActions::stop(std::string id){
@@ -490,6 +627,35 @@ int BTMain(int argn, char** argv){
 		if(line=="ls"){
 			try{
 				std::string res = actions.ls(); log<<res;
+			}catch(std::string& err){
+				log<<"ERROR: "<<err;
+			}
+			continue;
+		}
+		if(startWith(line,"save ")){
+			stringlist par = split(line);
+			if(par.size()<3){ log<<"error: save behavior tree : need filename and content"; continue; }
+			try{
+				actions.saveFile(par[1],par[2]);
+			}catch(std::string& err){
+				log<<"ERROR: "<<err;
+			}
+			continue;
+		}
+		if(startWith(line,"cat ")){
+			stringlist par = split(line);
+			if(par.size()<2){ log<<"error: save behavior tree : need filename"; continue; }
+			try{
+				std::string res = actions.readFile(par[1]);
+				log<<res;
+			}catch(std::string& err){
+				log<<"ERROR: "<<err;
+			}
+			continue;
+		}
+		if(line=="ps"){
+			try{
+				std::string res = actions.whoIsRunning(); log<<res;
 			}catch(std::string& err){
 				log<<"ERROR: "<<err;
 			}

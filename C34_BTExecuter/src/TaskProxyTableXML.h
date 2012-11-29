@@ -12,16 +12,19 @@
 
 
 class TaskProxyTableXML: public TaskProxyTable {
+	std::string src;
+	BTTaskProxyCreator::Ref creator;
 public:
 	TaskProxyTableXML(std::string pathToTaskList, BTTaskProxyCreator::Ref creator);
 	TaskProxyTableXML(std::istream& pathToTaskList, BTTaskProxyCreator::Ref creator);
 	virtual ~TaskProxyTableXML();
 
+	virtual std::string source(){ return src; }
 
 //	virtual void add(std::string taskname, BTTask::Ref taskaccess);
-//	virtual bool contains(std::string tn);
+	virtual bool contains(std::string tn);
 //	virtual void remove(std::string tn);
-//	virtual BTTask::Ref get(std::string tn);
+	virtual BTTask::Ref get(std::string tn);
 
 };
 

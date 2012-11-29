@@ -66,16 +66,19 @@ public:
 	std::string str()const{
 		std::stringstream s;
 		for(table::const_iterator i = tbl.begin(); i!= tbl.end(); i++){
-			s<<"("<<i->first<<", "<<i->second->address()<<") ";
+			s<<"("<<i->first<<", "<<i->second->address()<<")\n";
 		}
 		return s.str();
 	}
+	virtual std::string source(){ return ""; }
 };
 
 class BTTaskProxyCreator{
 public:
 	typedef boost::shared_ptr<BTTaskProxyCreator> Ref;
 	virtual BTTask* create(std::string BTNAME)=0;
+	virtual bool canCreate(std::string BTNAME){return true;}
+	virtual std::string nameOfCreator(){return "unknown";}
 	virtual ~BTTaskProxyCreator(){}
 };
 

@@ -15,9 +15,12 @@
 
 
 
-TaskProxyTableXML::TaskProxyTableXML(std::string pathToTaskList, BTTaskProxyCreator::Ref creator) {
+TaskProxyTableXML::TaskProxyTableXML(std::string pathToTaskList, BTTaskProxyCreator::Ref creator):
+	creator(creator)
+{
 
 	PRINT("read map from file : "<<pathToTaskList)
+	src = pathToTaskList+std::string("+Creator[")+creator->nameOfCreator()+"]";
 	MapReader mr(pathToTaskList,
 			"tasks","task","name","address");
 	PRINT("... "<<mr.getMap().size()<<" elements have been read.")
@@ -29,8 +32,11 @@ TaskProxyTableXML::TaskProxyTableXML(std::string pathToTaskList, BTTaskProxyCrea
 	}
 
 }
-TaskProxyTableXML::TaskProxyTableXML(std::istream& pathToTaskList, BTTaskProxyCreator::Ref creator) {
+TaskProxyTableXML::TaskProxyTableXML(std::istream& pathToTaskList, BTTaskProxyCreator::Ref creator):
+			creator(creator)
+{
 
+	src = std::string("istream")+std::string("+Creator[")+creator->nameOfCreator()+"]";
 	MapReader mr(pathToTaskList,
 			"tasks","task","name","address");
 	typedef MapReader::MAP Map;
@@ -49,11 +55,12 @@ TaskProxyTableXML::~TaskProxyTableXML() {
 //	TaskProxyTable::add(taskname,taskaccess);
 //	PRINT("TaskProxyTableXML::add("<<taskname<<",taskaccess)");
 //}
-// bool TaskProxyTableXML::contains(std::string tn){
-//	bool res = TaskProxyTable::contains(tn);
-//	PRINT("TaskProxyTableXML::contains("<<tn<<") = "<<res);
-//	return res;
-//}
+ bool TaskProxyTableXML::contains(std::string tn){
+	bool res = TaskProxyTable::contains(tn);
+	if(res) return true;
+	res = creator->canCreate(tn);
+	return res;
+}
 // void TaskProxyTableXML::remove(std::string tn){
 //	PRINT("TaskProxyTableXML::remove("<<tn<<")");
 //	if(contains(tn)){
@@ -61,14 +68,18 @@ TaskProxyTableXML::~TaskProxyTableXML() {
 //		PRINT("TaskProxyTableXML::remove: ... done");
 //	}
 //}
-// RobilTask::Ref TaskProxyTableXML::get(std::string tn){
-//	PRINT("TaskProxyTableXML::get("<<tn<<")");
-//	if(contains(tn)){
-//		PRINT("TaskProxyTableXML::get: ... done");
-//		return tbl[tn];
-//	}logID
-//	return RobilTask::Ref();
-//}
+ BTTask::Ref TaskProxyTableXML::get(std::string tn){
+	if(TaskProxyTable::contains(tn)){
+		return tbl[tn];
+	}
+	if(creator->canCreate(tn)){
+		add(tn, BTTask::Ref( creator->create(tn) ));
+		PRINT("ADDRESS("<<tn<<" , "<<tn<<")")
+		PRINT_COUT("ADDRESS("<<tn<<" , "<<tn<<")")
+		return tbl[tn];
+	}
+	return BTTask::Ref();
+}
 
 #undef PRINT
 #undef PRINT_COUT
