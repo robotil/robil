@@ -7,33 +7,19 @@
                <tsk name="ObstacleDetection" />
                <tsk name="PathPlanning" />
          </par>
-         <par name="ProgressControl"> 
-               <tsk name="Monitor(target=LiveLock)" />
-               <seq name="mission"> 
-                     <tsk name="RobotBody(pose=standUp)" />
-                     <seq name="objectAFlow"> 
-                           <tsk name="TurnTo(target=A)" />
-                           <par name="safe"> 
-                              <dec name="L"> 
-                                    <seq name="Stabilization"> 
-                                          <tsk name="Monitor(target=Stable)" />
-                                          <tsk name="RobotBody(pose=stabilize)" />
-                                    </seq>
-                              </dec>
-                                 <par name="TimeControl"> 
-                                       <seq name="OperatorRequest"> 
-                                             <tsk name="PushHMI(data=panoramic_image)" />
-                                             <tsk name="PushHMI(data=occupancy_grid)" />
-                                             <tsk name="PushHMI(data=path)" />
-                                             <tsk name="HMIResponse" />
-                                       </seq>
-                                       <tsk name="Monitor(target=Timeout)" />
-                                 </par>
-                           </par>
-                           <tsk name="FollowPath" />
-                           <tsk name="PickUp(target=A)" />
+         <seq name="mission"> 
+               <tsk name="RobotBody(pose=standUp)" />
+               <seq name="objectAFlow"> 
+                     <tsk name="TurnTo(target=A)" />
+                     <seq name="OperatorRequest"> 
+                           <tsk name="PushHMI(data=panoramic_image)" />
+                           <tsk name="PushHMI(data=occupancy_grid)" />
+                           <tsk name="PushHMI(data=path)" />
+                           <tsk name="HMIResponse" />
                      </seq>
+                     <tsk name="FollowPath" />
+                     <tsk name="PickUp(target=A)" />
                </seq>
-         </par>
+         </seq>
    </par>
 </plan>

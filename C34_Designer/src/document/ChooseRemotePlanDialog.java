@@ -28,7 +28,7 @@ public class ChooseRemotePlanDialog extends JDialog
                         implements ActionListener {
     private static ChooseRemotePlanDialog dialog;
     private static String value = "";
-    private JList<String> list;
+    private JList list;
  
     /**
      * Set up and show the dialog.  The first Component argument
@@ -84,7 +84,7 @@ public class ChooseRemotePlanDialog extends JDialog
         getRootPane().setDefaultButton(loadButton);
  
         //main part of the dialog
-        list = new JList<String>(data) {
+        list = new JList(data) {
             //Subclass JList to workaround bug 4832765, which can cause the
             //scroll pane to not let the user easily scroll up to the beginning
             //of the list.  An alternative would be to set the unitIncrement

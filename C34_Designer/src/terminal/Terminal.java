@@ -210,7 +210,7 @@ public class Terminal extends javax.swing.JFrame {
 	}// GEN-LAST:event_txtInKeyTyped
 
 	private void txtInKeyPressed(java.awt.event.KeyEvent evt) {// GEN-FIRST:event_txtInKeyPressed
-		if (evt.getExtendedKeyCode() == KeyEvent.VK_UP) {
+		if (evt.getKeyCode() == KeyEvent.VK_UP) {
 			if (history.size() == 0)
 				return;
 			history_index++;
@@ -220,7 +220,7 @@ public class Terminal extends javax.swing.JFrame {
 			evt.consume();
 			return;
 		}
-		if (evt.getExtendedKeyCode() == KeyEvent.VK_DOWN) {
+		if (evt.getKeyCode() == KeyEvent.VK_DOWN) {
 			history_index--;
 			if (history_index < 0)
 				history_index = 0;
@@ -231,12 +231,12 @@ public class Terminal extends javax.swing.JFrame {
 			evt.consume();
 			return;
 		}
-		if (evt.getExtendedKeyCode() == KeyEvent.VK_TAB) {
+		if (evt.getKeyCode() == KeyEvent.VK_TAB) {
 			evt.consume();
 			autocomplete(input);
 			return;
 		}
-		if (evt.isControlDown() && evt.getExtendedKeyCode() == KeyEvent.VK_C) {
+		if (evt.isControlDown() && evt.getKeyCode() == KeyEvent.VK_C) {
 			println("^C");
 			if (activeProgram != null) {
 				activeProgram.stop();
@@ -250,9 +250,9 @@ public class Terminal extends javax.swing.JFrame {
 	}// GEN-LAST:event_txtInKeyPressed
 
 	private void txtInKeyReleased(java.awt.event.KeyEvent evt) {// GEN-FIRST:event_txtInKeyReleased
-		if (evt.getExtendedKeyCode() == KeyEvent.VK_UP)
+		if (evt.getKeyCode() == KeyEvent.VK_UP)
 			return;
-		if (evt.getExtendedKeyCode() == KeyEvent.VK_DOWN)
+		if (evt.getKeyCode() == KeyEvent.VK_DOWN)
 			return;
 		String in = txtIn.getText();
 		input = in;
