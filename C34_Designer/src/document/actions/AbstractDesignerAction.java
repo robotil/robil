@@ -10,7 +10,7 @@ import document.Document;
  * An abstract designer action listener, use it if your action listener utilize
  * any designer components
  * @author matan
- *
+ * 
  */ 
 public abstract class AbstractDesignerAction implements ActionListener{
 
