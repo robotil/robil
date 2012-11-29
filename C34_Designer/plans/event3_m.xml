@@ -1,37 +1,37 @@
 <plan>
-   <par name="event3" x="411.08333333333314" y="18.91666666666649" id="83828891-c7d7-48da-867f-72f3f15cb960"> 
-         <par name="perception" x="230.08333333333314" y="112.91666666666649" id="ac1a5217-449b-412b-ba1e-587b424aad5d"> 
-               <tsk name="LocalizationTrack" x="95.08333333333316" y="149.9166666666665" dbg_time="0" dbg_result="true" id="a8cbffaf-f5ea-486a-9bf7-d79f14b50508" />
-               <tsk name="TrackObject(target=A)" x="103.08333333333316" y="185.9166666666665" dbg_time="0" dbg_result="true" id="cb8c9b0b-8768-4a92-83c3-a7864819f87b" />
-               <tsk name="TrackObject(target=B)" x="155.08333333333314" y="224.9166666666665" dbg_time="0" dbg_result="true" id="f8b73abd-429d-4bbb-95c5-c66026761d55" />
-               <tsk name="ObstacleDetection" x="196.08333333333314" y="259.9166666666665" dbg_time="0" dbg_result="true" id="f9699205-292e-4d6a-869e-4272c2c89d56" />
-               <tsk name="PathPlanning" x="246.08333333333314" y="296.9166666666665" dbg_time="0" dbg_result="true" id="ac96e849-318c-47d2-afcc-c01d590b8f2f" />
+   <par name="event3" x="305.797924297924" y="49.96031746031709" id="83828891-c7d7-48da-867f-72f3f15cb960"> 
+         <par name="perception" x="124.797924297924" y="143.9603174603171" id="ac1a5217-449b-412b-ba1e-587b424aad5d"> 
+               <tsk name="LocalizationTrack" x="-10.202075702075987" y="180.9603174603171" dbg_time="0" dbg_result="true" id="a8cbffaf-f5ea-486a-9bf7-d79f14b50508" />
+               <tsk name="TrackObject(target=A)" x="-2.2020757020759874" y="216.9603174603171" dbg_time="0" dbg_result="true" id="cb8c9b0b-8768-4a92-83c3-a7864819f87b" />
+               <tsk name="TrackObject(target=B)" x="49.797924297924" y="255.9603174603171" dbg_time="0" dbg_result="true" id="f8b73abd-429d-4bbb-95c5-c66026761d55" />
+               <tsk name="ObstacleDetection" x="90.797924297924" y="290.9603174603171" dbg_time="0" dbg_result="true" id="f9699205-292e-4d6a-869e-4272c2c89d56" />
+               <tsk name="PathPlanning" x="140.797924297924" y="327.9603174603171" dbg_time="0" dbg_result="true" id="ac96e849-318c-47d2-afcc-c01d590b8f2f" />
          </par>
-         <par name="ProgressControl" x="493.08333333333314" y="90.91666666666649" id="f10af216-6f4c-4361-9974-59a2fef0b681"> 
-               <tsk name="Monitor(target=LiveLock)" x="404.08333333333314" y="144.9166666666665" dbg_time="0" dbg_result="true" id="0a64c093-4c1a-46c1-a32d-9abbb2c72079" />
-               <seq name="mission" x="628.0833333333331" y="156.9166666666665" id="8002a72b-760f-49b1-b91b-f7a67c6c3bec"> 
-                     <tsk name="BodyControl(pose=standUp)" x="480.08333333333314" y="228.9166666666665" dbg_time="0" dbg_result="true" id="50b4f751-04a5-4ef2-aa07-38bc128ccc2d" />
-                     <seq name="objectAFlow" x="685.0833333333331" y="227.9166666666665" id="c19bda81-5d25-4c63-acff-0c11d4030344"> 
-                           <tsk name="TurnTo(target=A)" x="572.0833333333331" y="298.9166666666665" dbg_time="0" dbg_result="true" id="2b1a72a0-e3db-4fe6-b4d2-6754beacc045" />
-                           <par name="safe" x="743.0833333333331" y="329.9166666666665" id="2518f615-d94c-43d5-8e25-dc9424acd565"> 
-                              <dec name="L" x="701.0833333333331" y="388.9166666666665"> 
-                                    <seq name="Stabilization" x="672.0833333333331" y="439.9166666666665" id="e2431913-1286-4690-9a28-da3f66e15e97"> 
-                                          <tsk name="Monitor(target=Stable)" x="499.08333333333314" y="486.9166666666665" dbg_time="0" dbg_result="true" id="34f602cd-9797-462c-a86b-5d44b11dac2e" />
-                                          <tsk name="BodyControl(pose=stabilize)" x="679.0833333333331" y="489.9166666666665" dbg_time="0" dbg_result="true" id="6c49cdfe-9de7-4ee6-934a-cb0959a54ff6" />
+         <par name="ProgressControl" x="387.797924297924" y="121.96031746031709" id="f10af216-6f4c-4361-9974-59a2fef0b681"> 
+               <tsk name="Monitor(target=LiveLock)" x="298.797924297924" y="175.9603174603171" dbg_time="0" dbg_result="true" id="0a64c093-4c1a-46c1-a32d-9abbb2c72079" />
+               <seq name="mission" x="522.797924297924" y="187.9603174603171" id="8002a72b-760f-49b1-b91b-f7a67c6c3bec"> 
+                     <tsk name="BodyControl(pose=standUp)" x="374.797924297924" y="259.96031746031707" dbg_time="0" dbg_result="true" id="50b4f751-04a5-4ef2-aa07-38bc128ccc2d" />
+                     <seq name="objectAFlow" x="579.797924297924" y="258.96031746031707" id="c19bda81-5d25-4c63-acff-0c11d4030344"> 
+                           <tsk name="TurnTo(target=A)" x="466.797924297924" y="329.9603174603171" dbg_time="0" dbg_result="true" id="2b1a72a0-e3db-4fe6-b4d2-6754beacc045" />
+                           <par name="safe" x="637.797924297924" y="360.9603174603171" id="2518f615-d94c-43d5-8e25-dc9424acd565"> 
+                              <dec name="L" x="595.797924297924" y="419.9603174603171"> 
+                                    <seq name="Stabilization" x="566.797924297924" y="470.9603174603171" id="e2431913-1286-4690-9a28-da3f66e15e97"> 
+                                          <tsk name="Monitor(target=Stable)" x="393.797924297924" y="517.9603174603171" dbg_time="0" dbg_result="true" id="34f602cd-9797-462c-a86b-5d44b11dac2e" />
+                                          <tsk name="BodyControl(pose=stabilize)" x="573.797924297924" y="520.9603174603171" dbg_time="0" dbg_result="true" id="6c49cdfe-9de7-4ee6-934a-cb0959a54ff6" />
                                     </seq>
                               </dec>
-                                 <par name="TimeControl" x="935.0833333333331" y="506.9166666666665" id="df211792-d525-4806-b9de-ffb665940413"> 
-                                       <seq name="OperatorRequest" x="810.0833333333331" y="565.9166666666665" id="3fa4b07c-910e-4ee4-8922-0005ad9f0d44"> 
-                                             <tsk name="PushHMI(data=panoramic_image)" x="632.0833333333331" y="628.9166666666665" dbg_time="0" dbg_result="true" id="8a8f498b-098c-45a2-b2cc-04133f19e2e1" />
-                                             <tsk name="PushHMI(data=occupancy_grid)" x="730.0833333333331" y="663.9166666666665" dbg_time="0" dbg_result="true" id="c3bb5602-32e6-4a59-906e-bfb96dd9f924" />
-                                             <tsk name="PushHMI(data=path)" x="829.0833333333331" y="703.9166666666665" dbg_time="0" dbg_result="true" id="8e647d01-781a-4992-853e-b26cc61be56a" />
-                                             <tsk name="HMIResponse" x="915.0833333333331" y="635.9166666666665" dbg_time="0" dbg_result="true" id="7dcbaf63-c292-443c-af20-235e104426c9" />
+                                 <par name="TimeControl" x="829.797924297924" y="537.9603174603171" id="df211792-d525-4806-b9de-ffb665940413"> 
+                                       <seq name="OperatorRequest" x="704.797924297924" y="596.9603174603171" id="3fa4b07c-910e-4ee4-8922-0005ad9f0d44"> 
+                                             <tsk name="PushHMI(data=panoramic_image)" x="526.797924297924" y="659.9603174603171" dbg_time="0" dbg_result="true" id="8a8f498b-098c-45a2-b2cc-04133f19e2e1" />
+                                             <tsk name="PushHMI(data=occupancy_grid)" x="624.797924297924" y="694.9603174603171" dbg_time="0" dbg_result="true" id="c3bb5602-32e6-4a59-906e-bfb96dd9f924" />
+                                             <tsk name="PushHMI(data=path)" x="723.797924297924" y="734.9603174603171" dbg_time="0" dbg_result="true" id="8e647d01-781a-4992-853e-b26cc61be56a" />
+                                             <tsk name="HMIResponse" x="809.797924297924" y="666.9603174603171" dbg_time="0" dbg_result="true" id="7dcbaf63-c292-443c-af20-235e104426c9" />
                                        </seq>
-                                       <tsk name="Monitor(target=Timeout)" x="1004.0833333333331" y="558.9166666666665" dbg_time="0" dbg_result="true" id="e9b2dcdb-0af6-45b4-83aa-7ea3e31ec56a" />
+                                       <tsk name="Monitor(target=Timeout)" x="898.797924297924" y="589.9603174603171" dbg_time="0" dbg_result="true" id="e9b2dcdb-0af6-45b4-83aa-7ea3e31ec56a" />
                                  </par>
                            </par>
-                           <tsk name="FollowPath" x="873.0833333333331" y="301.9166666666665" dbg_time="0" dbg_result="true" id="29ddebd3-cadc-4898-a03b-6f166bb6914d" />
-                           <tsk name="PickUp(target=A)" x="978.0833333333331" y="300.9166666666665" dbg_time="0" dbg_result="true" id="d632a4dc-2775-4519-a63e-69d05517f60b" />
+                           <tsk name="FollowPath" x="767.797924297924" y="332.9603174603171" dbg_time="0" dbg_result="true" id="29ddebd3-cadc-4898-a03b-6f166bb6914d" />
+                           <tsk name="PickUp(target=A)" x="872.797924297924" y="331.9603174603171" dbg_time="0" dbg_result="true" id="d632a4dc-2775-4519-a63e-69d05517f60b" />
                      </seq>
                </seq>
          </par>
