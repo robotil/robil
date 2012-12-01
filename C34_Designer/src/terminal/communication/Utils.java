@@ -11,8 +11,11 @@ public class Utils {
 	public static final String letters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
 	
 	private static Random rnd = new Random(System.currentTimeMillis());
-	
+
 	public static ArrayList<String> getMatchedInstances(String txt, String regex) {
+		return getMatchedInstances(txt, regex, 4, 1);
+	}
+	public static ArrayList<String> getMatchedInstances(String txt, String regex, int beginIndex, int endIndex) {
 		ArrayList<String> ids = new ArrayList<String>();
 		
 		Pattern pattern = Pattern.compile(regex);
@@ -20,7 +23,7 @@ public class Utils {
 		
 		while (m.find()) {
 			String rawID = m.group(0); 
-			ids.add(rawID.substring(4, rawID.length()-1));
+			ids.add(rawID.substring(beginIndex, rawID.length()-endIndex));
 		}
 		
 		return ids;
