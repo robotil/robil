@@ -1,3 +1,8 @@
 <launch>
-  <node name="c21" pkg="C21_VisionAndLidar" type="c21" />
+	<param name="_left" value="/wide_stereo/left/image_raw" />
+  	<param name="_right" value="/wide_stereo/right/image_raw" />
+  <node name="c21" pkg="C21_VisionAndLidar" type="c21">
+	<param name="_left" value="/wide_stereo/left/image_raw" />
+  	<param name="_right" value="/wide_stereo/right/image_raw" />
+ </node>
 </launch>

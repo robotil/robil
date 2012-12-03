@@ -1,13 +1,6 @@
 /**************************************************************************************
- * This is a basic prototype for the C21_VisionAndLidar module for the robil project
- * The C21_VisionAndLidar module goal is to provide a 3D reconstruction of a scene.
- *
- * this module generate a ROS node that provide the service on demand,
- * the reconstructed scene is represented by a point cloud, the point cloud can be viewed by the testing node
- *
- * due to lack of information on the robil structure and cameras
- * this prototype dosen'tmake use of the input specified in the capability document.
- *
+ * This is a basic prototype for the C21_vision_and_Lidar module for the robil project
+ * The C21_vision_and_Lidar module goal is to provide a 3D reconstruction of a scene.
  **************************************************************************************/
 
 #include "ros/ros.h"
@@ -30,7 +23,7 @@
 #include <pcl/visualization/pcl_visualizer.h>
 #include <image_transport/subscriber_filter.h>
 #include <pcl_ros/point_cloud.h>
-
+#include "opencv2/stitching/stitcher.hpp"
 namespace enc=sensor_msgs::image_encodings;
 
 /**
@@ -54,20 +47,29 @@ public:
 		right_image_sub_( it_, right_camera, 1 ),
 		sync( MySyncPolicy( 10 ), left_image_sub_, right_image_sub_ )
 	  {
+		leftpub = it_.advertise("C21/left_camera/image", 1);
+		rightpub = it_.advertise("C21/right_camera/image", 1);
+		//set compression data to png
 		ROS_INFO("finished subscribing\n");
 		sync.registerCallback( boost::bind( &C21_Node::callback, this, _1, _2 ) );  //Specifying what to do with the data
-		cv::FileStorage fs("Q.xml", cv::FileStorage::READ); // reading a Q matrix that tell us the stereo calibration
-		fs["Q"] >> Q;
 
-		  Q03 = Q.at<double>(0,3);
-		  Q13 = Q.at<double>(1,3);
-		  Q23 = Q.at<double>(2,3);
-		  Q32 = Q.at<double>(3,2);
-		  Q33 = Q.at<double>(3,3);
+/*
+ * the Q matrix
+ *     1. 0. 0. -2.9615028381347656e+02
+ *     0. 1. 0. -2.3373317337036133e+02
+ *     0. 0. 0. 5.6446880931501073e+02
+ *     0. 0. -1.1340974198400260e-01 4.1658568844268817e+00
+ */
+		  Q03 = -2.9615028381347656;
+		  Q13 = -2.3373317337036133;
+		  Q23 = 5.6446880931501073;
+		  Q32 = -1.1340974198400260;
+		  Q33 = 4.1658568844268817;
 		_myMutex=new boost::mutex();
-		service = nh_.advertiseService("C21", &C21_Node::proccess, this); //Specifying what to do when a reconstructed 3d scene is requested
+
+		pcl_service = nh_.advertiseService("C21", &C21_Node::proccess, this); //Specifying what to do when a reconstructed 3d scene is requested
 		ROS_INFO("service on\n");
-		cvStartWindowThread();
+		boost::thread panorama(&C21_Node::publishPanorama,this);
 	  }
 
 
@@ -145,25 +147,43 @@ public:
 	  void callback(const sensor_msgs::ImageConstPtr& left_msg,const sensor_msgs::ImageConstPtr& right_msg){
 		 cv_bridge::CvImagePtr left;
 		 cv_bridge::CvImagePtr right;
-
 		try
 		{
-		  left = cv_bridge::toCvCopy(left_msg,enc::RGB8);
-		  right =cv_bridge::toCvCopy(right_msg,enc::RGB8);
+		  left = cv_bridge::toCvCopy(left_msg,enc::BAYER_BGGR8);
+		  right =cv_bridge::toCvCopy(right_msg,enc::BAYER_BGGR8);
 		}
 		catch (cv_bridge::Exception& e)
 		{
 		  ROS_ERROR("cv_bridge exception: %s", e.what());
 		  return;
 		}
+
+		// first, compress raw images and publish them
+		//this is done using the compressed_image_transport package
+		//more information can be found here:
+		//http://www.ros.org/wiki/image_transport/Tutorials/ExaminingImagePublisherSubscriber#Changing_Transport-Specific_Behavior
+		sensor_msgs::ImagePtr leftMsg=left->toImageMsg();
+		sensor_msgs::ImagePtr rightMsg=right->toImageMsg();
+		leftMsg->encoding=enc::BAYER_BGGR8;
+		rightMsg->encoding=enc::BAYER_BGGR8;
+		leftMsg->header=left_msg->header;
+		rightMsg->header=right_msg->header;
+		leftpub.publish(leftMsg);
+		rightpub.publish(rightMsg);
+		ros::spinOnce();
+
+		_myMutex->lock();
 		IplImage tosave=left->image;
 		cvSaveImage("rgb.ppm",&tosave);
 
+		IplImage tosave2=right->image;
+		cvSaveImage("rgb2.ppm",&tosave2);
+		_myMutex->unlock();
 		//calculating disparity
 		cv::Mat left_image;
 		cv::Mat right_image;
-		cv::cvtColor( left->image,left_image, CV_BGR2GRAY);
-		cv::cvtColor( right->image,right_image,CV_BGR2GRAY);
+		cv::cvtColor( left->image,left_image, CV_BayerBG2GRAY);
+		cv::cvtColor( right->image,right_image, CV_BayerBG2GRAY);
 		IplImage temp=left_image;
 		IplImage temp2=right_image;
 		CvMat *matf= cvCreateMat ( temp.height, temp.width, CV_16S);
@@ -193,6 +213,30 @@ public:
 		cvReleaseImage(&cv_image_depth_aux);
 	  }
 
+	  void publishPanorama(){
+		  smallPanoramicPublisher = it_.advertise("C21/smallPanorama", 1);
+		  ros::Rate loop_rate=ros::Rate(10);
+		  while(ros::ok()){
+			  std::vector<cv::Mat> imgs;
+			  _myMutex->lock();
+			  imgs.push_back(cv::imread("rgb.ppm", CV_LOAD_IMAGE_COLOR));
+			  imgs.push_back(cv::imread("rgb2.ppm", CV_LOAD_IMAGE_COLOR));
+			  cv::Mat pano;
+			  cv::Stitcher stitcher = cv::Stitcher::createDefault(false);
+			  stitcher.stitch(imgs, pano);
+ 			  _myMutex->unlock();
+	            cv_bridge::CvImage cvi;
+	            cvi.header.stamp = ros::Time::now();
+	            cvi.header.frame_id = "image";
+	            cvi.encoding = "rgb8";
+	            cvi.image = pano;
+
+	            sensor_msgs::Image im;
+	            cvi.toImageMsg(im);
+			  smallPanoramicPublisher.publish(im);
+			  loop_rate.sleep();
+		  }
+	  }
 private:
   ros::NodeHandle nh_;
   image_transport::ImageTransport it_;
@@ -202,10 +246,13 @@ private:
   boost::mutex * _myMutex;
   typedef image_transport::SubscriberFilter ImageSubscriber;
   pcl::PointCloud<pcl::PointXYZRGB>* my_answer;
-
   ImageSubscriber left_image_sub_;
   ImageSubscriber right_image_sub_;
-  ros::ServiceServer service;
+  image_transport::Publisher leftpub;
+  image_transport::Publisher rightpub;
+  image_transport::Publisher smallPanoramicPublisher;
+
+  ros::ServiceServer pcl_service;
   typedef message_filters::sync_policies::ApproximateTime<
     sensor_msgs::Image, sensor_msgs::Image
   > MySyncPolicy;
@@ -215,12 +262,14 @@ private:
 
 int main(int argc, char **argv)
 {
-  ros::init(argc, argv, "C21_VisionAndLidar");
-  if(argc!=3){
-	  printf("usage: C21_module <left camera topic> <right camera topic>");
-  }
-  C21_Node my_node(argv[1],argv[2]);
-  ROS_INFO("made topic at %s %s \n",argv[1],argv[2]);
+  ros::init(argc, argv, "c21_Vision_and_Lidar");
+  ros::NodeHandle nh("~");
+  std::string left;
+  std::string right;
+  nh.getParam("left", left);
+  nh.getParam("right", right);
+
+  C21_Node my_node(left,right);
   while(ros::ok()){
 	  ros::spin();
   }
