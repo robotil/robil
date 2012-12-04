@@ -13,7 +13,7 @@ How to Check:
 run the node with the PR2
 
 roslaunch pr2_gazebo pr2_wg_world.launch 
-rosrun C21_VisionAndLidar C21 c21 _left:=/wide_stereo/left/image_raw _right:=/wide_stereo/right/image_raw
+rosrun C21_VisionAndLidar c21 _left:=/wide_stereo/left/image_raw _right:=/wide_stereo/right/image_raw
 
 test with
 
