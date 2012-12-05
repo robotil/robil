@@ -6,7 +6,7 @@
 int main(int argc, char *argv[])
 {
 	QApplication a(argc, argv);
-	QFile styleSheetFile("src/C11.qss");
+	QFile styleSheetFile("C11.qss");
         if (styleSheetFile.open(QIODevice::ReadOnly))
           {
             QString ss = QLatin1String(styleSheetFile.readAll());
