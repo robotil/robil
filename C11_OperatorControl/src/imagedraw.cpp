@@ -9,13 +9,14 @@ ImageDraw::ImageDraw(int argc, char** argv, QWidget *parent, Qt::WFlags flags)
         , C11node(argc,argv)
 {
 	ui.setupUi(this);
-	/*image.load("..\RobilDemoPic02.jpg");
-	image = image.scaled(696,529);*/
-	QRectF rect(0,0,696,529);
+	image.load("RobilDemoPic02.jpg");
+	image = image.scaled(1080,817);
+	QRectF rect(0,0,1080,817);
 	scene = new QGraphicsScene(rect,this);
-//	scene->setSceneRect(ui.graphicsView->geometry());
+	scene->setSceneRect(ui.graphicsView->geometry());
 	ui.graphicsView->setScene(scene);
 	ui.graphicsView->setSceneRect(rect);
+	ui.graphicsView->resize(1080,817);
 	ui.graphicsView->setRenderHint(QPainter::Antialiasing);
 	ui.graphicsView->setBackgroundBrush(image);
 	ui.graphicsView->setCacheMode(QGraphicsView::CacheBackground);

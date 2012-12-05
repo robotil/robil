@@ -28,6 +28,9 @@
   <property name="windowTitle">
    <string>Operator Control</string>
   </property>
+  <property name="styleSheet">
+   <string notr="true"/>
+  </property>
   <widget class="QWidget" name="centralWidget">
    <layout class="QHBoxLayout" name="horizontalLayout">
     <item>
@@ -70,7 +73,7 @@
               <widget class="QPushButton" name="btn141">
                <property name="minimumSize">
                 <size>
-                 <width>25</width>
+                 <width>0</width>
                  <height>25</height>
                 </size>
                </property>
@@ -82,6 +85,9 @@
                </property>
                <property name="text">
                 <string/>
+               </property>
+               <property name="checkable">
+                <bool>true</bool>
                </property>
               </widget>
              </item>
@@ -96,7 +102,7 @@
               <widget class="QPushButton" name="btn142">
                <property name="minimumSize">
                 <size>
-                 <width>25</width>
+                 <width>0</width>
                  <height>25</height>
                 </size>
                </property>
@@ -108,6 +114,9 @@
                </property>
                <property name="text">
                 <string/>
+               </property>
+               <property name="checkable">
+                <bool>true</bool>
                </property>
               </widget>
              </item>
@@ -121,7 +130,7 @@
               <widget class="QPushButton" name="btn121">
                <property name="minimumSize">
                 <size>
-                 <width>25</width>
+                 <width>0</width>
                  <height>25</height>
                 </size>
                </property>
@@ -133,6 +142,9 @@
                </property>
                <property name="text">
                 <string/>
+               </property>
+               <property name="checkable">
+                <bool>true</bool>
                </property>
               </widget>
              </item>
@@ -140,7 +152,7 @@
               <widget class="QPushButton" name="btn122">
                <property name="minimumSize">
                 <size>
-                 <width>25</width>
+                 <width>0</width>
                  <height>25</height>
                 </size>
                </property>
@@ -152,6 +164,9 @@
                </property>
                <property name="text">
                 <string/>
+               </property>
+               <property name="checkable">
+                <bool>true</bool>
                </property>
               </widget>
              </item>
@@ -178,7 +193,7 @@
               <widget class="QPushButton" name="btn111">
                <property name="minimumSize">
                 <size>
-                 <width>25</width>
+                 <width>0</width>
                  <height>25</height>
                 </size>
                </property>
@@ -190,6 +205,9 @@
                </property>
                <property name="text">
                 <string/>
+               </property>
+               <property name="checkable">
+                <bool>true</bool>
                </property>
               </widget>
              </item>
@@ -204,7 +222,7 @@
               <widget class="QPushButton" name="btn112">
                <property name="minimumSize">
                 <size>
-                 <width>25</width>
+                 <width>0</width>
                  <height>25</height>
                 </size>
                </property>
@@ -216,6 +234,9 @@
                </property>
                <property name="text">
                 <string/>
+               </property>
+               <property name="checkable">
+                <bool>true</bool>
                </property>
               </widget>
              </item>
@@ -229,7 +250,7 @@
               <widget class="QPushButton" name="btn131">
                <property name="minimumSize">
                 <size>
-                 <width>25</width>
+                 <width>0</width>
                  <height>25</height>
                 </size>
                </property>
@@ -241,6 +262,9 @@
                </property>
                <property name="text">
                 <string/>
+               </property>
+               <property name="checkable">
+                <bool>true</bool>
                </property>
               </widget>
              </item>
@@ -255,7 +279,7 @@
               <widget class="QPushButton" name="btn132">
                <property name="minimumSize">
                 <size>
-                 <width>25</width>
+                 <width>0</width>
                  <height>25</height>
                 </size>
                </property>
@@ -267,6 +291,9 @@
                </property>
                <property name="text">
                 <string/>
+               </property>
+               <property name="checkable">
+                <bool>true</bool>
                </property>
               </widget>
              </item>
@@ -328,7 +355,7 @@
               <widget class="QPushButton" name="btn231">
                <property name="minimumSize">
                 <size>
-                 <width>25</width>
+                 <width>0</width>
                  <height>25</height>
                 </size>
                </property>
@@ -340,6 +367,9 @@
                </property>
                <property name="text">
                 <string/>
+               </property>
+               <property name="checkable">
+                <bool>true</bool>
                </property>
               </widget>
              </item>
@@ -366,7 +396,7 @@
               <widget class="QPushButton" name="btn241">
                <property name="minimumSize">
                 <size>
-                 <width>25</width>
+                 <width>0</width>
                  <height>25</height>
                 </size>
                </property>
@@ -378,6 +408,9 @@
                </property>
                <property name="text">
                 <string/>
+               </property>
+               <property name="checkable">
+                <bool>true</bool>
                </property>
               </widget>
              </item>
@@ -385,7 +418,7 @@
               <widget class="QPushButton" name="btn242">
                <property name="minimumSize">
                 <size>
-                 <width>25</width>
+                 <width>0</width>
                  <height>25</height>
                 </size>
                </property>
@@ -397,6 +430,9 @@
                </property>
                <property name="text">
                 <string/>
+               </property>
+               <property name="checkable">
+                <bool>true</bool>
                </property>
               </widget>
              </item>
@@ -404,7 +440,7 @@
               <widget class="QPushButton" name="btn243">
                <property name="minimumSize">
                 <size>
-                 <width>25</width>
+                 <width>0</width>
                  <height>25</height>
                 </size>
                </property>
@@ -416,6 +452,9 @@
                </property>
                <property name="text">
                 <string/>
+               </property>
+               <property name="checkable">
+                <bool>true</bool>
                </property>
               </widget>
              </item>
@@ -423,7 +462,7 @@
               <widget class="QPushButton" name="btn244">
                <property name="minimumSize">
                 <size>
-                 <width>25</width>
+                 <width>0</width>
                  <height>25</height>
                 </size>
                </property>
@@ -435,6 +474,9 @@
                </property>
                <property name="text">
                 <string/>
+               </property>
+               <property name="checkable">
+                <bool>true</bool>
                </property>
               </widget>
              </item>
@@ -442,7 +484,7 @@
               <widget class="QPushButton" name="btn245">
                <property name="minimumSize">
                 <size>
-                 <width>25</width>
+                 <width>0</width>
                  <height>25</height>
                 </size>
                </property>
@@ -454,6 +496,9 @@
                </property>
                <property name="text">
                 <string/>
+               </property>
+               <property name="checkable">
+                <bool>true</bool>
                </property>
               </widget>
              </item>
@@ -617,7 +662,7 @@
            <widget class="QPushButton" name="btnIndication">
             <property name="minimumSize">
              <size>
-              <width>16</width>
+              <width>0</width>
               <height>16</height>
              </size>
             </property>
@@ -724,7 +769,7 @@
               <widget class="QPushButton" name="btn421">
                <property name="minimumSize">
                 <size>
-                 <width>25</width>
+                 <width>0</width>
                  <height>25</height>
                 </size>
                </property>
@@ -736,6 +781,9 @@
                </property>
                <property name="text">
                 <string/>
+               </property>
+               <property name="checkable">
+                <bool>true</bool>
                </property>
               </widget>
              </item>
@@ -749,20 +797,59 @@
      </widget>
     </item>
     <item>
+     <widget class="Line" name="line_5">
+      <property name="orientation">
+       <enum>Qt::Vertical</enum>
+      </property>
+     </widget>
+    </item>
+    <item>
      <widget class="QWidget" name="widMain" native="true">
       <layout class="QHBoxLayout" name="horizontalLayout_2">
        <item>
-        <widget class="CGraphicsView" name="graphicsView">
-         <property name="styleSheet">
-          <string notr="true"/>
-         </property>
-         <property name="verticalScrollBarPolicy">
-          <enum>Qt::ScrollBarAlwaysOff</enum>
-         </property>
-         <property name="horizontalScrollBarPolicy">
-          <enum>Qt::ScrollBarAlwaysOff</enum>
-         </property>
+        <widget class="QWidget" name="widget" native="true">
+         <layout class="QVBoxLayout" name="verticalLayout_5">
+          <item>
+           <widget class="CGraphicsView" name="graphicsView">
+            <property name="styleSheet">
+             <string notr="true"/>
+            </property>
+            <property name="verticalScrollBarPolicy">
+             <enum>Qt::ScrollBarAlwaysOff</enum>
+            </property>
+            <property name="horizontalScrollBarPolicy">
+             <enum>Qt::ScrollBarAlwaysOff</enum>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <spacer name="verticalSpacer_2">
+            <property name="orientation">
+             <enum>Qt::Vertical</enum>
+            </property>
+            <property name="sizeHint" stdset="0">
+             <size>
+              <width>20</width>
+              <height>40</height>
+             </size>
+            </property>
+           </spacer>
+          </item>
+         </layout>
         </widget>
+       </item>
+       <item>
+        <spacer name="horizontalSpacer_6">
+         <property name="orientation">
+          <enum>Qt::Horizontal</enum>
+         </property>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>40</width>
+           <height>20</height>
+          </size>
+         </property>
+        </spacer>
        </item>
       </layout>
      </widget>

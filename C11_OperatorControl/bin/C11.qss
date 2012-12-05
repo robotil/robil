@@ -1,0 +1,41 @@
+*{
+    font: Bold 8pt "Aharoni CLM";
+    background-color: rgb(0, 0, 0);
+    color: rgb(255, 255, 255);
+}
+
+QPushButton {
+     border: 2px solid rgb(255,255,255);
+     background-color: rgba(255,255,255,0);
+ }
+
+QPushButton:hover {
+     border: 2px solid rgb(255,255,255);
+     border-radius: 4px;
+     background-color: rgba(255,255,255,100);
+ }
+
+QPushButton:checked {
+     border: 2px solid rgb(70,150,255);
+     background-color: rgba(70,150,255,0);
+ }
+
+QPushButton:checked:hover {
+     border: 2px solid rgb(70,150,255);
+     border-radius: 4px;
+     background-color: rgba(70,150,255,100);
+ }
+
+QSlider::groove:horizontal {
+     margin 2px 0;
+     height: 2px; /* the groove expands to the size of the slider by default. by giving it a height, it has a fixed size */
+     background-color: rgb(255, 255, 255);
+ }
+
+QSlider::handle:horizontal {
+     background: white;
+     width: 1px;
+     border: 2px solid white;
+     border-radius: 1px;
+     margin: -11px 4px;
+ }
