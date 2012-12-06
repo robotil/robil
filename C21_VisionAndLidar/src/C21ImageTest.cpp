@@ -61,7 +61,7 @@ void imageView(const sensor_msgs::ImageConstPtr& msg,char window[],std::string e
 
 int main(int argc, char **argv)
 {
-  ros::init(argc, argv, "c21_pr2_tester");
+  ros::init(argc, argv, "c21_panorama_tester");
   ros::NodeHandle n;
   image_transport::ImageTransport it_(n);
   image_transport::Subscriber left_image;
