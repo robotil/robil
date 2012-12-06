@@ -39,7 +39,7 @@ boost::shared_ptr<pcl::visualization::PCLVisualizer> createVisualizer (pcl::Poin
 
 int main(int argc, char **argv)
 {
-  ros::init(argc, argv, "c21_pr2_tester");
+  ros::init(argc, argv, "c21_scene_tester");
   ros::NodeHandle n;
   ros::ServiceClient client = n.serviceClient<C21_VisionAndLidar::C21>("C21");
   C21_VisionAndLidar::C21 srv;
