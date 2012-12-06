@@ -19,17 +19,21 @@ import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.Properties;
 import java.util.UUID;
 
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.stream.events.StartDocument;
 
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
+
+import document.description.TaskDescription;
 
 import elements.Arrow;
 import elements.Joint;
@@ -48,6 +52,7 @@ public class Document extends JPanel {
 	public ArrayList<GElement> arrays = new ArrayList<GElement>();
 	public ArrayList<GElement> elements = new ArrayList<GElement>();
 	public View view = new View();
+	public TaskDescription task_desc = null;
 	
 	public BTDesigner mainWindow = null;
 
@@ -96,6 +101,11 @@ public class Document extends JPanel {
 		addMouseMotionListener(mh);
 		addMouseWheelListener(mh);
 	
+		try {
+			task_desc = new TaskDescription(Parameters.path_to_description);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 	}
 	public void renumberElements(ArrayList<GElement> elements){
 		for(GElement el: elements){ if(el instanceof Task){ ((Task) el).seqNumber = 0; } }
