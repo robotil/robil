@@ -1,0 +1,39 @@
+FILE(REMOVE_RECURSE
+  "../msg_gen"
+  "../src/C66_Grasp/msg"
+  "../msg_gen"
+  "CMakeFiles/ROSBUILD_genmsg_lisp"
+  "../msg_gen/lisp/C66_GraspAction.lisp"
+  "../msg_gen/lisp/_package.lisp"
+  "../msg_gen/lisp/_package_C66_GraspAction.lisp"
+  "../msg_gen/lisp/C66_GraspGoal.lisp"
+  "../msg_gen/lisp/_package.lisp"
+  "../msg_gen/lisp/_package_C66_GraspGoal.lisp"
+  "../msg_gen/lisp/C66_GraspActionGoal.lisp"
+  "../msg_gen/lisp/_package.lisp"
+  "../msg_gen/lisp/_package_C66_GraspActionGoal.lisp"
+  "../msg_gen/lisp/C66_GraspResult.lisp"
+  "../msg_gen/lisp/_package.lisp"
+  "../msg_gen/lisp/_package_C66_GraspResult.lisp"
+  "../msg_gen/lisp/C66_GraspActionResult.lisp"
+  "../msg_gen/lisp/_package.lisp"
+  "../msg_gen/lisp/_package_C66_GraspActionResult.lisp"
+  "../msg_gen/lisp/C66_GraspFeedback.lisp"
+  "../msg_gen/lisp/_package.lisp"
+  "../msg_gen/lisp/_package_C66_GraspFeedback.lisp"
+  "../msg_gen/lisp/C66_GraspActionFeedback.lisp"
+  "../msg_gen/lisp/_package.lisp"
+  "../msg_gen/lisp/_package_C66_GraspActionFeedback.lisp"
+  "../msg/C66_GraspAction.msg"
+  "../msg/C66_GraspGoal.msg"
+  "../msg/C66_GraspActionGoal.msg"
+  "../msg/C66_GraspResult.msg"
+  "../msg/C66_GraspActionResult.msg"
+  "../msg/C66_GraspFeedback.msg"
+  "../msg/C66_GraspActionFeedback.msg"
+)
+
+# Per-language clean rules from dependency scanning.
+FOREACH(lang)
+  INCLUDE(CMakeFiles/ROSBUILD_genmsg_lisp.dir/cmake_clean_${lang}.cmake OPTIONAL)
+ENDFOREACH(lang)
