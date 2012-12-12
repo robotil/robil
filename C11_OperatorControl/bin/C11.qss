@@ -4,6 +4,11 @@
     color: rgb(255, 255, 255);
 }
 
+QFrame#line,#line_2,#line_3,#line_4,#line_5{
+     
+     background-color: white;
+}
+
 QPushButton {
      border: 2px solid rgb(255,255,255);
      background-color: rgba(255,255,255,0);
@@ -24,6 +29,11 @@ QPushButton:checked:hover {
      border: 2px solid rgb(70,150,255);
      border-radius: 4px;
      background-color: rgba(70,150,255,100);
+ }
+
+QPushButton#btnMagGlass {
+     
+     background-image: url(:/Resources/MagGlass.png);
  }
 
 QSlider::groove:horizontal {

@@ -1,5 +1,15 @@
 <RCC>
-    <qresource prefix="/">
-        <file>Resources/niagara_falls.jpg</file>
-    </qresource>
+  <qresource prefix="/">
+    <file>Resources/Annotations.png</file>
+    <file>Resources/Arrow.png</file>
+    <file>Resources/Create.png</file>
+    <file>Resources/MagGlass.png</file>
+    <file>Resources/Path.png</file>
+    <file>Resources/Slider1L.png</file>
+    <file>Resources/Slider1R.png</file>
+    <file>Resources/Slider2L.png</file>
+    <file>Resources/Slider2R.png</file>
+    <file>Resources/Slider3L.png</file>
+    <file>Resources/Slider3R.png</file>
+  </qresource>
 </RCC>
