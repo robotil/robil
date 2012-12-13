@@ -1,9 +1,12 @@
 #goal definition
-float32[2] location
-int32 max
+bool closed
 ---
 #result definition
 bool success
 ---
 #feedback
-float32[2] location
+float32[3] finger0
+float32[3] finger1
+float32[3] finger2
+float32[3] finger3
+
