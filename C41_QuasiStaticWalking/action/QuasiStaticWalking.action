@@ -1,0 +1,10 @@
+#goal definition
+float[][] map
+float[][] path
+---
+#result definition
+bool success
+---
+#feedback
+float estimatedTime
+
