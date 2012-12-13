@@ -1,10 +1,10 @@
 #goal definition
-float[][] map
-float[][] path
+float32[] map
+float32[] path
 ---
 #result definition
 bool success
 ---
 #feedback
-float estimatedTime
+float32 estimatedTime
 
