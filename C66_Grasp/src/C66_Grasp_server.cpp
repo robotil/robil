@@ -2,6 +2,7 @@
 #include <actionlib/server/simple_action_server.h>
 #include <std_msgs/Float32.h>
 #include <C66_Grasp/C66_GraspAction.h>
+#include <tf/transform_listener.h>
 
 class C66_Grasp_Server
 {
@@ -16,7 +17,7 @@ public:
 	    ROS_INFO("%s: Running", action_name_.c_str());
 
 	    //subscribe to the data topic of interest
-	    sub_ = nh_.subscribe("/random_number", 1, &C66_Grasp_Server::analysisCB, this);
+	    //sub_ = nh_.subscribe("/random_number", 1, &C66_Grasp_Server::analysisCB, this);
 	    as_.start();
 	  }
 
@@ -27,13 +28,11 @@ public:
 	  void goalCB()
 	  {
 	    // reset helper variables
-	    data_count_ = 0;
-	    sum_ = 0;
-	    sum_sq_ = 0;
+	    //data_count_ = 0;
+	    //sum_ = 0;
+	    //sum_sq_ = 0;
 	    // accept the new goal
-	    goal_ = as_.acceptNewGoal()->max;
-	    feedback_.location[0] = 0;
-	    feedback_.location[1] = 0;
+	    goal_ = as_.acceptNewGoal()->closed;
 	    ROS_INFO("Accepted goal: %d", goal_);
 	  }
 
@@ -50,10 +49,10 @@ public:
 	    if (!as_.isActive())
 	      return;
 
-	    feedback_.location[0] = feedback_.location[0] + msg->data;
-	    feedback_.location[1] = feedback_.location[1] + (msg->data / 2.0);
-	    data_count_++;
-        ROS_INFO("Feedback: %f.04 %f.04", feedback_.location[0], feedback_.location[1]);
+//	    feedback_.location[0] = feedback_.location[0] + msg->data;
+//	    feedback_.location[1] = feedback_.location[1] + (msg->data / 2.0);
+//	    data_count_++;
+//        ROS_INFO("Feedback: %f.04 %f.04", feedback_.location[0], feedback_.location[1]);
 	    as_.publishFeedback(feedback_);
 
 	    if(data_count_ > goal_)

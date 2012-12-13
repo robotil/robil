@@ -24,7 +24,7 @@ int main (int argc, char **argv)
   ROS_INFO("Action server started, sending goal.");
   // send a goal to the action
   C66_Grasp::C66_GraspGoal goal;
-  goal.max = 3;
+  goal.closed = true;
   ac.sendGoal(goal);
 
   //wait for the action to return
