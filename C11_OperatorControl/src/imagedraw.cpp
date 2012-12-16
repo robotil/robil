@@ -1,4 +1,3 @@
-#include "C11_Node.h"
 #include <QGraphicsItem>
 #include <QFileDialog>
 #include "cnode.h"
@@ -11,19 +10,20 @@ ImageDraw::ImageDraw(int argc, char** argv, QWidget *parent, Qt::WFlags flags)
 {
 	ui.setupUi(this);
 	image.load("RobilDemoPic02.jpg");
-	image = image.scaled(696,529);
-	QRectF rect(0,0,696,529);
+	image = image.scaled(1080,817);
+	QRectF rect(0,0,1080,817);
 	scene = new QGraphicsScene(rect,this);
-//	scene->setSceneRect(ui.graphicsView->geometry());
+	scene->setSceneRect(ui.graphicsView->geometry());
 	ui.graphicsView->setScene(scene);
 	ui.graphicsView->setSceneRect(rect);
+	ui.graphicsView->resize(1080,817);
 	ui.graphicsView->setRenderHint(QPainter::Antialiasing);
 	ui.graphicsView->setBackgroundBrush(image);
 	ui.graphicsView->setCacheMode(QGraphicsView::CacheBackground);
     ui.graphicsView->setViewportUpdateMode(QGraphicsView::BoundingRectViewportUpdate);
 	
-	connect(ui.btnRect,SIGNAL(clicked()),this,SLOT(SltOnRectClick()));
-	connect(ui.btnOpenImg,SIGNAL(clicked()),this,SLOT(SltOnOpenUImgClick()));
+	/*connect(ui.btnRect,SIGNAL(clicked()),this,SLOT(SltOnRectClick()));
+	connect(ui.btnOpenImg,SIGNAL(clicked()),this,SLOT(SltOnOpenUImgClick()));*/
 
 	C11node.init();
 }

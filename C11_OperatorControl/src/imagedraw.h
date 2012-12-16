@@ -5,8 +5,6 @@
 #include "C11_Node.h"
 #include "ui_imagedraw.h"
 
-class C11_Node;
-
 class ImageDraw : public QMainWindow
 {
 	Q_OBJECT
