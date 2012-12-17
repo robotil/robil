@@ -8,17 +8,12 @@
 
 ImageDraw::ImageDraw(int argc, char** argv, QWidget *parent, Qt::WFlags flags)
 	: QMainWindow(parent, flags)
-        , C11node(argc,argv)
+        , C11node(argc,argv,this)
 {
 	ui.setupUi(this);
 	ImageAreaCount = 0;
-	
-	/*connect(ui.btnRect,SIGNAL(clicked()),this,SLOT(SltOnRectClick()));
-	connect(ui.btnOpenImg,SIGNAL(clicked()),this,SLOT(SltOnOpenUImgClick()));*/
 
-	CreateNewImageArea("RobilDemoPic02.jpg");
-	CreateNewImageArea("niagara_falls.jpg");
-	CreateNewImageArea("RobilDemoPic02.jpg");
+	connect(this,SIGNAL(SigOnNewImg(QImage)),this,SLOT(SltOnNewImg(QImage)),Qt::QueuedConnection);
 
 	C11node.init();
 }
@@ -32,7 +27,7 @@ void ImageDraw::CreateNewImageArea(QString imageName)
 {
 	CloseOpenedImages();
 
-	QRectF rect(0,0,800,600);
+	QRectF rect(0,0,520,420);
 	QGraphicsScene* pScene = new QGraphicsScene(rect,this);
 
 	QDateTime dateTime = QDateTime::currentDateTime();
@@ -82,6 +77,54 @@ void ImageDraw::SltImageAreaOpened(int id)
 			ImageAreas[i]->MinimizeView();
 		}
 	}
+}
+
+void ImageDraw::OnImgReceived(QImage image)
+{
+	std::cout << "Step2" << std::endl;
+	QImage myImage(image);
+	emit SigOnNewImg(myImage);
+	std::cout << "Step3" << std::endl;
+
+}
+
+void ImageDraw::SltOnNewImg(QImage image)
+{
+		std::cout << "Step4" << std::endl;
+		CloseOpenedImages();
+
+		std::cout << "Step5" << std::endl;
+		QRectF rect(0,0,520,420);
+		QGraphicsScene* pScene = new QGraphicsScene(rect,this);
+
+		QDateTime dateTime = QDateTime::currentDateTime();
+		QString dateStr = dateTime.toString("dd.MM.yyyy");
+		QString timeStr = dateTime.toString("hh:mm:ss");
+		QString DateTimeStr = dateStr + " " + timeStr;
+
+		std::cout << "Step6" << std::endl;
+		CGraphicsView* pCGraphicsView = new CGraphicsView(ImageAreaCount,image,DateTimeStr,this);
+		ImageAreaCount++;
+		std::cout << "Step7" << std::endl;
+
+		pCGraphicsView->setScene(pScene);
+		pCGraphicsView->setSceneRect(rect);
+
+		ui.layImages->addWidget(pCGraphicsView);
+
+		ImageAreas.insert(pCGraphicsView->GetId(),pCGraphicsView);
+
+		for(int i=ImageAreaCount-1; i>=0; i--)
+		{
+			if(i != pCGraphicsView->GetId())
+			{
+				ui.layImages->removeWidget(ImageAreas[i]);
+				ui.layImages->addWidget(ImageAreas[i]);
+			}
+		}
+
+		connect(pCGraphicsView,SIGNAL(SigOpened(int)),this,SLOT(SltImageAreaOpened(int)));
+		std::cout << "Step8" << std::endl;
 }
 
 void ImageDraw::SltOnRectClick()

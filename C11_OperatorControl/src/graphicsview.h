@@ -12,6 +12,7 @@ signals:
 
 public:
 	CGraphicsView(int id, QString imageName, QString dateTimeStr, QWidget *parent = 0);
+	CGraphicsView(int id, QImage image, QString dateTimeStr, QWidget *parent = 0);
 	~CGraphicsView();
 
 	void setScene(QGraphicsScene * scene);
