@@ -1,0 +1,1 @@
+/usr/bin/c++   -O2 -g     -pthread CMakeFiles/C11_AG.dir/src/C11_agent_st.o  -o ../bin/C11_AG -rdynamic -L/opt/ros/fuerte/lib -lroslib -lroscpp -lrostime -lrosconsole -lroscpp_serialization -lxmlrpcpp -Wl,-rpath,/opt/ros/fuerte/lib 
