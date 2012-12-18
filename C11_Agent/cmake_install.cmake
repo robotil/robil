@@ -1,4 +1,4 @@
-# Install script for directory: /userhome/skirsh/shoshana_workspace/C11_Agent
+# Install script for directory: /userhome/skirsh/shoshana_workspace/robil/C11_Agent
 
 # Set the install prefix
 IF(NOT DEFINED CMAKE_INSTALL_PREFIX)
@@ -38,7 +38,7 @@ ELSE(CMAKE_INSTALL_COMPONENT)
   SET(CMAKE_INSTALL_MANIFEST "install_manifest.txt")
 ENDIF(CMAKE_INSTALL_COMPONENT)
 
-FILE(WRITE "/userhome/skirsh/shoshana_workspace/C11_Agent/${CMAKE_INSTALL_MANIFEST}" "")
+FILE(WRITE "/userhome/skirsh/shoshana_workspace/robil/C11_Agent/${CMAKE_INSTALL_MANIFEST}" "")
 FOREACH(file ${CMAKE_INSTALL_MANIFEST_FILES})
-  FILE(APPEND "/userhome/skirsh/shoshana_workspace/C11_Agent/${CMAKE_INSTALL_MANIFEST}" "${file}\n")
+  FILE(APPEND "/userhome/skirsh/shoshana_workspace/robil/C11_Agent/${CMAKE_INSTALL_MANIFEST}" "${file}\n")
 ENDFOREACH(file)
