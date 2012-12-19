@@ -4,26 +4,265 @@
     color: rgb(255, 255, 255);
 }
 
-QPushButton {
-     border: 2px solid rgb(255,255,255);
-     background-color: rgba(255,255,255,0);
+QFrame#line,#line_2,#line_3,#line_4,#line_5{
+     
+     background-color: white;
+}
+
+QPushButton#btnSlider1L {
+     border-image: url(Resources/S1Slide1L.bmp)
  }
 
-QPushButton:hover {
-     border: 2px solid rgb(255,255,255);
-     border-radius: 4px;
-     background-color: rgba(255,255,255,100);
+QPushButton#btnSlider1L:hover {
+     border-image: url(Resources/S2Slide1L.bmp);
  }
 
-QPushButton:checked {
-     border: 2px solid rgb(70,150,255);
-     background-color: rgba(70,150,255,0);
+QPushButton#btnSlider1L:checked {
+     border-image: url(Resources/S3Slide1L.bmp);
  }
 
-QPushButton:checked:hover {
-     border: 2px solid rgb(70,150,255);
-     border-radius: 4px;
-     background-color: rgba(70,150,255,100);
+QPushButton#btnSlider1L:checked:hover {
+     border-image: url(Resources/S4Slide1L.bmp);
+ }
+
+QPushButton#btnSlider1R {
+     border-image: url(Resources/S1Slide1R.bmp)
+ }
+
+QPushButton#btnSlider1R:hover {
+     border-image: url(Resources/S2Slide1R.bmp);
+ }
+
+QPushButton#btnSlider1R:checked {
+     border-image: url(Resources/S3Slide1R.bmp);
+ }
+
+QPushButton#btnSlider1R:checked:hover {
+     border-image: url(Resources/S4Slide1R.bmp);
+ }
+
+QPushButton#btnSlider2L {
+     border-image: url(Resources/S1Slide2L.bmp)
+ }
+
+QPushButton#btnSlider2L:hover {
+     border-image: url(Resources/S2Slide2L.bmp);
+ }
+
+QPushButton#btnSlider2L:checked {
+     border-image: url(Resources/S3Slide2L.bmp);
+ }
+
+QPushButton#btnSlider2L:checked:hover {
+     border-image: url(Resources/S4Slide2L.bmp);
+ }
+
+QPushButton#btnSlider2R {
+     border-image: url(Resources/S1Slide2R.bmp)
+ }
+
+QPushButton#btnSlider2R:hover {
+     border-image: url(Resources/S2Slide2R.bmp);
+ }
+
+QPushButton#btnSlider2R:checked {
+     border-image: url(Resources/S3Slide2R.bmp);
+ }
+
+QPushButton#btnSlider2R:checked:hover {
+     border-image: url(Resources/S4Slide2R.bmp);
+ }
+
+QPushButton#btnSlider3L {
+     border-image: url(Resources/S1Slide3L.bmp)
+ }
+
+QPushButton#btnSlider3L:hover {
+     border-image: url(Resources/S2Slide3L.bmp);
+ }
+
+QPushButton#btnSlider3L:checked {
+     border-image: url(Resources/S3Slide3L.bmp);
+ }
+
+QPushButton#btnSlider3L:checked:hover {
+     border-image: url(Resources/S4Slide3L.bmp);
+ }
+
+QPushButton#btnSlider3R {
+     border-image: url(Resources/S1Slide3R.bmp)
+ }
+
+QPushButton#btnSlider3R:hover {
+     border-image: url(Resources/S2Slide3R.bmp);
+ }
+
+QPushButton#btnSlider3R:checked {
+     border-image: url(Resources/S3Slide3R.bmp);
+ }
+
+QPushButton#btnSlider3R:checked:hover {
+     border-image: url(Resources/S4Slide3R.bmp);
+ }
+
+QPushButton#btnArrow {
+     border-image: url(Resources/S1Arrow.bmp)
+ }
+
+QPushButton#btnArrow:hover {
+     border-image: url(Resources/S2Arrow.bmp);
+ }
+
+QPushButton#btnArrow:checked {
+     border-image: url(Resources/S3Arrow.bmp);
+ }
+
+QPushButton#btnArrow:checked:hover {
+     border-image: url(Resources/S4Arrow.bmp);
+ }
+
+QPushButton#btnCreate {
+     border-image: url(Resources/S1Create.bmp)
+ }
+
+QPushButton#btnCreate:hover {
+     border-image: url(Resources/S2Create.bmp);
+ }
+
+QPushButton#btnCreate:checked {
+     border-image: url(Resources/S3Create.bmp);
+ }
+
+QPushButton#btnCreate:checked:hover {
+     border-image: url(Resources/S4Create.bmp);
+ }
+
+QPushButton#btnPath {
+     border-image: url(Resources/S1Path.bmp)
+ }
+
+QPushButton#btnPath:hover {
+     border-image: url(Resources/S2Path.bmp);
+ }
+
+QPushButton#btnPath:checked {
+     border-image: url(Resources/S3Path.bmp);
+ }
+
+QPushButton#btnPath:checked:hover {
+     border-image: url(Resources/S4Path.bmp);
+ }
+
+QPushButton#btnPath:disabled {
+     border-image: url(Resources/S5Path.bmp);
+ }
+
+QPushButton#btnNoGo {
+     border-image: url(Resources/S1NoGo.bmp)
+ }
+
+QPushButton#btnNoGo:hover {
+     border-image: url(Resources/S2NoGo.bmp);
+ }
+
+QPushButton#btnNoGo:checked {
+     border-image: url(Resources/S3NoGo.bmp);
+ }
+
+QPushButton#btnNoGo:checked:hover {
+     border-image: url(Resources/S4NoGo.bmp);
+ }
+
+QPushButton#btnNoGo:disabled {
+     border-image: url(Resources/S5NoGo.bmp);
+ }
+
+QPushButton#btnDoor {
+     border-image: url(Resources/S1Door.bmp)
+ }
+
+QPushButton#btnDoor:hover {
+     border-image: url(Resources/S2Door.bmp);
+ }
+
+QPushButton#btnDoor:checked {
+     border-image: url(Resources/S3Door.bmp);
+ }
+
+QPushButton#btnDoor:checked:hover {
+     border-image: url(Resources/S4Door.bmp);
+ }
+
+QPushButton#btnDoor:disabled {
+     border-image: url(Resources/S5Door.bmp);
+ }
+
+QPushButton#btnCarInt {
+     border-image: url(Resources/S1CarInt.bmp)
+ }
+
+QPushButton#btnCarInt:hover {
+     border-image: url(Resources/S2CarInt.bmp);
+ }
+
+QPushButton#btnCarInt:checked {
+     border-image: url(Resources/S3CarInt.bmp);
+ }
+
+QPushButton#btnCarInt:checked:hover {
+     border-image: url(Resources/S4CarInt.bmp);
+ }
+
+QPushButton#btnCarInt:disabled {
+     border-image: url(Resources/S5CarInt.bmp);
+ }
+
+QPushButton#btnAnnotation {
+     border-image: url(Resources/S1Annotations.bmp)
+ }
+
+QPushButton#btnAnnotation:hover {
+     border-image: url(Resources/S2Annotations.bmp);
+ }
+
+QPushButton#btnAnnotation:checked {
+     border-image: url(Resources/S3Annotations.bmp);
+ }
+
+QPushButton#btnAnnotation:checked:hover {
+     border-image: url(Resources/S4Annotations.bmp);
+ }
+
+QPushButton#btnMagGlass {
+     border-image: url(Resources/S1MagGlass.bmp)
+ }
+
+QPushButton#btnMagGlass:hover {
+     border-image: url(Resources/S2MagGlass.bmp);
+ }
+
+QPushButton#btnMagGlass:checked {
+     border-image: url(Resources/S3MagGlass.bmp);
+ }
+
+QPushButton#btnMagGlass:checked:hover {
+     border-image: url(Resources/S4MagGlass.bmp);
+ }
+
+QPushButton#btnPlayPause {
+     border-image: url(Resources/S1PlayPause.bmp)
+ }
+
+QPushButton#btnPlayPause:hover {
+     border-image: url(Resources/S2PlayPause.bmp);
+ }
+
+QPushButton#btnPlayPause:checked {
+     border-image: url(Resources/S3PlayPause.bmp);
+ }
+
+QPushButton#btnPlayPause:checked:hover {
+     border-image: url(Resources/S4PlayPause.bmp);
  }
 
 QSlider::groove:horizontal {
