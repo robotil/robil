@@ -49,6 +49,9 @@ bool C11_Node::init() {
 		it_ = new image_transport::ImageTransport(*nh_);
 		panoramic_image= it_->subscribe("C21/smallPanorama",1,&viewImage);
 
+		status_subscriber = nh_->subscribe("c11_stt",1000,&StatusMessageCallback);
+
+
         start();
  //       ros::start(); // explicitly needed since our nodehandle is going out of scope.
         return true;
@@ -79,6 +82,11 @@ void C11_Node::viewImage(const sensor_msgs::ImageConstPtr& msg)
 	std::cout << "Image received." << std::endl;
 	std::cout << "Image width: "<< msg->width << std::endl;
 	std::cout << "Image height: "<< msg->height << std::endl;
+}
+
+void C11_Node::StatusMessageCallback(const C11_Agent::C34C11_STTConstPtr)
+{
+
 }
 
 /*int main(int argc, char **argv)

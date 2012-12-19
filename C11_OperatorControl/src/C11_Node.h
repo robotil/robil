@@ -11,6 +11,7 @@
 
 #include "ros/ros.h"
 #include "C11_OperatorControl/C11.h"
+#include "C11_Agent/C34C11_STT.h"
 #include "C11_Node_Subscriber.h"
 #include <image_transport/image_transport.h>
 #include <sensor_msgs/image_encodings.h>
@@ -53,6 +54,7 @@ public:
           void run();
 
           static void viewImage(const sensor_msgs::ImageConstPtr& msg);
+          static void StatusMessageCallback(const C11_Agent::C34C11_STTConstPtr);
 
 Q_SIGNALS:
         void loggingUpdated();
@@ -63,6 +65,7 @@ private:
   ros::ServiceServer service;
   image_transport::ImageTransport* it_;
   image_transport::Subscriber panoramic_image;
+  ros::Subscriber status_subscriber;
   int init_argc;
   char** init_argv;
   static IC11_Node_Subscriber* pIC11_Node_Subscriber;
