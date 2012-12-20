@@ -270,6 +270,11 @@ int main(int argc, char** argv){
 		lookup::Request req; lookup::Response res;
 		req.filename = params.get<std::string>("address");
 		command_address(req,res);
+	}else{
+		std::cout<<"Set empty address list"<<std::endl;
+		lookup::Request req; lookup::Response res;
+		req.filename = "<tasks> </tasks>";
+		command_address(req,res);
 	}
 	if(params.contains("show_lookup")){
 		show_table_msg::Request req; show_table_msg::Response res;
