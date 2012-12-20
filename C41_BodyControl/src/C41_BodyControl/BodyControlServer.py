@@ -59,7 +59,7 @@ class BodyControlServer(object):
   
     
   def __init__(self):
-	print "BodyControl SERVER STARTED"
+    print "BodyControl SERVER STARTED"
     self.traj_client = actionlib.SimpleActionClient( '/drc_controller/follow_joint_trajectory', FollowJointTrajectoryAction )
     self.traj_client.wait_for_server()
 
@@ -68,8 +68,8 @@ class BodyControlServer(object):
     self._as.start()
 
   def finishTask(task_success, task_result, task_plan):
-	print "FINISH TASK : ",task_success, task_result, task_plan
-	if task_success:
+    print "FINISH TASK : ",task_success, task_result, task_plan
+    if task_success:
       self._result.success = task_result;
       rospy.loginfo("%s: Succeeded", self._action_name);
       if task_result == TASK_RESULT_PLAN:
@@ -81,38 +81,38 @@ class BodyControlServer(object):
       self._as.set_aborted(self._result);
 
   def moveArm():
-	print "DO moveArm"
+    print "DO moveArm"
     task_success = True
     task_result = TASK_RESULT_OK
     task_plan = ""
     # start executing the action
       
-	_arm = rospy.Publisher('/r_arm_ely_position_controller/command', Float64)
+    _arm = rospy.Publisher('/r_arm_ely_position_controller/command', Float64)
     #### DEFINE SLEEP DURATION BETWEEN TASK LOOP ITERATIONS ####
     r = rospy.Rate(100)
 
     #### SET NUMBER OF TASK LOOP ITERATIONS ####
     for i in xrange(1000): 
-		if self._as.is_preempt_requested() or rospy.is_shutdown():
-			#### HERE PROICESS PREEMTION OR INTERAPT #####
-	   
-			rospy.loginfo('%s: Preempted' % self._action_name)
-			self._as.set_preempted()
-			task_success = False
-			break
-		    
-    	#### HERE PROCESS TASK ####
-		print "TASK PROCESS"
-	   	t = 6 * rospy.get_time()
-    	next_pos =  0.4 + 0.4 * math.sin(t)
-    	_arm.publish(next_pos)
-	     
-		r.sleep()
+        if self._as.is_preempt_requested() or rospy.is_shutdown():
+            #### HERE PROICESS PREEMTION OR INTERAPT #####
+       
+            rospy.loginfo('%s: Preempted' % self._action_name)
+            self._as.set_preempted()
+            task_success = False
+            break
+            
+        #### HERE PROCESS TASK ####
+        print "TASK PROCESS"
+           t = 6 * rospy.get_time()
+        next_pos =  0.4 + 0.4 * math.sin(t)
+        _arm.publish(next_pos)
+         
+        r.sleep()
 
-	self.finishTask(task_success, task_result, task_plan)
-	
+    self.finishTask(task_success, task_result, task_plan)
+    
   def procTrajectory(gesture):
-	print "DO Trajectory : ",gesture
+    print "DO Trajectory : ",gesture
     task_success = True
     task_result = TASK_RESULT_OK
     task_plan = ""
@@ -145,25 +145,25 @@ class BodyControlServer(object):
         if self._as.is_preempt_requested() or rospy.is_shutdown():
             #### HERE PROICESS PREEMTION OR INTERAPT #####
    
-	    	self.traj_client.cancel_goal();
+            self.traj_client.cancel_goal();
 
             rospy.loginfo('%s: Preempted' % self._action_name)
             self._as.set_preempted()
             task_success = False
             break
             
-    	#### HERE PROCESS TASK ####
-   	
-		finished = self.traj_client.wait_for_result(guesture_duration)
-		if finished:
-	  		break;
+        #### HERE PROCESS TASK ####
+       
+        finished = self.traj_client.wait_for_result(guesture_duration)
+        if finished:
+              break;
              
         r.sleep()
 
-	self.finishTask(task_success, task_result, task_plan)
+    self.finishTask(task_success, task_result, task_plan)
 
   def task(self, goal):
-	print "START TASK"
+    print "START TASK"
     #### GET TASK PARAMETERS ####
     rospy.loginfo("%s: Start: task name = %s",self._action_name, goal.name);
     rospy.loginfo("%s: Start: task id = %s", self._action_name, goal.uid);
@@ -173,10 +173,10 @@ class BodyControlServer(object):
     parameters = parametersParsing(goal.parameters)
 
     if parameters['param'] == "MoveArm":
-		self.moveArm()
-	else:
-	    gesture = trajectories[parameters['param']]
-		self.procTrajectory(gesture)
+        self.moveArm()
+    else:
+        gesture = trajectories[parameters['param']]
+        self.procTrajectory(gesture)
 
   
     
