@@ -145,7 +145,7 @@ class BodyControlServer(object):
         if self._as.is_preempt_requested() or rospy.is_shutdown():
             #### HERE PROICESS PREEMTION OR INTERAPT #####
    
-	    self.traj_client.cancel_goal();
+	    	self.traj_client.cancel_goal();
 
             rospy.loginfo('%s: Preempted' % self._action_name)
             self._as.set_preempted()
