@@ -171,11 +171,11 @@ class BodyControlServer(object):
 
     #### HERE PROCESS TASK PARAMETERS ####
     parameters = parametersParsing(goal.parameters)
-    gesture = trajectories[parameters['param']
 
-    if gesture == "MoveArm":
+    if parameters['param'] == "MoveArm":
 		self.moveArm()
 	else:
+	    gesture = trajectories[parameters['param']]
 		self.procTrajectory(gesture)
 
   
