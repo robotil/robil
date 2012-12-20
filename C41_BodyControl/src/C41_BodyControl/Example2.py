@@ -67,21 +67,53 @@ class BodyControlServer(object):
     self._as = actionlib.SimpleActionServer(self._action_name, C0_RobilTask.msg.RobilTaskAction, execute_cb=self.task)
     self._as.start()
 
-  def task(self, goal):
+  def finishTask(task_success, task_result, task_plan):
+	if task_success:
+      self._result.success = task_result;
+      rospy.loginfo("%s: Succeeded", self._action_name);
+      if task_result == TASK_RESULT_PLAN:
+         ROS_INFO("%s: New plan", self._action_name);
+         self._result.plan = task_plan;
+      self._as.set_succeeded(self._result);
+    else:
+      rospy.loginfo("%s: Aborted", self._action_name);
+      self._as.set_aborted(self._result);
+
+  def moveArm():
     task_success = True
     task_result = TASK_RESULT_OK
     task_plan = ""
-
     # start executing the action
+      
+	_arm = rospy.Publisher('/r_arm_ely_position_controller/command', Float64)
+    #### DEFINE SLEEP DURATION BETWEEN TASK LOOP ITERATIONS ####
+    r = rospy.Rate(100)
 
-    #### GET TASK PARAMETERS ####
-    rospy.loginfo("%s: Start: task name = %s",self._action_name, goal.name);
-    rospy.loginfo("%s: Start: task id = %s", self._action_name, goal.uid);
-    rospy.loginfo("%s: Start: task params = %s", self._action_name, goal.parameters);
+    #### SET NUMBER OF TASK LOOP ITERATIONS ####
+    for i in xrange(1000): 
+		if self._as.is_preempt_requested() or rospy.is_shutdown():
+			#### HERE PROICESS PREEMTION OR INTERAPT #####
+	   
+			rospy.loginfo('%s: Preempted' % self._action_name)
+			self._as.set_preempted()
+			task_success = False
+			break
+		    
+    	#### HERE PROCESS TASK ####
+		print "TASK PROCESS"
+	   	t = 6 * rospy.get_time()
+    	next_pos =  0.4 + 0.4 * math.sin(t)
+    	_arm.publish(next_pos)
+	     
+		r.sleep()
 
-    #### HERE PROCESS TASK PARAMETERS ####
-    parameters = parametersParsing(goal.parameters)
-    gesture = trajectories[parameters['param']
+	self.finishTask(task_success, task_result, task_plan)
+	
+  def procTrajectory(gesture):
+    task_success = True
+    task_result = TASK_RESULT_OK
+    task_plan = ""
+    # start executing the action
 
     drc_goal = FollowJointTrajectoryGoal()
     drc_goal.trajectory.joint_names = joint_names
@@ -119,19 +151,28 @@ class BodyControlServer(object):
             
     	#### HERE PROCESS TASK ####
    	
-	finished = self.traj_client.wait_for_result(guesture_duration)
-	if finished:
-	  break;
+		finished = self.traj_client.wait_for_result(guesture_duration)
+		if finished:
+	  		break;
              
         r.sleep()
+
+	self.finishTask(task_success, task_result, task_plan)
+
+  def task(self, goal):
+    #### GET TASK PARAMETERS ####
+    rospy.loginfo("%s: Start: task name = %s",self._action_name, goal.name);
+    rospy.loginfo("%s: Start: task id = %s", self._action_name, goal.uid);
+    rospy.loginfo("%s: Start: task params = %s", self._action_name, goal.parameters);
+
+    #### HERE PROCESS TASK PARAMETERS ####
+    parameters = parametersParsing(goal.parameters)
+    gesture = trajectories[parameters['param']
+
+    if gesture == "MoveArm":
+		self.moveArm()
+	else:
+		self.procTrajectory(gesture)
+
   
-    if task_success:
-      self._result.success = task_result;
-      rospy.loginfo("%s: Succeeded", self._action_name);
-      if task_result == TASK_RESULT_PLAN:
-         ROS_INFO("%s: New plan", self._action_name);
-         self._result.plan = task_plan;
-      self._as.set_succeeded(self._result);
-    else:
-      rospy.loginfo("%s: Aborted", self._action_name);
-      self._as.set_aborted(self._result);
+    
