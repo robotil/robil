@@ -26,7 +26,11 @@ import java.awt.event.*;
  */
 public class ChooseRemotePlanDialog extends JDialog
                         implements ActionListener {
-    private static ChooseRemotePlanDialog dialog;
+    /**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+	private static ChooseRemotePlanDialog dialog;
     private static String value = "";
     private JList list;
  
@@ -85,7 +89,12 @@ public class ChooseRemotePlanDialog extends JDialog
  
         //main part of the dialog
         list = new JList(data) {
-            //Subclass JList to workaround bug 4832765, which can cause the
+            /**
+			 * 
+			 */
+			private static final long serialVersionUID = 1L;
+
+			//Subclass JList to workaround bug 4832765, which can cause the
             //scroll pane to not let the user easily scroll up to the beginning
             //of the list.  An alternative would be to set the unitIncrement
             //of the JScrollBar to a fixed value. You wouldn't get the nice
