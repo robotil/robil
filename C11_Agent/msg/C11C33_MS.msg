@@ -1,0 +1,3 @@
+int16 MSN
+int16 MSN_DRIVE_VEHICLE = 0
+int16 MSN_OPEN_DOOR     = 1
