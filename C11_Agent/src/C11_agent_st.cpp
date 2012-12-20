@@ -7,6 +7,8 @@
 #include "C11_Agent/override_obstacle_properties.h"
 #include "C11_Agent/mission_selection.h"
 #include "C11_Agent/ask_for_image.h"
+#include "C11_Agent/set_forbidden_are.h"
+#include "C11_Agent/override_local_path.h"
 #include <sstream>
 #include <stdlib.h>
 
@@ -76,7 +78,24 @@ return true;
 
 }
 
+bool setForbiddenAre(C11_Agent::set_forbidden_are::Request& req,
+		C11_Agent::set_forbidden_are::Response& res)
+{
 
+	                ROS_INFO("START CALCULATION OF setForbiddenAre");
+return true;
+
+}
+
+
+bool overrideLocalPath(C11_Agent::override_local_path::Request& req,
+		C11_Agent::override_local_path::Response& res)
+{
+
+	                ROS_INFO("START CALCULATION OF overrideLocalPath");
+return true;
+
+}
 
 int main(int argc, char **argv)
 {
@@ -106,6 +125,9 @@ int main(int argc, char **argv)
 
    ros::ServiceServer service_AskForImage = n.advertiseService("AskForImage", AskForImage);
 
+   ros::ServiceServer service_setForbiddenAre = n.advertiseService("setForbiddenAre", setForbiddenAre);
+
+   ros::ServiceServer service_overrideLocalPath = n.advertiseService("overrideLocalPath", overrideLocalPath);
 
    ros::Rate loop_rate(10);
  
