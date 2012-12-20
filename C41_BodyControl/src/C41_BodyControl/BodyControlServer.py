@@ -68,6 +68,7 @@ class BodyControlServer(object):
     self._as.start()
 
   def finishTask(task_success, task_result, task_plan):
+	print "FINISH TASK : ",task_success, task_result, task_plan
 	if task_success:
       self._result.success = task_result;
       rospy.loginfo("%s: Succeeded", self._action_name);
