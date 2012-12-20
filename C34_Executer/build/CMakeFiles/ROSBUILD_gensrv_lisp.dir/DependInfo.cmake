@@ -18,11 +18,15 @@ SET(CMAKE_MULTIPLE_OUTPUT_PAIRS
   "/home/ariy/robil/C34_Executer/srv_gen/lisp/_package_ls.lisp" "/home/ariy/robil/C34_Executer/srv_gen/lisp/ls.lisp"
   "/home/ariy/robil/C34_Executer/srv_gen/lisp/_package_pause.lisp" "/home/ariy/robil/C34_Executer/srv_gen/lisp/pause.lisp"
   "/home/ariy/robil/C34_Executer/srv_gen/lisp/_package_pwd.lisp" "/home/ariy/robil/C34_Executer/srv_gen/lisp/pwd.lisp"
+  "/home/ariy/robil/C34_Executer/srv_gen/lisp/_package_read_file.lisp" "/home/ariy/robil/C34_Executer/srv_gen/lisp/read_file.lisp"
   "/home/ariy/robil/C34_Executer/srv_gen/lisp/_package_resume.lisp" "/home/ariy/robil/C34_Executer/srv_gen/lisp/resume.lisp"
   "/home/ariy/robil/C34_Executer/srv_gen/lisp/_package_run.lisp" "/home/ariy/robil/C34_Executer/srv_gen/lisp/run.lisp"
+  "/home/ariy/robil/C34_Executer/srv_gen/lisp/_package_save_file.lisp" "/home/ariy/robil/C34_Executer/srv_gen/lisp/save_file.lisp"
   "/home/ariy/robil/C34_Executer/srv_gen/lisp/_package_show_table_msg.lisp" "/home/ariy/robil/C34_Executer/srv_gen/lisp/show_table_msg.lisp"
   "/home/ariy/robil/C34_Executer/srv_gen/lisp/_package_step.lisp" "/home/ariy/robil/C34_Executer/srv_gen/lisp/step.lisp"
   "/home/ariy/robil/C34_Executer/srv_gen/lisp/_package_stop.lisp" "/home/ariy/robil/C34_Executer/srv_gen/lisp/stop.lisp"
+  "/home/ariy/robil/C34_Executer/srv_gen/lisp/_package_version.lisp" "/home/ariy/robil/C34_Executer/srv_gen/lisp/version.lisp"
+  "/home/ariy/robil/C34_Executer/srv_gen/lisp/_package_whoIsRunning.lisp" "/home/ariy/robil/C34_Executer/srv_gen/lisp/whoIsRunning.lisp"
   )
 
 

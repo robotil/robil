@@ -10,11 +10,15 @@ FILE(REMOVE_RECURSE
   "../srv_gen/cpp/include/C34_Executer/run.h"
   "../srv_gen/cpp/include/C34_Executer/resume.h"
   "../srv_gen/cpp/include/C34_Executer/lookup.h"
+  "../srv_gen/cpp/include/C34_Executer/whoIsRunning.h"
   "../srv_gen/cpp/include/C34_Executer/step.h"
+  "../srv_gen/cpp/include/C34_Executer/read_file.h"
   "../srv_gen/cpp/include/C34_Executer/btstack.h"
   "../srv_gen/cpp/include/C34_Executer/cd.h"
   "../srv_gen/cpp/include/C34_Executer/ls.h"
+  "../srv_gen/cpp/include/C34_Executer/version.h"
   "../srv_gen/cpp/include/C34_Executer/pause.h"
+  "../srv_gen/cpp/include/C34_Executer/save_file.h"
 )
 
 # Per-language clean rules from dependency scanning.

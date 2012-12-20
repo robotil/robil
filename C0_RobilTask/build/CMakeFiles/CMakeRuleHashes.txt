@@ -21,7 +21,7 @@ d6c550299f68e8bc9cd4f4503a4fa452 ../src/C0_RobilTask/msg/_RobilTaskActionFeedbac
 05e46c9510e58cb04ca9841df4188447 ../src/C0_RobilTask/msg/_RobilTaskFeedback.py
 7a3b83d54af556c28d8abb3200608c60 ../src/C0_RobilTask/msg/_RobilTaskGoal.py
 6ee1854bcad3316e43d9b94a8c0184f4 ../src/C0_RobilTask/msg/_RobilTaskResult.py
-87a7477d057bedf21444e64733ab8478 ../src/C0_RobilTask/msg/__init__.py
+6fbc35c3818056f3f1b8bed77ec1fa7f ../src/C0_RobilTask/msg/__init__.py
 7e836294d37220ec5f3bbce45b865e09 CMakeFiles/ROSBUILD_genaction_msgs
 7e836294d37220ec5f3bbce45b865e09 CMakeFiles/ROSBUILD_genmsg_cpp
 7e836294d37220ec5f3bbce45b865e09 CMakeFiles/ROSBUILD_genmsg_lisp

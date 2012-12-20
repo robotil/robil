@@ -15,9 +15,9 @@ SET(CMAKE_C_INCLUDE_PATH
   "/opt/ros/fuerte/share/actionlib/include"
   "/home/ariy/robil/C0_RobilTask/include"
   "/home/ariy/robil/C0_RobilTask/msg_gen/cpp/include"
+  "/home/ariy/robil/C34_BTExecuter/src"
   "../msg_gen/cpp/include"
   "../srv_gen/cpp/include"
-  "../includes/BTExecuter"
   )
 SET(CMAKE_CXX_INCLUDE_PATH ${CMAKE_C_INCLUDE_PATH})
 SET(CMAKE_Fortran_INCLUDE_PATH ${CMAKE_C_INCLUDE_PATH})

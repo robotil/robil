@@ -11,11 +11,15 @@ FILE(REMOVE_RECURSE
   "../src/C34_Executer/srv/_run.py"
   "../src/C34_Executer/srv/_resume.py"
   "../src/C34_Executer/srv/_lookup.py"
+  "../src/C34_Executer/srv/_whoIsRunning.py"
   "../src/C34_Executer/srv/_step.py"
+  "../src/C34_Executer/srv/_read_file.py"
   "../src/C34_Executer/srv/_btstack.py"
   "../src/C34_Executer/srv/_cd.py"
   "../src/C34_Executer/srv/_ls.py"
+  "../src/C34_Executer/srv/_version.py"
   "../src/C34_Executer/srv/_pause.py"
+  "../src/C34_Executer/srv/_save_file.py"
 )
 
 # Per-language clean rules from dependency scanning.

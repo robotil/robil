@@ -51,13 +51,29 @@ CMakeFiles/ROSBUILD_genmsg_py: ../src/C0_RobilTask/msg/__init__.py
 ../src/C0_RobilTask/msg/__init__.py: ../src/C0_RobilTask/msg/_RobilTaskActionResult.py
 ../src/C0_RobilTask/msg/__init__.py: ../src/C0_RobilTask/msg/_RobilTaskFeedback.py
 ../src/C0_RobilTask/msg/__init__.py: ../src/C0_RobilTask/msg/_RobilTaskActionFeedback.py
+../src/C0_RobilTask/msg/__init__.py: ../src/C0_RobilTask/msg/_RobilTaskResult.py
+../src/C0_RobilTask/msg/__init__.py: ../src/C0_RobilTask/msg/_RobilTaskGoal.py
+../src/C0_RobilTask/msg/__init__.py: ../src/C0_RobilTask/msg/_RobilTaskFeedback.py
+../src/C0_RobilTask/msg/__init__.py: ../src/C0_RobilTask/msg/_RobilTaskAction.py
+../src/C0_RobilTask/msg/__init__.py: ../src/C0_RobilTask/msg/_RobilTaskActionGoal.py
+../src/C0_RobilTask/msg/__init__.py: ../src/C0_RobilTask/msg/_RobilTaskActionFeedback.py
+../src/C0_RobilTask/msg/__init__.py: ../src/C0_RobilTask/msg/_RobilTaskActionResult.py
 	$(CMAKE_COMMAND) -E cmake_progress_report /home/ariy/robil/C0_RobilTask/build/CMakeFiles $(CMAKE_PROGRESS_1)
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --blue --bold "Generating ../src/C0_RobilTask/msg/__init__.py"
-	/opt/ros/fuerte/share/rospy/rosbuild/scripts/genmsg_py.py --initpy /home/ariy/robil/C0_RobilTask/msg/RobilTaskAction.msg /home/ariy/robil/C0_RobilTask/msg/RobilTaskGoal.msg /home/ariy/robil/C0_RobilTask/msg/RobilTaskActionGoal.msg /home/ariy/robil/C0_RobilTask/msg/RobilTaskResult.msg /home/ariy/robil/C0_RobilTask/msg/RobilTaskActionResult.msg /home/ariy/robil/C0_RobilTask/msg/RobilTaskFeedback.msg /home/ariy/robil/C0_RobilTask/msg/RobilTaskActionFeedback.msg
+	/opt/ros/fuerte/share/rospy/rosbuild/scripts/genmsg_py.py --initpy /home/ariy/robil/C0_RobilTask/msg/RobilTaskAction.msg /home/ariy/robil/C0_RobilTask/msg/RobilTaskGoal.msg /home/ariy/robil/C0_RobilTask/msg/RobilTaskActionGoal.msg /home/ariy/robil/C0_RobilTask/msg/RobilTaskResult.msg /home/ariy/robil/C0_RobilTask/msg/RobilTaskActionResult.msg /home/ariy/robil/C0_RobilTask/msg/RobilTaskFeedback.msg /home/ariy/robil/C0_RobilTask/msg/RobilTaskActionFeedback.msg /home/ariy/robil/C0_RobilTask/msg/RobilTaskResult.msg /home/ariy/robil/C0_RobilTask/msg/RobilTaskGoal.msg /home/ariy/robil/C0_RobilTask/msg/RobilTaskFeedback.msg /home/ariy/robil/C0_RobilTask/msg/RobilTaskAction.msg /home/ariy/robil/C0_RobilTask/msg/RobilTaskActionGoal.msg /home/ariy/robil/C0_RobilTask/msg/RobilTaskActionFeedback.msg /home/ariy/robil/C0_RobilTask/msg/RobilTaskActionResult.msg
 
 ../src/C0_RobilTask/msg/_RobilTaskAction.py: ../msg/RobilTaskAction.msg
 ../src/C0_RobilTask/msg/_RobilTaskAction.py: /opt/ros/fuerte/share/rospy/rosbuild/scripts/genmsg_py.py
 ../src/C0_RobilTask/msg/_RobilTaskAction.py: /opt/ros/fuerte/share/roslib/bin/gendeps
+../src/C0_RobilTask/msg/_RobilTaskAction.py: /opt/ros/fuerte/share/actionlib_msgs/msg/GoalID.msg
+../src/C0_RobilTask/msg/_RobilTaskAction.py: ../msg/RobilTaskActionResult.msg
+../src/C0_RobilTask/msg/_RobilTaskAction.py: /opt/ros/fuerte/share/std_msgs/msg/Header.msg
+../src/C0_RobilTask/msg/_RobilTaskAction.py: ../msg/RobilTaskGoal.msg
+../src/C0_RobilTask/msg/_RobilTaskAction.py: ../msg/RobilTaskResult.msg
+../src/C0_RobilTask/msg/_RobilTaskAction.py: ../msg/RobilTaskActionGoal.msg
+../src/C0_RobilTask/msg/_RobilTaskAction.py: ../msg/RobilTaskFeedback.msg
+../src/C0_RobilTask/msg/_RobilTaskAction.py: /opt/ros/fuerte/share/actionlib_msgs/msg/GoalStatus.msg
+../src/C0_RobilTask/msg/_RobilTaskAction.py: ../msg/RobilTaskActionFeedback.msg
 ../src/C0_RobilTask/msg/_RobilTaskAction.py: ../manifest.xml
 ../src/C0_RobilTask/msg/_RobilTaskAction.py: /opt/ros/fuerte/share/roslib/manifest.xml
 ../src/C0_RobilTask/msg/_RobilTaskAction.py: /opt/ros/fuerte/share/roslang/manifest.xml
@@ -88,6 +104,9 @@ CMakeFiles/ROSBUILD_genmsg_py: ../src/C0_RobilTask/msg/__init__.py
 ../src/C0_RobilTask/msg/_RobilTaskActionGoal.py: ../msg/RobilTaskActionGoal.msg
 ../src/C0_RobilTask/msg/_RobilTaskActionGoal.py: /opt/ros/fuerte/share/rospy/rosbuild/scripts/genmsg_py.py
 ../src/C0_RobilTask/msg/_RobilTaskActionGoal.py: /opt/ros/fuerte/share/roslib/bin/gendeps
+../src/C0_RobilTask/msg/_RobilTaskActionGoal.py: /opt/ros/fuerte/share/actionlib_msgs/msg/GoalID.msg
+../src/C0_RobilTask/msg/_RobilTaskActionGoal.py: /opt/ros/fuerte/share/std_msgs/msg/Header.msg
+../src/C0_RobilTask/msg/_RobilTaskActionGoal.py: ../msg/RobilTaskGoal.msg
 ../src/C0_RobilTask/msg/_RobilTaskActionGoal.py: ../manifest.xml
 ../src/C0_RobilTask/msg/_RobilTaskActionGoal.py: /opt/ros/fuerte/share/roslib/manifest.xml
 ../src/C0_RobilTask/msg/_RobilTaskActionGoal.py: /opt/ros/fuerte/share/roslang/manifest.xml
@@ -118,6 +137,10 @@ CMakeFiles/ROSBUILD_genmsg_py: ../src/C0_RobilTask/msg/__init__.py
 ../src/C0_RobilTask/msg/_RobilTaskActionResult.py: ../msg/RobilTaskActionResult.msg
 ../src/C0_RobilTask/msg/_RobilTaskActionResult.py: /opt/ros/fuerte/share/rospy/rosbuild/scripts/genmsg_py.py
 ../src/C0_RobilTask/msg/_RobilTaskActionResult.py: /opt/ros/fuerte/share/roslib/bin/gendeps
+../src/C0_RobilTask/msg/_RobilTaskActionResult.py: /opt/ros/fuerte/share/actionlib_msgs/msg/GoalID.msg
+../src/C0_RobilTask/msg/_RobilTaskActionResult.py: ../msg/RobilTaskResult.msg
+../src/C0_RobilTask/msg/_RobilTaskActionResult.py: /opt/ros/fuerte/share/std_msgs/msg/Header.msg
+../src/C0_RobilTask/msg/_RobilTaskActionResult.py: /opt/ros/fuerte/share/actionlib_msgs/msg/GoalStatus.msg
 ../src/C0_RobilTask/msg/_RobilTaskActionResult.py: ../manifest.xml
 ../src/C0_RobilTask/msg/_RobilTaskActionResult.py: /opt/ros/fuerte/share/roslib/manifest.xml
 ../src/C0_RobilTask/msg/_RobilTaskActionResult.py: /opt/ros/fuerte/share/roslang/manifest.xml
@@ -148,6 +171,10 @@ CMakeFiles/ROSBUILD_genmsg_py: ../src/C0_RobilTask/msg/__init__.py
 ../src/C0_RobilTask/msg/_RobilTaskActionFeedback.py: ../msg/RobilTaskActionFeedback.msg
 ../src/C0_RobilTask/msg/_RobilTaskActionFeedback.py: /opt/ros/fuerte/share/rospy/rosbuild/scripts/genmsg_py.py
 ../src/C0_RobilTask/msg/_RobilTaskActionFeedback.py: /opt/ros/fuerte/share/roslib/bin/gendeps
+../src/C0_RobilTask/msg/_RobilTaskActionFeedback.py: /opt/ros/fuerte/share/actionlib_msgs/msg/GoalID.msg
+../src/C0_RobilTask/msg/_RobilTaskActionFeedback.py: /opt/ros/fuerte/share/std_msgs/msg/Header.msg
+../src/C0_RobilTask/msg/_RobilTaskActionFeedback.py: /opt/ros/fuerte/share/actionlib_msgs/msg/GoalStatus.msg
+../src/C0_RobilTask/msg/_RobilTaskActionFeedback.py: ../msg/RobilTaskFeedback.msg
 ../src/C0_RobilTask/msg/_RobilTaskActionFeedback.py: ../manifest.xml
 ../src/C0_RobilTask/msg/_RobilTaskActionFeedback.py: /opt/ros/fuerte/share/roslib/manifest.xml
 ../src/C0_RobilTask/msg/_RobilTaskActionFeedback.py: /opt/ros/fuerte/share/roslang/manifest.xml
