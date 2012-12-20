@@ -1,2 +1,1 @@
-float64 lat
-float64 lon
+C11_Agent/pathLocation[] points
