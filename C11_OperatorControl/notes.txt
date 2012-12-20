@@ -1,3 +1,6 @@
+KNOWN BUGS:
+The module crashes after 1-2 pictures
+============================================
 To be able to make this package you should have the next packages installed beforehand:
 ros-fuerte-qt-ros
 ros-fuerte-qt-gui-core
