@@ -30,7 +30,7 @@ public class RosExecutor {
 		workerThreads.add(new Thread(new RosStackStreamListener(designer),
 				"RosStackListener"));
 		workerThreads.add(new Thread(new RosStopStreamListener(),
-				"RosStackListener"));
+				"RosStopListener"));
 
 		for (Thread t : workerThreads) {
 			t.start();
