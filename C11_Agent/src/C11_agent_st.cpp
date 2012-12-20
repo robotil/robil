@@ -5,6 +5,8 @@
 #include "C11_Agent/object_map.h"
 #include "C11_Agent/override_object_properties.h"
 #include "C11_Agent/override_obstacle_properties.h"
+#include "C11_Agent/mission_selection.h"
+#include "C11_Agent/ask_for_image.h"
 #include <sstream>
 #include <stdlib.h>
 
@@ -55,6 +57,24 @@ return true;
 }
 
 
+bool MissionSelection(C11_Agent::mission_selection::Request& req,
+		C11_Agent::mission_selection::Response& res)
+{
+
+	                ROS_INFO("START CALCULATION OF MissionSelection");
+return true;
+
+}
+
+
+bool AskForImage(C11_Agent::ask_for_image::Request& req,
+		C11_Agent::ask_for_image::Response& res)
+{
+
+	                ROS_INFO("START CALCULATION OF AskForImage");
+return true;
+
+}
 
 
 
@@ -74,7 +94,7 @@ int main(int argc, char **argv)
 
    ros::ServiceServer service = n.advertiseService("PathPlan", PathPlan);
 
-   ros::ServiceServer service_ObstacleMap = n.advertiseService("ObstacleMap", ObstacleMap);
+   ros::ServiceServer severride_obstacle_propertiesrvice_ObstacleMap = n.advertiseService("ObstacleMap", ObstacleMap);
 
    ros::ServiceServer service_ObjectMap = n.advertiseService("ObjectMap", ObjectMap);
 
@@ -82,6 +102,9 @@ int main(int argc, char **argv)
 
    ros::ServiceServer service_OverrideObstacleProperties = n.advertiseService("OverrideObstacleProperties", OverrideObstacleProperties);
 
+   ros::ServiceServer service_MissionSelection = n.advertiseService("MissionSelection", MissionSelection);
+
+   ros::ServiceServer service_AskForImage = n.advertiseService("AskForImage", AskForImage);
 
 
    ros::Rate loop_rate(10);
@@ -95,7 +118,7 @@ int main(int argc, char **argv)
 
   C11_Agent::C34C11_STT  stt1;
 
- ROS_INFO("The status is  = %d",  1);
+// ROS_INFO("The status is  = %d",  1);
  
 
     stt_pub.publish(stt1);
