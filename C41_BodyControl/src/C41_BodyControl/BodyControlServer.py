@@ -20,11 +20,13 @@ class BodyControlServer(object):
   
     
   def __init__(self):
+    print "SERVER STARTED"
     self._action_name = "/BodyControl"
     self._as = actionlib.SimpleActionServer(self._action_name, C0_RobilTask.msg.RobilTaskAction, execute_cb=self.task)
     self._as.start()
 
   def task(self, goal):
+    print "TASK STARTED"
     task_success = True
     task_result = TASK_RESULT_OK
     task_plan = ""
@@ -39,7 +41,9 @@ class BodyControlServer(object):
     #### HERE PROCESS TASK PARAMETERS ####
     if goal.parameters == "param=MoveArm" :
 
-      _arm = rospy.Publisher('/r_arm_ely_position_controller/command', Float64)
+      print "PARAM FAUND"
+
+#      _arm = rospy.Publisher('/r_arm_ely_position_controller/command', Float64)
       #### DEFINE SLEEP DURATION BETWEEN TASK LOOP ITERATIONS ####
       r = rospy.Rate(100)
 
@@ -54,9 +58,10 @@ class BodyControlServer(object):
 	    break
 		    
     	#### HERE PROCESS TASK ####
-   	t = 6 * rospy.get_time()
-    	next_pos =  0.4 + 0.4 * math.sin(t)
-    	_arm.publish(next_pos)
+	print "TASK PROCESS"
+#   	t = 6 * rospy.get_time()
+#    	next_pos =  0.4 + 0.4 * math.sin(t)
+#    	_arm.publish(next_pos)
 	     
 	r.sleep()
       
@@ -101,11 +106,12 @@ class BodyControlServer(object):
     if task_success:
       self._result.success = task_result;
       rospy.loginfo("%s: Succeeded", self._action_name);
-    if task_result == TASK_RESULT_PLAN:
-      ROS_INFO("%s: New plan", self._action_name);
-      self._result.plan = task_plan;
+      if task_result == TASK_RESULT_PLAN:
+        ROS_INFO("%s: New plan", self._action_name);
+        self._result.plan = task_plan;
       self._as.set_succeeded(self._result);
     else:
       rospy.loginfo("%s: Aborted", self._action_name);
       self._as.set_aborted(self._result);
+    print "TASK FINISHED"
 
