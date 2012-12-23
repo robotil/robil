@@ -12,6 +12,7 @@ ImageDraw::ImageDraw(int argc, char** argv, QWidget *parent, Qt::WFlags flags)
 {
 	ui.setupUi(this);
 	ImageAreaCount = 0;
+	IsUpdateCurrentImg = false;
 
 	connect(this,SIGNAL(SigOnNewImg(QImage)),this,SLOT(SltOnNewImg(QImage)),Qt::QueuedConnection);
 
@@ -27,7 +28,7 @@ void ImageDraw::CreateNewImageArea(QString imageName)
 {
 	CloseOpenedImages();
 
-	QRectF rect(0,0,520,420);
+	QRectF rect(0,0,726,428);
 	QGraphicsScene* pScene = new QGraphicsScene(rect,this);
 
 	QDateTime dateTime = QDateTime::currentDateTime();
@@ -90,11 +91,14 @@ void ImageDraw::OnImgReceived(QImage image)
 
 void ImageDraw::SltOnNewImg(QImage image)
 {
+	if(!IsUpdateCurrentImg)
+	{
+		IsUpdateCurrentImg = true;
 		std::cout << "Step4" << std::endl;
 		CloseOpenedImages();
 
 		std::cout << "Step5" << std::endl;
-		QRectF rect(0,0,520,420);
+		QRectF rect(0,0,726,428);
 		QGraphicsScene* pScene = new QGraphicsScene(rect,this);
 
 		QDateTime dateTime = QDateTime::currentDateTime();
@@ -125,6 +129,17 @@ void ImageDraw::SltOnNewImg(QImage image)
 
 		connect(pCGraphicsView,SIGNAL(SigOpened(int)),this,SLOT(SltImageAreaOpened(int)));
 		std::cout << "Step8" << std::endl;
+	}
+	else
+	{
+		QDateTime dateTime = QDateTime::currentDateTime();
+		QString dateStr = dateTime.toString("dd.MM.yyyy");
+		QString timeStr = dateTime.toString("hh:mm:ss");
+		QString DateTimeStr = dateStr + " " + timeStr;
+
+		CGraphicsView* pCGraphicsView = ImageAreas[ImageAreaCount-1];
+		pCGraphicsView->UpdateImage(image,DateTimeStr);
+	}
 }
 
 void ImageDraw::SltOnRectClick()

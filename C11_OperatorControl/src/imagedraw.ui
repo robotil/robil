@@ -969,9 +969,15 @@
       <layout class="QHBoxLayout" name="horizontalLayout_2">
        <item>
         <widget class="QWidget" name="widImages" native="true">
+         <property name="minimumSize">
+          <size>
+           <width>762</width>
+           <height>0</height>
+          </size>
+         </property>
          <property name="maximumSize">
           <size>
-           <width>538</width>
+           <width>762</width>
            <height>16777215</height>
           </size>
          </property>
