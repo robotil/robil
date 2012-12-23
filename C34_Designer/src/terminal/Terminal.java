@@ -20,6 +20,9 @@ public class Terminal extends javax.swing.JFrame {
 
 		ProgramRegistrator.register(this);
 		print(getPromt());
+		
+		txtIn.requestFocus();
+
 	}
 
 	/**
@@ -40,6 +43,7 @@ public class Terminal extends javax.swing.JFrame {
 
 		txtIn.setColumns(20);
 		txtIn.setRows(5);
+		txtIn.setFocusable(true);
 		txtIn.addKeyListener(new java.awt.event.KeyAdapter() {
 			public void keyTyped(java.awt.event.KeyEvent evt) {
 				txtInKeyTyped(evt);
@@ -57,6 +61,7 @@ public class Terminal extends javax.swing.JFrame {
 		txtOut.setEditable(false);
 		txtOut.setColumns(20);
 		txtOut.setRows(5);
+		//txtOut.setFocusable(false);
 		jScrollPane1.setViewportView(txtOut);
 
 		javax.swing.GroupLayout layout = new javax.swing.GroupLayout(
