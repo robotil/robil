@@ -19,17 +19,21 @@ import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.Properties;
 import java.util.UUID;
 
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.stream.events.StartDocument;
 
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
+
+import document.description.TaskDescription;
 
 import elements.Arrow;
 import elements.Joint;
@@ -48,6 +52,7 @@ public class Document extends JPanel {
 	public ArrayList<GElement> arrays = new ArrayList<GElement>();
 	public ArrayList<GElement> elements = new ArrayList<GElement>();
 	public View view = new View();
+	public TaskDescription task_desc = null;
 	
 	public BTDesigner mainWindow = null;
 
@@ -96,6 +101,11 @@ public class Document extends JPanel {
 		addMouseMotionListener(mh);
 		addMouseWheelListener(mh);
 	
+		try {
+			task_desc = new TaskDescription(Parameters.path_to_description);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 	}
 	public void renumberElements(ArrayList<GElement> elements){
 		for(GElement el: elements){ if(el instanceof Task){ ((Task) el).seqNumber = 0; } }
@@ -217,11 +227,11 @@ public class Document extends JPanel {
 						lastX = nge.getProperty().loc.x = lastX+20;
 						lastY = nge.getProperty().loc.y = lastY;
 					}
-					if(e.hasAttribute("dbg_time")){	
-						nge.getProperty().dbg_time = Integer.parseInt( e.getAttribute("dbg_time") );
+					if(e.hasAttribute("test_time")){	
+						nge.getProperty().test_time = Integer.parseInt( e.getAttribute("test_time") );
 					}
-					if(e.hasAttribute("dbg_result")){	
-						nge.getProperty().dbg_result = Boolean.parseBoolean( e.getAttribute("dbg_result") );
+					if(e.hasAttribute("test_result")){	
+						nge.getProperty().test_result = Boolean.parseBoolean( e.getAttribute("test_result") );
 					}
 					if(e.hasAttribute("id")){	
 						nge.id = UUID.fromString( e.getAttribute("id") );
@@ -284,11 +294,11 @@ public class Document extends JPanel {
 						lastX = nge.getProperty().loc.x = lastX+20;
 						lastY = nge.getProperty().loc.y = lastY;
 					}
-					if(e.hasAttribute("dbg_time")){	
-						nge.getProperty().dbg_time = Integer.parseInt( e.getAttribute("dbg_time") );
+					if(e.hasAttribute("test_time")){	
+						nge.getProperty().test_time = Integer.parseInt( e.getAttribute("test_time") );
 					}
-					if(e.hasAttribute("dbg_result")){	
-						nge.getProperty().dbg_result = Boolean.parseBoolean( e.getAttribute("dbg_result") );
+					if(e.hasAttribute("test_result")){	
+						nge.getProperty().test_result = Boolean.parseBoolean( e.getAttribute("test_result") );
 					}
 					if(e.hasAttribute("id")){	
 						nge.id = UUID.fromString( e.getAttribute("id") );
@@ -414,6 +424,27 @@ public class Document extends JPanel {
 	public JLabel tip = null;
 	public final boolean cleanToolSelectionAfterUse = false;
 	private String absoluteFilePath = "plan.xml";
+	
+	public String getAbsoluteFilePath() {
+		if (absoluteFilePath == null) {
+			return null;
+		}
+		return new String(absoluteFilePath);
+	}
+
+	public String getShortFilePath() {
+		if (absoluteFilePath == null) {
+			return null;
+		}
+		
+		String[] splitted = absoluteFilePath.split("/");
+		if (splitted.length == 0) {
+			return null;
+		}
+		
+		return new String(splitted[splitted.length - 1]);
+	}
+	
 	public void toolSelectionClean(){
 		creator = null;
 		removeElement = false;
@@ -591,7 +622,9 @@ public class Document extends JPanel {
 		return xml;
 	}
 
-	public void compile() {
+	public void compile(String destination) {
+		setCurrentWorkingFile(destination);
+		
 		toolSelectionClean();
 		ArrayList<GElement> root = getRoot();
 		if(root.size()!=1){
@@ -628,6 +661,10 @@ public class Document extends JPanel {
 		if(saved) saveXmlToFile(createXml(rootTask, tabulation, true), getCurrentWorkingFileForXmlWithJustNames(), false);
 	}
 	
+	public void compile() {
+		compile(getCurrentWorkingFile());
+	}
+	
 	private boolean saveXmlToFile(String xml, String filen, boolean withNotifications){
 		xml = "<plan>\n"+xml+"\n</plan>";
 				
@@ -645,9 +682,8 @@ public class Document extends JPanel {
 		return true;
 	}
 
-	private void setCurrentWorkingFile(String absoluteFilePath) {
+	public void setCurrentWorkingFile(String absoluteFilePath) {
 		this.absoluteFilePath = absoluteFilePath;
-		mainWindow.setTitle("Cogniteam BTDesigner "+BTDesigner.VERSION+": "+absoluteFilePath);
 	}
 	
 	private String getCurrentWorkingFile() {
@@ -697,7 +733,7 @@ public class Document extends JPanel {
 	}
 
 	Process BTExecuter=null;
-	public void run() {
+	public void test() {
 		if(BTExecuter!=null){
 			BTExecuter.destroy();
 			return;

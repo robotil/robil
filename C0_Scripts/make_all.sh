@@ -9,6 +9,22 @@ echo 'Logging to' $LOG
 cd ..
 ROS_WD=$PWD
 export ROS_PACKAGE_PATH=$ROS_WD:$ROS_PACKAGE_PATH
+
+dir="$ROS_WD/C34_BTExecuter"
+if test -d "$dir"; then
+        echo ">> $dir" 
+        cd $dir/bin_so
+        make all 2>&1 2>&1 2>&1 >/dev/null
+        STATUS=$?
+        if [ $STATUS -ne 0 ]; then
+                                echo "[Error] $dir" >> $LOG
+        else
+                echo "[PASS] $dir" >> $LOG
+        fi
+        echo "<< $dir"
+        cd $ROS_WD
+fi
+
 for dir in "$ROS_WD"/*; do
 	if test -d "$dir"; then
 		echo ">> $dir" 
@@ -21,9 +37,10 @@ for dir in "$ROS_WD"/*; do
 			echo "[PASS] $dir" >> $LOG
 		fi 
 		echo "<< $dir"
-		cd ..
+		cd $ROS_WD
 	fi
 done
+
 cd $CURR_WD 
 
 exit 0

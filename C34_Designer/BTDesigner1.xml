@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<parameters>
+<path_to_images value="./images"/>
+<executer_service value="/executer"/>
+<path_to_plans value="./plans"/>
+<test_result value="true"/>
+<test_time value="29"/>
+</parameters>

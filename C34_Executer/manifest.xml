@@ -13,7 +13,7 @@
   <depend package="actionlib"/>
   <depend package="actionlib_msgs"/>
   <depend package="C0_RobilTask"/>
-
+  <depend package="C34_BTExecuter"/>
 </package>
 
 
