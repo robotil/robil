@@ -98,6 +98,11 @@ public abstract class GElement {
 		return null;
 	}
 	
+	public boolean isVisiable = true;
+	public void paintElement(Graphics2D g){
+		if(isVisiable) paint(g);
+	}
+	
 	public abstract void paint(Graphics2D g);
 	
 	Vec getLocation(){
