@@ -28,6 +28,8 @@ import javax.swing.JPanel;
 import javax.swing.JTextField;
 import javax.swing.SpringLayout;
 
+import org.w3c.dom.Element;
+
 public class Task extends GElement implements View.ChangesListener{
 
 	public final static String TYPE_task = "task";
@@ -39,6 +41,42 @@ public class Task extends GElement implements View.ChangesListener{
 	public String type = TYPE_task;
 	public Font font = new Font("sansserif", Font.BOLD, 10);
 	public int seqNumber=0;
+	
+	
+	static public class TaskDefinition{
+		public String conditions;
+		public String constraints;
+		public String effects;		
+		public String algorithm;
+		
+		public String toString(){
+			return "{cond:"+conditions+"; const:"+constraints+"; eff:"+effects+"; alg:"+algorithm+"}";
+		}
+		public String toXmlAttr(){
+			return " def.conditions=\""+conditions+"\" def.constraints=\""+constraints+"\" def.effects=\""+effects+"\" def.algorithm=\""+algorithm+"\" ";
+		}
+		public void parseXmlAttr(String xml){
+			xml = xml.trim();
+			String[] tk = xml.split("\"");
+			for(int i=0;i<tk.length-1;i++){
+				String t = tk[i].trim();
+				if(t.endsWith("=") && t.startsWith("def.")){
+					if(t.startsWith("def.conditions")) conditions = tk[i+1]; else
+					if(t.startsWith("def.constraints")) constraints = tk[i+1]; else
+					if(t.startsWith("def.effects")) effects = tk[i+1]; else
+					if(t.startsWith("def.algorithm")) algorithm = tk[i+1];
+				}
+			}
+		}
+		public void parseXmlAttr(Element el){
+			conditions = el.getAttribute("def.conditions");
+			constraints = el.getAttribute("def.constraints");
+			effects = el.getAttribute("def.effects");
+			algorithm = el.getAttribute("def.algorithm");
+		}
+	}
+	
+	public TaskDefinition def = new TaskDefinition();
 	
 	public Task(){
 		property.size = new Vec(100,100);
