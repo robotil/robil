@@ -16,6 +16,7 @@ public:
 	~CGraphicsView();
 
 	void setScene(QGraphicsScene * scene);
+	void UpdateImage(QImage image, QString dateTimeStr);
 
 	void SetOpen(bool isOpen);
 	bool IsOpen();
