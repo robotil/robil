@@ -1,0 +1,16 @@
+<package>
+  <description brief="C51_CarOperation">
+
+     C51_CarOperation
+
+  </description>
+  <author>Lar</author>
+  <license>BSD</license>
+  <review status="unreviewed" notes=""/>
+  <url>http://ros.org/wiki/C51_CarOperation</url>
+  <depend package="roscpp"/>
+  <depend package="std_msgs"/>
+  <depend package="rospy"/>
+</package>
+
+

@@ -1,0 +1,18 @@
+<package>
+  <description brief="C11_Agent">
+
+     C11_Agent
+
+  </description>
+  <author>Shoshana Kirshenbaum</author>
+  <license>BSD</license>
+  <review status="unreviewed" notes=""/>
+  <url>http://ros.org/wiki/C11_Agent</url>
+  <depend package="roslib"/>
+  <depend package="roscpp"/>
+  <depend package="std_msgs"/>
+  <depend package="rospy"/>
+
+</package>
+
+

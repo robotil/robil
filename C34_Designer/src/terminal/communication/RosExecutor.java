@@ -45,26 +45,31 @@ public class RosExecutor {
 
 	public void runBehaviorTree(String btName, String plan) {
 		ServiceCaller caller = new ServiceCaller();
+		System.out.println("Run "+btName);
 		caller.callService(RUN, btName, plan);
 	}
 
 	public void resumeBehaviorTree(String btName) {
+		System.out.println("Resume "+btName);
 		ServiceCaller caller = new ServiceCaller();
 		caller.callService(RESUME, btName);
 	}
 
 	public void stopBehaviorTree(String btName) {
 		ServiceCaller caller = new ServiceCaller();
+		System.out.println("Stop "+btName);
 		caller.callService(STOP, btName);
 	}
 	
 	public void stepBehaviorTree(String btName) {
 		ServiceCaller caller = new ServiceCaller();
+		System.out.println("step "+btName);
 		caller.callService(STEP, btName);
 	}
 	
 	public void pauseBehaviorTree(String btName) {
 		ServiceCaller caller = new ServiceCaller();
+		System.out.println("Pause "+btName);
 		caller.callService(PAUSE, btName);
 	}
 	

@@ -1,11 +1,24 @@
 Interfaces changed:
-N/A
+parameters passed in the ROS convention
+
+added three new topics:
+2 that pass raw data from cameras in raw and compressed form and pass them on to "C21/right_camera/image" "C21/left_camera/image"
+
+in addition to it's known services the node now creates a small panorama from it's two cameras and send it to "/C21/smallPanorama"
+
+
 
 How to Check:
 ============
-See c21_installation instructions.pdf
+run the node with the PR2
 
+roslaunch pr2_gazebo pr2_wg_world.launch 
+rosrun C21_VisionAndLidar c21 _left:=/wide_stereo/left/image_raw _right:=/wide_stereo/right/image_raw
 
+test with
+
+rosrun C21_VisionAndLidar test1
+rosrun C21_VisionAndLidar test2
 
 
 

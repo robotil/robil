@@ -1,5 +1,5 @@
 <plan>
    <seq name="mission"> 
-         <tsk name="BodyControl(param=Walk)" />
+         <tsk name="BodyControl(param=step_and_fall)" />
    </seq>
 </plan>

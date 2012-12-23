@@ -381,7 +381,7 @@ void ServerActions::lookup(std::string filename){
 	using namespace fs;
 	if(string_operations::startWith(filename, "<lookup") || string_operations::startWith(filename, "<?xml")){
 		std::stringstream xml; xml << filename;
-		std::cout<<"SET LOOKUP: code: "<<xml<<std::endl;
+		std::cout<<"SET LOOKUP: from xml string: "<<xml.str()<<std::endl;
 		server.lookup = Lookup::Ref(new Lookup(xml));
 	}else{
 		path p(filename);
@@ -391,7 +391,7 @@ void ServerActions::lookup(std::string filename){
 			std::cerr<<err.str()<<std::endl;
 			throw err.str();
 		}
-		std::cout<<"SET LOOKUP: file: "<<p.string()<<std::endl;
+		std::cout<<"SET LOOKUP: from xml file: "<<p.string()<<std::endl;
 		server.lookup = Lookup::Ref(new Lookup(p.string()));
 	}
 }
@@ -403,7 +403,7 @@ void ServerActions::address(std::string filename, BTTaskProxyCreator::Ref creato
 	if(string_operations::startWith(filename, "<tasks") || string_operations::startWith(filename, "<?xml")){
 		std::cout<<"--- ServerActions::address. from stream ---"<<std::endl;
 		std::stringstream xml; xml << filename;
-		std::cout<<"SET ADDRESS: code: "<<xml<<std::endl;
+		std::cout<<"SET ADDRESS: from xml string: "<<xml.str()<<std::endl;
 		server.taskproxy = TaskProxyTable::Ref(new TaskProxyTableXML(xml, creator));
 	}else{
 		std::cout<<"--- ServerActions::address. from file "<<filename<<" ---"<<std::endl;
@@ -414,7 +414,7 @@ void ServerActions::address(std::string filename, BTTaskProxyCreator::Ref creato
 			std::cerr<<err.str()<<std::endl;
 			throw err.str();
 		}
-		std::cout<<"SET ADDRESS: file: "<<p.string()<<std::endl;
+		std::cout<<"SET ADDRESS: from xml file: "<<p.string()<<std::endl;
 		server.taskproxy = TaskProxyTable::Ref(new TaskProxyTableXML(p.string(), creator));
 	}
 }

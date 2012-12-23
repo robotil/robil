@@ -39,7 +39,7 @@ Result::Ref Task::run(){
 	std::string params = extractParameters( fullname );
 
 	bool taskproxy_contains_this_task = taskproxy.get() && taskproxy->contains(tname);
-	IF_DEBUG log<<"tsk["<<bt.getRootName()<<"] taskproxy_contains_this_task = "<<taskproxy_contains_this_task;
+	IF_DEBUG log<<"tsk["<<bt.getRootName()<<"] taskproxy_contains_this_task = "<<(taskproxy_contains_this_task?"yes":"no");
 
 	if(debug_energy.get() && !taskproxy_contains_this_task){
 		long time = bt.getDBGTimeInterval();

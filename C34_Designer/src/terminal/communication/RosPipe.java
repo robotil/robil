@@ -113,8 +113,10 @@ public class RosPipe {
 
 		int emptyCounter = 0;
 		for (String s : args)
+		{
 			if (s.trim().equals(""))
 				emptyCounter++;
+		}
 
 		// build command arguments
 		ArrayList<String> arg_list = new ArrayList<String>();

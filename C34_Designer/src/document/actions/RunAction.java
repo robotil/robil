@@ -17,12 +17,21 @@ public class RunAction extends AbstractDesignerAction implements ActionListener 
 	}
 
 	private void runPlanXML(String id, String xml) {
+		System.out.println("RUN PLAN XML : "+xml);
+		
+		if(id == null) id = Utils.randomString(10); //"Matan";
+		System.out.println("SET ACTIVE TAB ID = "+id);
+		getActiveTab().setID(id);
+		
 		designer.rosExecutor.runBehaviorTree(id, xml);
 	}
 	
 	private void runPlan() {
 		Document doc = getActiveTab().doc;
 		String fileName = doc.getShortFilePath();
+		
+		System.out.println("RUN PLAN FILE : "+fileName);
+		
 
 		if (fileName == null) {
 			JOptionPane
@@ -37,12 +46,14 @@ public class RunAction extends AbstractDesignerAction implements ActionListener 
 		// fileName);
 		
 		String id = Utils.randomString(10); //"Matan";
+		System.out.println("SET ACTIVE TAB ID = "+id);
 		getActiveTab().setID(id);
 		designer.rosExecutor.runBehaviorTree(id, fileName);
 	}
 
 	private void resumePlan() {
 		String id = getActiveTab().getID();
+		System.out.println("GET ACTIVE TAB ID = "+id);
 		designer.rosExecutor.resumeBehaviorTree(id);
 	}
 	
@@ -63,7 +74,8 @@ public class RunAction extends AbstractDesignerAction implements ActionListener 
 	
 	public void actionPerformed(ActionEvent a) {
 		if (a.getActionCommand().equals("run_run_plan")) {
-			runPlanXML("matan", "<plan><tsk name=\"Noname\" x=\"274.5\" y=\"95.5\" test_time=\"0\" test_result=\"true\" id=\"03ccc501-6dec-4afc-b0c5-d76d3bed6970\" /></plan>");//runPlan();
+			//runPlanXML("matan", "<plan><tsk name=\"Noname\" x=\"274.5\" y=\"95.5\" test_time=\"0\" test_result=\"true\" id=\"03ccc501-6dec-4afc-b0c5-d76d3bed6970\" /></plan>");//runPlan();
+			runPlan();
 		} else if (a.getActionCommand().equals("run_resume_plan")) {
 			resumePlan();
 		} else if (a.getActionCommand().equals("run_stop_plan")) {
