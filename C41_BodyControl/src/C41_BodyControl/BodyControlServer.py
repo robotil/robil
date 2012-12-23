@@ -1,13 +1,15 @@
 #! /usr/bin/env python
 
 import roslib; 
-roslib.load_manifest('C45_PostureControl')
+roslib.load_manifest('C41_BodyControl')
 
 import rospy, math
 import actionlib
 
 import C0_RobilTask.msg
 from std_msgs.msg import Float64
+from control_msgs.msg import *
+
 
 TASK_RESULT_REJECT=0
 TASK_RESULT_OK=1
@@ -63,11 +65,11 @@ class BodyControlServer(object):
     self.traj_client = actionlib.SimpleActionClient( '/drc_controller/follow_joint_trajectory', FollowJointTrajectoryAction )
     self.traj_client.wait_for_server()
 
-    self._action_name = "/PostureControl"
+    self._action_name = "/BodyControl"
     self._as = actionlib.SimpleActionServer(self._action_name, C0_RobilTask.msg.RobilTaskAction, execute_cb=self.task)
     self._as.start()
 
-  def finishTask(task_success, task_result, task_plan):
+  def finishTask(self, task_success, task_result, task_plan):
     print "FINISH TASK : ",task_success, task_result, task_plan
     if task_success:
       self._result.success = task_result;
@@ -80,7 +82,7 @@ class BodyControlServer(object):
       rospy.loginfo("%s: Aborted", self._action_name);
       self._as.set_aborted(self._result);
 
-  def moveArm():
+  def moveArm(self):
     print "DO moveArm"
     task_success = True
     task_result = TASK_RESULT_OK
@@ -103,7 +105,7 @@ class BodyControlServer(object):
             
         #### HERE PROCESS TASK ####
         print "TASK PROCESS"
-           t = 6 * rospy.get_time()
+        t = 6 * rospy.get_time()
         next_pos =  0.4 + 0.4 * math.sin(t)
         _arm.publish(next_pos)
          
@@ -111,7 +113,7 @@ class BodyControlServer(object):
 
     self.finishTask(task_success, task_result, task_plan)
     
-  def procTrajectory(gesture):
+  def procTrajectory(self,gesture):
     print "DO Trajectory : ",gesture
     task_success = True
     task_result = TASK_RESULT_OK
@@ -134,7 +136,7 @@ class BodyControlServer(object):
       
       drc_goal.trajectory.points.append(goal_pt)
       
-    self.traj_client.send_goal(goal)
+    self.traj_client.send_goal(drc_goal)
     guesture_duration = rospy.Duration.from_sec(guesture_duration + 3)
 
     #### DEFINE SLEEP DURATION BETWEEN TASK LOOP ITERATIONS ####
