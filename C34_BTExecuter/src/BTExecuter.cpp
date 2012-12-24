@@ -5,7 +5,7 @@
  *      Author: dan
  */
 
-#define VERSION "1.1.2"
+#define VERSION "1.2.1"
 #define COMPILATION_TIME __DATE__ " " __TIME__
 
 #include "BTExecuter.h"

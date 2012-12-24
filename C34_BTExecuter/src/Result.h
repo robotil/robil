@@ -33,6 +33,10 @@ public:
 
 	void print(Logger& cout);
 	void print(std::ostream& cout);
+
+	void printTop(Logger& cout);
+	void printTop(std::ostream& cout);
+
 private:
 	Result(bool v, int error_code, Info i):_val(v), _error_code(error_code), _info(i){ }
 	Result(bool v, int error_code, Info i, Result::Ref r):_next(r),_val(v), _error_code(error_code), _info(i){ }

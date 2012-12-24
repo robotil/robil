@@ -44,8 +44,11 @@ Result::Ref Task::run(){
 	if(debug_energy.get() && !taskproxy_contains_this_task){
 		long time = bt.getDBGTimeInterval();
 		int result = bt.getDBGResult();
-		IF_DEBUG log<<"tsk["<<bt.getRootName()<<"] debug energy: time="<<time<<", ret="<<(result?"true":"false")
+		IF_DEBUG{
+			std::stringstream _res; _res<<(result==0?"true":"false"); if(result>0) _res<<"("<<result<<")";
+			log<<"tsk["<<bt.getRootName()<<"] debug energy: time="<<time<<", ret="<<_res.str()
 				<<", proxy table "<<(!taskproxy_contains_this_task?"does not contain":"contains")<<" task name";
+		}
 
 		if(time>=0){
 			debug_energy->setContinuously(time);
