@@ -12,6 +12,7 @@ import javax.swing.JMenuItem;
 import javax.swing.KeyStroke;
 
 import document.actions.CompileAction;
+import document.actions.CopyTreeAction;
 import document.actions.LoadAndOpenAction;
 import document.actions.LogConsoleAction;
 import document.actions.ModifyAction;
@@ -163,6 +164,16 @@ public class Menubar extends JMenuBar {
 		menu.add(buildToolsMenu(designer));
 		menu.add(buildElementsCreatorMenu(designer));
 
+		ImageIcon icon = new ImageIcon(getClass().getClassLoader().getResource(
+				"icons/copy.png"));
+		JMenuItem menuItemCopy = new JMenuItem("Copy", KeyEvent.VK_C);
+		menuItemCopy.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_1,
+				ActionEvent.ALT_MASK));
+		menuItemCopy.setToolTipText("Copy selected sub-tree");
+		menuItemCopy.setIcon(icon);
+		menuItemCopy.addActionListener(new CopyTreeAction(designer));
+		menu.add(menuItemCopy);
+		
 		return menu;
 	}
 

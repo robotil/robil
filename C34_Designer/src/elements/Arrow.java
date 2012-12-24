@@ -6,6 +6,7 @@ import java.awt.Dimension;
 import java.awt.Graphics2D;
 import java.awt.Point;
 import java.util.ArrayList;
+import java.util.Map;
 
 import javax.swing.Icon;
 
@@ -19,6 +20,10 @@ public class Arrow extends GElement {
 	public GElement source = null;
 	public ArrayList<GElement> targets = new ArrayList<GElement>();
 	public int lastSelectedSegmentId = -1;
+	
+	private Arrow(){
+		source = null;
+	}
 	
 	public Arrow(GElement str, GElement end){
 		source = str;
@@ -176,6 +181,24 @@ public class Arrow extends GElement {
 		if(e instanceof ArrayElement){
 			((ArrayElement)e).add(this);
 		}
+	}
+	
+	@Override
+	public GElement clone() {
+		Arrow n = new Arrow();
+		cloneInit(n);
+		n.source = source;
+		n.targets.addAll(targets);
+		n.lastSelectedSegmentId = lastSelectedSegmentId;
+		return n;
+	}
+
+	@Override
+	public void cloneReconnect(Map<GElement, GElement> link) {
+		source = link.get(source);
+		ArrayList<GElement> old = targets;
+		targets = new ArrayList<GElement>();
+		for(GElement e: old) targets.add(link.get(e));
 	}
 
 	@Override

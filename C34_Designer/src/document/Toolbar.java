@@ -67,6 +67,7 @@ public class Toolbar extends JPanel {
 
 	static public final String TIP_move = "Select and move element.";
 	static public final String TIP_remove = "Select element for remove it from document";
+	static public final String TIP_copy = "Select element for clone it with all its children.";
 	static public final String TIP_modify = "Select element for modification (change text, type, etc)";
 	public JLabel tip = new JLabel(TIP_move);
 

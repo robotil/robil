@@ -8,6 +8,7 @@ import java.awt.Graphics2D;
 import java.awt.Paint;
 import java.awt.Point;
 import java.awt.Stroke;
+import java.util.Map;
 import java.util.UUID;
 
 import javax.management.remote.TargetedNotification;
@@ -116,6 +117,9 @@ public abstract class GElement {
 	}
 	
 	static Dimension getTextSize(Graphics graphics, Font font, String text){
+		if(graphics==null || font == null){
+			System.out.println("EXECPTION");
+		}
 		FontMetrics metrics = graphics.getFontMetrics(font);
 		int hgt = metrics.getHeight();
 		int adv = metrics.stringWidth(text);
@@ -126,4 +130,12 @@ public abstract class GElement {
 		return getTextSize(graphics, graphics.getFont(), text);
 	}
 	abstract public void modify() ;
+	
+	abstract public GElement clone();
+	protected void cloneInit(GElement n){
+		n.property = property.clone();
+		n.view = ( n.view.clone() );
+		n.xmlElement = xmlElement;
+	}
+	abstract public void cloneReconnect(Map<GElement,GElement> link);
 }

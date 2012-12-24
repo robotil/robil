@@ -5,6 +5,7 @@ import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics2D;
 import java.awt.Point;
+import java.util.Map;
 
 import javax.swing.Icon;
 
@@ -93,5 +94,19 @@ public class Joint extends GElement implements Arrow.ArrayElement{
 	public void modify() {
 		
 	}
+
+	@Override
+	public GElement clone() {
+		Joint n = new Joint();
+		cloneInit(n);
+		n.array = array;
+		return n;
+	}
+
+	@Override
+	public void cloneReconnect(Map<GElement, GElement> link) {
+		array = (Arrow) link.get(array);
+	}
+	
 	
 }

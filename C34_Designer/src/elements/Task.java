@@ -13,6 +13,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.font.FontRenderContext;
 import java.awt.font.TextLayout;
+import java.util.Map;
 
 import javax.swing.Box;
 import javax.swing.BoxLayout;
@@ -273,7 +274,21 @@ public class Task extends GElement implements View.ChangesListener{
 		property.size = new Vec(getTextSize(view.graphics, font, getShortText())).add(new Vec(10,10));
 	}
 
+	@Override
+	public GElement clone() {
+		Task n = new Task();
+		cloneInit(n);
+		n.text = text;
+		n.type = type;
+		n.seqNumber = seqNumber;
+		return n;
+	}
 
+	@Override
+	public void cloneReconnect(Map<GElement, GElement> link) {
+		
+	}
+	
 	@Override
 	public void modify() {
 		ModifyDialog dlg = new ModifyDialog();

@@ -19,6 +19,7 @@ import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.Properties;
 import java.util.UUID;
 
@@ -90,6 +91,21 @@ public class Document extends JPanel {
 			a.getArray().targets.remove(el);
 		}
 	}
+	public void copyTree(GElement el){
+		ArrayList<GElement> targets = searchAllSubelements(el);
+		targets.add(el);
+		HashMap<GElement, GElement> link = new HashMap<GElement, GElement>();
+		for(GElement t : targets){
+			GElement n = t.clone();
+			link.put(t, n);
+			add(n);
+			n.getProperty().loc = n.getProperty().loc.add(new Vec(10,10));
+			n.getProperty().selected = false;
+		}
+		for(GElement t : targets){
+			link.get(t).cloneReconnect(link);
+		}
+	}
 	
 	public Document(BTDesigner mw){
 		this.mainWindow = mw;
@@ -123,8 +139,15 @@ public class Document extends JPanel {
 			}
 		}
 	}
+	public ArrayList<GElement> getReversed(ArrayList<GElement> original)
+	{
+		ArrayList<GElement> copy = new ArrayList<GElement>(original);
+		Collections.reverse(copy);
+		return copy;
+	}
 	public void paintElement(Graphics2D g, ArrayList<GElement> elements){
-		for(GElement el: elements){	
+		//for(GElement el: getReversed(elements)){	
+		for(GElement el: (elements)){	
 			el.paintElement(g);			
 		}
 	}
@@ -441,6 +464,7 @@ public class Document extends JPanel {
 	
 	public GElement.Creator creator = null;
 	public boolean removeElement = false;
+	public boolean copyElement = false;
 	public Modifier modifier = null;
 	public JLabel tip = null;
 	public final boolean cleanToolSelectionAfterUse = false;
@@ -469,6 +493,7 @@ public class Document extends JPanel {
 	public void toolSelectionClean(){
 		creator = null;
 		removeElement = false;
+		copyElement = false;
 		modifier = null;
 		if(tip!=null) tip.setText(Toolbar.TIP_move);
 	}
@@ -511,7 +536,7 @@ public class Document extends JPanel {
 		@Override
 		public void mousePressed(MouseEvent ev) {
 			mousePressed = ev.getPoint();
-			for(GElement el: elements){
+			for(GElement el: getReversed(elements)){
 				GElement e = el.underMouse(ev.getPoint());
 				if(e!=null){
 					selectedElement = e;
@@ -569,6 +594,11 @@ public class Document extends JPanel {
 			if(removeElement && selectedElement!=null){
 				remove(selectedElement);
 				if(cleanToolSelectionAfterUse) toolSelectionClean();
+			}
+			if(copyElement && selectedElement!=null){
+				copyTree(selectedElement);
+				//if(cleanToolSelectionAfterUse) 
+				toolSelectionClean();
 			}
 			if(modifier!=null && selectedElement!=null){
 				modifier.set(selectedElement);
