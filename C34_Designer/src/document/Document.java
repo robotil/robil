@@ -125,7 +125,7 @@ public class Document extends JPanel {
 	}
 	public void paintElement(Graphics2D g, ArrayList<GElement> elements){
 		for(GElement el: elements){	
-			el.paint(g);			
+			el.paintElement(g);			
 		}
 	}
 	public void paint(Graphics g){
@@ -138,10 +138,21 @@ public class Document extends JPanel {
 			riceOnViewChange();
 		}
 		renumberElements(elements);
+		hideCollapsed();
 		paintElement(g2d, arrays);
 		paintElement(g2d, elements);
 		if(selectedElement!=null) selectedElement.paint(g2d);
 		
+	}
+	
+	private void hideCollapsed(){
+		for(GElement e: elements) e.isVisiable = true;
+		for(GElement e: arrays) e.isVisiable = true;
+		for(GElement e: elements){
+			if(e.getProperty().collapsed){
+				for(GElement c : searchAllSubelements(e)) c.isVisiable=false;
+			}
+		}
 	}
 	
 	private void riceOnViewChange(){
@@ -227,6 +238,11 @@ public class Document extends JPanel {
 						lastX = nge.getProperty().loc.x = lastX+20;
 						lastY = nge.getProperty().loc.y = lastY;
 					}
+					if(e.hasAttribute("collapsed")){	
+						nge.getProperty().collapsed = Boolean.parseBoolean( e.getAttribute("collapsed") );	
+					}else{
+						nge.getProperty().collapsed = false;
+					}
 					if(e.hasAttribute("test_time")){	
 						nge.getProperty().test_time = Integer.parseInt( e.getAttribute("test_time") );
 					}
@@ -293,6 +309,11 @@ public class Document extends JPanel {
 					}else{
 						lastX = nge.getProperty().loc.x = lastX+20;
 						lastY = nge.getProperty().loc.y = lastY;
+					}
+					if(e.hasAttribute("collapsed")){	
+						nge.getProperty().collapsed = Boolean.parseBoolean( e.getAttribute("collapsed") );	
+					}else{
+						nge.getProperty().collapsed = false;
 					}
 					if(e.hasAttribute("test_time")){	
 						nge.getProperty().test_time = Integer.parseInt( e.getAttribute("test_time") );

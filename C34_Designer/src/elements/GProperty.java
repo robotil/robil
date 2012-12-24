@@ -11,6 +11,8 @@ public class GProperty {
 	public Vec size = new Vec(0,0);
 	public boolean selected = false;
 	
+	public boolean collapsed = false;
+	
 	public int test_time=Parameters.test_time;
 	public boolean test_result=Parameters.test_result;
 	
@@ -34,7 +36,7 @@ public class GProperty {
 	}
 	public String toStringForSTask(View v){
 		Vec l = loc.add(v.loc.scale(1/v.zoom));
-		return "x=\""+l.x+"\" y=\""+l.y+"\"";
+		return "x=\""+l.x+"\" y=\""+l.y+"\""+" collapsed=\""+(collapsed?"true":"false")+"\"";
 	}
 
 	public void setCenter(Vec p) {

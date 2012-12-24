@@ -20,6 +20,7 @@ import javax.swing.GroupLayout;
 import javax.swing.Icon;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
+import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JDialog;
 import javax.swing.JLabel;
@@ -27,6 +28,8 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 import javax.swing.SpringLayout;
+
+import org.w3c.dom.Element;
 
 public class Task extends GElement implements View.ChangesListener{
 
@@ -39,6 +42,8 @@ public class Task extends GElement implements View.ChangesListener{
 	public String type = TYPE_task;
 	public Font font = new Font("sansserif", Font.BOLD, 10);
 	public int seqNumber=0;
+	
+	
 	
 	public Task(){
 		property.size = new Vec(100,100);
@@ -142,7 +147,7 @@ public class Task extends GElement implements View.ChangesListener{
 		}
 		public void paint(Graphics2D g){
 			setBackgroundColor(g);
-			g.drawString("P", _x[0]+ size()/2, _y[0]-5);
+			//g.drawString("P", _x[0]+ size()/2, _y[0]-5);
 			//g.setPaint(new Color(127,255,212));
 			g.fillPolygon(_x, _y, size());
 			
@@ -159,13 +164,13 @@ public class Task extends GElement implements View.ChangesListener{
 			Vec t = new Vec(20,20).scale(view.zoom);
 			setBackgroundColor(g);
 			g.fillRoundRect(x, y, w, h, t.getIntX(), t.getIntY());
-			g.setStroke (new BasicStroke(
-				      2f, 
-				      BasicStroke.CAP_ROUND, 
-				      BasicStroke.JOIN_ROUND, 
-				      2f, 
-				      new float[] {6f}, 
-				      0f));
+//			g.setStroke (new BasicStroke(
+//				      2f, 
+//				      BasicStroke.CAP_ROUND, 
+//				      BasicStroke.JOIN_ROUND, 
+//				      2f, 
+//				      new float[] {6f}, 
+//				      0f));
 			g.setPaint(Color.black);
 			g.drawRoundRect(x, y, w, h, t.getIntX(), t.getIntY());
 		}
@@ -232,6 +237,18 @@ public class Task extends GElement implements View.ChangesListener{
 		Vec typesize = new Vec(20,20).scale(view.zoom);
 		Vec typeloc = getLocation().sub(typesize.scale(0.5));
 		
+		if(property.collapsed){
+			f = new Font(font.getFamily(), font.getStyle(), (int)(fontsize*0.8*view.zoom));
+			g.setStroke(new BasicStroke(1));
+			cnt = getLocation().add(getSizeInternal()).getPoint();
+			Vec dim = new Vec(10,10).scale(view.zoom);
+			g.setPaint(Color.white);
+			g.fillRect(cnt.x, cnt.y, dim.getIntX(),dim.getIntY());
+			g.setPaint(Color.blue);
+			g.drawRect(cnt.x, cnt.y, dim.getIntX(),dim.getIntY());
+			g.drawLine(cnt.x+dim.getIntX()/2, cnt.y+(int)(view.zoom*2), cnt.x+dim.getIntX()/2, cnt.y+dim.getIntY()-(int)(view.zoom*2));
+			g.drawLine(cnt.x+(int)(view.zoom*2), cnt.y+dim.getIntY()/2, cnt.x+dim.getIntX()-(int)(view.zoom*2), cnt.y+dim.getIntY()/2);
+		}
 		
 		gp.restore();
 	}
@@ -266,8 +283,9 @@ public class Task extends GElement implements View.ChangesListener{
 	
 	
 	class ModifyDialog extends JDialog {
+		private static final long serialVersionUID = 1739783395697186997L;
 
-	    public ModifyDialog() {
+		public ModifyDialog() {
 
 	        initUI();
 	    }
@@ -275,6 +293,7 @@ public class Task extends GElement implements View.ChangesListener{
 	    JComboBox cType = null;
 	    JTextField txtDbgTime = null;
 	    JComboBox txtDbgResult = null;
+	    JCheckBox chkCollapse = null;
 	    
 	    public final void initUI() {
 
@@ -291,6 +310,9 @@ public class Task extends GElement implements View.ChangesListener{
 	    	txtDbgTime = new JTextField(""+getProperty().test_time); 
 	    	txtDbgResult = new JComboBox(new String[]{"true","false"});
 	    	txtDbgResult.setSelectedItem(""+getProperty().test_result);
+
+	    	chkCollapse = new JCheckBox("Collapse");
+	    	chkCollapse.setSelected(getProperty().collapsed);
 	    	
         
 	        JButton close = new JButton("Close");
@@ -310,13 +332,13 @@ public class Task extends GElement implements View.ChangesListener{
 	        		try{
 	        			getProperty().test_time = Integer.parseInt(txtDbgTime.getText());
 	        			getProperty().test_result = Boolean.parseBoolean((String) txtDbgResult.getSelectedItem());
+	        			getProperty().collapsed = chkCollapse.isSelected();
 	        		}catch(Exception e){
 	        			e.printStackTrace();
 	        		}
 	        		dispose();
 	        	}
 	        });
-
 	        
 	        add(lbl1);
 	        add(txtName);
@@ -326,6 +348,8 @@ public class Task extends GElement implements View.ChangesListener{
 	        add(txtDbgTime);
 	        add(lbl4);
 	        add(txtDbgResult);
+	        
+	        if(type!=TYPE_task) add(chkCollapse);
 	        
 	        add(close);
 	        add(OK);
@@ -339,15 +363,18 @@ public class Task extends GElement implements View.ChangesListener{
 	        lbl4.setBounds(10,130, 100, 30);
 	        txtDbgResult.setBounds(120,130, 170, 30);
 	        
-	        close.setBounds(120,170, 80, 30);
-	        OK.setBounds(210,170, 80, 30);
+	        chkCollapse.setBounds(5,160, 100, 30);
+	        
+	        close.setBounds(120,200, 80, 30);
+	        OK.setBounds(210,200, 80, 30);
 
 	        setModalityType(ModalityType.APPLICATION_MODAL);
 
 	        setTitle("Change Task");
 	        setDefaultCloseOperation(DISPOSE_ON_CLOSE);
 	        setLocationRelativeTo(null);
-	        setSize(300, 230);
+	        //setSize(300, 230);
+	        setSize(300, 260);
 	    }
 	}
 	

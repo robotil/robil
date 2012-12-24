@@ -67,7 +67,7 @@ public class Decorator extends GElement implements ArrayElement, View.ChangesLis
 	
 	@Override
 	public void modify() {
-		String ip = JOptionPane.showInputDialog("Set Task name", text);
+		String ip = JOptionPane.showInputDialog("Set Decorator", text);
 		if(ip!=null && ip.trim().length()>0) text = ip;
 		onViewChange();
 	}
