@@ -163,7 +163,7 @@ public:
 
 //#define NODE_REMOVE_FROM_STACK(N) N->removeFromStack();
 //#define NODE_ADD_TO_STACK(N) {if(stack.get()){ N->setStack(stack); }}
-#define NODE_RETURN_IF_TERMINATED {if(_terminateSignaled){ return Result::New(false, info(_terminateDescription) );}}
+#define NODE_RETURN_IF_TERMINATED {if(_terminateSignaled){ return Result::New(false, Result::SYSTEM_ERROR_TERMINATED, info(_terminateDescription) );}}
 #define EMPTY if(false){}
 #define NODE_DESTRUCTOR(N) struct stract_##N{Node *self; Node::Ref node; public:stract_##N(Node* s, Node::Ref _n):self(s),node(_n){ } ~stract_##N(){ self->deleteChildNode(node); }} instance_##N(this, N);
 

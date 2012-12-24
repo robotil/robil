@@ -16,7 +16,7 @@ Result::Ref Seq::run(){
 
 	std::vector<BT> subs = bt.getSubtree();
 	if(subs.size()==0){
-		return Result::New(false, info("sequencer does not have children"));
+		return Result::New(false, Result::SYSTEM_ERROR+1, info("sequencer does not have children"));
 	}
 
 	checkTerminateSignal(l);
@@ -30,10 +30,10 @@ Result::Ref Seq::run(){
 
 		NODE_RETURN_IF_TERMINATED
 		if( res->value() == false ){
-			return Result::New(false, info(), res);
+			return Result::New(false, res->error_code(), info(), res);
 		}
 	}
-	return Result::New(true, info());
+	return Result::New(true, 0, info());
 }
 
 
