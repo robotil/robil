@@ -69,6 +69,45 @@ public class Arrow extends GElement {
 			return "Create an Arrow between to tasks. Fist, select source task and then select distination task.";
 		}
 	}
+	static public class Reconector extends GElement.Creator{
+		ArrayList<GElement> els = new ArrayList<GElement>();
+		Arrow inst = null;
+		public Reconector(Arrow inst){
+			this.inst = inst;
+		}
+		public GElement getInstance(){ return inst; }
+		public GElement newInstance(){
+			if(ready()==false) return null;
+			//Arrow a = new Arrow(els.get(0), els.get(1));
+			inst.source = els.get(0);
+			inst.targets.remove(inst.getTarget());
+			inst.add(els.get(1));
+			els.clear();
+			return inst;
+		}
+		public Icon getIcon(){
+			return null;
+		}
+		public boolean ready(){
+			return els.size()==2;
+		}
+		public boolean createOnEmptyPlace(){
+			return false;
+		}
+		public void add(GElement selectedElement) {
+			if(selectedElement instanceof Task == false) return;
+			if(els.size()==1 && els.get(0)==selectedElement) return;
+			if(els.size()<2)
+				els.add(selectedElement);
+		}
+		public String getToolbarName() {
+			return "Arrow Reconector";
+		}
+		@Override
+		public String toolTip() {
+			return "Reconect selected arrow. Fist, select source task and then select distination task.";
+		}
+	}
 	
 	static double line_y(Vec v1, Vec v2, double x){
 		return (v2.y-v1.y)/(v2.x-v1.x)*(x - v1.x) + v1.y;

@@ -11,6 +11,7 @@ import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 import javax.swing.KeyStroke;
 
+import document.actions.ArrowReconnectAction;
 import document.actions.CompileAction;
 import document.actions.CopyTreeAction;
 import document.actions.LoadAndOpenAction;
@@ -22,6 +23,7 @@ import document.actions.OpenTerminalAction;
 import document.actions.PointAction;
 import document.actions.PropertiesAction;
 import document.actions.RemoveAction;
+import document.actions.RemoveSubtreeAction;
 import document.actions.RunAction;
 import document.actions.SaveImageAction;
 import document.actions.SaveXMLAction;
@@ -191,6 +193,28 @@ public class Menubar extends JMenuBar {
 		menuItemRemove.setIcon(icon);
 		menuItemRemove.addActionListener(new RemoveAction(designer));
 		menu.add(menuItemRemove);
+
+		// remove Subtree
+		icon = new ImageIcon(getClass().getClassLoader().getResource(
+				"icons/remove.png"));
+		JMenuItem menuItemRemoveSubtree = new JMenuItem("Remove sub-tree", KeyEvent.VK_T);
+		menuItemRemoveSubtree.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_4,
+				ActionEvent.ALT_MASK));
+		menuItemRemoveSubtree.setToolTipText("sets mode of selector to remove subtree");
+		menuItemRemoveSubtree.setIcon(icon);
+		menuItemRemoveSubtree.addActionListener(new RemoveSubtreeAction(designer));
+		menu.add(menuItemRemoveSubtree);
+
+		// remove Subtree
+		//icon = new ImageIcon(getClass().getClassLoader().getResource(
+		//		"icons/remove.png"));
+		JMenuItem menuItemReconnect = new JMenuItem("Reconnect", KeyEvent.VK_C);
+		menuItemReconnect.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_5,
+				ActionEvent.ALT_MASK));
+		menuItemReconnect.setToolTipText("arrow reconnect");
+		//menuItemReconnect.setIcon(icon);
+		menuItemReconnect.addActionListener(new ArrowReconnectAction(designer));
+		menu.add(menuItemReconnect);
 
 		// modify
 		icon = new ImageIcon(getClass().getClassLoader().getResource(

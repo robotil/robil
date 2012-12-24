@@ -18,7 +18,11 @@ import org.w3c.dom.Element;
 
 public abstract class GElement {
 	
-	public UUID id = UUID.randomUUID();
+	public UUID id = getRandomUUID();
+	
+	public static UUID getRandomUUID(){
+		return UUID.randomUUID();
+	}
 	
 	static protected class GraphProp{
 		Graphics2D g;
