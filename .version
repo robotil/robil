@@ -1,5 +1,5 @@
-V0.0.0.20
-====================================================
+V0.0.0.21
+================================================
 C0_RobilTask     			0.2
 C0_Scripts     				0.3
 C11_Agent     				0.4
@@ -10,9 +10,10 @@ C23_ObjectRecognition     		0.1
 C24_ObstacleDetection     		0.1
 C25_GlobalPosition     			0.1
 C31_PathPlanner     			0.1
-C34_Designer     			0.2
-C34_Executer     			0.3
-C34_ExecuterLib     			0.1
+C34_BTExecuter     			0.1
+C34_Designer     			0.3
+C34_Executer     			0.4
+C41_BodyControl     			0.1
 C41_QuasiStaticWalking     		0.1
 C42_LocomotionAndStability     		0.1
 C43_LocalBodyPVA     			0.1
