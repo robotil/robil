@@ -25,9 +25,9 @@ public:
 };
 class BTTaskResult{
 public:
-	static const int SUCCESS_FAULT = 0;
-	static const int SUCCESS_OK = 1;
-	static const int SUCCESS_PLAN = 2;
+	static const int SUCCESS_FAULT = 1;
+	static const int SUCCESS_OK = 0;
+	static const int SUCCESS_PLAN = -1;
 	int32_t success;
 	std::string description;
 	std::string plan;

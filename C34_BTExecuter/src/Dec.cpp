@@ -15,7 +15,7 @@ Result::Ref Dec::run(){
 
 	std::vector<BT> subs = bt.getSubtree();
 	if(subs.size()!=1)
-		return Result::New(false, info("decorator has to have just one child"));
+		return Result::New(false, Result::SYSTEM_ERROR+1, info("decorator has to have just one child"));
 
 	checkTerminateSignal(l);
 	NODE_RETURN_IF_TERMINATED;
@@ -36,7 +36,7 @@ Result::Ref Dec::run(){
 	}
 
 	//Unreachable code.
-	return Result::New(false, info());
+	return Result::New(false, Result::SYSTEM_ERROR, info());
 }
 bool Dec::doit(){
 	return true;
@@ -63,25 +63,25 @@ bool Dec::done(Result::Ref res){
 }
 Result::Ref Dec::result(Result::Ref res){
 	if(bt_name=="!"){
-		return Result::New(!res->value(), info(), res);
+		return Result::New(!res->value(), res->error_code(), info(), res);
 	}
 
 	if(bt_name=="L"||bt_name=="!L"){
-		return Result::New(false, info(), res);
+		return Result::New(false, res->error_code(), info(), res);
 	}
 
 	if(bt_name=="!L!"||bt_name=="L!"){
-		return Result::New(true, info(), res);
+		return Result::New(true, res->error_code(), info(), res);
 	}
 
 	if(bt_name=="T"){
-		return Result::New(true, info(), res);
+		return Result::New(true, res->error_code(), info(), res);
 	}
 
 	if(bt_name=="F"){
-		return Result::New(false, info(), res);
+		return Result::New(false, res->error_code(), info(), res);
 	}
 
-	return Result::New(res->value(), info(), res);
+	return Result::New(res->value(), res->error_code(), info(), res);
 }
 

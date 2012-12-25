@@ -9,9 +9,9 @@
 #define _DEF_ROBIL_TASK
 
 namespace RobilTask{
-	static const int32_t FAULT = 0;
-	static const int32_t SUCCESS = 1;
-	static const int32_t PLAN=2;
+	static const int32_t FAULT = 1;
+	static const int32_t SUCCESS = 0;
+	static const int32_t PLAN=-1;
 }
 
 #endif // _DEF_ROBIL_TASK

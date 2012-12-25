@@ -13,6 +13,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.font.FontRenderContext;
 import java.awt.font.TextLayout;
+import java.util.Map;
 
 import javax.swing.Box;
 import javax.swing.BoxLayout;
@@ -37,6 +38,7 @@ public class Task extends GElement implements View.ChangesListener{
 	public final static String TYPE_selector = "selector";
 	public final static String TYPE_sequenser = "sequenser";
 	public final static String TYPE_parallel = "parallel";
+	public final static String TYPE_switch = "switch";
 	
 	public String text = "Noname";
 	public String type = TYPE_task;
@@ -155,6 +157,7 @@ public class Task extends GElement implements View.ChangesListener{
 			g.drawPolygon(_x, _y, size());
 			}
 	}
+
 	private class Sel extends Border{
 		int x,  y,  w,  h;
 		public Sel(int _x, int _y, int _w, int _h){
@@ -172,6 +175,27 @@ public class Task extends GElement implements View.ChangesListener{
 //				      new float[] {6f}, 
 //				      0f));
 			g.setPaint(Color.black);
+			g.drawRoundRect(x, y, w, h, t.getIntX(), t.getIntY());
+		}
+	}
+	
+	private class Swi extends Border{
+		int x,  y,  w,  h;
+		public Swi(int _x, int _y, int _w, int _h){
+			x=_x; y=_y; w=_w; h=_h;
+		}
+		public void paint(Graphics2D g){
+			Vec t = new Vec(20,20).scale(view.zoom);
+			setBackgroundColor(g);
+			g.fillRoundRect(x, y, w, h, t.getIntX(), t.getIntY());
+//			g.setStroke (new BasicStroke(
+//				      2f, 
+//				      BasicStroke.CAP_ROUND, 
+//				      BasicStroke.JOIN_ROUND, 
+//				      2f, 
+//				      new float[] {6f}, 
+//				      0f));
+			g.setPaint(Color.RED);
 			g.drawRoundRect(x, y, w, h, t.getIntX(), t.getIntY());
 		}
 	}
@@ -215,6 +239,7 @@ public class Task extends GElement implements View.ChangesListener{
 		if(type==TYPE_sequenser) border = new Seq(loc.x, loc.y, size.width, size.height);
 		if(type==TYPE_task) border = new Tsk(loc.x, loc.y, size.width, size.height);
 		if(type==TYPE_parallel) border = new Par(loc.x, loc.y, size.width, size.height);
+		if(type==TYPE_switch) border = new Swi(loc.x, loc.y, size.width, size.height);
 		border.paint(g);
 
 		int fontsize=font.getSize();
@@ -273,7 +298,21 @@ public class Task extends GElement implements View.ChangesListener{
 		property.size = new Vec(getTextSize(view.graphics, font, getShortText())).add(new Vec(10,10));
 	}
 
+	@Override
+	public GElement clone() {
+		Task n = new Task();
+		cloneInit(n);
+		n.text = text;
+		n.type = type;
+		n.seqNumber = seqNumber;
+		return n;
+	}
 
+	@Override
+	public void cloneReconnect(Map<GElement, GElement> link) {
+		
+	}
+	
 	@Override
 	public void modify() {
 		ModifyDialog dlg = new ModifyDialog();
@@ -305,7 +344,7 @@ public class Task extends GElement implements View.ChangesListener{
 	    	JLabel lbl4 = new JLabel("Dbg-Result ");
 	    	
 	    	txtName = new JTextField(text); txtName.selectAll();
-	    	cType = new JComboBox(new String[]{TYPE_sequenser,TYPE_selector,TYPE_task, TYPE_parallel});
+	    	cType = new JComboBox(new String[]{TYPE_sequenser,TYPE_selector,TYPE_task, TYPE_parallel, TYPE_switch});
 	    	cType.setSelectedItem(type);
 	    	txtDbgTime = new JTextField(""+getProperty().test_time); 
 	    	txtDbgResult = new JComboBox(new String[]{"true","false"});

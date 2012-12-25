@@ -25,7 +25,7 @@ Result::Ref Par::run(){
 
 		std::vector<BT> subs = bt.getSubtree();
 		if(subs.size()==0){
-			return Result::New(false, info("parallel does not have children"));
+			return Result::New(false, Result::SYSTEM_ERROR+1, info("parallel does not have children"));
 		}
 
 		checkTerminateSignal(l);
@@ -50,9 +50,9 @@ Result::Ref Par::run(){
 
 	NODE_RETURN_IF_TERMINATED
 	if(res.get())
-		return Result::New(res->value(), info(), res);
+		return Result::New(res->value(), res->error_code(), info(), res);
 	else
-		return Result::New(false, info("No results gotten from children"));
+		return Result::New(false, Result::SYSTEM_ERROR+1, info("No results gotten from children"));
 
 }
 

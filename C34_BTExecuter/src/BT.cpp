@@ -37,17 +37,23 @@
 	}
 	int BT::getDBGTimeInterval()const{
 		try{
-			return pt.get<int>("<xmlattr>.dbg_time");
+			return pt.get<int>("<xmlattr>.test_time");
 		}catch(boost::property_tree::ptree_bad_path& e){}
 		return 0;
 	}
-	bool BT::getDBGResult()const{
+	int BT::getDBGResult()const{
 		try{
-			std::string v = pt.get<std::string>("<xmlattr>.dbg_result");
+			std::string v = pt.get<std::string>("<xmlattr>.test_result");
 			std::transform(v.begin(), v.end(), v.begin(), ::tolower);
-			return v=="true";
+			if(v.size()==0) return 0;
+			else if( v=="true" ) return 0;
+			else if( v=="false") return 1;
+			else if( v[0]=='<') return 0;
+			else{
+				std::stringstream s; s<<v; int i; s>>i; return i;
+			}
 		}catch(boost::property_tree::ptree_bad_path& e){}
-		return true;
+		return 0;
 	}
 	std::string BT::getRootType()const{
 		return type;

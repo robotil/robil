@@ -105,7 +105,7 @@ inline bool endWith(const std::string& line, const std::string& t){
 	}
 	return true;
 }
-
+typedef std::map<std::string,std::string> Arguments;
 struct Function{
 private:
 	bool undef;
@@ -149,10 +149,25 @@ static Function parse(std::string line){
 	}
 	return f;
 }
-static map<string,string> parseParameters(std::string line){
+static map<string,string> parseFunctionArgumens(std::string line){
 	stringstream sline; sline<<"_("<<line<<")";
 	Function f = parse(sline.str());
 	return f.values;
+}
+
+static Arguments parseArguments(std::string line){
+	std::map<std::string,std::string> args;
+	vector<string> vars = split(line,",");
+	for(size_t i=0;i<vars.size();i++){
+		if(trim(vars[i])=="") continue;
+		vector<string> pair;
+		int c = split(vars[i], pair, "=");
+		trimAll(pair);
+		if(c==1){ stringstream s; s<<"#"<<i; args[s.str()] = pair[0]; }
+		else if(c==2){ args[pair[0]]=pair[1]; }
+		else continue;
+	}
+	return args;
 }
 
 }

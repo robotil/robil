@@ -69,7 +69,7 @@ public:
 	std::string getID()const;
 	bool hasID()const;
 	int getDBGTimeInterval()const;
-	bool getDBGResult()const;
+	int getDBGResult()const;
 	std::string getRootType()const;
 
 	void print(Logger& std_cout, std::string tab)const;

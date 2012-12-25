@@ -15,10 +15,10 @@ Result::Ref UnknownNode::run(){
 
 	std::vector<BT> subs = bt.getSubtree();
 	if(subs.size()>1){
-		return Result::New(false, info());
+		return Result::New(false, Result::SYSTEM_ERROR+1, info());
 	}
 	if(subs.size()<1){
-		return Result::New(true, info());
+		return Result::New(true, 0, info());
 	}
 
 	checkTerminateSignal(l);
@@ -30,5 +30,5 @@ Result::Ref UnknownNode::run(){
 	Result::Ref res = runChildNode(_runningNode,l);
 
 	NODE_RETURN_IF_TERMINATED
-	return Result::New(res->value(), info(), res);
+	return Result::New(res->value(), res->error_code(), info(), res);
 }
