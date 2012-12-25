@@ -43,9 +43,12 @@ Result::Ref Task::run(){
 
 	if(debug_energy.get() && !taskproxy_contains_this_task){
 		long time = bt.getDBGTimeInterval();
-		bool result = bt.getDBGResult();
-		IF_DEBUG log<<"tsk["<<bt.getRootName()<<"] debug energy: time="<<time<<", ret="<<(result?"true":"false")
+		int result = bt.getDBGResult();
+		IF_DEBUG{
+			std::stringstream _res; _res<<(result==0?"true":"false"); if(result>0) _res<<"("<<result<<")";
+			log<<"tsk["<<bt.getRootName()<<"] debug energy: time="<<time<<", ret="<<_res.str()
 				<<", proxy table "<<(!taskproxy_contains_this_task?"does not contain":"contains")<<" task name";
+		}
 
 		if(time>=0){
 			debug_energy->setContinuously(time);
@@ -56,7 +59,7 @@ Result::Ref Task::run(){
 
 		NODE_RETURN_IF_TERMINATED
 		IF_DEBUG log<<"tsk["<<bt.getRootName()<<"] done";
-		return Result::New(result, info("Debugging simulation"));
+		return Result::New(result==0, result, info("Debugging simulation"));
 
 	}else{
 		IF_DEBUG log<<"tsk["<<bt.getRootName()<<"]: search proxy for task";
@@ -76,7 +79,7 @@ Result::Ref Task::run(){
 			if(_terminateSignaled){
 				IF_DEBUG log<<"tsk["<<bt.getRootName()<<"]: task terminated by Executer.";
 				proxy->terminate();
-				return Result::New(false, info(_terminateDescription) );
+				return Result::New(false, Result::SYSTEM_ERROR_TERMINATED, info(_terminateDescription) );
 			}else{
 				IF_DEBUG log<<"tsk["<<bt.getRootName()<<"]: task done.";
 				BTTaskResult task_result = proxy->getResult();
@@ -92,7 +95,7 @@ Result::Ref Task::run(){
 
 						if(rbt.getRootType()!="plan"){
 							_terminateDescription = "gotten plan xml does not valid.";
-							return Result::New(false, info(_terminateDescription) );
+							return Result::New(false, 1, info(_terminateDescription) );
 						}
 
 						_runningNode = createChildNode(rbt);
@@ -101,11 +104,14 @@ Result::Ref Task::run(){
 						Result::Ref res = runChildNode(_runningNode,l);
 
 						NODE_RETURN_IF_TERMINATED
-						return Result::New(res->value(), info(), res);
+						return Result::New(res->value(), res->error_code(), info(), res);
 
 					}break;
 					default:
-						return Result::New(task_result.success!=BTTaskResult::SUCCESS_FAULT, info(_terminateDescription) );
+						return Result::New(
+								task_result.success==BTTaskResult::SUCCESS_OK || task_result.success==BTTaskResult::SUCCESS_PLAN,
+								task_result.success,
+								info(_terminateDescription) );
 				}
 			}
 		}else{
@@ -114,7 +120,7 @@ Result::Ref Task::run(){
 	}
 
 	NODE_RETURN_IF_TERMINATED
-	return Result::New(true, info());
+	return Result::New(true, 0, info());
 
 }
 
