@@ -185,9 +185,10 @@ public class Task extends GElement implements View.ChangesListener{
 			x=_x; y=_y; w=_w; h=_h;
 		}
 		public void paint(Graphics2D g){
-			Vec t = new Vec(20,20).scale(view.zoom);
+			Vec t = new Vec(5,5).scale(view.zoom);
+			if(t.y>5)t.y=5;
 			setBackgroundColor(g);
-			g.fillRoundRect(x, y, w, h, t.getIntX(), t.getIntY());
+			g.fillRect(x, y, w, h);
 //			g.setStroke (new BasicStroke(
 //				      2f, 
 //				      BasicStroke.CAP_ROUND, 
@@ -195,8 +196,32 @@ public class Task extends GElement implements View.ChangesListener{
 //				      2f, 
 //				      new float[] {6f}, 
 //				      0f));
-			g.setPaint(Color.RED);
-			g.drawRoundRect(x, y, w, h, t.getIntX(), t.getIntY());
+			g.setPaint(Color.black);
+			g.drawRect(x, y, w, h);
+			
+			int sw, k, d=0;
+			if( w >= 5*5){
+				int kk, nn; for( kk=3, nn=3; w/kk >=5; nn=kk,kk+=2 );
+				k = Math.abs(w%kk)>Math.abs(w%nn) ? nn : kk;
+				d = w%k;
+			}else{
+				k=5;
+			}
+			sw = w/k;
+			int di=1;//(d/(k/2));
+						
+			int[] _x = new int[k*2];	int[] _y = new int[k*2];
+			_x[0]=x;
+			for(int i=1;i<k;i+=1){	_x[i*2]=_x[i*2-2]+sw;	if(d>0){ _x[i*2]+= di; d-=di; }	}
+			for(int i=0;i<k-1;i+=1){	_x[1+i*2]=_x[1+i*2+1];	}
+			for(int i=0;i<k;i+=1){	_y[i*2]=i%2==0?y+h:y+h+(int)(t.y);	}
+			for(int i=0;i<k-1;i+=1){	_y[1+i*2]=_y[1+i*2-1];	}
+			_x[k*2-1]=x+w;	_y[k*2-1]=y+h;
+			
+			setBackgroundColor(g);
+			g.fillPolygon(_x, _y, _x.length);
+			g.setPaint(Color.black);
+			g.drawPolygon(_x, _y, _x.length);
 		}
 	}
 	private class Tsk extends Border{
@@ -379,24 +404,23 @@ public class Task extends GElement implements View.ChangesListener{
 	        	}
 	        });
 	        
-	        add(lbl1);
-	        add(txtName);
-	        add(lbl2);
-	        add(cType);
-	        add(lbl3);
-	        add(txtDbgTime);
-	        add(lbl4);
-	        add(txtDbgResult);
+	        add(lbl1); add(txtName);
+	        add(lbl2); add(cType);
 	        
-	        if(type!=TYPE_task) add(chkCollapse);
+	        if(type!=TYPE_task){
+	        	add(chkCollapse);
+	        }else{
+	        	add(lbl3); add(txtDbgTime);
+	        	add(lbl4); add(txtDbgResult);	        	
+	        }
 	        
-	        add(close);
-	        add(OK);
+	        add(close); add(OK);
 	        
 	        lbl1.setBounds(10,10, 100, 30);
 	        txtName.setBounds(120,10, 170, 30);
 	        lbl2.setBounds(10,50, 100, 30);
 	        cType.setBounds(120,50, 170, 30);
+	        
 	        lbl3.setBounds(10,90, 100, 30);
 	        txtDbgTime.setBounds(120,90, 170, 30);
 	        lbl4.setBounds(10,130, 100, 30);
