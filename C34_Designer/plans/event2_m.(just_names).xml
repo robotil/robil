@@ -7,7 +7,7 @@
                      <tsk name="ObstacleDetection" />
                      <tsk name="PathPlanning" />
                </par>
-               <par name="@2"> 
+               <par name="MissionProgress"> 
                      <tsk name="Monitor(target=LiveLock)" />
                   <dec name="!L!"> 
                         <seq name="Mission"> 
@@ -15,14 +15,14 @@
                               <par name="@3"> 
                                     <tsk name="Monitor(target=Falling)" />
                                  <dec name="!L!"> 
-                                       <seq name="@4"> 
+                                       <seq name="SearchObjectAndGo"> 
                                              <tsk name="SearchObject(target=A)" />
                                              <par name="@5"> 
                                                    <tsk name="TrackObject(target=A)" />
-                                                   <seq name="@6"> 
+                                                   <seq name="SearchPathAndGo"> 
                                                          <tsk name="PathPlanningFocus(target=A)" />
                                                          <tsk name="TurnTo(target=A)" />
-                                                         <par name="@7"> 
+                                                         <par name="OperatorCheckPoint"> 
                                                             <dec name="L"> 
                                                                   <seq name="Stabilization"> 
                                                                         <tsk name="Monitor(target=Stable)" />
@@ -30,25 +30,23 @@
                                                                   </seq>
                                                             </dec>
                                                             <dec name="T"> 
-                                                                  <seq name="@8"> 
-                                                                        <par name="TimeControl"> 
-                                                                              <seq name="OperatorRequest"> 
-                                                                                    <tsk name="PushHMI(data=panoramic_image)" />
-                                                                                    <tsk name="PushHMI(data=occupancy_grid)" />
-                                                                                    <tsk name="PushHMI(data=path)" />
-                                                                                    <tsk name="HMIResponce" />
-                                                                              </seq>
-                                                                              <tsk name="Monitor(target=Timeout)" />
-                                                                        </par>
-                                                                  </seq>
+                                                                  <par name="TimeControl"> 
+                                                                        <seq name="OperatorRequest"> 
+                                                                              <tsk name="PushHMI(data=panoramic_image)" />
+                                                                              <tsk name="PushHMI(data=occupancy_grid)" />
+                                                                              <tsk name="PushHMI(data=path)" />
+                                                                              <tsk name="HMIResponce" />
+                                                                        </seq>
+                                                                        <tsk name="Monitor(target=Timeout)" />
+                                                                  </par>
                                                             </dec>
                                                          </par>
                                                          <tsk name="DirectSensorsAtNearPathArea" />
                                                          <tsk name="UpdateLocalPathToAllowThreading" />
-                                                         <swi name="@9"> 
+                                                         <swi name="Move"> 
                                                                <par name="AdvanceByWalkingAlongPath"> 
                                                                      <tsk name="FollowPath" />
-                                                                     <par name="@10"> 
+                                                                     <par name="Exceptions"> 
                                                                         <dec name="F:1"> 
                                                                               <tsk name="whilePlaceToThreadIn" />
                                                                         </dec>
@@ -73,17 +71,15 @@
                                                                      <tsk name="Stop" />
                                                                      <tsk name="DirectSensorsAt270ForwardSection" />
                                                                      <tsk name="PlanDetour" />
-                                                                     <par name="@11"> 
+                                                                     <par name="OperatorCheckPoint"> 
                                                                         <dec name="T"> 
-                                                                              <seq name="@12"> 
-                                                                                    <par name="TimeControl"> 
-                                                                                          <seq name="OperatorRequest"> 
-                                                                                                <tsk name="PushHMI(data=panoramic_image)" />
-                                                                                                <tsk name="HMIResponce" />
-                                                                                          </seq>
-                                                                                          <tsk name="Monitor(target=Timeout)" />
-                                                                                    </par>
-                                                                              </seq>
+                                                                              <par name="TimeControl"> 
+                                                                                    <seq name="OperatorRequest"> 
+                                                                                          <tsk name="PushHMI(data=panoramic_image)" />
+                                                                                          <tsk name="HMIResponce" />
+                                                                                    </seq>
+                                                                                    <tsk name="Monitor(target=Timeout)" />
+                                                                              </par>
                                                                         </dec>
                                                                         <dec name="L"> 
                                                                               <seq name="Stabilization"> 
@@ -102,7 +98,7 @@
                                                                      <tsk name="TurnTo(target=A)" />
                                                                      <tsk name="DirectSensorsAt270ForwardSection" />
                                                                      <tsk name="PlanDetour" />
-                                                                     <par name="@13"> 
+                                                                     <par name="OperatorCheckPoint"> 
                                                                         <dec name="L"> 
                                                                               <seq name="Stabilization"> 
                                                                                     <tsk name="Monitor(target=Stable)" />
@@ -110,20 +106,18 @@
                                                                               </seq>
                                                                         </dec>
                                                                         <dec name="T"> 
-                                                                              <seq name="@14"> 
-                                                                                    <par name="TimeControl"> 
-                                                                                          <seq name="OperatorRequest"> 
-                                                                                                <tsk name="PushHMI(data=panoramic_image)" />
-                                                                                                <tsk name="HMIResponce" />
-                                                                                          </seq>
-                                                                                          <tsk name="Monitor(target=Timeout)" />
-                                                                                    </par>
-                                                                              </seq>
+                                                                              <par name="TimeControl"> 
+                                                                                    <seq name="OperatorRequest"> 
+                                                                                          <tsk name="PushHMI(data=panoramic_image)" />
+                                                                                          <tsk name="HMIResponce" />
+                                                                                    </seq>
+                                                                                    <tsk name="Monitor(target=Timeout)" />
+                                                                              </par>
                                                                         </dec>
                                                                      </par>
                                                                </seq>
                                                                <seq name="NoSolution"> 
-                                                                     <par name="@15"> 
+                                                                     <par name="OperatorControlPoint"> 
                                                                         <dec name="L"> 
                                                                               <seq name="Stabilization"> 
                                                                                     <tsk name="Monitor(target=Stable)" />
@@ -131,15 +125,13 @@
                                                                               </seq>
                                                                         </dec>
                                                                         <dec name="T"> 
-                                                                              <seq name="@16"> 
-                                                                                    <par name="TimeControl"> 
-                                                                                          <seq name="OperatorRequest"> 
-                                                                                                <tsk name="PushHMI(data=panoramic_image)" />
-                                                                                                <tsk name="HMIResponce" />
-                                                                                          </seq>
-                                                                                          <tsk name="Monitor(target=Timeout)" />
-                                                                                    </par>
-                                                                              </seq>
+                                                                              <par name="TimeControl"> 
+                                                                                    <seq name="OperatorRequest"> 
+                                                                                          <tsk name="PushHMI(data=panoramic_image)" />
+                                                                                          <tsk name="HMIResponce" />
+                                                                                    </seq>
+                                                                                    <tsk name="Monitor(target=Timeout)" />
+                                                                              </par>
                                                                         </dec>
                                                                      </par>
                                                                </seq>
