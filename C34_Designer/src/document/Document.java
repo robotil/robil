@@ -56,7 +56,7 @@ public class Document extends JPanel {
 	public ArrayList<GElement> arrays = new ArrayList<GElement>();
 	public ArrayList<GElement> elements = new ArrayList<GElement>();
 	public View view = new View();
-	public TaskDescription task_desc = null;
+	public TaskDescription task_description = null;
 	
 	public BTDesigner mainWindow = null;
 
@@ -129,8 +129,10 @@ public class Document extends JPanel {
 		addMouseWheelListener(mh);
 	
 		try {
-			task_desc = new TaskDescription(Parameters.path_to_description);
+			task_description = new TaskDescription(Parameters.path_to_description);
 		} catch (Exception e) {
+			System.out.println("WARNING: Can't find or open task description file. It's not a critical error.");
+			System.err.println("NOT CRITICAL : Print stack and exception name (for debug purposes only): ");
 			e.printStackTrace();
 		}
 	}
