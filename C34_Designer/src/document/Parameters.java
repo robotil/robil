@@ -9,4 +9,6 @@ public class Parameters {
 	public static String path_to_lookup = "./plans/lookup.xml";
 	public static String path_to_address = "./plans/TaskList.xml";
 	public static String path_to_description = "./plans/TaskDescriptions.xml";
+	public static boolean enableLinkConnection = true;
+	public static boolean enableTaskIdRegeneration = false;
 }
