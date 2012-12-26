@@ -19,6 +19,7 @@ CPP_SRCS += \
 ../src/Result.cpp \
 ../src/Sel.cpp \
 ../src/Seq.cpp \
+../src/Swi.cpp \
 ../src/Task.cpp \
 ../src/TaskProxyTableXML.cpp \
 ../src/TestTaskProxyTable.cpp \
@@ -41,6 +42,7 @@ OBJS += \
 ./src/Result.o \
 ./src/Sel.o \
 ./src/Seq.o \
+./src/Swi.o \
 ./src/Task.o \
 ./src/TaskProxyTableXML.o \
 ./src/TestTaskProxyTable.o \
@@ -63,6 +65,7 @@ CPP_DEPS += \
 ./src/Result.d \
 ./src/Sel.d \
 ./src/Seq.d \
+./src/Swi.d \
 ./src/Task.d \
 ./src/TaskProxyTableXML.d \
 ./src/TestTaskProxyTable.d \
