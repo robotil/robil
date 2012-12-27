@@ -2,6 +2,7 @@ package document.actions;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.File;
 
 import javax.swing.JOptionPane;
 
@@ -9,6 +10,7 @@ import terminal.communication.Utils;
 
 import document.BTDesigner;
 import document.Document;
+import document.Parameters;
 
 public class RunAction extends AbstractDesignerAction implements ActionListener {
 
@@ -29,6 +31,17 @@ public class RunAction extends AbstractDesignerAction implements ActionListener 
 	private void runPlan() {
 		Document doc = getActiveTab().doc;
 		String fileName = doc.getShortFilePath();
+		if(Parameters.path_to_plans_on_executer.equals("{LOCALPATH}")){
+			fileName = doc.getAbsoluteFilePath();
+		}else
+		if(Parameters.path_to_plans_on_executer.equals("{FILENAME}")){
+			
+		}else
+		if(Parameters.path_to_plans_on_executer.contains("{FILENAME}")){
+			fileName = Parameters.path_to_plans_on_executer.replace("{FILENAME}", doc.getShortFilePath());
+		}else{
+			fileName = Parameters.path_to_plans_on_executer+File.separator+doc.getShortFilePath();
+		}
 		
 		System.out.println("RUN PLAN FILE : "+fileName);
 		
@@ -37,7 +50,7 @@ public class RunAction extends AbstractDesignerAction implements ActionListener 
 			JOptionPane
 					.showMessageDialog(
 							null,
-							"No plan file selected.\nPlease verify that your last changes are saved",
+							"No plan file selected.\nPlease verify that your last changes are compiled",
 							"Run Plan", JOptionPane.INFORMATION_MESSAGE);
 			return;
 		}

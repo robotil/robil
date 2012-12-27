@@ -69,6 +69,10 @@ public class PropertiesXmlHandler {
 				Parameters.path_to_address = new String(value);
 			} else if (key.equals("path_to_description")) {
 				Parameters.path_to_description = new String(value);
+			} else if (key.equals("enableLinkConnection")) {
+				Parameters.enableLinkConnection = Boolean.parseBoolean(value);
+			} else if (key.equals("enableTaskIdRegeneration")) {
+				Parameters.enableTaskIdRegeneration = Boolean.parseBoolean(value);
 			} else {
 				System.err.println("Error: unknown field in " + path);
 			}
@@ -155,8 +159,12 @@ public class PropertiesXmlHandler {
 				Parameters.path_to_lookup = new String(value);
 			} else if (name.equals("path_to_address")) {
 				Parameters.path_to_address = new String(value);
-			} else if (name.equals("path_to_description")) {
-				Parameters.path_to_description = new String(value);
+			} else if (name.equals("path_to_address")) {
+				Parameters.path_to_address = new String(value);
+			} else if (name.equals("enableLinkConnection")) {
+				Parameters.enableLinkConnection = Boolean.parseBoolean(value);
+			} else if (name.equals("enableTaskIdRegeneration")) {
+				Parameters.enableTaskIdRegeneration = Boolean.parseBoolean(value);
 			}
 		}
 	}
