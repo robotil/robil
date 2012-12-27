@@ -24,19 +24,24 @@ rosbuild_gensrv()
 #common commands for building c++ executables and libraries
 #rosbuild_add_library(${PROJECT_NAME} src/example.cpp)
 #target_link_libraries(${PROJECT_NAME} another_library)
-#rosbuild_add_boost_directories()
 #rosbuild_link_boost(${PROJECT_NAME} thread)
 #rosbuild_add_executable(example examples/example.cpp)
 #target_link_libraries(example ${PROJECT_NAME})
-
-
-#find_package( PCL 1.5 REQUIRED )
-
-#include_directories(${PCL_INCLUDE_DIRS})
-#link_directories(${PCL_LIBRARY_DIRS})
-#add_definitions(${PCL_DEFINITIONS})
 rosbuild_add_boost_directories()
-find_package(OpenCV REQUIRED)
-rosbuild_add_executable(c22 src/C22_Node.cpp)
-rosbuild_link_boost(c22 thread signals)
-target_link_libraries(c22 ${OpenCV_LIBS})
+find_package( PCL 1.5 REQUIRED )
+
+include_directories(${PCL_INCLUDE_DIRS})
+link_directories(${PCL_LIBRARY_DIRS})
+add_definitions(${PCL_DEFINITIONS})
+
+
+rosbuild_add_library(pclPlane src/pclPlane.cpp)
+rosbuild_add_library(MPlane src/MPlane.cpp)
+rosbuild_add_library(MapSquare src/MapSquare.cpp)
+target_link_libraries(MapSquare MPlane)
+rosbuild_add_library(MapMatrix src/MapMatrix.cpp)
+target_link_libraries(MapMatrix pclPlane MPlane MapSquare)
+rosbuild_add_executable(C22 src/C22_Node.cpp)
+target_link_libraries(C22 MapMatrix ${PCL_LIBRARIES})
+rosbuild_link_boost(C22 thread)
+rosbuild_add_executable(C22_test src/C22_Test.cpp)
