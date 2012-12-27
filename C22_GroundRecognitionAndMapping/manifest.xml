@@ -1,21 +1,21 @@
 <package>
-  <description brief="C21_VisionAndLidar">
+  <description brief="C22_GroundRecognitionAndMapping">
 
-     C21_VisionAndLidar
+     C22_GroundRecognitionAndMapping
 
   </description>
   <author>Lar</author>
   <license>BSD</license>
   <review status="unreviewed" notes=""/>
-  <url>http://ros.org/wiki/C21_VisionAndLidar</url>
   <depend package="roscpp"/>
   <depend package="std_msgs"/>
   <depend package="sensor_msgs"/>
   <depend package="rospy"/>
-  <depend package="opencv2"/>
-  <depend package="cv_bridge"/>
+  <depend package="nav_msgs"/>
+  <depend package="message_filters"/>
   <depend package="image_transport"/>
-  <depend package="C0_RobilTask"/>
+  <depend package="pcl_ros"/>
+  <depend package="pcl"/>
 </package>
 
 
