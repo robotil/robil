@@ -1,0 +1,94 @@
+def root {
+	event2{
+		InitialDismountedTraversabilityMission
+		||{
+			||Perception{
+				LocalizationTrack
+				ObstacleDetection
+				PathPlanning
+			}
+			||{
+				Monitor(target=LiveLock)
+				<!L!>Mission{
+					StandUp
+					||{
+						Monitor(target=Falling)
+						<!L!>{
+							SearchObject(target=A)
+							||{
+								TrackObject(target=A)
+								{
+									PathPlanningFocus(target=A)
+									TurnTo(target=A)
+									OperatorControlPoint(data=[panoramic_image,occupancy_grid,path])
+									DirectSensorsAtNearPathArea
+									UpdateLocalPathToAllowThreading
+									??{
+										||AdvanceByWalkingAlongPath{
+											FollowPath
+											||{
+												<F:1>whilePlaceToThreadIn
+												<F:2>whileNoObstacles
+												<F:3>whilePathSolution
+												<F:4>whileSolution
+												<F:4>untilOperatorIntervention
+												<F:4>untilSpeedAveregeIsLowerThen(kmh=?)
+											}
+										}
+										1 NoPlaceToTreadIn{
+											Stop
+											Replanning
+										}
+										2 Obstacle{
+											AdjustPathPlan
+										}
+										3 NoPathSolution{
+											DirectSensorsAt270RearSection
+											GoBackAlongPath(distance=?)
+											TurnTo(target=A)
+											Replanning
+										}
+										4 NoSolution{
+											OperatorControlPoint(data=[panoramic_image])
+										}
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+}
+
+def OperatorControlPoint{
+	||{
+		<L>Stabilization{
+			Monitor(target=Stable)
+			PostureControl(pose=stabilization)
+		}
+		<T>{
+			||TimeControl{
+				OperatorRequest{
+					For(OperatorControlPoint.data){
+						PushHMI(data=$[OperatorControlPoint.data#])
+					}
+					HMIResponce
+				}
+				Monitor(target=Timeout)
+			}
+		}
+	}
+}
+
+def Replanning{
+	DirectSensorsAt270ForwardSection
+	PlanDetour
+	OperatorControlPoint(data=[panoramic_image])
+}
+
+
+
+
+
