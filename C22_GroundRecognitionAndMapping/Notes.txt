@@ -10,6 +10,7 @@ test with
 
 rosrun C22_GroundRecognitionAndMapping C22_test
 
+it is advised to look at the actual pointcloud using rvis in order to get a better image of the mapping
 
 Known Bugs:
 ==========
