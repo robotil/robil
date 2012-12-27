@@ -1,0 +1,12 @@
+C45 – Posture Control
+---------------------------------
+C34C45_PM: Posture Mode.
+1 – Stand in place
+2 – Turn to object
+C34C44_PSU: Posture State Update
+1 - maintain stability in current position
+2 - new direction to rotate body to
+C45C0_EVE: Posture Events  
+	1 - Stand in place success. [0 1]
+	2 – Turn to object success. [0 1]
+C22C45_SSL:  Current position Surface Slope.
