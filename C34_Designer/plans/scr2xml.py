@@ -200,6 +200,10 @@ def compileXml( TAB, text, func, repl):
 				repl[args+'#']=0
 				print tab+"<!-- "+'FOR '+' '+args+' -->'
 				return tab+"<!-- "+'DONE'+' '+args+' -->'+ret
+			elif fname.upper().find('IF')==0 :
+				repl[args+'#']=0
+				print tab+"<!-- "+'IF '+' '+args+' -->'
+				return tab+"<!-- "+'ENDIF'+' '+args+' -->'+ret
 			else:
 				typ = ''
 				if fname.find('??')==0 : typ = 'swi'
@@ -255,6 +259,10 @@ def compileXml( TAB, text, func, repl):
 				if args in repl:
 					for x in repl[args].split(','):
 						compileXml( TAB, ttt, func, repl)
+			elif fname.upper().find('IF')==0:
+				args_k,args_v = args.split('=')
+				if args_k in repl and repl[args_k]==args_v:
+					compileXml( TAB, ttt, func, repl)
 			else:
 				compileXml( TAB, ttt, func, repl)
 			print tg
