@@ -1,0 +1,25 @@
+provides a 2d map where each cell represents a 25 cm square
+
+How to Check:
+============
+run the node with the DRC simulation
+
+rosrun C22_GroundRecognitionAndMapping C22
+
+test with
+
+rosrun C22_GroundRecognitionAndMapping C22_test
+
+
+Known Bugs:
+==========
+
+
+
+Known Limitations:
+=================
+
+
+
+
+
