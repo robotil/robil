@@ -45,9 +45,7 @@ public:
 		  pos_sub(nh_,"ground_truth_odom",1),
 		  sync(MySyncPolicy(10), imu_sub, pos_sub)
 	  {
-		  ROS_INFO("before subscribing\n");
 		  sync.registerCallback( boost::bind( &C25_Node::callback, this, _1, _2 ) );
-		  ROS_INFO("finished subscribing\n");
 		  c25_publisher=nh_.advertise<C25_GlobalPosition::C25C0_ROP>("C25/publish",100);
 		  c25_service=nh_.advertiseService("C25/service",&C25_Node::proccess,this);
 		  ROS_INFO("service on\n");

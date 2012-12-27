@@ -8,7 +8,7 @@ using namespace std;
 
 int main(int argc, char **argv)
 {
-  ros::init(argc, argv, "c21_pr2_tester");
+  ros::init(argc, argv, "C25_test");
   ros::NodeHandle n;
   ros::ServiceClient client = n.serviceClient<C25_GlobalPosition::C25>("C25/service");
   C25_GlobalPosition::C25 srv;

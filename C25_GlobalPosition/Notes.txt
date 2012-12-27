@@ -9,7 +9,7 @@ rosrun C25_GlobalPosition C25
 test with
 
 rosrun C25_GlobalPosition C25_test
-
+rostopic echo /C25/publish 
 one can use the gazebo to look at the actual position of the robot
 
 Known Bugs:
