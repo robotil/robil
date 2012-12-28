@@ -42,6 +42,8 @@ bool Dec::doit(){
 	return true;
 }
 bool Dec::done(Result::Ref res){
+	if(bt_name.size()<1) return true;
+
 	if(bt_name=="!"){
 		return true;
 	}
@@ -55,7 +57,7 @@ bool Dec::done(Result::Ref res){
 		return true;
 	}
 
-	if(bt_name=="T" || bt_name=="F"){
+	if(bt_name=="T" || bt_name=="F" || bt_name.find("F:")==0){
 		return true;
 	}
 
@@ -80,6 +82,13 @@ Result::Ref Dec::result(Result::Ref res){
 
 	if(bt_name=="F"){
 		return Result::New(false, res->error_code(), info(), res);
+	}
+
+	if(bt_name.find("F:")==0){
+		std::stringstream s; s<<bt_name; char c; s>>c>>c; int code = 1;
+		if(bt_name.size()>2) s>>code;
+		if(code<1) code=1;
+		return Result::New(false, code, info(), res);
 	}
 
 	return Result::New(res->value(), res->error_code(), info(), res);

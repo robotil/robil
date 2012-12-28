@@ -53,16 +53,10 @@ import elements.Arrow.Creator;
 @SuppressWarnings("serial")
 public class Document extends JPanel {
 	
-	public static enum TASK_ID_MODE{
-		REGENERATE, RECONNECT
-	};
-	public static TASK_ID_MODE task_id_mode = TASK_ID_MODE.RECONNECT;
-	
-	
 	public ArrayList<GElement> arrays = new ArrayList<GElement>();
 	public ArrayList<GElement> elements = new ArrayList<GElement>();
 	public View view = new View();
-	public TaskDescription task_desc = null;
+	public TaskDescription task_description = null;
 	
 	public BTDesigner mainWindow = null;
 
@@ -135,8 +129,10 @@ public class Document extends JPanel {
 		addMouseWheelListener(mh);
 	
 		try {
-			task_desc = new TaskDescription(Parameters.path_to_description);
+			task_description = new TaskDescription(Parameters.path_to_description);
 		} catch (Exception e) {
+			System.out.println("WARNING: Can't find or open task description file. It's not a critical error.");
+			System.err.println("NOT CRITICAL : Print stack and exception name (for debug purposes only): ");
 			e.printStackTrace();
 		}
 	}
@@ -260,7 +256,7 @@ public class Document extends JPanel {
 					ge = a;
 				}
 				GElement nge = null;
-				if( task_id_mode == TASK_ID_MODE.RECONNECT && 
+				if( Parameters.enableLinkConnection && 
 					e.hasAttribute("id") && loadedElements.containsKey( UUID.fromString( e.getAttribute("id") ).toString()) 
 				){
 					nge = loadedElements.get( UUID.fromString( e.getAttribute("id") ).toString() );
@@ -717,7 +713,7 @@ public class Document extends JPanel {
 	private Set<String> savedIds = new HashSet<String>();
 	public String strTaskProperties(Task root){
 		String rootId = root.id.toString();
-		if(task_id_mode == TASK_ID_MODE.REGENERATE){
+		if(Parameters.enableTaskIdRegeneration){
 			if(savedIds.contains(rootId)){
 				rootId = GElement.getRandomUUID().toString();
 			}

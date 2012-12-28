@@ -1,8 +1,13 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <parameters>
+<enableLinkConnection value="true"/>
 <path_to_images value="./images"/>
-<test_time value="0"/>
+<path_to_lookup value="./plans/lookup.xml"/>
 <executer_service value="/executer"/>
 <path_to_plans value="./plans"/>
+<enableTaskIdRegeneration value="false"/>
 <test_result value="true"/>
+<path_to_address value="./plans/TaskList.xml"/>
+<path_to_description value="./plans/TaskDescriptions.xml"/>
+<test_time value="0"/>
 </parameters>
