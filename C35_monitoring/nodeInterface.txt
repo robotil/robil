@@ -1,0 +1,98 @@
+﻿Tree from scratch:
+if you're creating a tree from scratch please use:
+tree = node()
+now the tree is actually the root. I'm suggesting to use another pointer to the root:
+root= tree
+
+Tree from xml file:
+if you have an xml file please use:
+tree = xmlTree(filename)
+root = tree.getRoot()
+
+**please noticed that from each node/xmlTree instance you can print the tree to an xml file
+with this func: def treeToXml(fileName)
+# with node instance you have to provide a file.
+root.treeToXml(“OUT.xml”)
+# with xmlTree instance you can override the file you read the original xml tree from.
+tree.treeToXml()
+
+
+
+Interface for node:
+constructor:
+
+def __init__(treeInstance = None, mytree = None, prep="plan", parent=None)
+you don't need to know how to use it.
+Just use the example above.
+
+def getParent()
+returns pointer to the parent node (already wrapped) 
+if it's the root- return None. Don't forget to check if this is the root.
+
+def getProbAtIndex(index)
+input: int, output: double
+if this node has a probability table it will return the index if it's existed in the table
+otherwise return None.
+
+def getBF()
+return the branch factor of the immediate children of this node.
+
+
+def getSucc()
+def setSucc(setbool)
+getter-setter for self.succ – boolean property of the node.
+
+def addNode(tag)
+input- node type (tsk,parallel,loop,not and etc.) output- a new Node of the type chosen
+this func adds a new node to the immidiate children list of the node.
+Example of use:
+root.addNode('tsk')
+we added a new child with node type- tsk to the root node.
+
+def setAttrib(parm,value)
+input: parm- the attribute name- as a string, value- the attribute value as a string
+add a new attribute to the node (this new attribute will be presented in the xml file )
+Example of use:
+node.setAttrib(“probability”,”0.1 0.2 0.78”)
+#xml file:
+… probability = ”0.1 0.2 0.78” …
+
+def getAttrib(parm)
+input: parm  the attribute name- as a string ,output : parm value as a string, or None.
+
+def isMonitored ()
+output: True/False if this node is monitor or not.
+
+#input- tag, output if this node is this tag type- return True, else- False
+def boolWhoAmI ( tag)
+
+for example you can do: 
+ans = root.boolWhoAmI(“plan”)
+# ans = True. Don't forget! Root is always type- plan 
+ 
+
+
+def getChildren ()
+output- list of the node immediate children (already wrapped).
+
+def getChild(index)
+please note that if you didn't use the func  getChildren ()  before this one, this func will call getChildren for you and return the child requested.  Children list start from zero.
+
+def run ()
+virtual fun -implemented differently in each node type.
+
+def treeToXml(fileName)
+input: fileName (“plan1.xml”) as a string .
+This func print an xml tree to the file, override/create it if needed.
+
+def setMonitor(boolSet)
+input: boolean True/False, set the monitor property of the node.
+
+def comparTo(nodeToCompare)
+input: node to compare. Output: True/False 
+compare by instance id
+
+
+
+
+

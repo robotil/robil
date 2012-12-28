@@ -1,0 +1,12 @@
+How to Check:
+============
+Requires python ver 2.7.3. In order to test the code, run tests.py. This should take about 20 seconds to complete. Check in stdout that all tests succeeded.
+
+
+Known Bugs:
+==========
+
+
+Known Limitations:
+=================
+Currently, the code runs without integration to the executor/designer packages. Input is event xml files with some additions. These additions describe the probability of success in tasks, and time distributions of these tasks given success or failure.
