@@ -1,0 +1,6 @@
+C66 – Grasp and Release
+C23C66_OPO: Position/COG of an object relative to the pelvis.
+C23C66_ODIM: Object dimensions [ grid of the object relative to the pelvis].
+C0C66_GRRE: Grasp or Release the Object [1 or 0].
+C66C0_GRS: Grasp/Release Success [0 or 1].
+
