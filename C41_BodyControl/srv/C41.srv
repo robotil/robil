@@ -1,0 +1,7 @@
+C41_BodyControl/C0C41_WM Work_mode_msg
+C41_BodyControl/C0C41_TC Torque_Control_msg
+C41_BodyControl/C0C41_PVA Position_Velocity_Aceleration_Control_msg
+C41_BodyControl/C0C41_LOAD External_Load_msg
+---
+C41_BodyControl/C41C0_AT Actual_torque_on_each_joint_msg
+C41_BodyControl/C41C0_APVA Actual_Position_Velocity_Acceleration_of_each_joint_msg

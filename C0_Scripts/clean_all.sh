@@ -12,9 +12,19 @@ for dir in "$ROS_WD"/*; do
 		cd $dir
 		make clean;
 		echo "<< $dir"
-		cd ..
+		cd $ROS_WD
 	fi
 done
+
+dir="$ROS_WD/C34_BTExecuter"
+if test -d "$dir"; then
+	echo ">> $dir" 
+	cd $dir/bin_so
+	make clean;
+	echo "<< $dir"
+	cd $ROS_WD
+fi
+
 cd $CURR_WD 
 
 exit 0

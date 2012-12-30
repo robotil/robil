@@ -1,0 +1,6 @@
+<plan>
+   <sel name="Mission" x="283.70945720945707" y="86.65354090354073" id="2939ca25-67cc-446f-8e25-f091252b45e3"> 
+         <tsk name="DoSomething" x="168.70945720945707" y="201.65354090354072" dbg_time="1000" dbg_result="false" id="4a0b6982-c44a-4f7c-8096-8914bc71fd67" />
+         <tsk name="DoSomethingElse" x="349.70945720945707" y="200.65354090354072" dbg_time="100" dbg_result="true" id="eddae2a5-15ae-4f69-a2c1-f32111e925b5" />
+   </sel>
+</plan>

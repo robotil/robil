@@ -1,0 +1,10 @@
+#goal position and orientation
+geometry_msgs/Pose2D goal_pos
+float64 tol
+---
+#current position and orientation
+geometry_msgs/Pose2D res_pos
+float64 dis
+---
+#feedback
+float64 dis_to_goal

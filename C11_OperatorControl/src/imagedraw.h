@@ -38,6 +38,7 @@ private:
 	C11_Node C11node;
 	int ImageAreaCount;
 	QMap<int,CGraphicsView*> ImageAreas;
+	bool IsUpdateCurrentImg;	//don't create new image, update the current
 };
 
 #endif // IMAGEDRAW_H

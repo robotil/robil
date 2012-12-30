@@ -1,7 +1,0 @@
-<plan>
-  <seq name="s1">
-    <tsk name="t1" dbg_time="1000" dbg_result="true" />
-    <tsk name="t2(make plan)" dbg_time="1000" dbg_result="true" />
-    <tsk name="t4" dbg_time="1000" dbg_result="true" />    
-  </seq>
-</plan>
