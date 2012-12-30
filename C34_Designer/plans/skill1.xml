@@ -1,0 +1,15 @@
+<plan>
+   <par name="skill1" x="618.1666666666661" y="117.55555555555559" collapsed="false" id="29da2136-5677-4b7a-b859-df13ca8d6a72"> 
+         <par name="Perception" x="365.7222222222225" y="302.2222222222216" collapsed="false" id="8f55da09-d777-4b0c-9f5d-10a90463ed3e"> 
+               <tsk name="ObstacleDetection" x="207.72222222222175" y="405.2222222222201" test_time="-1" test_result="true" id="1018cc7b-8ef7-4336-924c-aeb7bea86c74" />
+               <tsk name="PathPlanning" x="291.72222222222183" y="489.22222222222" test_time="-1" test_result="true" id="d7315da9-f6fa-481b-ae0f-756c1084d0e0" />
+         </par>
+         <tsk name="PostureControl(pose=stabilize)" x="402.1666666666665" y="502.5555555555551" test_time="100" test_result="true" id="ce2bb670-1f09-4ed3-854f-4743ff631fab" />
+         <seq name="skill1Mission" x="684.1666666666661" y="304.5555555555551" collapsed="false" id="563a39ca-99df-45dc-a369-73c7af2fe951"> 
+               <tsk name="TurnTorso(direction=left)" x="488.416666666666" y="566.305555555555" test_time="100" test_result="true" id="4e287781-61bd-42f3-a359-b81767619c6f" />
+               <tsk name="TurnTorso(direction=center)" x="680.1666666666661" y="581.555555555555" test_time="100" test_result="true" id="4e1cb0a6-2376-4872-94f4-db01784e0cca" />
+               <tsk name="TurnTorso(direction=right)" x="842.1666666666658" y="581.555555555555" test_time="100" test_result="true" id="48ba1d81-068b-4bc1-b423-f468f27740ef" />
+               <tsk name="PathPlanningFocus(x=2,y=3,z=4)" x="1019.1666666666658" y="539.555555555555" test_time="100" test_result="true" id="9acec6a0-7543-4c70-9716-b5db94c71088" />
+         </seq>
+   </par>
+</plan>
