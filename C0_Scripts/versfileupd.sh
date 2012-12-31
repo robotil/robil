@@ -10,13 +10,17 @@ cd ..
 ROS_WD=$PWD
 for dir in "$ROS_WD"/*; do
 	if test -d "$dir"; then
-		cd $dir
-		echo -n ` basename $dir ` >> $VER
-		echo -n "     " >> $VER
-		if [ -e $FILE ]; then cat $FILE >> $VER; 
-		else echo "file $FILE in $dir doesn't exist.";
+		bn=` basename $dir`
+#                echo "bn=$bn"
+                if [ "$bn" != "launch" ]; then
+			cd $dir
+			echo -n ` basename $dir ` >> $VER
+			echo -n "     " >> $VER
+			if [ -e $FILE ]; then cat $FILE >> $VER; 
+			else echo "file $FILE in $dir doesn't exist.";
+			fi
+			cd ..
 		fi
-		cd ..
 	fi
 done
 cd $CURR_WD 

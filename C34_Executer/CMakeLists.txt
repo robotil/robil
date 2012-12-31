@@ -31,12 +31,12 @@ rosbuild_gensrv()
 #target_link_libraries(example ${PROJECT_NAME})
 
 #=============== INCLUDES ==================================
-include_directories (includes/BTExecuter)  
+#include_directories (includes/BTExecuter)  
 #include_directories (includes/SimpleTask)  
 rosbuild_add_boost_directories()
 
 #=============== LINKER ====================================
-link_directories (${PROJECT_SOURCE_DIR}/lib)
+#link_directories (${PROJECT_SOURCE_DIR}/lib)
 
 #------------------------ executer -------------------------
 rosbuild_add_executable(executer src/TaskProxyConnectionByActionLib.cpp)

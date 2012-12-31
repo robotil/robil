@@ -1,0 +1,18 @@
+<package>
+  <description brief="C34_BTExecuter">
+
+     C34_BTExecuter
+
+  </description>
+  <author>dan</author>
+  <license>BSD</license>
+  <review status="unreviewed" notes=""/>
+  <url>http://ros.org/wiki/C34_BTDesigner</url>
+ 
+  <export>
+  	<cpp cflags="-I${prefix}/src" lflags="-L${prefix}/bin_so"/>
+  </export>
+
+</package>
+
+

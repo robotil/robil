@@ -1,0 +1,6 @@
+<plan>
+   <sel name="Mission"> 
+         <tsk name="DoSomething" />
+         <tsk name="DoSomethingElse" />
+   </sel>
+</plan>

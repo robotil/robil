@@ -2,38 +2,125 @@
    <par name="event3"> 
          <par name="perception"> 
                <tsk name="LocalizationTrack" />
-               <tsk name="TrackObject(target=A)" />
-               <tsk name="TrackObject(target=B)" />
                <tsk name="ObstacleDetection" />
                <tsk name="PathPlanning" />
          </par>
          <par name="ProgressControl"> 
                <tsk name="Monitor(target=LiveLock)" />
-               <seq name="mission"> 
-                     <tsk name="BodyControl(pose=standUp)" />
-                     <seq name="objectAFlow"> 
-                           <tsk name="TurnTo(target=A)" />
-                           <par name="safe"> 
-                              <dec name="L"> 
-                                    <seq name="Stabilization"> 
-                                          <tsk name="Monitor(target=Stable)" />
-                                          <tsk name="BodyControl(pose=stabilize)" />
-                                    </seq>
-                              </dec>
-                                 <par name="TimeControl"> 
-                                       <seq name="OperatorRequest"> 
-                                             <tsk name="PushHMI(data=panoramic_image)" />
-                                             <tsk name="PushHMI(data=occupancy_grid)" />
-                                             <tsk name="PushHMI(data=path)" />
-                                             <tsk name="HMIResponse" />
+            <dec name="!L!"> 
+                  <seq name="mission"> 
+                        <tsk name="StandUp" />
+                        <par name="StandingUp"> 
+                              <tsk name="Monitor(target=Falling)" />
+                           <dec name="!L!"> 
+                                 <seq name="CollectObjects"> 
+                                       <sel name="GetObject"> 
+                                             <tsk name="isObjectInHand(target=right)" />
+                                             <seq name="GetObjectA"> 
+                                                   <tsk name="SearchObject(target=A)" />
+                                                   <par name="ObjectA"> 
+                                                         <tsk name="TrackObject(target=A)" />
+                                                         <seq name="objectAFlow"> 
+                                                               <tsk name="PathPlanningFocus(target=A)" />
+                                                               <tsk name="TurnTo(target=A)" />
+                                                               <par name="safe"> 
+                                                                  <dec name="L"> 
+                                                                        <seq name="Stabilization"> 
+                                                                              <tsk name="Monitor(target=Stable)" />
+                                                                              <tsk name="PostureControl(pose=stabilize)" />
+                                                                        </seq>
+                                                                  </dec>
+                                                                  <dec name="T"> 
+                                                                        <par name="TimeControl"> 
+                                                                              <seq name="OperatorRequest"> 
+                                                                                    <tsk name="PushHMI(data=panoramic_image)" />
+                                                                                    <tsk name="PushHMI(data=occupancy_grid)" />
+                                                                                    <tsk name="PushHMI(data=path)" />
+                                                                                    <tsk name="HMIResponse" />
+                                                                              </seq>
+                                                                              <tsk name="Monitor(target=Timeout)" />
+                                                                        </par>
+                                                                  </dec>
+                                                               </par>
+                                                               <tsk name="FollowPath" />
+                                                               <tsk name="PickUp(target=A)" />
+                                                         </seq>
+                                                   </par>
+                                             </seq>
+                                       </sel>
+                                       <seq name="GoToObjectB"> 
+                                             <tsk name="SearchObject(target=B)" />
+                                             <par name="ObjectB"> 
+                                                   <tsk name="whileObjectInHands" />
+                                                   <tsk name="TrackObject(target=B)" />
+                                                   <seq name="objectBFlow"> 
+                                                         <tsk name="PathPlanningFocus(target=B)" />
+                                                         <tsk name="TurnTo(target=B)" />
+                                                         <par name="safe"> 
+                                                            <dec name="L"> 
+                                                                  <seq name="Stabilization"> 
+                                                                        <tsk name="Monitor(target=Stable)" />
+                                                                        <tsk name="PostureControl(pose=stabilize)" />
+                                                                  </seq>
+                                                            </dec>
+                                                            <dec name="T"> 
+                                                                  <par name="TimeControl"> 
+                                                                        <seq name="OperatorRequest"> 
+                                                                              <tsk name="PushHMI(data=panoramic_image)" />
+                                                                              <tsk name="PushHMI(data=occupancy_grid)" />
+                                                                              <tsk name="PushHMI(data=path)" />
+                                                                              <tsk name="HMIResponse" />
+                                                                        </seq>
+                                                                        <tsk name="Monitor(target=Timeout)" />
+                                                                  </par>
+                                                            </dec>
+                                                         </par>
+                                                         <tsk name="FollowPath" />
+                                                         <seq name="ConnectObjects"> 
+                                                               <tsk name="Squat" />
+                                                               <par name="safe"> 
+                                                                  <dec name="L"> 
+                                                                        <seq name="Stabilization"> 
+                                                                              <tsk name="Monitor(target=Stable)" />
+                                                                              <tsk name="PostureControl(pose=stabilize)" />
+                                                                        </seq>
+                                                                  </dec>
+                                                                  <dec name="!L!"> 
+                                                                        <seq name="Connection"> 
+                                                                              <tsk name="AlignObjects" />
+                                                                              <par name="TimeControl"> 
+                                                                                    <seq name="OperatorRequest"> 
+                                                                                          <tsk name="PushHMI(data=objects)" />
+                                                                                          <tsk name="HMIResponse" />
+                                                                                    </seq>
+                                                                                    <tsk name="Monitor(target=Timeout)" />
+                                                                              </par>
+                                                                              <tsk name="ObjectAttachment" />
+                                                                              <par name="TimeControl"> 
+                                                                                    <tsk name="Monitor(target=Timeout)" />
+                                                                                    <seq name="OperatorRequest"> 
+                                                                                          <tsk name="PushHMI(data=objects)" />
+                                                                                          <tsk name="HMIResponse" />
+                                                                                    </seq>
+                                                                              </par>
+                                                                              <sel name="ConnectionValidation"> 
+                                                                                    <tsk name="ValidateConnection" />
+                                                                                 <dec name="F"> 
+                                                                                       <tsk name="ReverseAttachment" />
+                                                                                 </dec>
+                                                                              </sel>
+                                                                        </seq>
+                                                                  </dec>
+                                                               </par>
+                                                         </seq>
+                                                   </seq>
+                                             </par>
                                        </seq>
-                                       <tsk name="Monitor(target=Timeout)" />
-                                 </par>
-                           </par>
-                           <tsk name="FollowPath" />
-                           <tsk name="PickUp(target=A)" />
-                     </seq>
-               </seq>
+                                 </seq>
+                           </dec>
+                        </par>
+                  </seq>
+            </dec>
          </par>
    </par>
 </plan>

@@ -1,0 +1,23 @@
+I attached a stub for module C42 interface, it contains two actions : 
+ZmpWlk and CPGWlk, for now both have the same format:
+
+goal : requested 2d position (goal_pos) and tolerance (tol)
+----
+result: 2D position (res_pos) and distance from goal (dis)
+----
+feedback: distance from goal (dis_to_goal)
+
+the src folder contains the action servers for the tho actions, for now 
+they both do the same thing:
+wait for goal, then loop until goal is reached (distance from goal<tol) 
+and publish the distance from goal as feedback
+when goal is reached task flagged as success
+
+you can check it out by building the pkg, running ZmpServer.py and then 
+running test_zmp_client.py, A task will be sent to the zmp server, 
+dragging the robot manualy to the requested position (2,0) will mark the 
+task as finished
+
+the action server contains some empty functions we will write later, for 
+now the function get_path waits for C31 path planning service (which 
+name and type we dont know yet)

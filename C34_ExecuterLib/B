@@ -1,9 +1,0 @@
-<plan>
-  <seq name="s2">
-    <tsk name="t10" dbg_time="100" dbg_result="true" />
-    <tsk name="t20" dbg_time="100" dbg_result="true" />
-    <tsk name="C" />
-    <tsk name="t30" dbg_time="100" dbg_result="true" />
-    <tsk name="t40" dbg_time="100" dbg_result="true" />    
-  </seq>
-</plan>
