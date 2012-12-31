@@ -1,0 +1,22 @@
+C46_EnterVehicle
+# Description: robot enters vehicle from a standing position
+facing forwards near the entrence of the vehicle.
+Robot enters vehicle with final position sitting inside facing the wheel.
+
+Known bugs:
+* The robot can't keep still and "slides" on the ground and seat
+while executing and after finished.
+* The robot final position is not perfected 
+thus he can finalize sitting on the side  or slide twords wheel, 
+but should be in the right sitting place.
+
+Conditions:
+* start testing world using launch forlder: drc_robot_profile_lower.launch
+
+*Not final steps, may change*
+Follow the steps:
+1. run designer and executer
+2. roslaunch drc_robot_profile_lower.launch
+3. rosrun C46_MountVehicle C46_Mount_server.py
+4. start mountVehicle.xml in TestTree folder inside the designer
+(make sure to reset poses before runing tree)
