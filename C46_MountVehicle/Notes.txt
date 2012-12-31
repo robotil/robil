@@ -1,3 +1,9 @@
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+BUG
+.ver=0.2
+roslaunch C46_MountVehicle drc_robot_profile_lower.launch doesn't run.
+roslaunch atlas_utils drc_robot_profile_lower.launch doesn't run.
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ 
 C46_EnterVehicle
 # Description: robot enters vehicle from a standing position
 facing forwards near the entrence of the vehicle.
