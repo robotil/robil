@@ -3,6 +3,7 @@
 from tree import xmlTree
 from Node import node
 import time
+import sys
 
 
 #create a tree from scratch
@@ -380,7 +381,7 @@ def test10():
 #            print("test 11.1: success")
 #        else:
 #            print ("test 11.1: failed :-( ")
-#        seqChild.setDEBUGresult(True, 0.5)
+#        seqChild.setDEBUGresult("True 100")
 #        if seqChild.getDEBUGsucc() == True :#and seqChild.DEBUG[1] == 5 :
 #            print("test 11.2: success")
 #        else:
@@ -440,8 +441,7 @@ def test14():
                               tempN2.addDistToFailTable(dist_fail)
                           tempN2.setAttrib("Successdistribution",tempN2._distTableToString(tempN2.distTableSucc))
                           tempN2.setAttrib("Failuredistribution",tempN2._distTableToString(tempN2.distTableFail))
-                          tempN2.setDebug(True, 100)
-                          tempN2.setAttrib("DEBUG", tempN2.DEBUG)
+                          tempN2.setDebug("True 100")
                               
           else:
               tempN1 = tempN.addNode("tsk")
@@ -517,8 +517,7 @@ def test15():
                               tempN2.addDistToFailTable(dist_fail)
                           tempN2.setAttrib("Successdistribution",tempN2._distTableToString(tempN2.distTableSucc))
                           tempN2.setAttrib("Failuredistribution",tempN2._distTableToString(tempN2.distTableFail))
-                          tempN2.setDebug(True, 100)
-                          tempN2.setAttrib("DEBUG", tempN2.DEBUG)
+                          tempN2.setDebug("True 100")
                               
           else:
               tempN1 = tempN.addNode("tsk")
@@ -605,8 +604,7 @@ def test16():
                               tempN2.addDistToFailTable(dist_fail)
                           tempN2.setAttrib("Successdistribution",tempN2._distTableToString(tempN2.distTableSucc))
                           tempN2.setAttrib("Failuredistribution",tempN2._distTableToString(tempN2.distTableFail))
-                          tempN2.setDebug(True, 100)
-                          tempN2.setAttrib("DEBUG", tempN2.DEBUG)
+                          tempN2.setDebug("True 100")
                               
           else:
               tempN1 = tempN.addNode("tsk")
@@ -690,8 +688,7 @@ def test17():
                               tempN2.addDistToFailTable(dist_fail)
                           tempN2.setAttrib("Successdistribution",tempN2._distTableToString(tempN2.distTableSucc))
                           tempN2.setAttrib("Failuredistribution",tempN2._distTableToString(tempN2.distTableFail))
-                          tempN2.setDebug(True, 100)
-                          tempN2.setAttrib("DEBUG", tempN2.DEBUG)
+                          tempN2.setDebug("True 100")
                               
           else:
               tempN1 = tempN.addNode("tsk")
@@ -993,9 +990,9 @@ def test24():
     print "Time: %f" %elapsed
     print "-------Debug mode-------"
     node.debugMode = True
-    for i in range(1000):
+    for i in range(100):
         root.runPlan(0)    
-    for i in range(1000):
+    for i in range(100):
         root.runPlan(1)   
     root.treeToXml("output/small_test_debug_mode.xml") 
     print("test 4.3: success!")
@@ -1025,9 +1022,9 @@ def test25():
     node.debugMode = True    
     tree = xmlTree("output/small_test_after_offline.xml")
     root = tree.getRoot()
-    for i in range(1000):
+    for i in range(100):
         root.runPlan(0)    
-    for i in range(1000):
+    for i in range(100):
         root.runPlan(1)   
     root.treeToXml("output/small_test_debug_mode.xml") 
     print("test 4.3: success!")
@@ -1054,27 +1051,37 @@ def _createUniformDist(parmA,parmB):
 
 if __name__ == "__main__":
     #run the 10 tests
-    test1()
-    test2()
-    test3()
-    test4()
-    test5()
-    test6()
-    test7()
-    test8()
-    test9()
-    test10()
+    if len(sys.argv) == 2 and sys.argv[1] == "all":
+	test1()
+	test2()
+	test3()
+	test4()
+	test5()
+	test6()
+	test7()
+	test8()
+	test9()
+	test10()
 #    test11()
-    test12()
-    test14()
-    test15()
-    test16()
-    test17()
-    test18()
-    test19()
-    test20()
-    test21()
-    test22()
-    test23()
-    test24()
-    test25()
+	test12()
+	test14()
+	test15()
+	test16()
+	test17()
+	test18()
+	test19()
+	test20()
+	test21()
+	test22()
+	test23()
+	test24()
+	test25()
+    elif len(sys.argv) == 2 and sys.argv[1] == "events":
+	test21()
+	test22()
+	test23()
+    elif len(sys.argv) == 2 and sys.argv[1] == "demo":
+	test24()
+	test25()
+    else:
+	print "please provide one of the following command line arguments: [all,events,demo]"

@@ -1,6 +1,8 @@
 How to Check:
 ============
-Requires python ver 2.7.3. In order to test the code, run tests.py. This should take about 20 seconds to complete. Check in stdout that all tests succeeded.
+Requires python ver 2.7.3. In order to test the code, run tests.py from the src/ directory:
+python tests.py all
+This should take no more than 20 seconds to complete. Check in stdout that all tests succeeded.
 tests/ directory contains xml files used as input. distributions/ directory contains some source code. output/ directory is where test output is redirected.
 
 Known Bugs:

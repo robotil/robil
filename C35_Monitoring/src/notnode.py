@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 """
-Created on Thu Dec 13 15:44:32 2012
-
-@author: polak
+NotNode class inherits from node class.
+type of node- not
+has it own run function
 """
 
 
@@ -10,9 +10,10 @@ from Node import node
 
 class NotNode (node):
     def __init__(self,treeInst,mytree,parent):
+        #call to super constracture
         node.__init__(self,treeInst,mytree,"not",parent)
 
-    
+    #run-not
     def run (self, index):
         tmpIndex = index 
         if (node.debugMode):

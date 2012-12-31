@@ -1,0 +1,20 @@
+<package>
+  <description brief="C35_Monitoring">
+
+     C35_Monitoring
+
+  </description>
+  <author>Raz Nissim</author>
+  <license>BSD</license>
+  <review status="unreviewed" notes=""/>
+  <url>http://ros.org/wiki/C35_Monitoring</url>
+  <depend package="roslib"/>
+  <depend package="roscpp"/>
+  <depend package="rospy"/>
+  <depend package="actionlib"/>
+  <depend package="actionlib_msgs"/>
+  <depend package="std_msgs"/>
+
+</package>
+
+

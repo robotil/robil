@@ -1,15 +1,18 @@
 # -*- coding: utf-8 -*-
 """
-
-@author: polak
+SelectNode class inherits from node class.
+type of node- sel
+has it own run function
 """
 
 from Node import node
 
 class SelectNode (node):
     def __init__(self,treeInst,mytree,parent):
-        node.__init__(self,treeInst,mytree,"select",parent)
+        #call to super constracture
+        node.__init__(self,treeInst,mytree,"sel",parent)
     
+    #run-select
     def run (self, index):       
         tmpIndex = index
         
@@ -30,14 +33,11 @@ class SelectNode (node):
         for i in self.getChildren():                        
             b = i.run(index)           
             a[0] = a[0] or b[0]
-            #self.setSucc(a[0])
             a[1] = a[1] + b[1]
-            #self.setTime(a[1])
             if b[0]:	  
                 break
             
-#        if (self.getNot()):
-#            a[0] = not(a[0]) 
+
             
         if (self.monitor):    
             if a[0]:
