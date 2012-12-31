@@ -1,8 +1,0 @@
-#goal definition
-int32 which_hand
----
-#result definition
-float32 final_location
----
-#feedback
-int32 percent_done 
