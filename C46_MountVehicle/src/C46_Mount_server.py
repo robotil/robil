@@ -5,9 +5,11 @@ roslib.load_manifest('C46_MountVehicle')
 
 import rospy, math
 import actionlib
+import yaml, sys
 
-import C46_MountVehicle.msg
+import C0_RobilTask.msg
 from std_msgs.msg import Float64
+#from control_msgs.msg import *
 
 TASK_RESULT_REJECT=0
 TASK_RESULT_OK=1
@@ -15,25 +17,25 @@ TASK_RESULT_PLAN=2
 
 class MountVehicleServer(object):
   # create messages that are used to publish feedback/result
-  _feedback = C46_MountVehicle.msg.MountFeedback()
-  _result   = C46_MountVehicle.msg.MountResult()
+  _feedback = C0_RobilTask.msg.RobilTaskFeedback()
+  _result   = C0_RobilTask.msg.RobilTaskResult()
   
     
   def __init__(self):
     self._action_name = "/MountVehicle"
-    self._as = actionlib.SimpleActionServer(self._action_name, C46_MountVehicle.msg.MountAction, execute_cb=self.task)
+    self._as = actionlib.SimpleActionServer(self._action_name, C0_RobilTask.msg.RobilTaskAction, execute_cb=self.task)
     self._as.start()
 
   def task(self, goalAct):
-	print ("Hi")
+	print ("Start Mounting Vehicle")
 	task_success = True
 	task_result = TASK_RESULT_OK
 	task_plan = ""
 
 	# start executing the action
 
-	rospy.init_node('trajectory')
-	Traj_data_file = "Traj_data.yaml"
+	#rospy.init_node('trajectory')
+	Traj_data_file = "./Traj_data.yaml"
 	Traj_name_to_execute = "Mount"
 	traj_yaml = yaml.load(file(Traj_data_file, 'r'))
 	traj_name = Traj_name_to_execute
