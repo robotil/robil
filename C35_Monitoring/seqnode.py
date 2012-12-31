@@ -1,15 +1,18 @@
 # -*- coding: utf-8 -*-
 """
-
-@author: polak
+SeqNode class inherits from node class.
+type of node- seq
+has it own run function
 """
 from Node import node
 
 class SeqNode (node):
     
     def __init__(self,treeInst,mytree,parent):
+        #call to super constracture
         node.__init__(self,treeInst,mytree,"seq",parent)
     
+    #seq- run
     def run (self, index):      
         tmpIndex = index 
         

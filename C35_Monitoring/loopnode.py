@@ -1,13 +1,15 @@
 # -*- coding: utf-8 -*-
 """
-
-@author: polak
+LoopNode class inherits from node class.
+type of node- loop
+has it own run function
 """
 
 from Node import node
 
 class LoopNode (node):
     def __init__(self,treeInst,mytree,parent):
+        #call to super constracture
         node.__init__(self,treeInst,mytree,"loop",parent)
     
     def run (self, index):

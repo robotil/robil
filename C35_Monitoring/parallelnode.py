@@ -1,15 +1,18 @@
 # -*- coding: utf-8 -*-
 """
-
-@author: polak
+ParallelNode class inherits from node class.
+type of node- parallel
+has it own run function
 """
 
 from Node import node
 
 class ParallelNode (node):
     def __init__(self,treeInst,mytree,parent):
-        node.__init__(self,treeInst,mytree,"parallel",parent)
+        #call to super constracture
+        node.__init__(self,treeInst,mytree,"par",parent)
     
+    #run-parallel
     def run(self, index):
         tmpIndex = index
        
@@ -39,8 +42,6 @@ class ParallelNode (node):
                     a[1] = (max(b[1], a[1]))
             a[0] = b[0] or a[0]
             
-#        if (self.getNot()):
-#            a[0] = not(a[0])
         if (self.monitor):    
             if a[0]:
                 self.setDistTableSuccAtIndex(tmpIndex, a[1])
