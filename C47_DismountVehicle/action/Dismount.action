@@ -1,0 +1,8 @@
+# Define the goal
+float64 dismount
+---
+# Define the result
+float64 dismounted
+---
+# Define a feedback message
+float64s percent_complete
