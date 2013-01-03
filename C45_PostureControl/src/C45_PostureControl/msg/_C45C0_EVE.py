@@ -10,7 +10,6 @@ class C45C0_EVE(genpy.Message):
   _type = "C45_PostureControl/C45C0_EVE"
   _has_header = False #flag to mark the presence of a Header object
   _full_text = """bool event_succes
-
 """
   __slots__ = ['event_succes']
   _slot_types = ['bool']

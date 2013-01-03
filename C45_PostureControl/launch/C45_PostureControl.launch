@@ -1,0 +1,8 @@
+<launch>
+	<param name="PID_gains/P" type="double" value="0.10" />
+	<param name="PID_gains/I" type="double" value="0.00" />
+	<param name="PID_gains/D" type="double" value="-0.01" />
+	<node name="C45_PostureControl_com_error" pkg="C45_PostureControl" type="C45_PostureControl_com_error" cwd="node"/>
+	<node name="C45_PostureControl_maintain_stability" pkg="C45_PostureControl" type="C45_PostureControl_maintain_stability" cwd="node"/>
+	<node name="C45_PostureControl" pkg="C45_PostureControl" type="C45_PostureControl" cwd="node"/>
+</launch>

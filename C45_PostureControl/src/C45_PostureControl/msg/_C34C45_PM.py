@@ -10,7 +10,6 @@ class C34C45_PM(genpy.Message):
   _type = "C45_PostureControl/C34C45_PM"
   _has_header = False #flag to mark the presence of a Header object
   _full_text = """int32 posture_mode
-
 """
   __slots__ = ['posture_mode']
   _slot_types = ['int32']

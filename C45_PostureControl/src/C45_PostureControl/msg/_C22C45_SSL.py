@@ -10,7 +10,6 @@ class C22C45_SSL(genpy.Message):
   _type = "C45_PostureControl/C22C45_SSL"
   _has_header = False #flag to mark the presence of a Header object
   _full_text = """float32 surface_slope
-
 """
   __slots__ = ['surface_slope']
   _slot_types = ['float32']
