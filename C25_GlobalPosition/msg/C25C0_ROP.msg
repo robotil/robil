@@ -1,2 +1,2 @@
-C25_GlobalPosition/UTM min_dimensions
-
+sensor_msgs/Imu imu
+nav_msgs/Odometry pose

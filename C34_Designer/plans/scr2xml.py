@@ -1,6 +1,8 @@
 #!/usr/bin/python
 
-file = 'event2.scr'
+import sys
+
+file = sys.argv[1]
 
 text = open(file,'r').read()
 

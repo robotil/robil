@@ -1,6 +1,5 @@
 def root {
 	event2{
-		InitialDismountedTraversabilityMission
 		||{
 			||Perception{
 				LocalizationTrack
@@ -21,34 +20,22 @@ def root {
 									PathPlanningFocus(target=A)
 									TurnTo(target=A)
 									OperatorControlPoint(data=[panoramic_image,occupancy_grid,path])
-									DirectSensorsAtNearPathArea
-									UpdateLocalPathToAllowThreading
-									??{
+									<!L!>??{
 										||AdvanceByWalkingAlongPath{
 											FollowPath
 											||{
 												<F:1>whilePlaceToThreadIn
-												<F:2>whileNoObstacles
-												<F:3>whilePathSolution
-												<F:4>whileSolution
-												<F:4>untilOperatorIntervention
-												<F:4>untilSpeedAveregeIsLowerThen(kmh=?)
+												<F:2>whileSolution
+												<F:2>untilOperatorIntervention
+												<F:2>untilSpeedAveregeIsLowerThen(kmh=?)
 											}
 										}
 										1 NoPlaceToTreadIn{
 											Stop
-											Replanning
+											PlanDetour
+											OperatorControlPoint(data=[panoramic_image])
 										}
-										2 Obstacle{
-											AdjustPathPlan
-										}
-										3 NoPathSolution{
-											DirectSensorsAt270RearSection
-											GoBackAlongPath(distance=?)
-											TurnTo(target=A)
-											Replanning
-										}
-										4 NoSolution{
+										2 NoSolution{
 											OperatorControlPoint(data=[panoramic_image])
 										}
 									}
@@ -82,11 +69,6 @@ def OperatorControlPoint{
 	}
 }
 
-def Replanning{
-	DirectSensorsAt270ForwardSection
-	PlanDetour
-	OperatorControlPoint(data=[panoramic_image])
-}
 
 
 
