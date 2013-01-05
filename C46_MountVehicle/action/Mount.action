@@ -5,4 +5,4 @@ float64 mount
 float64 mounted
 ---
 # Define a feedback message
-float64s percent_complete
+float64 percent_complete
