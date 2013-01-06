@@ -1,1 +1,0 @@
-bool climb_a_ladder_success

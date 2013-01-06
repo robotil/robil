@@ -1,0 +1,9 @@
+#goal definition
+float32[2] location
+int32 max
+---
+#result definition
+bool success
+---
+#feedback
+float32[2] location

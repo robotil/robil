@@ -13,6 +13,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.font.FontRenderContext;
 import java.awt.font.TextLayout;
+import java.util.Map;
 
 import javax.swing.Box;
 import javax.swing.BoxLayout;
@@ -20,6 +21,7 @@ import javax.swing.GroupLayout;
 import javax.swing.Icon;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
+import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JDialog;
 import javax.swing.JLabel;
@@ -28,17 +30,22 @@ import javax.swing.JPanel;
 import javax.swing.JTextField;
 import javax.swing.SpringLayout;
 
+import org.w3c.dom.Element;
+
 public class Task extends GElement implements View.ChangesListener{
 
 	public final static String TYPE_task = "task";
 	public final static String TYPE_selector = "selector";
 	public final static String TYPE_sequenser = "sequenser";
 	public final static String TYPE_parallel = "parallel";
+	public final static String TYPE_switch = "switch";
 	
 	public String text = "Noname";
 	public String type = TYPE_task;
 	public Font font = new Font("sansserif", Font.BOLD, 10);
 	public int seqNumber=0;
+	
+	
 	
 	public Task(){
 		property.size = new Vec(100,100);
@@ -142,7 +149,7 @@ public class Task extends GElement implements View.ChangesListener{
 		}
 		public void paint(Graphics2D g){
 			setBackgroundColor(g);
-			g.drawString("P", _x[0]+ size()/2, _y[0]-5);
+			//g.drawString("P", _x[0]+ size()/2, _y[0]-5);
 			//g.setPaint(new Color(127,255,212));
 			g.fillPolygon(_x, _y, size());
 			
@@ -150,6 +157,7 @@ public class Task extends GElement implements View.ChangesListener{
 			g.drawPolygon(_x, _y, size());
 			}
 	}
+
 	private class Sel extends Border{
 		int x,  y,  w,  h;
 		public Sel(int _x, int _y, int _w, int _h){
@@ -159,15 +167,61 @@ public class Task extends GElement implements View.ChangesListener{
 			Vec t = new Vec(20,20).scale(view.zoom);
 			setBackgroundColor(g);
 			g.fillRoundRect(x, y, w, h, t.getIntX(), t.getIntY());
-			g.setStroke (new BasicStroke(
-				      2f, 
-				      BasicStroke.CAP_ROUND, 
-				      BasicStroke.JOIN_ROUND, 
-				      2f, 
-				      new float[] {6f}, 
-				      0f));
+//			g.setStroke (new BasicStroke(
+//				      2f, 
+//				      BasicStroke.CAP_ROUND, 
+//				      BasicStroke.JOIN_ROUND, 
+//				      2f, 
+//				      new float[] {6f}, 
+//				      0f));
 			g.setPaint(Color.black);
 			g.drawRoundRect(x, y, w, h, t.getIntX(), t.getIntY());
+		}
+	}
+	
+	private class Swi extends Border{
+		int x,  y,  w,  h;
+		public Swi(int _x, int _y, int _w, int _h){
+			x=_x; y=_y; w=_w; h=_h;
+		}
+		public void paint(Graphics2D g){
+			Vec t = new Vec(5,5).scale(view.zoom);
+			if(t.y>5)t.y=5;
+			setBackgroundColor(g);
+			g.fillRect(x, y, w, h);
+//			g.setStroke (new BasicStroke(
+//				      2f, 
+//				      BasicStroke.CAP_ROUND, 
+//				      BasicStroke.JOIN_ROUND, 
+//				      2f, 
+//				      new float[] {6f}, 
+//				      0f));
+			g.setPaint(Color.black);
+			g.drawRect(x, y, w, h);
+			
+			int sw, k, d=0;
+			if( w >= 5*5){
+				int kk, nn; for( kk=3, nn=3; w/kk >=5; nn=kk,kk+=2 );
+				k = Math.abs(w%kk)>Math.abs(w%nn) ? nn : kk;
+				d = w%k;
+			}else{
+				k=5;
+			}
+			sw = w/k;
+			int di=1;//(d/(k/2));
+						
+			int[] _x = new int[k*2];	int[] _y = new int[k*2];
+			_x[0]=x;
+			for(int i=1;i<k;i+=1){	_x[i*2]=_x[i*2-2]+sw;	if(d>0){ _x[i*2]+= di; d-=di; }	}
+			for(int i=0;i<k-1;i+=1){	_x[1+i*2]=_x[1+i*2+1];	}
+			for(int i=0;i<k;i+=1){	_y[i*2]=i%2==0?y+h:y+h+(int)(t.y);	}
+			for(int i=0;i<k-1;i+=1){	_y[1+i*2]=_y[1+i*2-1];	}
+			_x[k*2-1]=x+w;	_y[k*2-1]=y+h;
+			
+			setBackgroundColor(g);
+			g.fillPolygon(_x, _y, _x.length);
+			g.setPaint(Color.black);
+			g.drawPolygon(_x, _y, _x.length);
 		}
 	}
 	private class Tsk extends Border{
@@ -183,7 +237,7 @@ public class Task extends GElement implements View.ChangesListener{
 			g.setPaint(Color.black);
 			g.drawRect(x, y, w, h);
 
-			if(getProperty().dbg_result==false){
+			if(getProperty().test_result==false){
 				GraphProp gp = new GraphProp(g);
 				g.setPaint(Color.red);
 				g.drawRect(x-1, y-1, w+2, h+2);
@@ -210,6 +264,7 @@ public class Task extends GElement implements View.ChangesListener{
 		if(type==TYPE_sequenser) border = new Seq(loc.x, loc.y, size.width, size.height);
 		if(type==TYPE_task) border = new Tsk(loc.x, loc.y, size.width, size.height);
 		if(type==TYPE_parallel) border = new Par(loc.x, loc.y, size.width, size.height);
+		if(type==TYPE_switch) border = new Swi(loc.x, loc.y, size.width, size.height);
 		border.paint(g);
 
 		int fontsize=font.getSize();
@@ -232,6 +287,18 @@ public class Task extends GElement implements View.ChangesListener{
 		Vec typesize = new Vec(20,20).scale(view.zoom);
 		Vec typeloc = getLocation().sub(typesize.scale(0.5));
 		
+		if(property.collapsed){
+			f = new Font(font.getFamily(), font.getStyle(), (int)(fontsize*0.8*view.zoom));
+			g.setStroke(new BasicStroke(1));
+			cnt = getLocation().add(getSizeInternal()).getPoint();
+			Vec dim = new Vec(10,10).scale(view.zoom);
+			g.setPaint(Color.white);
+			g.fillRect(cnt.x, cnt.y, dim.getIntX(),dim.getIntY());
+			g.setPaint(Color.blue);
+			g.drawRect(cnt.x, cnt.y, dim.getIntX(),dim.getIntY());
+			g.drawLine(cnt.x+dim.getIntX()/2, cnt.y+(int)(view.zoom*2), cnt.x+dim.getIntX()/2, cnt.y+dim.getIntY()-(int)(view.zoom*2));
+			g.drawLine(cnt.x+(int)(view.zoom*2), cnt.y+dim.getIntY()/2, cnt.x+dim.getIntX()-(int)(view.zoom*2), cnt.y+dim.getIntY()/2);
+		}
 		
 		gp.restore();
 	}
@@ -256,7 +323,21 @@ public class Task extends GElement implements View.ChangesListener{
 		property.size = new Vec(getTextSize(view.graphics, font, getShortText())).add(new Vec(10,10));
 	}
 
+	@Override
+	public GElement clone() {
+		Task n = new Task();
+		cloneInit(n);
+		n.text = text;
+		n.type = type;
+		n.seqNumber = seqNumber;
+		return n;
+	}
 
+	@Override
+	public void cloneReconnect(Map<GElement, GElement> link) {
+		
+	}
+	
 	@Override
 	public void modify() {
 		ModifyDialog dlg = new ModifyDialog();
@@ -266,8 +347,9 @@ public class Task extends GElement implements View.ChangesListener{
 	
 	
 	class ModifyDialog extends JDialog {
+		private static final long serialVersionUID = 1739783395697186997L;
 
-	    public ModifyDialog() {
+		public ModifyDialog() {
 
 	        initUI();
 	    }
@@ -275,6 +357,7 @@ public class Task extends GElement implements View.ChangesListener{
 	    JComboBox cType = null;
 	    JTextField txtDbgTime = null;
 	    JComboBox txtDbgResult = null;
+	    JCheckBox chkCollapse = null;
 	    
 	    public final void initUI() {
 
@@ -286,11 +369,14 @@ public class Task extends GElement implements View.ChangesListener{
 	    	JLabel lbl4 = new JLabel("Dbg-Result ");
 	    	
 	    	txtName = new JTextField(text); txtName.selectAll();
-	    	cType = new JComboBox(new String[]{TYPE_sequenser,TYPE_selector,TYPE_task, TYPE_parallel});
+	    	cType = new JComboBox(new String[]{TYPE_sequenser,TYPE_selector,TYPE_task, TYPE_parallel, TYPE_switch});
 	    	cType.setSelectedItem(type);
-	    	txtDbgTime = new JTextField(""+getProperty().dbg_time); 
+	    	txtDbgTime = new JTextField(""+getProperty().test_time); 
 	    	txtDbgResult = new JComboBox(new String[]{"true","false"});
-	    	txtDbgResult.setSelectedItem(""+getProperty().dbg_result);
+	    	txtDbgResult.setSelectedItem(""+getProperty().test_result);
+
+	    	chkCollapse = new JCheckBox("Collapse");
+	    	chkCollapse.setSelected(getProperty().collapsed);
 	    	
         
 	        JButton close = new JButton("Close");
@@ -308,46 +394,50 @@ public class Task extends GElement implements View.ChangesListener{
 	        		text = txtName.getText();
 	        		type = (String) cType.getSelectedItem();
 	        		try{
-	        			getProperty().dbg_time = Integer.parseInt(txtDbgTime.getText());
-	        			getProperty().dbg_result = Boolean.parseBoolean((String) txtDbgResult.getSelectedItem());
+	        			getProperty().test_time = Integer.parseInt(txtDbgTime.getText());
+	        			getProperty().test_result = Boolean.parseBoolean((String) txtDbgResult.getSelectedItem());
+	        			getProperty().collapsed = chkCollapse.isSelected();
 	        		}catch(Exception e){
 	        			e.printStackTrace();
 	        		}
 	        		dispose();
 	        	}
 	        });
-
 	        
-	        add(lbl1);
-	        add(txtName);
-	        add(lbl2);
-	        add(cType);
-	        add(lbl3);
-	        add(txtDbgTime);
-	        add(lbl4);
-	        add(txtDbgResult);
+	        add(lbl1); add(txtName);
+	        add(lbl2); add(cType);
 	        
-	        add(close);
-	        add(OK);
+	        if(type!=TYPE_task){
+	        	add(chkCollapse);
+	        }else{
+	        	add(lbl3); add(txtDbgTime);
+	        	add(lbl4); add(txtDbgResult);	        	
+	        }
+	        
+	        add(close); add(OK);
 	        
 	        lbl1.setBounds(10,10, 100, 30);
 	        txtName.setBounds(120,10, 170, 30);
 	        lbl2.setBounds(10,50, 100, 30);
 	        cType.setBounds(120,50, 170, 30);
+	        
 	        lbl3.setBounds(10,90, 100, 30);
 	        txtDbgTime.setBounds(120,90, 170, 30);
 	        lbl4.setBounds(10,130, 100, 30);
 	        txtDbgResult.setBounds(120,130, 170, 30);
 	        
-	        close.setBounds(120,170, 80, 30);
-	        OK.setBounds(210,170, 80, 30);
+	        chkCollapse.setBounds(5,160, 100, 30);
+	        
+	        close.setBounds(120,200, 80, 30);
+	        OK.setBounds(210,200, 80, 30);
 
 	        setModalityType(ModalityType.APPLICATION_MODAL);
 
 	        setTitle("Change Task");
 	        setDefaultCloseOperation(DISPOSE_ON_CLOSE);
 	        setLocationRelativeTo(null);
-	        setSize(300, 230);
+	        //setSize(300, 230);
+	        setSize(300, 260);
 	    }
 	}
 	

@@ -1,8 +1,0 @@
-#goal definition
-int32 positionNum
----
-#result definition
-float64 location
----
-#feedback
-int32 percent_done

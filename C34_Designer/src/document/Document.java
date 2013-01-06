@@ -19,17 +19,25 @@ import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Properties;
+import java.util.Set;
 import java.util.UUID;
 
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.stream.events.StartDocument;
 
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
+
+import document.description.TaskDescription;
 
 import elements.Arrow;
 import elements.Joint;
@@ -48,6 +56,7 @@ public class Document extends JPanel {
 	public ArrayList<GElement> arrays = new ArrayList<GElement>();
 	public ArrayList<GElement> elements = new ArrayList<GElement>();
 	public View view = new View();
+	public TaskDescription task_description = null;
 	
 	public BTDesigner mainWindow = null;
 
@@ -85,6 +94,29 @@ public class Document extends JPanel {
 			a.getArray().targets.remove(el);
 		}
 	}
+	@SuppressWarnings("unchecked")
+	public void removeSubTree(GElement el){
+		ArrayList<GElement> targets = searchAllSubelements(el);
+		targets.add(el);
+		for(GElement t : targets){
+			if(elements.contains(t)||arrays.contains(t)) remove(t);
+		}
+	}
+	public void copyTree(GElement el){
+		ArrayList<GElement> targets = searchAllSubelements(el);
+		targets.add(el);
+		HashMap<GElement, GElement> link = new HashMap<GElement, GElement>();
+		for(GElement t : targets){
+			GElement n = t.clone();
+			link.put(t, n);
+			add(n);
+			n.getProperty().loc = n.getProperty().loc.add(new Vec(10,10));
+			n.getProperty().selected = false;
+		}
+		for(GElement t : targets){
+			link.get(t).cloneReconnect(link);
+		}
+	}
 	
 	public Document(BTDesigner mw){
 		this.mainWindow = mw;
@@ -96,6 +128,13 @@ public class Document extends JPanel {
 		addMouseMotionListener(mh);
 		addMouseWheelListener(mh);
 	
+		try {
+			task_description = new TaskDescription(Parameters.path_to_description);
+		} catch (Exception e) {
+			System.out.println("WARNING: Can't find or open task description file. It's not a critical error.");
+			System.err.println("NOT CRITICAL : Print stack and exception name (for debug purposes only): ");
+			e.printStackTrace();
+		}
 	}
 	public void renumberElements(ArrayList<GElement> elements){
 		for(GElement el: elements){ if(el instanceof Task){ ((Task) el).seqNumber = 0; } }
@@ -109,13 +148,28 @@ public class Document extends JPanel {
 							((Task) e).seqNumber = i++;
 						}
 					}
+				}else
+				if(t.type == Task.TYPE_switch){
+					int i=0;
+					for(GElement e: getSubElements(t)){
+						if(e instanceof Task){
+							((Task) e).seqNumber = i++;
+						}
+					}
 				}
 			}
 		}
 	}
+	public ArrayList<GElement> getReversed(ArrayList<GElement> original)
+	{
+		ArrayList<GElement> copy = new ArrayList<GElement>(original);
+		Collections.reverse(copy);
+		return copy;
+	}
 	public void paintElement(Graphics2D g, ArrayList<GElement> elements){
-		for(GElement el: elements){	
-			el.paint(g);			
+		//for(GElement el: getReversed(elements)){	
+		for(GElement el: (elements)){	
+			el.paintElement(g);			
 		}
 	}
 	public void paint(Graphics g){
@@ -128,16 +182,29 @@ public class Document extends JPanel {
 			riceOnViewChange();
 		}
 		renumberElements(elements);
+		hideCollapsed();
 		paintElement(g2d, arrays);
 		paintElement(g2d, elements);
 		if(selectedElement!=null) selectedElement.paint(g2d);
 		
 	}
 	
+	private void hideCollapsed(){
+		for(GElement e: elements) e.isVisiable = true;
+		for(GElement e: arrays) e.isVisiable = true;
+		for(GElement e: elements){
+			if(e.getProperty().collapsed){
+				for(GElement c : searchAllSubelements(e)) c.isVisiable=false;
+			}
+		}
+	}
+	
 	private void riceOnViewChange(){
 		for(GElement e: elements) if(e instanceof View.ChangesListener) ((View.ChangesListener)e).onViewChange();
 		for(GElement e: arrays) if(e instanceof View.ChangesListener) ((View.ChangesListener)e).onViewChange();
 	}
+	
+	private Map<String, GElement> loadedElements = new HashMap<String, GElement>();
 	
 	public void loadPlan(String fname){
 		setCurrentWorkingFile(fname);
@@ -169,6 +236,7 @@ public class Document extends JPanel {
 		view.loc = new Vec(0,0);
 		view.zoom = 1;
 		lastX=0;lastY=0;
+		loadedElements.clear();
 		loadPlan( doc.getDocumentElement() , null );
 		repaint();
 	}
@@ -188,112 +256,153 @@ public class Document extends JPanel {
 					ge = a;
 				}
 				GElement nge = null;
-				String nodeName = e.getNodeName().toLowerCase();
-				if(ge == null){
-					if(nodeName.equals("seq") || nodeName.equals("sequenser")){
-						nge = new Task();
-						((Task)nge).type = Task.TYPE_sequenser;
-						((Task)nge).text = e.getAttribute("name");
+				if( Parameters.enableLinkConnection && 
+					e.hasAttribute("id") && loadedElements.containsKey( UUID.fromString( e.getAttribute("id") ).toString()) 
+				){
+					nge = loadedElements.get( UUID.fromString( e.getAttribute("id") ).toString() );
+					if(ge == null){
+						loadPlan(e,nge);
 					}else
-					if(nodeName.equals("sel") || nodeName.equals("selector")){
-						nge = new Task();
-						((Task)nge).type = Task.TYPE_selector;
-						((Task)nge).text = e.getAttribute("name");
-					}else
-					if(nodeName.equals("par") || nodeName.equals("parallel")){
-						nge = new Task();
-						((Task)nge).type = Task.TYPE_parallel;
-						((Task)nge).text = e.getAttribute("name");
-					}else
-					if(nodeName.equals("tsk") || nodeName.equals("task")){
-						nge = new Task();
-						((Task)nge).type = Task.TYPE_task;
-						((Task)nge).text = e.getAttribute("name");
-					}
-					if(e.hasAttribute("x") && e.hasAttribute("y")){	
-						lastX = nge.getProperty().loc.x = Double.parseDouble( e.getAttribute("x") );
-						lastY = nge.getProperty().loc.y = Double.parseDouble( e.getAttribute("y") );		
-					}else{
-						lastX = nge.getProperty().loc.x = lastX+20;
-						lastY = nge.getProperty().loc.y = lastY;
-					}
-					if(e.hasAttribute("dbg_time")){	
-						nge.getProperty().dbg_time = Integer.parseInt( e.getAttribute("dbg_time") );
-					}
-					if(e.hasAttribute("dbg_result")){	
-						nge.getProperty().dbg_result = Boolean.parseBoolean( e.getAttribute("dbg_result") );
-					}
-					if(e.hasAttribute("id")){	
-						nge.id = UUID.fromString( e.getAttribute("id") );
-					}
-					add(nge);
-					loadPlan(e,nge);
-				}else
-				if(ge instanceof Arrow){
-					GElement se = null;
-					if(nodeName.equals("jnt") || nodeName.equals("joint")){
+					if(ge instanceof Arrow){
+						GElement se = null;
 						Arrow a = (Arrow)ge;
-						nge = new Joint();
-						a.add(nge);
-						loadPlan(e,ge);
-					}else
-					if(nodeName.equals("dec") || nodeName.equals("decorator")){
-						Arrow a = (Arrow)ge;
-						nge = new Decorator();
-						((Decorator)nge).text = e.getAttribute("name");
-						a.add(nge);
-						se=ge;
-					}else
-					if(nodeName.equals("seq") || nodeName.equals("sequenser")){
-						Arrow a = (Arrow)ge;
-						nge = new Task();
-						((Task)nge).type = Task.TYPE_sequenser;
-						((Task)nge).text = e.getAttribute("name");
 						a.add(nge);
 						se=nge;
+						loadPlan(e, se);
+					}
+				}else{
+					String nodeName = e.getNodeName().toLowerCase();
+					if(ge == null){
+						if(nodeName.equals("seq") || nodeName.equals("sequenser")){
+							nge = new Task();
+							((Task)nge).type = Task.TYPE_sequenser;
+							((Task)nge).text = e.getAttribute("name");
+						}else
+						if(nodeName.equals("sel") || nodeName.equals("selector")){
+							nge = new Task();
+							((Task)nge).type = Task.TYPE_selector;
+							((Task)nge).text = e.getAttribute("name");
+						}else
+						if(nodeName.equals("swi") || nodeName.equals("switch")){
+							nge = new Task();
+							((Task)nge).type = Task.TYPE_switch;
+							((Task)nge).text = e.getAttribute("name");
+						}else
+						if(nodeName.equals("par") || nodeName.equals("parallel")){
+							nge = new Task();
+							((Task)nge).type = Task.TYPE_parallel;
+							((Task)nge).text = e.getAttribute("name");
+						}else
+						if(nodeName.equals("tsk") || nodeName.equals("task")){
+							nge = new Task();
+							((Task)nge).type = Task.TYPE_task;
+							((Task)nge).text = e.getAttribute("name");
+						}
+						if(e.hasAttribute("x") && e.hasAttribute("y")){	
+							lastX = nge.getProperty().loc.x = Double.parseDouble( e.getAttribute("x") );
+							lastY = nge.getProperty().loc.y = Double.parseDouble( e.getAttribute("y") );		
+						}else{
+							lastX = nge.getProperty().loc.x = lastX+20;
+							lastY = nge.getProperty().loc.y = lastY;
+						}
+						if(e.hasAttribute("collapsed")){	
+							nge.getProperty().collapsed = Boolean.parseBoolean( e.getAttribute("collapsed") );	
+						}else{
+							nge.getProperty().collapsed = false;
+						}
+						if(e.hasAttribute("test_time")){	
+							nge.getProperty().test_time = Integer.parseInt( e.getAttribute("test_time") );
+						}
+						if(e.hasAttribute("test_result")){	
+							nge.getProperty().test_result = Boolean.parseBoolean( e.getAttribute("test_result") );
+						}
+						if(e.hasAttribute("id")){	
+							nge.id = UUID.fromString( e.getAttribute("id") );
+							loadedElements.put(nge.id.toString(), nge);
+						}
+						add(nge);
+						loadPlan(e,nge);
 					}else
-					if(nodeName.equals("sel") || nodeName.equals("seletor")){
-						Arrow a = (Arrow)ge;
-						nge = new Task();
-						((Task)nge).type = Task.TYPE_selector;
-						((Task)nge).text = e.getAttribute("name");
-						a.add(nge);
-						se=nge;
-					}else
-					if(nodeName.equals("par") || nodeName.equals("parallel")){
-						Arrow a = (Arrow)ge;
-						nge = new Task();
-						((Task)nge).type = Task.TYPE_parallel;
-						((Task)nge).text = e.getAttribute("name");
-						a.add(nge);
-						se=nge;
-					}else
-					if(nodeName.equals("tsk") || nodeName.equals("task")){
-						Arrow a = (Arrow)ge;
-						nge = new Task();
-						((Task)nge).type = Task.TYPE_task;
-						((Task)nge).text = e.getAttribute("name");
-						a.add(nge);
-						se=nge;
+					if(ge instanceof Arrow){
+						GElement se = null;
+						if(nodeName.equals("jnt") || nodeName.equals("joint")){
+							Arrow a = (Arrow)ge;
+							nge = new Joint();
+							a.add(nge);
+							loadPlan(e,ge);
+						}else
+						if(nodeName.equals("dec") || nodeName.equals("decorator")){
+							Arrow a = (Arrow)ge;
+							nge = new Decorator();
+							((Decorator)nge).text = e.getAttribute("name");
+							a.add(nge);
+							se=ge;
+						}else
+						if(nodeName.equals("seq") || nodeName.equals("sequenser")){
+							Arrow a = (Arrow)ge;
+							nge = new Task();
+							((Task)nge).type = Task.TYPE_sequenser;
+							((Task)nge).text = e.getAttribute("name");
+							a.add(nge);
+							se=nge;
+						}else
+						if(nodeName.equals("sel") || nodeName.equals("seletor")){
+							Arrow a = (Arrow)ge;
+							nge = new Task();
+							((Task)nge).type = Task.TYPE_selector;
+							((Task)nge).text = e.getAttribute("name");
+							a.add(nge);
+							se=nge;
+						}else
+						if(nodeName.equals("swi") || nodeName.equals("switch")){
+							Arrow a = (Arrow)ge;
+							nge = new Task();
+							((Task)nge).type = Task.TYPE_switch;
+							((Task)nge).text = e.getAttribute("name");
+							a.add(nge);
+							se=nge;
+						}else
+						if(nodeName.equals("par") || nodeName.equals("parallel")){
+							Arrow a = (Arrow)ge;
+							nge = new Task();
+							((Task)nge).type = Task.TYPE_parallel;
+							((Task)nge).text = e.getAttribute("name");
+							a.add(nge);
+							se=nge;
+						}else
+						if(nodeName.equals("tsk") || nodeName.equals("task")){
+							Arrow a = (Arrow)ge;
+							nge = new Task();
+							((Task)nge).type = Task.TYPE_task;
+							((Task)nge).text = e.getAttribute("name");
+							a.add(nge);
+							se=nge;
+						}
+						add(nge);
+						if(e.hasAttribute("x") && e.hasAttribute("y")){	
+							lastX=nge.getProperty().loc.x = Double.parseDouble( e.getAttribute("x") );
+							lastY=nge.getProperty().loc.y = Double.parseDouble( e.getAttribute("y") );
+						}else{
+							lastX = nge.getProperty().loc.x = lastX+20;
+							lastY = nge.getProperty().loc.y = lastY;
+						}
+						if(e.hasAttribute("collapsed")){	
+							nge.getProperty().collapsed = Boolean.parseBoolean( e.getAttribute("collapsed") );	
+						}else{
+							nge.getProperty().collapsed = false;
+						}
+						if(e.hasAttribute("test_time")){	
+							nge.getProperty().test_time = Integer.parseInt( e.getAttribute("test_time") );
+						}
+						if(e.hasAttribute("test_result")){	
+							nge.getProperty().test_result = Boolean.parseBoolean( e.getAttribute("test_result") );
+						}
+						if(e.hasAttribute("id")){	
+							nge.id = UUID.fromString( e.getAttribute("id") );
+							loadedElements.put(nge.id.toString(), nge);
+						}
+						loadPlan(e, se);
 					}
-					add(nge);
-					if(e.hasAttribute("x") && e.hasAttribute("y")){	
-						lastX=nge.getProperty().loc.x = Double.parseDouble( e.getAttribute("x") );
-						lastY=nge.getProperty().loc.y = Double.parseDouble( e.getAttribute("y") );
-					}else{
-						lastX = nge.getProperty().loc.x = lastX+20;
-						lastY = nge.getProperty().loc.y = lastY;
-					}
-					if(e.hasAttribute("dbg_time")){	
-						nge.getProperty().dbg_time = Integer.parseInt( e.getAttribute("dbg_time") );
-					}
-					if(e.hasAttribute("dbg_result")){	
-						nge.getProperty().dbg_result = Boolean.parseBoolean( e.getAttribute("dbg_result") );
-					}
-					if(e.hasAttribute("id")){	
-						nge.id = UUID.fromString( e.getAttribute("id") );
-					}
-					loadPlan(e, se);
 				}
 			}
 		}
@@ -410,13 +519,40 @@ public class Document extends JPanel {
 	
 	public GElement.Creator creator = null;
 	public boolean removeElement = false;
+	public boolean removeSubElements = false;
+	public boolean copyElement = false;
+	public boolean reconectArrow = false;
 	public Modifier modifier = null;
 	public JLabel tip = null;
 	public final boolean cleanToolSelectionAfterUse = false;
 	private String absoluteFilePath = "plan.xml";
+	
+	public String getAbsoluteFilePath() {
+		if (absoluteFilePath == null) {
+			return null;
+		}
+		return new String(absoluteFilePath);
+	}
+
+	public String getShortFilePath() {
+		if (absoluteFilePath == null) {
+			return null;
+		}
+		
+		String[] splitted = absoluteFilePath.split("/");
+		if (splitted.length == 0) {
+			return null;
+		}
+		
+		return new String(splitted[splitted.length - 1]);
+	}
+	
 	public void toolSelectionClean(){
 		creator = null;
 		removeElement = false;
+		removeSubElements = false;
+		copyElement = false;
+		reconectArrow = false;
 		modifier = null;
 		if(tip!=null) tip.setText(Toolbar.TIP_move);
 	}
@@ -459,7 +595,7 @@ public class Document extends JPanel {
 		@Override
 		public void mousePressed(MouseEvent ev) {
 			mousePressed = ev.getPoint();
-			for(GElement el: elements){
+			for(GElement el: getReversed(elements)){
 				GElement e = el.underMouse(ev.getPoint());
 				if(e!=null){
 					selectedElement = e;
@@ -511,12 +647,32 @@ public class Document extends JPanel {
 						el.modify();
 						repaint();
 					}
-					if(cleanToolSelectionAfterUse) toolSelectionClean();
+					if(cleanToolSelectionAfterUse) 
+						toolSelectionClean();
+					else 
+					if(creator instanceof Arrow.Reconector){
+						((Arrow.Reconector)creator).getInstance().getProperty().selected=false;
+						toolSelectionClean();
+					}
 				}
 			}
 			if(removeElement && selectedElement!=null){
 				remove(selectedElement);
 				if(cleanToolSelectionAfterUse) toolSelectionClean();
+			}
+			if(removeSubElements && selectedElement!=null){
+				removeSubTree(selectedElement);
+				//if(cleanToolSelectionAfterUse) 
+				toolSelectionClean();
+			}
+			if(copyElement && selectedElement!=null){
+				copyTree(selectedElement);
+				//if(cleanToolSelectionAfterUse) 
+				toolSelectionClean();
+			}
+			if(reconectArrow && selectedElement!=null && selectedElement instanceof Arrow){
+				creator = new Arrow.Reconector((Arrow)selectedElement);
+				mainWindow.toolbar.setTipText(creator.toolTip());
 			}
 			if(modifier!=null && selectedElement!=null){
 				modifier.set(selectedElement);
@@ -531,8 +687,14 @@ public class Document extends JPanel {
 //				}
 //				System.out.println();
 //			}
+			
 			selectedElement.getProperty().selected=false;
 			selectedElement = null;
+			
+			if(creator!=null && creator instanceof Arrow.Reconector){
+				((Arrow.Reconector)creator).getInstance().getProperty().selected=true;
+			}
+			
 			repaint();
 			super.mouseReleased(e);
 		}
@@ -544,13 +706,22 @@ public class Document extends JPanel {
 		if(tname==Task.TYPE_sequenser) return "seq";
 		if(tname==Task.TYPE_task) return "tsk";
 		if(tname==Task.TYPE_parallel) return "par";
+		if(tname==Task.TYPE_switch) return "swi";
 		return "";
 	}
 	public static final String tabulation = "   ";
+	private Set<String> savedIds = new HashSet<String>();
 	public String strTaskProperties(Task root){
+		String rootId = root.id.toString();
+		if(Parameters.enableTaskIdRegeneration){
+			if(savedIds.contains(rootId)){
+				rootId = GElement.getRandomUUID().toString();
+			}
+			savedIds.add(rootId);
+		}
 		if(root.type.equals(Task.TYPE_task))
-			return root.getProperty().toStringForTask(view)+" id=\""+root.id.toString()+"\"";
-		return root.getProperty().toStringForSTask(view)+" id=\""+root.id.toString()+"\"";
+			return root.getProperty().toStringForTask(view)+" id=\""+rootId+"\"";
+		return root.getProperty().toStringForSTask(view)+" id=\""+rootId+"\"";
 	}
 	public String strDecProperties(Decorator d){
 		return d.getProperty().toString(view);
@@ -558,7 +729,7 @@ public class Document extends JPanel {
 	public String strJointProperties(Joint d){
 		return "";
 	}
-	public String createXml(Task root, String tab){return createXml(root, tab, false);}
+	public String createXml(Task root, String tab){String res = createXml(root, tab, false); savedIds.clear(); return res; }
 	public String createXml(Task root, String tab, boolean justNames){
 		if(root.type == Task.TYPE_task) 
 			return tab+"<"+xmlNameOfTask(root.type)+" name=\""+root.text+"\""+(justNames?"":" "+strTaskProperties(root))+" />";
@@ -591,7 +762,9 @@ public class Document extends JPanel {
 		return xml;
 	}
 
-	public void compile() {
+	public void compile(String destination) {
+		setCurrentWorkingFile(destination);
+		
 		toolSelectionClean();
 		ArrayList<GElement> root = getRoot();
 		if(root.size()!=1){
@@ -628,6 +801,10 @@ public class Document extends JPanel {
 		if(saved) saveXmlToFile(createXml(rootTask, tabulation, true), getCurrentWorkingFileForXmlWithJustNames(), false);
 	}
 	
+	public void compile() {
+		compile(getCurrentWorkingFile());
+	}
+	
 	private boolean saveXmlToFile(String xml, String filen, boolean withNotifications){
 		xml = "<plan>\n"+xml+"\n</plan>";
 				
@@ -645,9 +822,8 @@ public class Document extends JPanel {
 		return true;
 	}
 
-	private void setCurrentWorkingFile(String absoluteFilePath) {
+	public void setCurrentWorkingFile(String absoluteFilePath) {
 		this.absoluteFilePath = absoluteFilePath;
-		mainWindow.setTitle("Cogniteam BTDesigner "+BTDesigner.VERSION+": "+absoluteFilePath);
 	}
 	
 	private String getCurrentWorkingFile() {
@@ -697,7 +873,7 @@ public class Document extends JPanel {
 	}
 
 	Process BTExecuter=null;
-	public void run() {
+	public void test() {
 		if(BTExecuter!=null){
 			BTExecuter.destroy();
 			return;
@@ -722,7 +898,8 @@ public class Document extends JPanel {
 				cmd.add("./BTExecuter-win.exe");
 			//cmd.add("--test");
 			cmd.add("-bt"); cmd.add(absoluteFilePath);
-			cmd.add("-lu"); cmd.add((new File("lookup.xml")).getAbsolutePath());
+			cmd.add("-lu"); cmd.add((new File(Parameters.path_to_lookup)).getAbsolutePath());
+			cmd.add("--address"); cmd.add((new File(Parameters.path_to_address)).getAbsolutePath());
 			ProcessBuilder pb = new ProcessBuilder(cmd);
 			try {
 				Process p = pb.start();
@@ -734,13 +911,12 @@ public class Document extends JPanel {
 				tip.setText("Execution running... (press \"Run\" again for stop running)");
 				while( (line=stdout.readLine())!=null){
 					System.out.println("BTExecuter STDOUT: "+line);
-					if(line.startsWith("plan{")){ plan+=line; c++; }
+					if(line.contains("plan{")){ plan+=line; c++; }
 					else if(plan.length()>0){
 						plan+=line;
 						if(line.contains("{")) c++;
 						if(line.contains("}")) c--;
 						if(c==0){
-							//System.out.println(": "+plan);
 							cleanRunning();
 							setRunning(extractIds(plan));
 							plan="";
