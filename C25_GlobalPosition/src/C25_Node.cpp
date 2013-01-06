@@ -8,6 +8,7 @@
 #include "C25_GlobalPosition/C25.h"
 #include "C25_GlobalPosition/C25C0_ROP.h"
 #include "ros/service.h"
+#include "LocalizationTrackServer.hpp"
 #include <message_filters/subscriber.h>
 #include <message_filters/synchronizer.h>
 #include <message_filters/time_synchronizer.h>
@@ -35,12 +36,13 @@ private:
   message_filters::Subscriber<Odometry> pos_sub;
   Synchronizer<MySyncPolicy> sync;
   C25_GlobalPosition::C25C0_ROP last_msg;
+  LocalizationTrackServer *taskserver;
 public:
 
 	 /**
 	  * constructor, initializes the ROS node, subscribe it to the given topics and instruct it to provide the service
 	  */
-	  C25_Node():
+	  C25_Node(int argc, char **argv):
 		  imu_sub(nh_,"imu",1),
 		  pos_sub(nh_,"ground_truth_odom",1),
 		  sync(MySyncPolicy(10), imu_sub, pos_sub)
@@ -49,6 +51,16 @@ public:
 		  c25_publisher=nh_.advertise<C25_GlobalPosition::C25C0_ROP>("C25/publish",100);
 		  c25_service=nh_.advertiseService("C25/service",&C25_Node::proccess,this);
 		  ROS_INFO("service on\n");
+		boost::thread mythread( &C25_Node::startActionServer,this,argc,argv);
+	  }
+
+
+	  void startActionServer(int argc, char **argv){
+		  ros::init(argc, argv, "C24_ObstacleDetectionTaskServer");
+		  taskserver=new LocalizationTrackServer();
+		  while(ros::ok()){
+
+		  }
 	  }
 
 	  /**
@@ -82,7 +94,7 @@ public:
 int main(int argc, char **argv)
 {
   ros::init(argc, argv, "C25_GlobalPosition");
-  C25_Node *my_node=new C25_Node();
+  C25_Node *my_node=new C25_Node(argc,argv);
   while(ros::ok()){
 	  ros::spin();
   }
