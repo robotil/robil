@@ -12,11 +12,13 @@ from Node import node
 
 class TskNode (node):
     def __init__(self,treeInst,mytree,parent):
+        #tsk id is it's name        
+        self.Id = treeInst.get("name")
         #call to super-condstracture
         node.__init__(self,treeInst,mytree,"tsk",parent)
         #upsate distributions from xml file
-        self.distTableSucc = self.createDistTable("Successdistribution")
-        self.distTableFail = self.createDistTable("Failuredistribution")
+#        self.distTableSucc = self.createDistTable("Successdistribution")
+#        self.distTableFail = self.createDistTable("Failuredistribution")
            
         
         
@@ -47,8 +49,17 @@ class TskNode (node):
     def setDEBUGnode(self,sSucc=None,sTime=None):
         node.DEBUGnode(None,None)
         self.DEBUG = [sSucc,sTime]
-     
     
+    
+    #override the node func- check for tsk etree and then in the plan etree 
+    def getAttrib(self,parm):
+        #try to get string attributes from tsk etree in myTree
+        stringAttrib = self.myTree.getTskAttrib(self.Id,parm)
+        #if faild- return none, try to take string attributes from plan tree by calling node method-getAttrib
+        if stringAttrib == None:
+            stringAttrib = node.getAttrib(self,parm)
+
+        return stringAttrib
 
 
    
