@@ -1,9 +1,7 @@
 C31_PathPlanner/ppMap map
-C31_PathPlanner/ppConstraints constraints
 C31_PathPlanner/ppLocation start
 C31_PathPlanner/ppLocation destination
-C31_PathPlanner/ppWaypoints path
-uint8 algorith
-C31_PathPlanner/ppRequirements requirements
+C31_PathPlanner/ppConstraints constraints
+uint8 algorithm
 ---
 C31_PathPlanner/ppWaypoints path
