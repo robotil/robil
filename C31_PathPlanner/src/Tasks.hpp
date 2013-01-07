@@ -69,7 +69,17 @@ public:
 
 	Path plan(){ SYNCHRONIZED
 
-		Path path = searchPath(arguments.map, arguments.start, arguments.finish, constraints);
+		stringstream out;
+		out<<"searchPath(map="<<map.w()<<"x"<<map.h()
+				<<", start="<<start.x<<","<<start.y
+				<<", finish="<<finish.x<<","<<finish.y
+				<<", const.dim="<<dimentions.radius
+				<<", const.trans#="<<transits.size()
+				<<", const.attractors#="<<attractors.size()
+		<<")";
+		ROS_INFO("PathPlanning::plan : %s",out.str().c_str());
+
+		Path path ;//= searchPath(arguments.map, arguments.start, arguments.finish, constraints);
 
 		return path;
 	}
@@ -135,17 +145,10 @@ protected:
 };
 
 class PathPlanningServer:public PathPlanningTask{
-
-
-
 public:
     PathPlanningServer(PathPlanning& planner, string name = "/PathPlanning"):
     	PathPlanningTask(planner, name, boost::bind(&PathPlanningServer::task, this, _1))
-    {
-
-    }
-
-
+    {  }
 
     void task(const GOAL &goal){
         int32_t success = SUCCESS; //FAULT, SUCCESS, PLAN
@@ -161,7 +164,7 @@ public:
         Arguments args = parseArguments(goal->parameters);
 
         /* NUMBER OF ITERATIONS IN TASK LOOP */
-        for(int times =0; times < 100; times++){
+        for(int times =0; times < 1; /*times++*/){
             if (_server.isPreemptRequested() || !ros::ok()){
 
                 /* HERE PROCESS PREEMPTION OR INTERAPT */
@@ -173,10 +176,12 @@ public:
             }
 
             /* HERE PROCESS TASK */
-            ROS_INFO("%s: ITERATION %i", _name.c_str(), times);
+            ROS_INFO("%s: plan path", _name.c_str());
+            _planner.plan();
 
             /* SLEEP BETWEEN LOOP ITERATIONS */
-            boost::this_thread::sleep(boost::posix_time::millisec(100));
+            //boost::this_thread::sleep(boost::posix_time::millisec(100));
+            boost::this_thread::sleep(boost::posix_time::millisec(1000));
         }
 
         finish( success, desc, plan );
@@ -189,9 +194,7 @@ class PathPlanningFocusServer:public PathPlanningTask{
 public:
     PathPlanningFocusServer(PathPlanning& planner, string name = "/PathPlanningFocus"):
     	PathPlanningTask(planner, name, boost::bind(&PathPlanningFocusServer::task, this, _1))
-    {
-
-    }
+    {  }
 
     void task(const GOAL &goal){
         int32_t success = SUCCESS; //FAULT, SUCCESS, PLAN
@@ -204,7 +207,6 @@ public:
         ROS_INFO("%s: Start: task params = %s", _name.c_str(), goal->parameters.c_str());
         
         /* HERE PROCESS TASK PARAMETERS */
-
         Arguments args = parseArguments(goal->parameters);
 
         /* NUMBER OF ITERATIONS IN TASK LOOP */
@@ -225,13 +227,13 @@ public:
             	std::stringstream numbers; numbers<<args["x"]<<','<<args["y"];
             	char c; double x, y;
             	numbers>>x>>c>>y;
-            	ROS_INFO("%s: set planning goal [x,y] = %f, %f", _name.c_str(), x, y);
+            	ROS_INFO("%s: set planning goal to [x,y] = %f, %f", _name.c_str(), x, y);
             	PathPlanning::EditSession session = _planner.startEdit();
             	session.arguments.finish.x=x;
             	session.arguments.finish.y=y;
             }else{
             	success = FAULT;
-            	desc = "I don't know to set path planner arguments from current parameters";
+            	desc = "I don't know to set path planner goal from current parameters : "+goal->parameters;
             	ROS_INFO("%s: ERROR: %s", _name.c_str(), desc.c_str());
             	break;
             }
