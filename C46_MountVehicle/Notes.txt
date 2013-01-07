@@ -1,4 +1,4 @@
-C46_EnterVehicle
+C46_MountVehicle
 # Description: robot enters vehicle from a standing position
 facing forwards near the entrence of the vehicle.
 Robot enters vehicle with final position sitting inside facing the wheel.
