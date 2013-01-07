@@ -1,4 +1,0 @@
-<launch>
-  <node name="c21" pkg="C21_VisionAndLidar" type="c21" 
-       args="/left_eye/image_raw /right_eye/image_raw"/>
-</launch>

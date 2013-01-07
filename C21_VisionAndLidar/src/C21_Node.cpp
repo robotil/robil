@@ -72,7 +72,9 @@ public:
 			C21_VisionAndLidar::C21::Response &res )
 	  {
 		  ROS_INFO("recived request, tying to fetch data\n");
+			_myMutex->lock();
 		  pcl::io::loadPCDFile("cloud.pcd",res.scene_full_resolution_msg.cloud);
+			_myMutex->unlock();
 		  return true;
 	  }
 
@@ -104,7 +106,9 @@ public:
 
 		pcl::PointCloud<pcl::PointXYZ> out;
 		pcl::fromROSMsg(*cloud,out);
-		pcl::io::savePCDFile("cloud.pcd",out);
+		_myMutex->lock();
+		pcl::io::savePCDFile("cloud.pcd",out,true);
+		_myMutex->unlock();
 
 	  }
 
@@ -116,10 +120,11 @@ public:
 			  _myMutex->lock();
 			  imgs.push_back(cv::imread("rgb.ppm", CV_LOAD_IMAGE_COLOR));
 			  imgs.push_back(cv::imread("rgb2.ppm", CV_LOAD_IMAGE_COLOR));
+ 			  _myMutex->unlock();
 			  cv::Mat pano;
 			  cv::Stitcher stitcher = cv::Stitcher::createDefault(false);
 			  stitcher.stitch(imgs, pano);
- 			  _myMutex->unlock();
+
 	            cv_bridge::CvImage cvi;
 	            cvi.header.stamp = ros::Time::now();
 	            cvi.header.frame_id = "image";
@@ -157,7 +162,7 @@ private:
 
 int main(int argc, char **argv)
 {
-  ros::init(argc, argv, "c21_Vision_and_Lidar");
+  ros::init(argc, argv, "C21_VisionAndLidar");
   C21_Node my_node("/multisense_sl/left/image_raw","/multisense_sl/right/image_raw");
   while(ros::ok()){
 	  ros::spin();
