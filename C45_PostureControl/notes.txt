@@ -1,0 +1,5 @@
+C45 – Posture Control
+---------------------------------
+1) run:
+roslaunch C45_PostureControl C45_PostureControl.action
+2) use action C45_PostureControl
