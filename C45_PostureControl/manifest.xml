@@ -15,7 +15,6 @@
   <depend package="roslib"/>
   <depend package="std_msgs"/>
   <depend package="actionlib_msgs"/>
-  <depend package="drc_robot_utils"/>
   <depend package="hrl_kinematics"/>
   <depend package="control_toolbox"/>
 
