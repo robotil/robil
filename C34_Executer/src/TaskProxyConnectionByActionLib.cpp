@@ -62,15 +62,15 @@ using namespace C0_RobilTask;
 			res.success = BTTaskResult::SUCCESS_FAULT;			
 		}else{
 			actionlib::SimpleClientGoalState state = client.getState();
-			if(state==actionlib::SimpleClientGoalState::SUCCEEDED){
-				res.description=client.getResult()->description;
-				res.plan=client.getResult()->plan;
+			/*if(state==actionlib::SimpleClientGoalState::SUCCEEDED){*/
+				res.description = client.getResult()->description;
+				res.plan = client.getResult()->plan;
 				res.success = client.getResult()->success;
-			}else{
+			/*}else{
 				res.description="actionlib::SimpleClientGoalState != actionlib::SimpleClientGoalState::SUCCEEDED";
 				res.plan="";
 				res.success = BTTaskResult::SUCCESS_FAULT;
-			}
+			}*/
 		}
 		PRINT("result{success="<<success2str(res.success)<<",plan="<<res.plan<<",desc="<<res.description<<"}");
 		return res;

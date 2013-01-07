@@ -26,9 +26,11 @@ int _main(int argc, char** argv){
 int main(int argc, char** argv){
 	  ros::init(argc, argv, "C31_GlobalPathPlanner");
 	  ros::NodeHandle node;
-	  ros::ServiceServer ss_PathPlan = node.advertiseService(ros::this_node::getName(),PathPlan);
+	  ros::ServiceServer c31_PathPlan = node.advertiseService(ros::this_node::getName(),PathPlan);
 
-	  PathPlanningServer task;
+	  PathPlanning pathplanning;
+	  PathPlanningServer task_pathplanning(pathplanning);
+	  PathPlanningFocusServer task_pathplanningfocus(pathplanning);
 
 	  ros::spin();
 	  return 0;

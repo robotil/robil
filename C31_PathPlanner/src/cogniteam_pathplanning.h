@@ -23,7 +23,7 @@ typedef vector<Attractor> Attractors;
 
 struct Waypoint{
 	size_t x; size_t y;
-	Waypoint(size_t x, size_t y):x(x),y(y){}
+	Waypoint(size_t x=0, size_t y=0):x(x),y(y){}
 };
 typedef vector<Waypoint> Waypoints;
 typedef Waypoints Path;
