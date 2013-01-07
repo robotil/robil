@@ -12,15 +12,16 @@ class LocalizationTrackServer{
     typedef C0_RobilTask::RobilTaskFeedback FEEDBACK;
     typedef C0_RobilTask::RobilTaskResult RESULT;
     typedef actionlib::SimpleActionServer<C0_RobilTask::RobilTaskAction> Server;
-    
-protected:
-    ros::NodeHandle _node;
-    Server _server;
-    string _name;
-    FEEDBACK _feedback;
-    RESULT _result;
     int PLAN;
     int FAULT;
+
+protected:
+    ros::NodeHandle _node;
+    string _name;
+    Server _server;
+    FEEDBACK _feedback;
+    RESULT _result;
+
 
 public:
     LocalizationTrackServer():

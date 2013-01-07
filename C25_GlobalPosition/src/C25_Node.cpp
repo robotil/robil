@@ -51,12 +51,12 @@ public:
 		  c25_publisher=nh_.advertise<C25_GlobalPosition::C25C0_ROP>("C25/publish",100);
 		  c25_service=nh_.advertiseService("C25/service",&C25_Node::proccess,this);
 		  ROS_INFO("service on\n");
-		boost::thread mythread( &C25_Node::startActionServer,this,argc,argv);
+		  boost::thread mythread( &C25_Node::startActionServer,this,argc,argv);
 	  }
 
 
 	  void startActionServer(int argc, char **argv){
-		  ros::init(argc, argv, "C24_ObstacleDetectionTaskServer");
+		  ros::init(argc, argv, "C25_LocalizationTrackServer");
 		  taskserver=new LocalizationTrackServer();
 		  while(ros::ok()){
 
