@@ -12,6 +12,8 @@ using namespace std;
 using namespace C0_RobilTask;
 using namespace RobilTask;
 
+
+
 class PathPlanningServer{
 
     typedef RobilTaskGoalConstPtr GOAL;
@@ -52,7 +54,7 @@ public:
     }
 
     void task(const GOAL &goal){
-        int32_t success = PLAN;
+        int32_t success = SUCCESS; //FAULT, SUCCESS, PLAN
         string plan ="";
 
         /* GET TASK PARAMETERS */
@@ -75,6 +77,7 @@ public:
             }
 
             /* HERE PROCESS TASK */
+            ROS_INFO("%s: ITERATION %i", _name.c_str(), times);
 
             /* SLEEP BETWEEN LOOP ITERATIONS */
             boost::this_thread::sleep(boost::posix_time::millisec(100));
@@ -125,7 +128,7 @@ public:
     }
 
     void task(const GOAL &goal){
-        int32_t success = PLAN;
+        int32_t success = SUCCESS; //FAULT, SUCCESS, PLAN
         string plan ="";
         
         /* GET TASK PARAMETERS */

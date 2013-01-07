@@ -14,7 +14,7 @@ bool PathPlan( C31_PathPlanner::PathPlanRequest& req, C31_PathPlanner::PathPlanR
 }
 
 
-int main(int argc, char** argv){
+int _main(int argc, char** argv){
   ros::init(argc, argv, "C31_GlobalPathPlanner");
   ros::NodeHandle node;
   ros::ServiceServer ss_PathPlan = node.advertiseService(ros::this_node::getName(),PathPlan);
@@ -23,9 +23,17 @@ int main(int argc, char** argv){
   return 0;
 }
 
-int _main(int argc, char** argv){
+int main(int argc, char** argv){
+	  ros::init(argc, argv, "C31_GlobalPathPlanner");
+	  ros::NodeHandle node;
+	  ros::ServiceServer ss_PathPlan = node.advertiseService(ros::this_node::getName(),PathPlan);
 
-	return cogniteam_pathplanning_test_map_inflation(argc, argv);
+	  PathPlanningServer task;
+
+	  ros::spin();
+	  return 0;
+
+	//return cogniteam_pathplanning_test_map_inflation(argc, argv);
 
 }
 
