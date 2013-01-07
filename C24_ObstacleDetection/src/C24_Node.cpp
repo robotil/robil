@@ -9,17 +9,15 @@
 
 #include "ros/ros.h"
 #include "C24_ObstacleDetection/C24.h"
-#include <image_transport/image_transport.h>
-#include <message_filters/synchronizer.h>
-#include <message_filters/sync_policies/approximate_time.h>
-#include <sensor_msgs/image_encodings.h>
-#include <cv_bridge/cv_bridge.h>
-#include <opencv2/imgproc/imgproc.hpp>
-#include <opencv/cv.h>
-#include <opencv/highgui.h>
-#include <image_transport/subscriber_filter.h>
+#include "ObstacleDetectionServer.hpp"
+#include <C22_GroundRecognitionAndMapping/C22C24.h>
+#include "ros/service.h"
+#include <nav_msgs/Odometry.h>
+#include <geometry_msgs/PoseWithCovariance.h>
+#include <tf/transform_listener.h>
 
-namespace enc=sensor_msgs::image_encodings;
+
+
 
 /**
  * this class represent the C24_Node,
@@ -34,18 +32,22 @@ public:
 	 * @param left_camera the left camera image topic
 	 * @param right_camera the right camera image topic
 	 */
-	  C24_Node(std::string left_camera,std::string right_camera) :
-		it_(nh_),
-		//the purpose of the following 3 lines is to synchronize the data from the cameras using a message filter
-		//more on filters and how to use them can be found on http://www.ros.org/wiki/message_filters
-		left_image_sub_( it_, left_camera, 1 ),
-		right_image_sub_( it_, right_camera, 1 ),
-		sync( MySyncPolicy( 10 ), left_image_sub_, right_image_sub_ )
+	  C24_Node(int argc, char **argv)
 	  {
-		ROS_INFO("finished subscribing\n");
-		sync.registerCallback( boost::bind( &C24_Node::callback, this, _1, _2 ) );  //Specifying what to do with the data
+		client = nh_.serviceClient<C22_GroundRecognitionAndMapping::C22C24>("C22/C24");
+		sub_=nh_.subscribe("ground_truth_odom",1,&C24_Node::callback, this);
 		service = nh_.advertiseService("C24", &C24_Node::proccess, this); //Specifying what to do when a reconstructed 3d scene is requested
 		ROS_INFO("service on\n");
+		boost::thread mythread( &C24_Node::startActionServer,this,argc,argv);
+	  }
+
+
+	  void startActionServer(int argc, char **argv){
+		  ros::init(argc, argv, "C24_ObstacleDetectionTaskServer");
+		  taskserver=new ObstacleDetectionServer();
+		  while(ros::ok()){
+
+		  }
 	  }
 
 
@@ -58,8 +60,40 @@ public:
 	  bool proccess(C24_ObstacleDetection::C24::Request  &req,
 			C24_ObstacleDetection::C24::Response &res )
 	  {
-		  ROS_INFO("recived request, tying to fetch data\n");
+		  C22_GroundRecognitionAndMapping::C22C24 srv;
+		  if (client.call(srv))
+		  {
+			  res.map.row.resize(srv.response.drivingPath.row.size());
+			  for (unsigned int i=0;i<srv.response.drivingPath.row.size();i++){
+				 res.map.row.at(i).column.resize(srv.response.drivingPath.row.size());
+			  	 for (unsigned int j=0;j<srv.response.drivingPath.row.size();j++){
+			  		  if (srv.response.drivingPath.row.at(i).column.at(j).status==0){
+			  			  float height=srv.response.drivingPath.row.at(i).column.at(j).height;
+			  			  //std::cout<<"block: "<<height -zhead -zpelvis-0.4<< std::endl;
+			  			  if(std::abs(height -zhead -zpelvis-0.5)>0.25){
+			  						std::cout<<"block: "<<height -zhead -zpelvis-0.4<< std::endl;
+			  						res.map.row.at(i).column.at(j).status=1;
 
+			  				}else{
+			  					res.map.row.at(i).column.at(j).status=0;
+			  				}
+
+
+			  		  }else{
+			  			  if(srv.response.drivingPath.row.at(i).column.at(j).status==1){
+			  			  	  res.map.row.at(i).column.at(j).status=1;
+			  		  	  }else{
+			  		  	  	  res.map.row.at(i).column.at(j).status=2;
+			  		  	  }
+			  		  }
+			  	 }
+			  }
+		  }
+		  else
+		  {
+			  ROS_ERROR("couldn't get a reply from C22\n");
+			  return false;
+		  }
 		  return true;
 	  }
 
@@ -69,43 +103,40 @@ public:
 	   * @param left_msg ROS mesage with image data from the left camera topic
 	   * @param right_msg ROS mesage with image data from the right camera topic
 	   */
-	  void callback(const sensor_msgs::ImageConstPtr& left_msg,const sensor_msgs::ImageConstPtr& right_msg){
-		 cv_bridge::CvImagePtr left;
-		 cv_bridge::CvImagePtr right;
-
-		try
-		{
-		  left = cv_bridge::toCvCopy(left_msg,enc::RGB8);
-		  right =cv_bridge::toCvCopy(right_msg,enc::RGB8);
-		}
-		catch (cv_bridge::Exception& e)
-		{
-		  ROS_ERROR("cv_bridge exception: %s", e.what());
-		  return;
-		}
+	  void callback(const nav_msgs::OdometryConstPtr& pos_msg){
+		  zpelvis=pos_msg->pose.pose.position.z;
 	  }
 
+  float zhead;
+  float zpelvis;
 private:
   ros::NodeHandle nh_;
-  image_transport::ImageTransport it_;
-  typedef image_transport::SubscriberFilter ImageSubscriber;
-  ImageSubscriber left_image_sub_;
-  ImageSubscriber right_image_sub_;
+  ros::Subscriber sub_;
   ros::ServiceServer service;
-  typedef message_filters::sync_policies::ApproximateTime<sensor_msgs::Image, sensor_msgs::Image> MySyncPolicy;
-  message_filters::Synchronizer< MySyncPolicy > sync;
+  ros::ServiceClient client;
+  ObstacleDetectionServer * taskserver;
 };
 
 int main(int argc, char **argv)
 {
   ros::init(argc, argv, "C24_ObstacleDetection");
-  if(argc!=3){
-	  printf("usage: C24_module <left camera topic> <right camera topic>");
-  }
-  C24_Node my_node(argv[1],argv[2]);
-  ROS_INFO("made topic at %s %s \n",argv[1],argv[2]);
-  while(ros::ok()){
-	  ros::spin();
+  C24_Node *my_node=new C24_Node(argc, argv);
+
+  tf::TransformListener listener;
+
+  ros::Rate rate(10.0);
+  while (ros::ok()){
+	tf::StampedTransform transform;
+	try{
+	  listener.lookupTransform("pelvis", "head",
+							   ros::Time(0), transform);
+	}
+	catch (tf::TransformException ex){
+	  ROS_ERROR("%s",ex.what());
+	}
+	my_node->zhead=transform.getOrigin().z();
+
+	ros::spinOnce();
   }
   return 0;
 }
