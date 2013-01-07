@@ -31,7 +31,12 @@ rosbuild_gensrv()
 #rosbuild_add_boost_directories()
 #rosbuild_link_boost(${PROJECT_NAME} thread)
 #rosbuild_add_executable(example examples/example.cpp)
+<<<<<<< HEAD
 #rosbuild_add_executable(C45_PostureControl_client src/turn_in_place.cpp)
 rosbuild_add_executable(C45_PostureControl src/C45_PostureControl.cpp)
+=======
+rosbuild_add_executable(C45_PostureControl src/turn_in_place.cpp)
+rosbuild_add_executable(C45_PostureControl_maintain_stability src/maintain_stability.cpp)
+>>>>>>> e2257af8996de269162ddd2be0c5cefb72b5fd1c
 rosbuild_add_executable(C45_PostureControl_com_error src/com_error.cpp)
 #target_link_libraries(example ${PROJECT_NAME})

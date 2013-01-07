@@ -15,16 +15,22 @@
 #include <actionlib/client/simple_action_client.h>
 #include <actionlib/client/terminal_state.h>
 #include <boost/thread.hpp>
+<<<<<<< HEAD
 #include <C45_PostureControl/C45_PostureControlAction.h>
 //#include <C45_PostureControl/maintain_postureAction.h>
 #include <std_msgs/Float64.h>
 #include <boost/bind.hpp>
+=======
+#include <C45_PostureControl/PostureControlAction.h>
+#include <std_msgs/Float64.h>
+>>>>>>> e2257af8996de269162ddd2be0c5cefb72b5fd1c
 
 class turn_in_place{
 private:
 	ros::NodeHandle nh_;
 	ros::Publisher turn_angle;
 	ros::Subscriber turn_sub_;
+<<<<<<< HEAD
 	//actionlib::SimpleActionClient<C45_PostureControl::C45_PostureControlAction> as_;// NodeHandle instance must be created before this line.
 	C45_PostureControl::C45_PostureControlFeedback feedback_;
 	C45_PostureControl::C45_PostureControlResult result_;
@@ -46,6 +52,15 @@ public:
 				boost::bind(&turn_in_place::activeCB, this), boost::bind(&turn_in_place::feedbackCB, this, _1)*/);
 
 		ROS_DEBUG("Goal sent");
+=======
+	C45_PostureControl::PostureControlGoal goal;
+
+public:
+	turn_in_place(){
+		turn_angle = nh_.advertise<std_msgs::Float64>("/back_lbz_position_controller/command",true);
+		goal.maintainPosture = true;
+		turn_sub_ =nh_.subscribe("C45_PostureControl",1000,&turn_in_place::turn_and_maintain_stability,this);
+>>>>>>> e2257af8996de269162ddd2be0c5cefb72b5fd1c
 
 	}
 
@@ -53,6 +68,7 @@ public:
 	}
 
 	void turn_and_maintain_stability(std_msgs::Float64 angle){
+<<<<<<< HEAD
 
 	}
 
@@ -103,14 +119,32 @@ public:
 	void feedbackCB(const C45_PostureControl::C45_PostureControlActionFeedbackConstPtr& fb){
 		ROS_INFO("Feedback Callback: %f", fb->feedback.stabilityQuality);
 	}
+=======
+		// create the action client
+		actionlib::SimpleActionClient<C45_PostureControl::PostureControlAction> ac(nh_,"C45_PostureControl_maintain_stability",true);
+		ROS_INFO("Waiting for maintain_stability action server to start.");
+		ac.waitForServer();
+		ROS_INFO("Action server started");
+		turn_angle.publish(angle);
+		// send a goal to the action
+		ac.sendGoal(goal);
+	  }
+>>>>>>> e2257af8996de269162ddd2be0c5cefb72b5fd1c
 };
 
 int main (int argc, char **argv)
 {
+<<<<<<< HEAD
 	ros::init(argc, argv, "turn_in_place");
 	turn_in_place turn_maintain_stability = turn_in_place();
 	ROS_INFO("Ready");
 	ros::spin();
+=======
+  ros::init(argc, argv, "turn_in_place");
+  turn_in_place turn_maintain_stability = turn_in_place();
+  ROS_INFO("Ready");
+  ros::spin();
+>>>>>>> e2257af8996de269162ddd2be0c5cefb72b5fd1c
 
   return 0;
 }
