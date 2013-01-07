@@ -4,7 +4,7 @@ import roslib; roslib.load_manifest('C47_DismountVehicle')
 import rospy, math
 
 import actionlib
-from C46_Mount_server import DismountVehicleServer
+from C47_Dismount_server import DismountVehicleServer
 from std_msgs.msg import Float64
 
 if __name__ == '__main__':

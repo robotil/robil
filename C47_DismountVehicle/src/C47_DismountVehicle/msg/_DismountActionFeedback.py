@@ -4,9 +4,9 @@ python3 = True if sys.hexversion > 0x03000000 else False
 import genpy
 import struct
 
+import C47_DismountVehicle.msg
 import genpy
 import actionlib_msgs.msg
-import C47_DismountVehicle.msg
 import std_msgs.msg
 
 class DismountActionFeedback(genpy.Message):

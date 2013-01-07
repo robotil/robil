@@ -5,4 +5,4 @@ float64 dismount
 float64 dismounted
 ---
 # Define a feedback message
-float64s percent_complete
+float64 percent_complete
