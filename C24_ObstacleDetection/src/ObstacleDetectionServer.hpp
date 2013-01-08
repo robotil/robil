@@ -62,7 +62,7 @@ public:
             boost::this_thread::sleep(boost::posix_time::millisec(100));
         }
 
-        if(success)
+        if(success-1)
         {
             _result.success = success;
             ROS_INFO("%s: Succeeded", _name.c_str());
