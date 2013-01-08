@@ -17,8 +17,8 @@ class TskNode (node):
         #call to super-condstracture
         node.__init__(self,treeInst,mytree,"tsk",parent)
         #upsate distributions from xml file
-#        self.distTableSucc = self.createDistTable("Successdistribution")
-#        self.distTableFail = self.createDistTable("Failuredistribution")
+#        self.distTableSucc = self._createDistTable("Successdistribution")
+#        self.distTableFail = self._createDistTable("Failuredistribution")
            
         
         

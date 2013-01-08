@@ -72,7 +72,7 @@ class xmlTree:
     
     #input: tskId- name, parm- parmeter needed
     def getTskAttrib(self,tskId, parm):
-        attrib = ""
+        attrib = None
         #check if the map holds this key
         if tskId in self._tskMap:
             #return string

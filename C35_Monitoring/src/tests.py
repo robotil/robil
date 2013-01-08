@@ -1034,6 +1034,40 @@ def test25():
     elapsed = (time.time() - start)
     print "Time: %f" %elapsed
     print "-----------------------"
+    
+
+def test26():
+    print "-------TEST 26-------"
+    start = time.time()
+    tree = xmlTree("tests/small_test_no_tsk_attrib.xml", None, "tests/small_test_tsk_attrib.xml")
+    root = tree.getRoot()
+    node.parmetersInTheWorld = 1
+    
+    node.debugMode = False
+    for i in range(1000):
+        root.runPlan(0)
+    for i in range(1000):
+        root.runPlan(1)
+    root.treeToXml("output/small_test_after_offline_tsk.xml")
+    print "Finished gathering offline statistics."
+    print "-------Debug mode-------"
+      
+    #tree = xmlTree("output/small_test_after_offline_tsk.xml")
+    node.debugMode = True
+    root = tree.getRoot()
+    for i in range(1000):
+        root.runPlan(0)
+    for i in range(1000):
+        root.runPlan(1)
+    root.treeToXml("output/small_test_debug_mode_tsk.xml")
+    print("test 26: success!")
+    print "Success probability in debug mode: Clear sky = %f, Cloudy = %f" %(root.getChild(0).getProbAtIndex(0),root.getChild(0).getProbAtIndex(1))
+    print "Average success time in debug mode with clear sky = %f" %(root.getChild(0).getAverageSuccTime(0))
+    print "Average success time in debug mode when Cloudy = %f" %(root.getChild(0).getAverageSuccTime(1))
+    elapsed = (time.time() - start)
+    print "Time: %f" %elapsed
+    print "-----------------------"    
+    
 #changed by RAZ -- we can now import from dist.* files, since the directory has an empty __init__.py file, and python recognizes it as a module.#thanks
 def _createComputedDist(string = None):
     from distributions.computed import Computed
@@ -1076,6 +1110,7 @@ if __name__ == "__main__":
 	test23()
 	test24()
 	test25()
+	test26()
     elif len(sys.argv) == 2 and sys.argv[1] == "events":
 	test21()
 	test22()
@@ -1085,3 +1120,4 @@ if __name__ == "__main__":
 	test25()
     else:
 	print "please provide one of the following command line arguments: [all,events,demo]"
+     

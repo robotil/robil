@@ -48,8 +48,8 @@ class node:
         self.probTable = []
         # node distribution table for success and failure
         #distribution table - each entry points to a distribution
-        self.distTableSucc = self.createDistTable("Successdistribution")
-        self.distTableFail = self.createDistTable("Failuredistribution")
+        self.distTableSucc = self._createDistTable("Successdistribution")
+        self.distTableFail = self._createDistTable("Failuredistribution")
         #update probability table
         probString = self.getAttrib("probability")
         if probString !=None:
@@ -308,8 +308,8 @@ class node:
                  #update child debug
                   childToCheck._updateChildDebug()
                   #update distributions tables
-                  childToCheck.distTableSucc = self.createDistTable("Successdistribution")
-                  childToCheck.distTableFail = self.createDistTable("Failuredistribution")
+                  childToCheck.distTableSucc = self._createDistTable("Successdistribution")
+                  childToCheck.distTableFail = self._createDistTable("Failuredistribution")
                   #get the next child
                   childToCheck = childToCheck.getChild(0)
              
@@ -608,7 +608,7 @@ class node:
 
 
  #table is the name of the table needed- attribute
-    def createDistTable(self,table):
+    def _createDistTable(self,table):
         string = self.getAttrib(str(table))
         
         table =[]        
