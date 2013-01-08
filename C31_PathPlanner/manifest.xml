@@ -10,6 +10,8 @@
   <url>http://ros.org/wiki/C31_PathPlanner</url>
   <depend package="roslib"/>
   <depend package="roscpp"/>
+  <depend package="C22_GroundRecognitionAndMapping"/>
+  <depend package="C0_RobilTask"/>
 
 </package>
 
