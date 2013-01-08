@@ -78,6 +78,11 @@ using namespace C0_RobilTask;
 	void RobilTaskProxy::waitResult(double time){
 		if(!active) return;
 		   
+		if(client.isServerConnected()==false){
+			active = false;
+			return;
+		}
+
 		bool finished = client.waitForResult(ros::Duration(time));
 //		actionlib::SimpleClientGoalState::StateEnum state = client.getState();
 //		switch( state ){

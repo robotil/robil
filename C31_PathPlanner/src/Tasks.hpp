@@ -1,20 +1,46 @@
 #ifndef _PATH_PLANNING_SERVER_H_
 #define _PATH_PLANNING_SERVER_H_
 
-
+//tasks dependencies
 #include <actionlib/server/simple_action_server.h>
 #include <C0_RobilTask/RobilTask.h>
 #include <C0_RobilTask/RobilTaskAction.h>
 #include <C0_RobilTask/StringOperations.h>
+
+//common utils
 #include <sstream>
 #include <iostream>
 
+//local pathplanner dependencies
 #include "cogniteam_pathplanning.h"
+#include "ConvertorC22.hpp"
+
+
+//messages
+#include <C31_PathPlanner/C31_PlanPath.h>
+#include <C31_PathPlanner/C31_GetPath.h>
+
+
 
 using namespace std;
 using namespace C0_RobilTask;
 using namespace RobilTask;
 
+
+class GPSPoint{
+public:
+	double x, y;
+	GPSPoint(double x, double y):x(x),y(y){
+
+	}
+};
+class TargetPosition:public GPSPoint{
+public:
+	TargetPosition(double x, double y):GPSPoint(x,y){
+
+	}
+};
+typedef std::vector<GPSPoint> GPSPath;
 
 struct Editable_Constraints{
 	RobotDimentions& dimentions;
@@ -29,224 +55,369 @@ public:
 	const Map& map;
 	const Waypoint& start;
 	const Waypoint& finish;
-	PlanningArguments(const Map& map, const Waypoint& start, const Waypoint& finish)
-	:map(map), start(start), finish(finish){}
+	const TargetPosition& targetPosition;
+	PlanningArguments(const Map& map, const Waypoint& start, const Waypoint& finish, const TargetPosition& targetPos)
+	:map(map), start(start), finish(finish), targetPosition(targetPos){}
 };
 class Editable_PlanningArguments{
 public:
 	Map& map;
 	Waypoint& start;
 	Waypoint& finish;
-	Editable_PlanningArguments(Map& map, Waypoint& start, Waypoint& finish)
-	:map(map), start(start), finish(finish){}
+	TargetPosition& targetPosition;
+	Editable_PlanningArguments(Map& map, Waypoint& start, Waypoint& finish, TargetPosition& targetPos)
+	:map(map), start(start), finish(finish), targetPosition(targetPos){}
 };
+
+class PlanningResult{
+public:
+	const Path& path;
+	PlanningResult(const Path& path)
+	:path(path){}
+};
+
 
 class PathPlanning{
 	boost::mutex _mtx;
 #define SYNCHRONIZED boost::mutex::scoped_lock l(_mtx);
+#define LOCK( X ) boost::shared_ptr<boost::mutex::scoped_lock> X(new boost::mutex::scoped_lock(_mtx));
+#define UNLOCK( X ) X = boost::shared_ptr<boost::mutex::scoped_lock>();
 
-	Map map;
-	Waypoint start;
-	Waypoint finish;
 
-	RobotDimentions dimentions;
-	Transits transits;
-	Attractors attractors;
+	class PlanningInputData{
+	public:
+		Map map;
+		Waypoint start;
+		Waypoint finish;
+		RobotDimentions dimentions;
+		Transits transits;
+		Attractors attractors;
+		PlanningInputData():map(0,0){}
+		PlanningInputData(const PlanningInputData& p):
+			 map(p.map)
+			,start(p.start)
+			,finish(p.finish)
+			,dimentions(p.dimentions)
+			,transits(p.transits)
+			,attractors(p.attractors)
+		{}
+	};
+
+	class ChangesNotification{
+	public:
+		virtual ~ChangesNotification(){}
+		virtual void notify()=0;
+	};
+	template <typename CALLBACK>
+	class _ChangesNotification:public ChangesNotification{
+	public:
+		CALLBACK callback;
+		_ChangesNotification(CALLBACK cb):callback(cb){}
+		virtual void notify(){callback();}
+	};
+
+	TargetPosition targetPosition;
+	PlanningInputData data;
+	Path path;
 
 	PlanningArguments arguments;
 	Constraints constraints;
+	PlanningResult results;
+
 	Editable_PlanningArguments ed_arguments;
 	Editable_Constraints ed_constraints;
+
+	boost::shared_ptr<ChangesNotification> changeNotification;
+
 public:
 
 	PathPlanning():
-		map(0,0),
-		arguments(map, start, finish), constraints(dimentions, transits, attractors),
-		ed_arguments(map, start, finish), ed_constraints(dimentions, transits, attractors)
+		//temporal data
+		targetPosition(0,0),
+		//input data
+		data(),
+		//output data
+		path(),
+		//parameters interfaces
+		//...read-only
+		arguments(data.map, data.start, data.finish, targetPosition), constraints(data.dimentions, data.transits, data.attractors), results(path),
+		//...read-write
+		ed_arguments(data.map, data.start, data.finish, targetPosition), ed_constraints(data.dimentions, data.transits, data.attractors)
 	{
 
 	}
 
-	Path plan(){ SYNCHRONIZED
+	template <typename CALLBACK>
+	void setChangeNotifier(CALLBACK cb){ changeNotification = boost::shared_ptr<ChangesNotification>(new _ChangesNotification<CALLBACK>(cb)); }
+
+	void plan(){
+
+		LOCK( locker_bfr )
+			PlanningInputData _data(data);
+		UNLOCK( locker_bfr )
 
 		stringstream out;
-		out<<"searchPath(map="<<map.w()<<"x"<<map.h()
-				<<", start="<<start.x<<","<<start.y
-				<<", finish="<<finish.x<<","<<finish.y
-				<<", const.dim="<<dimentions.radius
-				<<", const.trans#="<<transits.size()
-				<<", const.attractors#="<<attractors.size()
+		out<<"searchPath(map="<<_data.map.w()<<"x"<<_data.map.h()
+				<<", start="<<_data.start.x<<","<<_data.start.y
+				<<", finish="<<_data.finish.x<<","<<_data.finish.y
+				<<", const.dim="<<_data.dimentions.radius
+				<<", const.trans#="<<_data.transits.size()
+				<<", const.attractors#="<<_data.attractors.size()
 		<<")";
 		ROS_INFO("PathPlanning::plan : %s",out.str().c_str());
 
-		Path path ;//= searchPath(arguments.map, arguments.start, arguments.finish, constraints);
+		Constraints constraints(_data.dimentions, _data.transits, _data.attractors);
+		Path _path ;//= searchPath(_data.map, _data.start, _data.finish, constraints);
 
-		return path;
+		LOCK( locker_aft )
+			path = _path;
+		UNLOCK( locker_aft )
 	}
 
 	class EditSession{
 		boost::shared_ptr<boost::mutex::scoped_lock> l;
+		boost::shared_ptr<ChangesNotification> changeNotification;
 	public:
 		Editable_Constraints& constraints;
 		Editable_PlanningArguments& arguments;
-		EditSession(boost::mutex& _mtx, Editable_Constraints& cons, Editable_PlanningArguments& arguments):l(new boost::mutex::scoped_lock(_mtx)),constraints(cons),arguments(arguments) {}
-		EditSession(const EditSession& e):l(e.l),constraints(e.constraints),arguments(e.arguments)  {}
+		EditSession(boost::mutex& _mtx, Editable_Constraints& cons, Editable_PlanningArguments& arguments, boost::shared_ptr<ChangesNotification> ch_notify):
+			l(new boost::mutex::scoped_lock(_mtx)), changeNotification(ch_notify),constraints(cons),arguments(arguments)  {}
+		EditSession(const EditSession& e):
+			l(e.l), changeNotification(e.changeNotification),constraints(e.constraints),arguments(e.arguments)  {}
+		~EditSession(){ if(changeNotification.get()) changeNotification->notify(); }
+	};
+	class ReadSession{
+		boost::shared_ptr<boost::mutex::scoped_lock> l;
+	public:
+		const Constraints& constraints;
+		const PlanningArguments& arguments;
+		const PlanningResult& results;
+		ReadSession(boost::mutex& _mtx, const Constraints& cons, const PlanningArguments& argumentsc, const PlanningResult& results):
+			l(new boost::mutex::scoped_lock(_mtx)),constraints(cons),arguments(arguments), results(results) {}
+		ReadSession(const ReadSession& e):
+			l(e.l),constraints(e.constraints),arguments(e.arguments), results(e.results)  {}
 	};
 
 	EditSession startEdit(){
-		return EditSession(_mtx, ed_constraints, ed_arguments);
+		return EditSession(_mtx, ed_constraints, ed_arguments, changeNotification);
 	}
+	ReadSession startReading(){
+		return ReadSession(_mtx, constraints, arguments, results);
+	}
+
+
+	Waypoint cast(const GPSPoint& gps)const{
+		//TODO: WARNING !!!!!!!!! THIS THIS WRONG ALGORITHM !!!!!!!!!!!!!
+		return Waypoint(gps.x, gps.y);
+	}
+	GPSPoint cast(const Waypoint& wp)const{
+		//TODO: WARNING !!!!!!!!! THIS THIS WRONG ALGORITHM !!!!!!!!!!!!!
+		return GPSPoint(wp.x, wp.y);
+	}
+
 
 #undef SYNCHRONIZED
+#undef LOCK
+#undef UNLOCK
+
 };
 
 
-class PathPlanningTask{
-protected:
-    typedef RobilTaskGoalConstPtr GOAL;
-    typedef RobilTaskFeedback FEEDBACK;
-    typedef RobilTaskResult RESULT;
-    typedef actionlib::SimpleActionServer<RobilTaskAction> Server;
+class PathPlanningServer:public AbstractTask{
+	PathPlanning& _planner;
 
-protected:
-    ros::NodeHandle _node;
-    Server _server;
-    string _name;
-    FEEDBACK _feedback;
-    RESULT _result;
+	bool new_map_or_location;
+	boost::mutex _mtx;
+	//boost::condition_variable new_map_or_location_gotten;
+#define LOCK( X ) boost::shared_ptr<boost::mutex::scoped_lock> X(new boost::mutex::scoped_lock(_mtx));
+#define UNLOCK( X ) X = boost::shared_ptr<boost::mutex::scoped_lock>();
 
-    PathPlanning& _planner;
-
-    template <typename A>
-    PathPlanningTask(PathPlanning& planner, string name, A taskFunc):
-		_server(_node, name, taskFunc, false),
-		_name(name), _planner(planner)
-	{
-		_server.start();
-		ROS_INFO("instance of %s started.",_name.c_str());
-	}
-
-	void finish(const int32_t& success, const std::string& description, const string& plan){
-		_result.success = success;
-		_result.description = description;
-		if(success <= 0)
-		{
-			ROS_INFO("%s: Succeeded", _name.c_str());
-			if(success == PLAN){
-				ROS_INFO("%s: New plan", _name.c_str());
-				_result.plan = plan;
-			}
-			_server.setSucceeded(_result);
-		}else{
-			ROS_INFO("%s: Aborted", _name.c_str());
-			_server.setAborted(_result);
-		}
-	}
-};
-
-class PathPlanningServer:public PathPlanningTask{
 public:
     PathPlanningServer(PathPlanning& planner, string name = "/PathPlanning"):
-    	PathPlanningTask(planner, name, boost::bind(&PathPlanningServer::task, this, _1))
-    {  }
+    	AbstractTask(name), _planner(planner), new_map_or_location(false)
+    {
 
-    void task(const GOAL &goal){
-        int32_t success = SUCCESS; //FAULT, SUCCESS, PLAN
-        string plan ="";
-        string desc = "";
+    	_planner.setChangeNotifier(boost::bind(&PathPlanningServer::dataChanged, this));
 
-        /* GET TASK PARAMETERS */
-        ROS_INFO("%s: Start: task name = %s", _name.c_str(), goal->name.c_str());
-        ROS_INFO("%s: Start: task id = %s", _name.c_str(), goal->uid.c_str());
-        ROS_INFO("%s: Start: task params = %s", _name.c_str(), goal->parameters.c_str());
+    }
 
-        /* HERE PROCESS TASK PARAMETERS */
-        Arguments args = parseArguments(goal->parameters);
+    bool srv_PlanPath( C31_PathPlanner::C31_PlanPathRequest& req, C31_PathPlanner::C31_PlanPathResponse& res){
+		ROS_INFO("START CALCULATION OF GLOBAL PATH PLANNER");
 
-        /* NUMBER OF ITERATIONS IN TASK LOOP */
-        for(int times =0; times < 1; /*times++*/){
-            if (_server.isPreemptRequested() || !ros::ok()){
+		PathPlanning planner;
+
+		{ PathPlanning::EditSession session = planner.startEdit();
+		  //TODO: fill data of planner from message
+		}
+
+		planner.plan();
+
+		{ PathPlanning::ReadSession session = planner.startReading();
+			GPSPath gpspath;
+			for(size_t i=0;i<session.results.path.size();i++){
+				const Waypoint& wp = session.results.path[i];
+				gpspath.push_back(_planner.cast(wp));
+			}
+			//TODO: fill message by planner results
+		}
+		return true;
+    }
+
+    bool srv_GetPath( C31_PathPlanner::C31_GetPathRequest& req, C31_PathPlanner::C31_GetPathResponse& res){
+      ROS_INFO("RETURN CALCULATED GLOBAL PATH");
+      GPSPath path = get_calculated_path();
+      return true;
+    }
+
+    TaskResult task(const string& name, const string& uid, Arguments& args){
+
+    	ros::ServiceServer c31_PlanPath =
+    			_node.advertiseService<C31_PathPlanner::C31_PlanPathRequest, C31_PathPlanner::C31_PlanPathResponse>(
+    					ros::this_node::getName(),boost::bind(&PathPlanningServer::srv_PlanPath,this,_1,_2)
+    			);
+    	ros::ServiceServer c31_GetPath =
+    			_node.advertiseService<C31_PathPlanner::C31_GetPathRequest, C31_PathPlanner::C31_GetPathResponse>(
+    					ros::this_node::getName(),boost::bind(&PathPlanningServer::srv_GetPath,this,_1,_2)
+    			);
+
+    	/* NUMBER OF ITERATIONS IN TASK LOOP */
+        while(true){
+            if (isPreempt()){
 
                 /* HERE PROCESS PREEMPTION OR INTERAPT */
 
-                ROS_INFO("%s: Preempted", _name.c_str());
-                _server.setPreempted();
-                success = FAULT;
-                break;
+            	return TaskResult::Preempted();
             }
 
             /* HERE PROCESS TASK */
-            ROS_INFO("%s: plan path", _name.c_str());
-            _planner.plan();
+
+            requestNewMap();
+            requestNewLocation();
+
+            LOCK( locker )
+            if(exists_new_map_or_location()){
+
+					map_and_location_gotten();
+
+			UNLOCK( locker )
+
+					ROS_INFO("%s: plan path", _name.c_str());
+					_planner.plan();
+
+            }else{
+
+            UNLOCK( locker )
+
+            		ROS_INFO("%s: wait for new data (map, location, target, constraints, etc.)", _name.c_str());
+
+            }
+
+
 
             /* SLEEP BETWEEN LOOP ITERATIONS */
-            //boost::this_thread::sleep(boost::posix_time::millisec(100));
-            boost::this_thread::sleep(boost::posix_time::millisec(1000));
+            sleep(1000);
         }
 
-        finish( success, desc, plan );
+        return TaskResult::FAULT();
     }
 
+
+    //==================== NEW DATA CONVERTING FROM GRID TO GPS WORLD =====================
+    GPSPath get_calculated_path(){
+    	PathPlanning::ReadSession session = _planner.startReading();
+    	GPSPath gpspath;
+    	for(size_t i=0;i<session.results.path.size();i++){
+    		const Waypoint& wp = session.results.path[i];
+    		gpspath.push_back(_planner.cast(wp));
+    	}
+    	return gpspath;
+    }
+
+    //=================== NEW DATA REQUESTS ===============================================
+    void requestNewMap(){
+
+    }
+    void requestNewLocation(){
+
+    }
+
+    //=================== NEW DATA INPUT ==================================================
+    void dataChanged(){
+    	ROS_INFO("%s: data changed", _name.c_str());
+    	boost::mutex::scoped_lock locker(_mtx);
+    	new_map_or_location = true;
+    }
+
+    bool exists_new_map_or_location(){
+    	return new_map_or_location;
+    }
+    void map_and_location_gotten(){
+    	new_map_or_location = false;
+    }
+
+    void onNewMap(const Map map){
+    	PathPlanning::EditSession session = _planner.startEdit();
+    	session.arguments.map = map;
+    }
+    void onNewLocation(const GPSPoint& pos){
+    	PathPlanning::EditSession session = _planner.startEdit();
+    	session.arguments.start = _planner.cast(pos);
+    }
+    void onNewConstraints(const Constraints& constr){
+    	PathPlanning::EditSession session = _planner.startEdit();
+    }
+
+#undef LOCK
+#undef UNLOCK
 };
 
-class PathPlanningFocusServer:public PathPlanningTask{
-
+class PathPlanningFocusServer:public AbstractTask{
+	PathPlanning& _planner;
 public:
     PathPlanningFocusServer(PathPlanning& planner, string name = "/PathPlanningFocus"):
-    	PathPlanningTask(planner, name, boost::bind(&PathPlanningFocusServer::task, this, _1))
+    	AbstractTask(name), _planner(planner)
     {  }
 
-    void task(const GOAL &goal){
-        int32_t success = SUCCESS; //FAULT, SUCCESS, PLAN
-        string desc = "";
-        string plan ="";
-        
-        /* GET TASK PARAMETERS */
-        ROS_INFO("%s: Start: task name = %s", _name.c_str(), goal->name.c_str());
-        ROS_INFO("%s: Start: task id = %s", _name.c_str(), goal->uid.c_str());
-        ROS_INFO("%s: Start: task params = %s", _name.c_str(), goal->parameters.c_str());
-        
-        /* HERE PROCESS TASK PARAMETERS */
-        Arguments args = parseArguments(goal->parameters);
+    TaskResult task(const string& name, const string& uid, Arguments& args){
 
-        /* NUMBER OF ITERATIONS IN TASK LOOP */
-        for(int times =0; times < 1; times++){
-            if (_server.isPreemptRequested() || !ros::ok()){
-            
-                /* HERE PROCESS PREEMPTION OR INTERAPT */
-            
-                ROS_INFO("%s: Preempted", _name.c_str());
-                _server.setPreempted();
-                success = FAULT;
-                break;
-            }
-            
-            /* HERE PROCESS TASK */
+		if( args.find("x")!=args.end() && args.find("y")!=args.end() ){
+			std::stringstream numbers; numbers<<(args["x"])<<','<<(args["y"]);
+			char c; double x, y;
+			numbers>>x>>c>>y;
+			ROS_INFO("%s: set planning goal to [x,y] = %f, %f", _name.c_str(), x, y);
+			PathPlanning::EditSession session = _planner.startEdit();
+			session.arguments.targetPosition.x=x;
+			session.arguments.targetPosition.y=y;
+			session.arguments.finish = _planner.cast(session.arguments.targetPosition);
 
-            if( args.find("x")!=args.end() && args.find("y")!=args.end() ){
-            	std::stringstream numbers; numbers<<args["x"]<<','<<args["y"];
-            	char c; double x, y;
-            	numbers>>x>>c>>y;
-            	ROS_INFO("%s: set planning goal to [x,y] = %f, %f", _name.c_str(), x, y);
-            	PathPlanning::EditSession session = _planner.startEdit();
-            	session.arguments.finish.x=x;
-            	session.arguments.finish.y=y;
-            }else{
-            	success = FAULT;
-            	desc = "I don't know to set path planner goal from current parameters : "+goal->parameters;
-            	ROS_INFO("%s: ERROR: %s", _name.c_str(), desc.c_str());
-            	break;
-            }
+			return TaskResult(SUCCESS, "OK");
+		}else{
+			string desc = "I don't know to set path planner goal from current parameters ";
+			ROS_INFO("%s: ERROR: %s", _name.c_str(), desc.c_str());
 
-            /* SLEEP BETWEEN LOOP ITERATIONS */
-            boost::this_thread::sleep(boost::posix_time::millisec(100));
-        }
+			return TaskResult(FAULT, desc);
+		}
+//        /* NUMBER OF ITERATIONS IN TASK LOOP */
+//        while(true){
+//            if (isPreempt()){
+//
+//                /* HERE PROCESS PREEMPTION OR INTERAPT */
+//
+//
+//                return TaskResult::Preempted();
+//            }
+//
+//            /* HERE PROCESS TASK */
+//
+//
+//
+//            /* SLEEP BETWEEN LOOP ITERATIONS */
+//            sleep(100);
+//        }
 
-        finish( success, desc, plan );
+        return TaskResult::FAULT();
     }
 
 };
-
-
 
 #endif //_PATH_PLANNING_SERVER_H_
