@@ -1,5 +1,0 @@
-<plan>
-  <seq name="s2" time="12">
-        <seq name="check" probability="0.1" result="al"/>
-  </seq>
-</plan>
