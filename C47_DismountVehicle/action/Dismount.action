@@ -1,8 +1,8 @@
 # Define the goal
-float64 mount
+float64 dismount
 ---
 # Define the result
-float64 mounted
+float64 dismounted
 ---
 # Define a feedback message
 float64 percent_complete

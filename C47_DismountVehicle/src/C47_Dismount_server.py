@@ -1,7 +1,7 @@
 #! /usr/bin/env python
 
 import roslib; 
-roslib.load_manifest('C46_MountVehicle')
+roslib.load_manifest('C47_DismountVehicle')
 
 import rospy, math
 import actionlib
@@ -15,19 +15,19 @@ TASK_RESULT_REJECT=0
 TASK_RESULT_OK=1
 TASK_RESULT_PLAN=2
 
-class MountVehicleServer(object):
+class DismountVehicleServer(object):
   # create messages that are used to publish feedback/result
   _feedback = C0_RobilTask.msg.RobilTaskFeedback()
   _result   = C0_RobilTask.msg.RobilTaskResult()
   
     
   def __init__(self):
-    self._action_name = "/MountVehicle"
+    self._action_name = "/DismountVehicle"
     self._as = actionlib.SimpleActionServer(self._action_name, C0_RobilTask.msg.RobilTaskAction, execute_cb=self.task)
     self._as.start()
 
   def task(self, goalAct):
-	print ("Start Mounting Vehicle")
+	print ("Start Dismounting Vehicle")
 	task_success = True
 	task_result = TASK_RESULT_OK
 	task_plan = ""
@@ -36,7 +36,7 @@ class MountVehicleServer(object):
 
 	#rospy.init_node('trajectory')
 	Traj_data_file = "./Traj_data.yaml"
-	Traj_name_to_execute = "Mount"
+	Traj_name_to_execute = "Dismount"
 	traj_yaml = yaml.load(file(Traj_data_file, 'r'))
 	traj_name = Traj_name_to_execute
 	if not traj_name in traj_yaml:
@@ -87,6 +87,6 @@ class MountVehicleServer(object):
 
 
 if __name__ == '__main__':
-  rospy.init_node('C46_Mount')
-  MountVehicleServer()
+  rospy.init_node('C47_Dismount')
+  DismountVehicleServer()
   rospy.spin()
