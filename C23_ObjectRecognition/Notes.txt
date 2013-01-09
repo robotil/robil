@@ -1,0 +1,41 @@
+C23 Object Recognition.
+============================
+Version: beta 0.02
+
+Changes from beta 0.01:
+1. Added new class to handle the TLD,
+2. Added Learning mode, in order to easly learn new objects.
+3. Bug fixes.
+
+
+
+How to Check:
+============
+run the node with the atlas
+
+roslaunch atlas_utils atlas.launch 
+rosrun C23_ObjectRecognition c23 
+
+What to expect : 
+The node is now running in "Learning Mode", as it is learning new objects
+Steps:
+1. Select an object from the image by drawing a box 
+2. Press enter
+3. Move the object around in the simulation
+4. Look at the output (ROS INFO), you should see the position and size of the object.
+
+
+
+Known Bugs:
+==========
+1. Image isn't changing, you can't view the tracking via visulization.
+2. The object isn't saved at the end.
+
+
+Known Limitations:
+=================
+
+
+
+
+
