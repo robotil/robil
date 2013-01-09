@@ -56,7 +56,12 @@ public:
 		return '?';
 	}
 
+	bool inRange(long x, long y)const;
+	void approximate(long& x, long& y)const;
+
 private:
+	void approximate(long& x, long& y, char ctype)const;
+
 	char getByIndex(size_t ix)const{ return _data[ix]; }
 	char& getByIndex(size_t ix){ return _data[ix]; }
 

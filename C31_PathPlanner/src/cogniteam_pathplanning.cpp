@@ -10,6 +10,7 @@
 #include "QTNode.h"
 #include "AStar.h"
 #include "Inflator.h"
+#include "math.h"
 
 #include "cogniteam_pathplanning.h"
 
@@ -42,6 +43,40 @@ ostream& operator<<(ostream& out, const Map& m){
 	return out;
 }
 
+bool Map::inRange(long x, long y)const{
+	if(x<0||y<0) return false;
+	if(x>=(long)w()||y>=(long)h()) return false;
+	return true;
+}
+void Map::approximate(long& tx, long& ty, char ctype)const{
+	if(inRange(tx, ty)) return;
+	long x = 0;long y = 0;
+	double min_dis = ::hypot(double(tx-x), double(ty-y));
+	long minX(-1), minY(-1);
+
+	#define proc if((*this)(x,y) == ctype){ double dis = ::hypot(double(tx-x), double(ty-y)); if(min_dis>dis || minX<0){ min_dis=dis; minX=x; minY=y; } }
+
+	for(; x< (long)w()	; x++){ proc }	x--; y++;
+	for(; y< (long)h()	; y++){ proc }	x--; y--;
+	for(; x>=0  		; x--){ proc }	x++; y++;
+	for(; y>=0  		; y--){ proc }
+
+	#undef proc
+
+	tx = minX; ty=minY;
+}
+void Map::approximate(long& tx, long& ty)const{
+	long x(tx), y(ty);
+	if(inRange(tx, ty)) return;
+	approximate(tx, tx, Map::ST_AVAILABLE);
+
+	if(inRange(tx, ty)) return;
+	tx=x; ty=y;
+	approximate(tx, tx, Map::ST_UNCHARTED);
+
+	if(inRange(tx, ty)) return;
+	approximate(tx, tx, Map::ST_BLOCKED);
+}
 // -------------------------- QTNode ---------------------------------------------
 
 QTNode::QTNode(size_t x1, size_t x2, size_t y1, size_t y2, const Map& map, QTNode* supper):
@@ -495,11 +530,13 @@ Path searchPath(const Map& source_map, const Waypoint& start, const Waypoint& fi
 
 	//TODO: PROCESS CONSTRAINTS PATH BEFORE INFLATION
 
-	Inflator i(3, Map::ST_BLOCKED);
+	Inflator i( constraints.dimentions.radius , Map::ST_BLOCKED);
 	Map map = i.coloring( i.inflate(source_map), start.x, start.y, Map::ST_AVAILABLE,Map::ST_BLOCKED);
 
 	QTNode qt(0,map.w()-1, 0, map.h()-1, map);
 	qt.folding();
+
+	// CHECK IF ALL INTERESTING POINTS (start, stop and transits) ARE AVAILABLE
 
 	if( !qt.findEmpty(start.x, start.y) || !qt.findEmpty(finish.x, finish.y) ){
 		return Path();

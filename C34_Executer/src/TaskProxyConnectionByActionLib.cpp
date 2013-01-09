@@ -54,6 +54,9 @@ using namespace C0_RobilTask;
 			return "UNKNOWN";
 		}
 	}
+	inline std::string str_state(actionlib::SimpleClientGoalState& _state){
+		return _state.toString();
+	}
 	BTTaskResult RobilTaskProxy::getResult (){
 		BTTaskResult res;
 		if(serverFound==false){
@@ -62,15 +65,20 @@ using namespace C0_RobilTask;
 			res.success = BTTaskResult::SUCCESS_FAULT;			
 		}else{
 			actionlib::SimpleClientGoalState state = client.getState();
-			/*if(state==actionlib::SimpleClientGoalState::SUCCEEDED){*/
+			PRINT("GoalState = "<<str_state(state));
+			if(
+					state==actionlib::SimpleClientGoalState::SUCCEEDED ||
+					state==actionlib::SimpleClientGoalState::PREEMPTED ||
+					state==actionlib::SimpleClientGoalState::ABORTED
+			){
 				res.description = client.getResult()->description;
 				res.plan = client.getResult()->plan;
 				res.success = client.getResult()->success;
-			/*}else{
-				res.description="actionlib::SimpleClientGoalState != actionlib::SimpleClientGoalState::SUCCEEDED";
+			}else{
+				res.description="WARNING: Task finished by unexpected way, the GoalState is "+str_state(state)+".";
 				res.plan="";
 				res.success = BTTaskResult::SUCCESS_FAULT;
-			}*/
+			}
 		}
 		PRINT("result{success="<<success2str(res.success)<<",plan="<<res.plan<<",desc="<<res.description<<"}");
 		return res;

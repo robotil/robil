@@ -134,6 +134,22 @@ namespace RobilTask{
 	    }
 	};
 
+
 }
+
+class SSTREAM{
+	typedef const char* c_str_t;
+	boost::shared_ptr<std::stringstream> stream;
+public:
+	operator c_str_t()const{ return c_str(); }
+	c_str_t c_str()const{ if(stream.get()) return stream->str().c_str(); return 0; }
+	operator std::string()const{ return str(); }
+	std::string str()const{ if(stream.get()) return stream->str(); return ""; }
+	SSTREAM(const SSTREAM& str):stream(str.stream){}
+	SSTREAM():stream(new std::stringstream()){}
+	template <typename T>
+	SSTREAM& operator<<(const T& t){ if(stream.get()) *(stream.get()) << t; return *this; }
+};
+#define STR(X) ((SSTREAM()<<X).c_str())
 
 #endif // _DEF_ROBIL_TASK

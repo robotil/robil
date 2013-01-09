@@ -3,9 +3,10 @@
 
 #include "C22_GroundRecognitionAndMapping/C22.h"
 #include "Map.h"
+#include "Gps.h"
 
 
-Map convertToMap(C22_GroundRecognitionAndMapping::C22::Response &res){
+Map extractMap(C22_GroundRecognitionAndMapping::C22::Response &res){
 	Map::MapCreator m;
 	size_t h = res.drivingPath.row.size();
 	bool size_ok = false;
@@ -26,9 +27,33 @@ Map convertToMap(C22_GroundRecognitionAndMapping::C22::Response &res){
 };
 
 
+Gps2Grid extractLocation(C22_GroundRecognitionAndMapping::C22::Response &res){
+	GPSPoint gps(0,0);
+	Waypoint wp(0,0);
 
+	//TODO: TEMPORAL CODE
 
+	size_t h = res.drivingPath.row.size();
+	if(h){
+		size_t w = res.drivingPath.row.at(0).column.size();
+		wp.x = w/2;
+	}
+	return Gps2Grid(gps,wp);
+};
 
+MapProperties extractMapProperties(C22_GroundRecognitionAndMapping::C22::Response &res){
+	GPSPoint gps(0,0);
+	Waypoint wp(0,0);
+
+	//TODO: TEMPORAL CODE
+
+	size_t h = res.drivingPath.row.size();
+	if(h){
+		size_t w = res.drivingPath.row.at(0).column.size();
+		wp.x = w/2;
+	}
+	return MapProperties(0.12, gps, wp);
+};
 
 
 #endif
