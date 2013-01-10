@@ -5,7 +5,21 @@ import re
 
 file = sys.argv[1]
 
-text = ''.join([line for line in open(file,'r').readlines() if len(line.lstrip())>0 and line.lstrip()[0]!='#'])
+def ReadFile(fname):
+	return ''.join([line for line in open(fname,'r').readlines() if len(line.lstrip())>0 and line.lstrip()[0]!='#'])
+
+text = ReadFile(file)
+
+def loadIncludes(text, includedText):
+	lines = [x.strip() for x in [y for y in text.split('\n') if len(y.lstrip())>0]if x.find('INCLUDE=')==0]
+	for l in lines:
+		k,v = l.split('=')
+		includedText.append( ReadFile(v.strip()) )
+
+includedText = []
+loadIncludes(text, includedText)
+if len(includedText)>0:
+	text = text+'\n\nINCLUDED_FILES\n\n'+'\n\tFILE\n'.join(includedText)
 
 #print text
 
@@ -96,24 +110,26 @@ def splitFunctions(text, functions):
 		node = searchTag('def', start)
 		if node!=None:
 			start = node[3]
-			functions[functionName(node[0])]=node
-	for f in functions:
-		if f[0].find('root')==0:
-			functions['root'] = f
+			fname =  functionName(node[0])
+			if fname!='root' or 'root' not in functions:
+				functions[fname]=node
+	if 'root' not in functions:
+		for f in functions:
+			if f[0].find('root')==0:
+				functions['root'] = f
 		
 func={}
 splitFunctions(text, func)
 #print 'keys = ', func.keys()
 
 def splitDecoratorsAl(text, decorators):
-	lines = [line[4:] for line in [line for line in text.split('\n') if len(line.lstrip())>0]if line.find('dec ')==0]
+	lines = [line.strip()[4:] for line in [line for line in text.split('\n') if len(line.lstrip())>0]if line.find('dec ')==0]
 	for l in lines:
 		k,v = l.split('=')
 		decorators[k.strip()]=v.strip()
 
 decorators={}
 splitDecoratorsAl(text, decorators)
-
 
 def isArray(t): return len(t)>2 and t[0]=='[' and t[-1]==']'
 
