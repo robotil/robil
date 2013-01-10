@@ -1,8 +1,8 @@
 #goal definition
-bool maintainPosture
+int32 turn_to
 ---
 #result definition
 bool success
 ---
 #feedback
-int32[] PostureQuality
+float64 stabilityQuality
