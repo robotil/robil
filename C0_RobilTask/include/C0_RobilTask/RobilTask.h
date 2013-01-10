@@ -10,10 +10,10 @@
 
 
 
-namespace RobilTask{
-	static const int32_t FAULT = 1;
-	static const int32_t SUCCESS = 0;
-	static const int32_t PLAN=-1;
+namespace C0_RobilTask{
+//	static const int32_t FAULT = 1;
+//	static const int32_t SUCCESS = 0;
+//	static const int32_t PLAN=-1;
 }
 
 
@@ -23,12 +23,17 @@ namespace RobilTask{
 #include <sstream>
 #include <iostream>
 
-namespace RobilTask{
+namespace C0_RobilTask{
 
 	using namespace std;
 	using namespace C0_RobilTask;
 
-	class AbstractTask{
+	class RobilTask{
+	public:
+		static const int32_t FAULT = 1;
+		static const int32_t SUCCESS = 0;
+		static const int32_t PLAN=-1;
+
 	protected:
 	    typedef RobilTaskGoalConstPtr GOAL;
 	    typedef RobilTaskFeedback FEEDBACK;
@@ -42,15 +47,15 @@ namespace RobilTask{
 	    FEEDBACK _feedback;
 	    RESULT _result;
 
-	    AbstractTask(string name):
-			_server(_node, name, boost::bind(&AbstractTask::abstract_task, this, _1), false),
+	    RobilTask(string name):
+			_server(_node, name, boost::bind(&RobilTask::abstract_task, this, _1), false),
 			_name(name)
 		{
 			_server.start();
 			ROS_INFO("instance of %s started.",_name.c_str());
 		}
 
-	    virtual ~AbstractTask(){}
+	    virtual ~RobilTask(){}
 
 		void finish(const int32_t& success, const std::string& description, const string& plan, bool AbortForUnsuccess = true){
 			_result.success = success;
@@ -69,13 +74,14 @@ namespace RobilTask{
 					_server.setAborted(_result);
 				}else{
 					ROS_INFO("%s: Preempted", _name.c_str());
-					//_server.setPreempted();
+					_server.setPreempted();
+					//_server.setCanceled(_result);
 				}
 			}
 		}
 
 		class TaskResult{
-			friend class AbstractTask;
+			friend class RobilTask;
 		protected:
 			int32_t success;
 			string plan;
@@ -98,9 +104,10 @@ namespace RobilTask{
 
 			static TaskResult Preempted(){ return TaskResult(true); }
 			static TaskResult FAULT(){ return TaskResult(RobilTask::FAULT,"Unexpected exception"); }
+			static TaskResult SUCCESS(){ return TaskResult(RobilTask::SUCCESS,"success"); }
 		};
 
-		virtual AbstractTask::TaskResult task(const string& name, const string& uid, Arguments& args)=0;
+		virtual RobilTask::TaskResult task(const string& name, const string& uid, Arguments& args)=0;
 
 		bool isPreempt(){
 			return (_server.isPreemptRequested() || !ros::ok());
@@ -124,12 +131,8 @@ namespace RobilTask{
 	        	ROS_INFO("%s: WARNING: argument parser report about parameters problem.", _name.c_str());
 	        }
 
-	        AbstractTask::TaskResult res = task(goal->name, goal->uid, args);
+	        RobilTask::TaskResult res = task(goal->name, goal->uid, args);
 
-	        if(res.preempted){
-
-	        	_server.setPreempted();
-	        }
 	        finish( res.success, res.description, res.plan, !res.preempted);
 	    }
 	};

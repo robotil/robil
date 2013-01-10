@@ -30,6 +30,8 @@ typedef Waypoints Path;
 
 struct RobotDimentions{
 	size_t radius;
+	double gps_radius;
+	RobotDimentions(double gps_rad=1):radius(gps_rad),gps_radius(gps_rad){}
 };
 
 struct Constraints{

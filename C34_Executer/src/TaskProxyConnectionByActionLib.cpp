@@ -78,6 +78,7 @@ using namespace C0_RobilTask;
 				res.description="WARNING: Task finished by unexpected way, the GoalState is "+str_state(state)+".";
 				res.plan="";
 				res.success = BTTaskResult::SUCCESS_FAULT;
+				if(state==actionlib::SimpleClientGoalState::ACTIVE) terminate();
 			}
 		}
 		PRINT("result{success="<<success2str(res.success)<<",plan="<<res.plan<<",desc="<<res.description<<"}");
@@ -110,6 +111,7 @@ using namespace C0_RobilTask;
 		active = !finished;
 	}
 	void RobilTaskProxy::terminate(){
+		PRINT("cancel task goal.");
 		client.cancelGoal();
 	}
 	bool RobilTaskProxy::isActive(){
