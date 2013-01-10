@@ -587,8 +587,10 @@ class node:
 
     #get average to success time
     def getAverageSuccTime(self, index):
-        return self.getDistSuccByIndex(index).calcAverageTime()
-        
+        if self.getDistSuccByIndex(index) != None:
+            return self.getDistSuccByIndex(index).calcAverageTime()
+        else:
+            return float('Inf')
 
 
  #table is the name of the table needed- attribute
