@@ -14,7 +14,7 @@ How to Check:
 run the node with the atlas
 
 roslaunch atlas_utils atlas.launch 
-rosrun C23_ObjectRecognition c23 
+rosrun C23_ObjectRecognition c23 /multisense_sl/left/image_color /multisense_sl/right/image_color 
 
 What to expect : 
 The node is now running in "Learning Mode", as it is learning new objects
