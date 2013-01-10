@@ -5,7 +5,7 @@ import re
 
 file = sys.argv[1]
 
-text = open(file,'r').read()
+text = ''.join([line for line in open(file,'r').readlines() if len(line.lstrip())>0 and line.lstrip()[0]!='#'])
 
 #print text
 
@@ -104,6 +104,17 @@ def splitFunctions(text, functions):
 func={}
 splitFunctions(text, func)
 #print 'keys = ', func.keys()
+
+def splitDecoratorsAl(text, decorators):
+	lines = [line[4:] for line in [line for line in text.split('\n') if len(line.lstrip())>0]if line.find('dec ')==0]
+	for l in lines:
+		k,v = l.split('=')
+		decorators[k.strip()]=v.strip()
+
+decorators={}
+splitDecoratorsAl(text, decorators)
+
+
 def isArray(t): return len(t)>2 and t[0]=='[' and t[-1]==']'
 
 funcNameCounter=1
@@ -133,7 +144,7 @@ def getPrefix(txt):
 
 	return funcname, arguments, decors
 
-def compileXml( TAB, text, func, repl):
+def compileXml( TAB, text, func, repl, defaultName):
 	def getTab(t):
 		res = ""
 		for x in text:
@@ -201,6 +212,7 @@ def compileXml( TAB, text, func, repl):
 		t = replasment(t)
 		fname,args,decors = getPrefix(t)
 		for d in decors:
+			if d in decorators: d=decorators[d]
 			print tab+'<dec name="'+d+'" >'
 			if len(ret)==0: ret = tab+'</dec>'
 			else: ret = tab+'</dec>'+'\n'+ret
@@ -226,8 +238,12 @@ def compileXml( TAB, text, func, repl):
 				if len(tt)>0: fname = fname[len(tt):].strip()
 				if typ=='': typ = 'seq'; tt=''
 				if len(fname)==0:
-					fname="@"+str(funcNameCounter)
-					funcNameCounter+=1
+					if len(defaultName)==0:
+						fname="@"+str(funcNameCounter)
+						funcNameCounter+=1
+					else:
+						fname=defaultName
+				if fname == '': fname = defaultName
 				print tab+"<"+typ+' name="'+fname+'" '+ attr +'>'
 				return tab+"</"+typ+">"+ret
 		else:
@@ -249,12 +265,15 @@ def compileXml( TAB, text, func, repl):
 				print tab+"<!-- function: "+ t + " -->"
 				nrepl = repl.copy()
 				parseValues(nrepl,args,fname)
-				compileXml( tab, body, func, nrepl)
-				return tab+"<!-- function end: "+ fname+"-->"+ret
+				compileXml( tab, body, func, nrepl, fname)
+				return tab+"<!-- function end: "+ fname+" -->"+ret
 			else:
 				if len(fname)==0:
-					fname="@"+str(funcNameCounter)
-					funcNameCounter+=1
+					if len(defaultName)==0:
+						fname="@"+str(funcNameCounter)
+						funcNameCounter+=1
+					else:
+						fname=defaultName
 				if len(args)>0:
 					print tab+'<tsk name="'+fname+'('+args+')'+'" '+ attr +' />'
 				else:
@@ -293,7 +312,7 @@ def compileXml( TAB, text, func, repl):
 					vals = repl[args][1:-1].split(',')
 					for xi,x in enumerate(vals):
 						repl[args+'#']=xi
-						compileXml( TAB, ttt, func, repl)
+						compileXml( TAB, ttt, func, repl, "")
 						if xi!=len(vals)-1: print tab+'<!-- NEXT '+args+' -->'
 			elif fname.upper().find('IF')==0:
 				args_k,args_v = args.split('=')
@@ -315,11 +334,11 @@ def compileXml( TAB, text, func, repl):
 						val = val[1:-1]
 						vv = val.split(',')[repl[args_k]]
 					if isnot==False and vv==args_v:
-						compileXml( TAB, ttt, func, repl)
+						compileXml( TAB, ttt, func, repl, "")
 					if isnot==True and vv!=args_v:
-						compileXml( TAB, ttt, func, repl)
+						compileXml( TAB, ttt, func, repl, "")
 			else:
-				compileXml( TAB, ttt, func, repl)
+				compileXml( TAB, ttt, func, repl, "")
 			print tg
 		text = text[linelen+1:]
 
@@ -328,5 +347,5 @@ if 'root' not in func:
 	exit(1)
 		
 print '<plan>'
-compileXml( '', "root", func , {'A':'[10,11]'})
+compileXml( '', "root", func , {'A':'[10,11]'}, "")
 print '</plan>'
