@@ -35,7 +35,7 @@ def root {
 							<WHILE_ERROR>Driving{
 								PathPlanningFocus(target=FORWARD)
 								InitDrive
-								OperatorControlPointInCar(data=[panoramic_image, occupancy_grid, path, vehicle_parametrics])
+								InCarOperatorControlPoint(data=[panoramic_image, occupancy_grid, path, vehicle_parametrics])
 								WayPointsDriving
 							}
 						}

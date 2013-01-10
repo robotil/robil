@@ -325,16 +325,21 @@ def compileXml( TAB, text, func, repl, defaultName):
 					onError_VariableIsNotArray(args+'='+repl[args])
 					continue
 				if args in repl:
-					vals = repl[args][1:-1].split(',')
+					vals = [x.strip() for x in repl[args][1:-1].split(',')]
 					for xi,x in enumerate(vals):
 						repl[args+'#']=xi
 						compileXml( TAB, ttt, func, repl, "")
 						if xi!=len(vals)-1: print tab+'<!-- NEXT '+args+' -->'
 			elif fname.upper().find('IF')==0:
 				args_k,args_v = args.split('=')
+				args_k = args_k.strip()
+				args_v = args_v.strip()
 				isnot = False
 				if args_k.find('!')==0:
 					args_k=args_k[1:]
+					isnot = True
+				if len(args_k.rstrip())>0 and args_k.rstrip()[-1]=='!':
+					args_k=args_k[:-1]
 					isnot = True
 				if args_k in repl:
 					vv = ''
@@ -348,7 +353,8 @@ def compileXml( TAB, text, func, repl, defaultName):
 							onError_VariableIsNotArray(args+'='+repl[args])
 							continue
 						val = val[1:-1]
-						vv = val.split(',')[repl[args_k]]
+						vv = val.split(',')[repl[args_k]].strip()
+					#print "compare: ",'['+vv+']', isnot, '['+args_v+']',(vv==args_v), (isnot==False and vv==args_v), (isnot==True and vv!=args_v)
 					if isnot==False and vv==args_v:
 						compileXml( TAB, ttt, func, repl, "")
 					if isnot==True and vv!=args_v:
