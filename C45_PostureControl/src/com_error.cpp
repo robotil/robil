@@ -1,32 +1,54 @@
 #include "com_error.h"
 
-namespace hrl_kinematics{
+//namespace hrl_kinematics{
 
-com_error_node::com_error_node(Kinematics::FootSupport support = Kinematics::SUPPORT_DOUBLE)
-	: support_mode_ (support), support_mode_status_ (support){
+	com_error_node::com_error_node(){
+	//: support_mode_ (support), support_mode_status_ (support){
 		  ros::NodeHandle nh_private("~");
-		  visualization_pub_ = nh_private.advertise<visualization_msgs::MarkerArray>("stability_visualization", 1);
-		  support_polygon_pub_ = nh_private.advertise<geometry_msgs::PolygonStamped>("support_polygon", 10);
-		  pcom_pub_ = nh_private.advertise<visualization_msgs::Marker>("projected_com", 10);
-		  com_pub_ = nh_private.advertise<geometry_msgs::Point>("CoM", 1);
-		  joint_state_sub_ = nh_.subscribe("joint_states", 1, &com_error_node::jointStateCb, this);
+
+		  /*
+		  joint_state_sub_ = nh_.subscribe("joint_states", 1, &com_error_node::jointStateCb, this);*/
+
+		  pcom_sub_ = nh_.subscribe("projected_com", 1, &com_error_node::get_com_from_hrl_kinematics, this);
+		  support_polygon_sub_ = nh_.subscribe("support_polygon", 1, &com_error_node::get_support_polygon_from_hrl_kinematics, this);
+
+
 		  com_error_srv_ = nh3_.advertiseService("com_error", &com_error_node::result_com_error, this);
-		  support_mode_srv_ = nh2_.advertiseService("support_legs", &com_error_node::FootSupport_func, this);
+
+		  //support_mode_srv_ = nh2_.advertiseService("support_legs", &com_error_node::FootSupport_func, this);
 	}
-com_error_node::~com_error_node(){
+	com_error_node::~com_error_node(){
 
 	}
 
-	bool com_error_node::result_com_error(C45_PostureControl::com_error::Request  &req,
-			C45_PostureControl::com_error::Response &res)
+	void com_error_node::get_com_from_hrl_kinematics(const visualization_msgs::MarkerConstPtr& comMarker){
+		  ROS_INFO("# of points: %d", (int) comMarker->points.size());
+		  //this->_CoM.x = com.x();
+		  //this->_CoM.y = com.y();
+	}
+
+	void com_error_node::get_support_polygon_from_hrl_kinematics(const geometry_msgs::PolygonStampedConstPtr& sp){
+		  double avg_x=0, avg_y=0;
+		  for(unsigned i=0; i < sp->polygon.points.size(); i++){
+			  avg_x += sp->polygon.points.at(i).x;
+			  avg_y += sp->polygon.points.at(i).y;
+		  }
+		  avg_x = avg_x / sp->polygon.points.size();
+		  avg_y = avg_y / sp->polygon.points.size();
+		  this->_SP.x = avg_x;
+		  this->_SP.y = avg_y;
+	}
+
+	bool com_error_node::result_com_error(C45_PostureControl::com_error::Request &req, C45_PostureControl::com_error::Response &res)
 	{
+		//joint_state_sub_ = nh_.subscribe("joint_states", 1, &com_error_node::jointStateCb, this);
 		res.x_error = this->_CoM.x - this->_SP.x;
 		res.y_error = this->_CoM.y - this->_SP.y;
 	  //ROS_INFO("sending back response: [%ld]", (long int)res.sum);
 	  return true;
 	}
 
-	void com_error_node::jointStateCb(const sensor_msgs::JointStateConstPtr& state){
+	/*void com_error_node::jointStateCb(const sensor_msgs::JointStateConstPtr& state){
 	  size_t num_joints = state->position.size();
 	  ROS_DEBUG("Received JointState with %zu joints", num_joints);
 
@@ -46,7 +68,7 @@ com_error_node::~com_error_node(){
 	  bool stable = test_stability_.isPoseStable(joint_positions, support_mode_, normal_vector);
 
 //	   //print info
-	  tf::Point com1 = test_stability_.get_pCOM();
+	  tf::Point com1 = test_stability_.getCOM();
 	  if (stable)
 	    ROS_INFO("Pose is stable, pCOM at %f %f", com1.x(), com1.y());
 	  else
@@ -62,15 +84,15 @@ com_error_node::~com_error_node(){
 	  avg_y = avg_y / sp.polygon.points.size();
 	  this->_SP.x = avg_x;
 	  this->_SP.y = avg_y;
-	  ROS_DEBUG("Got support polygon average: x=%f, y=%f", this->_SP.x, this->_SP.y);
+	  ROS_INFO("Got support polygon average: x=%f, y=%f", this->_SP.x, this->_SP.y);
 
-	  geometry_msgs::Point com(test_stability_.getCOM());
-	  		this->_CoM.x = com.x;
-	  		this->_CoM.y = com.y;
-	  ROS_DEBUG("Got COM: x=%f, y=%f", this->_CoM.x, this->_CoM.y);
-	}
+	  tf::Point com(test_stability_.getCOM());
+	  		this->_CoM.x = com.x();
+	  		this->_CoM.y = com.y();
+	  ROS_INFO("Got COM: x=%f, y=%f", this->_CoM.x, this->_CoM.y);
+	}*/
 
-	bool com_error_node::FootSupport_func(hrl_kinematics::SupportLegs_Status::Request &req,
+	/*bool com_error_node::FootSupport_func(hrl_kinematics::SupportLegs_Status::Request &req,
 	                                         hrl_kinematics::SupportLegs_Status::Response &res){
 	    switch ( req.FootSupport_CMD )
 	    {
@@ -100,14 +122,14 @@ com_error_node::~com_error_node(){
 	    }
 	    ROS_INFO("sending back response: [%d]", (int)res.FootSupport_Status);
 	    return true;
-	}
-}
+	}*/
+//}
 
-using namespace hrl_kinematics;
+//using namespace hrl_kinematics;
 int main(int argc, char **argv)
 {
 	ros::init(argc, argv, "calculate_com_error_server");
-	Kinematics::FootSupport support = Kinematics::SUPPORT_DOUBLE;
+	/*Kinematics::FootSupport support = Kinematics::SUPPORT_DOUBLE;
 
 	if (argc == 2){
 		int i = atoi(argv[1]);
@@ -115,11 +137,11 @@ int main(int argc, char **argv)
 			support = Kinematics::FootSupport(i);
 	}
 
-	try{
-		com_error_node c = com_error_node(support);
+	try{*/
+		com_error_node c = com_error_node();
 
 		ros::spin();
-	}
+	/*}
 	catch(hrl_kinematics::Kinematics::InitFailed &e)
 	{
 	    std::cerr << "Could not initialize kinematics node: " << e.what() << std::endl;
@@ -127,7 +149,7 @@ int main(int argc, char **argv)
 	}
 	catch(...){
 		ROS_INFO("Unknown error");
-	}
+	}*/
 
   return 0;
 }
