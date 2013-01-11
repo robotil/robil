@@ -565,6 +565,7 @@ std::string ServerActions::stack(std::string id){
 #include "TestTaskProxyTable.h"
 
 int BTMain(int argn, char** argv){
+	std::cout<<std::string("EXECUTER VERSION ")+VERSION+" COMPILED AT "+std::string(COMPILATION_TIME)<<std::endl;
 	Params params(argn,argv);
 	if(params.contains("bt")){
 
