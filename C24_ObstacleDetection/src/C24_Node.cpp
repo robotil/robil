@@ -19,6 +19,8 @@
 #include <opencv/highgui.h>
 #include <image_transport/subscriber_filter.h>
 
+#include "ObstacleDetectionServer.hpp"
+
 namespace enc=sensor_msgs::image_encodings;
 
 /**
@@ -103,6 +105,9 @@ int main(int argc, char **argv)
 	  printf("usage: C24_module <left camera topic> <right camera topic>");
   }
   C24_Node my_node(argv[1],argv[2]);
+  
+  ObstacleDetectionServer task;
+  
   ROS_INFO("made topic at %s %s \n",argv[1],argv[2]);
   while(ros::ok()){
 	  ros::spin();
