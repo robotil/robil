@@ -11,20 +11,22 @@
 
 
 #include <ros/ros.h>
-#include <C45_PostureControl/C45_PostureControlAction.h>
+//#include <C45_PostureControl/C45_PostureControlAction.h>
+#include <C0_RobilTask/RobilTaskAction.h>
 #include <control_toolbox/pid.h>
 #include <actionlib/server/simple_action_server.h>
 #include <C45_PostureControl/com_error.h>
 #include <std_msgs/Float64.h>
 #include <math.h>
 #include <boost/bind.hpp>
+#include <string>
 
 class stability_maintainer{
 private:
 	ros::NodeHandle nh_, nh2_, nh3_, nh4_;
-	actionlib::SimpleActionServer<C45_PostureControl::C45_PostureControlAction> as_; // NodeHandle instance must be created before this line.
-	C45_PostureControl::C45_PostureControlFeedback feedback_;
-	C45_PostureControl::C45_PostureControlResult result_;
+	actionlib::SimpleActionServer<C0_RobilTask::RobilTaskAction> as_; // NodeHandle instance must be created before this line.
+	C0_RobilTask::RobilTaskFeedback feedback_;
+	C0_RobilTask::RobilTaskResult result_;
 	C45_PostureControl::com_error com_error_srv;
 	ros::ServiceClient COM_error_client;
 	control_toolbox::Pid back_ubx_stab_pid,back_mby_stab_pid; // PIDs for stability
@@ -88,9 +90,23 @@ public:
 		 ROS_INFO("Current ok: %d", (nh_.ok())?1:0);
 		 ROS_INFO("Current isactive: %d", as_.isActive());
 
-		 uint32_t turn_to(as_.acceptNewGoal()->turn_to);
-		 double direction = turn_to*0.612;
-		 ROS_INFO("Current maintainPosture: %d", turn_to);
+		 double direction = 0;
+		 std::string goal_params = as_.acceptNewGoal()->parameters;
+		 if(goal_params == "direction=1"){
+			 direction = 0.612;
+		 }else{
+			 if(goal_params == "direction=0"){
+				 direction = 0;
+			 }else{
+				 if(goal_params == "direction=-1"){
+					 direction = -0.612;
+			}else{
+					 ROS_ERROR("Bad parameter for direction");
+					 return;
+				 }
+			 }
+		 }
+		 //ROS_INFO("Current maintainPosture: %d", turn_to);
 		 ROS_INFO("Current isactive: %d", as_.isActive());
 		 ROS_INFO("Current time11: %f", ros::Time::now().toSec());
 
@@ -98,19 +114,21 @@ public:
 		 d.data = direction;
 		 turn_angle.publish(d);
 		 //Maintain posture while not preempted and is requested to maintain posture
-		 while (nh_.ok() && as_.isActive()){
+		 /*while (nh_.ok() && as_.isActive()){
 		      // check that preempt was not requested by the client
 			 if(as_.isNewGoalAvailable()){
-				 turn_to = as_.acceptNewGoal()->turn_to;
+				 ROS_ERROR("Got new goal");
+				 goal_params = as_.acceptNewGoal()->parameters;
+				 break;
 			 }
 		     if (as_.isPreemptRequested() || !ros::ok())
 		     {
-		    	 ROS_INFO("%s: Preempted", action_name_.c_str());
+		    	 ROS_ERROR("%s: Preempted", action_name_.c_str());
 		    	 // set the action state to preempted
 		    	 as_.setPreempted();
 		    	 break;
 		     }
-		     ROS_INFO("Current goal: %d", turn_to);
+		     ROS_INFO("Current goal: %s", goal_params.c_str());
 
 		     //Update PID
 			 COM_error_client.call(com_error_srv);
@@ -124,24 +142,27 @@ public:
 			 back_mby_pub.publish(float64_msg);
 			 float64_msg.data = -back_ubx_stab_pid.getCurrentCmd();
 			 back_ubx_pub.publish(float64_msg);
-			 feedback_.stabilityQuality=sqrt(pow(com_error_srv.response.x_error,2)+pow(com_error_srv.response.y_error,2));
-			 ROS_INFO("Last stability quality: %f", feedback_.stabilityQuality);
+			 feedback_.complete=sqrt(pow(com_error_srv.response.x_error,2)+pow(com_error_srv.response.y_error,2));
+			 ROS_INFO("Last stability quality: %f", feedback_.complete);
 			 as_.publishFeedback(feedback_);
 			 ros::Duration(0.01).sleep();
 		 }
 	     if (as_.isPreemptRequested() || !ros::ok())
 	      {
-	        ROS_INFO("%s: Preempted", action_name_.c_str());
+	        ROS_ERROR("%s: Preempted", action_name_.c_str());
 	        // set the action state to preempted
 	        as_.setPreempted();
-	      }
+	      }*/
+		 C0_RobilTask::RobilTaskResult _res;
+		 _res.success = 1;
+		 as_.setSucceeded(_res);
 		 ROS_INFO("ENd: Current time: %f", ros::Time::now().toSec());
 		 return;
 	 }
 
 	 void preemptCB()
 	 {
-		 ROS_INFO("%s: Preempted", action_name_.c_str());
+		 ROS_ERROR("%s: Preempted", action_name_.c_str());
 		 as_.setPreempted();
 	 }
 };
