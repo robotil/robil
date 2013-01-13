@@ -42,36 +42,119 @@ public:
 		ROS_INFO("Waiting for maintain_stability action server to start.");
 		ac.waitForServer();
 		ROS_INFO("Action server started");
-		C0_RobilTask::RobilTaskGoal goal_to_maintain;
+		C0_RobilTask::RobilTaskGoal goal_to_maintain, goal_to_maintain2;
 		ROS_INFO("S: %s", side.c_str());
 		std::string param;
 		param = "direction=" + side;
 		goal_to_maintain.parameters = param;
 		// send a goal to the action
 
+		/*actionlib::SimpleClientGoalState state1 = ac.getState();
+		ROS_INFO("Status: %s", state1.toString().c_str());*/
+		ac.cancelAllGoals();
 		ac.sendGoal(goal_to_maintain/*, boost::bind(&turn_in_place::doneCB, this, _1, _2),
 				boost::bind(&turn_in_place::activeCB, this), boost::bind(&turn_in_place::feedbackCB, this, _1)*/);
 		ROS_INFO("Goal sent");
-		ros::Duration(5.0).sleep(); //
+		ros::Duration(1.0).sleep();
+		if(ac.waitForResult(ros::Duration(5.0))){
+			ROS_INFO("Finished in 5 seconds");
+		}else{
+			ros::Duration(3.0).sleep(); //
+			ROS_INFO("Did not finish");
+		}
 
-		if(ac.getState() == actionlib::SimpleClientGoalState::ACTIVE){
-			ROS_INFO("Goal canceled");
+		actionlib::SimpleClientGoalState state = ac.getState();
+		if(state == actionlib::SimpleClientGoalState::ACTIVE){
+			ROS_INFO("Goal canceled Status: %s", state.toString().c_str());
 			ac.cancelGoal();
+
 		}
 		else{
-			ROS_INFO("All Goals canceled");
+			ROS_INFO("All Goals canceled. Status: %s", state.toString().c_str());
 			ac.cancelAllGoals();
 		}
 
+
+
 		param = "direction=0";
-		goal_to_maintain.parameters = param;
-		ac.sendGoal(goal_to_maintain/*, boost::bind(&turn_in_place::doneCB, this, _1, _2),
-				boost::bind(&turn_in_place::activeCB, this), boost::bind(&turn_in_place::feedbackCB, this, _1)*/);
+		goal_to_maintain2.parameters = param;
+		ac.sendGoal(goal_to_maintain2);
 		ROS_INFO("Goal sent");
 
+		ros::Duration(1.0).sleep();
+		if(ac.waitForResult(ros::Duration(5.0))){
+			ROS_INFO("Finished in 5 seconds");
+		}else{
+			ros::Duration(3.0).sleep(); //
+			ROS_INFO("Did not finish");
+		}
+		if(ac.waitForResult(ros::Duration(5.0))){
+			ROS_INFO("Finished in 5 seconds");
+		}else{
+			ros::Duration(3.0).sleep(); //
+			ROS_INFO("Did not finish");
+		}
+		state = ac.getState();
+		if(state == actionlib::SimpleClientGoalState::ACTIVE){
+			ROS_INFO("Goal canceled. Status: %s", state.toString().c_str());
+			ac.cancelGoal();
+
+		}
+		else{
+			ROS_INFO("All Goals canceled. Status: %s", state.toString().c_str());
+			ac.cancelAllGoals();
+		}
+
+		param = "direction=1";
+		goal_to_maintain2.parameters = param;
+		ac.sendGoal(goal_to_maintain2);
+		ROS_INFO("Goal sent");
+
+		ros::Duration(1.0).sleep();
+		if(ac.waitForResult(ros::Duration(5.0))){
+			ROS_INFO("Finished in 5 seconds");
+		}else{
+			ros::Duration(3.0).sleep(); //
+			ROS_INFO("Did not finish");
+		}
+		state = ac.getState();
+		if(state == actionlib::SimpleClientGoalState::ACTIVE){
+			ROS_INFO("Goal canceled. Status: %s", state.toString().c_str());
+			ac.cancelGoal();
+
+		}
+		else{
+			ROS_INFO("All Goals canceled. Status: %s", state.toString().c_str());
+			ac.cancelAllGoals();
+		}
+
+		param = "direction=-1";
+		goal_to_maintain2.parameters = param;
+		ac.sendGoal(goal_to_maintain2);
+		ROS_INFO("Goal sent");
+
+		ros::Duration(1.0).sleep();
+		if(ac.waitForResult(ros::Duration(5.0))){
+			ROS_INFO("Finished in 5 seconds");
+		}else{
+			ros::Duration(3.0).sleep(); //
+			ROS_INFO("Did not finish");
+		}
+
+		state = ac.getState();
+		if(state == actionlib::SimpleClientGoalState::ACTIVE){
+			ROS_INFO("Goal canceled. Status: %s", state.toString().c_str());
+			ac.cancelGoal();
+
+		}
+		else{
+			ROS_INFO("All Goals canceled. Status: %s", state.toString().c_str());
+			ac.cancelAllGoals();
+		}
 	}
 
 	~turn_in_place(){
+		nh_.shutdown();
 	}
 
 	void turn_and_maintain_stability(std_msgs::Float64 angle){
