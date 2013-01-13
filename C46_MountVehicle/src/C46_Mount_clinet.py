@@ -11,7 +11,7 @@ if __name__ == '__main__':
     client = actionlib.SimpleActionClient('Mount_Vehicle', MountAction)
     client.wait_for_server()
 
-    goal = "EnterVehicle"
+    goal = "MountVehicle"
     # Fill in the goal here
     client.send_goal(goal)
     client.wait_for_result(rospy.Duration.from_sec(5.0))

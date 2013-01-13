@@ -31,6 +31,7 @@ private:
   ros::NodeHandle nh_;
   ros::Subscriber pointCloud_sub;
   ros::ServiceServer service;
+  ros::ServiceServer service2;
   MapMatrix * _myMatrix;
   std::vector<pclPlane*>* _myPlanes;
 public:
@@ -51,6 +52,9 @@ public:
 	   */
 	  bool proccess(C22_GroundRecognitionAndMapping::C22::Request  &req,
 			C22_GroundRecognitionAndMapping::C22::Response &res );
+
+	  bool proccess2(C22_GroundRecognitionAndMapping::C22C24::Request  &req,
+	  			C22_GroundRecognitionAndMapping::C22C24::Response &res );
 
 	  /**
 	   * The call back function executed when a data is available

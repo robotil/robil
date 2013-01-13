@@ -1,10 +1,4 @@
-++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-BUG
-.ver=0.2
-roslaunch C46_MountVehicle drc_robot_profile_lower.launch doesn't run.
-roslaunch atlas_utils drc_robot_profile_lower.launch doesn't run.
-+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ 
-C46_EnterVehicle
+C46_MountVehicle
 # Description: robot enters vehicle from a standing position
 facing forwards near the entrence of the vehicle.
 Robot enters vehicle with final position sitting inside facing the wheel.
@@ -17,12 +11,23 @@ thus he can finalize sitting on the side  or slide twords wheel,
 but should be in the right sitting place.
 
 Conditions:
+* works with version 1.2 of drcsim!
 * start testing world using launch forlder: drc_robot_profile_lower.launch
+it is in the launch directory. It also calles a world in the world directory.
+* a chair module must be added to drcsim directory.
+same as the vehicles. check robil site -> dismounted mobility.
+the chair is in the Models directory
 
 *Not final steps, may change*
 Follow the steps:
-1. run designer and executer
-2. roslaunch drc_robot_profile_lower.launch
-3. rosrun C46_MountVehicle C46_Mount_server.py
-4. start mountVehicle.xml in TestTree folder inside the designer
-(make sure to reset poses before runing tree)
+1. roslaunch drc_robot_profile_lower.launch
+2. run designer and executer
+3. rosrun C46_MountVehicle C46_MountV2.py
+4. in designer load tree located in TestTree folder.
+5. run the tree
+
+Contains:
+launch folder: launch files, last working is drc_robot_profile_lower.launch.
+world folder: test world, last working world: drc_robot_profile_lower.world.
+Modules folder: chair module.
+TestTree folder: tree wich executes the mounting code.

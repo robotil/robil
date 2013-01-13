@@ -9,6 +9,13 @@ include($ENV{ROS_ROOT}/core/rosbuild/rosbuild.cmake)
 #  MinSizeRel     : w/o debug symbols, w/ optimization, stripped binaries
 #set(ROS_BUILD_TYPE RelWithDebInfo)
 
+
+rosbuild_find_ros_package(actionlib_msgs)
+include(${actionlib_msgs_PACKAGE_PATH}/cmake/actionbuild.cmake)
+genaction()
+
+
+
 rosbuild_init()
 
 #set the default path for built executables to the "bin" directory
@@ -36,7 +43,10 @@ rosbuild_gensrv()
 #link_directories(${PCL_LIBRARY_DIRS})
 #add_definitions(${PCL_DEFINITIONS})
 rosbuild_add_boost_directories()
-find_package(OpenCV REQUIRED)
-rosbuild_add_executable(c24 src/C24_Node.cpp)
-rosbuild_link_boost(c24 thread signals)
-target_link_libraries(c24 ${OpenCV_LIBS})
+rosbuild_add_executable(C24 src/C24_Node.cpp)
+rosbuild_link_boost(C24 thread signals)
+#rosbuild_add_library(${PROJECT_NAME} src/example.cpp)
+#target_link_libraries(${PROJECT_NAME} another_library)
+rosbuild_add_executable(C24_Test src/C24_Test.cpp)
+rosbuild_link_boost(C24_Test thread signals)
+
