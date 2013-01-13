@@ -13,6 +13,7 @@
 #include <ros/ros.h>
 //#include <C45_PostureControl/C45_PostureControlAction.h>
 #include <C0_RobilTask/RobilTaskAction.h>
+#include <C0_RobilTask/RobilTask.h>
 #include <control_toolbox/pid.h>
 #include <actionlib/server/simple_action_server.h>
 #include <C45_PostureControl/com_error.h>
@@ -63,8 +64,8 @@ public:
 			ROS_ERROR("/PID_gains/D was not set");
 			return;
 		}
-		back_mby_stab_pid.initPid(p,i,d,M_PI,-M_PI);
-		back_ubx_stab_pid.initPid(p,i,d,M_PI,-M_PI);
+		/*back_mby_stab_pid.initPid(p,i,d,M_PI,-M_PI);
+		back_ubx_stab_pid.initPid(p,i,d,M_PI,-M_PI);*/
 	    COM_error_client = nh_.serviceClient<C45_PostureControl::com_error>("com_error");
 
 	    //Set callback functions
@@ -83,12 +84,12 @@ public:
 	 void goalCB(){
 
 		 //Init variables
-		 back_mby_stab_pid.reset();
-		 back_ubx_stab_pid.reset();
+		 /*back_mby_stab_pid.reset();
+		 back_ubx_stab_pid.reset();*/
 		 clock = ros::Time::now();
-		 ROS_INFO("Current time: %f", ros::Time::now().toSec());
-		 ROS_INFO("Current ok: %d", (nh_.ok())?1:0);
-		 ROS_INFO("Current isactive: %d", as_.isActive());
+		 ROS_INFO("Start time: %f", ros::Time::now().toSec());
+		 /*ROS_INFO("Current ok: %d", (nh_.ok())?1:0);
+		 ROS_INFO("Current isactive: %d", as_.isActive());*/
 
 		 double direction = 0;
 		 std::string goal_params = as_.acceptNewGoal()->parameters;
@@ -107,8 +108,9 @@ public:
 			 }
 		 }
 		 //ROS_INFO("Current maintainPosture: %d", turn_to);
-		 ROS_INFO("Current isactive: %d", as_.isActive());
-		 ROS_INFO("Current time11: %f", ros::Time::now().toSec());
+		 /*ROS_INFO("Current isactive: %d", as_.isActive());
+		 ROS_INFO("Current time11: %f", ros::Time::now().toSec());*/
+		 ROS_INFO("Got goal: direction %f", direction);
 
 		 std_msgs::Float64 d;
 		 d.data = direction;
@@ -154,9 +156,9 @@ public:
 	        as_.setPreempted();
 	      }*/
 		 C0_RobilTask::RobilTaskResult _res;
-		 _res.success = 1;
+		 _res.success = RobilTask::SUCCESS;
 		 as_.setSucceeded(_res);
-		 ROS_INFO("ENd: Current time: %f", ros::Time::now().toSec());
+		 ROS_INFO("End time: %f", ros::Time::now().toSec());
 		 return;
 	 }
 
