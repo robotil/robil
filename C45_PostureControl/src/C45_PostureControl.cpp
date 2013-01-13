@@ -156,7 +156,7 @@ public:
 	        as_.setPreempted();
 	      }*/
 		 C0_RobilTask::RobilTaskResult _res;
-		 _res.success = RobilTask::SUCCESS;
+		 _res.success = C0_RobilTask::RobilTask::SUCCESS;
 		 as_.setSucceeded(_res);
 		 ROS_INFO("End time: %f", ros::Time::now().toSec());
 		 return;
