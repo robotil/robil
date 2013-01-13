@@ -945,7 +945,7 @@ def test23():
     for i in range(100):
         root.runPlan(1)
     root.treeToXml("output/testE232.xml") 
-    print("test 3.2: success!")
+    print("test 23.2: success!")
     print "Success probability in offline mode: Clear sky = %f, Cloudy = %f" %(root.getChild(0).getProbAtIndex(0),root.getChild(0).getProbAtIndex(1))
     print "Average success time with clear sky = %f" %(root.getChild(0).getAverageSuccTime(0))
     print "Average success time when Cloudy = %f" %(root.getChild(0).getAverageSuccTime(1))
@@ -1034,6 +1034,153 @@ def test25():
     elapsed = (time.time() - start)
     print "Time: %f" %elapsed
     print "-----------------------"
+    
+
+def test26():
+    print "-------TEST 26-------"
+    start = time.time()
+    tree = xmlTree("tests/small_test_no_tsk_attrib.xml", None, "tests/small_test_tsk_attrib.xml")
+    root = tree.getRoot()
+    node.parmetersInTheWorld = 1
+    
+    node.debugMode = False
+    for i in range(1000):
+        root.runPlan(0)
+    for i in range(1000):
+        root.runPlan(1)
+    root.treeToXml("output/small_test_after_offline_tsk.xml")
+    print "Finished gathering offline statistics."
+    print "-------Debug mode-------"
+      
+    #tree = xmlTree("output/small_test_after_offline_tsk.xml")
+    node.debugMode = True
+    root = tree.getRoot()
+    for i in range(1000):
+        root.runPlan(0)
+    for i in range(1000):
+        root.runPlan(1)
+    root.treeToXml("output/small_test_debug_mode_tsk.xml")
+    print("test 26: success!")
+    print "Success probability in debug mode: Clear sky = %f, Cloudy = %f" %(root.getChild(0).getProbAtIndex(0),root.getChild(0).getProbAtIndex(1))
+    print "Average success time in debug mode with clear sky = %f" %(root.getChild(0).getAverageSuccTime(0))
+    print "Average success time in debug mode when Cloudy = %f" %(root.getChild(0).getAverageSuccTime(1))
+    elapsed = (time.time() - start)
+    print "Time: %f" %elapsed
+    print "-----------------------"    
+    
+    
+    
+def test27():
+    
+    start = time.time()
+    tree = xmlTree("tests/event1_no_tsk_attrib.xml",None ,"tests/event1_tsk_attrib.xml")
+    root = tree.getRoot()
+    node.parmetersInTheWorld = 1
+    root.treeToXml("output/testE271.xml")  
+    print("test 27.1: success!, testE271.xml")
+ 
+    node.debugMode = False
+    for i in range(100):
+        root.runPlan(0)  
+    for i in range(100):
+        root.runPlan(1)    
+    root.treeToXml("output/testE272.xml") 
+    print("test 21.2: success!, testE272.xml")
+    print "Success probability in offline mode: Clear sky = %f, Cloudy = %f" %(root.getChild(0).getProbAtIndex(0),root.getChild(0).getProbAtIndex(1))
+    print "Average success time with clear sky = %f" %(root.getChild(0).getAverageSuccTime(0))
+    print "Average success time when Cloudy = %f" %(root.getChild(0).getAverageSuccTime(1))
+    elapsed = (time.time() - start)
+    print "Time: %f" %elapsed
+    print "-------Debug mode-------"
+    node.debugMode = True
+    for i in range(100):
+        root.runPlan(0) 
+    for i in range(100):
+        root.runPlan(1)
+    root.treeToXml("output/testE273.xml") 
+    print("test 27.3: success!, testE273.xml")
+    print "Success probability in debug mode: Clear sky = %f, Cloudy = %f" %(root.getChild(0).getProbAtIndex(0),root.getChild(0).getProbAtIndex(1))
+    print "Average success time in debug mode with clear sky = %f" %(root.getChild(0).getAverageSuccTime(0))
+    print "Average success time in debug mode when Cloudy = %f" %(root.getChild(0).getAverageSuccTime(1))
+    elapsed = (time.time() - start)
+    elapsed = (time.time() - start)
+    print "Time: %f" %elapsed
+    
+    
+def test28():
+    start = time.time()
+    tree = xmlTree("tests/event2_no_tsk_attrib.xml",None,"tests/event2_tsk_attrib.xml")
+    root = tree.getRoot()
+    node.parmetersInTheWorld = 1
+
+    root.treeToXml("output/testE281.xml")  
+    print("test 28.1: success!")
+ 
+    node.debugMode = False
+    for i in range(100):
+        root.runPlan(0) 
+    for i in range(100):
+        root.runPlan(1)
+    root.treeToXml("output/testE282.xml") 
+    print("test 28.2: success!")
+    print "Success probability in offline mode: Clear sky = %f, Cloudy = %f" %(root.getChild(0).getProbAtIndex(0),root.getChild(0).getProbAtIndex(1))
+    print "Average success time with clear sky = %f" %(root.getChild(0).getAverageSuccTime(0))
+    print "Average success time when Cloudy = %f" %(root.getChild(0).getAverageSuccTime(1))
+    elapsed = (time.time() - start)
+    print "Time: %f" %elapsed
+    print "-------Debug mode-------"
+    node.debugMode = True
+    for i in range(100):
+        root.runPlan(0) 
+    for i in range(100):
+        root.runPlan(1)
+    root.treeToXml("output/testE283.xml") 
+    print("test 28.3: success!")
+    print "Success probability in debug mode: Clear sky = %f, Cloudy = %f" %(root.getChild(0).getProbAtIndex(0),root.getChild(0).getProbAtIndex(1))
+    print "Average success time in debug mode with clear sky = %f" %(root.getChild(0).getAverageSuccTime(0))
+    print "Average success time in debug mode when Cloudy = %f" %(root.getChild(0).getAverageSuccTime(1))
+    elapsed = (time.time() - start)
+    elapsed = (time.time() - start)
+    print "Time: %f" %elapsed
+    
+    
+def test29():
+    start = time.time()
+    tree = xmlTree("tests/event3_no_tsk_attrib.xml", None,"tests/event3_tsk_attrib.xml")
+    root = tree.getRoot()
+    node.parmetersInTheWorld = 1
+
+    root.treeToXml("output/testE291.xml")  
+    print("test 29.1: success!")
+ 
+    node.debugMode = False
+    for i in range(100):
+        root.runPlan(0)
+    for i in range(100):
+        root.runPlan(1)
+    root.treeToXml("output/testE292.xml") 
+    print("test 29.2: success!")
+    print "Success probability in offline mode: Clear sky = %f, Cloudy = %f" %(root.getChild(0).getProbAtIndex(0),root.getChild(0).getProbAtIndex(1))
+    print "Average success time with clear sky = %f" %(root.getChild(0).getAverageSuccTime(0))
+    print "Average success time when Cloudy = %f" %(root.getChild(0).getAverageSuccTime(1))
+    elapsed = (time.time() - start)
+    print "Time: %f" %elapsed
+    print "-------Debug mode-------"
+    node.debugMode = True
+    for i in range(100):
+        root.runPlan(0)
+    for i in range(100):
+        root.runPlan(1)
+    root.treeToXml("output/testE293.xml") 
+    print("test 29.3: success!")
+    print "Success probability in debug mode: Clear sky = %f, Cloudy = %f" %(root.getChild(0).getProbAtIndex(0),root.getChild(0).getProbAtIndex(1))
+    print "Average success time in debug mode with clear sky = %f" %(root.getChild(0).getAverageSuccTime(0))
+    print "Average success time in debug mode when Cloudy = %f" %(root.getChild(0).getAverageSuccTime(1))
+    elapsed = (time.time() - start)
+    elapsed = (time.time() - start)
+    print "Time: %f" %elapsed
+
+    
 #changed by RAZ -- we can now import from dist.* files, since the directory has an empty __init__.py file, and python recognizes it as a module.#thanks
 def _createComputedDist(string = None):
     from distributions.computed import Computed
@@ -1052,36 +1199,44 @@ def _createUniformDist(parmA,parmB):
 if __name__ == "__main__":
     #run the 10 tests
     if len(sys.argv) == 2 and sys.argv[1] == "all":
-	test1()
-	test2()
-	test3()
-	test4()
-	test5()
-	test6()
-	test7()
-	test8()
-	test9()
-	test10()
-#    test11()
-	test12()
-	test14()
-	test15()
-	test16()
-	test17()
-	test18()
-	test19()
-	test20()
-	test21()
-	test22()
+#	test1()
+#	test2()
+#	test3()
+#	test4()
+#	test5()
+#	test6()
+#	test7()
+#	test8()
+#	test9()
+#	test10()
+##    test11()
+#	test12()
+#	test14()
+#	test15()
+#	test16()
+#	test17()
+#	test18()
+#	test19()
+#	test20()
+#	test21()
+#	test22()
 	test23()
-	test24()
-	test25()
+#	test24()
+#	test25()
+#	test26()
+# 	test27()
+#  	test28()
+	test29()
     elif len(sys.argv) == 2 and sys.argv[1] == "events":
 	test21()
 	test22()
 	test23()
+	test27()
+	test28()
+	test29()
     elif len(sys.argv) == 2 and sys.argv[1] == "demo":
 	test24()
 	test25()
     else:
 	print "please provide one of the following command line arguments: [all,events,demo]"
+     
