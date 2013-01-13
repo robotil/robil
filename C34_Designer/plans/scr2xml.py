@@ -5,7 +5,21 @@ import re
 
 file = sys.argv[1]
 
-text = open(file,'r').read()
+def ReadFile(fname):
+	return ''.join([line for line in open(fname,'r').readlines() if len(line.lstrip())>0 and line.lstrip()[0]!='#'])
+
+text = ReadFile(file)
+
+def loadIncludes(text, includedText):
+	lines = [x.strip() for x in [y for y in text.split('\n') if len(y.lstrip())>0]if x.find('INCLUDE=')==0]
+	for l in lines:
+		k,v = l.split('=')
+		includedText.append( ReadFile(v.strip()) )
+
+includedText = []
+loadIncludes(text, includedText)
+if len(includedText)>0:
+	text = text+'\n\nINCLUDED_FILES\n\n'+'\n\tFILE\n'.join(includedText)
 
 #print text
 
@@ -96,14 +110,27 @@ def splitFunctions(text, functions):
 		node = searchTag('def', start)
 		if node!=None:
 			start = node[3]
-			functions[functionName(node[0])]=node
-	for f in functions:
-		if f[0].find('root')==0:
-			functions['root'] = f
+			fname =  functionName(node[0])
+			if fname!='root' or 'root' not in functions:
+				functions[fname]=node
+	if 'root' not in functions:
+		for f in functions:
+			if f[0].find('root')==0:
+				functions['root'] = f
 		
 func={}
 splitFunctions(text, func)
 #print 'keys = ', func.keys()
+
+def splitDecoratorsAl(text, decorators):
+	lines = [line.strip()[4:] for line in [line for line in text.split('\n') if len(line.lstrip())>0]if line.find('dec ')==0]
+	for l in lines:
+		k,v = l.split('=')
+		decorators[k.strip()]=v.strip()
+
+decorators={}
+splitDecoratorsAl(text, decorators)
+
 def isArray(t): return len(t)>2 and t[0]=='[' and t[-1]==']'
 
 funcNameCounter=1
@@ -133,7 +160,7 @@ def getPrefix(txt):
 
 	return funcname, arguments, decors
 
-def compileXml( TAB, text, func, repl):
+def compileXml( TAB, text, func, repl, defaultName):
 	def getTab(t):
 		res = ""
 		for x in text:
@@ -201,6 +228,7 @@ def compileXml( TAB, text, func, repl):
 		t = replasment(t)
 		fname,args,decors = getPrefix(t)
 		for d in decors:
+			if d in decorators: d=decorators[d]
 			print tab+'<dec name="'+d+'" >'
 			if len(ret)==0: ret = tab+'</dec>'
 			else: ret = tab+'</dec>'+'\n'+ret
@@ -226,8 +254,12 @@ def compileXml( TAB, text, func, repl):
 				if len(tt)>0: fname = fname[len(tt):].strip()
 				if typ=='': typ = 'seq'; tt=''
 				if len(fname)==0:
-					fname="@"+str(funcNameCounter)
-					funcNameCounter+=1
+					if len(defaultName)==0:
+						fname="@"+str(funcNameCounter)
+						funcNameCounter+=1
+					else:
+						fname=defaultName
+				if fname == '': fname = defaultName
 				print tab+"<"+typ+' name="'+fname+'" '+ attr +'>'
 				return tab+"</"+typ+">"+ret
 		else:
@@ -249,12 +281,15 @@ def compileXml( TAB, text, func, repl):
 				print tab+"<!-- function: "+ t + " -->"
 				nrepl = repl.copy()
 				parseValues(nrepl,args,fname)
-				compileXml( tab, body, func, nrepl)
-				return tab+"<!-- function end: "+ fname+"-->"+ret
+				compileXml( tab, body, func, nrepl, fname)
+				return tab+"<!-- function end: "+ fname+" -->"+ret
 			else:
 				if len(fname)==0:
-					fname="@"+str(funcNameCounter)
-					funcNameCounter+=1
+					if len(defaultName)==0:
+						fname="@"+str(funcNameCounter)
+						funcNameCounter+=1
+					else:
+						fname=defaultName
 				if len(args)>0:
 					print tab+'<tsk name="'+fname+'('+args+')'+'" '+ attr +' />'
 				else:
@@ -290,16 +325,21 @@ def compileXml( TAB, text, func, repl):
 					onError_VariableIsNotArray(args+'='+repl[args])
 					continue
 				if args in repl:
-					vals = repl[args][1:-1].split(',')
+					vals = [x.strip() for x in repl[args][1:-1].split(',')]
 					for xi,x in enumerate(vals):
 						repl[args+'#']=xi
-						compileXml( TAB, ttt, func, repl)
+						compileXml( TAB, ttt, func, repl, "")
 						if xi!=len(vals)-1: print tab+'<!-- NEXT '+args+' -->'
 			elif fname.upper().find('IF')==0:
 				args_k,args_v = args.split('=')
+				args_k = args_k.strip()
+				args_v = args_v.strip()
 				isnot = False
 				if args_k.find('!')==0:
 					args_k=args_k[1:]
+					isnot = True
+				if len(args_k.rstrip())>0 and args_k.rstrip()[-1]=='!':
+					args_k=args_k[:-1]
 					isnot = True
 				if args_k in repl:
 					vv = ''
@@ -313,13 +353,14 @@ def compileXml( TAB, text, func, repl):
 							onError_VariableIsNotArray(args+'='+repl[args])
 							continue
 						val = val[1:-1]
-						vv = val.split(',')[repl[args_k]]
+						vv = val.split(',')[repl[args_k]].strip()
+					#print "compare: ",'['+vv+']', isnot, '['+args_v+']',(vv==args_v), (isnot==False and vv==args_v), (isnot==True and vv!=args_v)
 					if isnot==False and vv==args_v:
-						compileXml( TAB, ttt, func, repl)
+						compileXml( TAB, ttt, func, repl, "")
 					if isnot==True and vv!=args_v:
-						compileXml( TAB, ttt, func, repl)
+						compileXml( TAB, ttt, func, repl, "")
 			else:
-				compileXml( TAB, ttt, func, repl)
+				compileXml( TAB, ttt, func, repl, "")
 			print tg
 		text = text[linelen+1:]
 
@@ -328,5 +369,5 @@ if 'root' not in func:
 	exit(1)
 		
 print '<plan>'
-compileXml( '', "root", func , {'A':'[10,11]'})
+compileXml( '', "root", func , {'A':'[10,11]'}, "")
 print '</plan>'

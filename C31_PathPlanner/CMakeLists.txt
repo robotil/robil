@@ -36,6 +36,6 @@ rosbuild_add_executable(gpp src/cogniteam_pathplanning.cpp)
 #rosbuild_link_boost(gpp thread)
 
 
-rosbuild_add_executable(lpp src/lpp.cpp)
+#rosbuild_add_executable(lpp src/lpp.cpp)
 #rosbuild_link_boost(lpp thread)
 
