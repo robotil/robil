@@ -19,7 +19,7 @@ set(LIBRARY_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/lib)
 #uncomment if you have defined messages
 rosbuild_genmsg()
 #uncomment if you have defined services
-rosbuild_gensrv()
+#rosbuild_gensrv()
 
 #common commands for building c++ executables and libraries
 #rosbuild_add_library(${PROJECT_NAME} src/example.cpp)
@@ -31,12 +31,35 @@ rosbuild_gensrv()
 
 
 #find_package( PCL 1.5 REQUIRED )
-
-#include_directories(${PCL_INCLUDE_DIRS})
-#link_directories(${PCL_LIBRARY_DIRS})
-#add_definitions(${PCL_DEFINITIONS})
+add_library(libopentld.a STATIC IMPORTED)
+set_property(TARGET libopentld.a PROPERTY IMPORTED_LOCATION libopentld.a)
+include_directories(${PCL_INCLUDE_DIRS} src/OpenTLD/libopentld/)
+link_directories(${PCL_LIBRARY_DIRS})
+add_definitions(${PCL_DEFINITIONS})
 rosbuild_add_boost_directories()
 find_package(OpenCV REQUIRED)
 rosbuild_add_executable(c23 src/C23_Node.cpp)
 rosbuild_link_boost(c23 thread signals)
-target_link_libraries(c23 ${OpenCV_LIBS})
+include_directories(main
+    src/libopentld/imacq
+    src/libopentld/mftracker
+    src/libopentld/tld
+    src/3rdparty/cvblobs
+    ${OpenCV_INCLUDE_DIRS})
+
+
+#-------------------------------------------------------------------------------
+#add subdirectories
+add_subdirectory(src/3rdparty/cvblobs)
+
+if(NOT USE_SYSTEM_LIBS)
+    add_subdirectory(src/3rdparty/libconfig)
+endif(NOT USE_SYSTEM_LIBS)
+
+add_subdirectory(src/libopentld)
+
+target_link_libraries(c23 ${PCL_LIBRARIES} libopentld cvblobs ${OpenCV_LIBS} )
+rosbuild_add_executable(c23 src/C23_Node.cpp src/C23_Node_TLD_Handler.cpp)
+#rosbuild_add_executable(test1 src/C21testNode.cpp)
+#rosbuild_link_boost(test1 thread signals)
+#target_link_libraries(test1 ${OpenCV_LIBS} ${PCL_LIBRARIES})
