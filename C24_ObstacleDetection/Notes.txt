@@ -11,7 +11,7 @@ rosrun C24_ObstacleDetection C24
 (at first there is a list of error msgs, not to worry they don't effect the activity of the node)
 
 test with
-rosrun C24_ObstacleDetection C22_Test
+rosrun C24_ObstacleDetection C24_Test
 
 it is advised to look at the actual pointcloud using rvis in order to get a better image of the mapping
 
