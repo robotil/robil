@@ -1,5 +1,11 @@
 C45 – Posture Control
 ---------------------------------
-1) run:
+Prerequisites:
+1) Depends on HRL_Kinematics package. Installation instructions: http://www.robil.org/trac_robil/wiki/InstallUbuntuLog#insthrl
+2) Simulation ran using:
+roslaunch atlas_utils atlas_position_controllers.launch
+
+To run:
+1) Launch:
 roslaunch C45_PostureControl C45_PostureControl.launch
-2) use action C45_PostureControl
+2) Use action C45_PostureControl with parameter direction=0/1/-1
