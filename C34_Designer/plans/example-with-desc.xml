@@ -1,0 +1,6 @@
+<plan descriptions="tdescs.txt">
+   <seq name="mission" x="180.5" y="59.5" collapsed="false" id="b26af94b-b424-4689-9708-d3f7d8315b20"> 
+         <tsk name="BodyControl(param=touchdown)" x="118.5" y="218.5" test_time="0" test_result="true" id="3a1cc4b4-2b2e-437b-9a95-9380d5fcef59" />
+         <tsk name="Noname" x="485.5" y="150.5" test_time="0" test_result="true" id="c8139a35-0728-4d35-a029-3c734eb2d3f6" />
+   </seq>
+</plan>

@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<task_description>
+    <task name="Stand Up">
+        <conditions/>
+        <constraints/>
+        <effects/>
+        <algorithm>Stand Up 111111111111111</algorithm>
+    </task>
+    <task name="Identify possible target locations">
+        <conditions/>
+        <constraints/>
+        <effects/>
+        <algorithm>Asd asd asd as
+safds dfg dfg dfsg 
+cxvb cvb xcvb xcvb xcvb</algorithm>
+    </task>
+    <task name="Noname">
+        <conditions/>
+        <constraints/>
+        <effects/>
+        <algorithm>kj</algorithm>
+    </task>
+    <task name="Turn to face presumed target">
+        <conditions/>
+        <constraints/>
+        <effects/>
+        <algorithm>Awesome algorithm</algorithm>
+    </task>
+    <task name="Perform an all-around scan">
+        <conditions/>
+        <constraints/>
+        <effects/>
+        <algorithm>Trolololo olo lo lol ol ol ololo</algorithm>
+    </task>
+</task_description>

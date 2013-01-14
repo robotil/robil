@@ -5,6 +5,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import javax.xml.parsers.DocumentBuilder;
@@ -133,6 +134,7 @@ public class TaskDescription{
 			
 			return true;
 		}
+
 	}
 
 	
@@ -165,7 +167,7 @@ public class TaskDescription{
 		return list;
 	}
 	
-	public TaskDescription(String fname)throws ParserConfigurationException, SAXException, IOException{
+	public TaskDescription(String fname) throws ParserConfigurationException, SAXException, IOException{
 		DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
 		DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
 		Document doc = dBuilder.parse(new File(fname));
@@ -190,12 +192,25 @@ public class TaskDescription{
 		return res;
 	}
 	
+	public List getNames() {
+		ArrayList<String> names = new ArrayList<String>();
+		
+		names.add("");
+		names.add(" ");
+		
+		for (Task name : map.values()) 
+			names.add(name.name);
+				
+		return names;
+	}
+	
 	public Task get(String taskname){
 		if(map.containsKey(taskname)) return map.get(taskname);
 		return null;
 	}
 	
 	public void put(String taskname, Task task){
+		task.name = taskname;
 		map.put(taskname, task);
 	}
 	

@@ -8,13 +8,18 @@ import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Font;
 import java.awt.Graphics2D;
+import java.awt.Insets;
 import java.awt.Point;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
 import java.awt.font.FontRenderContext;
 import java.awt.font.TextLayout;
+import java.util.ArrayList;
 import java.util.Map;
 
+import javax.swing.BorderFactory;
 import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.GroupLayout;
@@ -27,10 +32,14 @@ import javax.swing.JDialog;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.SpringLayout;
+import javax.swing.UIManager;
 
 import org.w3c.dom.Element;
+
+import document.description.TaskDescription;
 
 public class Task extends GElement implements View.ChangesListener{
 
@@ -45,14 +54,34 @@ public class Task extends GElement implements View.ChangesListener{
 	public Font font = new Font("sansserif", Font.BOLD, 10);
 	public int seqNumber=0;
 	
+	private TaskDescription taskDescriptionProvider;
 	
+	private final Tooltip _tooltip;
 	
 	public Task(){
 		property.size = new Vec(100,100);
+		_tooltip = new Tooltip(this);
 	}
 	
 	public String toString(){
 		return ""+type+"{"+text+"}";
+	}
+	
+	public void setTaskDescriptionProvider(TaskDescription provider) {
+		taskDescriptionProvider = provider;
+		
+		// TaskDescription.Task testTask = new TaskDescription.Task();
+		// testTask.algorithm = text;
+		// taskDescriptionProvider.put(getNameWithoutParameters(), testTask);
+	}
+
+	public String getNameWithoutParameters() {
+		return getNameWithoutParameters(text);
+	}
+
+	public String getNameWithoutParameters(String name) {
+		name = name.replaceAll("\\(.*\\)", "");
+		return name.replaceAll("\\(.*", "");
 	}
 	
 	final int shortTextLen = 25;
@@ -300,13 +329,26 @@ public class Task extends GElement implements View.ChangesListener{
 			g.drawLine(cnt.x+(int)(view.zoom*2), cnt.y+dim.getIntY()/2, cnt.x+dim.getIntX()-(int)(view.zoom*2), cnt.y+dim.getIntY()/2);
 		}
 		
+		// ADDED Draw tooltip
+		if (type.equals(TYPE_task) && property.selected && taskDescriptionProvider != null) {
+			String cleanName = getNameWithoutParameters();
+			
+			TaskDescription.Task taskDesc = taskDescriptionProvider.get(cleanName);
+			if (taskDesc != null) {
+				String message = String.format("Description:\n\t- %s", taskDesc.algorithm);
+				
+				_tooltip.setMessage("", message);
+				_tooltip.paint(g);
+			}
+		}
+		
 		gp.restore();
 	}
-	
+
 	public void drawString(Graphics2D g, String t, int x, int y){
 		g.drawString(t, x, y + (int)(getTextSize(g, getText()).height*0.8));
 	}
-
+	
 	Vec getSize(){
 		onViewChange();
 		return super.getSize();
@@ -345,7 +387,6 @@ public class Task extends GElement implements View.ChangesListener{
 		onViewChange();
 	}
 	
-	
 	class ModifyDialog extends JDialog {
 		private static final long serialVersionUID = 1739783395697186997L;
 
@@ -353,27 +394,47 @@ public class Task extends GElement implements View.ChangesListener{
 
 	        initUI();
 	    }
-	    JTextField txtName = null;
+		
+		Java2sAutoTextField txtName = null;
 	    JComboBox cType = null;
 	    JTextField txtDbgTime = null;
 	    JComboBox txtDbgResult = null;
 	    JCheckBox chkCollapse = null;
+	    JTextArea txtTaskDescAlgoritm;
+	    
+	    // Java2sAutoTextField txtNameAC;
 	    
 	    public final void initUI() {
 
 	    	setLayout(null);
+	    	UIManager.put("TextArea.margin", new Insets(10,10,10,10));
 	    	
 	    	JLabel lbl1 = new JLabel("Name ");
 	    	JLabel lbl2 = new JLabel("Type ");
 	    	JLabel lbl3 = new JLabel("Dbg-Time   ");
 	    	JLabel lbl4 = new JLabel("Dbg-Result ");
 	    	
-	    	txtName = new JTextField(text); txtName.selectAll();
+	    	// Task description
+	    	JLabel lbl5 = new JLabel("Description ");
+	    	
+	    	
+	    	if (taskDescriptionProvider != null)
+	    		txtName = new Java2sAutoTextField(taskDescriptionProvider.getNames()); // txtName.selectAll();
+	    	else
+	    		txtName = new Java2sAutoTextField(new ArrayList<String>()); // txtName.selectAll();
+	    	
+	    	txtName.setEditable(true);
+	    	txtName.setEnabled(true);
+	    	txtName.setStrict(false);
+	    	txtName.setText(text);
+	    	
 	    	cType = new JComboBox(new String[]{TYPE_sequenser,TYPE_selector,TYPE_task, TYPE_parallel, TYPE_switch});
 	    	cType.setSelectedItem(type);
 	    	txtDbgTime = new JTextField(""+getProperty().test_time); 
 	    	txtDbgResult = new JComboBox(new String[]{"true","false"});
 	    	txtDbgResult.setSelectedItem(""+getProperty().test_result);
+	    	
+	    	txtTaskDescAlgoritm = new JTextArea();
 
 	    	chkCollapse = new JCheckBox("Collapse");
 	    	chkCollapse.setSelected(getProperty().collapsed);
@@ -397,11 +458,40 @@ public class Task extends GElement implements View.ChangesListener{
 	        			getProperty().test_time = Integer.parseInt(txtDbgTime.getText());
 	        			getProperty().test_result = Boolean.parseBoolean((String) txtDbgResult.getSelectedItem());
 	        			getProperty().collapsed = chkCollapse.isSelected();
+	        			
+						if (type == TYPE_task && taskDescriptionProvider != null) {
+							TaskDescription.Task updateTask = new TaskDescription.Task();
+							updateTask.algorithm = txtTaskDescAlgoritm.getText();
+							taskDescriptionProvider.put(getNameWithoutParameters(), updateTask);
+						}
 	        		}catch(Exception e){
 	        			e.printStackTrace();
 	        		}
 	        		dispose();
 	        	}
+	        });
+	        
+	        txtName.addKeyListener(new KeyAdapter() {
+	            public void keyReleased(KeyEvent e) {
+	            	if (taskDescriptionProvider == null)
+	            		return;
+	            	
+	            	String typedText = getNameWithoutParameters(txtName.getText());
+	            	TaskDescription.Task taskDesc = taskDescriptionProvider.get(typedText);
+	            	
+	            	if (taskDesc != null)
+	            		txtTaskDescAlgoritm.setText(taskDesc.algorithm);
+	            	else 
+	            		txtTaskDescAlgoritm.setText("");
+	            }
+	 
+	            public void keyTyped(KeyEvent e) {
+	            	
+	            }
+	 
+	            public void keyPressed(KeyEvent e) {
+	                
+	            }
 	        });
 	        
 	        add(lbl1); add(txtName);
@@ -411,25 +501,40 @@ public class Task extends GElement implements View.ChangesListener{
 	        	add(chkCollapse);
 	        }else{
 	        	add(lbl3); add(txtDbgTime);
-	        	add(lbl4); add(txtDbgResult);	        	
+	        	add(lbl4); add(txtDbgResult);
+	        	
+	        	if (taskDescriptionProvider != null) {
+		        	TaskDescription.Task taskDesc = taskDescriptionProvider.get(getNameWithoutParameters());
+		        	
+		        	if (taskDesc != null)
+		        		txtTaskDescAlgoritm.setText(taskDesc.algorithm);
+		        	
+		        	txtTaskDescAlgoritm.setBorder(BorderFactory.createLineBorder(Color.DARK_GRAY));
+		        	
+			        // Task description
+		        	add(lbl5); add(txtTaskDescAlgoritm);
+	        	}
 	        }
 	        
 	        add(close); add(OK);
 	        
 	        lbl1.setBounds(10,10, 100, 30);
-	        txtName.setBounds(120,10, 170, 30);
+	        txtName.setBounds(160,10, 370, 30);
 	        lbl2.setBounds(10,50, 100, 30);
-	        cType.setBounds(120,50, 170, 30);
+	        cType.setBounds(160,50, 370, 30);
 	        
-	        lbl3.setBounds(10,90, 100, 30);
-	        txtDbgTime.setBounds(120,90, 170, 30);
-	        lbl4.setBounds(10,130, 100, 30);
-	        txtDbgResult.setBounds(120,130, 170, 30);
+	        lbl3.setBounds(10,90, 130, 30);
+	        txtDbgTime.setBounds(160,90, 370, 30);
+	        lbl4.setBounds(10,130, 130, 30);
+	        txtDbgResult.setBounds(160,130, 370, 30);
 	        
-	        chkCollapse.setBounds(5,160, 100, 30);
+	        lbl5.setBounds(10, 170, 100, 30);
+	        txtTaskDescAlgoritm.setBounds(160, 170, 370, 150);
 	        
-	        close.setBounds(120,200, 80, 30);
-	        OK.setBounds(210,200, 80, 30);
+	        chkCollapse.setBounds(5,200, 100, 30);
+	        
+	        close.setBounds(10,340, 80, 30);
+	        OK.setBounds(440,330, 100, 30);
 
 	        setModalityType(ModalityType.APPLICATION_MODAL);
 
@@ -437,7 +542,7 @@ public class Task extends GElement implements View.ChangesListener{
 	        setDefaultCloseOperation(DISPOSE_ON_CLOSE);
 	        setLocationRelativeTo(null);
 	        //setSize(300, 230);
-	        setSize(300, 260);
+	        setSize(550, 400);
 	    }
 	}
 	

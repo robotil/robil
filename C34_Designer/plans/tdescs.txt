@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<task_description>
+    <task name="Noname">
+        <conditions/>
+        <constraints/>
+        <effects/>
+        <algorithm>Noname</algorithm>
+    </task>
+    <task name="BodyControl">
+        <conditions/>
+        <constraints/>
+        <effects/>
+        <algorithm>BodyControl(param=touchdown)</algorithm>
+    </task>
+</task_description>

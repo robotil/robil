@@ -1,0 +1,6 @@
+<plan descriptions="tdescs.txt">
+   <seq name="mission"> 
+         <tsk name="BodyControl(param=touchdown)" />
+         <tsk name="Noname" />
+   </seq>
+</plan>
