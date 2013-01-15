@@ -48,13 +48,18 @@ bool Map::inRange(long x, long y)const{
 	if(x>=(long)w()||y>=(long)h()) return false;
 	return true;
 }
-void Map::approximate(long& tx, long& ty, char ctype)const{
-	if(inRange(tx, ty)) return;
+double Map::approximate(const long cx, const long cy, long& tx, long& ty, char ctype)const{
+	cout<<"tx="<<tx<<", ty="<<ty<<", ctype="<<ctype<<", cx="<<cx<<", cy="<<cy<<endl;
+	if(inRange(tx, ty)) return 0;
 	long x = 0;long y = 0;
-	double min_dis = ::hypot(double(tx-x), double(ty-y));
+	#define DIST(x,y, xx, yy) ::hypot(double((xx-cx)-(x-cx)), double((yy-cy)-(y-cy)))
+	
+	double min_dis = DIST(tx,ty,  x,y);
 	long minX(-1), minY(-1);
+	const Map& me = *this;
 
-	#define proc if((*this)(x,y) == ctype){ double dis = ::hypot(double(tx-x), double(ty-y)); if(min_dis>dis || minX<0){ min_dis=dis; minX=x; minY=y; } }
+	#define proc if(me(x,y) == ctype){ double dis = DIST(tx,ty,  x,y); cout<<"x,y="<<x<<","<<y<<"="<<dis; if(min_dis>dis || minX<0){ min_dis=dis; minX=x; minY=y; cout<<" set as min: "<<minX<<","<<minY<<"="<<min_dis;} cout<<endl;}
+//	#define proc if(me(x,y) == ctype){ double dis = DIST(tx,ty,  x,y); if(min_dis>dis || minX<0){ min_dis=dis; minX=x; minY=y;} }
 
 	for(; x< (long)w()	; x++){ proc }	x--; y++;
 	for(; y< (long)h()	; y++){ proc }	x--; y--;
@@ -62,20 +67,28 @@ void Map::approximate(long& tx, long& ty, char ctype)const{
 	for(; y>=0  		; y--){ proc }
 
 	#undef proc
-
+	#undef DIST
 	tx = minX; ty=minY;
+	cout<<"----"<<endl;
+	return min_dis;
 }
-void Map::approximate(long& tx, long& ty)const{
+void Map::approximate(const long cx, const long cy, long& tx, long& ty)const{
+	double min_dis=0;
 	long x(tx), y(ty);
-	if(inRange(tx, ty)) return;
-	approximate(tx, tx, Map::ST_AVAILABLE);
+	if(inRange(tx, ty)){ /*cout<<"original x,y in range"<<endl;*/ return; }
+	double dis_av = approximate(cx, cy, tx, ty, Map::ST_AVAILABLE);
+	long x_av(tx), y_av(ty);
 
-	if(inRange(tx, ty)) return;
+	//if(inRange(tx, ty)){ cout<<"x,y on available celles in range : "<<tx<<","<<ty<<endl; return; }
 	tx=x; ty=y;
-	approximate(tx, tx, Map::ST_UNCHARTED);
+	double dis_un = approximate(cx, cy, tx, ty, Map::ST_UNCHARTED);
+	long x_un(tx), y_un(ty);
+	
+	if(dis_av<=dis_un){ tx=x_av; ty=y_av; } else { tx=x_un; ty=y_un; }
 
-	if(inRange(tx, ty)) return;
-	approximate(tx, tx, Map::ST_BLOCKED);
+	if(inRange(tx, ty)){ /*cout<<"x,y on uncharted celles in range"<<endl;*/ return; }
+	approximate(cx, cy, tx, ty, Map::ST_BLOCKED);
+	//cout<<"x,y on blocked celles"<<endl;
 }
 // -------------------------- QTNode ---------------------------------------------
 
@@ -336,6 +349,8 @@ AStar::Path AStar::reconstruct_path(map<AStar::QT,AStar::QT>& came_from, AStar::
 Inflator::Inflator(size_t radius, char sbv)
 : radius(radius), cellBlockValue(sbv)
 {
+	//TODO: MUST UNIQUE ON (tx,ty) => INCREACE SPEED OF INFLATION
+	//cout<<"Inflator("<<radius<<","<<(int)sbv<<")"<<endl;
 	int rr = radius*radius;
 	for(int x = -(int)radius; x<=(int)radius; x++){
 		int y = (int)round(sqrt( rr - x*x ));
@@ -344,12 +359,14 @@ Inflator::Inflator(size_t radius, char sbv)
 		tx.push_back(y); ty.push_back(x);
 		tx.push_back(-y); ty.push_back(x);
 	}
+	//for( size_t i=0;i<tx.size();i++){cout<<"x,y="<<tx[i]<<","<<ty[i]<<endl;}
+	//cout<<"Inflator: end"<<endl;
 }
 Map Inflator::inflate(const Map& source)const{
 	Map m(source);
 	for( size_t y=0; y<source.h(); y++){
 		for( size_t x=0; x<source.w(); x++){
-			if(source(x,y)==Map::ST_BLOCKED){
+			if(source(x,y)==cellBlockValue){
 				for( size_t i=0;i<tx.size();i++){
 					size_t xx, yy;
 					#define setInRage(val, mi, ma, v) { if( (int)(v) < (int)(mi) ) val=(mi); else if( (int)(v) > (int)(ma) ) val=(ma); else val=(v); }
@@ -357,23 +374,33 @@ Map Inflator::inflate(const Map& source)const{
 					setInRage(yy, 0, m.h()-1, y+ty[i])
 					#undef setInRage
 					m(xx,yy) = cellBlockValue;
+					//cout<<"x,y="<<x<<","<<y<<"  "<<"xx,yy="<<xx<<","<<yy<<endl;
 				}
 			}
 		}
 	}
 	return m;
 }
-Map Inflator::coloring(const Map& source, size_t x, size_t y, char av, char bl)const{
+
+Map MapEditor::replace(const Map& source, const char from, const char to)const{
+	Map res ( source );
+	for( size_t y=0; y<source.h(); y++){for( size_t x=0; x<source.w(); x++){
+		if(res(x,y)==from) res(x,y)=to;
+	}}
+	return res;
+}
+
+Map MapEditor::coloring(const Map& source, size_t x, size_t y, const char av, const char bl)const{
 	Map visited(source.w(), source.h());
 	Map res(source.w(), source.h());
-	cout<<": "<<(int)source(x,y)<<": "<<(int)av<<": "<<(int)bl<<endl;
+	//cout<<": "<<(int)source(x,y)<<": "<<(int)av<<": "<<(int)bl<<endl;
 	coloring(source, x, y, source(x,y), av, bl, visited, res);
 	for( size_t y=0; y<source.h(); y++){for( size_t x=0; x<source.w(); x++){
 		if(visited(x,y)==Map::ST_UNCHARTED) res(x,y)=bl;
 	}}
 	return res;
 }
-void Inflator::coloring(const Map& source, size_t x, size_t y, char c, char av, char bl, Map& visited, Map& res)const{
+void MapEditor::coloring(const Map& source, size_t x, size_t y, const char c, const char av, const char bl, Map& visited, Map& res)const{
 	if(visited(x,y)==Map::ST_BLOCKED) return;
 	visited(x,y) = Map::ST_BLOCKED;
 	if(c == source(x,y)){
@@ -438,7 +465,8 @@ int cogniteam_pathplanning_test_map_inflation(int argc, char** argv) {
 	cout<<"map"<<endl<<map<<endl;
 
 	Inflator i(3, Map::ST_BLOCKED);
-	cout<<"inflated:"<<endl<<i.coloring(i.inflate(map), 11,7, 0,1)<<endl;
+	MapEditor e;
+	cout<<"inflated:"<<endl<<e.coloring(i.inflate(map), 11,7, 0,1)<<endl;
 
 	return 0;
 }
@@ -447,33 +475,64 @@ int cogniteam_pathplanning_test(int argc, char** argv) {
 	cout << "START" << endl; // prints PP
 
 	char cmap[]={
-			0,0,0,0,0, 0,0,0,0,0, 0,0,0,0,0, 0,0,0,0,0, 0,
-			0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-			0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-			0,0,0,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-			0,0,0,0,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-
-			0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-			0,0,0,0,0,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-			0,0,0,0,0,0,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,
-			0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-			0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-
-			0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,1,1,
-			0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,0,1,1,1,1,1,
-			0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,
-			0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,0,0,0,
-			0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-
-			0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+		2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,
+		2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,
+		2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,0,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,
+		2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,1,2,2,2,2,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,
+		2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,1,1,1,1,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,
+		2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,
+		2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,
+		2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,
+		2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,
+		2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,1,1,2,2,2,2,2,2,2,2,2,2,2,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,
+		2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,
+		2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,
+		2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,
+		2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,
+		2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,
+		2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,
+		2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,
+		2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,1,0,2,2,2,2,2,2,2,2,2,
+		2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,0,0,2,2,2,0,0,0,0,2,2,2,2,2,2,2,2,
+		2,2,2,2,2,2,2,2,2,2,2,2,2,2,1,1,1,0,2,2,2,2,2,2,2,2,2,2,2,2,2,0,0,2,2,1,1,1,1,1,2,2,2,2,2,2,2,2,
+		2,2,2,2,2,2,2,2,2,2,2,2,1,1,1,1,1,1,1,2,1,1,1,1,2,2,0,2,1,1,1,1,0,1,1,1,1,1,1,1,1,1,2,2,2,2,2,2,
+		2,2,2,2,2,2,2,2,2,2,2,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,2,2,2,2,2,
+		2,2,2,2,2,2,2,2,2,2,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,2,2,2,2,
+		2,2,2,2,2,2,2,2,2,2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2,2,2,2,
+		2,2,2,2,2,2,2,2,2,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,2,2,2,
+		2,2,2,2,2,2,2,2,2,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,2,2,
+		2,2,2,2,2,2,2,2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2,
+		2,2,2,2,2,2,2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+		2,2,2,2,2,2,2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+		2,2,2,2,2,2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+		2,2,2,2,2,2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+		2,2,2,2,2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+		2,2,2,2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+		2,2,2,2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+		2,2,2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+		2,2,2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+		2,2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+		2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+		2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+		0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+		0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+		0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+		0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+		0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+		0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+		0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+		0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+		0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
 	};
-	size_t w=21,h=16;
+	size_t w=48,h=48;
 	Map map(w, h, cmap);
 	cout<<"map"<<endl<<map<<endl;
+	
+	map = MapEditor().replace(map, Map::ST_UNCHARTED,Map::ST_AVAILABLE);
 
 	QTNode qt(0,w-1, 0, h-1, map);
-	qt.folding();
-	cout<<"QT:"<<endl<<qt<<endl;
+	//qt.folding();
+	//cout<<"QT:"<<endl<<qt<<endl;
 
 #define PRINT_NODE(X,Y){\
 	const QTNode* node = qt.findEmpty(X,Y);\
@@ -489,26 +548,30 @@ int cogniteam_pathplanning_test(int argc, char** argv) {
 		cout<<"NOT FOUND : "<<X<<":"<<Y<<endl;\
 	}cout<<"-------"<<endl;}
 
-	PRINT_NODE(19,13)
-	PRINT_NODE(20,14)
-	PRINT_NODE(20,15)
-	PRINT_NODE(5,5)
-
+// 	PRINT_NODE(19,13)
+// 	PRINT_NODE(20,14)
+// 	PRINT_NODE(20,15)
+// 	PRINT_NODE(5,5)
+// 
 	AStar a_star;
 	size_t sx(2),sy(13),gx(15),gy(3);
-	AStar::Path path = a_star.search(2, 13,   15,3 , &qt);
+	AStar::Path path = a_star.search(24,0,   17,31 , &qt);
 
 	cout<<"A* ("<<sx<<","<<sy<<":"<<gx<<","<<gy<<") result : path length = "<<path.size()<<endl;
 	cout<<"path (by nodes): "<<endl;
-	for(size_t i=0; i<path.size();i++) cout<<*(path[i]);
+	for(size_t i=0; i<path.size();i++){
+		cout<<*(path[i]);
+		map(path[i]->getCenterX(), path[i]->getCenterY())='@';
+	}
 	cout << "------------"<< endl;
-	vector<QTNode::XY> points = QTPath(path).extractPoints(2, 13,   15,3);
+	vector<QTNode::XY> points = QTPath(path).extractPoints(24,0,   17,31);
 	cout<<"path by points: ";
 	for( size_t i=0;i<points.size(); i++){
 		cout<<"("<<points[i].x<<","<<points[i].y<<") ";
+		map(points[i].x, points[i].y)='@';
 	}
 	cout<<endl;
-
+	cout<<"map with path"<<endl<<map<<endl;
 
 	cout << endl << "END" << endl; // prints PP
 	return 0;
@@ -528,10 +591,35 @@ namespace {
 Path searchPath(const Map& source_map, const Waypoint& start, const Waypoint& finish, const Constraints& constraints){
 	using namespace std;
 
+	//cout<<"searchPath: "<<"Input map:"<<endl<<source_map<<endl;
+	
 	//TODO: PROCESS CONSTRAINTS PATH BEFORE INFLATION
 
+	if( source_map(start.x, start.y)==Map::ST_BLOCKED || source_map(finish.x, finish.y)==Map::ST_BLOCKED ){
+		cout<<"searchPath: "<<"some of interesting points are not available (before inflation)"<<endl;
+		return Path();
+	}
+	
 	Inflator i( constraints.dimentions.radius , Map::ST_BLOCKED);
-	Map map = i.coloring( i.inflate(source_map), start.x, start.y, Map::ST_AVAILABLE,Map::ST_BLOCKED);
+	MapEditor e;
+	
+// 	Map map =  i.inflate(source_map);
+	
+// 	Map map =  
+// 		e.replace(
+// 			i.inflate(source_map), 
+// 			Map::ST_UNCHARTED, Map::ST_AVAILABLE)
+// 	;
+
+	Map map = 
+		e.coloring( 
+			e.replace(
+				i.inflate(source_map), 
+				Map::ST_UNCHARTED, Map::ST_AVAILABLE), 
+			start.x, start.y, Map::ST_AVAILABLE,Map::ST_BLOCKED
+		);
+	
+	//cout<<"searchPath: "<<"Inflated map:"<<endl<<map<<endl;
 
 	QTNode qt(0,map.w()-1, 0, map.h()-1, map);
 	qt.folding();
@@ -539,11 +627,13 @@ Path searchPath(const Map& source_map, const Waypoint& start, const Waypoint& fi
 	// CHECK IF ALL INTERESTING POINTS (start, stop and transits) ARE AVAILABLE
 
 	if( !qt.findEmpty(start.x, start.y) || !qt.findEmpty(finish.x, finish.y) ){
+		cout<<"searchPath: "<<"some of interesting points are not available"<<endl;
 		return Path();
 	}
 	if(constraints.transits.size()!=0){
 		for( size_t i=0 ; i<constraints.transits.size(); i++ ){
 			if( !qt.findEmpty(constraints.transits[i].x, constraints.transits[i].y) ){
+				cout<<"searchPath: "<<"some of transit points are not available"<<endl;
 				return Path();
 			}
 		}

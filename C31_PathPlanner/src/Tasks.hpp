@@ -20,6 +20,7 @@ using namespace C0_RobilTask;
 #define NOW time(NULL)
 #define TIME_T time_t
 #define TIME_STR(T) std::string(ctime(&T)).substr(0,std::string(ctime(&T)).size()-1)
+#define SET_CURRENT_TIME(V) {V = NOW;}
 
 class PathPlanningServer:public RobilTask{
 	PathPlanning& _planner;
@@ -29,6 +30,7 @@ class PathPlanningServer:public RobilTask{
 	//boost::condition_variable new_map_or_location_gotten;
 	#define LOCK( X ) boost::shared_ptr<boost::mutex::scoped_lock> X(new boost::mutex::scoped_lock(_mtx));
 	#define UNLOCK( X ) X = boost::shared_ptr<boost::mutex::scoped_lock>();
+	#define SYNCH(V) {boost::mutex::scoped_lock locker(_mtx); V}
 
 	bool new_map_or_location;
 
@@ -36,9 +38,10 @@ class PathPlanningServer:public RobilTask{
 		friend class PathPlanningServer;
 		TIME_T time_map_lastRequest;
 		TIME_T time_map_lastReceive;
-		TIME_T time_plan_start_planning;
-		TIME_T time_plan_stop_planning;
+		TIME_T time_plan_startPlanning;
+		TIME_T time_plan_stopPlanning;
 		TIME_T time_location_lastRequest;
+		TIME_T time_targetLocation_lastRequest;
 		TIME_T time_location_lastReceive;
 		//TIME_T time_target_lastReceive;
 		Statistic(){
@@ -51,7 +54,6 @@ public:
     PathPlanningServer(PathPlanning& planner, string name = "/PathPlanning"):
     	RobilTask(name), _planner(planner), new_map_or_location(false)
     {
-    	ROS_INFO("=========== TEST STR: %s ===========", STR("1"<<","<<2<<","<<3.0<<"!!!") );
     	_planner.setChangeNotifier(boost::bind(&PathPlanningServer::dataChanged, this));
 
     }
@@ -86,7 +88,6 @@ public:
     }
 
     TaskResult task(const string& name, const string& uid, Arguments& args){
-
     	//ros::this_node::getName()
     	ros::ServiceServer c31_PlanPath =
     			_node.advertiseService<C31_PathPlanner::C31_PlanPathRequest, C31_PathPlanner::C31_PlanPathResponse>(
@@ -113,10 +114,12 @@ public:
             LOCK( locker_nds )
             	bool needNewMap = requestNewMapNeeded();
             	bool needNewLoc = requestNewLocationNeeded();
+            	bool needNewTargetLoc = requestNewTargetLocationNeeded();
+            UNLOCK( locker_nds )
 
 				if(needNewMap) requestNewMap(c22Client);
 				if(needNewLoc) requestNewLocation();
-            UNLOCK( locker_nds )
+				if(needNewTargetLoc) requestNewTargetLocation();
 
             LOCK( locker )
             if(exists_new_map_or_location()){
@@ -125,10 +128,10 @@ public:
 
 			UNLOCK( locker )
 
-					statistic.time_plan_start_planning = NOW;
+					SET_CURRENT_TIME(statistic.time_plan_startPlanning);
 					ROS_INFO("%s: plan path", _name.c_str());
 					_planner.plan();
-					statistic.time_plan_stop_planning = NOW;
+					SET_CURRENT_TIME(statistic.time_plan_stopPlanning);
 
             }else{
 
@@ -166,7 +169,7 @@ public:
     	//ROS_INFO("requestNewMapNeeded : %s",STR("Now="<<TIME_STR(now)<<", lastReceive="<<TIME_STR(statistic.time_map_lastReceive)<<", duration="<<duration<<"s"));
     	return duration > 1;
     }
-    void requestNewMap(ros::ServiceClient & c22Client){ //REQ. for external synchronization on _mtx
+    void requestNewMap(ros::ServiceClient & c22Client){ //REQ. HAS BE NOT external synchronizationed on _mtx
 
 		C22_GroundRecognitionAndMapping::C22 c22;
 		/*
@@ -192,15 +195,20 @@ public:
 							float32 z
 							float32 d
 		*/
-		statistic.time_map_lastRequest = NOW;
+		SYNCH(SET_CURRENT_TIME(statistic.time_map_lastRequest));
 		if (c22Client.call(c22)){
-			statistic.time_map_lastReceive = NOW;
+			ROS_INFO("map message is gotten");
+			SYNCH(SET_CURRENT_TIME(statistic.time_map_lastReceive));
+			
 			MapProperties mprop = extractMapProperties(c22.response);
 			Map map = extractMap(c22.response);
 			Gps2Grid gps_grid = extractLocation(c22.response);
+			
 			if(map.w()>0 && map.h()>0){
+			
 				onNewMap( map , mprop );
 				onNewLocation( gps_grid.gps, gps_grid.cell );
+				
 			}else{
 				ROS_ERROR("Map gotten from C22_GroundRecognitionAndMapping::C22 is EMPTY (size=0x0)");
 			}
@@ -208,12 +216,24 @@ public:
 			ROS_ERROR("Failed to call service C22_GroundRecognitionAndMapping::C22");
 		}
     }
-    bool requestNewLocationNeeded(){ //REQ. for external synchronization on _mtx
+    bool requestNewLocationNeeded(){ //REQ. HAS BE NOT external synchronizationed on _mtx
     	return false;
     }
-    void requestNewLocation(){ //REQ. for external synchronization on _mtx
-    	statistic.time_location_lastRequest = NOW;
-    	//statistic.time_location_lastReceive = NOW;
+    void requestNewLocation(){ //REQ. HAS BE NOT external synchronizationed on _mtx
+		//TODO: write real algorithm for requestNewLocation
+    	SYNCH(SET_CURRENT_TIME(statistic.time_location_lastRequest));
+		//onNewLocation(NEW_ROBOT_LOCATION_GPS)
+    }
+    bool requestNewTargetLocationNeeded(){ //REQ. HAS BE NOT external synchronizationed on _mtx
+		double duration = DURATION(statistic.time_map_lastReceive, NOW);
+		PathPlanning::ReadSession session = _planner.startReading();
+		if(session.arguments.targetGoal.size()>0 && duration>1) return true;
+    	return false;
+    }
+    void requestNewTargetLocation(){ //REQ. HAS BE NOT external synchronizationed on _mtx
+		//TODO: write real algorithm for requestNewTargetLocation
+    	SYNCH(SET_CURRENT_TIME(statistic.time_targetLocation_lastRequest));
+    	//onNewTargetLocation(NEW_TARGET_LOCATION_GPS)
     }
 
     //=================== NEW DATA INPUT ==================================================
@@ -236,12 +256,17 @@ public:
     	session.arguments.mapProperties = prop;
     	session.arguments.start = _planner.cast(session.arguments.selfLocation);
     	session.arguments.finish = _planner.cast(session.arguments.targetPosition);
-    	session.constraints.dimentions.radius = _planner.cast(session.constraints.dimentions.gps_radius);
+    	session.constraints.dimentions.radius = _planner.castLength(session.constraints.dimentions.gps_radius);
     }
     void onNewLocation(const GPSPoint& pos, const Waypoint& wp){
     	PathPlanning::EditSession session = _planner.startEdit();
     	session.arguments.start = wp;
     	session.arguments.selfLocation = pos;
+    }
+    void onNewTargetLocation(const GPSPoint& pos){
+    	PathPlanning::EditSession session = _planner.startEdit();
+    	session.arguments.targetPosition = pos;
+    	session.arguments.finish = _planner.cast(session.arguments.targetPosition);
     }
     void onNewLocation(const GPSPoint& pos){
     	PathPlanning::EditSession session = _planner.startEdit();
@@ -275,9 +300,15 @@ public:
 
 			if(_planner.isMapReady()==false){ session.aborted(); return TaskResult(FAULT, "Map is not ready"); }
 
+			session.arguments.targetGoal="";
 			session.arguments.targetPosition.x=x;
 			session.arguments.targetPosition.y=y;
 			session.arguments.finish = _planner.cast(session.arguments.targetPosition);
+			stringstream info; info<<"CONVERT "
+			<<session.arguments.targetPosition.x<<","<<session.arguments.targetPosition.y
+			<<" -> "
+			<<session.arguments.finish.x<<","<<session.arguments.finish.y<<endl;
+			ROS_INFO(info.str().c_str());
 
 			return TaskResult(SUCCESS, "OK");
 		}else{
