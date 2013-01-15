@@ -1,13 +1,13 @@
 <package>
-  <description brief="C21_VisionAndLidar">
+  <description brief="c21_Vision_and_Lidar">
 
-     C21_VisionAndLidar
+     c21_Vision_and_Lidar
 
   </description>
   <author>Lar</author>
   <license>BSD</license>
   <review status="unreviewed" notes=""/>
-  <url>http://ros.org/wiki/C21_VisionAndLidar</url>
+  <url>http://ros.org/wiki/c21_Vision_and_Lidar</url>
   <depend package="roscpp"/>
   <depend package="std_msgs"/>
   <depend package="sensor_msgs"/>

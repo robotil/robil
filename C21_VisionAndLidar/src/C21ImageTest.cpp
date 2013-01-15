@@ -47,11 +47,11 @@ void imageView(const sensor_msgs::ImageConstPtr& msg,char window[],std::string e
 
 
  void view(const sensor_msgs::ImageConstPtr& msg){
-	 imageView(msg,"LEFT",enc::BAYER_BGGR8);
+	 imageView(msg,"LEFT",enc::RGB8);
  }
 
  void view2(const sensor_msgs::ImageConstPtr& msg){
-	 imageView(msg,"RIGHT",enc::BAYER_BGGR8);
+	 imageView(msg,"RIGHT",enc::RGB8);
  }
  void view3(const sensor_msgs::ImageConstPtr& msg){
 	 imageView(msg,"PANORAMA",enc::RGB8);

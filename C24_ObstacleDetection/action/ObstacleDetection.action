@@ -1,0 +1,8 @@
+# Define the goal
+uint32 ObstacleDetection # Specify which dishwasher we want to use
+---
+# Define the result
+uint32 ObstacleDetection
+---
+# Define a feedback message
+uint32 ObstacleDetection

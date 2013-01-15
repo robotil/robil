@@ -1,0 +1,42 @@
+#IncludeRegexLine: ^[ 	]*#[ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
+
+#IncludeRegexScan: ^.*$
+
+#IncludeRegexComplain: ^$
+
+#IncludeRegexTransform: 
+
+/home/isl/darpa/c23_Object_Recognition/src/3rdparty/libconfig/libconfig.h
+stdio.h
+-
+
+/home/isl/darpa/c23_Object_Recognition/src/3rdparty/libconfig/libconfig.h++
+stdio.h
+-
+exception
+-
+string
+-
+
+/home/isl/darpa/c23_Object_Recognition/src/3rdparty/libconfig/libconfigcpp.c++
+libconfig.h++
+/home/isl/darpa/c23_Object_Recognition/src/3rdparty/libconfig/libconfig.h++
+wincompat.h
+/home/isl/darpa/c23_Object_Recognition/src/3rdparty/libconfig/wincompat.h
+libconfig.h
+/home/isl/darpa/c23_Object_Recognition/src/3rdparty/libconfig/libconfig.h
+cstring
+-
+cstdlib
+-
+sstream
+-
+
+/home/isl/darpa/c23_Object_Recognition/src/3rdparty/libconfig/libconfigcpp.cc
+libconfigcpp.c++
+/home/isl/darpa/c23_Object_Recognition/src/3rdparty/libconfig/libconfigcpp.c++
+
+/home/isl/darpa/c23_Object_Recognition/src/3rdparty/libconfig/wincompat.h
+windows.h
+-
+

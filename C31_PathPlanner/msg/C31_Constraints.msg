@@ -1,0 +1,5 @@
+C31_PathPlanner/C31_RobotDimension robot
+C31_PathPlanner/C31_Waypoints transits
+C31_PathPlanner/C31_Charge[] attractors
+C31_PathPlanner/C31_Charge[] repulsors
+C31_PathPlanner/C31_Corridor corridor

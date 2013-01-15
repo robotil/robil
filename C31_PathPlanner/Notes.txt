@@ -1,0 +1,23 @@
+provides path (way points list) planned on 2d map gotten from C22_GroundRecognitionAndMapping module
+it contains 
+  tasks : PathPlanning and PathPlanningFocus
+  services : planPath and getPath
+
+How to Check:
+============
+
+rosrun C31_PathPlanning gpp
+
+
+Known Bugs:
+==========
+
+
+
+Known Limitations:
+=================
+
+
+
+
+

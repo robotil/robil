@@ -597,7 +597,7 @@ public class Document extends JPanel {
 			mousePressed = ev.getPoint();
 			for(GElement el: getReversed(elements)){
 				GElement e = el.underMouse(ev.getPoint());
-				if(e!=null){
+				if(e!=null && e.isVisiable){
 					selectedElement = e;
 					selectedElement.getProperty().selected = true;
 					repaint();
@@ -607,7 +607,7 @@ public class Document extends JPanel {
 			if(selectedElement==null)
 			for(GElement el: arrays){
 				GElement e = el.underMouse(ev.getPoint());
-				if(e!=null){
+				if(e!=null && e.isVisiable){
 					selectedElement = e;
 					selectedElement.getProperty().selected = true;
 					repaint();
