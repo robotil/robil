@@ -48,12 +48,13 @@ class node:
         self.probTable = []
         # node distribution table for success and failure
         #distribution table - each entry points to a distribution
-        self.distTableSucc = self.createDistTable("Successdistribution")
-        self.distTableFail = self.createDistTable("Failuredistribution")
+        self.distTableSucc = self._createDistTable("Successdistribution")
+        self.distTableFail = self._createDistTable("Failuredistribution")
         #update probability table
         probString = self.getAttrib("probability")
         if probString !=None:
-            self.probTable= self._parseString(probString)
+           # self.probTable= self._parseString(probString)
+            self.probTable = self._createProbTable(probString)
         else:
             self.probTable= None
         
@@ -71,8 +72,15 @@ class node:
     #parseString by whiteSpace
     def _parseString(self, string):
         words = re.split('\s+',string)
-	#return a list of words seperate by whiteSpace
+	   #return a list of words seperate by whiteSpace
         return words
+    #create probtalbe- parse string to list of float
+    def _createProbTable(self,stringProbList):
+        probList = self._parseString(stringProbList)        
+       # for index in range(len(probList)):
+       #     probList[index] =float(probList[index])
+        return probList
+        
         
     #return parent. if it's the root- return None   
     def getParent(self):
@@ -289,6 +297,7 @@ class node:
         self._updateChildForDec(newChild , len(name))
         #return the newChild created.- return the root of the list/sub-tree
         return newChild
+        
     #update the childs that we create for decorator property   
     def _updateChildForDec(self,newChild,size):      
       childToCheck = newChild
@@ -299,8 +308,8 @@ class node:
                  #update child debug
                   childToCheck._updateChildDebug()
                   #update distributions tables
-                  childToCheck.distTableSucc = self.createDistTable("Successdistribution")
-                  childToCheck.distTableFail = self.createDistTable("Failuredistribution")
+                  childToCheck.distTableSucc = self._createDistTable("Successdistribution")
+                  childToCheck.distTableFail = self._createDistTable("Failuredistribution")
                   #get the next child
                   childToCheck = childToCheck.getChild(0)
              
@@ -323,6 +332,8 @@ class node:
                     self._updateEtreeToPrintXmlFile(child)                    
             #update Debug attributes in the xml file.        
             updateNode._updateDebugAttribToXmlFile()
+            #update probability attributes in the xml file- to the etree
+            updateNode._updateProbTableToXmlFile()
      
                
    #this func update the attribute in the xml file for debug - turn DEBUG- into a string and set etree attribute
@@ -341,11 +352,13 @@ class node:
     def _setDebugFromXmlFile(self):
         #get string from xml - "True 0.1" for example.	
           debug = self.getAttrib("DEBUG")
-          if debug !=None :
+          if debug != None :
 	      #return debug
               self.DEBUG =[]
+              #print(debug)
               #parse the string by whiteSpace and returns a list
               debug = self._parseString(debug)
+              #print(debug)
               #first element in the list should be boolen- success
               if debug[0]!=None and debug[0] == "True":
                   debug[0] = True
@@ -443,6 +456,7 @@ class node:
             self.setProbTable(a)
         if val:
             #if val is set to True- update another success . probTable[0]- count succ-numerator,probTable[1]-Counter of time tried-Denominator.
+            #print(type(self.probTable[index]) , type(self.probTable[index][0]))
             self.probTable[index][0] = self.probTable[index][0]+1
             self.probTable[index][1] = self.probTable[index][1]+1
             #update the new probtable in etree
@@ -587,12 +601,14 @@ class node:
 
     #get average to success time
     def getAverageSuccTime(self, index):
-        return self.getDistSuccByIndex(index).calcAverageTime()
-        
+        if self.getDistSuccByIndex(index) != None:
+            return self.getDistSuccByIndex(index).calcAverageTime()
+        else:
+            return float('Inf')
 
 
  #table is the name of the table needed- attribute
-    def createDistTable(self,table):
+    def _createDistTable(self,table):
         string = self.getAttrib(str(table))
         
         table =[]        
