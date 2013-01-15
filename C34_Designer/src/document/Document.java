@@ -57,6 +57,9 @@ public class Document extends JPanel {
 	public ArrayList<GElement> elements = new ArrayList<GElement>();
 	public View view = new View();
 	public TaskDescription task_description = null;
+	private String _taskDescriptionFilename;
+	private String _taskDescriptionFilenameOriginal;
+	private Boolean _taskDescriptionExists = false;
 	
 	public BTDesigner mainWindow = null;
 
@@ -65,7 +68,12 @@ public class Document extends JPanel {
 		if(el instanceof Arrow)
 			arrays.add(el);
 		else
+		{
 			elements.add(el);
+			
+			if (el instanceof Task && ((Task)el).type.equals("task"))
+				((Task)el).setTaskDescriptionProvider(task_description);
+		}
 	}
 	
 	@SuppressWarnings("unchecked")
@@ -128,13 +136,13 @@ public class Document extends JPanel {
 		addMouseMotionListener(mh);
 		addMouseWheelListener(mh);
 	
-		try {
-			task_description = new TaskDescription(Parameters.path_to_description);
-		} catch (Exception e) {
-			System.out.println("WARNING: Can't find or open task description file. It's not a critical error.");
-			System.err.println("NOT CRITICAL : Print stack and exception name (for debug purposes only): ");
-			e.printStackTrace();
-		}
+//		try {
+//			task_description = new TaskDescription(Parameters.path_to_description);
+//		} catch (Exception e) {
+//			System.out.println("WARNING: Can't find or open task description file. It's not a critical error.");
+//			System.err.println("NOT CRITICAL : Print stack and exception name (for debug purposes only): ");
+//			e.printStackTrace();
+//		}
 	}
 	public void renumberElements(ArrayList<GElement> elements){
 		for(GElement el: elements){ if(el instanceof Task){ ((Task) el).seqNumber = 0; } }
@@ -237,8 +245,62 @@ public class Document extends JPanel {
 		view.zoom = 1;
 		lastX=0;lastY=0;
 		loadedElements.clear();
+
+		_taskDescriptionFilename = null;
+		_taskDescriptionFilenameOriginal = null;
+		_taskDescriptionExists = false;
+		
+		if (doc.getDocumentElement().hasAttribute("descriptions")) {
+			try {
+				// Descriptions file path is relative to select plan file
+				_taskDescriptionExists = true;
+				_taskDescriptionFilename = doc.getDocumentElement().getAttribute("descriptions");
+				_taskDescriptionFilenameOriginal = _taskDescriptionFilename;
+				
+				System.out.println("Plan has a descriptions attribute = " + _taskDescriptionFilenameOriginal);
+				
+				// Relative path, need to combine with current path
+				if (!_taskDescriptionFilename.startsWith(".") && !_taskDescriptionFilename.startsWith("/"))
+					_taskDescriptionFilename = new File(new File(fname).getParent(), _taskDescriptionFilename).getPath();
+				
+				task_description = new TaskDescription(_taskDescriptionFilename);
+				System.out.println("Task descriptions loaded from " + _taskDescriptionFilename);
+			} catch (Exception e) {
+				System.out.println("WARNING: Can't find or open task description file. It's not a critical error.");
+				System.err.println("NOT CRITICAL : Print stack and exception name (for debug purposes only): ");
+				e.printStackTrace();
+				task_description = new TaskDescription();
+			}
+		}
+		else {
+			
+			try {
+				System.out.println("Plan has no descriptions attribute");
+				
+				_taskDescriptionFilename = parsePlanPath(Parameters.path_to_description);
+				
+				if (!_taskDescriptionFilename.startsWith(".") && !_taskDescriptionFilename.startsWith("/"))
+					_taskDescriptionFilename = new File(new File(fname).getParent(), _taskDescriptionFilename).getPath();
+				
+				task_description = new TaskDescription(_taskDescriptionFilename);
+				System.out.println("Descriptions loaded from " + _taskDescriptionFilename);
+			} catch (Exception e) {
+				System.out.println("WARNING: Can't find or open task description file. It's not a critical error.");
+				System.err.println("NOT CRITICAL : Print stack and exception name (for debug purposes only): ");
+				e.printStackTrace();
+				task_description = new TaskDescription();
+				System.out.println("Default task descriptions file not found, empty created.");
+			}
+		}
 		loadPlan( doc.getDocumentElement() , null );
 		repaint();
+	}
+	
+	private String parsePlanPath(String pattern) {
+		
+		String planFileName = new File(getCurrentWorkingFile()).getName();
+		planFileName = planFileName.replaceAll("\\.[^\\.]+$", "");
+		return pattern.replace("{PLANFILENAME}", planFileName);
 	}
 	
 	private double lastX=0,lastY=0;
@@ -789,7 +851,7 @@ public class Document extends JPanel {
 		try{
 			
 			xml = createXml(rootTask, tabulation);
-			System.out.println("XML : \n"+"<plan>\n"+xml+"\n</plan>");
+			// System.out.println("XML : \n"+"<plan>\n"+xml+"\n</plan>");
 			tip.setText("Compilation is OK");
 			
 		}catch(StackOverflowError e){
@@ -797,8 +859,21 @@ public class Document extends JPanel {
 			return;
 		}
 		
+		// Write task descriptions file
+		try {
+			task_description.save(_taskDescriptionFilename);
+			System.out.println("Task descriptions file successfully saved to " + _taskDescriptionFilename);
+		} catch (Exception e) {
+			System.err.println("Task descriptions save failed. Filename = " + _taskDescriptionFilename);
+		}
+		
 		boolean saved = saveXmlToFile(xml, getCurrentWorkingFile(), true);
 		if(saved) saveXmlToFile(createXml(rootTask, tabulation, true), getCurrentWorkingFileForXmlWithJustNames(), false);
+	}
+	
+	private String getTaskDescriptionFileName() {
+		
+		return "";
 	}
 	
 	public void compile() {
@@ -806,8 +881,19 @@ public class Document extends JPanel {
 	}
 	
 	private boolean saveXmlToFile(String xml, String filen, boolean withNotifications){
-		xml = "<plan>\n"+xml+"\n</plan>";
-				
+		String descriptionFileAttribute = "";
+		
+		// Add descriptions filename attribute
+		if (_taskDescriptionFilename != null && !_taskDescriptionFilename.equals("") && _taskDescriptionExists)
+			descriptionFileAttribute = "descriptions=\"" +  _taskDescriptionFilenameOriginal + "\"";
+		else
+			// Plan hadn't description attribute specified
+			descriptionFileAttribute = "descriptions=\"" + parsePlanPath(Parameters.path_to_description) + "\"";
+		
+		System.out.println("description attribute added to plan = " + descriptionFileAttribute);
+		
+		xml = "<plan" + (descriptionFileAttribute.equals("") ? "" : " " + descriptionFileAttribute) + ">\n"+xml+"\n</plan>";
+ 
 		FileWriter w = null;File file=null;
 		try{
 			file =  new File(filen);
@@ -935,6 +1021,42 @@ public class Document extends JPanel {
 			System.out.println("BTExecuter DONE");
 			tip.setText("Execution done.");
 		}}).start();
+	}
+
+	public void exportTasks(String fileName) {
+		StringBuilder stringBuilder = new StringBuilder();
+		String taskDescString = "";
+		
+		int maxTaskNameLength = 0;
+		
+		for (GElement ea : elements)
+			if (ea instanceof Task && ((Task)ea).type.equals(Task.TYPE_task))
+				if (((Task)ea).text.length() > maxTaskNameLength)
+					maxTaskNameLength = ((Task)ea).text.length();
+		
+		int i = 1;
+		for (GElement ea : elements)
+			if (ea instanceof Task && ((Task)ea).type.equals(Task.TYPE_task)) {
+				TaskDescription.Task taskDesc = task_description.get(((Task)ea).getNameWithoutParameters());
+				if (taskDesc != null)
+					taskDescString = taskDesc.algorithm;
+				else 
+					taskDescString = "";
+				
+				stringBuilder.append(String.format(" %3d\t%-" + maxTaskNameLength + "s\t%s\n", i++, ((Task)ea).text, taskDescString));
+			}
+		
+		FileWriter fw;
+		try {
+			fw = new FileWriter(fileName);
+			fw.write(stringBuilder.toString());
+			fw.close();
+			tip.setText("Tasks exported to " + fileName);
+		} catch (IOException e) {
+			e.printStackTrace();
+			tip.setText("Failed to export tasks, see log for more information");
+		}
+		
 	}
 
 }
