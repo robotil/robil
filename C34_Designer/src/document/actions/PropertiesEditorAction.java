@@ -47,10 +47,12 @@ public class PropertiesEditorAction implements ActionListener {
 			try {
 				String path = Dialogs.saveFile("Save Properties", "xml");
 				
-				if (path == null) {
+				if (path == null || path.equals("")) {
 					return;
 				}
 
+				// updateTable();
+				
 				PropertiesXmlHandler.setParametersFromTable(table);
 				PropertiesXmlHandler.saveToFile(path);
 				
