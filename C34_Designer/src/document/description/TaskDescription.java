@@ -192,8 +192,8 @@ public class TaskDescription{
 		return res;
 	}
 	
-	public List getNames() {
-		ArrayList<String> names = new ArrayList<String>();
+	public List<String> getNames() {
+		List<String> names = new ArrayList<String>();
 		
 		names.add("");
 		names.add(" ");

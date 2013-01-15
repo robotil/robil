@@ -1,82 +1,92 @@
 package elements;
 
 import java.awt.event.ItemEvent;
+import java.util.List;
+
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.JComboBox;
 import javax.swing.plaf.basic.BasicComboBoxEditor;
 
 public class Java2sAutoComboBox extends JComboBox {
-  private class AutoTextFieldEditor extends BasicComboBoxEditor {
 
-    private Java2sAutoTextField getAutoTextFieldEditor() {
-      return (Java2sAutoTextField) editor;
-    }
+	private static final long serialVersionUID = 8375007428420854617L;
 
-    AutoTextFieldEditor(java.util.List list) {
-      editor = new Java2sAutoTextField(list, Java2sAutoComboBox.this);
-    }
-  }
+	private class AutoTextFieldEditor extends BasicComboBoxEditor {
 
-  public Java2sAutoComboBox(java.util.List list) {
-    isFired = false;
-    autoTextFieldEditor = new AutoTextFieldEditor(list);
-    setEditable(true);
-    setModel(new DefaultComboBoxModel(list.toArray()) {
+		private Java2sAutoTextField getAutoTextFieldEditor() {
+			return (Java2sAutoTextField) editor;
+		}
 
-      protected void fireContentsChanged(Object obj, int i, int j) {
-        if (!isFired)
-          super.fireContentsChanged(obj, i, j);
-      }
+		AutoTextFieldEditor(List<String> list) {
+			editor = new Java2sAutoTextField(list, Java2sAutoComboBox.this);
+		}
+	}
 
-    });
-    setEditor(autoTextFieldEditor);
-  }
+	public Java2sAutoComboBox(List<String> list) {
+		isFired = false;
+		autoTextFieldEditor = new AutoTextFieldEditor(list);
+		setEditable(true);
+		setModel(new DefaultComboBoxModel(list.toArray()) {
 
-  public boolean isCaseSensitive() {
-    return autoTextFieldEditor.getAutoTextFieldEditor().isCaseSensitive();
-  }
+			/**
+		 * 
+		 */
+			private static final long serialVersionUID = -3234807106807262423L;
 
-  public void setCaseSensitive(boolean flag) {
-    autoTextFieldEditor.getAutoTextFieldEditor().setCaseSensitive(flag);
-  }
+			protected void fireContentsChanged(Object obj, int i, int j) {
+				if (!isFired)
+					super.fireContentsChanged(obj, i, j);
+			}
 
-  public boolean isStrict() {
-    return autoTextFieldEditor.getAutoTextFieldEditor().isStrict();
-  }
+		});
+		setEditor(autoTextFieldEditor);
+	}
 
-  public void setStrict(boolean flag) {
-    autoTextFieldEditor.getAutoTextFieldEditor().setStrict(flag);
-  }
+	public boolean isCaseSensitive() {
+		return autoTextFieldEditor.getAutoTextFieldEditor().isCaseSensitive();
+	}
 
-  public java.util.List getDataList() {
-    return autoTextFieldEditor.getAutoTextFieldEditor().getDataList();
-  }
+	public void setCaseSensitive(boolean flag) {
+		autoTextFieldEditor.getAutoTextFieldEditor().setCaseSensitive(flag);
+	}
 
-  public void setDataList(java.util.List list) {
-    autoTextFieldEditor.getAutoTextFieldEditor().setDataList(list);
-    setModel(new DefaultComboBoxModel(list.toArray()));
-  }
+	public boolean isStrict() {
+		return autoTextFieldEditor.getAutoTextFieldEditor().isStrict();
+	}
 
-  void setSelectedValue(Object obj) {
-    if (isFired) {
-      return;
-    } else {
-      isFired = true;
-      setSelectedItem(obj);
-      fireItemStateChanged(new ItemEvent(this, 701, selectedItemReminder,
-          1));
-      isFired = false;
-      return;
-    }
-  }
+	public void setStrict(boolean flag) {
+		autoTextFieldEditor.getAutoTextFieldEditor().setStrict(flag);
+	}
 
-  protected void fireActionEvent() {
-    if (!isFired)
-      super.fireActionEvent();
-  }
+	public List<String> getDataList() {
+		return autoTextFieldEditor.getAutoTextFieldEditor().getDataList();
+	}
 
-  private AutoTextFieldEditor autoTextFieldEditor;
+	public void setDataList(List<String> list) {
+		autoTextFieldEditor.getAutoTextFieldEditor().setDataList(list);
+		setModel(new DefaultComboBoxModel(list.toArray()));
+	}
 
-  private boolean isFired;
+	void setSelectedValue(Object obj) {
+		if (isFired) {
+			return;
+		} else {
+			isFired = true;
+			setSelectedItem(obj);
+			fireItemStateChanged(new ItemEvent(this, 701, selectedItemReminder,
+					1));
+			isFired = false;
+			return;
+		}
+	}
+
+	protected void fireActionEvent() {
+		if (!isFired)
+			super.fireActionEvent();
+	}
+
+	private AutoTextFieldEditor autoTextFieldEditor;
+
+	private boolean isFired;
 
 }

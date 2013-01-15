@@ -27,14 +27,16 @@ public class Tooltip extends GElement {
 	}
 	
 	public void updatePosition(Graphics2D g) {
+		// Box location & dimensions
 		property.loc.x = _parent.getLocation().getX();
 		property.loc.y = _parent.getLocation().getY() + 27 * _parent.getView().zoom;
 		
-		property.size.x = (getMaxLineWidth(g, _message) + 20) * _parent.getView().zoom;
-		property.size.y = 50 * _parent.getView().zoom;
+		property.size.x = getMaxLineWidth(g, _message) + 40 * _parent.getView().zoom;
+		property.size.y = getTextSize(g, _message).getHeight() * getLinesCountHeight(_message) + 10 * _parent.getView().zoom;
 		
+		// Text location
 		_textPosition.x = property.loc.x + 10 * _parent.getView().zoom;
-		_textPosition.y = property.loc.y + 15 * _parent.getView().zoom;
+		_textPosition.y = property.loc.y + 2 * _parent.getView().zoom;
 	}
 
 	private int getMaxLineWidth(Graphics2D g, String string) {
@@ -46,6 +48,10 @@ public class Tooltip extends GElement {
 		}
 		
 		return (int)maxWidth;
+	}
+	
+	private int getLinesCountHeight(String string) {
+		return string.split("\n").length;
 	}
 	
 	private void drawMultiLineString(Graphics2D g, String string, int x, int y) {
