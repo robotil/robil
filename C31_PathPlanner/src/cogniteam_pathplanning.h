@@ -28,10 +28,18 @@ struct Waypoint{
 typedef vector<Waypoint> Waypoints;
 typedef Waypoints Path;
 
+inline std::ostream& operator<<(std::ostream& o, const Waypoint& w){
+	return o<<"("<<w.x<<","<<w.y<<")";
+}
+inline std::ostream& operator<<(std::ostream& o, const Path& w){
+	o<<"Path#"<<w.size()<<"{"; for(size_t i=0;i<w.size();i++)o<<" "<<w[i]; o<<" }";
+	return o;
+}
+
 struct RobotDimentions{
 	size_t radius;
 	double gps_radius;
-	RobotDimentions(double gps_rad=1):radius(gps_rad),gps_radius(gps_rad){}
+	RobotDimentions(double gps_rad=0.12):radius(1),gps_radius(gps_rad){}
 };
 
 struct Constraints{
