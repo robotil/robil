@@ -83,7 +83,10 @@ public:
     bool srv_GetPath( C31_PathPlanner::C31_GetPathRequest& req, C31_PathPlanner::C31_GetPathResponse& res){
       ROS_INFO("RETURN CALCULATED GLOBAL PATH");
       GPSPath path = get_calculated_path();
-      //TODO: fill message by planner results
+	  for( size_t i=0;i<path.size();i++ ){
+		  C31_PathPlanner::C31_Location loc; loc.x=path[i].x; loc.y=path[i].y;
+		  res.path.points.push_back(loc);
+	  }
       return true;
     }
 
@@ -157,7 +160,9 @@ public:
     	GPSPath gpspath;
     	for(size_t i=0;i<session.results.path.size();i++){
     		const Waypoint& wp = session.results.path[i];
-    		gpspath.push_back(_planner.cast(wp));
+			GPSPoint gpsp = _planner.cast(wp);
+    		gpspath.push_back(gpsp);
+			//ROS_INFO("PATH: cast %i,%i  ->  %f,%f", wp.x, wp.y,  gpsp.x, gpsp.y);
     	}
     	return gpspath;
     }

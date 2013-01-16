@@ -50,17 +50,17 @@ bool Map::inRange(long x, long y)const{
 	return true;
 }
 double Map::approximate(const long cx, const long cy, long& tx, long& ty, char ctype)const{
-	cout<<"tx="<<tx<<", ty="<<ty<<", ctype="<<ctype<<", cx="<<cx<<", cy="<<cy<<endl;
+// 	cout<<"tx="<<tx<<", ty="<<ty<<", ctype="<<ctype<<", cx="<<cx<<", cy="<<cy<<endl;
 	if(inRange(tx, ty)) return 0;
 	long x = 0;long y = 0;
 	#define DIST(x,y, xx, yy) ::hypot(double((xx-cx)-(x-cx)), double((yy-cy)-(y-cy)))
 	
 	double min_dis = DIST(tx,ty,  x,y);
 	long minX(-1), minY(-1);
-	const Map& me = *this;
+	const Map& me = *this;   
 
-	#define proc if(me(x,y) == ctype){ double dis = DIST(tx,ty,  x,y); cout<<"x,y="<<x<<","<<y<<"="<<dis; if(min_dis>dis || minX<0){ min_dis=dis; minX=x; minY=y; cout<<" set as min: "<<minX<<","<<minY<<"="<<min_dis;} cout<<endl;}
-//	#define proc if(me(x,y) == ctype){ double dis = DIST(tx,ty,  x,y); if(min_dis>dis || minX<0){ min_dis=dis; minX=x; minY=y;} }
+//	#define proc if(me(x,y) == ctype){ double dis = DIST(tx,ty,  x,y); cout<<"x,y="<<x<<","<<y<<"="<<dis; if(min_dis>dis || minX<0){ min_dis=dis; minX=x; minY=y; cout<<" set as min: "<<minX<<","<<minY<<"="<<min_dis;} cout<<endl;}
+	#define proc if(me(x,y) == ctype){ double dis = DIST(tx,ty,  x,y); if(min_dis>dis || minX<0){ min_dis=dis; minX=x; minY=y;} }
 
 	for(; x< (long)w()	; x++){ proc }	x--; y++;
 	for(; y< (long)h()	; y++){ proc }	x--; y--;
@@ -70,7 +70,7 @@ double Map::approximate(const long cx, const long cy, long& tx, long& ty, char c
 	#undef proc
 	#undef DIST
 	tx = minX; ty=minY;
-	cout<<"----"<<endl;
+// 	cout<<"----"<<endl;
 	return min_dis;
 }
 void Map::approximate(const long cx, const long cy, long& tx, long& ty)const{
