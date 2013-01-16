@@ -1,0 +1,3 @@
+#!/bin/bash
+function test_file { c="rosrun C31_PathPlanner planner_test $@"; f=test_result_MAP_1_FROM_$1_$2_TO_$3_$4; echo $c > $f; $c >> $f; }
+while read line;do test_file $line; done
