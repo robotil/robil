@@ -219,84 +219,12 @@ public:
 		return data.map.w()>0 && data.map.h()>0;
 	}
 
-// 	#define TRANSLATE_GPS_TO_GRID(x, v) ( mapProperties.anchor.x + round( ( v - mapProperties.gps.x) / mapProperties.resolution ) )
-// 	#define TRANSLATE_GRID_TO_GPS(x, v) ( mapProperties.gps.x +  (v - mapProperties.anchor.x) * mapProperties.resolution  )
-// 	#define TRANSLATE_POINT_GPS_TO_GRID(x) TRANSLATE_GPS_TO_GRID(x, gps.x)
-// 	#define TRANSLATE_POINT_GRID_TO_GPS(x) TRANSLATE_GRID_TO_GPS(x, wp.x)
-
-	size_t cast(double gps)const;
-// 	{
-// 		if(isMapReady()==false){
-// 			return 0;
-// 		}
-// 		size_t cell = TRANSLATE_GPS_TO_GRID(x, gps);
-// 		return cell;
-// 	}
-	size_t castLength(double gps)const;
-// 	{
-// 		if(isMapReady()==false){
-// 			return 0;
-// 		}
-// 		size_t cell = TRANSLATE_GPS_TO_GRID(x, gps+mapProperties.gps.x) - mapProperties.anchor.x;
-// 		return cell;
-// 	}
-	double cast(size_t cell)const;
-// 	{
-// 		if(isMapReady()==false){
-// 			return 0.0;
-// 		}
-// 		size_t gps = TRANSLATE_GRID_TO_GPS(x, cell);
-// 		return gps;
-// 	}
-	double castLength(size_t cell)const;
-// 	{
-// 		if(isMapReady()==false){
-// 			return 0.0;
-// 		}
-// 		double gps = TRANSLATE_GRID_TO_GPS(x+mapProperties.anchor.x, cell) - mapProperties.gps.x;
-// 		return gps;
-// 	}
+	long cast(double gps)const;
+	long castLength(double gps)const;
+	double cast(long cell)const;
+	double castLength(long cell)const;
 	Waypoint cast(const GPSPoint& gps)const;
-// 	{
-// 		#define TRANSLATE(x) TRANSLATE_POINT_GPS_TO_GRID(x)
-// 
-// 		if(isMapReady()==false){
-// 			return Waypoint(0,0);
-// 		}
-// 
-// 		long x ( TRANSLATE(x) );
-// 		long y ( TRANSLATE(y) );
-// 
-// 		if(data.map.inRange(x, y)==false){
-// 			data.map.approximate(x, y);
-// 		}
-// 
-// 		return Waypoint((size_t)x, (size_t)y);
-// 
-// 		#undef TRANSLATE
-// 	}
 	GPSPoint cast(const Waypoint& wp)const;
-// 	{
-// 		#define TRANSLATE(x) TRANSLATE_POINT_GRID_TO_GPS(x)
-// 
-// 		if(isMapReady()==false){
-// 			return GPSPoint(0,0);
-// 		}
-// 
-// 		double x ( TRANSLATE(x) );
-// 		double y ( TRANSLATE(y) );
-// 
-// 		return GPSPoint(x, y);
-// 
-// 		#undef TRANSLATE
-// 	}
-
-// 	#undef TRANSLATE_POINT_GPS_TO_GRID
-// 	#undef TRANSLATE_POINT_GRID_TO_GPS
-// 	#undef TRANSLATE_GPS_TO_GRID
-// 	#undef TRANSLATE_GRID_TO_GPS
-
-
 
 #undef SYNCHRONIZED
 #undef LOCK
