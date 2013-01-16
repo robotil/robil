@@ -12,6 +12,7 @@
 #include "Inflator.h"
 #include "math.h"
 #include "Vec2d.hpp"
+#include "PField.h"
 
 #include "cogniteam_pathplanning.h"
 
@@ -565,6 +566,8 @@ int cogniteam_pathplanning_test(int argc, char** argv) {
 	);
 	
 	map = MapEditor().replace(map, Map::ST_UNCHARTED,Map::ST_AVAILABLE);
+	
+	Map input_map = map;
 
 	QTNode qt(0,w-1, 0, h-1, map);
 	qt.folding();
@@ -601,14 +604,19 @@ int cogniteam_pathplanning_test(int argc, char** argv) {
 		map(path[i]->getCenterX(), path[i]->getCenterY())='@';
 	}
 	cout << "------------"<< endl;
+	Path res_path;
 	vector<QTNode::XY> points = QTPath(path).extractPoints(POINTS);
 	cout<<"path by points: ";
 	for( size_t i=0;i<points.size(); i++){
 		cout<<"("<<points[i].x<<","<<points[i].y<<") ";
 		map(points[i].x, points[i].y)='+';
+		res_path.push_back(Waypoint(points[i].x,points[i].y));
 	}
+
 	cout<<endl;
 	cout<<"map with path"<<endl<<map<<endl;
+	
+	PField pf(input_map, res_path);
 
 	cout << endl << "END" << endl; // prints PP
 	return 0;
