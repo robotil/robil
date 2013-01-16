@@ -1,0 +1,3 @@
+<launch>
+  <node name="C21" pkg="C21_VisionAndLidar" type="C21"/>
+</launch>
