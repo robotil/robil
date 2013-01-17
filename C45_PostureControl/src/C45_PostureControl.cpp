@@ -16,6 +16,8 @@
 #include <C0_RobilTask/RobilTask.h>
 #include <control_toolbox/pid.h>
 #include <actionlib/server/simple_action_server.h>
+#include <pr2_controllers_msgs/JointControllerState.h>
+#include <C45_PostureControl/back_lbz_poller_service.h>
 #include <C45_PostureControl/com_error.h>
 #include <std_msgs/Float64.h>
 #include <math.h>
@@ -30,12 +32,16 @@ private:
 	C0_RobilTask::RobilTaskResult result_;
 	C45_PostureControl::com_error com_error_srv;
 	ros::ServiceClient COM_error_client;
+	ros::ServiceClient back_lbz_poller_cli_;
 	control_toolbox::Pid back_ubx_stab_pid,back_mby_stab_pid; // PIDs for stability
 	ros::Publisher back_mby_pub,back_ubx_pub;
 	ros::Publisher turn_angle;
 	std::string action_name_;
 	std_msgs::Float64 float64_msg;
+	 C45_PostureControl::back_lbz_poller_service back_;
 	ros::Time clock;
+	ros::Subscriber back_lbz_state_sub_;
+	double back_lbz_state_;
 
 public:
 	stability_maintainer(std::string name)
@@ -67,10 +73,13 @@ public:
 		/*back_mby_stab_pid.initPid(p,i,d,M_PI,-M_PI);
 		back_ubx_stab_pid.initPid(p,i,d,M_PI,-M_PI);*/
 	    COM_error_client = nh_.serviceClient<C45_PostureControl::com_error>("com_error");
+	    back_lbz_poller_cli_ = nh_.serviceClient<C45_PostureControl::back_lbz_poller_service>("back_lbz_poller_service");
 
 	    //Set callback functions
 	    as_.registerGoalCallback(boost::bind(&stability_maintainer::goalCB, this));
 		as_.registerPreemptCallback(boost::bind(&stability_maintainer::preemptCB, this));
+
+		//back_lbz_state_sub_ = nh_.subscribe("/back_lbz_position_controller/state",100,&stability_maintainer::back_lbz_state_CB,this);
 
 		//
 		back_mby_pub = nh2_.advertise<std_msgs::Float64>("/back_mby_position_controller/command",1000,true);
@@ -81,7 +90,11 @@ public:
 		ROS_INFO("started");
 		  }
 	~stability_maintainer(){}
-	 void goalCB(){
+	/*void back_lbz_state_CB(const pr2_controllers_msgs::JointControllerStateConstPtr& back_lbz_state){
+		ROS_ERROR("process value %f", back_lbz_state->process_value);
+		back_lbz_state_=back_lbz_state->process_value;
+	}*/
+	void goalCB(){
 
 		 //Init variables
 		 /*back_mby_stab_pid.reset();
@@ -155,6 +168,20 @@ public:
 	        // set the action state to preempted
 	        as_.setPreempted();
 	      }*/
+		 double dist;
+		 do{
+			 if(back_lbz_poller_cli_.call(back_)){
+				 back_lbz_state_ = back_.response.state.process_value;
+				 dist = fabs(back_lbz_state_ - direction);
+				 //ROS_INFO("Dist: %f", dist);
+			 }else{
+				 C0_RobilTask::RobilTaskResult _res;
+				 _res.success = C0_RobilTask::RobilTask::FAULT;
+				 as_.setAborted(_res);
+				 return;
+			 }
+		 }while(dist > 0.2);
+
 		 C0_RobilTask::RobilTaskResult _res;
 		 _res.success = C0_RobilTask::RobilTask::SUCCESS;
 		 as_.setSucceeded(_res);
