@@ -31,10 +31,174 @@
       <uri>model://atlas</uri>
       <pose>-0.5 0.7 0.93 0 0 0</pose>
     </include>
-    <include>
-      <uri>model://chair</uri>
-      <pose>0 0 0 0 0 0</pose>
-    </include>
+
+    <model name='chair'>
+    <link name='chair1'>
+      <pose>-0.3 0.0 0.2575 0.000000 0.000000 0.000000</pose>
+      <inertial>
+        <mass>100.000000</mass>
+      </inertial>
+      <collision name='collision'>
+        <geometry>
+          <box>
+            <size>1.6 0.77 0.515</size>
+          </box>
+        </geometry>
+        <surface>
+          <bounce/>
+          <friction>
+            <ode/>
+          </friction>
+          <contact>
+            <ode/>
+          </contact>
+        </surface>
+      </collision>
+      <visual name='visual'>
+        <geometry>
+          <box>
+            <size>1.6 0.77 0.515</size>
+          </box>
+        </geometry>
+        <material>
+          <script>
+            <uri>file://media/materials/scripts/gazebo.material</uri>
+            <name>Gazebo/Grey</name>
+          </script>
+        </material>
+      </visual>
+      <velocity_decay>
+        <linear>0.000000</linear>
+        <angular>0.000000</angular>
+      </velocity_decay>
+      <self_collide>0</self_collide>
+      <kinematic>0</kinematic>
+    </link>
+    <link name='chair2'>
+      <pose>-0.645 0.0 0.615 0.000000 0.000000 0.000000</pose>
+      <inertial>
+        <mass>100.000000</mass>
+      </inertial>
+      <collision name='collision'>
+        <geometry>
+          <box>
+            <size>0.91 0.77 0.2</size>
+          </box>
+        </geometry>
+        <surface>
+          <bounce/>
+          <friction>
+            <ode/>
+          </friction>
+          <contact>
+            <ode/>
+          </contact>
+        </surface>
+      </collision>
+      <visual name='visual'>
+        <geometry>
+          <box>
+            <size>0.91 0.77 0.2</size>
+          </box>
+        </geometry>
+        <material>
+          <script>
+            <uri>file://media/materials/scripts/gazebo.material</uri>
+            <name>Gazebo/Grey</name>
+          </script>
+        </material>
+      </visual>
+      <velocity_decay>
+        <linear>0.000000</linear>
+        <angular>0.000000</angular>
+      </velocity_decay>
+      <self_collide>0</self_collide>
+      <kinematic>0</kinematic>
+    </link>
+    <link name='chair3'>
+      <pose>-1.025 0.0 1.335 0.000000 0.000000 0.000000</pose>
+      <inertial>
+        <mass>100.000000</mass>
+      </inertial>
+      <collision name='collision'>
+        <geometry>
+          <box>
+            <size>0.15 0.77 1.24</size>
+          </box>
+        </geometry>
+        <surface>
+          <bounce/>
+          <friction>
+            <ode/>
+          </friction>
+          <contact>
+            <ode/>
+          </contact>
+        </surface>
+      </collision>
+      <visual name='visual'>
+        <geometry>
+          <box>
+            <size>0.15 0.77 1.24</size>
+          </box>
+        </geometry>
+        <material>
+          <script>
+            <uri>file://media/materials/scripts/gazebo.material</uri>
+            <name>Gazebo/Grey</name>
+          </script>
+        </material>
+      </visual>
+      <velocity_decay>
+        <linear>0.000000</linear>
+        <angular>0.000000</angular>
+      </velocity_decay>
+      <self_collide>0</self_collide>
+      <kinematic>0</kinematic>
+    </link>
+    <link name='chair4'>
+      <pose>1 0 0.75 0.000000 0.000000 0.000000</pose>
+      <inertial>
+        <mass>100.000000</mass>
+      </inertial>
+      <collision name='collision'>
+        <geometry>
+          <box>
+            <size>1 0.77 1.5</size>
+          </box>
+        </geometry>
+        <surface>
+          <bounce/>
+          <friction>
+            <ode/>
+          </friction>
+          <contact>
+            <ode/>
+          </contact>
+        </surface>
+      </collision>
+      <visual name='visual'>
+        <geometry>
+          <box>
+            <size>1 0.77 1.5</size>
+          </box>
+        </geometry>
+        <material>
+          <script>
+            <uri>file://media/materials/scripts/gazebo.material</uri>
+            <name>Gazebo/Grey</name>
+          </script>
+        </material>
+      </visual>
+      <velocity_decay>
+        <linear>0.000000</linear>
+        <angular>0.000000</angular>
+      </velocity_decay>
+      <self_collide>0</self_collide>
+      <kinematic>0</kinematic>
+    </link>
+    <static>1</static>
+    </model>
 
     <plugin filename="libVRCPlugin.so" name="vrc_plugin">
       <atlas>
