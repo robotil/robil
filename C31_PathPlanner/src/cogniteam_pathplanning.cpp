@@ -35,7 +35,8 @@ Map::Map(const Map& map):_w(map._w),_h(map._h){
 
 ostream& operator<<(ostream& out, const Map& m){
 	out<<"  "; for(size_t x=0;x<10;x++){cout<<' '<<x<<' ';}for(size_t x=10;x<m.w();x++){cout<<x<<' ';} out<<endl;
-	for(size_t y=0;y<m.h();y++){
+	for(long y=(long)m.h()-1;y>=0;y--){
+//	for(size_t y=0;y<m.h();y++){
 		if(y<10) out<<' '; out<<y;
 		for(size_t x=0;x<m.w();x++){
 			out<<' '<<m.str(x,y)<<' ';
@@ -617,6 +618,14 @@ int cogniteam_pathplanning_test(int argc, char** argv) {
 	cout<<"map with path"<<endl<<map<<endl;
 	
 	PField pf(input_map, res_path);
+	Path smoothed = pf.smooth();
+	cout<<"smoothed path: ";
+	for( size_t i=0;i<smoothed.size(); i++){
+		cout<<"("<<smoothed[i].x<<","<<smoothed[i].y<<") ";
+		map(smoothed[i].x, smoothed[i].y)='o';
+	}
+	cout<<endl;
+	cout<<"map with smoothed path"<<endl<<map<<endl;
 
 	cout << endl << "END" << endl; // prints PP
 	return 0;

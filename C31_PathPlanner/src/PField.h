@@ -3,6 +3,7 @@
 
 #include "Vec2d.hpp"
 #include "cogniteam_pathplanning.h"
+using namespace std;
 
 class PField{
 //------------------ types
@@ -25,6 +26,11 @@ public:
 	Path smooth()const;
 
 private:
+	
+	typedef vector<Vec2d> Points;
+	enum RepulsorType{RT_R1};
+	enum AttractorType{AT_A1};
+	Points simulate(double step, double viewRF, double viewRS, RepulsorType rt, AttractorType at) const;
 
 };
 
