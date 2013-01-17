@@ -6,12 +6,12 @@ Robot enters vehicle with final position sitting inside facing the wheel.
 Known bugs:
 * The robot can't keep still and "slides" on the ground and seat
 while executing and after finished.
-* The robot final position is not perfected 
-thus he can finalize sitting on the side  or slide twords wheel, 
+* The robot final position is not perfected
+thus he can finalize sitting on the side or slide twords wheel,
 but should be in the right sitting place.
 
 Conditions:
-* works with version 1.2 of drcsim!
+* works with version 1.3 of drcsim!
 * start testing world using launch forlder: drc_robot_profile_lower.launch
 it is in the launch directory. It also calles a world in the world directory.
 * a chair module must be added to drcsim directory.
@@ -20,9 +20,9 @@ the chair is in the Models directory
 
 *Not final steps, may change*
 Follow the steps:
-1. roslaunch drc_robot_profile_lower.launch
+1. roslaunch C46_MountVehicle atlas_profile_lower.launch
 2. run designer and executer
-3. rosrun C46_MountVehicle C46_MountV2.py
+3. rosrun C46_MountVehicle C46_Node.py
 4. in designer load tree located in TestTree folder.
 5. run the tree
 
