@@ -46,3 +46,7 @@ target_link_libraries(test1 ${OpenCV_LIBS} ${PCL_LIBRARIES})
 rosbuild_add_executable(test2 src/C21SceneTest.cpp)
 rosbuild_link_boost(test2 thread signals)
 target_link_libraries(test2 ${OpenCV_LIBS} ${PCL_LIBRARIES})
+
+rosbuild_add_executable(test3 src/C21PanoramaTest.cpp)
+rosbuild_link_boost(test3 thread signals)
+target_link_libraries(test3 ${OpenCV_LIBS} ${PCL_LIBRARIES})
