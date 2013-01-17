@@ -11,6 +11,8 @@
 #include "AStar.h"
 #include "Inflator.h"
 #include "math.h"
+#include "Vec2d.hpp"
+#include "PField.h"
 
 #include "cogniteam_pathplanning.h"
 
@@ -49,17 +51,17 @@ bool Map::inRange(long x, long y)const{
 	return true;
 }
 double Map::approximate(const long cx, const long cy, long& tx, long& ty, char ctype)const{
-	cout<<"tx="<<tx<<", ty="<<ty<<", ctype="<<ctype<<", cx="<<cx<<", cy="<<cy<<endl;
+// 	cout<<"tx="<<tx<<", ty="<<ty<<", ctype="<<ctype<<", cx="<<cx<<", cy="<<cy<<endl;
 	if(inRange(tx, ty)) return 0;
 	long x = 0;long y = 0;
 	#define DIST(x,y, xx, yy) ::hypot(double((xx-cx)-(x-cx)), double((yy-cy)-(y-cy)))
 	
 	double min_dis = DIST(tx,ty,  x,y);
 	long minX(-1), minY(-1);
-	const Map& me = *this;
+	const Map& me = *this;   
 
-	#define proc if(me(x,y) == ctype){ double dis = DIST(tx,ty,  x,y); cout<<"x,y="<<x<<","<<y<<"="<<dis; if(min_dis>dis || minX<0){ min_dis=dis; minX=x; minY=y; cout<<" set as min: "<<minX<<","<<minY<<"="<<min_dis;} cout<<endl;}
-//	#define proc if(me(x,y) == ctype){ double dis = DIST(tx,ty,  x,y); if(min_dis>dis || minX<0){ min_dis=dis; minX=x; minY=y;} }
+//	#define proc if(me(x,y) == ctype){ double dis = DIST(tx,ty,  x,y); cout<<"x,y="<<x<<","<<y<<"="<<dis; if(min_dis>dis || minX<0){ min_dis=dis; minX=x; minY=y; cout<<" set as min: "<<minX<<","<<minY<<"="<<min_dis;} cout<<endl;}
+	#define proc if(me(x,y) == ctype){ double dis = DIST(tx,ty,  x,y); if(min_dis>dis || minX<0){ min_dis=dis; minX=x; minY=y;} }
 
 	for(; x< (long)w()	; x++){ proc }	x--; y++;
 	for(; y< (long)h()	; y++){ proc }	x--; y--;
@@ -69,11 +71,10 @@ double Map::approximate(const long cx, const long cy, long& tx, long& ty, char c
 	#undef proc
 	#undef DIST
 	tx = minX; ty=minY;
-	cout<<"----"<<endl;
+// 	cout<<"----"<<endl;
 	return min_dis;
 }
 void Map::approximate(const long cx, const long cy, long& tx, long& ty)const{
-	double min_dis=0;
 	long x(tx), y(ty);
 	if(inRange(tx, ty)){ /*cout<<"original x,y in range"<<endl;*/ return; }
 	double dis_av = approximate(cx, cy, tx, ty, Map::ST_AVAILABLE);
@@ -245,13 +246,17 @@ vector<QTNode::XY> QTNode::getCorridor(const QTNode* target)const{
 
 // -------------------------- AStar ---------------------------------------------
 
+namespace {
+	Vec2d vec2d(const AStar::QT& c){
+		return Vec2d(c->getCenterX(),c->getCenterY());
+	}
+}
+
 double AStar::heuristic_cost_estimate(size_t sx, size_t sy, size_t gx, size_t gy){
-		double dx = gx-sx, dy = gy-sy;
-		return hypot(dx,dy);
+		return Vec2d::distance(Vec2d(sx, sy), Vec2d(gx, gy));
 	}
 double AStar::dist_between(QT current, QT neighbor){
-		double dx = neighbor->getCenterX()-current->getCenterX(), dy = neighbor->getCenterX()-current->getCenterY();
-		return hypot(dx,dy);
+		return Vec2d::distance( vec2d(current), vec2d(neighbor) );
 	}
 
 AStar::Path AStar::search(size_t sx, size_t sy, size_t gx, size_t gy, AStar::QT qtRoot){
@@ -269,7 +274,7 @@ AStar::Path AStar::search(size_t sx, size_t sy, size_t gx, size_t gy, AStar::QT 
 	 f_score = map<QT,double>();
 
 	 g_score[start]=0;
-	 // Estimated total cost from start to goal through y.
+	 // Estimated total cost from start to goal .
 	 f_score[start] = g_score[start] + heuristic_cost_estimate(sx,sy, gx, gy);
 	 openset.push(start);    							// The set of tentative nodes to be evaluated, initially containing the start node
 
@@ -293,6 +298,7 @@ AStar::Path AStar::search(size_t sx, size_t sy, size_t gx, size_t gy, AStar::QT 
 			 if( not_in_openset || tentative_g_score <= g_score[neighbor] ){
 				 came_from[neighbor] = current;
 				 g_score[neighbor] = tentative_g_score;
+				 // Estimated total cost from start to goal through neighbor.
 				 f_score[neighbor] = g_score[neighbor] + heuristic_cost_estimate(neighbor->getCenterX(), neighbor->getCenterY(), gx, gy);
 				 if(not_in_openset) openset.push(neighbor);
 			 }
@@ -471,10 +477,13 @@ int cogniteam_pathplanning_test_map_inflation(int argc, char** argv) {
 	return 0;
 }
 
+
+#include <cstdlib>
+#include <cstdio>
 int cogniteam_pathplanning_test(int argc, char** argv) {
 	cout << "START" << endl; // prints PP
 
-	char cmap[]={
+	char cmap_1[]={
 		2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,
 		2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,
 		2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,0,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,
@@ -524,15 +533,45 @@ int cogniteam_pathplanning_test(int argc, char** argv) {
 		0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
 		0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
 	};
+	
+	char* cmap = cmap_1;
 	size_t w=48,h=48;
+	
 	Map map(w, h, cmap);
-	cout<<"map"<<endl<<map<<endl;
+	cout<<"map source"<<endl<<map<<endl;
+	
+	long _sx=atoi(argv[1]), _sy=atoi(argv[2]);
+	long _ex=atoi(argv[3]), _ey=atoi(argv[4]);
+	
+	#define START_P _sx,_sy 
+	#define END_P   _ex,_ey
+	
+	#define POINTS START_P, END_P
+	
+	printf("Plan path : from %i,%i to %i,%i \n", POINTS);
+	
+	if(map.inRange(END_P)==false){
+		map.approximate(START_P, END_P);
+	}
+	
+	Inflator i( 1 , Map::ST_BLOCKED);
+	MapEditor e;
+	
+	map = 
+	e.coloring( 
+		e.replace(
+			i.inflate(map), 
+			Map::ST_UNCHARTED, Map::ST_AVAILABLE), 
+		START_P, Map::ST_AVAILABLE,Map::ST_BLOCKED
+	);
 	
 	map = MapEditor().replace(map, Map::ST_UNCHARTED,Map::ST_AVAILABLE);
+	
+	Map input_map = map;
 
 	QTNode qt(0,w-1, 0, h-1, map);
-	//qt.folding();
-	//cout<<"QT:"<<endl<<qt<<endl;
+	qt.folding();
+	cout<<"QT:"<<endl<<qt<<endl;
 
 #define PRINT_NODE(X,Y){\
 	const QTNode* node = qt.findEmpty(X,Y);\
@@ -548,14 +587,15 @@ int cogniteam_pathplanning_test(int argc, char** argv) {
 		cout<<"NOT FOUND : "<<X<<":"<<Y<<endl;\
 	}cout<<"-------"<<endl;}
 
-// 	PRINT_NODE(19,13)
-// 	PRINT_NODE(20,14)
-// 	PRINT_NODE(20,15)
-// 	PRINT_NODE(5,5)
-// 
+	PRINT_NODE(19,13)
+	PRINT_NODE(20,14)
+	PRINT_NODE(20,15)
+	PRINT_NODE(5,5)
+
 	AStar a_star;
 	size_t sx(2),sy(13),gx(15),gy(3);
-	AStar::Path path = a_star.search(24,0,   17,31 , &qt);
+	
+	AStar::Path path = a_star.search(POINTS , &qt);
 
 	cout<<"A* ("<<sx<<","<<sy<<":"<<gx<<","<<gy<<") result : path length = "<<path.size()<<endl;
 	cout<<"path (by nodes): "<<endl;
@@ -564,14 +604,19 @@ int cogniteam_pathplanning_test(int argc, char** argv) {
 		map(path[i]->getCenterX(), path[i]->getCenterY())='@';
 	}
 	cout << "------------"<< endl;
-	vector<QTNode::XY> points = QTPath(path).extractPoints(24,0,   17,31);
+	Path res_path;
+	vector<QTNode::XY> points = QTPath(path).extractPoints(POINTS);
 	cout<<"path by points: ";
 	for( size_t i=0;i<points.size(); i++){
 		cout<<"("<<points[i].x<<","<<points[i].y<<") ";
-		map(points[i].x, points[i].y)='@';
+		map(points[i].x, points[i].y)='+';
+		res_path.push_back(Waypoint(points[i].x,points[i].y));
 	}
+
 	cout<<endl;
 	cout<<"map with path"<<endl<<map<<endl;
+	
+	PField pf(input_map, res_path);
 
 	cout << endl << "END" << endl; // prints PP
 	return 0;

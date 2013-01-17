@@ -44,32 +44,32 @@ void PathPlanning::plan(){
 	}
 
 	#define TRANSLATE_GPS_TO_GRID(x, v) ( mapProperties.anchor.x + round( ( v - mapProperties.gps.x) / mapProperties.resolution ) )
-	#define TRANSLATE_GRID_TO_GPS(x, v) ( mapProperties.gps.x +  (v - mapProperties.anchor.x) * mapProperties.resolution  )
+	#define TRANSLATE_GRID_TO_GPS(x, v) ( mapProperties.gps.x +  (long)((long)v - (long)mapProperties.anchor.x) * mapProperties.resolution  )
 	#define TRANSLATE_POINT_GPS_TO_GRID(x) TRANSLATE_GPS_TO_GRID(x, gps.x)
 	#define TRANSLATE_POINT_GRID_TO_GPS(x) TRANSLATE_GRID_TO_GPS(x,  wp.x)
 
-	size_t PathPlanning::cast(double gps)const{
+	long PathPlanning::cast(double gps)const{
 		if(isMapReady()==false){
 			return 0;
 		}
-		size_t cell = TRANSLATE_GPS_TO_GRID(x, gps);
+		long cell = TRANSLATE_GPS_TO_GRID(x, gps);
 		return cell;
 	}
-	size_t PathPlanning::castLength(double gps)const{
+	long PathPlanning::castLength(double gps)const{
 		if(isMapReady()==false){
 			return 0;
 		}
-		size_t cell = TRANSLATE_GPS_TO_GRID(x, gps+mapProperties.gps.x) - mapProperties.anchor.x;
+		long cell = TRANSLATE_GPS_TO_GRID(x, gps+mapProperties.gps.x) - mapProperties.anchor.x;
 		return cell;
 	}
-	double PathPlanning::cast(size_t cell)const{
+	double PathPlanning::cast(long cell)const{
 		if(isMapReady()==false){
 			return 0.0;
 		}
-		size_t gps = TRANSLATE_GRID_TO_GPS(x, cell);
+		double gps = TRANSLATE_GRID_TO_GPS(x, cell);
 		return gps;
 	}
-	double PathPlanning::castLength(size_t cell)const{
+	double PathPlanning::castLength(long cell)const{
 		if(isMapReady()==false){
 			return 0.0;
 		}
