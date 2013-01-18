@@ -28,13 +28,13 @@
       <uri>model://ground_plane</uri>
     </include>
     <include>
-      <uri>model://drc_robot</uri>
+      <uri>model://atlas</uri>
       <pose>-0.5 0.7 0.93 0 0 0</pose>
     </include>
 
-  <model name='unit_box_1'>
-    <pose>-0.3 0.0 0.2575 0.000000 0.000000 0.000000</pose>
-    <link name='link'>
+    <model name='chair'>
+    <link name='chair1'>
+      <pose>-0.3 0.0 0.2575 0.000000 0.000000 0.000000</pose>
       <inertial>
         <mass>100.000000</mass>
       </inertial>
@@ -74,18 +74,15 @@
       <self_collide>0</self_collide>
       <kinematic>0</kinematic>
     </link>
-    <static>1</static>
-  </model>
-  <model name='unit_box_2'>
-    <pose>-0.645 0.0 0.7125 0.000000 0.000000 0.000000</pose>
-    <link name='link'>
+    <link name='chair2'>
+      <pose>-0.645 0.0 0.615 0.000000 0.000000 0.000000</pose>
       <inertial>
         <mass>100.000000</mass>
       </inertial>
       <collision name='collision'>
         <geometry>
           <box>
-            <size>0.91 0.77 0.395</size>
+            <size>0.91 0.77 0.2</size>
           </box>
         </geometry>
         <surface>
@@ -101,7 +98,7 @@
       <visual name='visual'>
         <geometry>
           <box>
-            <size>0.91 0.77 0.395</size>
+            <size>0.91 0.77 0.2</size>
           </box>
         </geometry>
         <material>
@@ -118,11 +115,8 @@
       <self_collide>0</self_collide>
       <kinematic>0</kinematic>
     </link>
-    <static>1</static>
-  </model>
-  <model name='unit_box_3'>
-    <pose>-1.025 0.0 1.53 0.000000 0.000000 0.000000</pose>
-    <link name='link'>
+    <link name='chair3'>
+      <pose>-1.025 0.0 1.335 0.000000 0.000000 0.000000</pose>
       <inertial>
         <mass>100.000000</mass>
       </inertial>
@@ -162,11 +156,8 @@
       <self_collide>0</self_collide>
       <kinematic>0</kinematic>
     </link>
-    <static>1</static>
-  </model>
-  <model name='unit_box_4'>
-    <pose>1 0 0.75 0.000000 0.000000 0.000000</pose>
-    <link name='link'>
+    <link name='chair4'>
+      <pose>1 0 0.75 0.000000 0.000000 0.000000</pose>
       <inertial>
         <mass>100.000000</mass>
       </inertial>
@@ -207,6 +198,28 @@
       <kinematic>0</kinematic>
     </link>
     <static>1</static>
-  </model>
+    </model>
+
+    <plugin filename="libVRCPlugin.so" name="vrc_plugin">
+      <atlas>
+         <model_name>atlas</model_name>
+         <pin_link>utorso</pin_link>
+      </atlas>
+      <drc_vehicle>
+        <model_name>golf_cart</model_name>
+        <seat_link>chassis</seat_link>
+      </drc_vehicle>
+      <drc_fire_hose>
+        <fire_hose_model>fire_hose</fire_hose_model>
+        <coupling_link>coupling</coupling_link>
+        <standpipe_model>standpipe</standpipe_model>
+        <spout_link>standpipe</spout_link>
+        <thread_pitch>-1000</thread_pitch>
+        <coupling_relative_pose>
+          1.17038e-05 -0.125623 0.35 -0.0412152 -1.57078 1.61199
+        </coupling_relative_pose>
+      </drc_fire_hose>
+    </plugin>
+
   </world>
 </gazebo>
