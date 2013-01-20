@@ -6,6 +6,7 @@
 #include "ros/ros.h"
 #include "C21_VisionAndLidar/C21.h"
 #include "C21_VisionAndLidar/C21_Pan.h"
+#include "C21_VisionAndLidar/C21_Pic.h"
 #include <image_transport/image_transport.h>
 #include <message_filters/synchronizer.h>
 #include <message_filters/subscriber.h>
@@ -56,10 +57,11 @@ public:
 		//set compression data to png
 		ROS_INFO("finished subscribing\n");
 		sync.registerCallback( boost::bind( &C21_Node::callback, this, _1, _2,_3 ) );  //Specifying what to do with the data
-		_myMutex=new boost::mutex();
-
+		_panMutex=new boost::mutex();
+		_cloudMutex=new boost::mutex();
 		pcl_service = nh_.advertiseService("C21", &C21_Node::proccess, this); //Specifying what to do when a reconstructed 3d scene is requested
 		pano_service = nh_.advertiseService("C21/Panorama", &C21_Node::pano_proccess, this);
+		pic_service= nh_.advertiseService("C21/Pic", &C21_Node::pic_proccess, this);
 		pan_imgs=new std::vector<cv::Mat>();
 		ROS_INFO("service on\n");
 		//boost::thread panorama(&C21_Node::publishPanorama,this);
@@ -76,11 +78,31 @@ public:
 			C21_VisionAndLidar::C21::Response &res )
 	  {
 		  ROS_INFO("recived request, tying to fetch data\n");
-		  _myMutex->lock();
+		  _cloudMutex->lock();
 		  pcl::toROSMsg(my_answer,res.scene_full_resolution_msg.cloud);
-		  _myMutex->unlock();
+		  _cloudMutex->unlock();
 		  return true;
 	  }
+
+	  bool pic_proccess(C21_VisionAndLidar::C21_Pic::Request  &req,
+	  			  C21_VisionAndLidar::C21_Pic::Response &res )
+	  	  {
+		  	  _panMutex->lock();
+	  			cv_bridge::CvImage cvi;
+			    cvi.header.stamp = ros::Time::now();
+			    cvi.header.frame_id = "image";
+			    cvi.encoding = "rgb8";
+			    if(req.req.cmd==C21_VisionAndLidar::C21_PICTURE::LEFT){
+			    	cvi.image = leftImage;
+			    }else{
+			    	cvi.image = rightImage;
+			    }
+			    cvi.toImageMsg(res.res);
+	  	      _panMutex->unlock();
+
+	  		  return true;
+	  	  }
+
 
 
 	  bool pano_proccess(C21_VisionAndLidar::C21_Pan::Request  &req,
@@ -88,11 +110,11 @@ public:
 	  {
 
 		  if(req.req.cmd==C21_VisionAndLidar::C21_PANORAMA::TAKE_PICTURE){
-			  _myMutex->lock();
+			  _panMutex->lock();
 			  cv::Mat im;
 			  leftImage.copyTo(im);
 			  pan_imgs->push_back(im);
-			  _myMutex->unlock();
+			  _panMutex->unlock();
 		  }else{
 			  if(pan_imgs->size()==0)
 				  return false;
@@ -141,16 +163,16 @@ public:
 		/*
 		 *saving frames for HMI use
 		 */
-		_myMutex->lock();
+		_panMutex->lock();
 		left->image.copyTo(leftImage);
-		left->image.copyTo(rightImage);
-		_myMutex->unlock();
+		right->image.copyTo(rightImage);
+		_panMutex->unlock();
 		pcl::PointCloud<pcl::PointXYZ> out;
 		pcl::fromROSMsg(*cloud,out);
-		_myMutex->lock();
+		_cloudMutex->lock();
 		my_answer.swap(out);
 		//pcl::io::savePCDFile("cloud.pcd",out,true);
-		_myMutex->unlock();
+		_cloudMutex->unlock();
 
 	  }
 
@@ -160,7 +182,8 @@ private:
   cv::Mat Q;
   int counter;
   bool request;
-  boost::mutex * _myMutex;
+  boost::mutex * _panMutex;
+  boost::mutex * _cloudMutex;
   typedef image_transport::SubscriberFilter ImageSubscriber;
   pcl::PointCloud<pcl::PointXYZ> my_answer;
   cv::Mat leftImage;
@@ -176,6 +199,7 @@ private:
 
   std::vector<cv::Mat> *pan_imgs;
   ros::ServiceServer pano_service;
+  ros::ServiceServer pic_service;
 
   typedef message_filters::sync_policies::ApproximateTime<
     sensor_msgs::Image, sensor_msgs::Image,sensor_msgs::PointCloud2
