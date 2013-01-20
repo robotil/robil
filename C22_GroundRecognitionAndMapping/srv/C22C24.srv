@@ -1,0 +1,6 @@
+C22_GroundRecognitionAndMapping/C0C22_AZI azimuth_msg
+C22_GroundRecognitionAndMapping/C0C22_CAM camera_sample_rate_msg
+C22_GroundRecognitionAndMapping/C0C22_LAZ laser_sample_rate_msg
+C22_GroundRecognitionAndMapping/C0C22_SAF safety_requirements
+---
+C22_GroundRecognitionAndMapping/C22C24_PATH drivingPath

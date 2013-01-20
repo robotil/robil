@@ -13,6 +13,7 @@
 #include <pcl/point_types.h>
 using namespace std;
 
+//c24 added includes
 MapMatrix::MapMatrix() {
 	data=new std::vector<std::vector<MapSquare*>*>();
 	for (int i=0;i<NUMOFSQUARES;i++){
@@ -82,7 +83,13 @@ bool MapMatrix::inMatrixRange(pcl::PointXYZ p){
 	return true;
 }
 
-
+//c24 changes + need to use type of the imu message which is const OdometryConstPtr& pos_msg
+/*
+ * the main idea here will be, having all planes, and the imu normal (coordinates and angle)
+ * going on each plane and compare its normal with the one from the imu, then we need to decide
+ * how similar they should be, and if they are similar (meaning also part of the ground) then "erase"
+ * this plane and going to the next plane etc.
+ */
 void MapMatrix::computeMMatrix(std::vector<pclPlane*>* mapPlanes,pcl::PointCloud<pcl::PointXYZ>::Ptr map_cloud){ //update way of calculating x and y indices of mapMatrix
 	int xIndex,yIndex;
 	data->at(0)->at(SIZEOFMAP*2)->square_status=BLOCKED;

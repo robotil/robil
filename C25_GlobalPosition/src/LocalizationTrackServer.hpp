@@ -1,32 +1,37 @@
 
 #include <actionlib/server/simple_action_server.h>
-#include <RobilTask/RobilTask.h>
-#include <RobilTask/RobilTaskAction.h>
+#include <C0_RobilTask/RobilTask.h>
+#include <C0_RobilTask/RobilTaskAction.h>
 
 using namespace std;
 using namespace RobilTask;
 
 class LocalizationTrackServer{
 
-    typedef RobilTask::RobilTaskGoalConstPtr GOAL;
-    typedef RobilTask::RobilTaskFeedback FEEDBACK;
-    typedef RobilTask::RobilTaskResult RESULT;
-    typedef actionlib::SimpleActionServer<RobilTask::RobilTaskAction> Server;
-    
+    typedef C0_RobilTask::RobilTaskGoalConstPtr GOAL;
+    typedef C0_RobilTask::RobilTaskFeedback FEEDBACK;
+    typedef C0_RobilTask::RobilTaskResult RESULT;
+    typedef actionlib::SimpleActionServer<C0_RobilTask::RobilTaskAction> Server;
+    int PLAN;
+    int FAULT;
+
 protected:
     ros::NodeHandle _node;
-    Server _server;
     string _name;
+    Server _server;
     FEEDBACK _feedback;
     RESULT _result;
 
+
 public:
     LocalizationTrackServer():
-        _server(_node, name, boost::bind(&SimpleTaskServer::task, this, _1), false),
-        _name("/LocalizationTrack")
+    	_name("/LocalizationTrack"),
+        _server(_node, _name, boost::bind(&LocalizationTrackServer::task, this, _1), false)
     {
         _server.start();
         ROS_INFO("instance of LocalizationTrackServer started.");
+        PLAN=0;
+        FAULT=1;
     }
 
     void task(const GOAL &goal){
