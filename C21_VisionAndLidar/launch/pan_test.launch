@@ -1,0 +1,6 @@
+<launch>
+  <node name="C21_panoramaTestingdf" pkg="pr2_teleop" type="teleop_pr2_keyboard">
+	<param name="cmd_vel" type="string" value="atlas/cmd_vel" />
+  </node>
+   <node name="C21_panoramaTesting" pkg="C21_VisionAndLidar" type="test3"/>
+</launch>
