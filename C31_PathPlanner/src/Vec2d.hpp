@@ -37,7 +37,7 @@ public:
 	
 	double len()const{ return hypot(x,y); }
 	double ang()const{ return atan2(y,x); }
-	double angY()const{ return ang()-PI05; }
+	double angY()const{ return poliar(ang()-PI05,1).ang(); }
 	
 	Vec2d operator+(const Vec2d& v)const{ return Vec2d(x+v.x, y+v.y); }
 	Vec2d operator-(const Vec2d& v)const{ return Vec2d(x-v.x, y-v.y); }
@@ -59,6 +59,8 @@ public:
 		double BC = (pt.y-p2.y)*(p3.x-p2.x) - (pt.x-p2.x)*(p3.y-p2.y);
 		return (AB*BC>0.f && BC*CA>0.f);
 	}
+	
+	Vec2d addLen(double l)const{ return poliar(ang(),len()+l); }
 	
     static Vec2d Unit(){ return Vec2d(0,1); }
     static Vec2d Ziro(){ return Vec2d(0,0); }

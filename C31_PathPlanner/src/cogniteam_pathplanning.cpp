@@ -618,7 +618,16 @@ int cogniteam_pathplanning_test(int argc, char** argv) {
 	cout<<"map with path"<<endl<<map<<endl;
 	
 	PField pf(input_map, res_path);
-	Path smoothed = pf.smooth();
+	PField::SmoothingParameters pf_params;
+	pf_params.viewRadiusForward = 5;
+	pf_params.viewRadiusSide = 2;
+	pf_params.stepRate=0.6;
+	pf_params.inertia=pow(1/pf_params.viewRadiusForward*0.5,2);
+	pf_params.distanceBetweenPoints = 1;
+	pf_params.maxAngleWhileReducing = Vec2d::d2r(10);
+
+	
+	Path smoothed = pf.smooth(pf_params);
 	cout<<"smoothed path: ";
 	for( size_t i=0;i<smoothed.size(); i++){
 		cout<<"("<<smoothed[i].x<<","<<smoothed[i].y<<") ";

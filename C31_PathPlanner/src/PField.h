@@ -8,6 +8,20 @@ using namespace std;
 class PField{
 //------------------ types
 public:
+	enum RepulsorType{RT_R1};
+	enum AttractorType{AT_A1};
+
+	struct SmoothingParameters{
+		double viewRadiusForward;
+		double viewRadiusSide;
+		double maxIterationNumber;
+		double stepRate;
+		double inertia;
+		double distanceBetweenPoints;
+		double maxAngleWhileReducing;
+		RepulsorType repulsorType;
+		AttractorType attractorType;
+	};
 	
 //------------------ members
 private:
@@ -23,14 +37,13 @@ public:
 		
 	}
 	
-	Path smooth()const;
+	Path smooth(const SmoothingParameters& params)const;
 
 private:
 	
 	typedef vector<Vec2d> Points;
-	enum RepulsorType{RT_R1};
-	enum AttractorType{AT_A1};
-	Points simulate(double step, double viewRF, double viewRS, RepulsorType rt, AttractorType at) const;
+	Points simulate(const SmoothingParameters& params) const;
+	Points reducePath(const Points& path, const SmoothingParameters& params) const;
 
 };
 
