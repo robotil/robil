@@ -11,6 +11,7 @@ import javax.swing.text.*;
 import document.actions.Dialogs;
 
 import java.awt.Color;
+import java.awt.Rectangle;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
@@ -18,10 +19,18 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStreamReader;
 
+import logger.LogManager;
+
 public class LogConsoleWindow extends JTextPane {
 
+	private static final long serialVersionUID = 7243421902696150132L;
 	private String logFile;
+	private JScrollPane scroll;
 
+	public void setScrollPane(JScrollPane scrollPane) {
+		scroll = scrollPane;
+	}
+	
 	public void appendNaive(Color c, String s) { // naive implementation
 		// bad: instiantiates a new AttributeSet object on each call
 		SimpleAttributeSet aset = new SimpleAttributeSet();
@@ -97,17 +106,43 @@ public class LogConsoleWindow extends JTextPane {
 		append(Color.YELLOW, txt+"\n", StyleConstants.Background);
 	}
 	
-	public LogConsoleWindow(String logFile) {
-		this.logFile = logFile;
+	public LogConsoleWindow() {
+		new Thread(new Runnable() {
+			
+			@Override
+			public void run() {
+
+				while (true) {
+					String outputContent = LogManager.getOutputContent();
+					
+					if (!outputContent.equals(getText())) {
+						setText(LogManager.getOutputContent());
+						
+						// Scroll down
+						// scrollRectToVisible(new Rectangle(0,getDocument().getLength(),1,1));
+						setCaretPosition(getDocument().getLength());
+					}
+					
+					try {
+						Thread.sleep(500);
+					} catch (InterruptedException e) { }
+				}
+			}
+		}).start();
 	}
 
 	public static void show(String logFile) {
-		LogConsoleWindow pane = new LogConsoleWindow(logFile);
+		// logFile = LogManager.getOutputFileName();
+		
+		LogConsoleWindow pane = new LogConsoleWindow();
+		JScrollPane scroll = new JScrollPane(pane);
+		pane.setScrollPane(scroll);
 
 		JFrame f = new JFrame("Log Console");
 		f.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-		f.setContentPane(new JScrollPane(pane));
+		f.setContentPane(scroll);
 		f.setSize(600, 400);
 		f.setVisible(true);
 	}
+	
 }

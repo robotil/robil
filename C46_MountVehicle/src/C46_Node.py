@@ -1,13 +1,12 @@
 #!/usr/bin/env python
 
 import roslib; roslib.load_manifest('C46_MountVehicle')
-import rospy, math
+import rospy
 
 import actionlib
-from C46_Mount_server import MountVehicleServer
-from std_msgs.msg import Float64
+from MountVehicleServer import MountVehicleServer
 
 if __name__ == '__main__':
-  rospy.init_node('C46_Mount')
-  MountVehicleServer()
-  rospy.spin()
+	rospy.init_node('C46_MountVehicle')
+	MountVehicleServer()
+	rospy.spin()

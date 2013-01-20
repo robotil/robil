@@ -1,0 +1,14 @@
+<plan descriptions="./plans/TaskDescriptions.xml">
+   <par name="skill1" x="523.1666666666661" y="13.0555555555555" collapsed="false" id="29da2136-5677-4b7a-b859-df13ca8d6a72"> 
+         <par name="Perception" x="270.72222222222246" y="197.72222222222152" collapsed="false" id="8f55da09-d777-4b0c-9f5d-10a90463ed3e"> 
+               <tsk name="ObstacleDetection" x="112.72222222222169" y="300.72222222222" test_time="-1" test_result="true" id="1018cc7b-8ef7-4336-924c-aeb7bea86c74" />
+               <tsk name="PathPlanning" x="196.72222222222177" y="384.7222222222199" test_time="-1" test_result="true" id="d7315da9-f6fa-481b-ae0f-756c1084d0e0" />
+         </par>
+         <seq name="skill1Mission" x="589.1666666666661" y="200.055555555555" collapsed="false" id="563a39ca-99df-45dc-a369-73c7af2fe951"> 
+               <tsk name="C45_PostureControl(direction=1)" x="393.41666666666595" y="461.80555555555486" test_time="100" test_result="true" id="4e287781-61bd-42f3-a359-b81767619c6f" />
+               <tsk name="C45_PostureControl(direction=0)" x="585.1666666666661" y="477.05555555555486" test_time="100" test_result="true" id="4e1cb0a6-2376-4872-94f4-db01784e0cca" />
+               <tsk name="C45_PostureControl(direction=-1)" x="747.1666666666658" y="477.05555555555486" test_time="100" test_result="true" id="48ba1d81-068b-4bc1-b423-f468f27740ef" />
+               <tsk name="PathPlanningFocus(x=2,y=3,z=4)" x="924.1666666666658" y="435.05555555555486" test_time="100" test_result="true" id="9acec6a0-7543-4c70-9716-b5db94c71088" />
+         </seq>
+   </par>
+</plan>

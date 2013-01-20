@@ -2,6 +2,7 @@ package document;
 
 import javax.swing.*;
 import javax.swing.table.AbstractTableModel;
+import javax.swing.border.TitledBorder;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 
@@ -14,6 +15,7 @@ import java.awt.event.ActionListener;
 import java.awt.BorderLayout;
 import java.awt.GridLayout;
 import java.awt.Dimension;
+import java.awt.LayoutManager;
 import java.io.FileInputStream;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -46,7 +48,7 @@ public class PropertiesEditor extends JPanel implements ActionListener {
 
 		table = new JTable(new PropertiesTableModel(path));
 
-		table.setPreferredScrollableViewportSize(new Dimension(500, 270));
+		table.setPreferredScrollableViewportSize(new Dimension(500, 200));
 		table.setFillsViewportHeight(true);
 		table.getSelectionModel().addListSelectionListener(new RowListener());
 		table.getColumnModel().getSelectionModel()
@@ -84,6 +86,8 @@ public class PropertiesEditor extends JPanel implements ActionListener {
 //		output.setEditable(false);
 //		add(new JScrollPane(output));
 		add(pnlButtons);
+		
+		
 	}
 
 	private JCheckBox addCheckBox(String text) {

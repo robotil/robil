@@ -1,4 +1,5 @@
 <<<<<<< HEAD
+<<<<<<< HEAD
 C46_MountVehicle
 =======
 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -9,6 +10,9 @@ roslaunch atlas_utils drc_robot_profile_lower.launch doesn't run.
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ 
 C46_EnterVehicle
 >>>>>>> 6cd81aedb3318e57d7dd0232ab254bf428e04268
+=======
+C46_MountVehicle
+>>>>>>> 8c621301281d46d961b5d622624d580db24ed08a
 # Description: robot enters vehicle from a standing position
 facing forwards near the entrence of the vehicle.
 Robot enters vehicle with final position sitting inside facing the wheel.
@@ -16,12 +20,12 @@ Robot enters vehicle with final position sitting inside facing the wheel.
 Known bugs:
 * The robot can't keep still and "slides" on the ground and seat
 while executing and after finished.
-* The robot final position is not perfected 
-thus he can finalize sitting on the side  or slide twords wheel, 
+* The robot final position is not perfected
+thus he can finalize sitting on the side or slide twords wheel,
 but should be in the right sitting place.
 
 Conditions:
-* works with version 1.2 of drcsim!
+* works with version 1.3 of drcsim!
 * start testing world using launch forlder: drc_robot_profile_lower.launch
 it is in the launch directory. It also calles a world in the world directory.
 * a chair module must be added to drcsim directory.
@@ -30,9 +34,9 @@ the chair is in the Models directory
 
 *Not final steps, may change*
 Follow the steps:
-1. roslaunch drc_robot_profile_lower.launch
+1. roslaunch C46_MountVehicle atlas_profile_lower.launch
 2. run designer and executer
-3. rosrun C46_MountVehicle C46_MountV2.py
+3. rosrun C46_MountVehicle C46_Node.py
 4. in designer load tree located in TestTree folder.
 5. run the tree
 

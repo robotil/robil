@@ -1,0 +1,25 @@
+synchs the head cameras and Lidar and provide features for HMI 
+
+How to Check:
+============
+run the node with the DRC simulation
+
+rosrun C21_VisionAndLidar C21
+
+test with
+
+rosrun C21_VisionAndLidar test1
+
+rosrun C21_VisionAndLidar test2
+
+rosrun C21_VisionAndLidar test3
+
+rosrun C21_VisionAndLidar test4
+
+Known Bugs:
+==========
+
+
+
+Known Limitations:
+=================

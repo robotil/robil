@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<task_description>
+    <task name="ObstacleDetection">
+        <conditions/>
+        <constraints/>
+        <effects/>
+        <algorithm>Obstacle Detection 1</algorithm>
+    </task>
+    <task name="LocalizationTrack">
+        <conditions/>
+        <constraints/>
+        <effects/>
+        <algorithm>Localization Track</algorithm>
+    </task>
+</task_description>

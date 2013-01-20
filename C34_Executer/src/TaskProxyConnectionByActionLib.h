@@ -22,6 +22,7 @@ using namespace C0_RobilTask;
 class RobilTaskProxy:public BTTask{
 private:
 	bool active;
+	bool serverFound;
 	Client client;
 	std::string tname;
 
@@ -42,6 +43,7 @@ class RobilTaskProxyCreator:public BTTaskProxyCreator{
 public:
 	virtual std::string nameOfCreator(){return "RobilTask";}
 	virtual BTTask* create(std::string TNAME){
+		PRINT("[RobilTask]: create "<<TNAME<<" task");
 		if(TNAME=="TEST"||TNAME=="test") return BTTask::Ref().get();
 		return new RobilTaskProxy(TNAME);
 	}

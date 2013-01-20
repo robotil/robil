@@ -1,0 +1,132 @@
+dec WHILE_ERROR=!L!
+
+def root {
+	event1{
+		||{
+			||Perception{
+				LocalizationTrack
+				ObstacleDetection
+			}
+			Monitor(target=LiveLock)
+			Mission{
+				event2(target=CarEntry)
+				DriveMission{
+					EnterToCar{
+						DirectSensorsAtDoorway(selfposition=external)
+						OperatorControlPoint(data=[cabin_image, cabin_parametrics])
+						InitEntryPosture
+						<WHILE_ERROR>?{
+							PerformEntry
+							<F>ReturnToEntryPosture
+						}
+					}
+					InCar{
+						<WHILE_ERROR>Setting{
+							InCarOperatorControlPoint(data=[inSideCabin_image, InSideCabin_parametrics])
+							TestControllers{
+								GripSteeringWheel
+								TestSteering
+								PlaceFeetOnPedals
+								TestPedals
+							}
+						}
+						||{
+							PathPlanning
+							<WHILE_ERROR>Driving{
+								PathPlanningFocus(target=FORWARD)
+								InitDrive
+								InCarOperatorControlPoint(data=[panoramic_image, occupancy_grid, path, vehicle_parametrics])
+								WayPointsDriving
+							}
+						}
+					}
+					ExitFromCar{
+						DirectSensorsAtDoorway(selfposition=internal)
+						OperatorControlPoint(data=[door_image,door_parameters])
+						InitExitPosture
+						<WHILE_ERROR>?{
+							PerformExit
+							<F>ReturnToExitPosture
+						}
+					}
+				}
+			}
+		}
+	}
+}
+	
+def event2{
+	||{
+		PathPlanning
+		<!L!>Mission{
+			StandUp
+			||{
+				Monitor(target=Falling)
+				<!L!>{
+					SearchObject(target=$[event2.target])
+					||{
+						TrackObject(target=$[event2.target])
+						{
+							PathPlanningFocus(target=$[event2.target])
+							TurnTo(target=$[event2.target])
+							OperatorControlPoint(data=[panoramic_image,occupancy_grid,path])
+							<!L!>??{
+								||AdvanceByWalkingAlongPath{
+									FollowPath
+									||{
+										<F:1>whilePlaceToThreadIn
+										<F:2>whileSolution
+										<F:2>untilOperatorIntervention
+										<F:2>untilSpeedAveregeIsLowerThen(kmh=?)
+									}
+								}
+								1 NoPlaceToTreadIn{
+									Stop
+									PlanDetour
+									OperatorControlPoint(data=[panoramic_image])
+								}
+								2 NoSolution{
+									OperatorControlPoint(data=[panoramic_image])
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+}
+		
+def OperatorControlPoint{
+	||{
+		<L>Stabilization{
+			Monitor(target=Stable)
+			PostureControl(pose=stabilization)
+		}
+		<T>||TimeControl{
+			OperatorRequest{
+				For(OperatorControlPoint.data){
+					PushHMI(data=$[OperatorControlPoint.data#])
+				}
+				HMIResponce
+			}
+			Monitor(target=Timeout)
+		}
+	}
+}
+	
+def InCarOperatorControlPoint{
+	<T>{
+		||TimeControl{
+			OperatorRequest{
+				For(InCarOperatorControlPoint.data){
+					PushHMI(data=$[InCarOperatorControlPoint.data#])
+				}
+				HMIResponce
+			}
+			Monitor(target=Timeout)
+		}
+	}
+}
+
+END
