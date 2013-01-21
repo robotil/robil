@@ -12,6 +12,7 @@
 #include "ros/ros.h"
 #include "C11_OperatorControl/C11.h"
 #include "C11_Agent/C34C11_STT.h"
+#include "C11_OperatorControl/push_img.h"
 #include "C11_Node_Subscriber.h"
 #include <image_transport/image_transport.h>
 #include <sensor_msgs/image_encodings.h>
@@ -53,8 +54,13 @@ public:
 
           void run();
 
+          void LoadMission(int index);
+
           static void viewImage(const sensor_msgs::ImageConstPtr& msg);
           static void StatusMessageCallback(const C11_Agent::C34C11_STTConstPtr);
+
+          bool push_img_proccess(C11_OperatorControl::push_img::Request  &req,
+        		  C11_OperatorControl::push_img::Response &res );
 
 Q_SIGNALS:
         void loggingUpdated();
