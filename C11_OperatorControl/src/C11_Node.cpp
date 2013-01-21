@@ -46,13 +46,12 @@ bool C11_Node::init() {
 				return false;
 		}
 
-		it_ = new image_transport::ImageTransport(*nh_);
+		//it_ = new image_transport::ImageTransport(*nh_);
 		//panoramic_image= it_->subscribe("C21/smallPanorama",1,&viewImage);
 
 		//status_subscriber = nh_->subscribe("c11_stt",1000,&StatusMessageCallback);
 
-		ros::ServiceServer c11_push_img =
-				nh_->advertiseService("C11/push_img", &C11_Node::push_img_proccess, this);
+		c11_push_img =	nh_->advertiseService("C11/push_img", &C11_Node::push_img_proccess, this);
 
 
         start();

@@ -69,6 +69,7 @@ Q_SIGNALS:
 private:
   ros::NodeHandle *nh_;
   ros::ServiceServer service;
+  ros::ServiceServer c11_push_img;
   image_transport::ImageTransport* it_;
   image_transport::Subscriber panoramic_image;
   ros::Subscriber status_subscriber;
