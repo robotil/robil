@@ -9,6 +9,8 @@ typedef vector<Vec2d> Points;
 #define DISPLAY_ATTRACTORS 0
 #define DISPLAY_REPULSORS  0
 #define DISPLAY_FORCES  0
+#define DISPLAY_SMOOTHED_PATH 0
+#define DISPLAY_SMOOTHED_REDUCED_PATH 0
 
 namespace {
 	
@@ -52,26 +54,40 @@ namespace {
 	}
 }
 
-Path PField::smooth(const SmoothingParameters& in_params)const{
+Path PField::smoothWaypoints(const SmoothingParameters& in_params)const{
+	return convert(smooth(in_params), map);
+}
+Points PField::smooth(const SmoothingParameters& in_params)const{
 	SmoothingParameters params = in_params;
-	params.repulsorType = RT_R1;
-	params.attractorType = AT_A1;
-	params.maxIterationNumber = (long)round(opath.size()/params.stepRate);
+	if(params.repulsorType==RT_ERROR)  params.repulsorType = RT_R1;
+	if(params.attractorType==AT_ERROR) params.attractorType = AT_A1;
+	if(params.maxIterationNumber==0) params.maxIterationNumber = (long)round(2*opath.size()/params.stepRate);
+	
+	if(params.notDefined()){
+		cout<<"WARNING: Some of Smoothing Parameters are not defined"<<endl;
+		
+		return convert(opath, map);
+	}
 	
 	Points points = simulate(params);
 	
-	cout<<"smoothed "<<endl;
-	for(size_t i=0;i<points.size();i++){
-		cout<<points[i].x<<"\t"<<points[i].y<<endl;
-	}
+	#if DISPLAY_SMOOTHED_PATH == 1
+		cout<<"smoothed "<<endl;
+		for(size_t i=0;i<points.size();i++){
+			cout<<points[i].x<<"\t"<<points[i].y<<endl;
+		}
+	#endif
 	
 	Points reduced = reducePath(points,params);
-	cout<<"reduced "<<endl;
-	for(size_t i=0;i<reduced.size();i++){
-		cout<<reduced[i].x<<"\t"<<reduced[i].y<<endl;
-	}
 	
-	return convert(reduced, map);
+	#if DISPLAY_SMOOTHED_REDUCED_PATH == 1
+		cout<<"reduced "<<endl;
+		for(size_t i=0;i<reduced.size();i++){
+			cout<<reduced[i].x<<"\t"<<reduced[i].y<<endl;
+		}
+	#endif
+	
+	return reduced;
 }
 
 struct Position{
@@ -132,11 +148,15 @@ namespace {
 	)
 	{
 		Points repulsors_tmp;
-		if(DISPLAY_VIEW_FRAME) cout<<"view frame"<<endl;
+		#if DISPLAY_VIEW_FRAME == 1
+			cout<<"view frame"<<endl;
+		#endif
 		for(long y=0;y<=viewRF;y++){
 			for(long x=-viewRS;x<=viewRS;x++){
 				Vec2d xy = Vec2d(x,y).rotate(pos.heading)+pos.loc;
-				if(DISPLAY_VIEW_FRAME) cout<<xy.x<<'\t'<<xy.y<<endl;
+				#if DISPLAY_VIEW_FRAME ==1
+					cout<<xy.x<<'\t'<<xy.y<<endl;
+				#endif
 				if(inMapRange(xy,map)==false) continue;
 				Waypoint wp_xy = convert(xy,map);
 				if(map(wp_xy.x, wp_xy.y)==Map::ST_BLOCKED && isFrontier(map, wp_xy)){
@@ -226,10 +246,10 @@ PField::Points PField::simulate(const SmoothingParameters& params) const{
 	Points trac;
 	while(true){iteration++;
 		
-		if(DISPLAY_FORCES){ 
+		#if DISPLAY_FORCES == 1 
 			cout<<"iteration = "<<iteration<<endl;
 			cout<<"POS "<<pos.loc.x<<'\t'<<pos.loc.y<<'\t'<<pos.loc.heading<<'\t'<<start_pos<<endl;
-		}
+		#endif
 		
 		smoothed_path.push_back(pos.loc);
 		
@@ -242,30 +262,29 @@ PField::Points PField::simulate(const SmoothingParameters& params) const{
 		Points attractors;
 		searchIP(viewRF, viewRS, pos, map, opath_points, start_pos, repulsors, attractors);
 		
-		if(DISPLAY_ATTRACTORS){
+		#if DISPLAY_ATTRACTORS == 1
 			cout<<"attractors"<<endl;
 			for(size_t i=0;i<attractors.size();i++){
 				Vec2d xy = attractors[i];
 				cout<<xy.x<<'\t'<<xy.y<<endl;
 			}
-		}
-		if(DISPLAY_REPULSORS){
+		#endif
+		#if DISPLAY_REPULSORS == 1
 			cout<<"repulsors"<<endl;
 			for(size_t i=0;i<repulsors.size();i++){
 				Vec2d xy = repulsors[i];
 				cout<<xy.x<<'\t'<<xy.y<<endl;
 			}
-		}
-
+		#endif
 		
 		Vec2d force(0,0.1);
 		for(size_t i=0;i<attractors.size();i++){
 			Vec2d v = attractors[i] - pos.loc;
 			if(at==AT_A1){
 				Vec2d f = Vec2d::poliar(v.ang(), 1/pow(v.len()/viewRF,2));
-				if(DISPLAY_FORCES){ 
+				#if DISPLAY_FORCES == 1
 					cout<<"att="<<attractors[i]<<",v="<<v<<", f="<<f<<", ang="<<Vec2d::r2d(v.ang())<<"deg, len="<<v.len()<<", viewRF="<<viewRF<<", len/FR="<<(v.len()/viewRF)<<", f.a="<<Vec2d::r2d(f.ang())<<"deg, pow="<<f.len()<<endl;
-				}
+				#endif
 				force = force + f;
 			}
 		}
@@ -274,9 +293,9 @@ PField::Points PField::simulate(const SmoothingParameters& params) const{
 			Vec2d ell = ellipse(v.ang(), viewRF, viewRS).rotate(pos.heading);
 			if(rt==RT_R1){
 				Vec2d f = Vec2d::poliar(PI+v.ang(), 1/pow(v.len()/ell.len(),2));
-				if(DISPLAY_FORCES){ 
+				#if DISPLAY_FORCES == 1
 					cout<<"rep="<<repulsors[i]<<",v="<<v<<", f="<<f<<", ang="<<Vec2d::r2d(v.ang())<<"deg, len="<<v.len()<<", viewRF="<<viewRF<<", |ell|="<<ell.len()<<", len/|ell|="<<(v.len()/ell.len())<<", f.a="<<Vec2d::r2d(f.ang())<<"deg pow="<<f.len()<<endl;
-				}
+				#endif
 				force = force + f;
 			}
 		}
@@ -286,13 +305,17 @@ PField::Points PField::simulate(const SmoothingParameters& params) const{
 		double delta_heading = force.rotate(-pos.heading).angY();
 		double power = 1;//force.len();
 		
-		if(DISPLAY_FORCES){
+		#if DISPLAY_FORCES == 1
 			cout<<"force = "<<force<<", ang="<<Vec2d::r2d(force.ang())<<"deg, len="<<force.len()<<", dh="<<Vec2d::r2d(delta_heading)<<"deg, power="<<power<<", cur.heading="<<Vec2d::r2d(pos.heading)<<"deg"<<endl;
-		}
+		#endif
 		
-		if(DISPLAY_FORCES){ cout<<"move: "<<pos.loc<<":"<<Vec2d::r2d(pos.heading)<<"d -> "; }
+		#if DISPLAY_FORCES == 1
+			cout<<"move: "<<pos.loc<<":"<<Vec2d::r2d(pos.heading)<<"d -> "; 
+		#endif
 		pos.move(delta_heading*stepF, power*stepF);
-		if(DISPLAY_FORCES){ cout<<pos.loc<<":"<<Vec2d::r2d(pos.heading)<<"d"<<endl;}
+		#if DISPLAY_FORCES == 1
+			cout<<pos.loc<<":"<<Vec2d::r2d(pos.heading)<<"d"<<endl;
+		#endif
 		
 		start_pos = searchOnPathPosition(pos, opath_points);
 	}
@@ -304,6 +327,9 @@ PField::Points PField::simulate(const SmoothingParameters& params) const{
 	
 }
 
+// #define RDP_MODE1
+// #define RDP_MODE2
+#define RDP_MODE3
 PField::Points PField::reducePath(const Points& path, const SmoothingParameters& params) const{
 	if(path.size()<2) return path;
 	Points rpath;
@@ -313,23 +339,66 @@ PField::Points PField::reducePath(const Points& path, const SmoothingParameters&
 	rpath.push_back(path[0]);
 	size_t lastAdded = 0;
 	for(size_t i=1;i<path.size();i++){
-		double dist = (path[i]-path[lastAdded]).len();
+		double dist = (path[i]-path[i-1]).len();
 		double angle = (path[i]-path[i-1]).angY() - heading;
+		//cout<<">>> path["<<i<<"]="<<path[i]<<" path["<<i-1<<"]="<<path[i-1]<<" dist:ang="<<dist<<":"<<Vec2d::r2d(angle)<<"d ";
 		heading=(path[i]-path[i-1]).angY();
+		//cout<<"heading="<<Vec2d::r2d(heading)<<"d ";
 		sum+=dist;
+		double prev_ang=ang;
 		ang+=angle;
+		//cout<<"sum="<<sum<<", sum_ang="<<Vec2d::r2d(ang)<<"d "<<endl;
+#if defined( RDP_MODE1 )
+		// REMOVE POINTS UP TO travel distance > TH or travel turn angles > TH
 		if(sum > params.distanceBetweenPoints || ang > params.maxAngleWhileReducing){
 			lastAdded = i-1;
 			rpath.push_back(path[lastAdded]);
 			sum=dist;
 			ang=angle;
+			//cout<<"get "<<lastAdded<<", sum="<<sum<<", sum_ang="<<Vec2d::r2d(ang)<<"d "<<endl;
 		}
+#elif defined( RDP_MODE2 )
+		// REMOVE POINTS UP TO travel distance > TH, THEN RETURN POINTS UP TO travel turn angle < TH
+		if(sum > params.distanceBetweenPoints){
+			size_t j=i;
+			for(;j>lastAdded && ang>params.maxAngleWhileReducing;j--){
+				double angle = (path[j]-path[j-1]).angY() - ((path[j-1]-path[j-2]).angY());
+				ang-=angle;
+			}
+			i=j;
+			lastAdded = i-1;
+			rpath.push_back(path[lastAdded]);
+			sum=0;
+			ang=0;
+			//cout<<"get "<<lastAdded<<", sum="<<sum<<", sum_ang="<<Vec2d::r2d(ang)<<"d "<<endl;
+		}
+#elif defined( RDP_MODE3 )
+		// REMOVE POINTS UP TO travel distance > 2*TH, THEN insert transit point for create same (50%) travel turn angle.
+		if(sum > params.distanceBetweenPoints*2){
+			//if(ang > params.maxAngleWhileReducing)
+			{
+				#define ANG_FIX -( PI05-(PI-prev_ang)/2 )
+				Vec2d bb = (path[i-1]-path[lastAdded]).scale(0.5);
+				double fix_ang = ANG_FIX / 2;
+				Vec2d b = bb.changeLen(bb.len()/cos(fix_ang)).rotate(fix_ang) + path[lastAdded];
+				rpath.push_back(b);
+			}
+			lastAdded = i-1;
+			rpath.push_back(path[lastAdded]);
+			sum=0;
+			ang=0;
+			//cout<<"get "<<lastAdded<<", sum="<<sum<<", sum_ang="<<Vec2d::r2d(ang)<<"d "<<endl;
+		}
+#endif
 	}
 	if(path.size()-1 != lastAdded) rpath.push_back(path[path.size()-1]);
 	
 	return rpath;
 }
 
+Path PField::castPath(const Points& points)const{
+	return convert(points, map);
+}
 
 
 

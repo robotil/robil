@@ -8,19 +8,43 @@ using namespace std;
 class PField{
 //------------------ types
 public:
-	enum RepulsorType{RT_R1};
-	enum AttractorType{AT_A1};
+	typedef vector<Vec2d> Points;
+	
+	enum RepulsorType{RT_ERROR, RT_R1};
+	enum AttractorType{AT_ERROR, AT_A1};
 
 	struct SmoothingParameters{
+		//define ellipse of attractors/repulsors search local window
 		double viewRadiusForward;
 		double viewRadiusSide;
+		//max iteration numbers for prevent endless search of simulation
 		double maxIterationNumber;
+		//rate of simulation step
 		double stepRate;
+		//virtual attractor power for push smoothing alg. forward
 		double inertia;
+		//distance between points in resulted path
 		double distanceBetweenPoints;
-		double maxAngleWhileReducing;
+		double maxAngleWhileReducing; // not used in RDP_MODE3
+		//type of repulsors and attractors potential calculation
 		RepulsorType repulsorType;
 		AttractorType attractorType;
+		
+		SmoothingParameters():
+			viewRadiusForward(0),viewRadiusSide(0),
+			maxIterationNumber(0),stepRate(0),inertia(0),
+			distanceBetweenPoints(0), maxAngleWhileReducing(0),
+			repulsorType(RT_ERROR),attractorType(AT_ERROR)
+		{}
+		bool notDefined()const{
+			if(
+				viewRadiusForward==0 || viewRadiusSide==0 ||
+				maxIterationNumber==0 || stepRate == 0 ||
+				distanceBetweenPoints==0 || maxAngleWhileReducing==0 ||
+				repulsorType==RT_ERROR || attractorType==AT_ERROR
+			) return true;
+			return false;
+		}
 	};
 	
 //------------------ members
@@ -37,11 +61,12 @@ public:
 		
 	}
 	
-	Path smooth(const SmoothingParameters& params)const;
+	Points smooth(const SmoothingParameters& params)const;
+	Path smoothWaypoints(const SmoothingParameters& params)const;
+	Path castPath(const Points& points)const;
 
 private:
-	
-	typedef vector<Vec2d> Points;
+
 	Points simulate(const SmoothingParameters& params) const;
 	Points reducePath(const Points& path, const SmoothingParameters& params) const;
 
