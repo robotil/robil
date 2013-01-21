@@ -3,6 +3,7 @@
 
 #include <vector>
 #include "Map.h"
+#include "Vec2d.hpp"
 
 using namespace std;
 
@@ -27,11 +28,17 @@ struct Waypoint{
 };
 typedef vector<Waypoint> Waypoints;
 typedef Waypoints Path;
+typedef vector<Vec2d> SmoothedPath;
+
 
 inline std::ostream& operator<<(std::ostream& o, const Waypoint& w){
 	return o<<"("<<w.x<<","<<w.y<<")";
 }
 inline std::ostream& operator<<(std::ostream& o, const Path& w){
+	o<<"Path#"<<w.size()<<"{"; for(size_t i=0;i<w.size();i++)o<<" "<<w[i]; o<<" }";
+	return o;
+}
+inline std::ostream& operator<<(std::ostream& o, const SmoothedPath& w){
 	o<<"Path#"<<w.size()<<"{"; for(size_t i=0;i<w.size();i++)o<<" "<<w[i]; o<<" }";
 	return o;
 }
@@ -50,8 +57,7 @@ struct Constraints{
 	:dimentions(dimentions),transits(transits),attractors(attractors){}
 };
 
-Path searchPath(const Map& map, const Waypoint& start, const Waypoint& finish, const Constraints& constraints);
-
+SmoothedPath searchPath(const Map& map, const Waypoint& start, const Waypoint& finish, const Constraints& constraints);
 
 
 #endif

@@ -16,6 +16,8 @@
 
 #include "cogniteam_pathplanning.h"
 
+#define PRINT_AS_VECTORS 1
+
 using namespace std;
 
 // -------------------------- MAP ---------------------------------------------
@@ -35,7 +37,8 @@ Map::Map(const Map& map):_w(map._w),_h(map._h){
 
 ostream& operator<<(ostream& out, const Map& m){
 	out<<"  "; for(size_t x=0;x<10;x++){cout<<' '<<x<<' ';}for(size_t x=10;x<m.w();x++){cout<<x<<' ';} out<<endl;
-	for(size_t y=0;y<m.h();y++){
+	for(long y=(long)m.h()-1;y>=0;y--){
+//	for(size_t y=0;y<m.h();y++){
 		if(y<10) out<<' '; out<<y;
 		for(size_t x=0;x<m.w();x++){
 			out<<' '<<m.str(x,y)<<' ';
@@ -534,6 +537,8 @@ int cogniteam_pathplanning_test(int argc, char** argv) {
 		0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
 	};
 	
+	clock_t start_time = clock();
+	
 	char* cmap = cmap_1;
 	size_t w=48,h=48;
 	
@@ -554,6 +559,20 @@ int cogniteam_pathplanning_test(int argc, char** argv) {
 		map.approximate(START_P, END_P);
 	}
 	
+#if PRINT_AS_VECTORS == 1
+	cout<<"\nPRINT MAP - STR"<<endl;
+	for(size_t yy=0;yy<map.h();yy++){
+		for(size_t xx=0;xx<map.w();xx++){
+			if(map(xx,yy)==Map::ST_BLOCKED){
+				cout<<xx<<'\t'<<yy<<endl;
+			}
+		}	
+	}
+	cout<<"PRINT MAP - END\n"<<endl;
+#endif
+	
+	clock_t time_inflator = clock();
+	
 	Inflator i( 1 , Map::ST_BLOCKED);
 	MapEditor e;
 	
@@ -567,10 +586,17 @@ int cogniteam_pathplanning_test(int argc, char** argv) {
 	
 	map = MapEditor().replace(map, Map::ST_UNCHARTED,Map::ST_AVAILABLE);
 	
+	time_inflator = clock()-time_inflator;
+	
 	Map input_map = map;
 
+	clock_t time_qt = clock();
+	
 	QTNode qt(0,w-1, 0, h-1, map);
 	qt.folding();
+	
+	time_qt = clock() - time_qt;
+	
 	cout<<"QT:"<<endl<<qt<<endl;
 
 #define PRINT_NODE(X,Y){\
@@ -591,11 +617,28 @@ int cogniteam_pathplanning_test(int argc, char** argv) {
 	PRINT_NODE(20,14)
 	PRINT_NODE(20,15)
 	PRINT_NODE(5,5)
+	
+
+#if PRINT_AS_VECTORS == 1
+	cout<<"\nPRINT INFLATED MAP - STR"<<endl;
+	for(size_t yy=0;yy<map.h();yy++){
+		for(size_t xx=0;xx<map.w();xx++){
+			if(map(xx,yy)==Map::ST_BLOCKED){
+				cout<<xx<<'\t'<<yy<<endl;
+			}
+		}	
+	}
+	cout<<"PRINT INFLATED - END\n"<<endl;
+#endif
 
 	AStar a_star;
 	size_t sx(2),sy(13),gx(15),gy(3);
 	
+	clock_t time_astar = clock();
+	
 	AStar::Path path = a_star.search(POINTS , &qt);
+	
+	time_astar = clock() - time_astar;
 
 	cout<<"A* ("<<sx<<","<<sy<<":"<<gx<<","<<gy<<") result : path length = "<<path.size()<<endl;
 	cout<<"path (by nodes): "<<endl;
@@ -605,19 +648,74 @@ int cogniteam_pathplanning_test(int argc, char** argv) {
 	}
 	cout << "------------"<< endl;
 	Path res_path;
+	
+	clock_t time_ep = clock();
+	
 	vector<QTNode::XY> points = QTPath(path).extractPoints(POINTS);
+	
+	time_ep = clock() - time_ep; time_astar+=time_ep;
+	
 	cout<<"path by points: ";
 	for( size_t i=0;i<points.size(); i++){
 		cout<<"("<<points[i].x<<","<<points[i].y<<") ";
 		map(points[i].x, points[i].y)='+';
 		res_path.push_back(Waypoint(points[i].x,points[i].y));
 	}
+#if PRINT_AS_VECTORS == 1
+	cout<<"\nPRINT PATH AFTER A* - STR"<<endl;
+	for( size_t i=0;i<points.size(); i++){
+		cout<<points[i].x<<'\t'<<points[i].y<<endl;
+	}
+	cout<<"PRINT PATH AFTER A* - END\n"<<endl;
+#endif
 
 	cout<<endl;
 	cout<<"map with path"<<endl<<map<<endl;
 	
 	PField pf(input_map, res_path);
+	PField::SmoothingParameters pf_params;
+	pf_params.viewRadiusForward = 5;
+	pf_params.viewRadiusSide = 2;
+	pf_params.stepRate=0.6;
+	pf_params.inertia=pow(1/pf_params.viewRadiusForward*0.5,2);
+	pf_params.distanceBetweenPoints = 2;
+	pf_params.maxAngleWhileReducing = Vec2d::d2r(10);
 
+	clock_t time_smoothing = clock();
+	
+	PField::Points smoothed_points= pf.smooth(pf_params);
+	
+	time_smoothing = clock() - time_smoothing;
+	
+	Path smoothed = pf.smoothWaypoints(pf_params);
+	
+	cout<<"smoothed path: ";
+	for( size_t i=0;i<smoothed.size(); i++){
+		cout<<"("<<smoothed[i].x<<","<<smoothed[i].y<<") ";
+		map(smoothed[i].x, smoothed[i].y)='o';
+	}
+	
+	cout<<endl;
+	cout<<"map with smoothed path"<<endl<<map<<endl;
+	
+	start_time = clock()-start_time;
+	
+#if PRINT_AS_VECTORS == 1
+	cout<<"\nPRINT PATH AFTER PFIELD - STR"<<endl;
+	for( size_t i=0;i<smoothed_points.size(); i++){
+		cout<<smoothed_points[i].x<<'\t'<<smoothed_points[i].y<<endl;
+	}
+	cout<<"PRINT PATH AFTER PFIELD - END\n"<<endl;
+#endif
+//#define STR_TIME(x) ((double)x)/(double)CLOCKS_PER_SEC/1000.0<<" msec"
+#define STR_TIME(x) x<<" clocks"
+	cout<<"TIMES:"<<endl;
+	cout<<"   total : "<<STR_TIME(start_time)<<endl;
+	cout<<"   inflation : "<<STR_TIME(time_inflator)<<endl;
+	cout<<"   quad tree : "<<STR_TIME(time_qt)<<endl;
+	cout<<"   A* : "<<STR_TIME(time_astar)<<endl;
+	cout<<"   smoothing : "<<STR_TIME(time_smoothing)<<endl;
+	
 	cout << endl << "END" << endl; // prints PP
 	return 0;
 }
@@ -633,7 +731,7 @@ namespace {
 
 }
 
-Path searchPath(const Map& source_map, const Waypoint& start, const Waypoint& finish, const Constraints& constraints){
+PField::Points searchPath(const Map& source_map, const Waypoint& start, const Waypoint& finish, const Constraints& constraints){
 	using namespace std;
 
 	//cout<<"searchPath: "<<"Input map:"<<endl<<source_map<<endl;
@@ -642,7 +740,7 @@ Path searchPath(const Map& source_map, const Waypoint& start, const Waypoint& fi
 
 	if( source_map(start.x, start.y)==Map::ST_BLOCKED || source_map(finish.x, finish.y)==Map::ST_BLOCKED ){
 		cout<<"searchPath: "<<"some of interesting points are not available (before inflation)"<<endl;
-		return Path();
+		return PField::Points();
 	}
 	
 	Inflator i( constraints.dimentions.radius , Map::ST_BLOCKED);
@@ -673,13 +771,13 @@ Path searchPath(const Map& source_map, const Waypoint& start, const Waypoint& fi
 
 	if( !qt.findEmpty(start.x, start.y) || !qt.findEmpty(finish.x, finish.y) ){
 		cout<<"searchPath: "<<"some of interesting points are not available"<<endl;
-		return Path();
+		return PField::Points();
 	}
 	if(constraints.transits.size()!=0){
 		for( size_t i=0 ; i<constraints.transits.size(); i++ ){
 			if( !qt.findEmpty(constraints.transits[i].x, constraints.transits[i].y) ){
 				cout<<"searchPath: "<<"some of transit points are not available"<<endl;
-				return Path();
+				return PField::Points();
 			}
 		}
 	}
@@ -712,5 +810,16 @@ Path searchPath(const Map& source_map, const Waypoint& start, const Waypoint& fi
 		#undef SEGMENT
 	}
 
-	return path;
+	PField::SmoothingParameters pf_params;
+	pf_params.viewRadiusForward = 5;
+	pf_params.viewRadiusSide = 2;
+	pf_params.stepRate=0.6;
+	pf_params.inertia=pow(1/pf_params.viewRadiusForward*0.5,2);
+	pf_params.distanceBetweenPoints = 2;
+	pf_params.maxAngleWhileReducing = Vec2d::d2r(10); // unused
+
+	PField pf(map, path);
+	PField::Points smoothed_path = pf.smooth(pf_params);
+	
+	return smoothed_path;
 }
