@@ -9,7 +9,7 @@ from Node import node
 
 class xmlTree:
     #constructor
-    def __init__(self, fileName=None ,root=None):
+    def __init__(self, fileName=None ,root=None, tskFileName=None):
         if fileName != None:
             tree = etree.parse(fileName)
         #if we don't get a file to parse
@@ -17,7 +17,11 @@ class xmlTree:
             self.root = tree.getroot()
         else:
             self.root= root
-            
+        #init tsk map- key is the name. value is a pointer to tsk etree element.
+        self._tskMap = {}
+        if(tskFileName != None):
+            self._tskEtree = etree.parse(tskFileName)
+            self._createTskAttribMap()
         #hold the name of the file.
         self.fileName = fileName
         #create a root node- type plan
@@ -60,7 +64,24 @@ class xmlTree:
         return self.rootNode
         
     
+    def _createTskAttribMap(self):
+        #iter over tsk tree and add tsk to the tree by the tsk name. key-name, value-etree element
+        for tsk in self._tskEtree.iter(tag=etree.Element):
+            self._tskMap[tsk.get("name")] = tsk
+            
+    
+    #input: tskId- name, parm- parmeter needed
+    def getTskAttrib(self,tskId, parm):
+        attrib = None
+        #check if the map holds this key
+        if tskId in self._tskMap:
+            #return string
+            attrib = (self._tskMap[tskId].get(parm))
+            
+        return attrib
+            
         
+            
         
         
     
