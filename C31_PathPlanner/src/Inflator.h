@@ -10,16 +10,12 @@ public:
 
 	Inflator(size_t radius, char cbv);
 	Map inflate(const Map& source)const;
-	Map coloring(const Map& source, size_t x, size_t y, char av, char bl)const;
-
-private:
-	void coloring(const Map& source, size_t x, size_t y, char c, char av, char bl, Map& visited, Map& res)const;
 
 private:
 	size_t radius;
 	char cellBlockValue;
-	vector<size_t> tx;
-	vector<size_t> ty;
+	vector<int> tx;
+	vector<int> ty;
 
 };
 

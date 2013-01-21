@@ -53,10 +53,16 @@ public:
 		if(c==ST_AVAILABLE) return '.';
 		if(c==ST_BLOCKED) return 'B';
 		if(c==ST_UNCHARTED) return '-';
+		if(c>=32) return c;
 		return '?';
 	}
 
+	bool inRange(long x, long y)const;
+	void approximate(const long cx, const long cy, long& x, long& y)const;
+
 private:
+	double approximate(const long cx, const long cy, long& x, long& y, char ctype)const;
+
 	char getByIndex(size_t ix)const{ return _data[ix]; }
 	char& getByIndex(size_t ix){ return _data[ix]; }
 
@@ -65,6 +71,19 @@ private:
 };
 
 ostream& operator<<(ostream& out, const Map& m);
+
+
+class MapEditor{
+public:
+
+	MapEditor(){};
+	Map coloring(const Map& source, size_t x, size_t y, char av, char bl)const;
+	Map replace(const Map& source, const char from, const char to)const;
+
+private:
+	void coloring(const Map& source, size_t x, size_t y, char c, char av, char bl, Map& visited, Map& res)const;
+
+};
 
 
 #endif /* COGNITEAM_PATHPLANNING_MAP_H_ */

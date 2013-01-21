@@ -13,7 +13,7 @@
 #include <map>
 #include <boost/algorithm/string.hpp>
 
-namespace RobilTask{
+namespace C0_RobilTask{
 
 using namespace std;
 

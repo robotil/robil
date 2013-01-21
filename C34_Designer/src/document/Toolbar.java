@@ -89,7 +89,7 @@ public class Toolbar extends JPanel {
 
 		
 		setBorder(new TitledBorder("Toolbar"));
-		setPreferredSize(new Dimension(10,75));
+		setPreferredSize(new Dimension(10,85));
 
 		setLayout(new BorderLayout());
 
@@ -108,8 +108,8 @@ public class Toolbar extends JPanel {
 
 		JPanel pnl = new JPanel();
 
-		pnl.setPreferredSize(new Dimension(15,0));
-		buttons.add(pnl);
+		// pnl.setPreferredSize(new Dimension(15,0));
+		// buttons.add(pnl);
 
 		JButton btn = new JButton();
 		btn.setText("Open");
@@ -155,6 +155,15 @@ public class Toolbar extends JPanel {
 			buttons.add(btn);
 		}
 
+		pnl = new JPanel();
+		pnl.setPreferredSize(new Dimension(15,0));
+		buttons.add(pnl);
+		
+		btn = new JButton("Export tasks");
+		btn.addActionListener(new ExportTasksAction(designer));
+		buttons.add(btn);
+		
+		
 		tippnl.add(tip, BorderLayout.CENTER);
 //		JLabel version = new JLabel("v."+VERSION);
 //		version.setFont(new Font("Arial", 1, 10));

@@ -1,0 +1,3 @@
+int32 cmd
+int32 TAKE_PICTURE=0
+int32 RETURN_PANORAMA=1

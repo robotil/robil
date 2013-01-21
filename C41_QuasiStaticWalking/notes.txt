@@ -1,0 +1,5 @@
+C41 – FootPlacement
+C0C42_DES – Destination Coordinate
+C42C0_DS: Destination Success [0 1]
+C25C42_RBPOS: robot global position.
+C22C42_RBMAP: ground position and surface shape.

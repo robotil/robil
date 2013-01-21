@@ -19,6 +19,7 @@
 #include <opencv/highgui.h>
 #include <image_transport/subscriber_filter.h>
 #include "libopentld/tld/TLD.h"
+#include "C23_Node_TLD_Handler.h"
 
 namespace enc=sensor_msgs::image_encodings;
 using namespace tld;
@@ -41,6 +42,7 @@ public:
 	 */
 	  C23_Node(std::string left_camera,std::string right_camera) :
 		it_(nh_),
+		tldh_(NULL),
 		//the purpose of the following 3 lines is to synchronize the data from the cameras using a message filter
 		//more on filters and how to use them can be found on http://www.ros.org/wiki/message_filters
 		left_image_sub_( it_, left_camera, 1 ),
@@ -51,6 +53,7 @@ public:
 		sync.registerCallback( boost::bind( &C23_Node::callback, this, _1, _2 ) );  //Specifying what to do with the data
 		//service = nh_.advertiseService("C23", &C23_Node::proccess, this); //Specifying what to do when a reconstructed 3d scene is requested
 		ROS_INFO("service on\n");
+		ready = true;
 	  }
 
 
@@ -79,8 +82,10 @@ public:
 		// cv_bridge::CvImagePtr left;
 		// cv_bridge::CvImagePtr right;
          cv_bridge::CvImagePtr cv_ptr;
+         if(ready) {
+            ready = false;
             try {
-                cv_ptr = cv_bridge::toCvCopy(left_msg,enc::RGB8);
+                cv_ptr = cv_bridge::toCvCopy(left_msg,enc::BGR8);
             }
             
 		    catch (cv_bridge::Exception& e)
@@ -90,10 +95,32 @@ public:
 		    }
 		    ROS_INFO("received picture 2!\n");
 		    IplImage tosave=cv_ptr->image;
-		    cvSaveImage("rgb.ppm",&tosave);
+		    int percent = 10;
+		    IplImage *destination = cvCreateImage
+( cvSize((int)((tosave.width*percent)/100) , (int)((tosave.height*percent)/100) ),
+                                     tosave.depth, tosave.nChannels );
+
+//use cvResize to resize source to a destination image
+cvResize(&tosave, destination);
+		    if(tldh_ == NULL) {
+		        tldh_ = new C23_Node_TLD_Handler(LEARNING, "~/darpa/robil/robil/C23_ObjectRecognition/models/");
+		        ROS_INFO("Init..\n");
+		        tldh_->init(destination);
+	        } else {
+	            ROS_INFO("after init\n");
+	            int x,y,width,height;
+	            float confident;
+	            tldh_->processFrame(destination, &x, &y, &width, &height, &confident);
+	            char buff[100];
+	            sprintf(buff,"BB: %d %d %d %d, Confident: %lf \n",x,y,width,height,confident);
+	            ROS_INFO(buff);
+            }
+            ready = true;
+        }
+		  //  cvSaveImage("rgb.ppm",&tosave);
 		   
-		    cv::imshow(WINDOW, cv_ptr->image);
-		    cv::waitKey(3);    
+		  //  cv::imshow(WINDOW, cv_ptr->image);
+		 //   cv::waitKey(3);    
 	    //	try
 	    //	{
 	    //	  left = cv_bridge::toCvCopy(left_msg,enc::RGB8);
@@ -116,6 +143,9 @@ private:
   typedef message_filters::sync_policies::ApproximateTime<sensor_msgs::Image, sensor_msgs::Image> MySyncPolicy;
   message_filters::Synchronizer< MySyncPolicy > sync;
   TLD tld;
+  C23_Node_TLD_Handler *tldh_;
+  bool ready;
+ // char *_window = "Image window";
 };
 
 int main(int argc, char **argv)
