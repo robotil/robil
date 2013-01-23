@@ -1,0 +1,45 @@
+#!/bin/bash
+cat << END
+
+Before testing follow instructions:
+
+1. download record_points4_2013-01-14-14-22-01.bag from 
+   http://www.robil.org/trac_robil/attachment/wiki/C31_PathPlanner/record_points4_2013-01-14-14-22-01.bag
+END
+
+echo 2. close all programs that use ROS
+echo 3. run: roscore
+echo 4. run: rosrun C22_GroundRecognitionAndMapping C22
+echo 5. run: rosbag play record_points4_2013-01-14-14-22-01.bag
+echo 6. run: rosrun C34_Executer executer
+
+cat << END > /tmp/pln
+<plan><seq name="S"><tsk name="PathPlanning" id="IDPP" /></seq></plan>
+END
+
+cat << END >/tmp/pln1
+<plan><seq name="S"><tsk name="PathPlanningFocus(x=0,y=4)" id="IDPPF" /></seq></plan>
+END
+
+echo 7. run: rosrun C31_PathPlanner gpp
+
+function __run_test_1 { rosservice call /executer/run T1 /tmp/pln; rosservice call /executer/resume T1; }
+function __run_test_2 { rosservice call /executer/run T2 /tmp/pln1; rosservice call /executer/resume T2; }
+
+echo
+echo "After all, press ENTER"
+read line
+echo "started..."
+
+__run_test_1 &> /dev/null
+sleep 2
+__run_test_2 &> /dev/null
+sleep 1
+
+rosservice call /C31_GlobalPathPlanner/getPath
+rossrv show $(rosservice type /C31_GlobalPathPlanner/getPath)
+
+echo
+echo "for getting this path use: rosservice call /C31_GlobalPathPlanner/getPath "
+echo "after your tests, run : rosservice call /executer/stop T1; rosservice call /executer/stop T2;"
+
