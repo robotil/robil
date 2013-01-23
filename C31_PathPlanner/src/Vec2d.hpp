@@ -6,6 +6,10 @@
 
 using namespace  std;
 
+#define PI 3.14159265359
+#define PI05 1.57079632679
+#define PI2 6.28318530718
+
 class Vec2d{
 public:
 	
@@ -16,13 +20,13 @@ public:
 	
 	bool isNull;
 	
-	Vec2d(double x, double y):x(x),y(y),isNull(false){}
+	Vec2d(double x=0, double y=0):x(x),y(y),isNull(false){}
 // 	Vec2d(size_t x, size_t y):x((double)x),y((double)y),isNull(false){}
 // 	Vec2d(long x, long y):x((double)x),y((double)y),isNull(false){}
 	Vec2d(const Vec2d& v):x(v.x),y(v.y),isNull(v.isNull){}
 	Vec2d& operator=(const Vec2d& v){ x=v.x; y=v.y; isNull=v.isNull; return *this; }
-	bool operator==(const Vec2d& v){ return (v-(*this)).len()<eps || (isNull && v.isNull); }
-	bool operator!=(const Vec2d& v){ return !((*this)==v); }
+	bool operator==(const Vec2d& v)const{ return (v-(*this)).len()<eps || (isNull && v.isNull); }
+	bool operator!=(const Vec2d& v)const{ return !((*this)==v); }
 	
 	Vec2d clone()const{ return Vec2d(x,y); }
 	static Vec2d poliar(double a, double l){ return Vec2d(l*cos(a), l*sin(a)); }
@@ -33,7 +37,7 @@ public:
 	
 	double len()const{ return hypot(x,y); }
 	double ang()const{ return atan2(y,x); }
-	double angY()const{ return atan2(x,y); }
+	double angY()const{ return poliar(ang()-PI05,1).ang(); }
 	
 	Vec2d operator+(const Vec2d& v)const{ return Vec2d(x+v.x, y+v.y); }
 	Vec2d operator-(const Vec2d& v)const{ return Vec2d(x-v.x, y-v.y); }
@@ -56,6 +60,8 @@ public:
 		return (AB*BC>0.f && BC*CA>0.f);
 	}
 	
+	Vec2d addLen(double l)const{ return poliar(ang(),len()+l); }
+	
     static Vec2d Unit(){ return Vec2d(0,1); }
     static Vec2d Ziro(){ return Vec2d(0,0); }
     static const Vec2d& Null(){ static Vec2d nullvec(0,0); nullvec.isNull=true; return nullvec; }
@@ -63,7 +69,8 @@ public:
 	
 	static double distance(const Vec2d& v1, const Vec2d& v2){ return (v2-v1).len(); }
 	static double heading(const Vec2d& v1, const Vec2d& v2){ return (v2-v1).angY()+v1.angY(); }
-
+	static double d2r(double d){return d/180*PI;}
+	static double r2d(double r){return r/PI*180;}
 };
 
 static ostream& operator<<(ostream& o, const Vec2d& v){
