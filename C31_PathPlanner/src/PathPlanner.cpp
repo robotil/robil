@@ -1,4 +1,5 @@
 #include "PathPlanner.h"
+#include "PField.h"
 
 // copy from HEADER
 #define SYNCHRONIZED boost::mutex::scoped_lock l(_mtx);
@@ -26,12 +27,14 @@ void PathPlanning::plan(){
 			Constraints constraints(_data.dimentions, _data.transits, _data.attractors);
 			
 			_data.map(_data.start.x, _data.start.y) = Map::ST_AVAILABLE;
-			Path _path = searchPath(_data.map, _data.start, _data.finish, constraints);
+			SmoothedPath _path = searchPath(_data.map, _data.start, _data.finish, constraints);
 			ROS_INFO("Calculated path: %s",STR(_path));
 			
+			PField pf(_data.map, Path());
 			Map map = _data.map;
-			for( size_t wp=0;wp<_path.size();wp++){
-				map(_path[wp].x,_path[wp].y)='@';
+			Path spath = pf.castPath(_path);
+			for( size_t wp=0;wp<spath.size();wp++){
+				map(spath[wp].x,spath[wp].y)='o';
 			}
 			cout<<map<<endl;
 
@@ -45,8 +48,10 @@ void PathPlanning::plan(){
 
 	#define TRANSLATE_GPS_TO_GRID(x, v) ( mapProperties.anchor.x + round( ( v - mapProperties.gps.x) / mapProperties.resolution ) )
 	#define TRANSLATE_GRID_TO_GPS(x, v) ( mapProperties.gps.x +  (long)((long)v - (long)mapProperties.anchor.x) * mapProperties.resolution  )
+	#define TRANSLATE_F_GRID_TO_GPS(x, v) ( mapProperties.gps.x +  (double)((double)v - (double)mapProperties.anchor.x) * mapProperties.resolution  )
 	#define TRANSLATE_POINT_GPS_TO_GRID(x) TRANSLATE_GPS_TO_GRID(x, gps.x)
 	#define TRANSLATE_POINT_GRID_TO_GPS(x) TRANSLATE_GRID_TO_GPS(x,  wp.x)
+	#define TRANSLATE_POINT_F_GRID_TO_GPS(x) TRANSLATE_F_GRID_TO_GPS(x,  wp.x)
 
 	long PathPlanning::cast(double gps)const{
 		if(isMapReady()==false){
@@ -110,6 +115,38 @@ void PathPlanning::plan(){
 		#undef TRANSLATE
 	}
 
+	double PathPlanning::castWP(double cell)const{
+		if(isMapReady()==false){
+			return 0.0;
+		}
+		double gps = TRANSLATE_F_GRID_TO_GPS(x, cell);
+		return gps;
+	}
+	double PathPlanning::castWPLength(double cell)const{
+		if(isMapReady()==false){
+			return 0.0;
+		}
+		double gps = TRANSLATE_F_GRID_TO_GPS(x+mapProperties.anchor.x, cell) - mapProperties.gps.x;
+		return gps;
+	}
+	GPSPoint PathPlanning::cast(const Vec2d& wp)const{
+		#define TRANSLATE(x) TRANSLATE_POINT_F_GRID_TO_GPS(x)
+
+		if(isMapReady()==false){
+			return GPSPoint(0,0);
+		}
+
+		double x ( TRANSLATE(x) );
+		double y ( TRANSLATE(y) );
+
+		return GPSPoint(x, y);
+
+		#undef TRANSLATE
+	}
+
+
+	
+	
 	#undef TRANSLATE_POINT_GPS_TO_GRID
 	#undef TRANSLATE_POINT_GRID_TO_GPS
 	#undef TRANSLATE_GPS_TO_GRID

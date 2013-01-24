@@ -1,4 +1,4 @@
-<plan descriptions="event1_m.desc.xml">
+<plan descriptions="./plans/TaskDescriptions.xml">
    <par name="event1"> 
          <par name="Perception"> 
                <tsk name="LocalizationTrack" />
@@ -111,7 +111,12 @@
                </par>
                <seq name="DriveMission"> 
                      <seq name="EnterToCar"> 
-                           <tsk name="DirectSensorsAtDoorway(selfposition=external)" />
+                           <seq name="SearchObjectsFromOutside"> 
+                                 <tsk name="SearchObject(target=Doorway,selfPosition=external)" />
+                                 <tsk name="SearchObject(target=Pedals)" />
+                                 <tsk name="SearchObject(target=wheel)" />
+                                 <tsk name="SearchObject(target=Set)" />
+                           </seq>
                            <par name="OperatorCheckPoint"> 
                               <dec name="L"> 
                                     <seq name="Stabilization"> 
@@ -130,29 +135,35 @@
                                     </par>
                               </dec>
                            </par>
-                           <tsk name="InitEntryPosture" />
+                           <tsk name="MountVehicleInit" />
                         <dec name="!L!"> 
                               <sel name="Entry"> 
-                                    <tsk name="PerformEntry" />
+                                    <tsk name="MountVehicle(param=Mount)" />
                                  <dec name="F"> 
-                                       <tsk name="ReturnToEntryPosture" />
+                                       <tsk name="MountVehicleInit" />
                                  </dec>
                               </sel>
                         </dec>
+                           <seq name="SearchObjectsFromInside"> 
+                                 <tsk name="SearchObject(target=Wheel)" />
+                                 <tsk name="SearchObject(target=ArmBrake)" />
+                           </seq>
                      </seq>
                      <seq name="InCar"> 
                         <dec name="!L!"> 
                               <seq name="Setting"> 
-                                 <dec name="T"> 
-                                       <par name="TimeControl"> 
-                                             <seq name="OperatorRequest"> 
-                                                   <tsk name="PushHMI(data=inSideCabin_image)" />
-                                                   <tsk name="PushHMI(data= InSideCabin_parametrics)" />
-                                                   <tsk name="HMIResponce" />
-                                             </seq>
-                                             <tsk name="Monitor(target=Timeout)" />
-                                       </par>
-                                 </dec>
+                                    <seq name="OperatorCheckPoint"> 
+                                       <dec name="T"> 
+                                             <par name="TimeControl"> 
+                                                   <seq name="OperatorRequest"> 
+                                                         <tsk name="PushHMI(data=inSideCabin_image)" />
+                                                         <tsk name="PushHMI(data= InSideCabin_parametrics)" />
+                                                         <tsk name="HMIResponce" />
+                                                   </seq>
+                                                   <tsk name="Monitor(target=Timeout)" />
+                                             </par>
+                                       </dec>
+                                    </seq>
                                     <seq name="TestControllers"> 
                                           <tsk name="GripSteeringWheel" />
                                           <tsk name="TestSteering" />
@@ -165,7 +176,6 @@
                               <dec name="!L!"> 
                                     <seq name="Driving"> 
                                           <tsk name="PathPlanningFocus(target=FORWARD)" />
-                                          <tsk name="InitDrive" />
                                           <par name="OperatorCheckPoint"> 
                                              <dec name="L"> 
                                                    <seq name="Stabilization"> 
@@ -186,14 +196,21 @@
                                                    </par>
                                              </dec>
                                           </par>
-                                          <tsk name="WayPointsDriving" />
+                                          <seq name="@4"> 
+                                                <tsk name="InitDrive" />
+                                                <sel name="@5"> 
+                                                      <tsk name="WayPointsDriving" />
+                                                      <tsk name="FinishDrive" />
+                                                </sel>
+                                                <tsk name="FinishDrive" />
+                                          </seq>
                                     </seq>
                               </dec>
                                  <tsk name="PathPlanning" />
                            </par>
                      </seq>
                      <seq name="ExitFromCar"> 
-                           <tsk name="DirectSensorsAtDoorway(selfposition=internal)" />
+                           <tsk name="TurnTo(target=Doorway,selfPosition=internal)" />
                            <par name="OperatorCheckPoint"> 
                               <dec name="L"> 
                                     <seq name="Stabilization"> 
@@ -212,12 +229,12 @@
                                     </par>
                               </dec>
                            </par>
-                           <tsk name="InitExitPosture" />
+                           <tsk name="DismountVechicleInit" />
                         <dec name="!L!"> 
                               <sel name="Exit"> 
-                                    <tsk name="PerformExit" />
+                                    <tsk name="DismountVechicle(param=Dismount)" />
                                  <dec name="F"> 
-                                       <tsk name="ReturnToExitPosture" />
+                                       <tsk name="DismountVechicleInit" />
                                  </dec>
                               </sel>
                         </dec>

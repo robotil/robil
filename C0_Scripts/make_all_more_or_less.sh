@@ -6,6 +6,7 @@ CURR_WD=$PWD
 LOG=$CURR_WD'/log.txt'
 rm $LOG
 echo 'Logging to' $LOG
+date >> $LOG
 cd ..
 ROS_WD=$PWD
 export ROS_PACKAGE_PATH=$ROS_WD:$ROS_PACKAGE_PATH
@@ -33,7 +34,9 @@ for dir in "$ROS_WD"/*; do
                                 if [ "$bn" != "launch" ]; then
 					echo ">> $dir" 
 					cd $dir
+					#rosmake --pjobs=4;
 					rosmake;
+					# --pjobs=8 --threads=4;
 					STATUS=$?
 					if [ $STATUS -ne 0 ]; then
        					 	echo "[Error] $dir" >> $LOG
@@ -41,11 +44,12 @@ for dir in "$ROS_WD"/*; do
 						echo "[PASS] $dir" >> $LOG
 					fi 
 					echo "<< $dir"
-					cd ..
+					cd $ROS_WD
                                 fi
                 fi
 	fi
 done
+date >> $LOG
 cd $CURR_WD 
 
 exit 0
