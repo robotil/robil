@@ -111,7 +111,12 @@
                </par>
                <seq name="DriveMission"> 
                      <seq name="EnterToCar"> 
-                           <tsk name="TurnTo(target=Doorway,selfPosition=external)" />
+                           <seq name="SearchObjectsFromOutside"> 
+                                 <tsk name="SearchObject(target=Doorway,selfPosition=external)" />
+                                 <tsk name="SearchObject(target=Pedals)" />
+                                 <tsk name="SearchObject(target=wheel)" />
+                                 <tsk name="SearchObject(target=Set)" />
+                           </seq>
                            <par name="OperatorCheckPoint"> 
                               <dec name="L"> 
                                     <seq name="Stabilization"> 
@@ -139,6 +144,10 @@
                                  </dec>
                               </sel>
                         </dec>
+                           <seq name="SearchObjectsFromInside"> 
+                                 <tsk name="SearchObject(target=Wheel)" />
+                                 <tsk name="SearchObject(target=ArmBrake)" />
+                           </seq>
                      </seq>
                      <seq name="InCar"> 
                         <dec name="!L!"> 
