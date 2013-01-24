@@ -1,8 +1,0 @@
-# Define the goal
-string node_id  # Specify which node we want to monitor
----
-# Define the result
-uint32 delay_time 
----
-# Define a feedback message
-uint32 percent_complete
