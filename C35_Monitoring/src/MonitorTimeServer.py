@@ -47,6 +47,10 @@ class MonitorTimeServer(object):
 
 		print "Behavior tree taken from: %s" % sys.argv[0][0:-11]+event_file		
 		MonitorTimeServer._offline_computed_BT = xmlTree(sys.argv[0][0:-11]+event_file)
+  
+          # I added this function- makes a map key- id/name, value- pointer to the wrapped node.
+          # example- revice name as unique id- we can also write  MonitorTimeServer._offline_computed_BT.createWrapperTreeMap("id")-Adi.
+           MonitorTimeServer._offline_computed_BT.createWrapperTreeMap("name") 
 
  
 		self._action_name = "MonitorTime"
@@ -85,14 +89,24 @@ class MonitorTimeServer(object):
 #		task_result = TASK_RESULT_OK
 		task_plan = ""
 
-		#TODO - get the average completion time of the node we need to monitor 
-		
+		#TODO - get the average completion time of the node we need to monitor - 
+           #from the xml tree get a wrappedNode by it's id/ name or a number (whatever we choose earlier in the constructor)
+		wrappedNode = MonitorTimeServer._offline_computed_BT.getWrappedNode(MonitorTimeServer._monitored_node_id)
+           # if the node existes-- suppose to be always true- unless we're not consistent with the event- get the time.      
+           if wrappedNode!=None:
+               #getTime functions get's the time from debug in the xml file- looks like this -> DEBUG = "True 5" . Adi.
+               average_completion_time = wrappedNode.getTime()
+               
+           #HERE- update threshold time -   threshold_time = average_completion_time (??) Adi.
+           
+           threshold_time = average_completion_time
 		
 		#rospy.init_node('stack_stream_listener', anonymous=True)
 		rospy.Subscriber("/executer/stack_stream", String, callback)
     		
-		threshold_time = 10	#TODO - get the average time for the monitored node!!!
-		while not rospy.is_shutdown() and time.time() - MonitorTimeServer._start_time  < threshold_time and not MonitorTimeServer._monitored_task_finished_on_time:
+		#threshold_time = 10	#TODO - get the average time for the monitored node!!!
+		
+           while not rospy.is_shutdown() and time.time() - MonitorTimeServer._start_time  < threshold_time and not MonitorTimeServer._monitored_task_finished_on_time:
 	            rospy.sleep(0.2)
 		if MonitorTimeServer._monitored_task_finished_on_time:
 			print "Monitored node finished on time! Finishing monitoring task with SUCCESS."
