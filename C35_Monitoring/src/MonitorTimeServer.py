@@ -4,8 +4,10 @@ import roslib; roslib.load_manifest('C35_Monitoring')#pkg name
 import rospy
 import actionlib
 import time
+import sys
 import C0_RobilTask.msg
 from std_msgs.msg import String
+from tree import xmlTree
 
 
 TASK_RESULT_REJECT=1
@@ -34,14 +36,25 @@ class MonitorTimeServer(object):
 	_start_time = 0.0
 	_monitored_node_id = ""
 	_monitored_task_finished_on_time = False
+	_offline_computed_BT = None
+      
+     
+     
 
-    	def __init__(self):
-		print "TIME MONITOR SERVER STARTED"      		
+     	def __init__(self,event_file):
+		print "TIME MONITOR SERVER STARTED"
 		#self.listOfTimes=[]
-      		
+
+		print "Behavior tree taken from: %s" % sys.argv[0][0:-11]+event_file		
+		MonitorTimeServer._offline_computed_BT = xmlTree(sys.argv[0][0:-11]+event_file)
+
+ 
 		self._action_name = "MonitorTime"
 		self._as = actionlib.SimpleActionServer(self._action_name, C0_RobilTask.msg.RobilTaskAction, execute_cb=self.task)
 		self._as.start()
+		
+		
+		
 	
 	def finishTask(self, task_success, task_result, task_plan):
 		print "FINISH TASK : ",task_success, task_result, task_plan
