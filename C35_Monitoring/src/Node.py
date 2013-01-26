@@ -705,4 +705,8 @@ class node:
                 continue
         #return distionry  
         return PairList
-            
+    
+        
+    def getTime(self):
+        if self.DEBUG !=None and len (self.DEBUG) > 1:
+            return self.DEBUG[1]

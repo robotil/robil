@@ -28,6 +28,7 @@ class xmlTree:
         self.rootNode = node(self.root,self,self.root.tag)
         #update the whole tree- create the wrap for the whole tree.
         self._getUpdateTree()
+        self._wrapMap = {}
                 
     #this func build the wrap for all the tree.
     def _getUpdateTree(self):
@@ -80,8 +81,19 @@ class xmlTree:
             
         return attrib
             
+    def _createWrapperTreeMap(self,idParm,curNode):
+        for wrapnode in curNode.getChildren:
+            self._wrapMap[wrapnode.getAttrib(idParm)] = wrapnode
+            self._createWrapperTreeMap(idParm,wrapnode)
         
-            
+        
+    def createWrapperTreeMap(self,idParm): #input - string of the id parm, can be "name" or "id"
+        #call a recursive function        
+        self._createWrapperTreeMap(idParm,self.rootNode)
+        
+    #get a pointer to the wrapped node- by it's id / name or id unique
+    def getWrappedNode(self,nodeId):
+        return self._wrapMap[nodeId]
         
         
     
