@@ -9,11 +9,12 @@ roscore &
 ROS_PID=$!
 echo $ROS_PID
 sleep 10
+rosrun C22_GroundRecognitionAndMapping C22 &
 C22_PID=$!
 echo $C22_PID
 sleep 3
 echo "Playing bag file"
-rosbag play /userhome/mhallak/Download/record_points4_2013-01-14-14-22-01.bag 
+rosbag play /userhome/mhallak/Downloads/record_points4_2013-01-14-14-22-01.bag 
 echo "Starting executer"
 rosrun C34_Executer executer &
 C34_PID=$!
@@ -25,9 +26,5 @@ rosrun C31_PathPlanner gpp&
 C31_PID=$!
 echo $C31_PID
 echo "Done "
-echo "Calling service PathPlanning"
-rosservice call /executer/run T1 /tmp/pln; rosservice call /executer/resume T1;
-echo "Calling service PathPlanningFocus"
-rosservice call /executer/run T2 /tmp/pln1; rosservice call /executer/resume T2;
 echo $ROS_PID $C22_PID $C31_PID $C34_PID >> $PKILL
 
