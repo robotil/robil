@@ -72,7 +72,7 @@ public:
 		{ PathPlanning::ReadSession session = planner.startReading();
 			GPSPath gpspath;
 			for(size_t i=0;i<session.results.path.size();i++){
-				const Waypoint& wp = session.results.path[i];
+				const Vec2d& wp = session.results.path[i];
 				gpspath.push_back(_planner.cast(wp));
 			}
 			//TODO: fill message by planner results
@@ -159,7 +159,7 @@ public:
     	PathPlanning::ReadSession session = _planner.startReading();
     	GPSPath gpspath;
     	for(size_t i=0;i<session.results.path.size();i++){
-    		const Waypoint& wp = session.results.path[i];
+    		const Vec2d& wp = session.results.path[i];
 			GPSPoint gpsp = _planner.cast(wp);
     		gpspath.push_back(gpsp);
 			//ROS_INFO("PATH: cast %i,%i  ->  %f,%f", wp.x, wp.y,  gpsp.x, gpsp.y);

@@ -9,6 +9,10 @@
 #include "C11_Agent/ask_for_image.h"
 #include "C11_Agent/set_forbidden_are.h"
 #include "C11_Agent/override_local_path.h"
+//#include "TaskProxyConnectionByActionLib.h"
+#include "C34_Executer/run.h"
+#include "PushHMIServer.hpp"
+#include "HMIResponseServer.hpp"
 #include <sstream>
 #include <stdlib.h>
 
@@ -62,9 +66,33 @@ return true;
 bool MissionSelection(C11_Agent::mission_selection::Request& req,
 		C11_Agent::mission_selection::Response& res)
 {
+	res.MES.MES = 1;
 
-	                ROS_INFO("START CALCULATION OF MissionSelection");
-return true;
+	ros::NodeHandle _node;
+
+   	ros::ServiceClient c34Client = _node.serviceClient<C34_Executer::run>("C34/run");
+
+   	C34_Executer::run srv34;
+
+   	std::ostringstream ostr;
+   	ostr << req.MSN.MSN << std::endl;
+   	srv34.request.tree_id = ostr.str ();
+   	//srv34.request.tree_id << req.MSN.MSN << std::endl;
+
+   	ostr << "skill3.xml";
+
+   	srv34.request.filename = ostr.str ();
+//   	srv34.request.req.filename << "skill3.xml";
+
+  	if (!c34Client.call(srv34))
+  	{
+  		ROS_ERROR("send of mission error, exiting\n");
+  		return false;
+  	}
+
+   ROS_INFO("send of mission success");
+
+   return true;
 
 }
 
@@ -113,27 +141,25 @@ int main(int argc, char **argv)
 
    ros::ServiceServer service = n.advertiseService("PathPlan", PathPlan);
 
-   ros::ServiceServer severride_obstacle_propertiesrvice_ObstacleMap = n.advertiseService("ObstacleMap", ObstacleMap);
+//   ros::ServiceServer severride_obstacle_propertiesrvice_ObstacleMap = n.advertiseService("ObstacleMap", ObstacleMap);
 
-   ros::ServiceServer service_ObjectMap = n.advertiseService("ObjectMap", ObjectMap);
+//   ros::ServiceServer service_ObjectMap = n.advertiseService("ObjectMap", ObjectMap);
 
-   ros::ServiceServer service_OverrideObjectProperties = n.advertiseService("OverrideObjectProperties", OverrideObjectProperties);
+//   ros::ServiceServer service_OverrideObjectProperties = n.advertiseService("OverrideObjectProperties", OverrideObjectProperties);
 
-   ros::ServiceServer service_OverrideObstacleProperties = n.advertiseService("OverrideObstacleProperties", OverrideObstacleProperties);
+//   ros::ServiceServer service_OverrideObstacleProperties = n.advertiseService("OverrideObstacleProperties", OverrideObstacleProperties);
 
    ros::ServiceServer service_MissionSelection = n.advertiseService("MissionSelection", MissionSelection);
 
    ros::ServiceServer service_AskForImage = n.advertiseService("AskForImage", AskForImage);
 
-   ros::ServiceServer service_setForbiddenAre = n.advertiseService("setForbiddenAre", setForbiddenAre);
+//   ros::ServiceServer service_setForbiddenAre = n.advertiseService("setForbiddenAre", setForbiddenAre);
 
-   ros::ServiceServer service_overrideLocalPath = n.advertiseService("overrideLocalPath", overrideLocalPath);
+//   ros::ServiceServer service_overrideLocalPath = n.advertiseService("overrideLocalPath", overrideLocalPath);
 
    ros::Rate loop_rate(10);
  
 
-
-  int count1 = 0;
   while (ros::ok())
   {
 

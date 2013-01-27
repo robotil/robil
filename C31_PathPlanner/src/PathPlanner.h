@@ -86,8 +86,8 @@ public:
 
 class PlanningResult{
 public:
-	const Path& path;
-	PlanningResult(const Path& path)
+	const SmoothedPath& path;
+	PlanningResult(const SmoothedPath& path)
 	:path(path){}
 };
 
@@ -131,22 +131,28 @@ class PathPlanning{
 		virtual void notify(){callback();}
 	};
 
+	//-------------- DATA ------------------------------
 	TargetPosition targetPosition;
 	TargetGoal targetGoal;
 	GPSPoint selfLocation;
 	MapProperties mapProperties;
 
 	PlanningInputData data;
-	Path path;
+	SmoothedPath path;
+	//--------------------------------------------------
 
+	//-------------- INTERFACES ------------------------
 	PlanningArguments arguments;
 	Constraints constraints;
 	PlanningResult results;
 
 	Editable_PlanningArguments ed_arguments;
 	Editable_Constraints ed_constraints;
+	//--------------------------------------------------
 
+	//-------------- EVENTS ----------------------------
 	boost::shared_ptr<ChangesNotification> changeNotification;
+	//--------------------------------------------------
 
 public:
 
@@ -223,8 +229,11 @@ public:
 	long castLength(double gps)const;
 	double cast(long cell)const;
 	double castLength(long cell)const;
+	double castWP(double cell)const;
+	double castWPLength(double cell)const;
 	Waypoint cast(const GPSPoint& gps)const;
 	GPSPoint cast(const Waypoint& wp)const;
+	GPSPoint cast(const Vec2d& wp)const;
 
 #undef SYNCHRONIZED
 #undef LOCK
