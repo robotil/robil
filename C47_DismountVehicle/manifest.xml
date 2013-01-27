@@ -13,6 +13,7 @@
   <depend package="roscpp"/>
   <depend package="tf"/>
   <depend package="C0_RobilTask"/>
+  <depend package="drc_robot_utils"/>
 </package>
 
 

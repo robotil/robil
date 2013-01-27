@@ -1,0 +1,245 @@
+<plan descriptions="./plans/TaskDescriptions.xml">
+   <par name="event1"> 
+         <par name="Perception"> 
+               <tsk name="LocalizationTrack" />
+               <tsk name="ObstacleDetection" />
+         </par>
+         <tsk name="Monitor(target=LiveLock)" />
+         <seq name="Mission"> 
+               <par name="Modifed_Event2"> 
+                     <tsk name="PathPlanning" />
+                  <dec name="!L!"> 
+                        <seq name="Mission"> 
+                              <tsk name="StandUp" />
+                              <par name="@3"> 
+                                    <tsk name="Monitor(target=Falling)" />
+                                 <dec name="!L!"> 
+                                       <seq name="SearchObjectAndGo"> 
+                                             <tsk name="SearchObject(target=CarEntry)" />
+                                             <par name="@5"> 
+                                                   <tsk name="TrackObject(target=CarEntry)" />
+                                                   <seq name="SearchPathAndGo"> 
+                                                         <tsk name="PathPlanningFocus(target=CarEntry)" />
+                                                         <tsk name="TurnTo(target=CarEntry)" />
+                                                         <par name="OperatorCheckPoint"> 
+                                                            <dec name="L"> 
+                                                                  <seq name="Stabilization"> 
+                                                                        <tsk name="Monitor(target=Stable)" />
+                                                                        <tsk name="PostureControl(pose=stabilization)" />
+                                                                  </seq>
+                                                            </dec>
+                                                            <dec name="T"> 
+                                                                  <par name="TimeControl"> 
+                                                                        <seq name="OperatorRequest"> 
+                                                                              <tsk name="PushHMI(data=panoramic_image)" />
+                                                                              <tsk name="PushHMI(data=occupancy_grid)" />
+                                                                              <tsk name="PushHMI(data=path)" />
+                                                                              <tsk name="HMIResponce" />
+                                                                        </seq>
+                                                                        <tsk name="Monitor(target=Timeout)" />
+                                                                  </par>
+                                                            </dec>
+                                                         </par>
+                                                      <dec name="!L!"> 
+                                                            <swi name="Move"> 
+                                                                  <par name="AdvanceByWalkingAlongPath"> 
+                                                                        <tsk name="FollowPath" />
+                                                                        <par name="Exceptions"> 
+                                                                           <dec name="F:1"> 
+                                                                                 <tsk name="whilePlaceToThreadIn" />
+                                                                           </dec>
+                                                                           <dec name="F:2"> 
+                                                                                 <tsk name="untilSpeedAveregeIsLowerThen(kmh=?)" />
+                                                                           </dec>
+                                                                           <dec name="F:2"> 
+                                                                                 <tsk name="untilOperatorIntervention" />
+                                                                           </dec>
+                                                                           <dec name="F:2"> 
+                                                                                 <tsk name="whileSolution" />
+                                                                           </dec>
+                                                                        </par>
+                                                                  </par>
+                                                                  <seq name="NoPlaceToTreadIn"> 
+                                                                        <tsk name="PlanDetour" />
+                                                                        <tsk name="Stop" />
+                                                                        <par name="OperatorCheckPoint"> 
+                                                                           <dec name="L"> 
+                                                                                 <seq name="Stabilization"> 
+                                                                                       <tsk name="Monitor(target=Stable)" />
+                                                                                       <tsk name="PostureControl(pose=stabilization)" />
+                                                                                 </seq>
+                                                                           </dec>
+                                                                           <dec name="T"> 
+                                                                                 <par name="TimeControl"> 
+                                                                                       <seq name="OperatorRequest"> 
+                                                                                             <tsk name="PushHMI(data=panoramic_image)" />
+                                                                                             <tsk name="HMIResponce" />
+                                                                                       </seq>
+                                                                                       <tsk name="Monitor(target=Timeout)" />
+                                                                                 </par>
+                                                                           </dec>
+                                                                        </par>
+                                                                  </seq>
+                                                                  <seq name="NoSolution"> 
+                                                                        <par name="OperatorCheckPoint"> 
+                                                                           <dec name="L"> 
+                                                                                 <seq name="Stabilization"> 
+                                                                                       <tsk name="Monitor(target=Stable)" />
+                                                                                       <tsk name="PostureControl(pose=stabilization)" />
+                                                                                 </seq>
+                                                                           </dec>
+                                                                           <dec name="T"> 
+                                                                                 <par name="TimeControl"> 
+                                                                                       <seq name="OperatorRequest"> 
+                                                                                             <tsk name="PushHMI(data=panoramic_image)" />
+                                                                                             <tsk name="HMIResponce" />
+                                                                                       </seq>
+                                                                                       <tsk name="Monitor(target=Timeout)" />
+                                                                                 </par>
+                                                                           </dec>
+                                                                        </par>
+                                                                  </seq>
+                                                            </swi>
+                                                      </dec>
+                                                   </seq>
+                                             </par>
+                                       </seq>
+                                 </dec>
+                              </par>
+                        </seq>
+                  </dec>
+               </par>
+               <seq name="DriveMission"> 
+                     <seq name="EnterToCar"> 
+                           <seq name="SearchObjectsFromOutside"> 
+                                 <tsk name="SearchObject(target=Doorway,selfPosition=external)" />
+                                 <tsk name="SearchObject(target=Pedals)" />
+                                 <tsk name="SearchObject(target=wheel)" />
+                                 <tsk name="SearchObject(target=Set)" />
+                           </seq>
+                           <par name="OperatorCheckPoint"> 
+                              <dec name="L"> 
+                                    <seq name="Stabilization"> 
+                                          <tsk name="Monitor(target=Stable)" />
+                                          <tsk name="PostureControl(pose=stabilization)" />
+                                    </seq>
+                              </dec>
+                              <dec name="T"> 
+                                    <par name="TimeControl"> 
+                                          <seq name="OperatorRequest"> 
+                                                <tsk name="PushHMI(data=cabin_image)" />
+                                                <tsk name="PushHMI(data= cabin_parametrics)" />
+                                                <tsk name="HMIResponce" />
+                                          </seq>
+                                          <tsk name="Monitor(target=Timeout)" />
+                                    </par>
+                              </dec>
+                           </par>
+                           <tsk name="MountVehicleInit" />
+                        <dec name="!L!"> 
+                              <sel name="Entry"> 
+                                    <tsk name="MountVehicle(param=Mount)" />
+                                 <dec name="F"> 
+                                       <tsk name="MountVehicleInit" />
+                                 </dec>
+                              </sel>
+                        </dec>
+                           <seq name="SearchObjectsFromInside"> 
+                                 <tsk name="SearchObject(target=Wheel)" />
+                                 <tsk name="SearchObject(target=ArmBrake)" />
+                           </seq>
+                     </seq>
+                     <seq name="InCar"> 
+                        <dec name="!L!"> 
+                              <seq name="Setting"> 
+                                    <seq name="OperatorCheckPoint"> 
+                                       <dec name="T"> 
+                                             <par name="TimeControl"> 
+                                                   <seq name="OperatorRequest"> 
+                                                         <tsk name="PushHMI(data=inSideCabin_image)" />
+                                                         <tsk name="PushHMI(data= InSideCabin_parametrics)" />
+                                                         <tsk name="HMIResponce" />
+                                                   </seq>
+                                                   <tsk name="Monitor(target=Timeout)" />
+                                             </par>
+                                       </dec>
+                                    </seq>
+                                    <seq name="TestControllers"> 
+                                          <tsk name="GripSteeringWheel" />
+                                          <tsk name="TestSteering" />
+                                          <tsk name="PlaceFeetOnPedals" />
+                                          <tsk name="TestPedals" />
+                                    </seq>
+                              </seq>
+                        </dec>
+                           <par name="Driving"> 
+                              <dec name="!L!"> 
+                                    <seq name="Driving"> 
+                                          <tsk name="PathPlanningFocus(target=FORWARD)" />
+                                          <par name="OperatorCheckPoint"> 
+                                             <dec name="L"> 
+                                                   <seq name="Stabilization"> 
+                                                         <tsk name="Monitor(target=Stable)" />
+                                                         <tsk name="PostureControl(pose=stabilization)" />
+                                                   </seq>
+                                             </dec>
+                                             <dec name="T"> 
+                                                   <par name="TimeControl"> 
+                                                         <seq name="OperatorRequest"> 
+                                                               <tsk name="PushHMI(data=panoramic_image)" />
+                                                               <tsk name="PushHMI(data= occupancy_grid)" />
+                                                               <tsk name="PushHMI(data= path)" />
+                                                               <tsk name="PushHMI(data= vehicle_parametrics)" />
+                                                               <tsk name="HMIResponce" />
+                                                         </seq>
+                                                         <tsk name="Monitor(target=Timeout)" />
+                                                   </par>
+                                             </dec>
+                                          </par>
+                                          <seq name="@4"> 
+                                                <tsk name="InitDrive" />
+                                                <sel name="@5"> 
+                                                      <tsk name="WayPointsDriving" />
+                                                      <tsk name="FinishDrive" />
+                                                </sel>
+                                                <tsk name="FinishDrive" />
+                                          </seq>
+                                    </seq>
+                              </dec>
+                                 <tsk name="PathPlanning" />
+                           </par>
+                     </seq>
+                     <seq name="ExitFromCar"> 
+                           <tsk name="TurnTo(target=Doorway,selfPosition=internal)" />
+                           <par name="OperatorCheckPoint"> 
+                              <dec name="L"> 
+                                    <seq name="Stabilization"> 
+                                          <tsk name="Monitor(target=Stable)" />
+                                          <tsk name="PostureControl(pose=stabilization)" />
+                                    </seq>
+                              </dec>
+                              <dec name="T"> 
+                                    <par name="TimeControl"> 
+                                          <seq name="OperatorRequest"> 
+                                                <tsk name="PushHMI(data=door_image)" />
+                                                <tsk name="PushHMI(data=door_parameters)" />
+                                                <tsk name="HMIResponce" />
+                                          </seq>
+                                          <tsk name="Monitor(target=Timeout)" />
+                                    </par>
+                              </dec>
+                           </par>
+                           <tsk name="DismountVechicleInit" />
+                        <dec name="!L!"> 
+                              <sel name="Exit"> 
+                                    <tsk name="DismountVechicle(param=Dismount)" />
+                                 <dec name="F"> 
+                                       <tsk name="DismountVechicleInit" />
+                                 </dec>
+                              </sel>
+                        </dec>
+                     </seq>
+               </seq>
+         </seq>
+   </par>
+</plan>

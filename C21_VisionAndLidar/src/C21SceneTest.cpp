@@ -24,12 +24,11 @@
 
 
 
-boost::shared_ptr<pcl::visualization::PCLVisualizer> createVisualizer (pcl::PointCloud<pcl::PointXYZRGB>::ConstPtr cloud)
+boost::shared_ptr<pcl::visualization::PCLVisualizer> createVisualizer (pcl::PointCloud<pcl::PointXYZ>::ConstPtr cloud)
 {
   boost::shared_ptr<pcl::visualization::PCLVisualizer> viewer (new pcl::visualization::PCLVisualizer ("3D Viewer"));
   viewer->setBackgroundColor (0, 0, 0);
-  pcl::visualization::PointCloudColorHandlerRGBField<pcl::PointXYZRGB> rgb(cloud);
-  viewer->addPointCloud<pcl::PointXYZRGB> (cloud, rgb, "reconstruction");
+  viewer->addPointCloud<pcl::PointXYZ> (cloud,"reconstruction");
   //viewer->setPointCloudRenderingProperties (pcl::visualization::PCL_VISUALIZER_POINT_SIZE, 3, "reconstruction");
   viewer->addCoordinateSystem ( 1.0 );
   viewer->initCameraParameters ();
@@ -56,9 +55,9 @@ int main(int argc, char **argv)
 	  if (client.call(srv))
 	  {
 		  boost::shared_ptr<pcl::visualization::PCLVisualizer> viewer;
-		  pcl::PointCloud<pcl::PointXYZRGB> cloud;
-		  pcl::fromROSMsg<pcl::PointXYZRGB>(srv.response.scene_full_resolution_msg.cloud,cloud);
-		  pcl::PointCloud<pcl::PointXYZRGB>::ConstPtr cloud_ptr(&cloud);
+		  pcl::PointCloud<pcl::PointXYZ> cloud;
+		  pcl::fromROSMsg<pcl::PointXYZ>(srv.response.scene_full_resolution_msg.cloud,cloud);
+		  pcl::PointCloud<pcl::PointXYZ>::ConstPtr cloud_ptr(&cloud);
 		  ROS_INFO("creating a visualiser\n");
 		  viewer = createVisualizer( cloud_ptr );
 

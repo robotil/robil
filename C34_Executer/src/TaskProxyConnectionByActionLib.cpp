@@ -25,34 +25,73 @@ using namespace C0_RobilTask;
 		//client.shutdown();
 	}
 	void RobilTaskProxy::setGoal (const BTTaskGoal& goal){
-		client.waitForServer();
 		C0_RobilTask::RobilTaskGoal msg_goal;
 		msg_goal.name = goal.name;
 		msg_goal.uid = goal.uid;
 		msg_goal.parameters = goal.parameters;
 		PRINT("goal{name="<<msg_goal.name<<",uid="<<msg_goal.uid<<",parameters="<<msg_goal.parameters<<"}");
-		client.sendGoal(msg_goal);
-		active = true;
+		PRINT("actionlib client waits for server");
+		serverFound = false;
+		client.waitForServer(ros::Duration(1.0));
+		if(client.isServerConnected()){
+			PRINT("actionlib client finds server");
+			serverFound = true;
+			client.sendGoal(msg_goal);
+			active = true;
+		}else{
+			PRINT("actionlib client does not find server");
+		}
 	}
 	BTTaskFeedback RobilTaskProxy::getFeedback (){
 		return BTTaskFeedback();
 	}
+	namespace{
+		inline std::string success2str(int val){
+			if(val==BTTaskResult::SUCCESS_FAULT) return "FAULT";
+			if(val==BTTaskResult::SUCCESS_OK) return "OK";
+			if(val==BTTaskResult::SUCCESS_PLAN) return "PLAN";
+			if(val > 0) return "ERROR_CODE";
+			return "UNKNOWN";
+		}
+	}
+	inline std::string str_state(actionlib::SimpleClientGoalState& _state){
+		return _state.toString();
+	}
 	BTTaskResult RobilTaskProxy::getResult (){
 		BTTaskResult res;
-		actionlib::SimpleClientGoalState state = client.getState();
-		if(state==actionlib::SimpleClientGoalState::SUCCEEDED){
-			res.description=client.getResult()->description;
-			res.plan=client.getResult()->plan;
-			res.success = client.getResult()->success;
-		}else{
-			res.description="Result does not available";
+		if(serverFound==false){
+			res.description="Task server is not connected.";
 			res.plan="";
-			res.success = 0;
+			res.success = BTTaskResult::SUCCESS_FAULT;			
+		}else{
+			actionlib::SimpleClientGoalState state = client.getState();
+			PRINT("GoalState = "<<str_state(state));
+			if(
+					state==actionlib::SimpleClientGoalState::SUCCEEDED ||
+					state==actionlib::SimpleClientGoalState::PREEMPTED ||
+					state==actionlib::SimpleClientGoalState::ABORTED
+			){
+				res.description = client.getResult()->description;
+				res.plan = client.getResult()->plan;
+				res.success = client.getResult()->success;
+			}else{
+				res.description="WARNING: Task finished by unexpected way, the GoalState is "+str_state(state)+".";
+				res.plan="";
+				res.success = BTTaskResult::SUCCESS_FAULT;
+				if(state==actionlib::SimpleClientGoalState::ACTIVE) terminate();
+			}
 		}
-		PRINT("result{success="<<res.success<<",plan="<<res.plan<<",desc="<<res.description<<"}");
+		PRINT("result{success="<<success2str(res.success)<<",plan="<<res.plan<<",desc="<<res.description<<"}");
 		return res;
 	}
 	void RobilTaskProxy::waitResult(double time){
+		if(!active) return;
+		   
+		if(client.isServerConnected()==false){
+			active = false;
+			return;
+		}
+
 		bool finished = client.waitForResult(ros::Duration(time));
 //		actionlib::SimpleClientGoalState::StateEnum state = client.getState();
 //		switch( state ){
@@ -72,6 +111,7 @@ using namespace C0_RobilTask;
 		active = !finished;
 	}
 	void RobilTaskProxy::terminate(){
+		PRINT("cancel task goal.");
 		client.cancelGoal();
 	}
 	bool RobilTaskProxy::isActive(){
