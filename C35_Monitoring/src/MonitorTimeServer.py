@@ -8,11 +8,13 @@ import sys
 import C0_RobilTask.msg
 from std_msgs.msg import String
 from tree import xmlTree
+from Node import node
 
 
 TASK_RESULT_REJECT=1
 TASK_RESULT_OK=0
 TASK_RESULT_PLAN=-1
+DEFAULT_THRESHOLD_TIME = 1000	#Should not be used!
 
 def callback(data):
 	#rospy.loginfo(rospy.get_name() + ": I heard %s" % data.data)
@@ -48,9 +50,9 @@ class MonitorTimeServer(object):
 		print "Behavior tree taken from: %s" % sys.argv[0][0:-11]+event_file		
 		MonitorTimeServer._offline_computed_BT = xmlTree(sys.argv[0][0:-11]+event_file)
   
-          # I added this function- makes a map key- id/name, value- pointer to the wrapped node.
-          # example- revice name as unique id- we can also write  MonitorTimeServer._offline_computed_BT.createWrapperTreeMap("id")-Adi.
-           MonitorTimeServer._offline_computed_BT.createWrapperTreeMap("name") 
+          	# I added this function- makes a map key- id/name, value- pointer to the wrapped node.
+          	# example- revice name as unique id- we can also write  MonitorTimeServer._offline_computed_BT.createWrapperTreeMap("id")-Adi.
+        	MonitorTimeServer._offline_computed_BT.createWrapperTreeMap("id") 
 
  
 		self._action_name = "MonitorTime"
@@ -88,26 +90,26 @@ class MonitorTimeServer(object):
 #		task_success = True
 #		task_result = TASK_RESULT_OK
 		task_plan = ""
-
+		threshold_time = DEFAULT_THRESHOLD_TIME
 		#TODO - get the average completion time of the node we need to monitor - 
-           #from the xml tree get a wrappedNode by it's id/ name or a number (whatever we choose earlier in the constructor)
-		wrappedNode = MonitorTimeServer._offline_computed_BT.getWrappedNode(MonitorTimeServer._monitored_node_id)
-           # if the node existes-- suppose to be always true- unless we're not consistent with the event- get the time.      
-           if wrappedNode!=None:
-               #getTime functions get's the time from debug in the xml file- looks like this -> DEBUG = "True 5" . Adi.
-               average_completion_time = wrappedNode.getTime()
-               
-           #HERE- update threshold time -   threshold_time = average_completion_time (??) Adi.
-           
-           threshold_time = average_completion_time
+           	#from the xml tree get a wrappedNode by it's id/ name or a number (whatever we choose earlier in the constructor)
+		MonitoredNode = MonitorTimeServer._offline_computed_BT.getWrappedNode(MonitorTimeServer._monitored_node_id)
+
+           	# if the node existes-- suppose to be always true- unless we're not consistent with the event- get the time.      
+           	if MonitoredNode!=None:
+			#TODO - we are currently calling getAverageSuccTime with index = 0. Change to handle parameters of the world more robustly.
+			threshold_time = MonitoredNode.getAverageSuccTime(0)
+			print "Monitored Node is:%s, with avg. success time:%f" % (MonitoredNode.getAttrib("name"),threshold_time)
+		else:
+			print "ERROR: Can't find monitored node with id:%s" % MonitorTimeServer._monitored_node_id
+
 		
 		#rospy.init_node('stack_stream_listener', anonymous=True)
 		rospy.Subscriber("/executer/stack_stream", String, callback)
     		
-		#threshold_time = 10	#TODO - get the average time for the monitored node!!!
 		
-           while not rospy.is_shutdown() and time.time() - MonitorTimeServer._start_time  < threshold_time and not MonitorTimeServer._monitored_task_finished_on_time:
-	            rospy.sleep(0.2)
+           	while not rospy.is_shutdown() and time.time() - MonitorTimeServer._start_time  < threshold_time and not MonitorTimeServer._monitored_task_finished_on_time:
+	            	rospy.sleep(0.2)
 		if MonitorTimeServer._monitored_task_finished_on_time:
 			print "Monitored node finished on time! Finishing monitoring task with SUCCESS."
 			self.finishTask(True, TASK_RESULT_OK, task_plan)
