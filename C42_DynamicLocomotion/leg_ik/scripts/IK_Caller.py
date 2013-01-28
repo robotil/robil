@@ -35,7 +35,6 @@ JSC_l_leg_mhx = Joint_Stiffness_Controller('l_leg_mhx', 8000, 1) # joint name, s
 JSC_r_leg_lax = Joint_Stiffness_Controller('r_leg_lax', 4000, 1) # joint name, stiffness, update_period [sec]
 JSC_r_leg_mhx = Joint_Stiffness_Controller('r_leg_mhx', 8000, 1) # joint name, stiffness, update_period [sec]
 
-
 swing_leg_ik = rospy.ServiceProxy('swing_leg_ik', LegIk)
 stance_leg_ik = rospy.ServiceProxy('stance_leg_ik', LegIk)
 
@@ -46,7 +45,7 @@ stance_leg_ik = rospy.ServiceProxy('stance_leg_ik', LegIk)
 def get_from_zmp(msg):
     
     if msg.leg==1: #right swing leg
-        
+
         ns.LegAng = stance_leg_ik(msg)
 
         ns.l_leg_lax.publish(ns.LegAng.ang.lax) #JSC_l_leg_lax.getCMD(ns.LegAng.ang.lax) )
@@ -97,7 +96,6 @@ def get_from_zmp(msg):
         ns.l_leg_lhy.publish(ns.LegAng.ang.lhy  )  #+ lhy_stance
         ns.l_leg_mhx.publish(ns.LegAng.ang.mhx + mhx_stance)
 
-
 ##########################################################################################
 # request from joint_states publisher joints state to update Stiffness Controllers state #
 ##########################################################################################
@@ -119,7 +117,7 @@ def get_joint_states(msg):
     JSC_l_leg_mhx.UpdateState(msg.position[JSC_l_leg_mhx.JS_i], msg.velocity[JSC_l_leg_mhx.JS_i], msg.effort[JSC_l_leg_mhx.JS_i], msg.header.stamp)
     JSC_r_leg_lax.UpdateState(msg.position[JSC_r_leg_lax.JS_i], msg.velocity[JSC_r_leg_lax.JS_i], msg.effort[JSC_r_leg_lax.JS_i], msg.header.stamp)
     JSC_r_leg_mhx.UpdateState(msg.position[JSC_r_leg_mhx.JS_i], msg.velocity[JSC_r_leg_mhx.JS_i], msg.effort[JSC_r_leg_mhx.JS_i], msg.header.stamp)
-    #rospy.loginfo("Stiffness Controllers joint state updated ")   
+    #rospy.loginfo("Stiffness Controllers joint state updated ")
 
 #######################################################################################
 #                                 init publishers                                     #

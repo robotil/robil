@@ -100,12 +100,15 @@ def swing_leg_ik(req):
 
        # rospy.loginfo([res.ang.lhy,res.ang.mhx]) 
 
+        
+
     else:
 
         rospy.loginfo("swing leg is out of reach") 
-
+    rospy.loginfo("Swing Leg IK angles: ay=%f,kny=%f,hip_y=%f,ax=%f,hip_x=%f " %(res.ang.uay,res.ang.kny,res.ang.lhy,res.ang.lax,res.ang.mhx)) 
     #    rospy.loginfo("swing_x,swing_y,swing_z") 
-    #    rospy.loginfo([swing_x,swing_y,swing_z]) 
+    #    rospy.loginfo([swing_x,swing_y,swing_z])
+    rospy.loginfo("Swing Leg position: swing_x=%f,swing_y=%f,swing_z=%f " %(swing_x,swing_y,swing_z))  
 
 
     return res
@@ -130,8 +133,14 @@ def stance_leg_ik(req):
         hip_frame = 'r_uleg'
        
     com_frame = 'com' 
-
-    (delta,rot) = ns.listener.lookupTransform(com_frame, hip_frame, rospy.Time(0))   # delta is hip - CoM
+            # while listener.waitForTransform (base_frame, hip_frame, rospy.Time(0), 0.1, 0.01) and not rospy.is_shutdown():
+            # rospy.loginfo("Not ready for Forward Kinematics transform")
+            
+            #try:
+    (delta,rot) = ns.listener.lookupTransform(com_frame, hip_frame, rospy.Time(0)) # delta is hip - CoM
+            # except (tf.LookupException, tf.ConnectivityException, tf.ExtrapolationException) as ex:
+            # print ex
+            # continue
   
     delX = 0.020318 -delta[0] # Yuval Comm
 
@@ -160,13 +169,19 @@ def stance_leg_ik(req):
     # rospy.loginfo('delY=%f' %delY) 
     # rospy.loginfo('delZ=%f' %delZ) 
 
+
     L1=hip_x**2+hip_y**2+hip_z**2
     L=round(L1,6)
 
     res = LegIkResponse()
     if round((hip_x**2+hip_y**2+hip_z**2),3)<=round((l1+l2)**2,3):
         res.ang.lax = math.atan2(hip_y,hip_z)
-        res.ang.kny = math.acos(round((L-l1**2-l2**2),3)/round((2*l1*l2),3))
+
+        des_cos_qky = round((L-l1**2-l2**2),3)/round((2*l1*l2),3);
+        cos_qky = max(min(0.9998,des_cos_qky),-0.9998)
+        res.ang.kny = math.acos(cos_qky);
+
+        #res.ang.kny = math.acos(round((L-l1**2-l2**2),3)/round((2*l1*l2),3))
         ztilda = hip_z*math.cos(res.ang.lax) + hip_y*math.sin(res.ang.lax)
 
         cosinus = round((-l1*math.sin(res.ang.kny)*hip_x+ztilda*l2+l1*ztilda*math.cos(res.ang.kny))/L,3)
@@ -182,12 +197,12 @@ def stance_leg_ik(req):
         res.ang.lhy = -math.atan2(math.sin(th4 + th5)*math.cos(th6),math.sqrt(( math.cos(th4 + th5) )**2+( math.sin(th4+th5)*math.sin(th6) )**2))
         res.ang.uhz = 0 #need to change
 
-        res.ang.mby =  0 #-res.ang.lhy/4
-        res.ang.ubx =  0 #res.ang.lax/4
+        res.ang.mby =  0#-res.ang.lhy/4
+        res.ang.ubx =  0#res.ang.lax
     else:
 
         rospy.loginfo("stance leg is out of reach") 
-     
+    rospy.loginfo("Stance Leg IK angles: ay=%f,kny=%f,hip_y=%f,ax=%f,hip_x=%f, " %(res.ang.uay,res.ang.kny,res.ang.lhy,res.ang.lax,res.ang.mhx))   
    # rospy.loginfo("lax,kny,uay") 
    # rospy.loginfo([res.ang.lax,res.ang.kny,res.ang.uay]) 
  

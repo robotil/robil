@@ -6,8 +6,10 @@ import rospy
 import actionlib
 from nav_msgs.msg import Odometry
 import C42_DynamicLocomotion.msg
-from std_msgs.msg import Float64
+from std_msgs.msg import Float64, Int32
 import geometry_msgs.msg as gm
+import init_zmp
+
 
 class ZmpWlkServer(object):
   # create messages that are used to publish feedback/result
@@ -15,6 +17,7 @@ class ZmpWlkServer(object):
   _result   = C42_DynamicLocomotion.msg.C42_ZmpWlkResult()
     
   def __init__(self):
+    self.walk_pub = rospy.Publisher('zmp_walk_command',Int32)
     self._action_name = "/ZmpWalk"
     self._as = actionlib.SimpleActionServer(self._action_name, C42_DynamicLocomotion.msg.C42_ZmpWlkAction, execute_cb=self.task)
     self._as.start()
@@ -54,8 +57,10 @@ class ZmpWlkServer(object):
 
   def task(self, goal):
 
+    init_zmp.main()
     # start executing the action
-
+    self.walk_pub.publish(Int32(1))
+    
     #### LOG TASK PARAMETERS ####
     rospy.loginfo("started ZMPwalk")
     rospy.loginfo("Target position: x:%s y:%s", goal.goal_pos.x, goal.goal_pos.y)
@@ -77,7 +82,7 @@ class ZmpWlkServer(object):
         self._as.set_preempted()
         task_success = False
         break
-
+    self.walk_pub.publish(Int32(0))
     if task_success:
       self._result.res_pos.x = self._pos.x
       self._result.res_pos.y = self._pos.y

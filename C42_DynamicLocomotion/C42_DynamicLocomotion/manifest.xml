@@ -12,7 +12,8 @@
   <depend package="actionlib_msgs"/>
   <depend package="std_msgs"/>
   <depend package="geometry_msgs"/>
-
+ <depend package="control_msgs"/>
+ <depend package="pr2_mechanism_msgs"/>
 </package>
 
 
