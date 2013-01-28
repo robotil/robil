@@ -1,0 +1,44 @@
+provides path (way points list) planned on 2d map gotten from C22_GroundRecognitionAndMapping module
+it contains 
+  tasks : PathPlanning and PathPlanningFocus
+  services : planPath and getPath
+
+How to Check:
+============
+
+rosrun C31_PathPlanning gpp
+
+How to Test:
+===========
+Algorithm test:
+  roscd C31_PathPlanning
+  cd tests
+  ./testing
+
+Service test:
+  PREP:
+	download record_points4_2013-01-14-14-22-01.bag from http://www.robil.org/trac_robil/attachment/wiki/C31_PathPlanner
+	rosrun C22_GroundRecognitionAndMapping C22
+	rosbag play record_points4_2013-01-14-14-22-01.bag
+	rosrun C34_Executer executer
+	create files:
+		/tmp/pln   : <plan><seq name="S"><tsk name="PathPlanning" id="IDPP" /></seq></plan>
+		/tmp/pln1  : <plan><seq name="S"><tsk name="PathPlanningFocus(x=-3,y=4)" id="IDPPF" /></seq></plan>
+	rosrun C31_PathPlanner gpp
+	rosservice call /executer/run T1 /tmp/pln; rosservice call /executer/resume T1;
+	rosservice call /executer/run T2 /tmp/pln1; rosservice call /executer/resume T2;
+  TEST:
+	( ft=$(tempfile); rosservice call /C31_GlobalPathPlanner/getPath &> $ft; roscd C31_PathPlanner; diff tests/test_service_result.txt $ft &> $ft.diff && echo "PASS" || (echo "ERROR: log file is $ft.log"; cat -n $ft &> $ft.log; cat $ft.diff &>> $ft.log) ; rm $ft $ft.diff )
+
+Known Bugs:
+==========
+PF smoothing does not finished
+
+
+Known Limitations:
+=================
+
+
+
+
+

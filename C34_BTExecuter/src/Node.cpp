@@ -12,6 +12,7 @@
 #include "Task.h"
 #include "Dec.h"
 #include "Par.h"
+#include "Swi.h"
 #include "UnknownNode.h"
 
 Node::Ref static_Node_createNode(BT& bt){
@@ -29,6 +30,9 @@ Node::Ref static_Node_createNode(BT& bt){
 	}else
 	if(bt.getRootType()=="par"){
 		return Node::Ref(new Par(bt));
+	}else
+	if(bt.getRootType()=="swi"){
+		return Node::Ref(new Swi(bt));
 	}
 	return Node::Ref(new UnknownNode(bt));
 }

@@ -67,6 +67,9 @@ public class Toolbar extends JPanel {
 
 	static public final String TIP_move = "Select and move element.";
 	static public final String TIP_remove = "Select element for remove it from document";
+	static public final String TIP_removeSubtree = "Select element for remove it and all its children from document";
+	static public final String TIP_copy = "Select element for clone it with all its children.";
+	static public final String TIP_reconnect = "Select arrow and then to tasks for reconnect.";
 	static public final String TIP_modify = "Select element for modification (change text, type, etc)";
 	public JLabel tip = new JLabel(TIP_move);
 
@@ -86,7 +89,7 @@ public class Toolbar extends JPanel {
 
 		
 		setBorder(new TitledBorder("Toolbar"));
-		setPreferredSize(new Dimension(10,75));
+		setPreferredSize(new Dimension(10,85));
 
 		setLayout(new BorderLayout());
 
@@ -105,8 +108,8 @@ public class Toolbar extends JPanel {
 
 		JPanel pnl = new JPanel();
 
-		pnl.setPreferredSize(new Dimension(15,0));
-		buttons.add(pnl);
+		// pnl.setPreferredSize(new Dimension(15,0));
+		// buttons.add(pnl);
 
 		JButton btn = new JButton();
 		btn.setText("Open");
@@ -152,6 +155,15 @@ public class Toolbar extends JPanel {
 			buttons.add(btn);
 		}
 
+		pnl = new JPanel();
+		pnl.setPreferredSize(new Dimension(15,0));
+		buttons.add(pnl);
+		
+		btn = new JButton("Export tasks");
+		btn.addActionListener(new ExportTasksAction(designer));
+		buttons.add(btn);
+		
+		
 		tippnl.add(tip, BorderLayout.CENTER);
 //		JLabel version = new JLabel("v."+VERSION);
 //		version.setFont(new Font("Arial", 1, 10));

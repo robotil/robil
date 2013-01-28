@@ -11,9 +11,9 @@ from std_msgs.msg import Float64
 from control_msgs.msg import *
 
 
-TASK_RESULT_REJECT=0
-TASK_RESULT_OK=1
-TASK_RESULT_PLAN=2
+TASK_RESULT_REJECT=1
+TASK_RESULT_OK=0
+TASK_RESULT_PLAN=-1
 
 def parametersParsing(params):
   m={}
@@ -101,6 +101,7 @@ class BodyControlServer(object):
             rospy.loginfo('%s: Preempted' % self._action_name)
             self._as.set_preempted()
             task_success = False
+            task_result = TASK_RESULT_REJECT
             break
             
         #### HERE PROCESS TASK ####
@@ -152,6 +153,7 @@ class BodyControlServer(object):
             rospy.loginfo('%s: Preempted' % self._action_name)
             self._as.set_preempted()
             task_success = False
+            task_result = TASK_RESULT_REJECT
             break
             
         #### HERE PROCESS TASK ####

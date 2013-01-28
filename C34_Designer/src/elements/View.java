@@ -12,5 +12,11 @@ public class View {
 	public double zoom = 1;
 	public Graphics2D graphics = null;
 	
-
+	public View clone(){
+		View v = new View();
+		v.loc = new Vec(loc);
+		v.zoom = zoom;
+		v.graphics = graphics;
+		return v;
+	}
 }

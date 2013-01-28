@@ -13,7 +13,7 @@
 #include <map>
 #include <boost/algorithm/string.hpp>
 
-namespace RobilTask{
+namespace C0_RobilTask{
 
 using namespace std;
 
@@ -24,7 +24,7 @@ inline bool parse(std::string line, string& name, string& params, string& sufix,
 	if(parentses.size()==2){ op=parentses[0]; cp=parentses[1]; }
 	int state = 1, pcount=0;
 	stringstream sname,sparams, ssufix;
-	for(int i=0;i<line.size();i++){
+	for(size_t i=0;i<line.size();i++){
 		if(line[i]==op){
 			pcount+=1;
 			if(parentses.size()==1 && state==2){ state=3; continue; }
@@ -45,9 +45,9 @@ inline bool parse(std::string line, string& name, string& params, string& sufix,
 }
 
 inline int split(std::string line, std::vector<string>& list, string del="()"){
-	struct _c{ bool contains(string& p, char c){ for(int i=0;i<p.size();i++) if(p[i]==c) return true; return false; } };
+	struct _c{ bool contains(string& p, char c){ for(size_t i=0;i<p.size();i++) if(p[i]==c) return true; return false; } };
 	stringstream word;
-	for(int i=0;i<line.size();i++){
+	for(size_t i=0;i<line.size();i++){
 		if(_c().contains(del,line[i])){
 			list.push_back(word.str()); word.str("");
 			continue;
@@ -67,7 +67,7 @@ inline string join(const std::vector<string>& list, string del="()"){
 	if(list.size()<1) return "";
 	stringstream line;
 	line << list[0];
-	for(int i=1;i<list.size();i++){
+	for(size_t i=1;i<list.size();i++){
 		line<<del[(i-1)%del.size()]<<list[i];
 	}
 	return line.str();
@@ -92,7 +92,7 @@ inline string toUpper(const string s){
 inline bool startWith(const std::string& line, const std::string& t){
 	if(t.size()>line.size()) return false;
 	if(t.size()==line.size()) return t==line;
-	for(int i=0;i<t.size();i++){
+	for(size_t i=0;i<t.size();i++){
 		if(line[i]!=t[i]) return false;
 	}
 	return true;
@@ -105,7 +105,7 @@ inline bool endWith(const std::string& line, const std::string& t){
 	}
 	return true;
 }
-
+typedef std::map<std::string,std::string> Arguments;
 struct Function{
 private:
 	bool undef;
@@ -129,7 +129,7 @@ public:
 	void setDefined(){ undef = false; }
 };
 inline void trimAll(std::vector<string>& v){
-	for(int i=0;i<v.size();i++) v[i]=trim(v[i]);
+	for(size_t i=0;i<v.size();i++) v[i]=trim(v[i]);
 }
 static Function parse(std::string line){
 	string name,params,suf;
@@ -149,10 +149,25 @@ static Function parse(std::string line){
 	}
 	return f;
 }
-static map<string,string> parseParameters(std::string line){
+static map<string,string> parseFunctionArgumens(std::string line){
 	stringstream sline; sline<<"_("<<line<<")";
 	Function f = parse(sline.str());
 	return f.values;
+}
+
+static Arguments parseArguments(std::string line){
+	std::map<std::string,std::string> args;
+	vector<string> vars = split(line,",");
+	for(size_t i=0;i<vars.size();i++){
+		if(trim(vars[i])=="") continue;
+		vector<string> pair;
+		int c = split(vars[i], pair, "=");
+		trimAll(pair);
+		if(c==1){ stringstream s; s<<"#"<<i; args[s.str()] = pair[0]; }
+		else if(c==2){ args[pair[0]]=pair[1]; }
+		else continue;
+	}
+	return args;
 }
 
 }

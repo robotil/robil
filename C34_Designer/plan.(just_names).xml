@@ -1,6 +1,14 @@
 <plan>
-   <sel name="Mission"> 
-         <tsk name="DoSomething" />
-         <tsk name="DoSomethingElse" />
-   </sel>
+   <par name="skill1"> 
+         <par name="Perception"> 
+               <tsk name="ObstacleDetection" />
+               <tsk name="PathPlanning" />
+         </par>
+         <seq name="skill1Mission"> 
+               <tsk name="C45_PostureControl(direction=1)" />
+               <tsk name="C45_PostureControl(direction=0)" />
+               <tsk name="C45_PostureControl(direction=-1)" />
+               <tsk name="PathPlanningFocus(x=2,y=3,z=4)" />
+         </seq>
+   </par>
 </plan>

@@ -5,8 +5,11 @@
 
 #include "ros/ros.h"
 #include "C21_VisionAndLidar/C21.h"
+#include "C21_VisionAndLidar/C21_Pan.h"
+#include "C21_VisionAndLidar/C21_Pic.h"
 #include <image_transport/image_transport.h>
 #include <message_filters/synchronizer.h>
+#include <message_filters/subscriber.h>
 #include <message_filters/sync_policies/approximate_time.h>
 #include <sensor_msgs/image_encodings.h>
 #include <cv_bridge/cv_bridge.h>
@@ -24,6 +27,7 @@
 #include <image_transport/subscriber_filter.h>
 #include <pcl_ros/point_cloud.h>
 #include "opencv2/stitching/stitcher.hpp"
+#include "std_msgs/Empty.h"
 namespace enc=sensor_msgs::image_encodings;
 
 /**
@@ -45,31 +49,22 @@ public:
 		//more on filters and how to use them can be found on http://www.ros.org/wiki/message_filters
 		left_image_sub_( it_, left_camera, 1 ),
 		right_image_sub_( it_, right_camera, 1 ),
-		sync( MySyncPolicy( 10 ), left_image_sub_, right_image_sub_ )
+		pointcloud(nh_,"/multisense_sl/points2",1),
+		sync( MySyncPolicy( 10 ), left_image_sub_, right_image_sub_ ,pointcloud)
 	  {
 		leftpub = it_.advertise("C21/left_camera/image", 1);
 		rightpub = it_.advertise("C21/right_camera/image", 1);
 		//set compression data to png
 		ROS_INFO("finished subscribing\n");
-		sync.registerCallback( boost::bind( &C21_Node::callback, this, _1, _2 ) );  //Specifying what to do with the data
-
-/*
- * the Q matrix
- *     1. 0. 0. -2.9615028381347656e+02
- *     0. 1. 0. -2.3373317337036133e+02
- *     0. 0. 0. 5.6446880931501073e+02
- *     0. 0. -1.1340974198400260e-01 4.1658568844268817e+00
- */
-		  Q03 = -2.9615028381347656;
-		  Q13 = -2.3373317337036133;
-		  Q23 = 5.6446880931501073;
-		  Q32 = -1.1340974198400260;
-		  Q33 = 4.1658568844268817;
-		_myMutex=new boost::mutex();
-
+		sync.registerCallback( boost::bind( &C21_Node::callback, this, _1, _2,_3 ) );  //Specifying what to do with the data
+		_panMutex=new boost::mutex();
+		_cloudMutex=new boost::mutex();
 		pcl_service = nh_.advertiseService("C21", &C21_Node::proccess, this); //Specifying what to do when a reconstructed 3d scene is requested
+		pano_service = nh_.advertiseService("C21/Panorama", &C21_Node::pano_proccess, this);
+		pic_service= nh_.advertiseService("C21/Pic", &C21_Node::pic_proccess, this);
+		pan_imgs=new std::vector<cv::Mat>();
 		ROS_INFO("service on\n");
-		boost::thread panorama(&C21_Node::publishPanorama,this);
+		//boost::thread panorama(&C21_Node::publishPanorama,this);
 	  }
 
 
@@ -83,193 +78,139 @@ public:
 			C21_VisionAndLidar::C21::Response &res )
 	  {
 		  ROS_INFO("recived request, tying to fetch data\n");
-
-		  //reading the data we gathered
-		   cv::Mat img_rgb = cv::imread("rgb.ppm", CV_LOAD_IMAGE_COLOR);
-		   cv::Mat img_disparity = cv::imread("disp.ppm", CV_LOAD_IMAGE_GRAYSCALE);
-
-		   //generating a point cloud
-			 pcl::PointCloud<pcl::PointXYZRGB>::Ptr point_cloud_ptr (new pcl::PointCloud<pcl::PointXYZRGB>);
-
-			 double px, py, pz;
-			 uchar pr, pg, pb;
-
-			 for (int i = 0; i < img_rgb.rows; i++)
-			 {
-			   uchar* rgb_ptr = img_rgb.ptr<uchar>(i);
-			   uchar* disp_ptr = img_disparity.ptr<uchar>(i);
-			   for (int j = 0; j < img_rgb.cols; j++)
-			   {
-				 //Get 3D coordinates
-				 uchar d = disp_ptr[j];
-				 if ( d == 0 ) continue; //Discard bad pixels
-				 double pw = -1.0 * static_cast<double>(d) * Q32 + Q33;
-				 px = static_cast<double>(j) + Q03;
-				 py = static_cast<double>(i) + Q13;
-				 pz = Q23;
-
-				 px = px/pw;
-				 py = py/pw;
-				 pz = pz/pw;
-
-				 //Get RGB info
-				 pb = rgb_ptr[3*j];
-				 pg = rgb_ptr[3*j+1];
-				 pr = rgb_ptr[3*j+2];
-
-				 //Insert info into point cloud structure
-				 pcl::PointXYZRGB point;
-				 point.x = px;
-				 point.y = py;
-				 point.z = pz;
-				 uint32_t rgb = (static_cast<uint32_t>(pr) << 16 |
-						 static_cast<uint32_t>(pg) << 8 | static_cast<uint32_t>(pb));
-				 point.rgb = *reinterpret_cast<float*>(&rgb);
-				 point_cloud_ptr->points.push_back (point);
-			   }
-			 }
-			 point_cloud_ptr->width = (int) point_cloud_ptr->points.size();
-			 point_cloud_ptr->height = 1;
-
-			 //converting the point cloud to a ROS message and saving it the response object
-			 pcl::PointCloud<pcl::PointXYZRGB> ans(*point_cloud_ptr);
-			 pcl::toROSMsg<pcl::PointXYZRGB>(ans,res.scene_full_resolution_msg.cloud);
-
+		  _cloudMutex->lock();
+		  pcl::toROSMsg(my_answer,res.scene_full_resolution_msg.cloud);
+		  _cloudMutex->unlock();
 		  return true;
 	  }
 
+	  bool pic_proccess(C21_VisionAndLidar::C21_Pic::Request  &req,
+	  			  C21_VisionAndLidar::C21_Pic::Response &res )
+	  	  {
+		  	  _panMutex->lock();
+	  			cv_bridge::CvImage cvi;
+			    cvi.header.stamp = ros::Time::now();
+			    cvi.header.frame_id = "image";
+			    cvi.encoding = "rgb8";
+			    if(req.req.cmd==C21_VisionAndLidar::C21_PICTURE::LEFT){
+			    	cvi.image = leftImage;
+			    }else{
+			    	cvi.image = rightImage;
+			    }
+			    cvi.toImageMsg(res.res);
+	  	      _panMutex->unlock();
+
+	  		  return true;
+	  	  }
+
+
+
+	  bool pano_proccess(C21_VisionAndLidar::C21_Pan::Request  &req,
+			  C21_VisionAndLidar::C21_Pan::Response &res )
+	  {
+
+		  if(req.req.cmd==C21_VisionAndLidar::C21_PANORAMA::TAKE_PICTURE){
+			  _panMutex->lock();
+			  cv::Mat im;
+			  leftImage.copyTo(im);
+			  pan_imgs->push_back(im);
+			  _panMutex->unlock();
+		  }else{
+			  if(pan_imgs->size()==0)
+				  return false;
+			  cv::Mat pano;
+			  cv::Stitcher stitcher = cv::Stitcher::createDefault(false);
+			  stitcher.stitch(*pan_imgs, pano);
+			  cv_bridge::CvImage cvi;
+			  cvi.header.stamp = ros::Time::now();
+			  cvi.header.frame_id = "image";
+			  cvi.encoding = "rgb8";
+			  cvi.image = pano;
+			  cvi.toImageMsg(res.res);
+			  while(pan_imgs->size()>0){
+				  cv::Mat im=pan_imgs->back();
+				  pan_imgs->pop_back();
+				  im.release();
+			  }
+
+
+		  }
+		  return true;
+	  }
 
 	  /**
 	   * The call back function executed when a data is available
 	   * @param left_msg ROS mesage with image data from the left camera topic
 	   * @param right_msg ROS mesage with image data from the right camera topic
 	   */
-	  void callback(const sensor_msgs::ImageConstPtr& left_msg,const sensor_msgs::ImageConstPtr& right_msg){
+	  void callback(const sensor_msgs::ImageConstPtr& left_msg,const sensor_msgs::ImageConstPtr& right_msg,const sensor_msgs::PointCloud2::ConstPtr &cloud){
 		 cv_bridge::CvImagePtr left;
 		 cv_bridge::CvImagePtr right;
 		try
 		{
-		  left = cv_bridge::toCvCopy(left_msg,enc::BAYER_BGGR8);
-		  right =cv_bridge::toCvCopy(right_msg,enc::BAYER_BGGR8);
+		  left = cv_bridge::toCvCopy(left_msg,enc::RGB8);
+		  right =cv_bridge::toCvCopy(right_msg,enc::RGB8);
 		}
 		catch (cv_bridge::Exception& e)
 		{
 		  ROS_ERROR("cv_bridge exception: %s", e.what());
 		  return;
 		}
+		//left_msg->header.stamp=ros::Time::now();
+		//right_msg->header.stamp=ros::Time::now();
+		leftpub.publish(left_msg);
+		rightpub.publish(right_msg);
+		/*
+		 *saving frames for HMI use
+		 */
+		_panMutex->lock();
+		left->image.copyTo(leftImage);
+		right->image.copyTo(rightImage);
+		_panMutex->unlock();
+		pcl::PointCloud<pcl::PointXYZ> out;
+		pcl::fromROSMsg(*cloud,out);
+		_cloudMutex->lock();
+		my_answer.swap(out);
+		//pcl::io::savePCDFile("cloud.pcd",out,true);
+		_cloudMutex->unlock();
 
-		// first, compress raw images and publish them
-		//this is done using the compressed_image_transport package
-		//more information can be found here:
-		//http://www.ros.org/wiki/image_transport/Tutorials/ExaminingImagePublisherSubscriber#Changing_Transport-Specific_Behavior
-		sensor_msgs::ImagePtr leftMsg=left->toImageMsg();
-		sensor_msgs::ImagePtr rightMsg=right->toImageMsg();
-		leftMsg->encoding=enc::BAYER_BGGR8;
-		rightMsg->encoding=enc::BAYER_BGGR8;
-		leftMsg->header=left_msg->header;
-		rightMsg->header=right_msg->header;
-		leftpub.publish(leftMsg);
-		rightpub.publish(rightMsg);
-		ros::spinOnce();
-
-		_myMutex->lock();
-		IplImage tosave=left->image;
-		cvSaveImage("rgb.ppm",&tosave);
-
-		IplImage tosave2=right->image;
-		cvSaveImage("rgb2.ppm",&tosave2);
-		_myMutex->unlock();
-		//calculating disparity
-		cv::Mat left_image;
-		cv::Mat right_image;
-		cv::cvtColor( left->image,left_image, CV_BayerBG2GRAY);
-		cv::cvtColor( right->image,right_image, CV_BayerBG2GRAY);
-		IplImage temp=left_image;
-		IplImage temp2=right_image;
-		CvMat *matf= cvCreateMat ( temp.height, temp.width, CV_16S);
-		CvStereoBMState * state=cvCreateStereoBMState(CV_STEREO_BM_BASIC,64);
-		cvFindStereoCorrespondenceBM(&temp,&temp2,matf,state);
-		CvMat * disp_left_visual= cvCreateMat(temp.height, temp.width, CV_8U);
-		cvConvertScale( matf, disp_left_visual, -16 );
-		cvNormalize( matf, matf, 0, 256, CV_MINMAX, NULL );
-		int i, j;
-		uchar *ptr_dst;
-		IplImage *cv_image_depth_aux = cvCreateImage (cvGetSize(&temp),IPL_DEPTH_8U, 3);
-		for ( i = 0; i < matf->rows; i++)
-		{
-			ptr_dst = (uchar*)(cv_image_depth_aux->imageData + i*cv_image_depth_aux->widthStep);
-			for ( j = 0; j < matf->cols; j++ )
-			{
-				ptr_dst[3*j] = (uchar)((short int*)(matf->data.ptr + matf->step*i))[j];
-				ptr_dst[3*j+1] = (uchar)((short int*)(matf->data.ptr + matf->step*i))[j];
-				ptr_dst[3*j+2] = (uchar)((short int*)(matf->data.ptr + matf->step*i))[j];
-			}
-		}
-
-		cvSaveImage("disp.ppm",cv_image_depth_aux);
-		cvReleaseMat(&matf);
-		cvReleaseStereoBMState(&state);
-		cvReleaseMat(&disp_left_visual);
-		cvReleaseImage(&cv_image_depth_aux);
 	  }
 
-	  void publishPanorama(){
-		  smallPanoramicPublisher = it_.advertise("C21/smallPanorama", 1);
-		  ros::Rate loop_rate=ros::Rate(10);
-		  while(ros::ok()){
-			  std::vector<cv::Mat> imgs;
-			  _myMutex->lock();
-			  imgs.push_back(cv::imread("rgb.ppm", CV_LOAD_IMAGE_COLOR));
-			  imgs.push_back(cv::imread("rgb2.ppm", CV_LOAD_IMAGE_COLOR));
-			  cv::Mat pano;
-			  cv::Stitcher stitcher = cv::Stitcher::createDefault(false);
-			  stitcher.stitch(imgs, pano);
- 			  _myMutex->unlock();
-	            cv_bridge::CvImage cvi;
-	            cvi.header.stamp = ros::Time::now();
-	            cvi.header.frame_id = "image";
-	            cvi.encoding = "rgb8";
-	            cvi.image = pano;
-
-	            sensor_msgs::Image im;
-	            cvi.toImageMsg(im);
-			  smallPanoramicPublisher.publish(im);
-			  loop_rate.sleep();
-		  }
-	  }
 private:
   ros::NodeHandle nh_;
   image_transport::ImageTransport it_;
   cv::Mat Q;
   int counter;
   bool request;
-  boost::mutex * _myMutex;
+  boost::mutex * _panMutex;
+  boost::mutex * _cloudMutex;
   typedef image_transport::SubscriberFilter ImageSubscriber;
-  pcl::PointCloud<pcl::PointXYZRGB>* my_answer;
+  pcl::PointCloud<pcl::PointXYZ> my_answer;
+  cv::Mat leftImage;
+  cv::Mat rightImage;
   ImageSubscriber left_image_sub_;
   ImageSubscriber right_image_sub_;
   image_transport::Publisher leftpub;
   image_transport::Publisher rightpub;
   image_transport::Publisher smallPanoramicPublisher;
+  message_filters::Subscriber<sensor_msgs::PointCloud2> pointcloud;
 
   ros::ServiceServer pcl_service;
+
+  std::vector<cv::Mat> *pan_imgs;
+  ros::ServiceServer pano_service;
+  ros::ServiceServer pic_service;
+
   typedef message_filters::sync_policies::ApproximateTime<
-    sensor_msgs::Image, sensor_msgs::Image
+    sensor_msgs::Image, sensor_msgs::Image,sensor_msgs::PointCloud2
   > MySyncPolicy;
-  double Q03, Q13, Q23, Q32, Q33;
   message_filters::Synchronizer< MySyncPolicy > sync;
 };
 
 int main(int argc, char **argv)
 {
-  ros::init(argc, argv, "c21_Vision_and_Lidar");
-  ros::NodeHandle nh("~");
-  std::string left;
-  std::string right;
-  nh.getParam("left", left);
-  nh.getParam("right", right);
-
-  C21_Node my_node(left,right);
+  ros::init(argc, argv, "C21_VisionAndLidar");
+  C21_Node my_node("/multisense_sl/left/image_raw","/multisense_sl/right/image_raw");
   while(ros::ok()){
 	  ros::spin();
   }

@@ -73,7 +73,7 @@ public:
 
 	bool isRoot()const{ return _parent.get()==NULL; }
 
-	void remove();
+	void remove(const std::string& res_desc = "");
 
 	ExeStack::Ref ref(){ if(isRoot()==false) return _parent->_children[this]; else return Ref(); }
 

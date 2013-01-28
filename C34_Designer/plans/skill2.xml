@@ -1,0 +1,10 @@
+<plan>
+   <par name="skill2Mission" x="395.5" y="106.5" collapsed="false" id="563a39ca-99df-45dc-a369-73c7af2fe951"> 
+         <par name="Perception" x="326.5" y="189.5" collapsed="false" id="8f55da09-d777-4b0c-9f5d-10a90463ed3e"> 
+               <tsk name="LocalizationTrack" x="116.5" y="266.5" test_time="-1" test_result="true" id="fa1ffacd-7c5a-4431-a32e-8bc53f8e40ac" />
+               <tsk name="ObstacleDetection" x="218.5" y="320.5" test_time="-1" test_result="true" id="1018cc7b-8ef7-4336-924c-aeb7bea86c74" />
+               <tsk name="PathPlanning" x="392.5" y="344.5" test_time="-1" test_result="true" id="d7315da9-f6fa-481b-ae0f-756c1084d0e0" />
+         </par>
+         <tsk name="PathPlanningFocus(x=1,y=2,z=3)" x="599.5" y="256.5" test_time="100" test_result="true" id="9acec6a0-7543-4c70-9716-b5db94c71088" />
+   </par>
+</plan>

@@ -32,9 +32,15 @@ rosbuild_add_boost_directories()
 
 
 rosbuild_add_executable(gpp src/gpp.cpp)
+rosbuild_add_executable(gpp src/cogniteam_pathplanning.cpp)
+rosbuild_add_executable(gpp src/PathPlanner.cpp)
+rosbuild_add_executable(gpp src/PField.cpp)
 #rosbuild_link_boost(gpp thread)
 
+rosbuild_add_executable(planner_test src/planning_test.cpp)
+rosbuild_add_executable(planner_test src/cogniteam_pathplanning.cpp)
+rosbuild_add_executable(planner_test src/PField.cpp)
 
-rosbuild_add_executable(lpp src/lpp.cpp)
+#rosbuild_add_executable(lpp src/lpp.cpp)
 #rosbuild_link_boost(lpp thread)
 
