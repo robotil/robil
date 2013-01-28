@@ -19,6 +19,9 @@
 
 *~
 
+#"Compiled" python files
+*.pyc
+
 #QT Creator files
 qtcreator-build/
 
