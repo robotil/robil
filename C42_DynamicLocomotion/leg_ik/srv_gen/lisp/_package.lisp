@@ -1,0 +1,15 @@
+(cl:defpackage leg_ik-srv
+  (:use )
+  (:export
+   "LEGIK"
+   "<LEGIK-REQUEST>"
+   "LEGIK-REQUEST"
+   "<LEGIK-RESPONSE>"
+   "LEGIK-RESPONSE"
+   "LEGIKINIT"
+   "<LEGIKINIT-REQUEST>"
+   "LEGIKINIT-REQUEST"
+   "<LEGIKINIT-RESPONSE>"
+   "LEGIKINIT-RESPONSE"
+  ))
+
