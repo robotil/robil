@@ -131,6 +131,106 @@ class Joint_Stiffness_Controller:
 
         return command 
 
+class Position_Stiffness_Controller:
+    'This controller modifies a position command to achieve better damping of the system using force feedback'
+    # parameters:
+    num_of_samples = 0
+    reset_avg_flag = True       
+    limit_command_diff = 0.01 # 0.02
+    command_resolution = 0.002 #0.0001 # Command will change with steps greater than command_resolution
+                                       # Should be greater than steady state noise (PID error) 
+
+    # Desired State:
+    last_X_0 = 0
+    last_Xdot_0 = 0
+
+    # Model State:
+    last_X_m = 0
+    last_Xdot_m = 0
+    last_model_stamp = rospy.Time() # time to use for integration
+
+
+    # Feedback: Interaction Force
+    last_Fint = 0  
+    Fint_sum = 0
+
+    def __init__(self, stiffness, damping):
+        self.K_m = stiffness # parameter to tune
+        self.B_m = damping   # parameter to tune
+        self.avg_stamp = rospy.Time()
+        self.avg_start_time = rospy.Time()     
+
+    def UpdateForce(self, force, time_stamp):
+        self.num_of_samples += 1
+        self.last_Fint = force
+        self.Fint_sum += force
+
+        self.avg_stamp = time_stamp
+        if self.reset_avg_flag:
+            self.avg_start_time = time_stamp
+            self.reset_avg_flag = False
+
+
+    def ResetSum(self):
+        self.num_of_samples = 0
+        self.Fint_sum = 0
+        self.reset_avg_flag = True
+
+    def getAvgForce(self):
+        if self.num_of_samples != 0:
+            return (self.Fint_sum/self.num_of_samples)
+        else:
+            return (0)
+
+
+    def getCMD(self, X_0, Xdot_0): # set_point = original position 
+        
+        # time_from_avg_start = self.avg_stamp.to_sec() - self.avg_start_time.to_sec()
+        # #rospy.loginfo("Stiffness C = '%s' method getCMD: time from starting to avg = %f " %(self.name,time_from_avg_start))
+
+        # if abs(set_point-self.last_set_point) < self.command_resolution: # if set_point doesn't change from previous set_point command 
+
+        #     command = self.last_command
+
+        #     if (time_from_avg_start >= self.update_period):
+
+        #         position_avg = self.getAvgPosition()
+
+        #         # rospy.loginfo("SC_'%s' method getCMD: update time = %f, position_sum = %f, effort_sum = %f" %  \
+        #         #              (self.name,time_from_avg_start,self.position_sum,self.effort_sum))
+
+        #         #J =  set_point - position_avg #self.latest_position ##self.latest_effort # units [Nm] J~=err*PID can try to use err = ??? 
+        #         J =  self.getAvgEffort() # units [Nm] J~=err*PID can try to use err = ??? 
+        #         #K =  10000 #Stiffness - parameter to tune
+        #         correction_factor = J/self.K
+        #         if correction_factor > self.limit_command_diff:
+        #             correction_factor = self.limit_command_diff
+        #         # error = last_set_point-latest_position
+        #         # if error == 0:
+        #         #     sign = 0
+        #         # else:
+        #         #     sign = abs(error)/error
+        #         command = self.last_set_point - correction_factor  #correction_factor*sign
+
+        #         self.ResetStateSum()
+        #         self.avg_start_time = self.avg_stamp # it's not enough to ResetStateSum() because getCMD might be called again before UpdateState
+
+        # else:
+        #     if self.last_set_point*set_point < 0: # if set_point command is jittering around zero
+        #         command = 0
+        #         #rospy.loginfo("JSC_'%s' method getCMD: set_point = %f, last_set_point = %f, JITTER" %(self.name,set_point,self.last_set_point))
+        #     else:
+        #         command = set_point
+        #         self.ResetStateSum()
+        #         #rospy.loginfo("JSC_'%s' method getCMD: set_point = %f, last_set_point = %f, CHANGED" %(self.name,set_point,self.last_set_point))
+
+        #     self.last_set_point = set_point            
+            
+
+        # self.last_command = command
+
+        return # command 
+
 class Position_Impedance_Controller:
     'This controller modifies a position command to achieve better damping of the system using force feedback'
     # parameters:
@@ -185,50 +285,48 @@ class Position_Impedance_Controller:
 
     def getCMD(self, X_0, Xdot_0): # set_point = original position 
         
-        time_from_avg_start = self.avg_stamp.to_sec() - self.avg_start_time.to_sec()
-        #rospy.loginfo("Stiffness C = '%s' method getCMD: time from starting to avg = %f " %(self.name,time_from_avg_start))
+        # time_from_avg_start = self.avg_stamp.to_sec() - self.avg_start_time.to_sec()
+        # #rospy.loginfo("Stiffness C = '%s' method getCMD: time from starting to avg = %f " %(self.name,time_from_avg_start))
 
-        if abs(set_point-self.last_set_point) < self.command_resolution: # if set_point doesn't change from previous set_point command 
+        # if abs(set_point-self.last_set_point) < self.command_resolution: # if set_point doesn't change from previous set_point command 
 
-            command = self.last_command
+        #     command = self.last_command
 
-            if (time_from_avg_start >= self.update_period):
+        #     if (time_from_avg_start >= self.update_period):
 
-                position_avg = self.getAvgPosition()
+        #         position_avg = self.getAvgPosition()
 
-                # rospy.loginfo("SC_'%s' method getCMD: update time = %f, position_sum = %f, effort_sum = %f" %  \
-                #              (self.name,time_from_avg_start,self.position_sum,self.effort_sum))
+        #         # rospy.loginfo("SC_'%s' method getCMD: update time = %f, position_sum = %f, effort_sum = %f" %  \
+        #         #              (self.name,time_from_avg_start,self.position_sum,self.effort_sum))
 
-                #J =  set_point - position_avg #self.latest_position ##self.latest_effort # units [Nm] J~=err*PID can try to use err = ??? 
-                J =  self.getAvgEffort() # units [Nm] J~=err*PID can try to use err = ??? 
-                #K =  10000 #Stiffness - parameter to tune
-                correction_factor = J/self.K
-                if correction_factor > self.limit_command_diff:
-                    correction_factor = self.limit_command_diff
-                # error = last_set_point-latest_position
-                # if error == 0:
-                #     sign = 0
-                # else:
-                #     sign = abs(error)/error
-                command = self.last_set_point - correction_factor  #correction_factor*sign
+        #         #J =  set_point - position_avg #self.latest_position ##self.latest_effort # units [Nm] J~=err*PID can try to use err = ??? 
+        #         J =  self.getAvgEffort() # units [Nm] J~=err*PID can try to use err = ??? 
+        #         #K =  10000 #Stiffness - parameter to tune
+        #         correction_factor = J/self.K
+        #         if correction_factor > self.limit_command_diff:
+        #             correction_factor = self.limit_command_diff
+        #         # error = last_set_point-latest_position
+        #         # if error == 0:
+        #         #     sign = 0
+        #         # else:
+        #         #     sign = abs(error)/error
+        #         command = self.last_set_point - correction_factor  #correction_factor*sign
 
-                self.ResetStateSum()
-                self.avg_start_time = self.avg_stamp # it's not enough to ResetStateSum() because getCMD might be called again before UpdateState
+        #         self.ResetStateSum()
+        #         self.avg_start_time = self.avg_stamp # it's not enough to ResetStateSum() because getCMD might be called again before UpdateState
 
-        else:
-            if self.last_set_point*set_point < 0: # if set_point command is jittering around zero
-                command = 0
-                #rospy.loginfo("JSC_'%s' method getCMD: set_point = %f, last_set_point = %f, JITTER" %(self.name,set_point,self.last_set_point))
-            else:
-                command = set_point
-                self.ResetStateSum()
-                #rospy.loginfo("JSC_'%s' method getCMD: set_point = %f, last_set_point = %f, CHANGED" %(self.name,set_point,self.last_set_point))
+        # else:
+        #     if self.last_set_point*set_point < 0: # if set_point command is jittering around zero
+        #         command = 0
+        #         #rospy.loginfo("JSC_'%s' method getCMD: set_point = %f, last_set_point = %f, JITTER" %(self.name,set_point,self.last_set_point))
+        #     else:
+        #         command = set_point
+        #         self.ResetStateSum()
+        #         #rospy.loginfo("JSC_'%s' method getCMD: set_point = %f, last_set_point = %f, CHANGED" %(self.name,set_point,self.last_set_point))
 
-            self.last_set_point = set_point            
+        #     self.last_set_point = set_point            
             
 
-        self.last_command = command
+        # self.last_command = command
 
-        return command 
-
-
+        return # command 
