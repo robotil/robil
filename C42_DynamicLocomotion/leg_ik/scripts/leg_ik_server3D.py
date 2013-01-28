@@ -8,7 +8,7 @@
 #####################################################################################
 
 import roslib; roslib.load_manifest('leg_ik')
-roslib.load_manifest('using_tf_with_com')
+#roslib.load_manifest('using_tf_with_com')
 roslib.load_manifest('hrl_kinematics')
 from leg_ik.srv import *
 from leg_ik.msg import *
