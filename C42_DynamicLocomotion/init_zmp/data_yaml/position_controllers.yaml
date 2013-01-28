@@ -1,0 +1,217 @@
+l_arm_elx_position_controller:
+  type: robot_mechanism_controllers/JointPositionController
+  joint: l_arm_elx
+  pid: &l_arm_elx_gains
+    p: 100.0
+    d: 5.0
+    i: 0.0
+    i_clamp: 0.0
+
+r_arm_elx_position_controller:
+  type: robot_mechanism_controllers/JointPositionController
+  joint: r_arm_elx
+  pid: *l_arm_elx_gains
+
+
+l_arm_ely_position_controller:
+  type: robot_mechanism_controllers/JointPositionController
+  joint: l_arm_ely
+  pid: &l_arm_ely_gains
+    p: 100.0
+    d: 5.0
+    i: 0.0
+    i_clamp: 0.0
+
+r_arm_ely_position_controller:
+  type: robot_mechanism_controllers/JointPositionController
+  joint: r_arm_ely
+  pid: *l_arm_ely_gains
+
+l_arm_mwx_position_controller:
+  type: robot_mechanism_controllers/JointPositionController
+  joint: l_arm_mwx
+  pid: &l_arm_mwx_gains
+    p: 100.0
+    d: 5.0
+    i: 0.0
+    i_clamp: 0.0
+
+r_arm_mwx_position_controller:
+  type: robot_mechanism_controllers/JointPositionController
+  joint: r_arm_mwx
+  pid: *l_arm_mwx_gains
+
+l_arm_shx_position_controller:
+  type: robot_mechanism_controllers/JointPositionController
+  joint: l_arm_shx
+  pid: &l_arm_shx_gains
+    p: 200.0
+    d: 20.0
+    i: 0.0
+    i_clamp: 0.0
+
+r_arm_shx_position_controller:
+  type: robot_mechanism_controllers/JointPositionController
+  joint: r_arm_shx
+  pid: *l_arm_shx_gains
+
+l_arm_usy_position_controller:
+  type: robot_mechanism_controllers/JointPositionController
+  joint: l_arm_usy
+  pid: &l_arm_usy_gains
+    p: 200.0
+    d: 20.0
+    i: 0.0
+    i_clamp: 0.0
+
+r_arm_usy_position_controller:
+  type: robot_mechanism_controllers/JointPositionController
+  joint: r_arm_usy
+  pid: *l_arm_usy_gains
+
+l_arm_uwy_position_controller:
+  type: robot_mechanism_controllers/JointPositionController
+  joint: l_arm_uwy
+  pid: &l_arm_uwy_gains
+    p: 100.0
+    d: 5.0
+    i: 0.0
+    i_clamp: 0.0
+
+r_arm_uwy_position_controller:
+  type: robot_mechanism_controllers/JointPositionController
+  joint: r_arm_uwy
+  pid: *l_arm_uwy_gains
+
+l_leg_kny_position_controller:
+  type: robot_mechanism_controllers/JointPositionController
+  joint: l_leg_kny
+  pid: &l_leg_kny_gains
+    p: 6000.0 #1000.0 error when bending knees
+    d: 10.0    #10.0
+    i: 500.0   #0.0
+    i_clamp: 150 #4.0
+
+r_leg_kny_position_controller:
+  type: robot_mechanism_controllers/JointPositionController
+  joint: r_leg_kny
+  pid: *l_leg_kny_gains
+
+l_leg_lax_position_controller:
+  type: robot_mechanism_controllers/JointPositionController
+  joint: l_leg_lax
+  pid: &l_leg_lax_gains
+    p: 5000.0 #5000.0 #10000.0
+    d: 1.5   #15.0 # 30.0 #0.75 max value 30
+    i: 150.0  #150.0  #5.0 
+    i_clamp: 50.0
+
+r_leg_lax_position_controller:
+  type: robot_mechanism_controllers/JointPositionController
+  joint: r_leg_lax
+  pid: *l_leg_lax_gains # &r_leg_lax_gains # 
+    #p: 1000.0 #1000.0
+    #d: 0.3    #0.0
+    #i: 30.0    #5.0
+    #i_clamp: 50.0
+
+l_leg_lhy_position_controller:
+  type: robot_mechanism_controllers/JointPositionController
+  joint: l_leg_lhy
+  pid: &l_leg_lhy_gains
+    p: 5000.0 #5000.0 #6000.0  # 5000.0 is fine ; lowest 400
+    d: 0.0    # #75.0  #10.0
+    i: 50.0    #50.0  #10.0   #5000.0 #120000.0
+    i_clamp: 50.0
+
+r_leg_lhy_position_controller:
+  type: robot_mechanism_controllers/JointPositionController
+  joint: r_leg_lhy
+  pid: *l_leg_lhy_gains
+
+l_leg_mhx_position_controller:
+  type: robot_mechanism_controllers/JointPositionController
+  joint: l_leg_mhx
+  pid: &l_leg_mhx_gains
+    p: 5000.0 #50000.0
+    d: 0.0    # # 10.0
+    i: 50.0   # 5.0
+    i_clamp: 50.0
+
+r_leg_mhx_position_controller:
+  type: robot_mechanism_controllers/JointPositionController
+  joint: r_leg_mhx
+  pid: *l_leg_mhx_gains #&r_leg_mhx_gains
+    #p: 2500.0 # 5000.0 #50000.0 #1000.0
+    #d: 0.0    # 0.0    #10.0
+    #i: 25     # 50.0   #5.0
+    #i_clamp: 50.0
+
+l_leg_uay_position_controller:
+  type: robot_mechanism_controllers/JointPositionController
+  joint: l_leg_uay
+  pid: &l_leg_uay_gains
+    p: 5000.0 #5000.0 #3073.3 #1000 #3000.0 #1000.0 # min 800 for both legs; 1600 good error; 5000 start resonance
+    d: 1.5    #15.0 #0.75 #10.0 #770.9 #10 #0.075 #10.0 max value 30
+    i: 150.0  #150.0 #281.8 #15 #150.0 good error 0.02peak #75.0 #5.0
+    i_clamp: 150.0
+
+r_leg_uay_position_controller:
+  type: robot_mechanism_controllers/JointPositionController
+  joint: r_leg_uay
+  pid: *l_leg_uay_gains # &r_leg_uay_gains #  
+    #p: 1000.0 #3000.0 #1000.0
+    #d: 0.0  #0.075 #10.0
+    #i: 5.0 #75.0 #5.0
+    #i_clamp: 150.0
+
+l_leg_uhz_position_controller:
+  type: robot_mechanism_controllers/JointPositionController
+  joint: l_leg_uhz
+  pid: &l_leg_uhz_gains
+    p: 10000.0 #1000
+    d: 0.0    #10.0
+    i: 0.0
+    i_clamp: 30.0
+
+r_leg_uhz_position_controller:
+  type: robot_mechanism_controllers/JointPositionController
+  joint: r_leg_uhz
+  pid: *l_leg_uhz_gains
+
+neck_ay_position_controller:
+  type: robot_mechanism_controllers/JointPositionController
+  joint: neck_ay
+  pid: &neck_ay_gains
+    p: 200.0
+    d: 20.0
+    i: 0.0
+    i_clamp: 0.0
+
+back_lbz_position_controller:
+  type: robot_mechanism_controllers/JointPositionController
+  joint: back_lbz
+  pid: &back_lbz_gains
+    p: 10000.0  #20000.0 #200000.0
+    d: 0.0  #20.0    #200.0
+    i: 0.0
+    i_clamp: 0.0
+
+back_mby_position_controller:
+  type: robot_mechanism_controllers/JointPositionController
+  joint: back_mby
+  pid: &back_mby_gains
+    p: 5000.0 #20000.0 #2000000.0
+    d: 5.0    #20.0    #200.0
+    i: 0.0
+    i_clamp: 0.0
+
+back_ubx_position_controller:
+  type: robot_mechanism_controllers/JointPositionController
+  joint: back_ubx
+  pid: &back_ubx_gains
+    p: 20000.0 #2000000.0
+    d: 20.0    #200.0
+    i: 0.0
+    i_clamp: 0.0
+

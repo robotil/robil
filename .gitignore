@@ -18,3 +18,10 @@
 *.a
 
 *~
+
+#QT Creator files
+qtcreator-build/
+
+#ROS auto-make files
+build/
+bin/
