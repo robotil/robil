@@ -6,6 +6,7 @@ import rospy
 import actionlib
 from nav_msgs.msg import Odometry
 import C42_DynamicLocomotion.msg
+import C31_PathPlanner.msg
 from std_msgs.msg import Float64, Int32
 import geometry_msgs.msg as gm
 import init_zmp
@@ -35,14 +36,15 @@ class ZmpWlkServer(object):
     self._pos = odom.pose.pose.position
     self._or = odom.pose.pose.orientation
 
-  def _get_path(self,goal,path_planner = "C31_Path_Planner",srv="C31PathPlan"):
+  def _get_path(self,goal,path_planner = "C31_PathPlanner",srv="C31_GetPath"):
+ 
     #client for path planning service from C31
     rospy.loginfo("waiting for path planing service")
     rospy.wait_for_service(path_planner)
     try:
       pth_pln = rospy.ServiceProxy(path_planner, srv)
-      pth = pth_pln(goal)
-      return resp1
+      pth = pth_pln()
+      return pth
     except rospy.ServiceException, e:
       print "Service call failed: %s"%e
     pass
@@ -55,15 +57,21 @@ class ZmpWlkServer(object):
     #control legs based on ref ZMP
     pass
 
-  def task(self, goal):
+  #def task(self, goal):
+  def task():
+    
+    Pth = rospy.ServiceProxy("C31_GetPath", srv)
 
+    pth = Pth()
+    pos.x = pth.path.points[0].x#2
+    pos.y = pth.path.points[0].y#0
     init_zmp.main()
     # start executing the action
     self.walk_pub.publish(Int32(1))
     
     #### LOG TASK PARAMETERS ####
     rospy.loginfo("started ZMPwalk")
-    rospy.loginfo("Target position: x:%s y:%s", goal.goal_pos.x, goal.goal_pos.y)
+    rospy.loginfo("Target position: x:%s y:%s", pos.x, pos.y)
     task_success = True
     self._tol = goal.tol
 
@@ -71,7 +79,7 @@ class ZmpWlkServer(object):
     while self._dis_from_goal > self._tol:
       #calculate distance from goal
       pos = np.array([self._pos.x,self._pos.y])
-      gl = np.array([goal.goal_pos.x, goal.goal_pos.y])
+      gl = np.array([pos.x, pos.y])
       self._dis_from_goal = np.linalg.norm(gl-pos)
       self._feedback.dis_to_goal = self._dis_from_goal
       self._as.publish_feedback(self._feedback)

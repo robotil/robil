@@ -66,11 +66,11 @@ time_step  =  0.01  # [sec]
 
 # Walking Parameters 
 
-step_length = 0.01  # [m]
-step_width  = 0.19  # 0.178  # [m]
-step_time   = 5   # [sec]
-bend_knees  = 0.04  # [m]    
-step_height = 0.02  # [m] 
+step_length = 0#0.01  # [m]
+step_width  = 0.10  # 0.178  # [m]
+step_time   = 2   # [sec]
+bend_knees  = 0.02  # [m]    
+step_height = 0.08  # [m] 
 
 # Sigmoid Plot
 

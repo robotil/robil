@@ -5,6 +5,8 @@ import rospy
 import actionlib
 from C42_DynamicLocomotion.msg import *
 
+import C31_PathPlanner.msg
+from std_msgs.msg import Float64, Int32
 
 def zmp_client():
     # Creates the SimpleActionClient, passing the type of the action
@@ -18,15 +20,20 @@ def zmp_client():
     # Creates a goal to send to the action server.
 
     goal = C42_ZmpWlkGoal()
-    goal.goal_pos.x = 2
-    goal.goal_pos.y = 0
-    goal.goal_pos.theta = 0
-    goal.tol = 0.1
+    
+    Pth = rospy.ServiceProxy("C31_GetPath", srv)
+    pth = Pth()
+
+    pos.x = pth.path.points[0].x#2
+    pos.y = pth.path.points[0].y#0
+    
+    #goal.goal_pos.theta = 0
+    #goal.tol = 0.1
 
 
     # Sends the goal to the action server.
-    client.send_goal(goal)
-
+    #client.send_goal(goal)
+    client.send_goal()
     # Waits for the server to finish performing the action.
     client.wait_for_result()
 
