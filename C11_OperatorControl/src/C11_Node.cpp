@@ -52,6 +52,7 @@ bool C11_Node::init() {
 		//status_subscriber = nh_->subscribe("c11_stt",1000,&StatusMessageCallback);
 
 		c11_push_img =	nh_->advertiseService("C11/push_img", &C11_Node::push_img_proccess, this);
+		LoadMissionClient = nh_->serviceClient<C10_Common::mission_selection>("MissionSelection");
 
 
         start();
@@ -88,13 +89,13 @@ void C11_Node::viewImage(const sensor_msgs::ImageConstPtr& msg)
 
 }
 
-void C11_Node::StatusMessageCallback(const C11_Agent::C34C11_STTConstPtr)
-{
+//void C11_Node::StatusMessageCallback(const C11_Agent::C34C11_STTConstPtr)
+//{
+//
+//}
 
-}
-
-bool C11_Node::push_img_proccess(C11_OperatorControl::push_img::Request  &req,
-        		  C11_OperatorControl::push_img::Response &res )
+bool C11_Node::push_img_proccess(C10_Common::push_img::Request  &req,
+		C10_Common::push_img::Response &res )
 {
 	std::cout << "Step1" << std::endl;
 	std::cout << "Image received." << std::endl;
@@ -117,7 +118,19 @@ bool C11_Node::push_img_proccess(C11_OperatorControl::push_img::Request  &req,
 
 void C11_Node::LoadMission(int index)
 {
+	C10_Common::mission_selection ms;
+	ms.request.MSN.MSN = index;
+	if (LoadMissionClient.call(ms))
+	{
+		if(ms.response.MES.mes != 1)
+		{
 
+		}
+	}
+	else
+	{
+		ROS_ERROR("Failed to call service C11_Agent::mission_selection");
+	}
 }
 
 /*int main(int argc, char **argv)

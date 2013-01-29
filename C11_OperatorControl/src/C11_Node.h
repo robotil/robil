@@ -11,8 +11,9 @@
 
 #include "ros/ros.h"
 #include "C11_OperatorControl/C11.h"
-#include "C11_Agent/C34C11_STT.h"
-#include "C11_OperatorControl/push_img.h"
+//#include "C11_Agent/C34C11_STT.h"
+#include "C10_Common/mission_selection.h"
+#include "C10_Common/push_img.h"
 #include "C11_Node_Subscriber.h"
 #include <image_transport/image_transport.h>
 #include <sensor_msgs/image_encodings.h>
@@ -57,10 +58,10 @@ public:
           void LoadMission(int index);
 
           static void viewImage(const sensor_msgs::ImageConstPtr& msg);
-          static void StatusMessageCallback(const C11_Agent::C34C11_STTConstPtr);
+//          static void StatusMessageCallback(const C11_Agent::C34C11_STTConstPtr);
 
-          bool push_img_proccess(C11_OperatorControl::push_img::Request  &req,
-        		  C11_OperatorControl::push_img::Response &res );
+          bool push_img_proccess(C10_Common::push_img::Request  &req,
+        		  C10_Common::push_img::Response &res );
 
 Q_SIGNALS:
         void loggingUpdated();
@@ -70,6 +71,7 @@ private:
   ros::NodeHandle *nh_;
   ros::ServiceServer service;
   ros::ServiceServer c11_push_img;
+  ros::ServiceClient LoadMissionClient;// = _node.serviceClient<C11_Agent::mission_selection>("C11/mission_selection");
   image_transport::ImageTransport* it_;
   image_transport::Subscriber panoramic_image;
   ros::Subscriber status_subscriber;

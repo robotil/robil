@@ -15,6 +15,7 @@
   <depend package="C0_RobilTask"/>
   <depend package="C21_VisionAndLidar"/>
   <depend package="C34_Executer"/>
+  <depend package="C10_Common"/>
 
 </package>
 

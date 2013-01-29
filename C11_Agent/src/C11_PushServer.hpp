@@ -11,7 +11,7 @@
 #include <sensor_msgs/image_encodings.h>
 #include <image_transport/image_transport.h>
 
-#include "C11_OperationControl/push_img.h"
+#include "C10_Common/push_img.h"
 
 using namespace std;
 using namespace C0_RobilTask;
@@ -28,6 +28,7 @@ public:
 
     TaskResult task(const string& name, const string& uid, Arguments& args){
 
+    	ROS_INFO("C11_Agent: PushHMI called!\n");
        	ros::ServiceClient c21Client = _node.serviceClient<C21_VisionAndLidar::C21_Pan>("C21/Panorama");
 
   	    C21_VisionAndLidar::C21_Pan srv21;
@@ -49,11 +50,11 @@ public:
 
   	    }
 
-    	ros::ServiceClient c11Client = _node.serviceClient<C11_OperationControl::push_img>("C11/push_img");
+    	ros::ServiceClient c11Client = _node.serviceClient<C10_Common::push_img>("C11/push_img");
 
-    	C11_OperationControl::push_img srv11;
+    	C10_Common::push_img srv11;
 
-  	    srv11.request.req.cmd = srv21.response.res;
+  	    srv11.request.IMG = srv21.response.res;
 
   	    if (!c11Client.call(srv11))
   	    {
@@ -62,14 +63,15 @@ public:
 
   	    }
 
-  	     if (srv11.response.ack != 1) {
+  	     if (srv11.response.ACK.mes != 1) {
    		    ROS_ERROR("C11 ack is fault, exiting\n");
  	  		return TaskResult::FAULT();
   	     }
 
   	     return TaskResult::SUCCESS ();
-
     }
+
+};
 
 
 #endif //_C11_PUSH_SERVER_
