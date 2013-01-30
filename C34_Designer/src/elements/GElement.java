@@ -11,117 +11,68 @@ import java.awt.Stroke;
 import java.util.Map;
 import java.util.UUID;
 
-import javax.management.remote.TargetedNotification;
 import javax.swing.Icon;
 
 import org.w3c.dom.Element;
 
 public abstract class GElement {
-	
-	public UUID id = getRandomUUID();
-	
-	public static UUID getRandomUUID(){
-		return UUID.randomUUID();
+
+	static abstract public class Creator {
+		public void add(GElement selectedElement) {
+
+		}
+
+		public boolean createOnEmptyPlace() {
+			return true;
+		}
+
+		public Icon getIcon() {
+			return null;
+		}
+
+		public String getToolbarName() {
+			return "None";
+		}
+
+		public GElement newInstance() {
+			return null;
+		}
+
+		public boolean ready() {
+			return false;
+		}
+
+		public String toolTip() {
+			return "";
+		}
 	}
-	
-	static protected class GraphProp{
+
+	static protected class GraphProp {
 		Graphics2D g;
 		Paint paint;
 		Stroke strok;
 		Font font;
+
 		public GraphProp(Graphics2D g) {
 			this.g = g;
-			paint = g.getPaint();
-			strok = g.getStroke();
-			font = g.getFont();
+			this.paint = g.getPaint();
+			this.strok = g.getStroke();
+			this.font = g.getFont();
 		}
-		public void restore(){
-			g.setPaint(paint);
-			g.setStroke(strok);
-			g.setFont(font);
+
+		public void restore() {
+			this.g.setPaint(this.paint);
+			this.g.setStroke(this.strok);
+			this.g.setFont(this.font);
 		}
-	}
-	
-	protected View view = new View();
-	public void setView(View view){
-		this.view = view;
-		if(this instanceof View.ChangesListener){
-			((View.ChangesListener) this).onViewChange();
-		}
-	}
-	public View getView(){
-		return view;
-	}
-	
-	protected Element xmlElement = null;
-	public Element getXmlElement(){
-		return xmlElement;
-	}
-	public void setXmlElement(Element xml){
-		xmlElement = xml;
 	}
 
-	protected GProperty property = new GProperty();
-	public String getPropertyToString(){
-		return property.toString();
-	}
-	public void setPropertyXml(Element xml){
-		property.setXml(xml);
-	}
-	public GProperty getProperty(){
-		return property;
-	}
-	public void setProperty(GProperty p){
-		property = p;
+	public static UUID getRandomUUID() {
+		return UUID.randomUUID();
 	}
 
-	static abstract public class Creator{
-		public GElement newInstance(){
-			return null;
-		}
-		public Icon getIcon(){
-			return null;
-		}
-		public boolean ready(){
-			return false;
-		}
-		public boolean createOnEmptyPlace(){
-			return true;
-		}
-		public void add(GElement selectedElement) {
-			
-		}
-		public String getToolbarName(){
-			return "None";
-		}
-		public String toolTip(){
-			return "";
-		}
-	}
-	
-	public GElement underMouse(Point p){
-		return null;
-	}
-	
-	public boolean isVisiable = true;
-	public void paintElement(Graphics2D g){
-		if(isVisiable) paint(g);
-	}
-	
-	public abstract void paint(Graphics2D g);
-	
-	Vec getLocation(){
-		return property.loc.scale(view.zoom).add(view.loc);
-	}
-	Vec getSize(){
-		return property.size.scale(view.zoom);
-	}
-	Vec getCenter(){
-		return getLocation().add(getSize().scale(0.5));
-	}
-	
-	static Dimension getTextSize(Graphics graphics, Font font, String text){
-		if(graphics==null || font == null){
+	static Dimension getTextSize(Graphics graphics, Font font, String text) {
+		if (graphics == null || font == null) {
 			System.out.println("EXECPTION");
 		}
 		FontMetrics metrics = graphics.getFontMetrics(font);
@@ -130,16 +81,87 @@ public abstract class GElement {
 		Dimension size = new Dimension(adv, hgt);
 		return size;
 	}
-	static Dimension getTextSize(Graphics graphics, String text){
+
+	static Dimension getTextSize(Graphics graphics, String text) {
 		return getTextSize(graphics, graphics.getFont(), text);
 	}
-	abstract public void modify() ;
-	
+
+	public UUID id = getRandomUUID();
+
+	protected View view = new View();
+	protected Element xmlElement = null;
+	protected GProperty property = new GProperty();
+
+	public boolean isVisiable = true;
+
+	@Override
 	abstract public GElement clone();
-	protected void cloneInit(GElement n){
-		n.property = property.clone();
-		n.view = ( n.view.clone() );
-		n.xmlElement = xmlElement;
+
+	protected void cloneInit(GElement n) {
+		n.property = this.property.clone();
+		n.view = (n.view.clone());
+		n.xmlElement = this.xmlElement;
 	}
-	abstract public void cloneReconnect(Map<GElement,GElement> link);
+
+	abstract public void cloneReconnect(Map<GElement, GElement> link);
+
+	Vec getCenter() {
+		return getLocation().add(getSize().scale(0.5));
+	}
+
+	Vec getLocation() {
+		return this.property.loc.scale(this.view.zoom).add(this.view.loc);
+	}
+
+	public GProperty getProperty() {
+		return this.property;
+	}
+
+	public String getPropertyToString() {
+		return this.property.toString();
+	}
+
+	Vec getSize() {
+		return this.property.size.scale(this.view.zoom);
+	}
+
+	public View getView() {
+		return this.view;
+	}
+
+	public Element getXmlElement() {
+		return this.xmlElement;
+	}
+
+	abstract public void modify();
+
+	public abstract void paint(Graphics2D g);
+
+	public void paintElement(Graphics2D g) {
+		if (this.isVisiable)
+			paint(g);
+	}
+
+	public void setProperty(GProperty p) {
+		this.property = p;
+	}
+
+	public void setPropertyXml(Element xml) {
+		this.property.setXml(xml);
+	}
+
+	public void setView(View view) {
+		this.view = view;
+		if (this instanceof View.ChangesListener) {
+			((View.ChangesListener) this).onViewChange();
+		}
+	}
+
+	public void setXmlElement(Element xml) {
+		this.xmlElement = xml;
+	}
+
+	public GElement underMouse(Point p) {
+		return null;
+	}
 }

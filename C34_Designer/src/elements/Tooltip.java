@@ -7,76 +7,18 @@ import java.awt.Graphics2D;
 import java.util.Map;
 
 public class Tooltip extends GElement {
-	
+
 	private String _title;
 	private String _message;
 	private GElement _parent;
-	
+
 	private Vec _textPosition = new Vec(0, 0);
-	
+
 	public Tooltip(GElement parent) {
 		super();
-		_parent = parent;
-		_title = "";
-		_message = "";
-	}
-	
-	public void setMessage(String title, String message) {
-		_title = title;
-		_message = message;
-	}
-	
-	public void updatePosition(Graphics2D g) {
-		// Box location & dimensions
-		property.loc.x = _parent.getLocation().getX();
-		property.loc.y = _parent.getLocation().getY() + 27 * _parent.getView().zoom;
-		
-		property.size.x = getMaxLineWidth(g, _message) + 40 * _parent.getView().zoom;
-		property.size.y = getTextSize(g, _message).getHeight() * getLinesCountHeight(_message) + 10 * _parent.getView().zoom;
-		
-		// Text location
-		_textPosition.x = property.loc.x + 10 * _parent.getView().zoom;
-		_textPosition.y = property.loc.y + 2 * _parent.getView().zoom;
-	}
-
-	private int getMaxLineWidth(Graphics2D g, String string) {
-		double maxWidth = 0;
-		
-		for (String line : string.split("\n")) {
-			if (maxWidth < getTextSize(g, line).getWidth())
-				maxWidth = getTextSize(g, line).getWidth();
-		}
-		
-		return (int)maxWidth;
-	}
-	
-	private int getLinesCountHeight(String string) {
-		return string.split("\n").length;
-	}
-	
-	private void drawMultiLineString(Graphics2D g, String string, int x, int y) {
-		for (String line : string.split("\n"))
-			g.drawString(line, x, y += g.getFontMetrics().getHeight());
-	}
-	
-	@Override
-	public void paint(Graphics2D g) {
-		updatePosition(g);
-		
-		Composite oldComposite = g.getComposite();
-		
-        AlphaComposite ac = java.awt.AlphaComposite.getInstance(AlphaComposite.SRC_OVER,0.7F);
-        g.setComposite(ac);
-	        
-		g.setColor(Color.BLACK);
-		g.fillRoundRect((int)property.loc.x, (int)property.loc.y, (int)property.size.x, (int)property.size.y, 10, 10);
-		g.setColor(Color.WHITE);
-		drawMultiLineString(g, _message, (int)_textPosition.x, (int)_textPosition.y);
-		g.setComposite(oldComposite);
-	}
-
-	@Override
-	public void modify() {
+		this._parent = parent;
+		this._title = "";
+		this._message = "";
 	}
 
 	@Override
@@ -87,6 +29,73 @@ public class Tooltip extends GElement {
 	@Override
 	public void cloneReconnect(Map<GElement, GElement> link) {
 
+	}
+
+	private void drawMultiLineString(Graphics2D g, String string, int x, int y) {
+		for (String line : string.split("\n"))
+			g.drawString(line, x, y += g.getFontMetrics().getHeight());
+	}
+
+	private int getLinesCountHeight(String string) {
+		return string.split("\n").length;
+	}
+
+	private int getMaxLineWidth(Graphics2D g, String string) {
+		double maxWidth = 0;
+
+		for (String line : string.split("\n")) {
+			if (maxWidth < getTextSize(g, line).getWidth())
+				maxWidth = getTextSize(g, line).getWidth();
+		}
+
+		return (int) maxWidth;
+	}
+
+	@Override
+	public void modify() {
+	}
+
+	@Override
+	public void paint(Graphics2D g) {
+		updatePosition(g);
+
+		Composite oldComposite = g.getComposite();
+
+		AlphaComposite ac = java.awt.AlphaComposite.getInstance(
+				AlphaComposite.SRC_OVER, 0.7F);
+		g.setComposite(ac);
+
+		g.setColor(Color.BLACK);
+		g.fillRoundRect((int) this.property.loc.x, (int) this.property.loc.y,
+				(int) this.property.size.x, (int) this.property.size.y, 10, 10);
+		g.setColor(Color.WHITE);
+		drawMultiLineString(g, this._message, (int) this._textPosition.x,
+				(int) this._textPosition.y);
+		g.setComposite(oldComposite);
+	}
+
+	public void setMessage(String title, String message) {
+		this._title = title;
+		this._message = message;
+	}
+
+	public void updatePosition(Graphics2D g) {
+		// Box location & dimensions
+		this.property.loc.x = this._parent.getLocation().getX();
+		this.property.loc.y = this._parent.getLocation().getY() + 27
+				* this._parent.getView().zoom;
+
+		this.property.size.x = getMaxLineWidth(g, this._message) + 40
+				* this._parent.getView().zoom;
+		this.property.size.y = getTextSize(g, this._message).getHeight()
+				* getLinesCountHeight(this._message) + 10
+				* this._parent.getView().zoom;
+
+		// Text location
+		this._textPosition.x = this.property.loc.x + 10
+				* this._parent.getView().zoom;
+		this._textPosition.y = this.property.loc.y + 2
+				* this._parent.getView().zoom;
 	}
 
 }

@@ -31,58 +31,6 @@ public class PropertiesXmlHandler {
 
 	public static String lastPath = "BTDesigner.xml";
 
-	public static void loadAndSetProperties() throws IOException,
-			ParserConfigurationException, SAXException {
-		loadAndSetProperties(lastPath);
-	}
-	
-	public static void loadAndSetProperties(String path) throws IOException,
-			ParserConfigurationException, SAXException {
-		File xmlFile = new File(path);
-		DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
-		DocumentBuilder db = dbFactory.newDocumentBuilder();
-		Document doc = db.parse(xmlFile);
-
-		doc.getDocumentElement().normalize();
-
-		NodeList list = doc.getDocumentElement().getChildNodes();
-		System.out.println("list size = " + list.getLength());
-		for (int i = 0; i < list.getLength(); ++i) {
-			Node n = list.item(i);
-			System.out.println(n.getNodeName());
-
-			if (n.getNodeName().trim().startsWith("#")) {
-				continue;
-			}
-			String key = n.getNodeName().trim();
-			String value = n.getAttributes().getNamedItem("value")
-					.getTextContent();
-			if (key.equals("test_time")) {
-				Parameters.test_time = Integer.parseInt(value);
-			} else if (key.equals("test_result")) {
-				Parameters.test_result = Boolean.parseBoolean(value);
-			} else if (key.equals("path_to_plans")) {
-				Parameters.path_to_plans = new String(value);
-			} else if (key.equals("path_to_images")) {
-				Parameters.path_to_images = new String(value);
-			} else if (key.equals("executer_service")) {
-				Parameters.executer_service = new String(value);
-			} else if (key.equals("path_to_lookup")) {
-				Parameters.path_to_lookup = new String(value);
-			} else if (key.equals("path_to_address")) {
-				Parameters.path_to_address = new String(value);
-			} else if (key.equals("path_to_description")) {
-				Parameters.path_to_description = new String(value);
-			} else if (key.equals("enableLinkConnection")) {
-				Parameters.enableLinkConnection = Boolean.parseBoolean(value);
-			} else if (key.equals("enableTaskIdRegeneration")) {
-				Parameters.enableTaskIdRegeneration = Boolean.parseBoolean(value);
-			} else {
-				System.err.println("Error: unknown field in " + path);
-			}
-		}
-	}
-
 	private static Node createNode(Document doc, String name, String value) {
 		Element element = doc.createElement(name);
 		// element.appendChild(doc.createTextNode(name));
@@ -132,6 +80,91 @@ public class PropertiesXmlHandler {
 		return map;
 	}
 
+	public static void loadAndSetProperties() throws IOException,
+			ParserConfigurationException, SAXException {
+		loadAndSetProperties(lastPath);
+	}
+
+	public static void loadAndSetProperties(String path) throws IOException,
+			ParserConfigurationException, SAXException {
+		File xmlFile = new File(path);
+		DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
+		DocumentBuilder db = dbFactory.newDocumentBuilder();
+		Document doc = db.parse(xmlFile);
+
+		doc.getDocumentElement().normalize();
+
+		NodeList list = doc.getDocumentElement().getChildNodes();
+		System.out.println("list size = " + list.getLength());
+		for (int i = 0; i < list.getLength(); ++i) {
+			Node n = list.item(i);
+			System.out.println(n.getNodeName());
+
+			if (n.getNodeName().trim().startsWith("#")) {
+				continue;
+			}
+			String key = n.getNodeName().trim();
+			String value = n.getAttributes().getNamedItem("value")
+					.getTextContent();
+			if (key.equals("test_time")) {
+				Parameters.test_time = Integer.parseInt(value);
+			} else if (key.equals("test_result")) {
+				Parameters.test_result = Boolean.parseBoolean(value);
+			} else if (key.equals("path_to_plans")) {
+				Parameters.path_to_plans = new String(value);
+			} else if (key.equals("path_to_images")) {
+				Parameters.path_to_images = new String(value);
+			} else if (key.equals("executer_service")) {
+				Parameters.executer_service = new String(value);
+			} else if (key.equals("path_to_lookup")) {
+				Parameters.path_to_lookup = new String(value);
+			} else if (key.equals("path_to_address")) {
+				Parameters.path_to_address = new String(value);
+			} else if (key.equals("path_to_description")) {
+				Parameters.path_to_description = new String(value);
+			} else if (key.equals("enableLinkConnection")) {
+				Parameters.enableLinkConnection = Boolean.parseBoolean(value);
+			} else if (key.equals("enableTaskIdRegeneration")) {
+				Parameters.enableTaskIdRegeneration = Boolean
+						.parseBoolean(value);
+			} else {
+				System.err.println("Error: unknown field in " + path);
+			}
+		}
+	}
+
+	public static void saveToFile(String path) throws IOException,
+			TransformerException, ParserConfigurationException,
+			TransformerConfigurationException {
+		try {
+			File xmlFile = new File(path);
+			DocumentBuilderFactory dbFactory = DocumentBuilderFactory
+					.newInstance();
+			DocumentBuilder db = dbFactory.newDocumentBuilder();
+			Document doc = db.newDocument();
+
+			Element root = doc.createElement("parameters");
+			doc.appendChild(root);
+
+			// use reflection to get all field values from Parameter class
+			Map<String, String> map = getParameters();
+
+			for (String name : map.keySet()) {
+				root.appendChild(createNode(doc, name, map.get(name)));
+			}
+
+			Source xmlSource = new DOMSource(doc);
+			Result result = new StreamResult(new FileOutputStream(xmlFile));
+			TransformerFactory transformerFactory = TransformerFactory
+					.newInstance();
+			Transformer transformer = transformerFactory.newTransformer();
+			transformer.setOutputProperty("indent", "yes");
+			transformer.transform(xmlSource, result);
+		} catch (Exception ex) {
+			System.err.println(ex.getMessage());
+		}
+	}
+
 	public static void setParametersFromTable(JTable table) {
 		Map<String, String> map = new HashMap<String, String>();// getParameters();
 
@@ -168,42 +201,11 @@ public class PropertiesXmlHandler {
 			} else if (name.equals("enableLinkConnection")) {
 				Parameters.enableLinkConnection = Boolean.parseBoolean(value);
 			} else if (name.equals("enableTaskIdRegeneration")) {
-				Parameters.enableTaskIdRegeneration = Boolean.parseBoolean(value);
+				Parameters.enableTaskIdRegeneration = Boolean
+						.parseBoolean(value);
 			} else if (name.equals("path_to_description")) {
 				Parameters.path_to_description = new String(value);
 			}
-		}
-	}
-
-	public static void saveToFile(String path) throws IOException,
-			TransformerException, ParserConfigurationException,
-			TransformerConfigurationException {
-		try {
-			File xmlFile = new File(path);
-			DocumentBuilderFactory dbFactory = DocumentBuilderFactory
-					.newInstance();
-			DocumentBuilder db = dbFactory.newDocumentBuilder();
-			Document doc = db.newDocument();
-
-			Element root = doc.createElement("parameters");
-			doc.appendChild(root);
-
-			// use reflection to get all field values from Parameter class
-			Map<String, String> map = getParameters();
-
-			for (String name : map.keySet()) {
-				root.appendChild(createNode(doc, name, map.get(name)));
-			}
-
-			Source xmlSource = new DOMSource(doc);
-			Result result = new StreamResult(new FileOutputStream(xmlFile));
-			TransformerFactory transformerFactory = TransformerFactory
-					.newInstance();
-			Transformer transformer = transformerFactory.newTransformer();
-			transformer.setOutputProperty("indent", "yes");
-			transformer.transform(xmlSource, result);
-		} catch (Exception ex) {
-			System.err.println(ex.getMessage());
 		}
 	}
 }

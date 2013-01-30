@@ -5,7 +5,8 @@ import java.awt.event.ActionListener;
 
 import document.BTDesigner;
 
-public class ExportTasksAction extends AbstractDesignerAction implements ActionListener {
+public class ExportTasksAction extends AbstractDesignerAction implements
+		ActionListener {
 
 	public ExportTasksAction(BTDesigner designer) {
 		super(designer);
@@ -13,12 +14,13 @@ public class ExportTasksAction extends AbstractDesignerAction implements ActionL
 
 	@Override
 	public void actionPerformed(ActionEvent arg0) {
-		
-		if (designer.getActiveTab() != null && designer.getActiveTab().doc != null) {
+
+		if (this.designer.getActiveTab() != null
+				&& this.designer.getActiveTab().doc != null) {
 			String fileName = Dialogs.saveFile("Export tasks", "");
-			
+
 			if (!fileName.equals(""))
-				designer.getActiveTab().doc.exportTasks(fileName);
+				this.designer.getActiveTab().doc.exportTasks(fileName);
 		}
 	}
 

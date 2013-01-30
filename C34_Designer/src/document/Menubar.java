@@ -1,10 +1,8 @@
 package document;
 
 import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 
-import javax.management.Descriptor;
 import javax.swing.ImageIcon;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
@@ -32,11 +30,81 @@ import document.actions.ToolAction;
 
 public class Menubar extends JMenuBar {
 
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 8066873848483126226L;
+
 	public Menubar(BTDesigner designer) {
 		add(buildFileMenu(designer));
 		add(buildEditMenu(designer));
 		add(buildRunMenu(designer));
 		add(buildWindowMenu(designer));
+	}
+
+	private JMenu buildEditMenu(BTDesigner designer) {
+		JMenu menu = new JMenu("Edit");
+
+		menu.setMnemonic(KeyEvent.VK_E);
+		menu.add(buildToolsMenu(designer));
+		menu.add(buildElementsCreatorMenu(designer));
+
+		ImageIcon icon = new ImageIcon(getClass().getClassLoader().getResource(
+				"icons/copy.png"));
+		JMenuItem menuItemCopy = new JMenuItem("Copy", KeyEvent.VK_C);
+		menuItemCopy.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_1,
+				ActionEvent.ALT_MASK));
+		menuItemCopy.setToolTipText("Copy selected sub-tree");
+		menuItemCopy.setIcon(icon);
+		menuItemCopy.addActionListener(new CopyTreeAction(designer));
+		menu.add(menuItemCopy);
+
+		return menu;
+	}
+
+	private JMenu buildElementsCreatorMenu(BTDesigner designer) {
+		JMenu menu = new JMenu("Elements Creator");
+		menu.setMnemonic(KeyEvent.VK_C);
+
+		// task
+		JMenuItem menuItemTask = new JMenuItem("Task", KeyEvent.VK_T);
+		menuItemTask.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_1,
+				ActionEvent.ALT_MASK));
+		menuItemTask.setToolTipText("sets mode of selector to create tasks");
+		menuItemTask.addActionListener(new ToolAction(designer,
+				designer.toolbar.creators.get(0)));
+		menu.add(menuItemTask);
+
+		// arrow
+		JMenuItem menuItemArrow = new JMenuItem("Arrow", KeyEvent.VK_A);
+		menuItemArrow.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_2,
+				ActionEvent.ALT_MASK));
+		menuItemArrow.setToolTipText("sets mode of selector to create arrows");
+		menuItemArrow.addActionListener(new ToolAction(designer,
+				designer.toolbar.creators.get(1)));
+		menu.add(menuItemArrow);
+
+		// decorator
+		JMenuItem menuItemDecorator = new JMenuItem("Decorator", KeyEvent.VK_D);
+		menuItemDecorator.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_3,
+				ActionEvent.ALT_MASK));
+		menuItemDecorator
+				.setToolTipText("sets mode of selector to create decorators");
+		menuItemDecorator.addActionListener(new ToolAction(designer,
+				designer.toolbar.creators.get(2)));
+		menu.add(menuItemDecorator);
+
+		// joint
+		JMenuItem menuItemJoint = new JMenuItem("Joint", KeyEvent.VK_J);
+		menuItemJoint.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_4,
+				ActionEvent.ALT_MASK));
+		menuItemJoint
+				.setToolTipText("sets mode of selector to create joint points on arrows");
+		menuItemJoint.addActionListener(new ToolAction(designer,
+				designer.toolbar.creators.get(3)));
+		menu.add(menuItemJoint);
+
+		return menu;
 	}
 
 	private JMenu buildFileMenu(BTDesigner designer) {
@@ -159,178 +227,6 @@ public class Menubar extends JMenuBar {
 		return menuFile;
 	}
 
-	private JMenu buildEditMenu(BTDesigner designer) {
-		JMenu menu = new JMenu("Edit");
-
-		menu.setMnemonic(KeyEvent.VK_E);
-		menu.add(buildToolsMenu(designer));
-		menu.add(buildElementsCreatorMenu(designer));
-
-		ImageIcon icon = new ImageIcon(getClass().getClassLoader().getResource(
-				"icons/copy.png"));
-		JMenuItem menuItemCopy = new JMenuItem("Copy", KeyEvent.VK_C);
-		menuItemCopy.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_1,
-				ActionEvent.ALT_MASK));
-		menuItemCopy.setToolTipText("Copy selected sub-tree");
-		menuItemCopy.setIcon(icon);
-		menuItemCopy.addActionListener(new CopyTreeAction(designer));
-		menu.add(menuItemCopy);
-		
-		return menu;
-	}
-
-	private JMenu buildToolsMenu(BTDesigner designer) {
-		JMenu menu = new JMenu("Tools");
-		menu.setMnemonic(KeyEvent.VK_T);
-
-		// remove
-		ImageIcon icon = new ImageIcon(getClass().getClassLoader().getResource(
-				"icons/remove.png"));
-		JMenuItem menuItemRemove = new JMenuItem("Remove", KeyEvent.VK_R);
-		menuItemRemove.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_1,
-				ActionEvent.ALT_MASK));
-		menuItemRemove.setToolTipText("sets mode of selector to remove");
-		menuItemRemove.setIcon(icon);
-		menuItemRemove.addActionListener(new RemoveAction(designer));
-		menu.add(menuItemRemove);
-
-		// remove Subtree
-		icon = new ImageIcon(getClass().getClassLoader().getResource(
-				"icons/remove.png"));
-		JMenuItem menuItemRemoveSubtree = new JMenuItem("Remove sub-tree", KeyEvent.VK_T);
-		menuItemRemoveSubtree.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_4,
-				ActionEvent.ALT_MASK));
-		menuItemRemoveSubtree.setToolTipText("sets mode of selector to remove subtree");
-		menuItemRemoveSubtree.setIcon(icon);
-		menuItemRemoveSubtree.addActionListener(new RemoveSubtreeAction(designer));
-		menu.add(menuItemRemoveSubtree);
-
-		// remove Subtree
-		//icon = new ImageIcon(getClass().getClassLoader().getResource(
-		//		"icons/remove.png"));
-		JMenuItem menuItemReconnect = new JMenuItem("Reconnect", KeyEvent.VK_C);
-		menuItemReconnect.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_5,
-				ActionEvent.ALT_MASK));
-		menuItemReconnect.setToolTipText("arrow reconnect");
-		//menuItemReconnect.setIcon(icon);
-		menuItemReconnect.addActionListener(new ArrowReconnectAction(designer));
-		menu.add(menuItemReconnect);
-
-		// modify
-		icon = new ImageIcon(getClass().getClassLoader().getResource(
-				"icons/modify.png"));
-		JMenuItem menuItemModify = new JMenuItem("Modify", KeyEvent.VK_M);
-		menuItemModify.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_2,
-				ActionEvent.ALT_MASK));
-		menuItemModify.setToolTipText("sets mode of selector to modify");
-		menuItemModify.setIcon(icon);
-		menuItemModify.addActionListener(new ModifyAction(designer));
-		menu.add(menuItemModify);
-
-		// move
-		JMenuItem menuItemMove = new JMenuItem("Move", KeyEvent.VK_V);
-		menuItemMove.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_3,
-				ActionEvent.ALT_MASK));
-		menuItemMove.setToolTipText("sets mode of selector to move");
-		menuItemMove.addActionListener(new PointAction(designer));
-		menu.add(menuItemMove);
-
-		return menu;
-	}
-
-	private JMenu buildElementsCreatorMenu(BTDesigner designer) {
-		JMenu menu = new JMenu("Elements Creator");
-		menu.setMnemonic(KeyEvent.VK_C);
-
-		// task
-		JMenuItem menuItemTask = new JMenuItem("Task", KeyEvent.VK_T);
-		menuItemTask.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_1,
-				ActionEvent.ALT_MASK));
-		menuItemTask.setToolTipText("sets mode of selector to create tasks");
-		menuItemTask.addActionListener(new ToolAction(designer,
-				designer.toolbar.creators.get(0)));
-		menu.add(menuItemTask);
-
-		// arrow
-		JMenuItem menuItemArrow = new JMenuItem("Arrow", KeyEvent.VK_A);
-		menuItemArrow.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_2,
-				ActionEvent.ALT_MASK));
-		menuItemArrow.setToolTipText("sets mode of selector to create arrows");
-		menuItemArrow.addActionListener(new ToolAction(designer,
-				designer.toolbar.creators.get(1)));
-		menu.add(menuItemArrow);
-
-		// decorator
-		JMenuItem menuItemDecorator = new JMenuItem("Decorator", KeyEvent.VK_D);
-		menuItemDecorator.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_3,
-				ActionEvent.ALT_MASK));
-		menuItemDecorator
-				.setToolTipText("sets mode of selector to create decorators");
-		menuItemDecorator.addActionListener(new ToolAction(designer,
-				designer.toolbar.creators.get(2)));
-		menu.add(menuItemDecorator);
-
-		// joint
-		JMenuItem menuItemJoint = new JMenuItem("Joint", KeyEvent.VK_J);
-		menuItemJoint.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_4,
-				ActionEvent.ALT_MASK));
-		menuItemJoint
-				.setToolTipText("sets mode of selector to create joint points on arrows");
-		menuItemJoint.addActionListener(new ToolAction(designer,
-				designer.toolbar.creators.get(3)));
-		menu.add(menuItemJoint);
-
-		return menu;
-	}
-
-	private JMenu buildWindowMenu(BTDesigner designer) {
-		JMenu menu = new JMenu("Window");
-		menu.setMnemonic(KeyEvent.VK_W);
-
-		ImageIcon icon;
-
-		// new
-		icon = new ImageIcon(getClass().getClassLoader().getResource(
-				"icons/new_tab.png"));
-		JMenuItem menuItemNew = new JMenuItem("New", KeyEvent.VK_N);
-		menuItemNew.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_1,
-				ActionEvent.ALT_MASK));
-		menuItemNew.setToolTipText("creates new instance of BTDesigner");
-		menuItemNew.addActionListener(new NewWindowAction(designer));
-		menuItemNew.setIcon(icon);
-		menu.add(menuItemNew);
-
-		// open terminal
-		icon = new ImageIcon(getClass().getClassLoader().getResource(
-				"icons/terminal.png"));
-		JMenuItem menuItemOpenTerminal = new JMenuItem("Open Terminal",
-				KeyEvent.VK_T);
-		menuItemOpenTerminal.setAccelerator(KeyStroke.getKeyStroke(
-				KeyEvent.VK_2, ActionEvent.ALT_MASK));
-		menuItemOpenTerminal.setToolTipText("opens ROS terminal window");
-		menuItemOpenTerminal.setIcon(icon);
-		menuItemOpenTerminal.addActionListener(new OpenTerminalAction());
-		menu.add(menuItemOpenTerminal);
-
-		// open log console
-		JMenuItem menuItemOpenLogConsole = new JMenuItem("Open Log Console",
-				KeyEvent.VK_L);
-		menuItemOpenLogConsole.setAccelerator(KeyStroke.getKeyStroke(
-				KeyEvent.VK_3, ActionEvent.ALT_MASK));
-		menuItemOpenLogConsole.setToolTipText("opens log history dialog");
-		menuItemOpenLogConsole.addActionListener(new LogConsoleAction());
-		menu.add(menuItemOpenLogConsole);
-
-		// about
-		JMenuItem menuItemAbout = new JMenuItem("About", KeyEvent.VK_B);
-		menuItemAbout.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_4,
-				ActionEvent.ALT_MASK));
-		menuItemAbout.setToolTipText("About the software");
-		menu.add(menuItemAbout);
-
-		return menu;
-	}
-
 	private JMenu buildRunMenu(BTDesigner designer) {
 		JMenu menu = new JMenu("Run");
 		menu.setMnemonic(KeyEvent.VK_R);
@@ -410,6 +306,116 @@ public class Menubar extends JMenuBar {
 		menuItem.setToolTipText("validates current plan, saves it to a temporal local file and runs it in mode of logic simulation");
 		// menuItemTest.addActionListener(listener);
 		menu.add(menuItem);
+
+		return menu;
+	}
+
+	private JMenu buildToolsMenu(BTDesigner designer) {
+		JMenu menu = new JMenu("Tools");
+		menu.setMnemonic(KeyEvent.VK_T);
+
+		// remove
+		ImageIcon icon = new ImageIcon(getClass().getClassLoader().getResource(
+				"icons/remove.png"));
+		JMenuItem menuItemRemove = new JMenuItem("Remove", KeyEvent.VK_R);
+		menuItemRemove.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_1,
+				ActionEvent.ALT_MASK));
+		menuItemRemove.setToolTipText("sets mode of selector to remove");
+		menuItemRemove.setIcon(icon);
+		menuItemRemove.addActionListener(new RemoveAction(designer));
+		menu.add(menuItemRemove);
+
+		// remove Subtree
+		icon = new ImageIcon(getClass().getClassLoader().getResource(
+				"icons/remove.png"));
+		JMenuItem menuItemRemoveSubtree = new JMenuItem("Remove sub-tree",
+				KeyEvent.VK_T);
+		menuItemRemoveSubtree.setAccelerator(KeyStroke.getKeyStroke(
+				KeyEvent.VK_4, ActionEvent.ALT_MASK));
+		menuItemRemoveSubtree
+				.setToolTipText("sets mode of selector to remove subtree");
+		menuItemRemoveSubtree.setIcon(icon);
+		menuItemRemoveSubtree.addActionListener(new RemoveSubtreeAction(
+				designer));
+		menu.add(menuItemRemoveSubtree);
+
+		// remove Subtree
+		// icon = new ImageIcon(getClass().getClassLoader().getResource(
+		// "icons/remove.png"));
+		JMenuItem menuItemReconnect = new JMenuItem("Reconnect", KeyEvent.VK_C);
+		menuItemReconnect.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_5,
+				ActionEvent.ALT_MASK));
+		menuItemReconnect.setToolTipText("arrow reconnect");
+		// menuItemReconnect.setIcon(icon);
+		menuItemReconnect.addActionListener(new ArrowReconnectAction(designer));
+		menu.add(menuItemReconnect);
+
+		// modify
+		icon = new ImageIcon(getClass().getClassLoader().getResource(
+				"icons/modify.png"));
+		JMenuItem menuItemModify = new JMenuItem("Modify", KeyEvent.VK_M);
+		menuItemModify.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_2,
+				ActionEvent.ALT_MASK));
+		menuItemModify.setToolTipText("sets mode of selector to modify");
+		menuItemModify.setIcon(icon);
+		menuItemModify.addActionListener(new ModifyAction(designer));
+		menu.add(menuItemModify);
+
+		// move
+		JMenuItem menuItemMove = new JMenuItem("Move", KeyEvent.VK_V);
+		menuItemMove.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_3,
+				ActionEvent.ALT_MASK));
+		menuItemMove.setToolTipText("sets mode of selector to move");
+		menuItemMove.addActionListener(new PointAction(designer));
+		menu.add(menuItemMove);
+
+		return menu;
+	}
+
+	private JMenu buildWindowMenu(BTDesigner designer) {
+		JMenu menu = new JMenu("Window");
+		menu.setMnemonic(KeyEvent.VK_W);
+
+		ImageIcon icon;
+
+		// new
+		icon = new ImageIcon(getClass().getClassLoader().getResource(
+				"icons/new_tab.png"));
+		JMenuItem menuItemNew = new JMenuItem("New", KeyEvent.VK_N);
+		menuItemNew.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_1,
+				ActionEvent.ALT_MASK));
+		menuItemNew.setToolTipText("creates new instance of BTDesigner");
+		menuItemNew.addActionListener(new NewWindowAction(designer));
+		menuItemNew.setIcon(icon);
+		menu.add(menuItemNew);
+
+		// open terminal
+		icon = new ImageIcon(getClass().getClassLoader().getResource(
+				"icons/terminal.png"));
+		JMenuItem menuItemOpenTerminal = new JMenuItem("Open Terminal",
+				KeyEvent.VK_T);
+		menuItemOpenTerminal.setAccelerator(KeyStroke.getKeyStroke(
+				KeyEvent.VK_2, ActionEvent.ALT_MASK));
+		menuItemOpenTerminal.setToolTipText("opens ROS terminal window");
+		menuItemOpenTerminal.setIcon(icon);
+		menuItemOpenTerminal.addActionListener(new OpenTerminalAction());
+		menu.add(menuItemOpenTerminal);
+
+		// open log console
+		JMenuItem menuItemOpenLogConsole = new JMenuItem("Open Log Console",
+				KeyEvent.VK_L);
+		menuItemOpenLogConsole.setAccelerator(KeyStroke.getKeyStroke(
+				KeyEvent.VK_3, ActionEvent.ALT_MASK));
+		menuItemOpenLogConsole.setToolTipText("opens log history dialog");
+		menuItemOpenLogConsole.addActionListener(new LogConsoleAction());
+		menu.add(menuItemOpenLogConsole);
+
+		// about
+		JMenuItem menuItemAbout = new JMenuItem("About", KeyEvent.VK_B);
+		menuItemAbout.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_4,
+				ActionEvent.ALT_MASK));
+		menuItemAbout.setToolTipText("About the software");
+		menu.add(menuItemAbout);
 
 		return menu;
 	}
