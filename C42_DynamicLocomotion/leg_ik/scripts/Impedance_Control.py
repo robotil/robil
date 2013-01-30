@@ -176,12 +176,13 @@ class Position_Stiffness_Controller:
     trigger_event = False
     trigger_value = 200 # units [Nm] under this value the trigger will be set
 
-    def __init__(self, name, stiffness, triggered_controller):
+    def __init__(self, name, stiffness, triggered_controller, bypass_input2output):
         self.name = name
         self.K_m = stiffness # parameter to tune
         #self.B_m = damping   # parameter to tune
         self.triggered_controller = triggered_controller
-        self.update_command = not(triggered_controller)
+        self.update_command = not(triggered_controller) # flag to enable update of controller output command when trigger is disabled
+        self.bypass_in2out = bypass_input2output
         # self.last_update_stamp = rospy.Time()
         self.avg_start_time = rospy.Time()     
 
@@ -213,16 +214,26 @@ class Position_Stiffness_Controller:
     def SetTrigger(self):
         self.trigger_event = True    
 
-    def checkTriggerEvent(self, force):
-        if (self.trigger_value >= force) and (force > 0):
+    def checkTriggerEvent(self, force, input_cmd_delta):
+        if (self.trigger_value >= force) and (force > 0) or (input_cmd_delta > 0):
             self.SetTrigger()
-            rospy.loginfo("PSC_'%s' method checkTriggerEvent: force = %f" %  \
-                          (self.name,force))
+            rospy.loginfo( "PSC_'%s' method checkTriggerEvent: force = %f, input_cmd_delta = %f" %  \
+                          (self.name,force, input_cmd_delta) )
         else:
             self.ResetTrigger()
 
+    def ByPassON(self):
+        self.bypass_in2out = True 
 
-    def getCMD(self, X_0): # X_0 = original position input command
+    def ByPassOFF(self):
+        self.bypass_in2out = False
+
+    def ByPassStatus(self):
+        return (self.bypass_in2out) 
+
+    def getCMD(self, X_0, force_desired): # X_0 = original position input command
+
+        force_des = force_desired # for debug print loginfo
 
         current_time = rospy.get_rostime().to_sec() #self.last_update_stamp.to_sec()
 
@@ -234,25 +245,32 @@ class Position_Stiffness_Controller:
         if (time_from_avg_start >= self.minimum_update_period) and (self.Fint_sum != 0):
 
             force_avg = self.getAvgForce() # Assumption that force will be able to get update in minimum_update_period=0.05[sec] 
-                                           # does not work all the time. Added to if statement to check Fint_sum value. 
+                                           # does not work all the time. Added to if statement to check Fint_sum value.
+                                           # Problem may have occured because rxplot of contact force was open!!! 
 
             rospy.loginfo("PSC_'%s' method getCMD: update interval = %f, force samples = %d, force_avg = %f" %  \
                           (self.name,time_from_avg_start,self.num_of_samples,force_avg))
             
             # Check trigger event if event has not yet occured and updates trigger_event accordingly
             if self.triggered_controller and not(self.trigger_event):
-                self.checkTriggerEvent(force_avg)
+                self.checkTriggerEvent(force_avg,  X_0 - self.last_X_0)
+
+            if X_0 > self.last_X_0: # if lifting swing foot we don't want any force on the swing leg 
+                force_des = 0
+            else:
+                force_des = force_desired
 
             # OUTPUT COMMAND:
-            if self.update_command or self.trigger_event: # if trigger event occured 
-                correction_factor = force_avg/self.K_m
+            if (self.update_command or self.trigger_event) and ( not self.bypass_in2out): # if update of output command is enabled 
+                     
+                correction_factor = (force_des - force_avg)/self.K_m
                 # output cmd saturation (clamp):
                 if correction_factor > self.limit_command_diff: 
                     correction_factor = self.limit_command_diff
                 elif -1*correction_factor > self.limit_command_diff: 
                     correction_factor = -1*self.limit_command_diff
 
-                command_out = X_0 + correction_factor 
+                command_out = X_0 - correction_factor 
             else:
                 command_out = X_0
 
@@ -266,8 +284,8 @@ class Position_Stiffness_Controller:
 
         self.last_X_m = command_out
         self.last_X_0 = X_0
-        rospy.loginfo("PSC_'%s' method getCMD: update time = %f, X_0 = %f, output cmd = %f, force_avg = %f " %  \
-                          (self.name, current_time, X_0, command_out, self.getAvgForce()))
+        rospy.loginfo("PSC_'%s' method getCMD: bypass_in2out-%s, X_0 = %f, output cmd = %f, force_des = %f, force_avg = %f " %  \
+                          (self.name, self.bypass_in2out, X_0, command_out, force_des, self.getAvgForce()))
 
         return command_out 
 

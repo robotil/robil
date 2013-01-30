@@ -75,10 +75,14 @@ step_height = 0.05  # [m]
 # Sigmoid Plot
 
 
-a = 100  # change slop of ZMP -> com
-s = arange(-0.1*step_time,0.1*step_time+time_step , time_step)
+a =  50 #15 #100  # change slop of ZMP -> com
+s =  arange(-0.1*step_time,0.1*step_time+time_step , time_step) #arange(-0.5*step_time,0.5*step_time+time_step , time_step) #
 sigmoid_x = step_length/(1+exp(-a*s))
 sigmoid_y = step_width/(1+exp(-a*s))
+
+# plot(sigmoid_y)
+# show()
+
 
 # Pref Initialization
 
@@ -335,8 +339,8 @@ while not rospy.is_shutdown():
 
       if swing_z_t < 0.00001 and k>1 and not pre_step:
          step_done = 1
-         rospy.loginfo("done step number:")
          steps_count = steps_count + 1
+         rospy.loginfo("done step number: %d" % (steps_count) )
          rospy.loginfo("time:")
          rospy.loginfo(rospy.get_time())
          

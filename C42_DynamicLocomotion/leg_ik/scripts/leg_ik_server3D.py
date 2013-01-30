@@ -35,7 +35,7 @@ ns.COMx_d = 0.0
 ns.COMy_d = 0.0
 ns.COMz_d = 0.0
 
-PSC_swing_leg = Position_Stiffness_Controller('Swing Leg', 50000, True) # name, stiffness, triggered_controller [True/False]
+PSC_swing_leg = Position_Stiffness_Controller('Swing Leg', 50000, True, False) # name, stiffness, triggered_controller [True/False]
 
 ###################################################################
 ##                                                                #
@@ -90,9 +90,19 @@ def swing_leg_ik(req):
     l2=round(0.42200,6) #l_leg
    # eps = 0.00000001
 
+    ## Desired Force Profile on swing leg
+    half_robot_weight = 864.75/2 # units [N], half robots weight without feet
+    com_y_max = 0.095 # maximal movement of COM in y direction
+    min_support_force = 200 # minimal weight that we want to keep on swing leg while shifting weight to stance leg
+    desired_normal_force = half_robot_weight - abs(req.pos.COMy/com_y_max) * (half_robot_weight - min_support_force)
+
+    # for debug:
+    if req.pos.leg == 1: # if right leg is stance
+         PSC_swing_leg.ByPassON  # bypass controller 
+
     swing_x = req.pos.Swing_x
     swing_y = req.pos.Swing_y
-    swing_z = PSC_swing_leg.getCMD(req.pos.Swing_z)  -l1 -l2 # the height of bend knees is subtracted in zmp_main 
+    swing_z = PSC_swing_leg.getCMD(req.pos.Swing_z, desired_normal_force)  -l1 -l2 # the height of bend knees is subtracted in zmp_main 
       # TODO: change code so that published ZMP_des contains swing leg ankle position relative to body coord.
     res = LegIkResponse()
 
