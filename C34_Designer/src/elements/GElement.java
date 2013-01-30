@@ -74,6 +74,7 @@ public abstract class GElement {
 	static Dimension getTextSize(Graphics graphics, Font font, String text) {
 		if (graphics == null || font == null) {
 			System.out.println("EXECPTION");
+			return new Dimension(10,10);
 		}
 		FontMetrics metrics = graphics.getFontMetrics(font);
 		int hgt = metrics.getHeight();

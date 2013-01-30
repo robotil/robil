@@ -34,11 +34,11 @@ public class OpenFileAction extends AbstractDesignerAction implements
 		// new NewWindowAction(designer).actionPerformed(a);
 		
 		
-		Document document = super.getActiveTab().doc;
-		document.loadPlan(fileName);
-		String shortName = document.getShortFilePath();
-		this.designer.setTabName(this.designer.tabbedPane.getSelectedIndex(), shortName);
+//		Document document = super.getActiveTab().doc;
+//		document.loadPlan(fileName);
+//		String shortName = document.getShortFilePath();
+//		this.designer.setTabName(this.designer.tabbedPane.getSelectedIndex(), shortName);
 		
-		// designer.addnewDocumentTab(fileName);
+		designer.addnewDocumentTab(fileName);
 	}
 }

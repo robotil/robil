@@ -18,6 +18,8 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTabbedPane;
 import javax.swing.UnsupportedLookAndFeelException;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 
 import logger.LogManager;
 import terminal.communication.RosExecutor;
@@ -168,10 +170,20 @@ public class BTDesigner extends JFrame implements AutoCloseable {
 		pnl.add(lblStatusBar, BorderLayout.WEST);
 		add(pnl, c);
 
+		
+		this.tabbedPane.addChangeListener(new ChangeListener() {
+			
+			@Override
+			public void stateChanged(ChangeEvent arg0) {
+				if (tabbedPane.getSelectedIndex() >= 0)
+					tabs.get((tabbedPane.getSelectedIndex())).doc.activate();
+			}
+		});
+		
 		this.setJMenuBar(menuBar);
 
 		// add new tab
-		addNewDocumentTab();
+		// addNewDocumentTab();
 		// this.toolbar.setActiveDocument(this.tabs.get(0).doc);
 	}
 
@@ -192,7 +204,23 @@ public class BTDesigner extends JFrame implements AutoCloseable {
 	}
 	
 	public void addnewDocumentTab(String planFilename) {
+		
+		for (int i = 0; i < tabs.size(); i++) {
+			if (tabs.get(i).doc.getAbsoluteFilePath().equals(planFilename)) {
+				tabbedPane.setSelectedIndex(i);
+				return;
+			}
+		}
+				
 		addNewDocumentTab();
+		
+		tabbedPane.setSelectedIndex(tabbedPane.getSelectedIndex());
+		
+		getActiveTab().doc.loadPlan(planFilename);
+		setTabName(tabbedPane.getSelectedIndex(), getActiveTab().doc.getShortFilePath());
+		// tabs.get(tabbedPane.getSelectedIndex()).doc.loadPlan(planFilename);
+		
+		
 		// this.tabbedPane.setSelectedIndex(this.tabbedPane.getSelectedIndex());
 		// this.toolbar.setActiveDocument(this.tabs.get(this.tabbedPane.getSelectedIndex()).doc);
 		

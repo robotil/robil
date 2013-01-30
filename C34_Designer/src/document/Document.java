@@ -75,6 +75,7 @@ public class Document extends JPanel implements AutoCloseable {
 
 		@Override
 		public void mousePressed(MouseEvent ev) {
+			
 			Document.this.mousePressed = ev.getPoint();
 			for (GElement el : getReversed(Document.this.elements)) {
 				GElement e = el.underMouse(ev.getPoint());
@@ -95,104 +96,118 @@ public class Document extends JPanel implements AutoCloseable {
 						break;
 					}
 				}
-
+			
 			super.mousePressed(ev);
 		}
-
+		
 		@Override
 		public void mouseReleased(MouseEvent e) {
 			Document.this.mousePressed = null;
-			if (Document.this.creator != null) {
-				if (Document.this.selectedElement != null)
-					Document.this.creator.add(Document.this.selectedElement);
-				boolean checkCreator = Document.this.creator != null
-						&& Document.this.creator.ready()
-						&& ((Document.this.selectedElement == null && Document.this.creator
-								.createOnEmptyPlace()) || (Document.this.selectedElement != null && !Document.this.creator
-								.createOnEmptyPlace()));
-				if (checkCreator) {
-					Vec p = new Vec(e.getPoint()).sub(Document.this.view.loc)
-							.scale(1 / Document.this.view.zoom);
-					GElement el = Document.this.creator.newInstance();
-					if (el instanceof Arrow) {
-						Arrow a = (Arrow) el;
-						if (getArrow(a.getSource(), a.getTarget()).size() > 0
-								|| getArrow(a.getTarget(), a.getSource())
-										.size() > 0)
-							el = null;
-					}
-					if (el != null) {
-						el.setView(Document.this.view);
-						if (el instanceof View.ChangesListener)
-							((View.ChangesListener) el).onViewChange();
-						el.getProperty().setCenter(p);
-						add(el);
-						el.modify();
-						repaint();
-					}
-					if (Document.this.cleanToolSelectionAfterUse)
-						toolSelectionClean();
-					else if (Document.this.creator instanceof Arrow.Reconector) {
-						((Arrow.Reconector) Document.this.creator)
-								.getInstance().getProperty().selected = false;
-						toolSelectionClean();
+			
+			if (e.getButton() == MouseEvent.BUTTON1) {
+			
+				if (Document.this.creator != null) {
+					if (Document.this.selectedElement != null)
+						Document.this.creator.add(Document.this.selectedElement);
+					boolean checkCreator = Document.this.creator != null
+							&& Document.this.creator.ready()
+							&& ((Document.this.selectedElement == null && Document.this.creator
+									.createOnEmptyPlace()) || (Document.this.selectedElement != null && !Document.this.creator
+									.createOnEmptyPlace()));
+					if (checkCreator) {
+						Vec p = new Vec(e.getPoint()).sub(Document.this.view.loc)
+								.scale(1 / Document.this.view.zoom);
+						GElement el = Document.this.creator.newInstance();
+						if (el instanceof Arrow) {
+							Arrow a = (Arrow) el;
+							if (getArrow(a.getSource(), a.getTarget()).size() > 0
+									|| getArrow(a.getTarget(), a.getSource())
+											.size() > 0)
+								el = null;
+						}
+						if (el != null) {
+							el.setView(Document.this.view);
+							if (el instanceof View.ChangesListener)
+								((View.ChangesListener) el).onViewChange();
+							el.getProperty().setCenter(p);
+							add(el);
+							el.modify();
+							repaint();
+						}
+						if (Document.this.cleanToolSelectionAfterUse)
+							toolSelectionClean();
+						else if (Document.this.creator instanceof Arrow.Reconector) {
+							((Arrow.Reconector) Document.this.creator)
+									.getInstance().getProperty().selected = false;
+							toolSelectionClean();
+						}
 					}
 				}
-			}
-			if (Document.this.removeElement
-					&& Document.this.selectedElement != null) {
-				remove(Document.this.selectedElement);
-				if (Document.this.cleanToolSelectionAfterUse)
+				if (Document.this.removeElement
+						&& Document.this.selectedElement != null) {
+					remove(Document.this.selectedElement);
+					if (Document.this.cleanToolSelectionAfterUse)
+						toolSelectionClean();
+				}
+				if (Document.this.removeSubElements
+						&& Document.this.selectedElement != null) {
+					removeSubTree(Document.this.selectedElement);
+					// if(cleanToolSelectionAfterUse)
 					toolSelectionClean();
-			}
-			if (Document.this.removeSubElements
-					&& Document.this.selectedElement != null) {
-				removeSubTree(Document.this.selectedElement);
-				// if(cleanToolSelectionAfterUse)
-				toolSelectionClean();
-			}
-			if (Document.this.copyElement
-					&& Document.this.selectedElement != null) {
-				copyTree(Document.this.selectedElement);
-				// if(cleanToolSelectionAfterUse)
-				toolSelectionClean();
-			}
-			if (Document.this.reconectArrow
-					&& Document.this.selectedElement != null
-					&& Document.this.selectedElement instanceof Arrow) {
-				Document.this.creator = new Arrow.Reconector(
-						(Arrow) Document.this.selectedElement);
-				Document.this.mainWindow.toolbar
-						.setTipText(Document.this.creator.toolTip());
-			}
-			if (Document.this.modifier != null
-					&& Document.this.selectedElement != null) {
-				Document.this.modifier.set(Document.this.selectedElement);
-				if (Document.this.cleanToolSelectionAfterUse)
+				}
+				if (Document.this.copyElement
+						&& Document.this.selectedElement != null) {
+					copyTree(Document.this.selectedElement);
+					// if(cleanToolSelectionAfterUse)
 					toolSelectionClean();
+				}
+				if (Document.this.reconectArrow
+						&& Document.this.selectedElement != null
+						&& Document.this.selectedElement instanceof Arrow) {
+					Document.this.creator = new Arrow.Reconector(
+							(Arrow) Document.this.selectedElement);
+					Document.this.mainWindow.toolbar
+							.setTipText(Document.this.creator.toolTip());
+				}
+				if (Document.this.modifier != null
+						&& Document.this.selectedElement != null) {
+					Document.this.modifier.set(Document.this.selectedElement);
+					if (Document.this.cleanToolSelectionAfterUse)
+						toolSelectionClean();
+				}
+				if (Document.this.selectedElement == null)
+					return;
+				// /*DEBUG*/{
+				// ArrayList<GElement> s = getSubElements(selectedElement);
+				// System.out.print("Sub elements: ");
+				// for(GElement ee: s){
+				// if(ee instanceof Task) System.out.print( ((Task)ee).text +" ");
+				// }
+				// System.out.println();
+				// }
+	
+				Document.this.selectedElement.getProperty().selected = false;
+				Document.this.selectedElement = null;
+	
+				if (Document.this.creator != null
+						&& Document.this.creator instanceof Arrow.Reconector) {
+					((Arrow.Reconector) Document.this.creator).getInstance()
+							.getProperty().selected = true;
+				}
+	
+				repaint();
+				super.mouseReleased(e);
+				
+			} else if (e.getButton() == MouseEvent.BUTTON3) {
+				// Right click
+				toolSelectionClean();
+				if (Document.this.selectedElement != null) {
+					DesignerPopupMenu popup = new DesignerPopupMenu(Document.this);
+					popup.show(e.getComponent(), e.getX(), e.getY());
+				}
 			}
-			if (Document.this.selectedElement == null)
-				return;
-			// /*DEBUG*/{
-			// ArrayList<GElement> s = getSubElements(selectedElement);
-			// System.out.print("Sub elements: ");
-			// for(GElement ee: s){
-			// if(ee instanceof Task) System.out.print( ((Task)ee).text +" ");
-			// }
-			// System.out.println();
-			// }
-
-			Document.this.selectedElement.getProperty().selected = false;
-			Document.this.selectedElement = null;
-
-			if (Document.this.creator != null
-					&& Document.this.creator instanceof Arrow.Reconector) {
-				((Arrow.Reconector) Document.this.creator).getInstance()
-						.getProperty().selected = true;
-			}
-
-			repaint();
-			super.mouseReleased(e);
+			
+			
 		}
 
 		@Override
@@ -263,6 +278,10 @@ public class Document extends JPanel implements AutoCloseable {
 		addMouseWheelListener(mh);
 	}
 
+	public void activate() {
+		updateUndoRedoButtonsState();
+	}
+	
 	public void add(GElement el) {
 		
 
@@ -946,21 +965,18 @@ public class Document extends JPanel implements AutoCloseable {
 		
 		_treeChangeEvent = true;
 		
-		if (_historyManager.isReady() && !_buildTime)
-			try {
-				_historyManager.createSnapshot();
-			} catch (HistoryManagerNotReadyException e) {
-				this.tip.setText("History manager init exception");
-			}
+
 	}
 
 	private void onDocumentLoad(String fileName) {
 		if (!_historyManager.isReady()) {
-			_historyManager.init(this, "undo", this.getShortFilePath());
+			try {
+				_historyManager.init(this, "undo", this.getShortFilePath());
+			} catch (HistoryManagerNotReadyException e) {
+				e.printStackTrace();
+			}
 		}
-
-		if (_historyManager.isReady() && !_buildTime)
-			_historyManager.setCurrentSnapshot();
+		
 	}
 
 	private void onTreeChange(TreeChangeType changeType, GElement element) {
@@ -968,6 +984,13 @@ public class Document extends JPanel implements AutoCloseable {
 		if (_treeChangeNestingCounter == 0)
 			_treeChangeEvent = false;
 
+		if (_historyManager.isReady() && !_buildTime)
+			try {
+				_historyManager.createSnapshot();
+			} catch (HistoryManagerNotReadyException e) {
+				this.tip.setText("History manager create snapshot exception");
+			}
+		
 		updateUndoRedoButtonsState();
 	}
 	
@@ -1005,7 +1028,7 @@ public class Document extends JPanel implements AutoCloseable {
 		Graphics2D g2d = (Graphics2D) g;
 		g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
 				RenderingHints.VALUE_ANTIALIAS_ON);
-		if (this.view.graphics == null) {
+		if (this.view.graphics == null && g2d != null) {
 			this.view.graphics = g2d;
 			riceOnViewChange();
 		}
