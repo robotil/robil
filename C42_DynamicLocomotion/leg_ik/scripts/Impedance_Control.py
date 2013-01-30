@@ -223,20 +223,21 @@ class Position_Stiffness_Controller:
 
 
     def getCMD(self, X_0): # X_0 = original position input command
-        
-        #self.last_X_0 = X_0
 
         current_time = rospy.get_rostime().to_sec() #self.last_update_stamp.to_sec()
 
         time_from_avg_start = current_time - self.avg_start_time.to_sec()
         #rospy.loginfo("Stiffness C = '%s' method getCMD: time from starting to avg = %f " %(self.name,time_from_avg_start))
 
-        if (time_from_avg_start >= self.minimum_update_period):
+        # if feedback had enough time to update generate new output command with feedback 
+        # else use previous command with feedback adding to it change of input command (same as using current input command with old feedback)
+        if (time_from_avg_start >= self.minimum_update_period) and (self.Fint_sum != 0):
 
-            force_avg = self.getAvgForce()
+            force_avg = self.getAvgForce() # Assumption that force will be able to get update in minimum_update_period=0.05[sec] 
+                                           # does not work all the time. Added to if statement to check Fint_sum value. 
 
-            rospy.loginfo("PSC_'%s' method getCMD: update interval = %f, force sum = %f, force_avg = %f" %  \
-                          (self.name,time_from_avg_start,self.Fint_sum,force_avg))
+            rospy.loginfo("PSC_'%s' method getCMD: update interval = %f, force samples = %d, force_avg = %f" %  \
+                          (self.name,time_from_avg_start,self.num_of_samples,force_avg))
             
             # Check trigger event if event has not yet occured and updates trigger_event accordingly
             if self.triggered_controller and not(self.trigger_event):
@@ -257,14 +258,16 @@ class Position_Stiffness_Controller:
 
             # handle feedback filter:
             self.ResetSum()
-            self.avg_start_time = rospy.get_rostime() # it's not enough to ResetSum() because getCMD might be called again before Update
+            # self.avg_start_time = rospy.get_rostime() # it's not enough to ResetSum() because getCMD might be called again before Update
 
         else:
-            command_out = self.last_X_m            
+            input_command_delta_update = X_0 - self.last_X_0 
+            command_out = self.last_X_m + input_command_delta_update          
 
         self.last_X_m = command_out
-        rospy.loginfo("PSC_'%s' method getCMD: update time = %f, X_0 = %f, output cmd = %f " %  \
-                          (self.name, current_time, X_0, command_out))
+        self.last_X_0 = X_0
+        rospy.loginfo("PSC_'%s' method getCMD: update time = %f, X_0 = %f, output cmd = %f, force_avg = %f " %  \
+                          (self.name, current_time, X_0, command_out, self.getAvgForce()))
 
         return command_out 
 

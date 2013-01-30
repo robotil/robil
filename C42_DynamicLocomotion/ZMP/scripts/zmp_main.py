@@ -70,7 +70,7 @@ step_length = 0.01  # [m]
 step_width  = 0.19  # 0.178  # [m]
 step_time   = 5   # [sec]
 bend_knees  = 0.04  # [m]    
-step_height = 0.02  # [m] 
+step_height = 0.05  # [m] 
 
 # Sigmoid Plot
 
