@@ -68,15 +68,15 @@ time_step  =  0.01  # [sec]
 
 step_length = 0.0001 #0.01  # [m]
 step_width  = 0.175  # 0.178  # [m]
-step_time   = 1.5 #1   # [sec]
+step_time   = 8 #1   # [sec]
 bend_knees  = 0.04  # [m]    
-step_height = 0.0001 #0.05  # [m] 
+step_height = 0.0001 #0.03 #0.05  # [m] 
+half_trans_ratio = 0.5 # units fraction: 0-0.5
 
 # Sigmoid Plot
 
-
-a =  1 #5 # 50  #100  # change slop of ZMP -> com
-s =  arange(-3*step_time, 3*step_time+time_step , time_step) #arange(-1.5*step_time,1.5*step_time+time_step , time_step) # arange(-0.1*step_time,0.1*step_time+time_step , time_step) #
+a =  1 #1 #5 # 50  #100  # change slop of ZMP -> com
+s =  arange(-half_trans_ratio*step_time, half_trans_ratio*step_time+time_step , time_step) #arange(-3*step_time, 3*step_time+time_step , time_step) #arange(-1.5*step_time,1.5*step_time+time_step , time_step) # arange(-0.1*step_time,0.1*step_time+time_step , time_step) #
 sigmoid_x = step_length/(1+exp(-a*s))
 sigmoid_y = step_width/(1+exp(-a*s))
 
@@ -86,9 +86,9 @@ sigmoid_y = step_width/(1+exp(-a*s))
 
 # Pref Initialization
 
-t1 = arange(0 , step_time-2*0.1*step_time+time_step , time_step)
-t0x = arange(0 , 2*step_time-0.1*step_time+time_step   , time_step)
-t0y = arange(0 , step_time-0.1*step_time+time_step   , time_step)
+t1 = arange(0 , step_time-2*half_trans_ratio*step_time+time_step , time_step)    # arange(0 , step_time-2*0.1*step_time+time_step , time_step)
+t0x = arange(0 , 2*step_time-half_trans_ratio*step_time+time_step   , time_step) # arange(0 , 2*step_time-0.1*step_time+time_step   , time_step)
+t0y = arange(0 , step_time-half_trans_ratio*step_time+time_step   , time_step)   # arange(0 , step_time-0.1*step_time+time_step   , time_step)
 
 p_ref1x = step_length*ones(( len(t1) ))
 p_ref1y = step_width*ones(( len(t1) ))
@@ -364,7 +364,7 @@ while not rospy.is_shutdown():
             plot(swing_z_v)
            # show()
             #rospy.loginfo("exited")
-            #exit()
+            # exit()                        # uncomment TO STOP AFTER ONE STEP
    
 
       if first_step and step_done and ns.walk:
