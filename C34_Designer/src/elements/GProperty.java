@@ -9,8 +9,8 @@ public class GProperty {
 	public Vec loc = new Vec(0, 0);
 	public double heading = 0;
 	public Vec size = new Vec(0, 0);
-	public boolean selected = false;
-
+	public boolean leftClicked = false;
+	public boolean rightClicked = false;
 	public boolean collapsed = false;
 
 	public int test_time = Parameters.test_time;
@@ -24,7 +24,7 @@ public class GProperty {
 		p.loc = new Vec(this.loc);
 		p.heading = this.heading;
 		p.size = new Vec(this.size);
-		p.selected = this.selected;
+		p.leftClicked = this.leftClicked;
 		p.collapsed = this.collapsed;
 		p.test_result = this.test_result;
 		p.test_time = this.test_time;

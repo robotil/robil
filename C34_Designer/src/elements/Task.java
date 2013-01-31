@@ -576,7 +576,7 @@ public class Task extends GElement implements View.ChangesListener {
 	}
 
 	public String getText() {
-		if (this.property.selected)
+		if (this.property.leftClicked)
 			return this.text;
 		if (this.text.length() > this.shortTextLen)
 			return this.text.substring(0, this.shortTextLen - 3) + "...";
@@ -606,7 +606,7 @@ public class Task extends GElement implements View.ChangesListener {
 		Point loc = getLocation().getPoint();
 		Dimension size = getSizeInternal().getDimension();
 
-		if (this.property.selected) {
+		if (this.property.leftClicked) {
 			g.setStroke(new BasicStroke(3));
 		}
 
@@ -669,7 +669,7 @@ public class Task extends GElement implements View.ChangesListener {
 		}
 
 		// ADDED Draw tooltip
-		if (this.type.equals(TYPE_task) && this.property.selected
+		if (this.type.equals(TYPE_task) && this.property.leftClicked
 				&& this.taskDescriptionProvider != null) {
 			String cleanName = getNameWithoutParameters();
 

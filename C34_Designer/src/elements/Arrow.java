@@ -216,7 +216,7 @@ public class Arrow extends GElement {
 			return;
 		GraphProp gp = new GraphProp(g);
 
-		if (this.property.selected) {
+		if (this.property.leftClicked) {
 			g.setStroke(new BasicStroke(3));
 		}
 

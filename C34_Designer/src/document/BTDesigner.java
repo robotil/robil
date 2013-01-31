@@ -24,7 +24,7 @@ import javax.swing.event.ChangeListener;
 import logger.LogManager;
 import terminal.communication.RosExecutor;
 
-public class BTDesigner extends JFrame implements AutoCloseable {
+public class BTDesigner extends JFrame {
 
 	public class DesignerTab {
 		public Document doc;
@@ -61,9 +61,7 @@ public class BTDesigner extends JFrame implements AutoCloseable {
 			if ("GTK+".equals(info.getName())) {
 				try {
 					javax.swing.UIManager.setLookAndFeel(info.getClassName());
-				} catch (ClassNotFoundException | InstantiationException
-						| IllegalAccessException
-						| UnsupportedLookAndFeelException e) {
+				} catch (Exception e) {
 					e.printStackTrace();
 				}
 				break;
@@ -266,7 +264,6 @@ public class BTDesigner extends JFrame implements AutoCloseable {
 		this.tabbedPane.setTitleAt(index, name);
 	}
 
-	@Override
 	public void close() throws Exception {
 		for (DesignerTab tab : this.tabs) {
 			tab.doc.close();

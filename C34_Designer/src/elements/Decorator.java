@@ -152,7 +152,7 @@ public class Decorator extends GElement implements ArrayElement,
 		Point loc = getLocation().getPoint();
 		Dimension size = getSize().getDimension();
 
-		if (this.property.selected) {
+		if (this.property.leftClicked) {
 			g.setStroke(new BasicStroke(3));
 		}
 

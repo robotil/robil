@@ -34,7 +34,6 @@ import org.xml.sax.SAXException;
 import document.description.TaskDescription;
 import document.history.HistoryManager;
 import document.history.HistoryManagerNotReadyException;
-import document.history.HistoryStackEmptyException;
 import elements.Arrow;
 import elements.Decorator;
 import elements.GElement;
@@ -45,7 +44,7 @@ import elements.Vec;
 import elements.View;
 
 @SuppressWarnings("serial")
-public class Document extends JPanel implements AutoCloseable {
+public class Document extends JPanel {
 
 	public class MouseHandler extends MouseAdapter {
 
@@ -81,7 +80,7 @@ public class Document extends JPanel implements AutoCloseable {
 				GElement e = el.underMouse(ev.getPoint());
 				if (e != null && e.isVisiable) {
 					Document.this.selectedElement = e;
-					Document.this.selectedElement.getProperty().selected = true;
+					Document.this.selectedElement.getProperty().leftClicked = true;
 					repaint();
 					break;
 				}
@@ -91,7 +90,7 @@ public class Document extends JPanel implements AutoCloseable {
 					GElement e = el.underMouse(ev.getPoint());
 					if (e != null && e.isVisiable) {
 						Document.this.selectedElement = e;
-						Document.this.selectedElement.getProperty().selected = true;
+						Document.this.selectedElement.getProperty().leftClicked = true;
 						repaint();
 						break;
 					}
@@ -138,7 +137,7 @@ public class Document extends JPanel implements AutoCloseable {
 							toolSelectionClean();
 						else if (Document.this.creator instanceof Arrow.Reconector) {
 							((Arrow.Reconector) Document.this.creator)
-									.getInstance().getProperty().selected = false;
+									.getInstance().getProperty().leftClicked = false;
 							toolSelectionClean();
 						}
 					}
@@ -186,13 +185,13 @@ public class Document extends JPanel implements AutoCloseable {
 				// System.out.println();
 				// }
 	
-				Document.this.selectedElement.getProperty().selected = false;
+				Document.this.selectedElement.getProperty().leftClicked = false;
 				Document.this.selectedElement = null;
 	
 				if (Document.this.creator != null
 						&& Document.this.creator instanceof Arrow.Reconector) {
 					((Arrow.Reconector) Document.this.creator).getInstance()
-							.getProperty().selected = true;
+							.getProperty().leftClicked = true;
 				}
 	
 				repaint();
@@ -202,8 +201,10 @@ public class Document extends JPanel implements AutoCloseable {
 				// Right click
 				toolSelectionClean();
 				if (Document.this.selectedElement != null) {
-					DesignerPopupMenu popup = new DesignerPopupMenu(Document.this);
+					DesignerPopupMenu popup = new DesignerPopupMenu(Document.this.mainWindow, Document.this);
 					popup.show(e.getComponent(), e.getX(), e.getY());
+					Document.this.selectedElement.getProperty().leftClicked = false;
+					Document.this.selectedElement = null;
 				}
 			}
 			
@@ -403,7 +404,7 @@ public class Document extends JPanel implements AutoCloseable {
 			link.put(t, n);
 			add(n);
 			n.getProperty().loc = n.getProperty().loc.add(new Vec(10, 10));
-			n.getProperty().selected = false;
+			n.getProperty().leftClicked = false;
 		}
 		for (GElement t : targets) {
 			link.get(t).cloneReconnect(link);
@@ -998,7 +999,7 @@ public class Document extends JPanel implements AutoCloseable {
 		try {
 			if (_historyManager.hasUndo())
 				_historyManager.undo();
-		} catch (HistoryStackEmptyException | HistoryManagerNotReadyException e) {
+		} catch (Exception e) {
 			e.printStackTrace();
 		}
 		
@@ -1357,8 +1358,7 @@ public class Document extends JPanel implements AutoCloseable {
 		return "";
 	}
 
-	@Override
-	public void close() throws Exception {
+	public void close() {
 		this._historyManager.finalize();
 	}
 
