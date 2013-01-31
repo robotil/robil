@@ -6,7 +6,8 @@ import rospy
 import actionlib
 from nav_msgs.msg import Odometry
 import C42_DynamicLocomotion.msg
-import C31_PathPlanner.msg
+from C31_PathPlanner.srv import *
+from C31_PathPlanner.msg import C31_Location
 from std_msgs.msg import Float64, Int32
 import geometry_msgs.msg as gm
 import init_zmp
@@ -28,6 +29,7 @@ class ZmpWlkServer(object):
     self._or = gm.Quaternion()
     #tolerance for deviation from goal
     self._tol = 0.1
+    self._nxt_wp = C31_Location()
     #ensure we enter the main loop at least once
     self._dis_from_goal = self._tol + 1
 
@@ -36,13 +38,13 @@ class ZmpWlkServer(object):
     self._pos = odom.pose.pose.position
     self._or = odom.pose.pose.orientation
 
-  def _get_path(self,goal,path_planner = "C31_PathPlanner",srv="C31_GetPath"):
- 
+  def _get_path(self,path_planner = 'getPath'):
+    pth = C31_Location()
     #client for path planning service from C31
     rospy.loginfo("waiting for path planing service")
     rospy.wait_for_service(path_planner)
     try:
-      pth_pln = rospy.ServiceProxy(path_planner, srv)
+      pth_pln = rospy.ServiceProxy(path_planner, C31_GetPath)
       pth = pth_pln()
       return pth
     except rospy.ServiceException, e:
@@ -58,28 +60,25 @@ class ZmpWlkServer(object):
     pass
 
   #def task(self, goal):
-  def task():
+  def task(self, goal):
     
-    Pth = rospy.ServiceProxy("C31_GetPath", srv)
-
-    pth = Pth()
-    pos.x = pth.path.points[0].x#2
-    pos.y = pth.path.points[0].y#0
+    pth = self._get_path()
+    self._nxt_wp.x = pth.path.points[1].x#2
+    self._nxt_wp.y = pth.path.points[1].y#0
     init_zmp.main()
     # start executing the action
     self.walk_pub.publish(Int32(1))
     
     #### LOG TASK PARAMETERS ####
     rospy.loginfo("started ZMPwalk")
-    rospy.loginfo("Target position: x:%s y:%s", pos.x, pos.y)
+    rospy.loginfo("Target position: x:%s y:%s", self._nxt_wp.x, self._nxt_wp.y)
     task_success = True
-    self._tol = goal.tol
 
     #### TASK ####
     while self._dis_from_goal > self._tol:
       #calculate distance from goal
       pos = np.array([self._pos.x,self._pos.y])
-      gl = np.array([pos.x, pos.y])
+      gl = np.array([self._nxt_wp.x, self._nxt_wp.y])
       self._dis_from_goal = np.linalg.norm(gl-pos)
       self._feedback.dis_to_goal = self._dis_from_goal
       self._as.publish_feedback(self._feedback)
@@ -94,7 +93,6 @@ class ZmpWlkServer(object):
     if task_success:
       self._result.res_pos.x = self._pos.x
       self._result.res_pos.y = self._pos.y
-      self._result.res_pos.theta = self._or.z
       self._result.dis = self._dis_from_goal      
       rospy.loginfo('%s: Succeeded' % self._action_name)
       self._as.set_succeeded(self._result)
