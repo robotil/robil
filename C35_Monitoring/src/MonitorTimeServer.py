@@ -43,7 +43,7 @@ class MonitorTimeServer(object):
 		if code == "1":		#This means a task is over
 			start_time = MonitorTimeServer._node_start_times_by_id.get(node_id, self._start_time)     #this assigns start_time with default value of the monitor's start time if the start message for this node did not arrive.
 			MonitorTimeServer._node_execution_times_by_id[node_id] = current_time - start_time
-			print "Node with id=%s has ended after %f seconds" % (node_id, current_time - start_time)
+			print "Node with id=%s has ended after %f seconds" % (node_id, MonitorTimeServer._node_execution_times_by_id[node_id])
 			if self._monitored_node_id == node_id:    
 				print "The node we are monitoring has ended! Time:%f" % MonitorTimeServer._node_execution_times_by_id.get(node_id)
 				self._monitored_task_finished_on_time = True
