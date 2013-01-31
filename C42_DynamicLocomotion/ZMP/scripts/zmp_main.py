@@ -66,17 +66,17 @@ time_step  =  0.01  # [sec]
 
 # Walking Parameters 
 
-step_length = 0.01  # [m]
-step_width  = 0.19  # 0.178  # [m]
-step_time   = 5   # [sec]
+step_length = 0.0001 #0.01  # [m]
+step_width  = 0.175  # 0.178  # [m]
+step_time   = 1.5 #1   # [sec]
 bend_knees  = 0.04  # [m]    
-step_height = 0.05  # [m] 
+step_height = 0.0001 #0.05  # [m] 
 
 # Sigmoid Plot
 
 
-a =  50 #15 #100  # change slop of ZMP -> com
-s =  arange(-0.1*step_time,0.1*step_time+time_step , time_step) #arange(-0.5*step_time,0.5*step_time+time_step , time_step) #
+a =  1 #5 # 50  #100  # change slop of ZMP -> com
+s =  arange(-3*step_time, 3*step_time+time_step , time_step) #arange(-1.5*step_time,1.5*step_time+time_step , time_step) # arange(-0.1*step_time,0.1*step_time+time_step , time_step) #
 sigmoid_x = step_length/(1+exp(-a*s))
 sigmoid_y = step_width/(1+exp(-a*s))
 

@@ -97,8 +97,9 @@ def swing_leg_ik(req):
     desired_normal_force = half_robot_weight - abs(req.pos.COMy/com_y_max) * (half_robot_weight - min_support_force)
 
     # for debug:
+    PSC_swing_leg.ByPassON()
     if req.pos.leg == 1: # if right leg is stance
-         PSC_swing_leg.ByPassON  # bypass controller 
+         PSC_swing_leg.ByPassON()  # bypass controller 
 
     swing_x = req.pos.Swing_x
     swing_y = req.pos.Swing_y
@@ -157,16 +158,16 @@ def stance_leg_ik(req):
 
     (delta,rot) = ns.listener.lookupTransform(com_frame, hip_frame, rospy.Time(0))   # delta is hip - CoM
   
-    delX = 0.020318 -delta[0] # Yuval Comm
+    delX = 0 # 0.020318 -delta[0] # Yuval Comm
 
     #rospy.loginfo('delta[0]=%f' %(delta[0])) 
 
-    # # Yuval Comm
-    if right_leg_is_swing:
-        delY = 0.089139 - delta[1]
-    else:
-        delY = 0.089139 + delta[1]
-   # delY = 0 # Yuval added
+    # # # Yuval Comm
+    # if right_leg_is_swing:
+    #     delY = 0.089139 - delta[1]
+    # else:
+    #     delY = 0.089139 + delta[1]
+    delY = 0 # Yuval added
 
 
     #rospy.loginfo('delta[1]=%f' %(delta[1])) 

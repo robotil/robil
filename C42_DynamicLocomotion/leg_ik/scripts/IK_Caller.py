@@ -45,7 +45,7 @@ stance_leg_ik = rospy.ServiceProxy('stance_leg_ik', LegIk)
 
 def get_from_zmp(msg):
     
-    if msg.leg==1: #right swing leg
+    #if msg.leg==1: #right swing leg
         
         ns.LegAng = stance_leg_ik(msg)
 
@@ -57,6 +57,10 @@ def get_from_zmp(msg):
         ns.l_leg_mhx.publish(ns.LegAng.ang.mhx) #JSC_l_leg_mhx.getCMD(ns.LegAng.ang.mhx) )
         ns.back_mby.publish(ns.LegAng.ang.mby)
         ns.back_ubx.publish(ns.LegAng.ang.ubx)
+
+        rospy.loginfo("JC L_leg: lax = %f effort = %f, uay = %f, kny = %f, uhz = %f, lhy = %f, mhx = %f effort = %f, mby = %f, ubx= %f" %  \
+                          (ns.LegAng.ang.lax, JSC_l_leg_lax.latest_effort, ns.LegAng.ang.uay, ns.LegAng.ang.kny, ns.LegAng.ang.uhz, \
+                           ns.LegAng.ang.lhy, ns.LegAng.ang.mhx, JSC_l_leg_mhx.latest_effort, ns.LegAng.ang.mby, ns.LegAng.ang.ubx))
 
         lax_stance = ns.LegAng.ang.lax
         mhx_stance = ns.LegAng.ang.mhx
@@ -71,31 +75,35 @@ def get_from_zmp(msg):
         ns.r_leg_lhy.publish(ns.LegAng.ang.lhy)
         ns.r_leg_mhx.publish(ns.LegAng.ang.mhx + mhx_stance) #JJSC_r_leg_mhx.getCMD(ns.LegAng.ang.mhx + mhx_stance) )
 
-    else:  #left swing leg
+        rospy.loginfo("JC R_leg: lax = %f cmd = %f effort = %f, uay = %f, kny = %f, uhz = %f, lhy = %f, mhx = %f cmd = %f effort = %f" %  \
+                          (ns.LegAng.ang.lax, ns.LegAng.ang.lax + lax_stance, JSC_r_leg_lax.latest_effort, ns.LegAng.ang.uay, ns.LegAng.ang.kny, ns.LegAng.ang.uhz, \
+                           ns.LegAng.ang.lhy, ns.LegAng.ang.mhx, ns.LegAng.ang.mhx + mhx_stance, JSC_r_leg_mhx.latest_effort))
 
-        ns.LegAng = stance_leg_ik(msg)
+    # else:  #left swing leg
+
+    #     ns.LegAng = stance_leg_ik(msg)
     
-        ns.r_leg_lax.publish(ns.LegAng.ang.lax)
-        ns.r_leg_uay.publish(ns.LegAng.ang.uay)
-        ns.r_leg_kny.publish(ns.LegAng.ang.kny)
-        ns.r_leg_uhz.publish(ns.LegAng.ang.uhz)
-        ns.r_leg_lhy.publish(ns.LegAng.ang.lhy)
-        ns.r_leg_mhx.publish(ns.LegAng.ang.mhx)
-        ns.back_mby.publish(ns.LegAng.ang.mby)
-        ns.back_ubx.publish(ns.LegAng.ang.ubx)
+    #     ns.r_leg_lax.publish(ns.LegAng.ang.lax)
+    #     ns.r_leg_uay.publish(ns.LegAng.ang.uay)
+    #     ns.r_leg_kny.publish(ns.LegAng.ang.kny)
+    #     ns.r_leg_uhz.publish(ns.LegAng.ang.uhz)
+    #     ns.r_leg_lhy.publish(ns.LegAng.ang.lhy)
+    #     ns.r_leg_mhx.publish(ns.LegAng.ang.mhx)
+    #     ns.back_mby.publish(ns.LegAng.ang.mby)
+    #     ns.back_ubx.publish(ns.LegAng.ang.ubx)
         
-        lax_stance = ns.LegAng.ang.lax
-        mhx_stance = ns.LegAng.ang.mhx
-        lhy_stance = ns.LegAng.ang.lhy
+    #     lax_stance = ns.LegAng.ang.lax
+    #     mhx_stance = ns.LegAng.ang.mhx
+    #     lhy_stance = ns.LegAng.ang.lhy
         
-        ns.LegAng = swing_leg_ik(msg)
+    #     ns.LegAng = swing_leg_ik(msg)
 
-        ns.l_leg_lax.publish(ns.LegAng.ang.lax + lax_stance)
-        ns.l_leg_uay.publish(ns.LegAng.ang.uay)
-        ns.l_leg_kny.publish(ns.LegAng.ang.kny)
-        ns.l_leg_uhz.publish(ns.LegAng.ang.uhz)
-        ns.l_leg_lhy.publish(ns.LegAng.ang.lhy  )  #+ lhy_stance
-        ns.l_leg_mhx.publish(ns.LegAng.ang.mhx + mhx_stance)
+    #     ns.l_leg_lax.publish(ns.LegAng.ang.lax + lax_stance)
+    #     ns.l_leg_uay.publish(ns.LegAng.ang.uay)
+    #     ns.l_leg_kny.publish(ns.LegAng.ang.kny)
+    #     ns.l_leg_uhz.publish(ns.LegAng.ang.uhz)
+    #     ns.l_leg_lhy.publish(ns.LegAng.ang.lhy  )  #+ lhy_stance
+    #     ns.l_leg_mhx.publish(ns.LegAng.ang.mhx + mhx_stance)
 
 
 ##########################################################################################
