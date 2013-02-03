@@ -1,0 +1,66 @@
+=====================================================================
+!###-----------C51 Car Operation - high level Driving--------------#!
+=====================================================================
+
+A fuzzy logic controller was implemented in Python code.
+Verify you have 2 files needed for the operation:
+	1. GolfDrive.py
+	2. Point2Point.py
+
+!# Drive using decision making's C31 - Path Planning #!
+-------------------------------------------------------
+
+Please note that you need modules C22, C31, C34 and C51 in your rosworkspace compiled. If one of these modules do not compile or operating abnormaly, please contact the owner of the module.
+
+!#Preperation Steps:#! (this step should be performed only once)
+----------------------
+Create a folder called "tmp" in C34_Executer folder :
+    a.) Create a file named pln (add no extensions). Fill the file with:
+	<plan><seq name="S"><tsk name="!PathPlanning"id="IDPP"/></seq></plan>
+    b.) Create a file named pln1 (add no extensions). Fill the file with: 
+	<plan><seq name="S"><tsk name="PathPlanningFocus(x=10,y=10)" id="IDPPF" /></seq></plan> 
+	!!! - Note - the (x,y) values are the goal of the planner.
+
+!#Run all required modules#!
+----------------------------
+Run the following scripts in the terminal (you will need several terminals):
+
+    roslaunch atlas_utils atlas_golf_cart_fire_hose.launch
+    rostopic pub /drc_world/robot_enter_car geometry_msgs/Pose "position (press TAB)
+    rosrun C34_Executer executer
+    rosrun C22_GroundRecognitionAndMapping C22
+    rosrun C31_PathPlanner gpp
+    roscd C34_Executer
+    rosservice call executer/run T $PWD/tmp/pln
+    rosservice call executer/resume T
+    rosservice call executer/run T1 $PWD/tmp/pln1
+    rosservice call executer/resume T1
+
+!!! Now you should be able to get the path, i.e. a series of way points, using:
+    rosservice call /C31_GlobalPathPlanner/getPath
+
+!#Execute the "Golf Drive" script in order to drive car#!
+---------------------------------------------------------
+go to C51_CarOperation by:
+    roscd C51_CarOperation
+run the python file in the terminal by:
+    python GolfDrive.py
+
+The Golf Cart should now drive through the way points using the car's controller.
+
+==============================
+!!!!!!!!Important Notes!!!!!!!
+==============================
+
+    * The driving operation is operated for now using the golf-carts controllers and not by the robot. Once 		dexterity will finish module C52_CarDriving an update will be released.
+    * It is possible to drive using decision's making module C32 only once since the way points given are not in 	absolute coordinates, but in relative coordinates. Tasks can not be performed, only to verify   	 	 	operability for integration purposes.
+    * If desired, it is possible to drive through a pre given  set of way points as described below. 
+	In this format of driving, obstacle avoidance is still an issue. 
+
+if __name__ == '__main__':
+    try:
+        array=[(W.P.x1,W.P.y1),(W.P.x2,W.P.y2),...]  #Edit this array as you wish
+	#array=getPath() #cross out this line to stop receiving the way points from module C32!!!
+	d=node(array)
+        d.talker() 
+
