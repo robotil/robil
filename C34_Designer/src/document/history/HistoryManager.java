@@ -55,10 +55,17 @@ public class HistoryManager {
 		if (!_sessionDirectory.exists())
 			return;
 		
-		for (File file : _sessionDirectory.listFiles()) 
-			file.delete();
+		clearSessionDirectory();
 		
 		_sessionDirectory.delete();
+	}
+	
+	private void clearSessionDirectory() {
+		if (!_sessionDirectory.exists())
+			return;
+		
+		for (File file : _sessionDirectory.listFiles()) 
+			file.delete();		
 	}
 	
 	private String getCurrentFileName() {
@@ -75,20 +82,27 @@ public class HistoryManager {
 		_sessionId = sessionId;
 		
 		if (isSessionExists(_sessionDirectory)) {
+			// TODO implement
 			restoreSession(_sessionDirectory);
 			_ready = true;
+			
+			// TODO Remove \/ \/ \/
+			createSessionDirectory(_sessionDirectory);
 			// createSnapshot();
 			System.out.println("Session restored from " + _sessionDirectory.getAbsolutePath());
-		}
-		else {
+		} else {
+			// _undoStack.clear();
+			// _redoStack.clear();
+			// clearSessionDirectory();
 			createSessionDirectory(_sessionDirectory);
 			_ready = true;
 			createSnapshot();
 			System.out.println("New history session created at " + _sessionDirectory.getAbsolutePath());
 		}
+		
 	}
 	
-	public void finalize() {
+	public void close() {
 		removeSessionDirectory();
 	}
 	
@@ -136,6 +150,10 @@ public class HistoryManager {
 		_undoStack.push(snapshot);
 		// _currentSnapshot = snapshot;
 		_sequenceNumber++;
+	}
+	
+	public int getUndoCount() {
+		return _undoStack.size() - 1;
 	}
 	
 	public boolean hasUndo() {

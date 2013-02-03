@@ -164,21 +164,22 @@ public class Toolbar extends JPanel {
 		pnl.setPreferredSize(new Dimension(15, 0));
 		buttons.add(pnl);
 
-		btn = new JButton();
-		btn.setText("");
-		btn.setIcon(new ImageIcon(getClass().getClassLoader().getResource("icons/remove.png")));
-		btn.addActionListener(new RemoveAction(designer));
-		buttons.add(btn);
-		btn = new JButton();
-		btn.setText("");
-		btn.setIcon(new ImageIcon(getClass().getClassLoader().getResource("icons/modify.png")));
-		btn.addActionListener(new ModifyAction(designer));
-		buttons.add(btn);
-		btn = new JButton();
-		btn.setText("");
-		btn.setIcon(new ImageIcon(getClass().getClassLoader().getResource("icons/move.png")));
-		btn.addActionListener(new PointAction(designer));
-		buttons.add(btn);
+//		btn = new JButton();
+//		btn.setText("");
+//		btn.setIcon(new ImageIcon(getClass().getClassLoader().getResource("icons/remove.png")));
+//		btn.addActionListener(new RemoveAction(designer));
+//		buttons.add(btn);
+//		btn = new JButton();
+//		btn.setText("");
+//		btn.setIcon(new ImageIcon(getClass().getClassLoader().getResource("icons/modify.png")));
+//		btn.addActionListener(new ModifyAction(designer));
+//		buttons.add(btn);
+//		btn = new JButton();
+//		btn.setText("");
+//		btn.setIcon(new ImageIcon(getClass().getClassLoader().getResource("icons/move.png")));
+//		btn.addActionListener(new PointAction(designer));
+//		buttons.add(btn);
+		
 		pnl = new JPanel();
 		pnl.setPreferredSize(new Dimension(15, 0));
 		buttons.add(pnl);

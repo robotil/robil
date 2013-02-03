@@ -194,7 +194,23 @@ public class BTDesigner extends JFrame {
 		this.tabs.add(this.activeTab);
 
 		panelDoc.add(this.activeTab.doc, BorderLayout.CENTER);
-		this.tabbedPane.addTab("New", panelDoc);
+		this.tabbedPane.addTab(this.activeTab.doc.getShortFilePath(), panelDoc);
+		this.tabbedPane.setTabComponentAt(numOfTabs, new ButtonTabComponent(
+				this.tabbedPane, this));
+		
+		this.tabbedPane.setSelectedIndex(this.tabbedPane.getTabCount() - 1);
+	}
+	
+	public void addNewDocumentTab(String fileName) {
+		int numOfTabs = this.tabbedPane.getTabCount();
+		JPanel panelDoc = new JPanel(new BorderLayout());
+
+		// add new document
+		this.activeTab = new DesignerTab(new Document(this, fileName), null);
+		this.tabs.add(this.activeTab);
+
+		panelDoc.add(this.activeTab.doc, BorderLayout.CENTER);
+		this.tabbedPane.addTab(this.activeTab.doc.getShortFilePath(), panelDoc);
 		this.tabbedPane.setTabComponentAt(numOfTabs, new ButtonTabComponent(
 				this.tabbedPane, this));
 		
@@ -210,11 +226,11 @@ public class BTDesigner extends JFrame {
 			}
 		}
 				
-		addNewDocumentTab();
+		addNewDocumentTab(planFilename);
 		
 		tabbedPane.setSelectedIndex(tabbedPane.getSelectedIndex());
 		
-		getActiveTab().doc.loadPlan(planFilename);
+		// getActiveTab().doc.loadPlan(planFilename);
 		setTabName(tabbedPane.getSelectedIndex(), getActiveTab().doc.getShortFilePath());
 		// tabs.get(tabbedPane.getSelectedIndex()).doc.loadPlan(planFilename);
 		

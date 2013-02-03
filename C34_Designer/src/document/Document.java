@@ -13,9 +13,12 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -80,7 +83,12 @@ public class Document extends JPanel {
 				GElement e = el.underMouse(ev.getPoint());
 				if (e != null && e.isVisiable) {
 					Document.this.selectedElement = e;
-					Document.this.selectedElement.getProperty().leftClicked = true;
+					
+					if (ev.getButton() == MouseEvent.BUTTON1)
+						Document.this.selectedElement.getProperty().leftClicked = true;
+					else if (ev.getButton() == MouseEvent.BUTTON3)
+						Document.this.selectedElement.getProperty().rightClicked = true;
+					
 					repaint();
 					break;
 				}
@@ -90,7 +98,12 @@ public class Document extends JPanel {
 					GElement e = el.underMouse(ev.getPoint());
 					if (e != null && e.isVisiable) {
 						Document.this.selectedElement = e;
-						Document.this.selectedElement.getProperty().leftClicked = true;
+						
+						if (ev.getButton() == MouseEvent.BUTTON1)
+							Document.this.selectedElement.getProperty().leftClicked = true;
+						else if (ev.getButton() == MouseEvent.BUTTON3)
+							Document.this.selectedElement.getProperty().rightClicked = true;
+						
 						repaint();
 						break;
 					}
@@ -201,9 +214,9 @@ public class Document extends JPanel {
 				// Right click
 				toolSelectionClean();
 				if (Document.this.selectedElement != null) {
-					DesignerPopupMenu popup = new DesignerPopupMenu(Document.this.mainWindow, Document.this);
+					DesignerPopupMenu popup = new DesignerPopupMenu(Document.this.mainWindow, Document.this, Document.this.selectedElement);
 					popup.show(e.getComponent(), e.getX(), e.getY());
-					Document.this.selectedElement.getProperty().leftClicked = false;
+					Document.this.selectedElement.getProperty().rightClicked = false;
 					Document.this.selectedElement = null;
 				}
 			}
@@ -247,7 +260,7 @@ public class Document extends JPanel {
 	public boolean copyElement = false;
 	public boolean reconectArrow = false;
 	public Modifier modifier = null;
-	public JLabel tip = null;
+	public JLabel tip = new JLabel();
 	public ArrayList<GElement> arrays = new ArrayList<GElement>();
 	public ArrayList<GElement> elements = new ArrayList<GElement>();
 	public View view = new View();
@@ -257,7 +270,7 @@ public class Document extends JPanel {
 	private String _taskDescriptionFilename;
 	private String _taskDescriptionFilenameOriginal;
 	private Boolean _taskDescriptionExists = false;
-	private Boolean _buildTime = true;
+	private Boolean _buildTime = false;
 	private String absoluteFilePath = "plan.xml";
 
 	private HistoryManager _historyManager = new HistoryManager();
@@ -269,6 +282,7 @@ public class Document extends JPanel {
 
 	public Document(BTDesigner mw) {
 
+		this.absoluteFilePath = new File(Parameters.path_to_plans, getTempFileName()).getAbsolutePath();
 		this.mainWindow = mw;
 		this.view.loc = new Vec(0, 0);
 		this.view.zoom = 1;
@@ -277,8 +291,44 @@ public class Document extends JPanel {
 		addMouseListener(mh);
 		addMouseMotionListener(mh);
 		addMouseWheelListener(mh);
+		
+		try {
+			this._historyManager.init(this, Parameters.path_to_undo, getShortFilePath());
+		} catch (HistoryManagerNotReadyException e) {
+			e.printStackTrace();
+		}
+	}
+	
+	public Document(BTDesigner mw, String fileName) {
+		try {
+			this.absoluteFilePath = new File(fileName).getCanonicalFile().getAbsolutePath();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		this.mainWindow = mw;
+		this.view.loc = new Vec(0, 0);
+		this.view.zoom = 1;
+
+		MouseHandler mh = new MouseHandler();
+		addMouseListener(mh);
+		addMouseMotionListener(mh);
+		addMouseWheelListener(mh);
+		
+		loadPlan(fileName);
+		
+		try {
+			_historyManager.init(this, Parameters.path_to_undo, this.getShortFilePath());
+		} catch (HistoryManagerNotReadyException e) {
+			e.printStackTrace();
+		}
+		
 	}
 
+	private String getTempFileName() {
+		SimpleDateFormat dateFormat = new SimpleDateFormat("dd-MM-yy-HHmmssSS");
+		return "plan" + dateFormat.format(new Date()) + ".xml";
+	}
+	
 	public void activate() {
 		updateUndoRedoButtonsState();
 	}
@@ -538,7 +588,7 @@ public class Document extends JPanel {
 	}
 
 	private String getCurrentWorkingFileForXmlWithJustNames() {
-		return addTextToFileName(this.absoluteFilePath, ".jn");
+		return addTextToFileName(this.absoluteFilePath, "jn");
 	}
 
 	public ArrayList<GElement> getDecorators(Arrow arr) {
@@ -970,13 +1020,6 @@ public class Document extends JPanel {
 	}
 
 	private void onDocumentLoad(String fileName) {
-		if (!_historyManager.isReady()) {
-			try {
-				_historyManager.init(this, "undo", this.getShortFilePath());
-			} catch (HistoryManagerNotReadyException e) {
-				e.printStackTrace();
-			}
-		}
 		
 	}
 
@@ -990,7 +1033,10 @@ public class Document extends JPanel {
 				_historyManager.createSnapshot();
 			} catch (HistoryManagerNotReadyException e) {
 				this.tip.setText("History manager create snapshot exception");
+				System.err.println("Snapshot create failed");
 			}
+		
+		System.out.println("Undo count = " + _historyManager.getUndoCount());
 		
 		updateUndoRedoButtonsState();
 	}
@@ -1359,7 +1405,7 @@ public class Document extends JPanel {
 	}
 
 	public void close() {
-		this._historyManager.finalize();
+		this._historyManager.close();
 	}
 
 }
