@@ -1,4 +1,6 @@
 #include <QImage>
+#include <cv_bridge/cv_bridge.h>
+#include <opencv/highgui.h>
 #include "C11_Node.h"
 
 //void C11_Node::viewImage(const sensor_msgs::ImageConstPtr& msg);
@@ -7,6 +9,7 @@ IC11_Node_Subscriber* C11_Node::pIC11_Node_Subscriber;
 C11_Node::C11_Node(IC11_Node_Subscriber* subscriber)
 {
 	pIC11_Node_Subscriber = subscriber;
+	img_counter = 0;
 }
 
 C11_Node::C11_Node(int argc, char** argv, IC11_Node_Subscriber* subscriber ):
@@ -14,6 +17,7 @@ C11_Node::C11_Node(int argc, char** argv, IC11_Node_Subscriber* subscriber ):
        init_argv(argv)
 {
 	pIC11_Node_Subscriber = subscriber;
+	img_counter = 0;
 }
 
 C11_Node::~C11_Node() {
@@ -46,8 +50,8 @@ bool C11_Node::init() {
 				return false;
 		}
 
-		//it_ = new image_transport::ImageTransport(*nh_);
-		//panoramic_image= it_->subscribe("C21/smallPanorama",1,&viewImage);
+//		it_ = new image_transport::ImageTransport(*nh_);
+//		panoramic_image= it_->subscribe("C21/smallPanorama",1,&viewImage);
 
 		//status_subscriber = nh_->subscribe("c11_stt",1000,&StatusMessageCallback);
 
@@ -56,6 +60,7 @@ bool C11_Node::init() {
 
 
         start();
+        img_counter = 0;
  //       ros::start(); // explicitly needed since our nodehandle is going out of scope.
         return true;
 }
@@ -104,8 +109,27 @@ bool C11_Node::push_img_proccess(C10_Common::push_img::Request  &req,
 	std::cout << "Image step: "<< req.IMG.step << std::endl;
 	if(req.IMG.width > 1 && req.IMG.height > 1)
 	{
-		QImage myImage(req.IMG.data.data(), req.IMG.width, req.IMG.height, req.IMG.step, QImage::Format_RGB888);
-		pIC11_Node_Subscriber->OnImgReceived(myImage);
+		//QImage myImage(req.IMG.data.data(), req.IMG.width, req.IMG.height, req.IMG.step, QImage::Format_RGB888);
+		//pIC11_Node_Subscriber->OnImgReceived(myImage);
+		cv_bridge::CvImagePtr pan;
+		try
+		{
+		  pan = cv_bridge::toCvCopy(req.IMG,enc::RGB8);
+		}
+		catch (cv_bridge::Exception& e)
+		{
+		  ROS_ERROR("cv_bridge exception: %s", e.what());
+		  return false;
+		}
+//		cv::imshow("Image",pan->image);
+		std::string imgName;
+		std::stringstream out;
+		out << "img"<< img_counter << std::endl;
+		imgName = out.str();
+		imgName.append(".jpg");
+		cv::imwrite(imgName,pan->image);
+		pIC11_Node_Subscriber->OnImgReceived(imgName);
+		img_counter++;
 		res.ACK.mes = 1;
 		return true;
 	}

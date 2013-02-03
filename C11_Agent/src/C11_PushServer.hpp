@@ -7,6 +7,7 @@
 #include <C0_RobilTask/RobilTaskAction.h>
 #include <C0_RobilTask/StringOperations.h>
 #include "C21_VisionAndLidar/C21_Pan.h"
+#include "C21_VisionAndLidar/C21_Pic.h"
 //#include <cstdlib>
 #include <sensor_msgs/image_encodings.h>
 #include <image_transport/image_transport.h>
@@ -29,26 +30,34 @@ public:
     TaskResult task(const string& name, const string& uid, Arguments& args){
 
     	ROS_INFO("C11_Agent: PushHMI called!\n");
-       	ros::ServiceClient c21Client = _node.serviceClient<C21_VisionAndLidar::C21_Pan>("C21/Panorama");
+       	ros::ServiceClient c21Client = _node.serviceClient<C21_VisionAndLidar::C21_Pic>("C21/Pic");
 
-  	    C21_VisionAndLidar::C21_Pan srv21;
+//  	    C21_VisionAndLidar::C21_Pan srv21;
+//
+//  	    srv21.request.req.cmd=C21_VisionAndLidar::C21_PANORAMA::TAKE_PICTURE;
+//
+//  	    if (!c21Client.call(srv21))
+//  		{
+//  			ROS_ERROR("couldn't get a picture, exiting\n");
+//  			return TaskResult::FAULT();
+//  		}
+//
+//  	    //C21_VisionAndLidar::C21_Pan srv;
+//  	    srv21.request.req.cmd=C21_VisionAndLidar::C21_PANORAMA::RETURN_PANORAMA;
+//  	    if (!c21Client.call(srv21))
+//  	    {
+//  		    ROS_ERROR("couldn't get a C21 reply, exiting\n");
+//	  		return TaskResult::FAULT();
+//
+//  	    }
 
-  	    srv21.request.req.cmd=C21_VisionAndLidar::C21_PANORAMA::TAKE_PICTURE;
-
-  	    if (!c21Client.call(srv21))
-  		{
-  			ROS_ERROR("couldn't get a picture, exiting\n");
-  			return TaskResult::FAULT();
-  		}
-
-  	    //C21_VisionAndLidar::C21_Pan srv;
-  	    srv21.request.req.cmd=C21_VisionAndLidar::C21_PANORAMA::RETURN_PANORAMA;
-  	    if (!c21Client.call(srv21))
-  	    {
-  		    ROS_ERROR("couldn't get a C21 reply, exiting\n");
-	  		return TaskResult::FAULT();
-
-  	    }
+       	C21_VisionAndLidar::C21_Pic srv21;
+       	srv21.request.req.cmd=C21_VisionAndLidar::C21_PICTURE::LEFT;
+       	if (!c21Client.call(srv21))
+       	{
+       		ROS_ERROR("couldn't get a picture, exiting\n");
+       		return TaskResult::FAULT();
+       	}
 
     	ros::ServiceClient c11Client = _node.serviceClient<C10_Common::push_img>("C11/push_img");
 

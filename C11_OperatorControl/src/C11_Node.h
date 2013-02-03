@@ -77,6 +77,7 @@ private:
   ros::Subscriber status_subscriber;
   int init_argc;
   char** init_argv;
+  int img_counter;
   static IC11_Node_Subscriber* pIC11_Node_Subscriber;
 };
 

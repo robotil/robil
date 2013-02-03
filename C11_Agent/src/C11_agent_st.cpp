@@ -12,6 +12,7 @@
 #include "C11_PushServer.hpp"
 //#include "TaskProxyConnectionByActionLib.h"
 #include "C34_Executer/run.h"
+#include "C34_Executer/resume.h"
 #include <sstream>
 #include <stdlib.h>
 
@@ -34,25 +35,26 @@ bool MissionSelection(C10_Common::mission_selection::Request& req,
 
 	ros::NodeHandle _node;
 
-   	ros::ServiceClient c34Client = _node.serviceClient<C34_Executer::run>("executer/run");
+   	ros::ServiceClient c34RunClient = _node.serviceClient<C34_Executer::run>("executer/run");
 
-   	C34_Executer::run srv34;
+   	C34_Executer::run srv34Run;
 
    	std::string ostr;
    	std::stringstream out;
-   	out << req.MSN.MSN << std::endl;
+   	out <<"id"<< req.MSN.MSN << std::endl;
    	ostr= out.str();
    	ROS_INFO(ostr.data());
-   	srv34.request.tree_id = ostr;
+   	srv34Run.request.tree_id = ostr;
    	//srv34.request.tree_id << req.MSN.MSN << std::endl;
 
    	//ostr << "skill3.xml";
-   	ostr.assign("C34_Designer//plans//skill3.xml");
+   	std::string filename;
+   	filename.assign("git/robil/C34_Designer/plans/skill3.xml");
 
-   	srv34.request.filename = ostr;
+   	srv34Run.request.filename = filename;
 //   	srv34.request.req.filename << "skill3.xml";
 
-  	if (!c34Client.call(srv34))
+  	if (!c34RunClient.call(srv34Run))
   	{
   		ROS_ERROR("send of mission error, exiting\n");
   		return false;
@@ -60,8 +62,18 @@ bool MissionSelection(C10_Common::mission_selection::Request& req,
 
    ROS_INFO("send of mission success");
 
-   std::string str = srv34.response.output;
+   std::string str = srv34Run.response.output;
    ROS_INFO(str.data());
+
+   ros::ServiceClient c34ResumeClient = _node.serviceClient<C34_Executer::resume>("executer/resume");
+   C34_Executer::resume srv34Resume;
+   srv34Resume.request.tree_id = ostr;
+   if (!c34ResumeClient.call(srv34Resume))
+	{
+		ROS_ERROR("resume of mission error, exiting\n");
+		return false;
+	}
+   ROS_INFO("resume of mission success");
 
    return true;
 

@@ -18,6 +18,13 @@ ImageDraw::ImageDraw(int argc, char** argv, QWidget *parent, Qt::WFlags flags)
 	connect(ui.btnPlayPause,SIGNAL(clicked(bool)),this,SLOT(SltOnPlayPauseClick(bool)));
 
 	C11node.init();
+
+//	QString fileName = QFileDialog::getOpenFileName(this,
+//	     tr("Open Image"), "", tr("Image Files (*.png *.jpg *.bmp)"));
+//
+//	QImage image;
+//	image.load(fileName);
+//	SltOnNewImg(image);
 }
 
 ImageDraw::~ImageDraw()
@@ -90,6 +97,14 @@ void ImageDraw::OnImgReceived(QImage image)
 
 }
 
+void ImageDraw::OnImgReceived(std::string fileName)
+{
+	QImage myImage;
+	QString qfileName = QString::fromStdString(fileName);
+	myImage.load(qfileName);
+	emit SigOnNewImg(myImage);
+}
+
 void ImageDraw::SltOnNewImg(QImage image)
 {
 //	QLabel* lbl = new QLabel(this);
@@ -97,12 +112,12 @@ void ImageDraw::SltOnNewImg(QImage image)
 //	ui.layImages->addWidget(lbl);
 	if(!IsUpdateCurrentImg)
 	{
-		IsUpdateCurrentImg = true;
+//		IsUpdateCurrentImg = true;
 		std::cout << "Step4" << std::endl;
 		CloseOpenedImages();
 
 		std::cout << "Step5" << std::endl;
-		QRectF rect(0,0,520,428);
+		QRectF rect(0,0,image.size().width(),image.size().height());
 		QGraphicsScene* pScene = new QGraphicsScene(rect,this);
 
 		QDateTime dateTime = QDateTime::currentDateTime();

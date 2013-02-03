@@ -30,6 +30,7 @@ public:
 
 	//C11_Node_Subscriber implementation
 	virtual void OnImgReceived(QImage image);
+	virtual void OnImgReceived(std::string fileName);
 
 protected:
 	void CloseOpenedImages();

@@ -34,7 +34,8 @@ CGraphicsView::CGraphicsView(int id, QImage image, QString dateTimeStr, QWidget 
 	std::cout << "Step611" << std::endl;
 	try
 	{
-		Image = QPixmap::fromImage(image).scaled( 520,428, Qt::KeepAspectRatio ).toImage();//image.scaled(520,428,Qt::KeepAspectRatio);
+//		Image = QPixmap::fromImage(image).scaled( 520,428, Qt::KeepAspectRatio ).toImage();//image.scaled(520,428,Qt::KeepAspectRatio);
+		Image = image;
 	}
 	catch(...)
 	{
@@ -47,9 +48,9 @@ CGraphicsView::CGraphicsView(int id, QImage image, QString dateTimeStr, QWidget 
 		return;
 	}
 	std::cout << "Step62" << std::endl;
-	resize(520,428);
-	setMaximumHeight(428);
-	setMinimumHeight(428);
+	resize(image.size().width(),image.size().height());
+//	setMaximumHeight(1088);
+//	setMinimumHeight(1088);
 	std::cout << "Step63" << std::endl;
 	setBackgroundBrush(Image);
 	std::cout << "Step64" << std::endl;
