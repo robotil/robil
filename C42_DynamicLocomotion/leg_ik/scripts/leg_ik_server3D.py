@@ -23,6 +23,7 @@ from geometry_msgs.msg import *
 from sensor_msgs.msg import *
 from nav_msgs.msg import *
 import tf
+from Impedance_Control import Position_Stiffness_Controller
 
 
 class Nasmpace5: pass
@@ -33,6 +34,9 @@ ns.EIz = 0.0
 ns.COMx_d = 0.0
 ns.COMy_d = 0.0
 ns.COMz_d = 0.0
+
+PSC_right_swing_leg = Position_Stiffness_Controller('R_Swing Leg', 50000, True, False) # name, stiffness, triggered_controller, bypass_input2output [True/False]
+PSC_left_swing_leg = Position_Stiffness_Controller('L_Swing Leg', 30000, True, False) # name, stiffness, triggered_controller, bypass_input2output [True/False]
 
 ###################################################################
 ##                                                                #
@@ -65,6 +69,20 @@ def get_com(msg):
   ns.EIy = (ns.EIy + ns.EPy)*ns.dt
   ns.EIz = (ns.EIz + ns.EPz)*ns.dt
 
+##########################################################################################
+# request from foot contact publisher to update Position Stiffness Controllers avg force #
+##########################################################################################
+
+def get_r_foot_contact(msg):
+    
+    PSC_right_swing_leg.UpdateForce(msg.force.z)
+    
+    #rospy.loginfo("Stiffness Controllers joint state updated ")  
+
+def get_l_foot_contact(msg):
+    
+    PSC_left_swing_leg.UpdateForce(msg.force.z) 
+
 ###################################################################
 #                       Swing leg IK                              #                                   
 ###################################################################
@@ -77,9 +95,30 @@ def swing_leg_ik(req):
     l2=round(0.42200,6) #l_leg
    # eps = 0.00000001
 
+    ## Desired Force Profile on swing leg
+    half_robot_weight = 864.75/2 # units [N], half robots weight without feet
+    com_y_max = 0.095 # maximal movement of COM in y direction
+    min_support_force = 200 # minimal weight that we want to keep on swing leg while shifting weight to stance leg
+    desired_normal_force = half_robot_weight - abs(req.pos.COMy/com_y_max) * (half_robot_weight - min_support_force)
+
+    # for debug:
+    # PSC_right_swing_leg.ByPassON()
+    if req.pos.leg == 0: # if left leg is swing
+        PSC_right_swing_leg.ByPassON()  # bypass controller
+        PSC_left_swing_leg.ByPassOFF()
+        swing_z = PSC_left_swing_leg.getCMD(req.pos.Swing_z, desired_normal_force)  -l1 -l2 # the height of bend knees is subtracted in zmp_main
+    else:
+        PSC_right_swing_leg.ByPassOFF()
+        PSC_left_swing_leg.ByPassON()  # bypass controller
+        swing_z = PSC_right_swing_leg.getCMD(req.pos.Swing_z, desired_normal_force)  -l1 -l2 # the height of bend knees is subtracted in zmp_main
+
+
+
     swing_x = req.pos.Swing_x
     swing_y = req.pos.Swing_y
-    swing_z = req.pos.Swing_z  -l1 -l2
+
+    #swing_z = req.pos.Swing_z-l1 -l2 # the height of bend knees is subtracted in zmp_main 
+      # TODO: change code so that published ZMP_des contains swing leg ankle position relative to body coord.
     res = LegIkResponse()
 
     if round((swing_x**2+swing_y**2+swing_z**2),5)<=round((l1+l2)**2,5):
@@ -133,16 +172,16 @@ def stance_leg_ik(req):
 
     (delta,rot) = ns.listener.lookupTransform(com_frame, hip_frame, rospy.Time(0))   # delta is hip - CoM
   
-    delX = 0.020318 -delta[0] # Yuval Comm
+    delX = 0 # 0.020318 -delta[0] # Yuval Comm
 
     #rospy.loginfo('delta[0]=%f' %(delta[0])) 
 
-    # # Yuval Comm
-    if right_leg_is_swing:
-        delY = 0.089139 - delta[1]
-    else:
-        delY = 0.089139 + delta[1]
-   # delY = 0 # Yuval added
+    # # # Yuval Comm
+    # if right_leg_is_swing:
+    #     delY = 0.089139 - delta[1]
+    # else:
+    #     delY = 0.089139 + delta[1]
+    delY = 0 # Yuval added
 
 
     #rospy.loginfo('delta[1]=%f' %(delta[1])) 
@@ -200,7 +239,9 @@ def leg_ik_server():
     
     s1 = rospy.Service('swing_leg_ik', LegIk, swing_leg_ik)
     s2 = rospy.Service('stance_leg_ik', LegIk, stance_leg_ik)
-    s3 =rospy.Subscriber('/test_stability/CoM', CoM_Array_msg, get_com)
+    s3 = rospy.Subscriber('/test_stability/CoM', CoM_Array_msg, get_com)
+    s4 = rospy.Subscriber('/atlas/r_foot_contact', Wrench, get_r_foot_contact)
+    s5 = rospy.Subscriber('/atlas/l_foot_contact', Wrench, get_l_foot_contact)
     ns.listener = tf.TransformListener()
     rospy.loginfo("Leg ik server ready") 
     rospy.spin()
