@@ -102,13 +102,14 @@ def swing_leg_ik(req):
     desired_normal_force = half_robot_weight - abs(req.pos.COMy/com_y_max) * (half_robot_weight - min_support_force)
 
     # for debug:
-    # PSC_right_swing_leg.ByPassON()
+    PSC_right_swing_leg.ByPassON()
+    PSC_left_swing_leg.ByPassON()
     if req.pos.leg == 0: # if left leg is swing
         PSC_right_swing_leg.ByPassON()  # bypass controller
-        PSC_left_swing_leg.ByPassOFF()
+        # PSC_left_swing_leg.ByPassOFF()
         swing_z = PSC_left_swing_leg.getCMD(req.pos.Swing_z, desired_normal_force)  -l1 -l2 # the height of bend knees is subtracted in zmp_main
     else:
-        PSC_right_swing_leg.ByPassOFF()
+        # PSC_right_swing_leg.ByPassOFF()
         PSC_left_swing_leg.ByPassON()  # bypass controller
         swing_z = PSC_right_swing_leg.getCMD(req.pos.Swing_z, desired_normal_force)  -l1 -l2 # the height of bend knees is subtracted in zmp_main
 

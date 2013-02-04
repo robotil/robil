@@ -1,0 +1,18 @@
+<launch>
+
+
+ 
+ <!-- zmp_node  -->
+  <node pkg="zmp_walk" type="zmp_main.py" name="zmp_movement_plan" />
+  
+  <!-- Leg IK caller -->
+  <node pkg="leg_ik" type="IK_Caller.py" name="IK_Caller" />
+
+  <!-- Start CoM publisher node -->
+  <node pkg="hrl_kinematics" type="test_stability" name="test_stability"/>
+
+  <!-- Leg IK server -->
+  <node pkg="leg_ik" type="leg_ik_server3D.py" name="leg_ik_server" />
+  
+
+</launch>
