@@ -19,9 +19,9 @@
 # Ros Parameters Initialization
 
 import roslib; roslib.load_manifest('leg_ik')
-from numpy import *
 import rospy, sys,os.path
 from pylab import *
+# from numpy import * # no need after line above
 from leg_ik.msg import *
 from std_msgs.msg import Int32
 
@@ -66,11 +66,11 @@ time_step  =  0.01  # [sec]
 
 # Walking Parameters 
 
-step_length = 0.0001 #0.01  # [m]
+step_length = 0.01 #0.01  # [m]
 step_width  = 0.175  # 0.178  # [m]
 step_time   = 8 #1   # [sec]
 bend_knees  = 0.04  # [m]    
-step_height = 0.0001 #0.03 #0.05  # [m] 
+step_height = 0.03 #0.03 #0.05  # [m] 
 half_trans_ratio = 0.5 # units fraction: 0-0.5
 
 # Sigmoid Plot
@@ -340,7 +340,7 @@ while not rospy.is_shutdown():
       if swing_z_t < 0.00001 and k>1 and not pre_step:
          step_done = 1
          steps_count = steps_count + 1
-         rospy.loginfo("done step number: %d" % (steps_count) )
+         rospy.loginfo("done step number = %d" % (steps_count) )
          rospy.loginfo("time:")
          rospy.loginfo(rospy.get_time())
          
@@ -349,14 +349,14 @@ while not rospy.is_shutdown():
         # show()
        
 
-         rospy.loginfo(steps_count)
+         #rospy.loginfo(steps_count)
          p_ref_x = p_ref_x[k:len(p_ref_x)]
          p_ref_y = p_ref_y[k:len(p_ref_y)]    
          k = 0
-         if steps_count > 0:
+         if steps_count >= 0:
             Leg = int(Leg!=1)
-         rospy.loginfo("Right Leg:")
-         rospy.loginfo(Leg)
+         rospy.loginfo("Right Leg = %d" % (Leg))
+         #rospy.loginfo(Leg)
          if steps_count > -1:
             plot(p_ref_x)
             plot(p_ref_y)
