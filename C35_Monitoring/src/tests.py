@@ -1205,30 +1205,55 @@ def test30():
     
     
 def test31():
-
+    start = time.time()
     tree = xmlTree("tests/event3_m.xml",None,"tests/event3_m_tsk_attribs.xml")
     root = tree.getRoot()
     node.parmetersInTheWorld = 1
 
     root.treeToXml("output/small_test_event3_m.xml") 
-    tree = xmlTree("output/small_test_event3_m.xml")
-    
+    print("test 31.1: success!")
+    node.debugMode = False
+    for i in range(1000):
+        root.runPlan(0)
+    root.treeToXml("output/small_test_event3_m_after_run.xml") 
+    print("test 31.2: success!")
+    print "Success probability in offline mode: %f" % root.getChild(0).getProbAtIndex(0)
+    print "Average success time = %f" % root.getChild(0).getAverageSuccTime(0)
+
+    elapsed = (time.time() - start)
+    print "Time: %f" %elapsed
+
+
+def test32():
+    start = time.time()
+    tree = xmlTree("tests/skill4.xml",None,"tests/skill4_tsk_attribs.xml")
     root = tree.getRoot()
-    root.treeToXml("output/small_test_event3_m_after_read.xml") 
-#    print("test 31.1: success!")
-#    node.debugMode = False
-#    for i in range(2):
-#        root.runPlan(0)
-#    for i in range(2):
-#        root.runPlan(1)
-#    root.treeToXml("output/small_test_event3_m.xml") 
-#    print("test 31.2: success!")
-#    print "Success probability in offline mode: %f" % root.getChild(0).getProbAtIndex(0)
-#    print "Average success time = %f" % root.getChild(0).getAverageSuccTime(0)
-#
-#    elapsed = (time.time() - start)
-#    print "Time: %f" %elapsed
+    node.parmetersInTheWorld = 1
+
+    root.treeToXml("output/skill4.xml") 
+    print("test 32.1: success!")
+    node.debugMode = False
+    for i in range(1000):
+        root.runPlan(0)
+    tree.createWrapperTreeMap("id")    
+#    monitorID = "param=9b82d340-6893-4e68-a676-4d1658aae8d0"
+#    print monitorID.split("=")[1]    
+    monitordNode=tree.getWrappedNode("ae9c53ae-b42c-4f21-ba6a-7b1fa8741c2d")
+    if monitordNode:
+        print "Success probability in offline mode monitor: Mission: %f" % monitordNode.getProbAtIndex(0)
+        print "Average success time monitor: Mission= %f" % monitordNode.getAverageSuccTime(0)
+    monitordNode=tree.getWrappedNode("b9e18714-4869-422c-bc38-cb2dca88c530")
+    if monitordNode:
+        print "Success probability in offline mode monitor: ExitFromCar: %f" % monitordNode.getProbAtIndex(0)
+        print "Average success time monitor: ExitFromCar= %f" % monitordNode.getAverageSuccTime(0)
     
+    root.treeToXml("output/skill4_after_run.xml") 
+    print("test 32.2: success!")
+    print "Success probability in offline mode - root: %f" % root.getChild(0).getProbAtIndex(0)
+    print "Average success time - root= %f" % root.getChild(0).getAverageSuccTime(0)
+
+    elapsed = (time.time() - start)
+    print "Time: %f" %elapsed    
 #changed by RAZ -- we can now import from dist.* files, since the directory has an empty __init__.py file, and python recognizes it as a module.#thanks
 def _createComputedDist(string = None):
     from distributions.computed import Computed
@@ -1246,7 +1271,7 @@ def _createUniformDist(parmA,parmB):
 
 if __name__ == "__main__":
     #run the 10 tests
-    test31()
+    test32()
 #    
 #    if len(sys.argv) == 2 and sys.argv[1] == "all":
 #	test1()
