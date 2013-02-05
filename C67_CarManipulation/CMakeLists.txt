@@ -40,11 +40,17 @@ rosbuild_link_boost(SteeringWheel_server thread)
 rosbuild_add_executable(SteeringWheel_client src/SteeringWheel_client.cpp)
 rosbuild_link_boost(SteeringWheel_client thread)
 
-#rosbuild_add_executable(GasPedal_server src/GasPedal_server.cpp)
-#rosbuild_link_boost(GasPedal_server thread)
+rosbuild_add_executable(GasPedal_server src/GasPedal_server.cpp)
+rosbuild_link_boost(GasPedal_server thread)
 
-#rosbuild_add_executable(BrakePedal_server src/BrakePedal_server.cpp)
-#rosbuild_link_boost(BrakePedal_server thread)
+rosbuild_add_executable(GasPedal_client src/GasPedal_client.cpp)
+rosbuild_link_boost(GasPedal_client thread)
+
+rosbuild_add_executable(BrakePedal_server src/BrakePedal_server.cpp)
+rosbuild_link_boost(BrakePedal_server thread)
+
+rosbuild_add_executable(BrakePedal_client src/BrakePedal_client.cpp)
+rosbuild_link_boost(BrakePedal_client thread)
 
 #rosbuild_add_executable(HandBrake_server src/HandBrake_server.cpp)
 #rosbuild_link_boost(HandBrake_server thread)
