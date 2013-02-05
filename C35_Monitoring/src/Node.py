@@ -183,6 +183,10 @@ class node:
         if elem.tag =="sel": 
             from selectnode import SelectNode 
             return SelectNode(elem,self.myTree,self)
+        #bool node
+        if elem.tag == "bool":
+            from boolean import BooleanNode
+            return BooleanNode(elem,self.myTree,self)
                 
                         
     #print the tree to xml- can be done from every node in the tree.       
@@ -222,6 +226,10 @@ class node:
         for char in name:        
                 #new child is the first child that replace decorator
                 if newChild == None:
+                        #if char is T/F create bool node
+                        if char == "T" or char == "F":
+                            from boolean import BooleanNode
+                            return BooleanNode(element,self.myTree,self)
                         #if char is "L"- create loop node
                         if char == "L" :
                             #addNode func- create the node by tag and appand it to self.childList
