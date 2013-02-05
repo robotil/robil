@@ -1211,7 +1211,8 @@ def test31():
     node.parmetersInTheWorld = 1
 
     root.treeToXml("output/small_test_event3_m.xml") 
-    tree = xmlTree("tests/small_test_event3_m_read.xml")
+    tree = xmlTree("output/small_test_event3_m.xml")
+    
     root = tree.getRoot()
     root.treeToXml("output/small_test_event3_m_after_read.xml") 
 #    print("test 31.1: success!")
@@ -1245,50 +1246,51 @@ def _createUniformDist(parmA,parmB):
 
 if __name__ == "__main__":
     #run the 10 tests
-    
-    if len(sys.argv) == 2 and sys.argv[1] == "all":
-	test1()
-	test2()
-	test3()
-	test4()
-	test5()
-	test6()
-	test7()
-	test8()
-	test9()
-	test10()
-#    test11()
-	test12()
-	test14()
-	test15()
-	test16()
-	test17()
-	test18()
-	test19()
-	test20()
-	test21()
-	test22()
-	test23()
-	test24()
-	test25()
-	test26()
- 	test27()
-  	test28()
-	test29()
-	test31()
-      
-    elif len(sys.argv) == 2 and sys.argv[1] == "events":
-	test21()
-	test22()
-	test23()
-	test27()
-	test28()
-	test29()
-    elif len(sys.argv) == 2 and sys.argv[1] == "demo":
-	test24()
-	test25()
-    elif len(sys.argv) == 2 and sys.argv[1] == "integration":
-	test30()
-    else:
-	print "please provide one of the following command line arguments: [all,events,demo]"
+    test31()
+#    
+#    if len(sys.argv) == 2 and sys.argv[1] == "all":
+#	test1()
+#	test2()
+#	test3()
+#	test4()
+#	test5()
+#	test6()
+#	test7()
+#	test8()
+#	test9()
+#	test10()
+##    test11()
+#	test12()
+#	test14()
+#	test15()
+#	test16()
+#	test17()
+#	test18()
+#	test19()
+#	test20()
+#	test21()
+#	test22()
+#	test23()
+#	test24()
+#	test25()
+#	test26()
+# 	test27()
+#  	test28()
+#	test29()
+#	test31()
+#      
+#    elif len(sys.argv) == 2 and sys.argv[1] == "events":
+#	test21()
+#	test22()
+#	test23()
+#	test27()
+#	test28()
+#	test29()
+#    elif len(sys.argv) == 2 and sys.argv[1] == "demo":
+#	test24()
+#	test25()
+#    elif len(sys.argv) == 2 and sys.argv[1] == "integration":
+#	test30()
+#    else:
+#	print "please provide one of the following command line arguments: [all,events,demo]"
      
