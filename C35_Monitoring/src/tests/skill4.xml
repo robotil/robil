@@ -15,7 +15,7 @@
                                  <seq name="Mission" x="612.6038961038957" y="735.1620879120877" collapsed="false" id="ae9c53ae-b42c-4f21-ba6a-7b1fa8741c2d">
                                        <tsk name="MountVehicle(param=Mount)" x="480.26029122173406" y="818.6180823963249" test_time="0" test_result="true" id="3c7ef23c-ffa3-4d42-aaf5-1c1a6147b5b8" />
                                  </seq>
-                                 <tsk name="MonitorTime(param=563a39ca-99df-45dc-a369-73c7af2fe951)" x="693.9466049080527" y="768.8645026427473" test_time="0" test_result="true" id="6004f2ac-2f5f-45d5-b9c6-c3896d9acf43" />
+                                 <tsk name="MonitorTime(param=ae9c53ae-b42c-4f21-ba6a-7b1fa8741c2d)" x="693.9466049080527" y="768.8645026427473" test_time="0" test_result="true" id="6004f2ac-2f5f-45d5-b9c6-c3896d9acf43" />
                            </par>
                            <seq name="SearchObjectsFromInside" x="901.0934620934592" y="598.0460927960888" collapsed="false" id="e3a15675-85ff-4ceb-a59a-13b98e908d6f">
                                  <tsk name="SearchObject(target=Wheel)" x="860.9823509823462" y="678.8238705738667" test_time="0" test_result="true" id="f49d86d1-1c85-4f22-b006-e83f220eafbb" />
@@ -43,7 +43,7 @@
                            <seq name="ExitFromCar" x="1693.2036928493383" y="492.6073548198277" collapsed="false" id="b9e18714-4869-422c-bc38-cb2dca88c530">
                                  <tsk name="DismountVechicle(param=Dismount)" x="1702.7751214207738" y="614.6513108637806" test_time="0" test_result="true" id="bf3df02a-9fe8-414b-8906-a9c8f49fbbb3" />
                            </seq>
-                           <tsk name="MonitorTime(param=563a39ca-99df-45dc-a369-73c7af2fe951)" x="1953.7027972027959" y="570.6346153846141" test_time="0" test_result="true" id="cca761ab-b52d-43e8-a753-b4c458aea4db" />
+                           <tsk name="MonitorTime(param=b9e18714-4869-422c-bc38-cb2dca88c530)" x="1953.7027972027959" y="570.6346153846141" test_time="0" test_result="true" id="cca761ab-b52d-43e8-a753-b4c458aea4db" />
                      </par>
                </seq>
          </seq>
