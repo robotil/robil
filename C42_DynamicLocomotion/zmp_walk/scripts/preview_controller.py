@@ -2,6 +2,10 @@
 
 ###############################################################################
 ####                                                                         ##
+####  preview_controller.py (based on zmp_main(old).py)                      ##
+####  Created - Yuval 04/2/2013                                              ##
+####  last updated - version 1.0, Yuval 05/2/2013                            ##
+####                                                                         ##
 ####    ZMP Preview Controller:   ##
 ####                       .                   ##
 ####                                                                         ##
@@ -25,7 +29,8 @@ class ZMP_Preview_Controller:
 
     def __init__(self, name, parameters_folder_name, COM ):
         self.name = name
-        #rospy.loginfo("ZMP_Preview_Controller: init %s controller" % (self.name) )
+        # rospy.loginfo("ZMP_Preview_Controller: init %s controller" % (self.name) )
+        # rospy.sleep(1)
 
         # assumption: we start movement from a static position => COM = ZMP point
         self.x = array([COM , 0.0 , 0.0])[:,newaxis]                              
@@ -48,6 +53,12 @@ class ZMP_Preview_Controller:
         self.BufferSize = genfromtxt(parameters_path + 'NL.txt') + 1
 
         #self.PreviewBuffer = zeros( self.BufferSize )
+
+        # for i in range(len(self.Gd)) :
+        #     rospy.loginfo("Gd coefficient in place %i) %.8f" % (i, self.Gd[i]) )
+        # # Wait 1 second
+        # rospy.sleep(1)
+
 
     def getBufferSize(self):
         return (self.BufferSize)

@@ -58,18 +58,18 @@ step_height = 0.0001 #0.03 #0.05  # [m]
 half_trans_ratio = 0.5 # units fraction: 0-0.5
 
 # Preview Controllers:
-Sagital_x_Preview_Controller = ZMP_Preview_Controller('X_sagital','sagital_x',0.0) # name,parameters_folder_name, COM 
-Lateral_y_Preview_Controller = ZMP_Preview_Controller('Y_lateral','lateral_y',step_width/2) # name,parameters_folder_name
+Sagital_x_Preview_Controller = ZMP_Preview_Controller('X_sagital','sagital_x',0.0) # name, parameters_folder_name, initial position of COM 
+Lateral_y_Preview_Controller = ZMP_Preview_Controller('Y_lateral','lateral_y',step_width/2) # name, parameters_folder_name, initial position of COM
 
 NL = Lateral_y_Preview_Controller.getBufferSize() 
 
 
 # Sigmoid Plot
 
-a =  1 #1 #5 # 50  #100  # change slop of ZMP -> com
-s =  arange(-half_trans_ratio*step_time, half_trans_ratio*step_time+dt , dt) #arange(-3*step_time, 3*step_time+dt , dt) #arange(-1.5*step_time,1.5*step_time+dt , dt) # arange(-0.1*step_time,0.1*step_time+dt , dt) #
-sigmoid_x = step_length/(1+exp(-a*s))
-sigmoid_y = step_width/(1+exp(-a*s))
+# a =  1 #1 #5 # 50  #100  # change slop of ZMP -> com
+# s =  arange(-half_trans_ratio*step_time, half_trans_ratio*step_time+dt , dt) #arange(-3*step_time, 3*step_time+dt , dt) #arange(-1.5*step_time,1.5*step_time+dt , dt) # arange(-0.1*step_time,0.1*step_time+dt , dt) #
+# sigmoid_x = step_length/(1+exp(-a*s))
+# sigmoid_y = step_width/(1+exp(-a*s))
 
 # plot(sigmoid_y)
 # show()
