@@ -1202,6 +1202,32 @@ def test30():
     elapsed = (time.time() - start)
     print "Time: %f" %elapsed
     
+    
+    
+def test31():
+
+    tree = xmlTree("tests/event3_m.xml",None,"tests/event3_m_tsk_attribs.xml")
+    root = tree.getRoot()
+    node.parmetersInTheWorld = 1
+
+    root.treeToXml("output/small_test_event3_m.xml") 
+    tree = xmlTree("tests/small_test_event3_m_read.xml")
+    root = tree.getRoot()
+    root.treeToXml("output/small_test_event3_m_after_read.xml") 
+#    print("test 31.1: success!")
+#    node.debugMode = False
+#    for i in range(2):
+#        root.runPlan(0)
+#    for i in range(2):
+#        root.runPlan(1)
+#    root.treeToXml("output/small_test_event3_m.xml") 
+#    print("test 31.2: success!")
+#    print "Success probability in offline mode: %f" % root.getChild(0).getProbAtIndex(0)
+#    print "Average success time = %f" % root.getChild(0).getAverageSuccTime(0)
+#
+#    elapsed = (time.time() - start)
+#    print "Time: %f" %elapsed
+    
 #changed by RAZ -- we can now import from dist.* files, since the directory has an empty __init__.py file, and python recognizes it as a module.#thanks
 def _createComputedDist(string = None):
     from distributions.computed import Computed
@@ -1219,6 +1245,7 @@ def _createUniformDist(parmA,parmB):
 
 if __name__ == "__main__":
     #run the 10 tests
+    
     if len(sys.argv) == 2 and sys.argv[1] == "all":
 	test1()
 	test2()
@@ -1248,6 +1275,8 @@ if __name__ == "__main__":
  	test27()
   	test28()
 	test29()
+	test31()
+      
     elif len(sys.argv) == 2 and sys.argv[1] == "events":
 	test21()
 	test22()
