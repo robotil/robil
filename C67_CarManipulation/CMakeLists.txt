@@ -58,8 +58,11 @@ rosbuild_link_boost(HandBrake_server thread)
 rosbuild_add_executable(HandBrake_client src/HandBrake_client.cpp)
 rosbuild_link_boost(HandBrake_client thread)
 
-#rosbuild_add_executable(GearHandle_server src/GearHandle_server.cpp)
-#rosbuild_link_boost(GearHandle_server thread)
+rosbuild_add_executable(GearHandle_server src/GearHandle_server.cpp)
+rosbuild_link_boost(GearHandle_server thread)
+
+rosbuild_add_executable(GearHandle_client src/GearHandle_client.cpp)
+rosbuild_link_boost(GearHandle_client thread)
 
 #rosbuild_link_boost(${PROJECT_NAME} thread)
 #rosbuild_add_executable(example examples/example.cpp)
