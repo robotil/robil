@@ -1,4 +1,5 @@
 #include "ros/ros.h"
+#include "ros/package.h"
 #include "std_msgs/String.h"
 #include "C11_Agent/C11.h"
 #include "C11_Agent/obstacle_map.h"
@@ -49,7 +50,8 @@ bool MissionSelection(C10_Common::mission_selection::Request& req,
 
    	//ostr << "skill3.xml";
    	std::string filename;
-   	filename.assign("git/robil/C34_Designer/plans/skill3.xml");
+   	filename = ros::package::getPath("C34_Designer");
+   	filename.append("/plans/skill3.xml");
 
    	srv34Run.request.filename = filename;
 //   	srv34.request.req.filename << "skill3.xml";
