@@ -1,0 +1,19 @@
+<package>
+  <description brief="C67_CarManipulation">
+
+     C67_CarManipulation
+
+  </description>
+  <author>Gotesdyner</author>
+  <license>BSD</license>
+  <review status="unreviewed" notes=""/>
+  <url>http://ros.org/wiki/C67_CarManipulation</url>
+  <depend package="std_msgs"/>
+  <depend package="rospy"/>
+  <depend package="roscpp"/>
+  <depend package="roslib"/>
+  <depend package="actionlib"/>
+
+</package>
+
+

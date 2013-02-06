@@ -1,0 +1,9 @@
+#goal definition
+#1:drive, 2:park, 3:reverse
+uint8 targetState
+---
+#result definition
+bool success
+---
+#feedback
+bool busy
