@@ -8,5 +8,5 @@ from MonitorTimeServer import MonitorTimeServer
 
 if __name__ == '__main__':
 	rospy.init_node('C35_Monitoring')
-	MonitorTimeServer("tests/simple_monitor_example.xml")
+	MonitorTimeServer("tests/skill4.xml")
 	rospy.spin()
