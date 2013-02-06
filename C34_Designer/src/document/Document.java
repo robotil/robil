@@ -24,6 +24,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
+import java.util.Vector;
 
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -77,6 +78,8 @@ public class Document extends JPanel {
 
 		@Override
 		public void mousePressed(MouseEvent ev) {
+			
+			_mousePosition = new Vec(ev.getPoint()).sub(Document.this.view.loc).scale(1 / Document.this.view.zoom);
 			
 			Document.this.mousePressed = ev.getPoint();
 			for (GElement el : getReversed(Document.this.elements)) {
@@ -218,7 +221,11 @@ public class Document extends JPanel {
 					popup.show(e.getComponent(), e.getX(), e.getY());
 					Document.this.selectedElement.getProperty().rightClicked = false;
 					Document.this.selectedElement = null;
+				} else {
+					DesignerPopupMenu popup = new DesignerPopupMenu(Document.this.mainWindow, Document.this);
+					popup.show(e.getComponent(), e.getX(), e.getY());
 				}
+				
 			}
 			
 			
@@ -272,7 +279,7 @@ public class Document extends JPanel {
 	private Boolean _taskDescriptionExists = false;
 	private Boolean _buildTime = false;
 	private String absoluteFilePath = "plan.xml";
-
+	private Vec _mousePosition = new Vec(0, 0);
 	private HistoryManager _historyManager = new HistoryManager();
 	private Set<String> savedIds = new HashSet<String>();
 
@@ -293,7 +300,7 @@ public class Document extends JPanel {
 		addMouseWheelListener(mh);
 		
 		try {
-			this._historyManager.init(this, Parameters.path_to_undo, getShortFilePath());
+			this._historyManager.init(this);
 		} catch (HistoryManagerNotReadyException e) {
 			e.printStackTrace();
 		}
@@ -317,13 +324,14 @@ public class Document extends JPanel {
 		loadPlan(fileName);
 		
 		try {
-			_historyManager.init(this, Parameters.path_to_undo, this.getShortFilePath());
+			_historyManager.init(this);
 		} catch (HistoryManagerNotReadyException e) {
 			e.printStackTrace();
 		}
 		
 	}
 
+	
 	private String getTempFileName() {
 		SimpleDateFormat dateFormat = new SimpleDateFormat("dd-MM-yy-HHmmssSS");
 		return "plan" + dateFormat.format(new Date()) + ".xml";
@@ -331,6 +339,55 @@ public class Document extends JPanel {
 	
 	public void activate() {
 		updateUndoRedoButtonsState();
+	}
+	
+	public void setBuildTime(boolean value) {
+		this._buildTime = value;
+	}
+	
+	public Vec getMousePos() {
+		return this._mousePosition;
+	}
+	
+	public void createTask() {
+		GElement el = new Task.Creator().newInstance();
+		el.setView(Document.this.view);
+		if (el instanceof View.ChangesListener)
+			((View.ChangesListener) el).onViewChange();
+		el.getProperty().setCenter(getMousePos());
+		el.modify();
+		add(el);
+		repaint();
+	}
+	
+	public void createDecorator(GElement element) {
+		Decorator.Creator creator = new Decorator.Creator();
+		creator.add(element);
+		GElement el = creator.newInstance();
+		
+		el.setView(Document.this.view);
+		if (el instanceof View.ChangesListener)
+			((View.ChangesListener) el).onViewChange();
+		el.getProperty().setCenter(getMousePos());
+		el.modify();
+		add(el);
+		
+		repaint();
+	}
+	
+	public void createJoint(GElement element) {
+		Joint.Creator creator = new Joint.Creator();
+		creator.add(element);
+		GElement el = creator.newInstance();
+		
+		el.setView(Document.this.view);
+		if (el instanceof View.ChangesListener)
+			((View.ChangesListener) el).onViewChange();
+		el.getProperty().setCenter(getMousePos());
+		el.modify();
+		add(el);
+		
+		repaint();
 	}
 	
 	public void add(GElement el) {
@@ -446,8 +503,11 @@ public class Document extends JPanel {
 	public void copyTree(GElement el) {
 		onBeforeTreeChange(TreeChangeType.TreeCopy, el);
 
+		el.setView(this.view);
+		
 		ArrayList<GElement> targets = searchAllSubelements(el);
 		targets.add(el);
+		
 		HashMap<GElement, GElement> link = new HashMap<GElement, GElement>();
 		for (GElement t : targets) {
 			GElement n = t.clone();
@@ -456,11 +516,75 @@ public class Document extends JPanel {
 			n.getProperty().loc = n.getProperty().loc.add(new Vec(10, 10));
 			n.getProperty().leftClicked = false;
 		}
-		for (GElement t : targets) {
+		
+		for (GElement t : targets) 
 			link.get(t).cloneReconnect(link);
-		}
-
+		
 		onTreeChange(TreeChangeType.TreeCopy, el);
+	}
+	
+	public void copyTree(GElement el, Document sourceDocument) {
+		onBeforeTreeChange(TreeChangeType.TreeCopy, el);
+
+		ArrayList<GElement> targets = sourceDocument.searchAllSubelements(el);
+		targets.add(el);
+		
+		HashMap<GElement, GElement> link = new HashMap<GElement, GElement>();
+		for (GElement t : targets) {
+			GElement n = t.clone();
+			link.put(t, n);
+			add(n);
+			n.getProperty().loc = n.getProperty().loc.add(new Vec(10, 10));
+			n.getProperty().leftClicked = false;
+		}
+		
+		for (GElement t : targets) 
+			link.get(t).cloneReconnect(link);
+		
+		onTreeChange(TreeChangeType.TreeCopy, el);
+	}
+	
+	public void cloneElements(ArrayList<GElement> outElements, ArrayList<GElement> outArrows) {
+		
+		HashMap<GElement, GElement> clonedElements = new HashMap<GElement, GElement>();
+		
+		// Copy arrows
+//		for (GElement arrow : arrays) {
+//			GElement clonedSource = arrow.getAsArrow().source.clone();
+//			ArrayList<GElement> clonedTargets = new ArrayList<GElement>();
+//			
+//			clonedElements.put(arrow.getAsArrow().source, clonedSource);
+//			
+//			for (GElement target : arrow.getAsArrow().targets) {
+//				
+//				clonedElements.put(target, target.clone());
+//				clonedTargets.add(clonedElements.get(target));
+//			}
+//			
+//			outArrows.add(arrow.getAsArrow().clone(clonedSource, clonedTargets));
+//		}
+//		
+		GElement clonedElement;
+		
+		// Copy elements
+		for (GElement element : elements) {
+			clonedElement = element.clone();
+			clonedElements.put(element, clonedElement);
+			outElements.add(clonedElement);
+		}
+		
+		for (GElement arrow : arrays) {
+			ArrayList<GElement> clonedTargets = new ArrayList<GElement>();
+			
+			for (GElement target : arrow.getAsArrow().targets)
+				clonedTargets.add(clonedElements.get(target));
+			
+			Arrow clonedArrow = arrow.getAsArrow().clone(
+					clonedElements.get(arrow.getAsArrow().source), 
+					clonedTargets);
+			
+			outArrows.add(clonedArrow);
+		}
 	}
 
 	public String createXml(Task root, String tab) {
@@ -581,6 +705,14 @@ public class Document extends JPanel {
 				subels.add(arr);
 		}
 		return uniq(subels);
+	}
+	
+	public Arrow getArrow(GElement source) {
+		for (GElement arrow : arrays) 
+			if (arrow.getAsArrow().source == source)
+				return arrow.getAsArrow();
+		
+		return null;
 	}
 
 	private String getCurrentWorkingFile() {
@@ -1011,34 +1143,37 @@ public class Document extends JPanel {
 	private void onBeforeTreeChange(TreeChangeType changeType, GElement element) {
 		// Disable nested calls
 		_treeChangeNestingCounter++;
-		if (_treeChangeEvent) 
-			return;
 		
-		_treeChangeEvent = true;
+		if (!_treeChangeEvent) 
+			_treeChangeEvent = true;
 		
 
 	}
-
-	private void onDocumentLoad(String fileName) {
-		
-	}
-
+	
 	private void onTreeChange(TreeChangeType changeType, GElement element) {
 		_treeChangeNestingCounter--;
 		if (_treeChangeNestingCounter == 0)
 			_treeChangeEvent = false;
-
-		if (_historyManager.isReady() && !_buildTime)
+		
+		if (_historyManager.isReady() && !_buildTime && !_treeChangeEvent)
 			try {
+				// if (!element.isArrow() || (element.isArrow() && _treeChangeNestingCounter == 0))
 				_historyManager.createSnapshot();
 			} catch (HistoryManagerNotReadyException e) {
 				this.tip.setText("History manager create snapshot exception");
 				System.err.println("Snapshot create failed");
 			}
 		
-		System.out.println("Undo count = " + _historyManager.getUndoCount());
+		// System.out.println("Undo count = " + _historyManager.getUndoCount());
+		
+		if (!_treeChangeEvent)
+			_historyManager.printStacks();
 		
 		updateUndoRedoButtonsState();
+	}
+
+	private void onDocumentLoad(String fileName) {
+		
 	}
 	
 	public void undo() {
@@ -1048,6 +1183,8 @@ public class Document extends JPanel {
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
+		
+		_historyManager.printStacks();
 		
 		updateUndoRedoButtonsState();
 	}
@@ -1059,6 +1196,8 @@ public class Document extends JPanel {
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
+		
+		_historyManager.printStacks();
 		
 		updateUndoRedoButtonsState();
 	}
@@ -1405,7 +1544,7 @@ public class Document extends JPanel {
 	}
 
 	public void close() {
-		this._historyManager.close();
+		// this._historyManager.close();
 	}
 
 }

@@ -1,42 +1,57 @@
 package document.history;
 
-import java.io.File;
+import java.util.ArrayList;
 import java.util.Date;
 
 import document.Document;
+import elements.GElement;
 
 class Snapshot {
 	
-	private String _fileName;
 	private Date _date;
-	private boolean _immutable = true;
+	private Document _document;
+	private int _sequenceNumber;
+	ArrayList<GElement> _elements;
+	ArrayList<GElement> _arrows;
 	
-	public Snapshot(String fileName) {
-		this._date = new Date();
-		this._fileName = fileName;
+	private Snapshot(Document document, ArrayList<GElement> elements, ArrayList<GElement> arrows, int sequenceNumber) {
+		this._date 		= new Date();
+		this._document 	= document;
+		this._elements 	= elements;
+		this._arrows 	= arrows;
+		this._sequenceNumber = sequenceNumber;
 	}
 	
-	public static Snapshot create(Document document, String fileName) {
-		Snapshot snapshot = new Snapshot(fileName);
-		snapshot._immutable = false;
-		return document.compile(fileName, false, false) ? snapshot : null;
+	public void activate() {
+		this._document.elements = this._elements;
+		this._document.arrays  	= this._arrows;
+
+		for (GElement element : this._elements) 
+			element.setView(this._document.view);
+		
+		for (GElement element : this._arrows) 
+			element.setView(this._document.view);
+
+		this._document.repaint();
 	}
 	
-	public String getFilename() {
-		return _fileName;
+	public static Snapshot create(Document document, int sequenceNumber) {
+		ArrayList<GElement> elements = new ArrayList<GElement>();
+		ArrayList<GElement> arrows   = new ArrayList<GElement>();
+		document.cloneElements(elements, arrows);
+		
+		// assert elements.size() == document.elements.size() : elements;
+		// assert arrows.size() == document.arrays.size() : arrows;
+		
+		return new Snapshot(document, elements, arrows, sequenceNumber);
 	}
 	
 	public Date getDate() {
 		return _date;
 	}
 	
-	public void delete() {
-		if (!_immutable)
-			new File(_fileName).delete();
-	}
-	
 	@Override
 	public String toString() {
-		return _fileName;
+		return Integer.toString(this._sequenceNumber) + "X" + _date.getTime();
 	}
 }

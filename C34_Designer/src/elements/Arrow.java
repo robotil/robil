@@ -171,6 +171,15 @@ public class Arrow extends GElement {
 		n.lastSelectedSegmentId = this.lastSelectedSegmentId;
 		return n;
 	}
+	
+	public Arrow clone(GElement newSource, ArrayList<GElement> newTargets) {
+		Arrow n = new Arrow();
+		cloneInit(n);
+		n.source = newSource;
+		n.targets.addAll(newTargets);
+		n.lastSelectedSegmentId = this.lastSelectedSegmentId;
+		return n;
+	}
 
 	@Override
 	public void cloneReconnect(Map<GElement, GElement> link) {

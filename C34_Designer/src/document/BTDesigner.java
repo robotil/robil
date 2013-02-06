@@ -9,7 +9,6 @@ import java.awt.Insets;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
 import java.util.ArrayList;
-import java.util.Iterator;
 
 import javax.swing.BorderFactory;
 import javax.swing.ImageIcon;
@@ -17,7 +16,6 @@ import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTabbedPane;
-import javax.swing.UnsupportedLookAndFeelException;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
@@ -244,6 +242,13 @@ public class BTDesigner extends JFrame {
 //		setTabName(this.tabbedPane.getSelectedIndex(), shortName);
 	}
 
+	public void setActiveTab(Document document) {
+		for (int i = 0; i < tabs.size(); i++) {
+			if (tabs.get(i).doc == document)
+				tabbedPane.setSelectedIndex(i);
+		}
+	}
+	
 	public DesignerTab getActiveTab() {
 
 		// if (activeTab == null) {

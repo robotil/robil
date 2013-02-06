@@ -55,7 +55,7 @@ public final class LogManager {
 		_outputStream = createPrintStreamToFile(outputFileName);
 
 		System.setOut(_outputStream);
-		System.setErr(_outputStream);
+		// System.setErr(_outputStream);
 	}
 
 }

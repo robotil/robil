@@ -165,4 +165,37 @@ public abstract class GElement {
 	public GElement underMouse(Point p) {
 		return null;
 	}
+	
+	public boolean isTask() {
+		return this instanceof Task;
+	}
+	
+	public String getTaskType() {
+		if (!isTask())
+			return "";
+		
+		return ((Task)this).type;
+	}
+	
+	public boolean isTaskType() {
+		return getTaskType().equals(Task.TYPE_task);
+	}
+	
+	public boolean isArrow() {
+		return this instanceof Arrow;
+	}
+	
+	public Task getAsTask() {
+		if (!isTask())
+			return null;
+		
+		return (Task)this;
+	}
+	
+	public Arrow getAsArrow() {
+		if (!isArrow())
+			return null;
+		
+		return (Arrow)this;
+	}
 }
