@@ -7,6 +7,7 @@ public class Parameters {
 	public static String path_to_images = "./images";
 	public static String executer_service = "/executer";
 	public static String path_to_lookup = "./plans/lookup.xml";
+	public static String path_to_undo = "./.undo";
 	public static String path_to_address = "./plans/TaskList.xml";
 	public static String path_to_description = "./plans/TaskDescriptions.xml";
 	public static String path_to_plans_on_executer = "{LOCALPATH}";

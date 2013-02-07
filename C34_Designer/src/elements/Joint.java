@@ -103,7 +103,7 @@ public class Joint extends GElement implements Arrow.ArrayElement {
 	public void paint(Graphics2D g) {
 		GraphProp gp = new GraphProp(g);
 		g.setColor(Color.darkGray);
-		if (this.property.selected) {
+		if (this.property.leftClicked) {
 			Point loc = getLocation().getPoint();
 			Dimension size = getSize().getDimension();
 			g.setStroke(new BasicStroke(3));

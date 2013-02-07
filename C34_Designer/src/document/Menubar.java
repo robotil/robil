@@ -68,8 +68,7 @@ public class Menubar extends JMenuBar {
 
 		// task
 		JMenuItem menuItemTask = new JMenuItem("Task", KeyEvent.VK_T);
-		menuItemTask.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_1,
-				ActionEvent.ALT_MASK));
+		menuItemTask.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_1, ActionEvent.ALT_MASK));
 		menuItemTask.setToolTipText("sets mode of selector to create tasks");
 		menuItemTask.addActionListener(new ToolAction(designer,
 				designer.toolbar.creators.get(0)));
@@ -114,14 +113,23 @@ public class Menubar extends JMenuBar {
 
 		ImageIcon icon;
 
+		icon = new ImageIcon(getClass().getClassLoader().getResource(
+				"icons/new_tab.png"));
+		JMenuItem menuItemNew = new JMenuItem("New document");
+		menuItemNew.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_T, ActionEvent.CTRL_MASK));
+		menuItemNew.setToolTipText("Creates new instance of BTDesigner");
+		menuItemNew.addActionListener(new NewWindowAction(designer));
+		menuItemNew.setIcon(icon);
+		menuFile.add(menuItemNew);
+		
+		
 		menuFile.setMnemonic(KeyEvent.VK_F);
 
 		// open file
 		icon = new ImageIcon(getClass().getClassLoader().getResource(
 				"icons/open.png"));
 		JMenuItem menuItemOpen = new JMenuItem("Open", KeyEvent.VK_O);
-		menuItemOpen.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_1,
-				ActionEvent.ALT_MASK));
+		menuItemOpen.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_O, ActionEvent.CTRL_MASK));
 		menuItemOpen.setToolTipText("open file");
 		menuItemOpen.setActionCommand("file_open");
 		menuItemOpen.setIcon(icon);
@@ -129,12 +137,9 @@ public class Menubar extends JMenuBar {
 		menuFile.add(menuItemOpen);
 
 		// load and open
-		icon = new ImageIcon(getClass().getClassLoader().getResource(
-				"icons/load_open.png"));
-		JMenuItem menuItemLoadAndOpen = new JMenuItem("Load and Open",
-				KeyEvent.VK_L);
-		menuItemLoadAndOpen.setAccelerator(KeyStroke.getKeyStroke(
-				KeyEvent.VK_2, ActionEvent.ALT_MASK));
+		icon = new ImageIcon(getClass().getClassLoader().getResource("icons/load_open.png"));
+		JMenuItem menuItemLoadAndOpen = new JMenuItem("Load and Open", KeyEvent.VK_L);
+		menuItemLoadAndOpen.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_O, ActionEvent.CTRL_MASK | ActionEvent.SHIFT_MASK));
 		menuItemLoadAndOpen.setToolTipText("load and open file");
 		menuItemLoadAndOpen.setActionCommand("file_load_and_open");
 		menuItemLoadAndOpen.addActionListener(new LoadAndOpenAction(designer));
@@ -145,8 +150,7 @@ public class Menubar extends JMenuBar {
 		icon = new ImageIcon(getClass().getClassLoader().getResource(
 				"icons/save.png"));
 		JMenuItem menuItemSave = new JMenuItem("Save", KeyEvent.VK_S);
-		menuItemSave.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_3,
-				ActionEvent.ALT_MASK));
+		menuItemSave.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_S, ActionEvent.CTRL_MASK));
 		menuItemSave.setToolTipText("save file");
 		menuItemSave.setActionCommand("file_save");
 		menuItemSave.setIcon(icon);
@@ -156,21 +160,17 @@ public class Menubar extends JMenuBar {
 
 		// save as
 		JMenuItem menuItemSaveAs = new JMenuItem("Save As...", KeyEvent.VK_A);
-		menuItemSaveAs.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_4,
-				ActionEvent.ALT_MASK));
+		menuItemSaveAs.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_S, ActionEvent.CTRL_MASK | ActionEvent.SHIFT_MASK));
 		menuItemSaveAs.setToolTipText("save file as");
 		menuItemSaveAs.setActionCommand("file_save_as");
 		menuItemSaveAs.addActionListener(new SaveXMLAction(designer));
 		menuFile.add(menuItemSaveAs);
 
 		// save image
-		icon = new ImageIcon(getClass().getClassLoader().getResource(
-				"icons/save_image.png"));
+		icon = new ImageIcon(getClass().getClassLoader().getResource("icons/save_image.png"));
 		JMenuItem menuItemSaveImage = new JMenuItem("Save Image", KeyEvent.VK_I);
-		menuItemSaveImage.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_5,
-				ActionEvent.ALT_MASK));
-		menuItemSaveImage
-				.setToolTipText("creates PNG image and saves it locally");
+		menuItemSaveImage.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_I, ActionEvent.CTRL_MASK));
+		menuItemSaveImage.setToolTipText("creates PNG image and saves it locally");
 		menuItemSaveImage.setActionCommand("file_save_image");
 		menuItemSaveImage.setIcon(icon);
 		menuItemSaveImage.addActionListener(new SaveImageAction(designer));
@@ -181,8 +181,7 @@ public class Menubar extends JMenuBar {
 				"icons/compile.png"));
 		JMenuItem menuItemCompile = new JMenuItem("Compile");
 		menuItemCompile.setMnemonic(KeyEvent.VK_C);
-		menuItemCompile.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_6,
-				ActionEvent.ALT_MASK));
+		menuItemCompile.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_B, ActionEvent.CTRL_MASK));
 		menuItemCompile
 				.setToolTipText("validates current plan and if plan is valid, saves it");
 		menuItemCompile.addActionListener(new CompileAction(designer));
@@ -192,8 +191,7 @@ public class Menubar extends JMenuBar {
 		// compile and upload
 		JMenuItem menuItemCompileAndUpload = new JMenuItem(
 				"Compile And Upload", KeyEvent.VK_U);
-		menuItemCompileAndUpload.setAccelerator(KeyStroke.getKeyStroke(
-				KeyEvent.VK_7, ActionEvent.ALT_MASK));
+		menuItemCompileAndUpload.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_B, ActionEvent.CTRL_MASK | ActionEvent.SHIFT_MASK));
 		menuItemCompileAndUpload
 				.setToolTipText("validates current plan and if plan is valid uploads it to remote host (C34_Executer’s host)");
 		// menuItemCompileAndUpload.addActionListener(listener);
@@ -216,8 +214,8 @@ public class Menubar extends JMenuBar {
 				"icons/settings.png"));
 		JMenuItem menuItemProperties = new JMenuItem("Properties",
 				KeyEvent.VK_P);
-		menuItemProperties.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_8,
-				ActionEvent.ALT_MASK));
+		menuItemProperties.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_P,
+				ActionEvent.CTRL_MASK));
 		menuItemProperties.setToolTipText("open properties dialog");
 		menuItemProperties.setActionCommand("open_properties_dialog");
 		menuItemProperties.addActionListener(new PropertiesAction());
@@ -379,15 +377,15 @@ public class Menubar extends JMenuBar {
 		ImageIcon icon;
 
 		// new
-		icon = new ImageIcon(getClass().getClassLoader().getResource(
-				"icons/new_tab.png"));
-		JMenuItem menuItemNew = new JMenuItem("New", KeyEvent.VK_N);
-		menuItemNew.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_1,
-				ActionEvent.ALT_MASK));
-		menuItemNew.setToolTipText("creates new instance of BTDesigner");
-		menuItemNew.addActionListener(new NewWindowAction(designer));
-		menuItemNew.setIcon(icon);
-		menu.add(menuItemNew);
+//		icon = new ImageIcon(getClass().getClassLoader().getResource(
+//				"icons/new_tab.png"));
+//		JMenuItem menuItemNew = new JMenuItem("New", KeyEvent.VK_N);
+//		menuItemNew.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_1,
+//				ActionEvent.ALT_MASK));
+//		menuItemNew.setToolTipText("creates new instance of BTDesigner");
+//		menuItemNew.addActionListener(new NewWindowAction(designer));
+//		menuItemNew.setIcon(icon);
+//		menu.add(menuItemNew);
 
 		// open terminal
 		icon = new ImageIcon(getClass().getClassLoader().getResource(

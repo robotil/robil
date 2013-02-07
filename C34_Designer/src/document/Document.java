@@ -13,14 +13,18 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
+import java.util.Vector;
 
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -34,7 +38,6 @@ import org.xml.sax.SAXException;
 import document.description.TaskDescription;
 import document.history.HistoryManager;
 import document.history.HistoryManagerNotReadyException;
-import document.history.HistoryStackEmptyException;
 import elements.Arrow;
 import elements.Decorator;
 import elements.GElement;
@@ -45,7 +48,7 @@ import elements.Vec;
 import elements.View;
 
 @SuppressWarnings("serial")
-public class Document extends JPanel implements AutoCloseable {
+public class Document extends JPanel {
 
 	public class MouseHandler extends MouseAdapter {
 
@@ -76,12 +79,19 @@ public class Document extends JPanel implements AutoCloseable {
 		@Override
 		public void mousePressed(MouseEvent ev) {
 			
+			_mousePosition = new Vec(ev.getPoint()).sub(Document.this.view.loc).scale(1 / Document.this.view.zoom);
+			
 			Document.this.mousePressed = ev.getPoint();
 			for (GElement el : getReversed(Document.this.elements)) {
 				GElement e = el.underMouse(ev.getPoint());
 				if (e != null && e.isVisiable) {
 					Document.this.selectedElement = e;
-					Document.this.selectedElement.getProperty().selected = true;
+					
+					if (ev.getButton() == MouseEvent.BUTTON1)
+						Document.this.selectedElement.getProperty().leftClicked = true;
+					else if (ev.getButton() == MouseEvent.BUTTON3)
+						Document.this.selectedElement.getProperty().rightClicked = true;
+					
 					repaint();
 					break;
 				}
@@ -91,7 +101,12 @@ public class Document extends JPanel implements AutoCloseable {
 					GElement e = el.underMouse(ev.getPoint());
 					if (e != null && e.isVisiable) {
 						Document.this.selectedElement = e;
-						Document.this.selectedElement.getProperty().selected = true;
+						
+						if (ev.getButton() == MouseEvent.BUTTON1)
+							Document.this.selectedElement.getProperty().leftClicked = true;
+						else if (ev.getButton() == MouseEvent.BUTTON3)
+							Document.this.selectedElement.getProperty().rightClicked = true;
+						
 						repaint();
 						break;
 					}
@@ -138,7 +153,7 @@ public class Document extends JPanel implements AutoCloseable {
 							toolSelectionClean();
 						else if (Document.this.creator instanceof Arrow.Reconector) {
 							((Arrow.Reconector) Document.this.creator)
-									.getInstance().getProperty().selected = false;
+									.getInstance().getProperty().leftClicked = false;
 							toolSelectionClean();
 						}
 					}
@@ -186,13 +201,13 @@ public class Document extends JPanel implements AutoCloseable {
 				// System.out.println();
 				// }
 	
-				Document.this.selectedElement.getProperty().selected = false;
+				Document.this.selectedElement.getProperty().leftClicked = false;
 				Document.this.selectedElement = null;
 	
 				if (Document.this.creator != null
 						&& Document.this.creator instanceof Arrow.Reconector) {
 					((Arrow.Reconector) Document.this.creator).getInstance()
-							.getProperty().selected = true;
+							.getProperty().leftClicked = true;
 				}
 	
 				repaint();
@@ -202,9 +217,15 @@ public class Document extends JPanel implements AutoCloseable {
 				// Right click
 				toolSelectionClean();
 				if (Document.this.selectedElement != null) {
-					DesignerPopupMenu popup = new DesignerPopupMenu(Document.this);
+					DesignerPopupMenu popup = new DesignerPopupMenu(Document.this.mainWindow, Document.this, Document.this.selectedElement);
+					popup.show(e.getComponent(), e.getX(), e.getY());
+					Document.this.selectedElement.getProperty().rightClicked = false;
+					Document.this.selectedElement = null;
+				} else {
+					DesignerPopupMenu popup = new DesignerPopupMenu(Document.this.mainWindow, Document.this);
 					popup.show(e.getComponent(), e.getX(), e.getY());
 				}
+				
 			}
 			
 			
@@ -246,7 +267,7 @@ public class Document extends JPanel implements AutoCloseable {
 	public boolean copyElement = false;
 	public boolean reconectArrow = false;
 	public Modifier modifier = null;
-	public JLabel tip = null;
+	public JLabel tip = new JLabel();
 	public ArrayList<GElement> arrays = new ArrayList<GElement>();
 	public ArrayList<GElement> elements = new ArrayList<GElement>();
 	public View view = new View();
@@ -256,9 +277,9 @@ public class Document extends JPanel implements AutoCloseable {
 	private String _taskDescriptionFilename;
 	private String _taskDescriptionFilenameOriginal;
 	private Boolean _taskDescriptionExists = false;
-	private Boolean _buildTime = true;
+	private Boolean _buildTime = false;
 	private String absoluteFilePath = "plan.xml";
-
+	private Vec _mousePosition = new Vec(0, 0);
 	private HistoryManager _historyManager = new HistoryManager();
 	private Set<String> savedIds = new HashSet<String>();
 
@@ -268,6 +289,7 @@ public class Document extends JPanel implements AutoCloseable {
 
 	public Document(BTDesigner mw) {
 
+		this.absoluteFilePath = new File(Parameters.path_to_plans, getTempFileName()).getAbsolutePath();
 		this.mainWindow = mw;
 		this.view.loc = new Vec(0, 0);
 		this.view.zoom = 1;
@@ -276,10 +298,96 @@ public class Document extends JPanel implements AutoCloseable {
 		addMouseListener(mh);
 		addMouseMotionListener(mh);
 		addMouseWheelListener(mh);
+		
+		try {
+			this._historyManager.init(this);
+		} catch (HistoryManagerNotReadyException e) {
+			e.printStackTrace();
+		}
+	}
+	
+	public Document(BTDesigner mw, String fileName) {
+		try {
+			this.absoluteFilePath = new File(fileName).getCanonicalFile().getAbsolutePath();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		this.mainWindow = mw;
+		this.view.loc = new Vec(0, 0);
+		this.view.zoom = 1;
+
+		MouseHandler mh = new MouseHandler();
+		addMouseListener(mh);
+		addMouseMotionListener(mh);
+		addMouseWheelListener(mh);
+		
+		loadPlan(fileName);
+		
+		try {
+			_historyManager.init(this);
+		} catch (HistoryManagerNotReadyException e) {
+			e.printStackTrace();
+		}
+		
 	}
 
+	
+	private String getTempFileName() {
+		SimpleDateFormat dateFormat = new SimpleDateFormat("dd-MM-yy-HHmmssSS");
+		return "plan" + dateFormat.format(new Date()) + ".xml";
+	}
+	
 	public void activate() {
 		updateUndoRedoButtonsState();
+	}
+	
+	public void setBuildTime(boolean value) {
+		this._buildTime = value;
+	}
+	
+	public Vec getMousePos() {
+		return this._mousePosition;
+	}
+	
+	public void createTask() {
+		GElement el = new Task.Creator().newInstance();
+		el.setView(Document.this.view);
+		if (el instanceof View.ChangesListener)
+			((View.ChangesListener) el).onViewChange();
+		el.getProperty().setCenter(getMousePos());
+		el.modify();
+		add(el);
+		repaint();
+	}
+	
+	public void createDecorator(GElement element) {
+		Decorator.Creator creator = new Decorator.Creator();
+		creator.add(element);
+		GElement el = creator.newInstance();
+		
+		el.setView(Document.this.view);
+		if (el instanceof View.ChangesListener)
+			((View.ChangesListener) el).onViewChange();
+		el.getProperty().setCenter(getMousePos());
+		el.modify();
+		add(el);
+		
+		repaint();
+	}
+	
+	public void createJoint(GElement element) {
+		Joint.Creator creator = new Joint.Creator();
+		creator.add(element);
+		GElement el = creator.newInstance();
+		
+		el.setView(Document.this.view);
+		if (el instanceof View.ChangesListener)
+			((View.ChangesListener) el).onViewChange();
+		el.getProperty().setCenter(getMousePos());
+		el.modify();
+		add(el);
+		
+		repaint();
 	}
 	
 	public void add(GElement el) {
@@ -395,21 +503,88 @@ public class Document extends JPanel implements AutoCloseable {
 	public void copyTree(GElement el) {
 		onBeforeTreeChange(TreeChangeType.TreeCopy, el);
 
+		el.setView(this.view);
+		
 		ArrayList<GElement> targets = searchAllSubelements(el);
 		targets.add(el);
+		
 		HashMap<GElement, GElement> link = new HashMap<GElement, GElement>();
 		for (GElement t : targets) {
 			GElement n = t.clone();
 			link.put(t, n);
 			add(n);
 			n.getProperty().loc = n.getProperty().loc.add(new Vec(10, 10));
-			n.getProperty().selected = false;
+			n.getProperty().leftClicked = false;
 		}
-		for (GElement t : targets) {
+		
+		for (GElement t : targets) 
 			link.get(t).cloneReconnect(link);
-		}
-
+		
 		onTreeChange(TreeChangeType.TreeCopy, el);
+	}
+	
+	public void copyTree(GElement el, Document sourceDocument) {
+		onBeforeTreeChange(TreeChangeType.TreeCopy, el);
+
+		ArrayList<GElement> targets = sourceDocument.searchAllSubelements(el);
+		targets.add(el);
+		
+		HashMap<GElement, GElement> link = new HashMap<GElement, GElement>();
+		for (GElement t : targets) {
+			GElement n = t.clone();
+			link.put(t, n);
+			add(n);
+			n.getProperty().loc = n.getProperty().loc.add(new Vec(10, 10));
+			n.getProperty().leftClicked = false;
+		}
+		
+		for (GElement t : targets) 
+			link.get(t).cloneReconnect(link);
+		
+		onTreeChange(TreeChangeType.TreeCopy, el);
+	}
+	
+	public void cloneElements(ArrayList<GElement> outElements, ArrayList<GElement> outArrows) {
+		
+		HashMap<GElement, GElement> clonedElements = new HashMap<GElement, GElement>();
+		
+		// Copy arrows
+//		for (GElement arrow : arrays) {
+//			GElement clonedSource = arrow.getAsArrow().source.clone();
+//			ArrayList<GElement> clonedTargets = new ArrayList<GElement>();
+//			
+//			clonedElements.put(arrow.getAsArrow().source, clonedSource);
+//			
+//			for (GElement target : arrow.getAsArrow().targets) {
+//				
+//				clonedElements.put(target, target.clone());
+//				clonedTargets.add(clonedElements.get(target));
+//			}
+//			
+//			outArrows.add(arrow.getAsArrow().clone(clonedSource, clonedTargets));
+//		}
+//		
+		GElement clonedElement;
+		
+		// Copy elements
+		for (GElement element : elements) {
+			clonedElement = element.clone();
+			clonedElements.put(element, clonedElement);
+			outElements.add(clonedElement);
+		}
+		
+		for (GElement arrow : arrays) {
+			ArrayList<GElement> clonedTargets = new ArrayList<GElement>();
+			
+			for (GElement target : arrow.getAsArrow().targets)
+				clonedTargets.add(clonedElements.get(target));
+			
+			Arrow clonedArrow = arrow.getAsArrow().clone(
+					clonedElements.get(arrow.getAsArrow().source), 
+					clonedTargets);
+			
+			outArrows.add(clonedArrow);
+		}
 	}
 
 	public String createXml(Task root, String tab) {
@@ -531,13 +706,21 @@ public class Document extends JPanel implements AutoCloseable {
 		}
 		return uniq(subels);
 	}
+	
+	public Arrow getArrow(GElement source) {
+		for (GElement arrow : arrays) 
+			if (arrow.getAsArrow().source == source)
+				return arrow.getAsArrow();
+		
+		return null;
+	}
 
 	private String getCurrentWorkingFile() {
 		return this.absoluteFilePath;
 	}
 
 	private String getCurrentWorkingFileForXmlWithJustNames() {
-		return addTextToFileName(this.absoluteFilePath, ".jn");
+		return addTextToFileName(this.absoluteFilePath, "jn");
 	}
 
 	public ArrayList<GElement> getDecorators(Arrow arr) {
@@ -960,47 +1143,48 @@ public class Document extends JPanel implements AutoCloseable {
 	private void onBeforeTreeChange(TreeChangeType changeType, GElement element) {
 		// Disable nested calls
 		_treeChangeNestingCounter++;
-		if (_treeChangeEvent) 
-			return;
 		
-		_treeChangeEvent = true;
+		if (!_treeChangeEvent) 
+			_treeChangeEvent = true;
 		
 
 	}
-
-	private void onDocumentLoad(String fileName) {
-		if (!_historyManager.isReady()) {
-			try {
-				_historyManager.init(this, "undo", this.getShortFilePath());
-			} catch (HistoryManagerNotReadyException e) {
-				e.printStackTrace();
-			}
-		}
-		
-	}
-
+	
 	private void onTreeChange(TreeChangeType changeType, GElement element) {
 		_treeChangeNestingCounter--;
 		if (_treeChangeNestingCounter == 0)
 			_treeChangeEvent = false;
-
-		if (_historyManager.isReady() && !_buildTime)
+		
+		if (_historyManager.isReady() && !_buildTime && !_treeChangeEvent)
 			try {
+				// if (!element.isArrow() || (element.isArrow() && _treeChangeNestingCounter == 0))
 				_historyManager.createSnapshot();
 			} catch (HistoryManagerNotReadyException e) {
 				this.tip.setText("History manager create snapshot exception");
+				System.err.println("Snapshot create failed");
 			}
 		
+		// System.out.println("Undo count = " + _historyManager.getUndoCount());
+		
+		if (!_treeChangeEvent)
+			_historyManager.printStacks();
+		
 		updateUndoRedoButtonsState();
+	}
+
+	private void onDocumentLoad(String fileName) {
+		
 	}
 	
 	public void undo() {
 		try {
 			if (_historyManager.hasUndo())
 				_historyManager.undo();
-		} catch (HistoryStackEmptyException | HistoryManagerNotReadyException e) {
+		} catch (Exception e) {
 			e.printStackTrace();
 		}
+		
+		_historyManager.printStacks();
 		
 		updateUndoRedoButtonsState();
 	}
@@ -1012,6 +1196,8 @@ public class Document extends JPanel implements AutoCloseable {
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
+		
+		_historyManager.printStacks();
 		
 		updateUndoRedoButtonsState();
 	}
@@ -1357,9 +1543,8 @@ public class Document extends JPanel implements AutoCloseable {
 		return "";
 	}
 
-	@Override
-	public void close() throws Exception {
-		this._historyManager.finalize();
+	public void close() {
+		// this._historyManager.close();
 	}
 
 }

@@ -9,7 +9,6 @@ import java.awt.Insets;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
 import java.util.ArrayList;
-import java.util.Iterator;
 
 import javax.swing.BorderFactory;
 import javax.swing.ImageIcon;
@@ -17,14 +16,13 @@ import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTabbedPane;
-import javax.swing.UnsupportedLookAndFeelException;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
 import logger.LogManager;
 import terminal.communication.RosExecutor;
 
-public class BTDesigner extends JFrame implements AutoCloseable {
+public class BTDesigner extends JFrame {
 
 	public class DesignerTab {
 		public Document doc;
@@ -61,9 +59,7 @@ public class BTDesigner extends JFrame implements AutoCloseable {
 			if ("GTK+".equals(info.getName())) {
 				try {
 					javax.swing.UIManager.setLookAndFeel(info.getClassName());
-				} catch (ClassNotFoundException | InstantiationException
-						| IllegalAccessException
-						| UnsupportedLookAndFeelException e) {
+				} catch (Exception e) {
 					e.printStackTrace();
 				}
 				break;
@@ -196,7 +192,23 @@ public class BTDesigner extends JFrame implements AutoCloseable {
 		this.tabs.add(this.activeTab);
 
 		panelDoc.add(this.activeTab.doc, BorderLayout.CENTER);
-		this.tabbedPane.addTab("New", panelDoc);
+		this.tabbedPane.addTab(this.activeTab.doc.getShortFilePath(), panelDoc);
+		this.tabbedPane.setTabComponentAt(numOfTabs, new ButtonTabComponent(
+				this.tabbedPane, this));
+		
+		this.tabbedPane.setSelectedIndex(this.tabbedPane.getTabCount() - 1);
+	}
+	
+	public void addNewDocumentTab(String fileName) {
+		int numOfTabs = this.tabbedPane.getTabCount();
+		JPanel panelDoc = new JPanel(new BorderLayout());
+
+		// add new document
+		this.activeTab = new DesignerTab(new Document(this, fileName), null);
+		this.tabs.add(this.activeTab);
+
+		panelDoc.add(this.activeTab.doc, BorderLayout.CENTER);
+		this.tabbedPane.addTab(this.activeTab.doc.getShortFilePath(), panelDoc);
 		this.tabbedPane.setTabComponentAt(numOfTabs, new ButtonTabComponent(
 				this.tabbedPane, this));
 		
@@ -212,11 +224,11 @@ public class BTDesigner extends JFrame implements AutoCloseable {
 			}
 		}
 				
-		addNewDocumentTab();
+		addNewDocumentTab(planFilename);
 		
 		tabbedPane.setSelectedIndex(tabbedPane.getSelectedIndex());
 		
-		getActiveTab().doc.loadPlan(planFilename);
+		// getActiveTab().doc.loadPlan(planFilename);
 		setTabName(tabbedPane.getSelectedIndex(), getActiveTab().doc.getShortFilePath());
 		// tabs.get(tabbedPane.getSelectedIndex()).doc.loadPlan(planFilename);
 		
@@ -230,6 +242,13 @@ public class BTDesigner extends JFrame implements AutoCloseable {
 //		setTabName(this.tabbedPane.getSelectedIndex(), shortName);
 	}
 
+	public void setActiveTab(Document document) {
+		for (int i = 0; i < tabs.size(); i++) {
+			if (tabs.get(i).doc == document)
+				tabbedPane.setSelectedIndex(i);
+		}
+	}
+	
 	public DesignerTab getActiveTab() {
 
 		// if (activeTab == null) {
@@ -266,7 +285,6 @@ public class BTDesigner extends JFrame implements AutoCloseable {
 		this.tabbedPane.setTitleAt(index, name);
 	}
 
-	@Override
 	public void close() throws Exception {
 		for (DesignerTab tab : this.tabs) {
 			tab.doc.close();

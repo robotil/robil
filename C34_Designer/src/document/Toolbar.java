@@ -179,6 +179,7 @@ public class Toolbar extends JPanel {
 		btn.setIcon(new ImageIcon(getClass().getClassLoader().getResource("icons/move.png")));
 		btn.addActionListener(new PointAction(designer));
 		buttons.add(btn);
+		
 		pnl = new JPanel();
 		pnl.setPreferredSize(new Dimension(15, 0));
 		buttons.add(pnl);

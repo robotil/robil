@@ -114,6 +114,7 @@ public class Decorator extends GElement implements ArrayElement,
 		Decorator n = new Decorator();
 		cloneInit(n);
 		n.array = this.array;
+		n.text = this.text;
 		return n;
 	}
 
@@ -152,7 +153,7 @@ public class Decorator extends GElement implements ArrayElement,
 		Point loc = getLocation().getPoint();
 		Dimension size = getSize().getDimension();
 
-		if (this.property.selected) {
+		if (this.property.leftClicked) {
 			g.setStroke(new BasicStroke(3));
 		}
 
