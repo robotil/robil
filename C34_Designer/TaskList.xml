@@ -1,3 +1,32 @@
 <tasks>
-  <task name="BodyControl" address="BodyControl" />
+  <task name="DismountVechicle" address="TEST" />
+  <task name="DismountVechicleInit" address="TEST" />
+  <task name="FinishDrive" address="TEST" />
+  <task name="FollowPath" address="TEST" />
+  <task name="GripSteeringWheel" address="TEST" />
+  <task name="HMIResponce" address="TEST" />
+  <task name="InitDrive" address="TEST" />
+  <task name="LocalizationTrack" address="TEST" />
+  <task name="Monitor" address="TEST" />
+  <task name="MountVehicle" address="TEST" />
+  <task name="MountVehicleInit" address="TEST" />
+  <task name="ObstacleDetection" address="TEST" />
+  <task name="PathPlanning" address="TEST" />
+  <task name="PathPlanningFocus" address="TEST" />
+  <task name="PlaceFeetOnPedals" address="TEST" />
+  <task name="PlanDetour" address="TEST" />
+  <task name="PostureControl" address="TEST" />
+  <task name="PushHMI" address="TEST" />
+  <task name="SearchObject" address="TEST" />
+  <task name="StandUp" address="TEST" />
+  <task name="Stop" address="TEST" />
+  <task name="TestPedals" address="TEST" />
+  <task name="TestSteering" address="TEST" />
+  <task name="TrackObject" address="TEST" />
+  <task name="TurnTo" address="TEST" />
+  <task name="untilOperatorIntervention" address="TEST" />
+  <task name="untilSpeedAveregeIsLowerThen" address="TEST" />
+  <task name="WayPointsDriving" address="TEST" />
+  <task name="whilePlaceToThreadIn" address="TEST" />
+  <task name="whileSolution" address="TEST" />
 </tasks>
