@@ -40,7 +40,7 @@
 C22_Node::C22_Node(){
 	_myMatrix=new MapMatrix();
 	_myPlanes=new std::vector<pclPlane*>();
-	pointCloud_sub=nh_.subscribe("/multisense_sl/points2",1,&C22_Node::callback,this);
+	pointCloud_sub=nh_.subscribe("/multisense_sl/camera/points2",1,&C22_Node::callback,this);
 	ROS_INFO("finished subscribing\n");
 	service = nh_.advertiseService("C22", &C22_Node::proccess, this); //Specifying what to do when a reconstructed 3d scene is requested
 	service2 = nh_.advertiseService("C22/C24", &C22_Node::proccess2, this); //Specifying what to do when a reconstructed 3d scene is requested
@@ -55,7 +55,7 @@ C22_Node::C22_Node(){
  */
 bool C22_Node::proccess(C22_GroundRecognitionAndMapping::C22::Request  &req,
 	C22_GroundRecognitionAndMapping::C22::Response &res ){
-	ROS_INFO("recived request, tying to fetch data\n");
+	ROS_INFO("recived request, trying to fetch data\n");
 	res.drivingPath.row.resize(_myMatrix->data->size());
 	for(int i=0;i<_myMatrix->data->size();i++){
 		res.drivingPath.row.at(i).column.resize(_myMatrix->data->at(i)->size());

@@ -43,7 +43,7 @@ public:
 	  * constructor, initializes the ROS node, subscribe it to the given topics and instruct it to provide the service
 	  */
 	  C25_Node(int argc, char **argv):
-		  imu_sub(nh_,"imu",1),
+		  imu_sub(nh_,"/atlas/imu",1),
 		  pos_sub(nh_,"ground_truth_odom",1),
 		  sync(MySyncPolicy(10), imu_sub, pos_sub)
 	  {
