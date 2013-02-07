@@ -33,10 +33,11 @@ from zmp_profiles import *
 ######### Profile: Start_lateral_y_weight_to_left_foot ###########
 
 # Walking Parameters
-ZMP_start_pos = 0.05 #0.05
+ZMP_start_pos = 0.0 #0.05
 ZMP_start_pos_step1 = 0.0
 step_width = 0.2
 step_length = 0.1
+step_length2 = 0.2
 trans_ratio_of_step = 0.8 #0.5
 trans_slope_steepens_factor = 2
 step_time = 8
@@ -47,14 +48,25 @@ p_ref_x_start = Start_sagital_x(ZMP_start_pos, step_length, trans_ratio_of_step,
 p_ref_y_start = Start_lateral_y_weight_to_left_foot(ZMP_start_pos, step_width, trans_ratio_of_step, trans_slope_steepens_factor, step_time, sample_time)
 
 p_res_x_forward_step = Step_forward_x(ZMP_start_pos_step1, step_length, trans_ratio_of_step, trans_slope_steepens_factor, step_time, sample_time)
+p_res_x_forward_step2 = Step_forward_x(ZMP_start_pos_step1, step_length2, trans_ratio_of_step, trans_slope_steepens_factor, step_time, sample_time)
+
 p_ref_y_step_right = Step_onto_right_foot(ZMP_start_pos_step1, step_width, trans_ratio_of_step, trans_slope_steepens_factor, step_time, sample_time)
 p_ref_y_step_left = Step_onto_left_foot(ZMP_start_pos_step1, step_width, trans_ratio_of_step, trans_slope_steepens_factor, step_time, sample_time)
 
-p_ref_x = r_[ p_ref_x_start, step_length/2 + p_res_x_forward_step, step_length*3/2 + p_res_x_forward_step ] #  
-p_ref_y = r_[ p_ref_y_old_correction + p_ref_y_start, p_ref_y_old_correction + p_ref_y_step_right, p_ref_y_old_correction + p_ref_y_step_left ]
+p_ref_x_stop = Stop_sagital_x(ZMP_start_pos, step_length, trans_ratio_of_step, trans_slope_steepens_factor, step_time, sample_time)
+p_ref_y_stop_from_left = Stop_lateral_y_from_left_foot(ZMP_start_pos, step_width, trans_ratio_of_step, trans_slope_steepens_factor, step_time, sample_time)
+p_ref_y_stop_from_right = Stop_lateral_y_from_right_foot(ZMP_start_pos, step_width, trans_ratio_of_step, trans_slope_steepens_factor, step_time, sample_time)
+
+p_ref_const_x = Constant_Template(step_length*3, step_time, sample_time)
+
+p_ref_x = r_[ p_ref_x_start, step_length/2 + p_res_x_forward_step2, step_length*1/2 + step_length2 + p_res_x_forward_step, step_length*3/2 + step_length2 + p_ref_x_stop ] # 
+p_ref_x_r = r_[ p_ref_x_start, step_length/2 + p_res_x_forward_step, step_length*3/2 + p_res_x_forward_step, step_length*5/2 + p_ref_x_stop, p_ref_const_x ]
+
+p_ref_y = r_[ p_ref_y_old_correction + p_ref_y_start, p_ref_y_old_correction + p_ref_y_step_right, p_ref_y_old_correction + p_ref_y_step_left, p_ref_y_old_correction + p_ref_y_stop_from_left ]
+p_ref_y_c = r_[ p_ref_y_old_correction + p_ref_y_start, p_ref_y_old_correction + p_ref_y_step_right, p_ref_y_old_correction + p_ref_y_step_left, p_ref_y_old_correction + p_ref_y_step_right, p_ref_y_old_correction + p_ref_y_stop_from_right ]
 
 
-plot(p_ref_x,'g-',p_ref_y,'b-') #plot(p_ref_y,'b-')
+plot(p_ref_x,'g-', p_ref_x_r,'r--', p_ref_y,'b-', p_ref_y_c,'c--') #plot(p_ref_y,'b-')
 grid(True)
 show()
 

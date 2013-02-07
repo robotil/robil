@@ -4,10 +4,12 @@
 ####                                                                         ##
 ####  zmp_profiles.py (based on zmp_main(old).py)                            ##
 ####  Created - Yuval 05/2/2013 	                                         ##
-####  last updated - version 1.0, Yuval 05/2/2013                            ##
+####  last updated - version 1.0, Yuval 07/2/2013                            ##
 ####                                                                         ##
 ####    Used for creating ZMP reference profiles in the sagital (x) and      ## 
-####    lateral (y) planes.                                                  ##
+####    lateral (y) planes. Each function describes a desired template of    ##
+####    ZMP refrence motion. The templates are replicated by the Preview     ##
+####    Buffer to achieve the desired walking pattern.                       ##
 ####    Directions: x is the forward direction of the robot, y is the left   ##
 ####    of the robot (and z is up).                                          ##
 ####    The reference profiles are in world coordinate system, where the     ##
@@ -70,6 +72,23 @@ def  transitionSigmoid_secondHalf(step_size, trans_slope_steepens_factor, number
 #     return (sigmoid)
 
 
+#################################################################
+#                                                               #
+#              ZMP Reference Profile Templates                  #
+#                                                               #
+#################################################################
+
+def  Constant_Template(const_value, step_time, sample_time):
+    samples_in_step = ceil (step_time / sample_time)
+
+    # step 1 : Constant value
+    p_ref = const_value*ones( samples_in_step )
+
+    return (p_ref)
+
+
+
+
 #######################################################
 #                                                     #
 #              sagital profiles  (x)                  #
@@ -123,6 +142,30 @@ def  Step_forward_x(ZMP_start_pos, step_length, trans_ratio_of_step, trans_slope
     half_sigmoid_x_end = transitionSigmoid_firstHalf(half_step_length, trans_slope_steepens_factor, samples_in_end_step_trans, sample_time)
 
     p_ref_x = r_[ ZMP_start_pos + half_sigmoid_x_begin, p_ref1x , half_sigmoid_x_end + half_step_length ]
+
+    return (p_ref_x)
+
+def  Stop_sagital_x(ZMP_start_pos, step_length, trans_ratio_of_step, trans_slope_steepens_factor, step_time, sample_time):
+    samples_in_step = ceil (step_time / sample_time)
+    samples_in_transition = floor (trans_ratio_of_step * samples_in_step)
+    samples_in_start_step_trans = floor (samples_in_transition/2)
+    samples_in_end_step_trans = samples_in_transition - samples_in_start_step_trans
+    samples_in_step_without_trans = samples_in_step - samples_in_transition
+    # One step sequence is divided into the following sampling order:
+    # 1) samples_in_start_step_trans
+    # 2) samples_in_step_without_trans
+    # 3) samples_in_end_step_trans
+    # total number of samples = samples_in_step
+
+    half_step_length = step_length/2
+
+    # step 1 begin : transition
+    half_sigmoid_x_begin = transitionSigmoid_secondHalf( half_step_length - ZMP_start_pos, trans_slope_steepens_factor, samples_in_start_step_trans, sample_time)
+    
+    # step 1 middle to step 2 end: no movement
+    p_ref1x = half_step_length*ones( samples_in_step_without_trans + samples_in_end_step_trans + samples_in_step )
+
+    p_ref_x = r_[ ZMP_start_pos + half_sigmoid_x_begin , ZMP_start_pos + p_ref1x ]
 
     return (p_ref_x)
 
@@ -223,6 +266,73 @@ def  Step_onto_left_foot(ZMP_start_pos, step_width, trans_ratio_of_step, trans_s
 
 
     p_ref_y = r_[ ZMP_start_pos + half_sigmoid_y_begin , p_ref1y, step_width/2 - half_sigmoid_y ]
+
+    return (p_ref_y)
+
+
+def  Stop_lateral_y_from_left_foot(ZMP_start_pos, step_width, trans_ratio_of_step, trans_slope_steepens_factor, step_time, sample_time):
+    samples_in_step = ceil (step_time / sample_time)
+    samples_in_transition = floor (trans_ratio_of_step * samples_in_step)
+    samples_in_start_step_trans = floor (samples_in_transition/2)
+    samples_in_end_step_trans = samples_in_transition - samples_in_start_step_trans
+    samples_in_step_without_trans = samples_in_step - samples_in_transition
+    # One step sequence is divided into the following sampling order:
+    # 1) samples_in_start_step_trans 
+    # 2) samples_in_step_without_trans
+    # 3) samples_in_end_step_trans
+    # total number of samples = samples_in_step
+
+    ## Step onto right foot:
+    # step 1 begin : transition
+    half_sigmoid_y_begin = transitionSigmoid_secondHalf(-(step_width/2 + ZMP_start_pos), trans_slope_steepens_factor, samples_in_start_step_trans, sample_time)
+    
+    # step 1 middle: with out transitions
+    p_ref1y = -step_width/2*ones( samples_in_step_without_trans )
+
+    ## move and stay at double support:
+    # step 1 to step 2 transition:
+    samples_in_trans = samples_in_end_step_trans + samples_in_start_step_trans
+    sigmoid_y_small_step = transitionSigmoid( step_width/2 - ZMP_start_pos, trans_slope_steepens_factor, samples_in_trans, sample_time )
+
+    # step 2 middle and end: 
+    p_ref2y = zeros( samples_in_step_without_trans + samples_in_end_step_trans )
+
+
+
+    p_ref_y = r_[ ZMP_start_pos + half_sigmoid_y_begin , p_ref1y, sigmoid_y_small_step - step_width/2, p_ref2y ]
+
+    return (p_ref_y)
+
+def  Stop_lateral_y_from_right_foot(ZMP_start_pos, step_width, trans_ratio_of_step, trans_slope_steepens_factor, step_time, sample_time):
+    samples_in_step = ceil (step_time / sample_time)
+    samples_in_transition = floor (trans_ratio_of_step * samples_in_step)
+    samples_in_start_step_trans = floor (samples_in_transition/2)
+    samples_in_end_step_trans = samples_in_transition - samples_in_start_step_trans
+    samples_in_step_without_trans = samples_in_step - samples_in_transition
+    # One step sequence is divided into the following sampling order:
+    # 1) samples_in_start_step_trans 
+    # 2) samples_in_step_without_trans
+    # 3) samples_in_end_step_trans
+    # total number of samples = samples_in_step
+
+    ## Step onto right foot:
+    # step 1 begin : transition
+    half_sigmoid_y_begin = transitionSigmoid_secondHalf( (step_width/2 - ZMP_start_pos), trans_slope_steepens_factor, samples_in_start_step_trans, sample_time)
+    
+    # step 1 middle: with out transitions
+    p_ref1y = step_width/2*ones( samples_in_step_without_trans )
+
+    ## move and stay at double support:
+    # step 1 to step 2 transition:
+    samples_in_trans = samples_in_end_step_trans + samples_in_start_step_trans
+    sigmoid_y_small_step = transitionSigmoid( -(step_width/2 + ZMP_start_pos), trans_slope_steepens_factor, samples_in_trans, sample_time )
+
+    # step 2 middle and end: 
+    p_ref2y = zeros( samples_in_step_without_trans + samples_in_end_step_trans )
+
+
+
+    p_ref_y = r_[ ZMP_start_pos + half_sigmoid_y_begin , p_ref1y, step_width/2 + sigmoid_y_small_step, p_ref2y ]
 
     return (p_ref_y)
 
