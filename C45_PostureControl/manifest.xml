@@ -15,10 +15,13 @@
   <depend package="roslib"/>
   <depend package="std_msgs"/>
   <depend package="actionlib_msgs"/>
+  <depend package="osrf_msgs"/>
   <depend package="hrl_kinematics"/>
   <depend package="control_toolbox"/>
   <depend package="pr2_controllers_msgs"/>
-
+  <depend package="sensor_msgs"/>
+  <depend package="control_msgs"/>
+  
 </package>
 
 
