@@ -6,8 +6,32 @@ import matplotlib.pyplot as plt
 def listUpt(list, obj):
         list.append(obj)
         return list
+def plotGraph(DATA):
+        print DATA.DistanceErrorLst
+        #print DATA.MyPathLst
+        print DATA.PassedWayPointLst
+        print DATA.WayPointLst
+        print DATA.WayPointLst[:][:][0]
+        for i, val in enumerate(DATA.WayPointLst):
+            print i, val
+            #plt.plot(DATA.WayPointLst[i][0], DATA.WayPointLst[i][1], 'r*',  markersize=14, label='WP Path')
+        #plt.plot(xo, yo, label='WP Path')
+        #plt.quiver(xo[:-1], yo[:-1], xo[1:]-xo[:-1], yo[1:]-yo[:-1],label='WP Path', scale_units='xy', angles='xy', scale=1)
+        myPath=DATA.MyPathLst[::100]
+        for i, val in enumerate(myPath):
+            print i
+            plt.plot(DATA.MyPathLst[i][0], DATA.MyPathLst[i][1], label="Golf Cart's Path")
+        #plt.plot(xe, ye,'r*',  markersize=14, label="arrived at way Point")
+        #plt.grid()
+        #plt.xlabel("X")
+        #plt.ylabel("Y")
+        #plt.title("Autonomus car drive via given way points using FLC")
+        #plt.legend(loc="best")
+        #plt.grid
+        #row_label=['Way Point', 'End of WP', 'Distance Error']
+        plt.show()
 
-def plotGraph( actlist, clist, erlist,olist):
+def plotGraphs( actlist, clist, erlist,olist):
         lst1, lst2 = [], []
         xe=[]
         ye=[]
