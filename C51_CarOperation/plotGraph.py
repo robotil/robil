@@ -8,19 +8,27 @@ def listUpt(list, obj):
         return list
 def plotGraph(DATA):
         print DATA.DistanceErrorLst
-        #print DATA.MyPathLst
-        print DATA.PassedWayPointLst
-        print DATA.WayPointLst
-        print DATA.WayPointLst[:][:][0]
-        for i, val in enumerate(DATA.WayPointLst):
-            print i, val
+        print "here", DATA.MyPathLst[-1]
+        print "x", DATA.MyPathLst[-1][0]
+        print "y", DATA.MyPathLst[-1][1]
+        print "time", DATA.MyPathLst[-1][2]
+        #print DATA.PassedWayPointLst
+        #print DATA.WayPointLst
+        #print DATA.WayPointLst[:][:][0]
+        #for i, val in enumerate(DATA.WayPointLst):
+           
             #plt.plot(DATA.WayPointLst[i][0], DATA.WayPointLst[i][1], 'r*',  markersize=14, label='WP Path')
         #plt.plot(xo, yo, label='WP Path')
         #plt.quiver(xo[:-1], yo[:-1], xo[1:]-xo[:-1], yo[1:]-yo[:-1],label='WP Path', scale_units='xy', angles='xy', scale=1)
-        myPath=DATA.MyPathLst[::100]
-        for i, val in enumerate(myPath):
-            print i
-            plt.plot(DATA.MyPathLst[i][0], DATA.MyPathLst[i][1], label="Golf Cart's Path")
+        myPath=DATA.MyPathLst[::500]
+        myPathX=[]
+        myPathY=[]
+        myPathTime=[]
+        for val in myPath:
+            myPathX.append(val[0])
+            myPathY.append(val[1])
+            myPathTime.append(val[2])
+        plt.plot(myPathX, myPathY, label="Golf Cart's Path")
         #plt.plot(xe, ye,'r*',  markersize=14, label="arrived at way Point")
         #plt.grid()
         #plt.xlabel("X")

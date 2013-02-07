@@ -102,7 +102,7 @@ class node:
                 break
         #------------------Pull hand brake - off -------------------------#
         hb.pullHB()   
-        plotGraph(DATA)       
+        #plotGraph(DATA)       
 
 class handB:
     handbrake=1
@@ -191,7 +191,8 @@ if __name__ == '__main__':
         rospy.init_node('talker')
         #array=getPath()
         #array=[(10, 19), (0, 0)]
-        array=[(200, 200),(26, -16),  (-20, -20), (-10, -10), (0, 0)]
+        array=[(26, -16),  (-20, -20), (-10, -10), (0, 0)]
+        #array=[(6, -6)  , (0, 0)]
 
         d=node(array)
         d.talker()   
