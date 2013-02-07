@@ -4,7 +4,7 @@
 
 A fuzzy logic controller was implemented in Python code.
 Verify you have 2 files needed for the operation:
-	1. GolfDrive.py
+	1. DRC_Vehicle_Drive.py
 	2. Point2Point.py
 
 !# Drive using decision making's C31 - Path Planning #!
@@ -25,8 +25,8 @@ Create a folder called "tmp" in C34_Executer folder :
 ----------------------------
 Run the following scripts in the terminal (you will need several terminals):
 
-    roslaunch atlas_utils atlas_golf_cart_fire_hose.launch
-    rostopic pub /drc_world/robot_enter_car geometry_msgs/Pose "position (press TAB)
+    roslaunch atlas_utils atlas_drc_vehicle_fire_hose.launch
+    rostopic pub --once /drc_world/robot_enter_car geometry_msgs/Pose {}'
     rosrun C34_Executer executer
     rosrun C22_GroundRecognitionAndMapping C22
     rosrun C31_PathPlanner gpp
@@ -39,20 +39,20 @@ Run the following scripts in the terminal (you will need several terminals):
 !!! Now you should be able to get the path, i.e. a series of way points, using:
     rosservice call /C31_GlobalPathPlanner/getPath
 
-!#Execute the "Golf Drive" script in order to drive car#!
+!#Execute the "DRC Vehicle Drive" script in order to drive car#!
 ---------------------------------------------------------
 go to C51_CarOperation by:
     roscd C51_CarOperation
 run the python file in the terminal by:
-    python GolfDrive.py
+     python DRC_Vehicle_Drive.py 
 
-The Golf Cart should now drive through the way points using the car's controller.
+The DRC Vehicle Cart should now drive through the way points using the car's controller.
 
 ==============================
 !!!!!!!!Important Notes!!!!!!!
 ==============================
 
-    * The driving operation is operated for now using the golf-carts controllers and not by the robot. Once 		dexterity will finish module C52_CarDriving an update will be released.
+    * The driving operation is operated for now using the DRC Vehicle controllers and not by the robot. Once 		dexterity will finish module C52_CarDriving an update will be released.
     * It is possible to drive using decision's making module C32 only once since the way points given are not in 	absolute coordinates, but in relative coordinates. Tasks can not be performed, only to verify   	 	 	operability for integration purposes.
     * If desired, it is possible to drive through a pre given  set of way points as described below. 
 	In this format of driving, obstacle avoidance is still an issue. 
