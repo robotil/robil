@@ -13,7 +13,7 @@
   <depend package="geometry_msgs"/>
   <depend package="nav_msgs"/>
   <depend package="std_msgs"/>
-  <depend package="atlas_utils"/>
+  <!--depend package="atlas_utils"/-->
   <depend package="robot_state_publisher"/>
   <depend package="joint_state_publisher"/>
   <depend package="xacro"/>
