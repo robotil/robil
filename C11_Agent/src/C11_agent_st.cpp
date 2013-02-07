@@ -1,14 +1,19 @@
 #include "ros/ros.h"
+#include "ros/package.h"
 #include "std_msgs/String.h"
 #include "C11_Agent/C11.h"
 #include "C11_Agent/obstacle_map.h"
 #include "C11_Agent/object_map.h"
 #include "C11_Agent/override_object_properties.h"
 #include "C11_Agent/override_obstacle_properties.h"
-#include "C11_Agent/mission_selection.h"
+#include "C10_Common/mission_selection.h"
 #include "C11_Agent/ask_for_image.h"
 #include "C11_Agent/set_forbidden_are.h"
 #include "C11_Agent/override_local_path.h"
+#include "C11_PushServer.hpp"
+//#include "TaskProxyConnectionByActionLib.h"
+#include "C34_Executer/run.h"
+#include "C34_Executer/resume.h"
 #include <sstream>
 #include <stdlib.h>
 
@@ -22,49 +27,57 @@ return true;
 
 }
 
-bool ObstacleMap(C11_Agent::obstacle_map::Request& req,
-		C11_Agent::obstacle_map::Response& res)
+
+bool MissionSelection(C10_Common::mission_selection::Request& req,
+		C10_Common::mission_selection::Response& res)
 {
+	res.MES.mes = 1;
+	int test = req.MSN.MSN;
 
-	                ROS_INFO("START CALCULATION OF Obstacle_map");
-return true;
+	ros::NodeHandle _node;
 
-}
+   	ros::ServiceClient c34RunClient = _node.serviceClient<C34_Executer::run>("executer/run");
 
-bool ObjectMap(C11_Agent::object_map::Request& req,
-		C11_Agent::object_map::Response& res)
-{
+   	C34_Executer::run srv34Run;
 
-	                ROS_INFO("START CALCULATION OF object_map");
-return true;
+   	std::string ostr;
+   	std::stringstream out;
+   	out <<"id"<< req.MSN.MSN << std::endl;
+   	ostr= out.str();
+   	ROS_INFO(ostr.data());
+   	srv34Run.request.tree_id = ostr;
+   	//srv34.request.tree_id << req.MSN.MSN << std::endl;
 
-}
+   	//ostr << "skill3.xml";
+   	std::string filename;
+   	filename = ros::package::getPath("C34_Designer");
+   	filename.append("/plans/skill3.xml");
 
-bool OverrideObjectProperties(C11_Agent::override_object_properties::Request& req,
-		C11_Agent::override_object_properties::Response& res)
-{
+   	srv34Run.request.filename = filename;
+//   	srv34.request.req.filename << "skill3.xml";
 
-	                ROS_INFO("START CALCULATION OF override_object_properties");
-return true;
+  	if (!c34RunClient.call(srv34Run))
+  	{
+  		ROS_ERROR("send of mission error, exiting\n");
+  		return false;
+  	}
 
-}
+   ROS_INFO("send of mission success");
 
-bool OverrideObstacleProperties(C11_Agent::override_obstacle_properties::Request& req,
-		C11_Agent::override_obstacle_properties::Response& res)
-{
+   std::string str = srv34Run.response.output;
+   ROS_INFO(str.data());
 
-	                ROS_INFO("START CALCULATION OF override_obstacle_properties");
-return true;
+   ros::ServiceClient c34ResumeClient = _node.serviceClient<C34_Executer::resume>("executer/resume");
+   C34_Executer::resume srv34Resume;
+   srv34Resume.request.tree_id = ostr;
+   if (!c34ResumeClient.call(srv34Resume))
+	{
+		ROS_ERROR("resume of mission error, exiting\n");
+		return false;
+	}
+   ROS_INFO("resume of mission success");
 
-}
-
-
-bool MissionSelection(C11_Agent::mission_selection::Request& req,
-		C11_Agent::mission_selection::Response& res)
-{
-
-	                ROS_INFO("START CALCULATION OF MissionSelection");
-return true;
+   return true;
 
 }
 
@@ -73,29 +86,12 @@ bool AskForImage(C11_Agent::ask_for_image::Request& req,
 		C11_Agent::ask_for_image::Response& res)
 {
 
-	                ROS_INFO("START CALCULATION OF AskForImage");
-return true;
-
-}
-
-bool setForbiddenAre(C11_Agent::set_forbidden_are::Request& req,
-		C11_Agent::set_forbidden_are::Response& res)
-{
-
-	                ROS_INFO("START CALCULATION OF setForbiddenAre");
-return true;
+		ROS_INFO("START CALCULATION OF AskForImage");
+		return true;
 
 }
 
 
-bool overrideLocalPath(C11_Agent::override_local_path::Request& req,
-		C11_Agent::override_local_path::Response& res)
-{
-
-	                ROS_INFO("START CALCULATION OF overrideLocalPath");
-return true;
-
-}
 
 int main(int argc, char **argv)
 {
@@ -112,28 +108,16 @@ int main(int argc, char **argv)
    ros::Publisher stt_pub = n.advertise<C11_Agent::C34C11_STT>("c11_stt", 1000);
 
    ros::ServiceServer service = n.advertiseService("PathPlan", PathPlan);
-
-   ros::ServiceServer severride_obstacle_propertiesrvice_ObstacleMap = n.advertiseService("ObstacleMap", ObstacleMap);
-
-   ros::ServiceServer service_ObjectMap = n.advertiseService("ObjectMap", ObjectMap);
-
-   ros::ServiceServer service_OverrideObjectProperties = n.advertiseService("OverrideObjectProperties", OverrideObjectProperties);
-
-   ros::ServiceServer service_OverrideObstacleProperties = n.advertiseService("OverrideObstacleProperties", OverrideObstacleProperties);
-
    ros::ServiceServer service_MissionSelection = n.advertiseService("MissionSelection", MissionSelection);
-
    ros::ServiceServer service_AskForImage = n.advertiseService("AskForImage", AskForImage);
 
-   ros::ServiceServer service_setForbiddenAre = n.advertiseService("setForbiddenAre", setForbiddenAre);
-
-   ros::ServiceServer service_overrideLocalPath = n.advertiseService("overrideLocalPath", overrideLocalPath);
-
    ros::Rate loop_rate(10);
+
+   ROS_INFO("C11_Agent started!\n");
+
+   PushHMIServer pushS;
  
 
-
-  int count1 = 0;
   while (ros::ok())
   {
 

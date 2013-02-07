@@ -21,6 +21,10 @@ rosbuild_genmsg()
 #uncomment if you have defined services
 rosbuild_gensrv()
 
+#set(hdrs src/PushHMIServer.hpp src/HMIResponseServer.hpp)
+set(srcs src/C11_agent_st.cpp)
+set(hdrs src/C11_PushServer.hpp)
+
 #common commands for building c++ executables and libraries
 #rosbuild_add_library(${PROJECT_NAME} src/example.cpp)
 #target_link_libraries(${PROJECT_NAME} another_library)
@@ -28,4 +32,4 @@ rosbuild_gensrv()
 #rosbuild_link_boost(${PROJECT_NAME} thread)
 #rosbuild_add_executable(example examples/example.cpp)
 #target_link_libraries(example ${PROJECT_NAME})
-rosbuild_add_executable(C11_AG src/C11_agent_st.cpp)
+rosbuild_add_executable(C11_Agent ${hdrs} ${srcs})

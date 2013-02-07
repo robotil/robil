@@ -30,15 +30,15 @@ class LoopNode (node):
             return debug 
             
         a = [True, 0]
-
+        loopBreak=0
         child = self.getChildren()
-        while a[0]:           
+        while a[0] and loopBreak<=100:           
             b = child[0].run(index)
             a[0] = a[0] and b[0]
             a[1] = a[1] + b[1]
             if not b[0]:	  
                 break
-            
+            loopBreak=loopBreak+1
 
         if (self.monitor):
             if a[0]:

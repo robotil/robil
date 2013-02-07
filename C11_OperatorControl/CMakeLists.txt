@@ -27,7 +27,7 @@ set(LIBRARY_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/lib)
 rosbuild_genmsg()
 #uncomment if you have defined services
 rosbuild_gensrv()
-set(qt_hdrs src/IFigure.h src/graphicsview.h src/imagedraw.h src/cline.h src/figure.h src/cnode.h src/C11_Node.h src/PushHMIServer.hpp src/HMIResponseServer.hpp)
+set(qt_hdrs src/IFigure.h src/graphicsview.h src/imagedraw.h src/cline.h src/figure.h src/cnode.h src/C11_Node.h)
 set(qt_srcs src/graphicsview.cpp src/imagedraw.cpp src/main.cpp src/figure.cpp src/cnode.cpp src/cline.cpp src/C11_Node.cpp)
 
 qt4_automoc(${qt_srcs})

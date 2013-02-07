@@ -9,8 +9,16 @@
   <review status="unreviewed" notes=""/>
   <url>http://ros.org/wiki/C51_CarOperation</url>
   <depend package="roscpp"/>
-  <depend package="std_msgs"/>
   <depend package="rospy"/>
+  <depend package="geometry_msgs"/>
+  <depend package="nav_msgs"/>
+  <depend package="std_msgs"/>
+  <!--depend package="atlas_utils"/-->
+  <depend package="robot_state_publisher"/>
+  <depend package="joint_state_publisher"/>
+  <depend package="xacro"/>
+  <depend package="C31_PathPlanner"/>
+  <depend package="robot_mechanism_controllers"/>
 </package>
 
 
