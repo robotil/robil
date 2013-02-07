@@ -49,7 +49,7 @@ public:
 		//more on filters and how to use them can be found on http://www.ros.org/wiki/message_filters
 		left_image_sub_( it_, left_camera, 1 ),
 		right_image_sub_( it_, right_camera, 1 ),
-		pointcloud(nh_,"/multisense_sl/points2",1),
+		pointcloud(nh_,"/multisense_sl/camera/points2",1),
 		sync( MySyncPolicy( 10 ), left_image_sub_, right_image_sub_ ,pointcloud)
 	  {
 		leftpub = it_.advertise("C21/left_camera/image", 1);
@@ -210,7 +210,7 @@ private:
 int main(int argc, char **argv)
 {
   ros::init(argc, argv, "C21_VisionAndLidar");
-  C21_Node my_node("/multisense_sl/left/image_raw","/multisense_sl/right/image_raw");
+  C21_Node my_node("/multisense_sl/camera/left/image_raw","/multisense_sl/camera/right/image_raw");
   while(ros::ok()){
 	  ros::spin();
   }
