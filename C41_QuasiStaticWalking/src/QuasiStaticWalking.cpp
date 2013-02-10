@@ -50,7 +50,6 @@ public:
 			ROS_INFO("Waiting for the /C31_GlobalPathPlanner/getPath server");
 		}
 
-
 		//Set callback functions
 		as_.registerGoalCallback(boost::bind(&QuasiStaticWalking::goalCB, this));
 		as_.registerPreemptCallback(boost::bind(&QuasiStaticWalking::preemptCB, this));
