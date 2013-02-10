@@ -22,10 +22,7 @@ from pylab import *
 
 class ZMP_Preview_Controller:
     'Preview controller - input: ZMP reference trajectory, output: COM reference trajectory; based on Linear Inverted Pendulum Model'
-    # State parameters:
-    # x = array([0.0 , 0.0 , 0.0])[:,newaxis]                              
-    # p = 0.0
-    sum_e = 0
+    # Class parameters:
 
     def __init__(self, name, parameters_folder_name, COM ):
         self.name = name
@@ -35,6 +32,7 @@ class ZMP_Preview_Controller:
         # assumption: we start movement from a static position => COM = ZMP point
         self.x = array([COM , 0.0 , 0.0])[:,newaxis]                              
         self.p = COM # initial_ZMP_point
+        self.sum_e = 0 # sum of ZMP error  
 
         # Load Controller Parameters
         [pathname, Script_File_Name] = os.path.split(sys.argv[0])
@@ -63,7 +61,7 @@ class ZMP_Preview_Controller:
     def getBufferSize(self):
         return (self.BufferSize)
 
-    def getCOM_ref(self, p_ref_Buffer): # set_point = original input to joint position controller 
+    def getCOM_ref(self, p_ref_Buffer): 
         
         SumGd = dot(self.Gd, p_ref_Buffer[1:self.BufferSize])
  

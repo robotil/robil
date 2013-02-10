@@ -22,6 +22,7 @@ from numpy import *
 import sys,os.path
 from pylab import *
 from zmp_profiles import *
+from preview_buffer import ZMP_Preview_Buffer
 
 
 ##################################################################
@@ -40,9 +41,11 @@ step_length = 0.1
 step_length2 = 0.2
 trans_ratio_of_step = 0.8 #0.5
 trans_slope_steepens_factor = 2
-step_time = 8
+step_time = 10
 sample_time = 0.01
 p_ref_y_old_correction = 0 # step_width/2 # for old version
+
+## Testing zmp_profiles:
 
 p_ref_x_start = Start_sagital_x(ZMP_start_pos, step_length, trans_ratio_of_step, trans_slope_steepens_factor, step_time, sample_time)
 p_ref_y_start = Start_lateral_y_weight_to_left_foot(ZMP_start_pos, step_width, trans_ratio_of_step, trans_slope_steepens_factor, step_time, sample_time)
@@ -59,12 +62,22 @@ p_ref_y_stop_from_right = Stop_lateral_y_from_right_foot(ZMP_start_pos, step_wid
 
 p_ref_const_x = Constant_Template(step_length*3, step_time, sample_time)
 
-p_ref_x = r_[ p_ref_x_start, step_length/2 + p_res_x_forward_step2, step_length*1/2 + step_length2 + p_res_x_forward_step, step_length*3/2 + step_length2 + p_ref_x_stop ] # 
-p_ref_x_r = r_[ p_ref_x_start, step_length/2 + p_res_x_forward_step, step_length*3/2 + p_res_x_forward_step, step_length*5/2 + p_ref_x_stop, p_ref_const_x ]
+# p_ref_x_r = r_[ p_ref_x_start, step_length/2 + p_res_x_forward_step2, step_length*1/2 + step_length2 + p_res_x_forward_step, step_length*3/2 + step_length2 + p_ref_x_stop ] # 
+p_ref_x = r_[ p_ref_x_start, step_length/2 + p_res_x_forward_step, step_length*3/2 + p_res_x_forward_step, step_length*5/2 + p_ref_x_stop, p_ref_const_x ]
 
 p_ref_y = r_[ p_ref_y_old_correction + p_ref_y_start, p_ref_y_old_correction + p_ref_y_step_right, p_ref_y_old_correction + p_ref_y_step_left, p_ref_y_old_correction + p_ref_y_stop_from_left ]
-p_ref_y_c = r_[ p_ref_y_old_correction + p_ref_y_start, p_ref_y_old_correction + p_ref_y_step_right, p_ref_y_old_correction + p_ref_y_step_left, p_ref_y_old_correction + p_ref_y_step_right, p_ref_y_old_correction + p_ref_y_stop_from_right ]
+# p_ref_y_c = r_[ p_ref_y_old_correction + p_ref_y_start, p_ref_y_old_correction + p_ref_y_step_right, p_ref_y_old_correction + p_ref_y_step_left, p_ref_y_old_correction + p_ref_y_step_right, p_ref_y_old_correction + p_ref_y_stop_from_right ]
 
+
+## Testing preview_buffer:
+Preview_Sagital_x = ZMP_Preview_Buffer('Sagital X', 720, 4*step_time*sample_time, 0 ) #name, preview_sample_size, max_step_samples, precede_time_samples
+Preview_Lateral_y = ZMP_Preview_Buffer('Lateral Y', 720, 4*step_time*sample_time, 0 ) #name, preview_sample_size, max_step_samples, precede_time_samples
+
+Preview_Sagital_x.build_NewStep( p_ref_x_start, p_res_x_forward_step)
+Preview_Lateral_y.build_NewStep( p_ref_y_start, r_[ p_ref_y_step_right, p_ref_y_step_left ] )
+
+p_ref_x_r = Preview_Sagital_x.update_Preview
+p_ref_y_c = Preview_Lateral_y.update_Preview
 
 plot(p_ref_x,'g-', p_ref_x_r,'r--', p_ref_y,'b-', p_ref_y_c,'c--') #plot(p_ref_y,'b-')
 grid(True)
