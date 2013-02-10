@@ -1,0 +1,6 @@
+<launch>
+	<include file="$(find move_pelvis)/launch/move_pelvis.launch" />
+	<node name="pelvis_leg_target" pkg="pelvis_leg_target" type="pelvis_leg_target" cwd="node" output="screen" />
+	
+	<node name="QuasiStaticWalking" pkg="C41_QuasiStaticWalking" type="QuasiStaticWalking" cwd="node" output="screen" />
+</launch>

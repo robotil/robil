@@ -1,0 +1,16 @@
+<package>
+  <description brief="traj_splitter_to_vector">
+
+     traj_splitter_to_vector
+
+  </description>
+  <author>owner</author>
+  <license>BSD</license>
+  <review status="unreviewed" notes=""/>
+  <url>http://ros.org/wiki/traj_splitter_to_vector</url>
+  <depend package="roscpp"/>
+  <depend package="geometry_msgs"/>
+
+</package>
+
+
