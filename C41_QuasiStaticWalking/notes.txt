@@ -2,6 +2,7 @@ C41 – QuasiStaticWalking:
 -------------------------------------------
 Prerequisites:
 1) Center of Mass must be lowered before running (position0 must be run)
+2) /C31_GlobalPathPlanner/getPath must be running
 
 To run:
 1) Run:

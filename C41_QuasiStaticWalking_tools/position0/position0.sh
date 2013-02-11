@@ -1,4 +1,4 @@
 #!/bin/sh
 
-python traj_yaml.py Traj_data.yaml step_0
+python `rospack find position0`/traj_yaml.py `rospack find position0`/Traj_data.yaml step_0
 
