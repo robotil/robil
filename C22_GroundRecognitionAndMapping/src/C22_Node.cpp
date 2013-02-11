@@ -10,6 +10,7 @@
 #include "MapMatrix.h"
 #include "C22_GroundRecognitionAndMapping/C22.h"
 #include "C22_GroundRecognitionAndMapping/C22C24.h"
+#include <C21_VisionAndLidar/C21_C22.h>
 #include "sensor_msgs/PointCloud.h"
 #include <pcl/correspondence.h>
 #include <pcl/point_cloud.h>
@@ -26,9 +27,16 @@
 #include <pcl/io/pcd_io.h>
 #include <iostream>
 #include <boost/thread/thread.hpp>
+#include <boost/bind.hpp>
 #include <pcl/sample_consensus/sac_model_plane.h>
 #include "C22_Node.h"
-
+#include <tf/tf.h>
+#include <pcl_ros/transforms.h>
+#include <message_filters/subscriber.h>
+#include <message_filters/synchronizer.h>
+#include <message_filters/time_synchronizer.h>
+#include <message_filters/sync_policies/approximate_time.h>
+#include "std_srvs/Empty.h"
 //c24 added includes
 #include <nav_msgs/Odometry.h>
 #include <sensor_msgs/Imu.h>
@@ -37,16 +45,30 @@
  * this class represent the C22_Node,
  * it subscribe to the drc multisense topic and provide the Eagle eye mapping
  **/
-C22_Node::C22_Node(){
+C22_Node::C22_Node():
+	pointCloud_sub(nh_,"/C21/C22",1),
+	pos_sub(nh_,"/ground_truth_odom",1),
+	sync( MySyncPolicy( 10000 ),pointCloud_sub, pos_sub){
+
+	sync.registerCallback( boost::bind( &C22_Node::callback, this, _1, _2) );
 	_myMatrix=new MapMatrix();
 	_myPlanes=new std::vector<pclPlane*>();
-	pointCloud_sub=nh_.subscribe("/multisense_sl/camera/points2",1,&C22_Node::callback,this);
 	ROS_INFO("finished subscribing\n");
+	//test1=nh_.subscribe("/C21/C22",1,&C22_Node::callback2,this);
+	//test2=nh_.subscribe("/ground_truth_odom",1,&C22_Node::callback3,this);
 	service = nh_.advertiseService("C22", &C22_Node::proccess, this); //Specifying what to do when a reconstructed 3d scene is requested
 	service2 = nh_.advertiseService("C22/C24", &C22_Node::proccess2, this); //Specifying what to do when a reconstructed 3d scene is requested
 
 }
 
+void C22_Node::callback2(const C21_VisionAndLidar::C21_C22::ConstPtr& pclMsg){
+	ROS_INFO("callback2\n");
+}
+
+
+void C22_Node::callback3(const nav_msgs::Odometry::ConstPtr& pos_msg){
+	ROS_INFO("callback3\n");
+}
 /**
  * The call back function executed when a service is requested
  * it must return true in order to work properly
@@ -100,10 +122,10 @@ bool C22_Node::proccess2(C22_GroundRecognitionAndMapping::C22C24::Request  &req,
 /**
  * The call back function executed when a new point cloud has arrived
  */
-void C22_Node::callback(const sensor_msgs::PointCloud2& pclMsg){
-	//ROS_INFO("callback\n");
+void C22_Node::callback(const C21_VisionAndLidar::C21_C22::ConstPtr& pclMsg,const nav_msgs::Odometry::ConstPtr& pos_msg){
+	ROS_INFO("callback\n");
 	 pcl::PointCloud<pcl::PointXYZ>cloud;
-	 pcl::fromROSMsg<pcl::PointXYZ>(pclMsg,cloud);
+	 pcl::fromROSMsg<pcl::PointXYZ>(pclMsg->cloud,cloud);
 	 pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_backup(cloud.makeShared());
 	 /*
 	  * this code segment filters the given cloud and lowers its resolution
@@ -115,8 +137,23 @@ void C22_Node::callback(const sensor_msgs::PointCloud2& pclMsg){
 	 vg.setInputCloud (cloud_backup);
 	 vg.setLeafSize (0.05f, 0.05f, 0.05f);
 	 vg.filter (*cloud_filtered);
+	 tf::Transform trans;
+	 trans.setOrigin(tf::Vector3(pclMsg->pose.position.x,pclMsg->pose.position.y,pclMsg->pose.position.z));
+	 trans.setRotation(tf::Quaternion(pclMsg->pose.orientation.x,pclMsg->pose.orientation.y,pclMsg->pose.orientation.z,pclMsg->pose.orientation.w));
+	 tf::Transform trans2;
+	 	 trans2.setOrigin(tf::Vector3(pos_msg->pose.pose.position.x,pos_msg->pose.pose.position.y,pos_msg->pose.pose.position.z));
+	 	 trans2.setRotation(tf::Quaternion(pos_msg->pose.pose.orientation.x,pos_msg->pose.pose.orientation.y,pos_msg->pose.pose.orientation.z,pos_msg->pose.pose.orientation.w));
+	 Eigen::Matrix4f headTopelvis,pelvisToWorld;
+	 pcl_ros::transformAsMatrix(trans, headTopelvis);
+	 pcl_ros::transformAsMatrix(trans2, pelvisToWorld);
 
-	 _myMatrix->clearMatrix();
+	 // transform pointcloud from sensor frame to fixed robot frame
+	 pcl::transformPointCloud(*cloud_filtered, *cloud_filtered, headTopelvis);
+	 pcl::transformPointCloud(*cloud_filtered, *cloud_filtered, pelvisToWorld);
+
+
+
+	_myMatrix->clearMatrix();
 	 pcl::PointCloud<pcl::PointXYZ>::Ptr cloudf_backup(cloud_filtered->makeShared());
 
 	  /*
