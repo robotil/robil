@@ -45,6 +45,8 @@ step_time = 10
 sample_time = 0.01
 p_ref_y_old_correction = 0 # step_width/2 # for old version
 
+preview_buffer_i = 2500
+
 ## Testing zmp_profiles:
 
 p_ref_x_start = Start_sagital_x(ZMP_start_pos, step_length, trans_ratio_of_step, trans_slope_steepens_factor, step_time, sample_time)
@@ -70,16 +72,24 @@ p_ref_y = r_[ p_ref_y_old_correction + p_ref_y_start, p_ref_y_old_correction + p
 
 
 ## Testing preview_buffer:
-Preview_Sagital_x = ZMP_Preview_Buffer('Sagital X', 720, 4*step_time*sample_time, 0 ) #name, preview_sample_size, max_step_samples, precede_time_samples
-Preview_Lateral_y = ZMP_Preview_Buffer('Lateral Y', 720, 4*step_time*sample_time, 0 ) #name, preview_sample_size, max_step_samples, precede_time_samples
+Preview_Sagital_x = ZMP_Preview_Buffer('Sagital X', 720, 4*step_time/sample_time, 0 ) #name, preview_sample_size, max_step_samples, precede_time_samples
+Preview_Lateral_y = ZMP_Preview_Buffer('Lateral Y', 720, 4*step_time/sample_time, 0 ) #name, preview_sample_size, max_step_samples, precede_time_samples
 
 Preview_Sagital_x.build_NewStep( p_ref_x_start, p_res_x_forward_step)
 Preview_Lateral_y.build_NewStep( p_ref_y_start, r_[ p_ref_y_step_right, p_ref_y_step_left ] )
 
-p_ref_x_r = Preview_Sagital_x.update_Preview
-p_ref_y_c = Preview_Lateral_y.update_Preview
+count = 0
+for num in range(0,preview_buffer_i):
+    p_ref_x_temp = Preview_Sagital_x.update_Preview()
+    p_ref_y_temp = Preview_Lateral_y.update_Preview()
+    count += 1
 
-plot(p_ref_x,'g-', p_ref_x_r,'r--', p_ref_y,'b-', p_ref_y_c,'c--') #plot(p_ref_y,'b-')
+rospy.loginfo("check_arr: count = %f" % (count ) )
+
+p_ref_x_r = r_[ zeros(preview_buffer_i-1), p_ref_x_temp ]
+p_ref_y_c = r_[ zeros(preview_buffer_i-1), p_ref_y_temp ]
+
+plot(p_ref_x,'g--', p_ref_x_r,'r-', p_ref_y,'b--', p_ref_y_c,'c-') #plot(p_ref_y,'b-')
 grid(True)
 show()
 
