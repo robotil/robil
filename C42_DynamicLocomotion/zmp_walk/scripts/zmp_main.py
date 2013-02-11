@@ -24,6 +24,9 @@ from pylab import *
 from zmp_walk.msg import traj
 from std_msgs.msg import Int32
 from preview_controller import ZMP_Preview_Controller
+from zmp_profiles import *
+from preview_buffer import ZMP_Preview_Buffer
+
 
 rospy.init_node('zmp_movement_plan')  #('ZMP_node')
 rospy.loginfo("started ZMP node")
@@ -55,7 +58,9 @@ step_width  = 0.175  # 0.178  # [m]
 step_time   = 8 #1   # [sec]
 bend_knees  = 0.04  # [m]    
 step_height = 0.0001 #0.03 #0.05  # [m] 
-half_trans_ratio = 0.5 # units fraction: 0-0.5
+# half_trans_ratio = 0.5 # units fraction: 0-0.5
+trans_ratio_of_step = 0.8 # units fraction: 0-1.0 ; fraction of step time to be used for transition. 1.0 = all of step time is transition 
+trans_slope_steepens_factor = 2 # 1 transition Sigmoid slope (a)
 
 # Preview Controllers:
 Sagital_x_Preview_Controller = ZMP_Preview_Controller('X_sagital','sagital_x',0.0) # name, parameters_folder_name, initial position of COM 
@@ -63,28 +68,23 @@ Lateral_y_Preview_Controller = ZMP_Preview_Controller('Y_lateral','lateral_y',st
 
 NL = Lateral_y_Preview_Controller.getBufferSize() 
 
+# Preview Buffers:
+Preview_Sagital_x = ZMP_Preview_Buffer('Sagital X', NL, 4*step_time/dt, 0 ) #name, preview_sample_size, max_step_samples, precede_time_samples
+Preview_Lateral_y = ZMP_Preview_Buffer('Lateral Y', NL, 4*step_time/dt, 0 ) #name, preview_sample_size, max_step_samples, precede_time_samples
 
-# Sigmoid Plot
+# init preview:
+p_ref_x = zeros(NL)
+p_ref_y = zeros(NL)
 
-# a =  1 #1 #5 # 50  #100  # change slop of ZMP -> com
-# s =  arange(-half_trans_ratio*step_time, half_trans_ratio*step_time+dt , dt) #arange(-3*step_time, 3*step_time+dt , dt) #arange(-1.5*step_time,1.5*step_time+dt , dt) # arange(-0.1*step_time,0.1*step_time+dt , dt) #
-# sigmoid_x = step_length/(1+exp(-a*s))
-# sigmoid_y = step_width/(1+exp(-a*s))
+# t1 = arange(0 , step_time-2*half_trans_ratio*step_time+dt , dt)    # arange(0 , step_time-2*0.1*step_time+dt , dt)
+# t0x = arange(0 , 2*step_time-half_trans_ratio*step_time+dt   , dt) # arange(0 , 2*step_time-0.1*step_time+dt   , dt)
+# t0y = arange(0 , step_time-half_trans_ratio*step_time+dt   , dt)   # arange(0 , step_time-0.1*step_time+dt   , dt)
 
-# plot(sigmoid_y)
-# show()
-
-# Pref Initialization
-
-t1 = arange(0 , step_time-2*half_trans_ratio*step_time+dt , dt)    # arange(0 , step_time-2*0.1*step_time+dt , dt)
-t0x = arange(0 , 2*step_time-half_trans_ratio*step_time+dt   , dt) # arange(0 , 2*step_time-0.1*step_time+dt   , dt)
-t0y = arange(0 , step_time-half_trans_ratio*step_time+dt   , dt)   # arange(0 , step_time-0.1*step_time+dt   , dt)
-
-p_ref1x = step_length*ones(( len(t1) ))
-p_ref1y = step_width*ones(( len(t1) ))
-p_ref0 = zeros(( len(t1)-1 ))
-p_ref0_0x = zeros(( len(t0x)-1 ))
-p_ref0_0y = (step_width/2)*ones(( len(t0y)-1 ))
+# p_ref1x = step_length*ones(( len(t1) ))
+# p_ref1y = step_width*ones(( len(t1) ))
+# p_ref0 = zeros(( len(t1)-1 ))
+# p_ref0_0x = zeros(( len(t0x)-1 ))
+# p_ref0_0y = (step_width/2)*ones(( len(t0y)-1 ))
 
 
 out.COMx = 0         
@@ -121,30 +121,44 @@ while not rospy.is_shutdown():
       rospy.loginfo("started walking")
       rospy.loginfo("time:")
       rospy.loginfo(rospy.get_time())
-      D     = 0.0
-      # x     = array([0.0 , 0.0 , 0.0])[:,newaxis]   
-      # y     = array([step_width/2 , 0.0 , 0.0])[:,newaxis]                             
-      # p_x   = 0.0
-      # p_y   = 0.0
-      # sum_e_x = 0
-      # sum_e_y = 0
+      #D     = 0.0
+
       k     = 1
+      samples_in_step = ceil (step_time / dt)
+
       step_length_z = step_length;
       step_time_z = step_time;
       pre_step = 1
       first_step = 0
       full_step = 0
-      last_step_mes = 0
+      #last_step_mes = 0
       go = 1
-      steps_count = -1
+      steps_count = 0 #-1
       last_step = 0
       step_done = 0
       swing_x_v = []
       swing_z_v = []
-      p_ref_x = r_[ p_ref0_0x , sigmoid_x , p_ref1x ]
-      p_ref_y = r_[ p_ref0_0y , sigmoid_y/2+step_width/2 , p_ref1y ]
+      # p_ref_x = r_[ p_ref0_0x , sigmoid_x , p_ref1x ]
+      # p_ref_y = r_[ p_ref0_0y , sigmoid_y/2+step_width/2 , p_ref1y ]
       swing_z_t_more_double_support = 0
       swing_x_t_more_double_support = 0
+
+      distance_x_ref = 0 # the accumelated ZMP ref distance past, is updated at the end of each step 
+                         # and used as initial starting point for the next step
+      step_phase = 1 # Double-Support left leg in front
+
+      # create ZMP_ref profiles: 
+      # 1) to start walking (pre_step + first_step)
+      p_ref_x_start = Start_sagital_x(0, step_length, trans_ratio_of_step, trans_slope_steepens_factor, step_time, dt)
+      p_ref_y_start = Start_lateral_y_weight_to_left_foot(0, step_width, trans_ratio_of_step, trans_slope_steepens_factor, step_time, dt)
+      # 2) preceeding steps (full_step)
+      p_ref_x_forward_step = Step_forward_x(0, step_length, trans_ratio_of_step, trans_slope_steepens_factor, step_time, dt)
+      p_ref_y_step_right = Step_onto_right_foot(0, step_width, trans_ratio_of_step, trans_slope_steepens_factor, step_time, dt)
+      p_ref_y_step_left = Step_onto_left_foot(0, step_width, trans_ratio_of_step, trans_slope_steepens_factor, step_time, dt)
+
+      # Load the starting step to preview buffer:
+      Preview_Sagital_x.load_NewStep( p_ref_x_start, p_ref_x_forward_step )
+      Preview_Lateral_y.load_NewStep( p_ref_y_start, r_[ p_ref_y_step_right, p_ref_y_step_left ] ) 
 
   while go == 1:
 
@@ -154,34 +168,9 @@ while not rospy.is_shutdown():
   #                                                     #
   #######################################################
 
-      while len(p_ref_x) < k+NL:
- 
-          D = D + step_length
+      p_ref_x = Preview_Sagital_x.update_Preview()
+      [COMx, COMx_dot] = Sagital_x_Preview_Controller.getCOM_ref( p_ref_x )
 
-
-          a = p_ref_x[0:len(p_ref_x)-1]
-
-          b = sigmoid_x[0:len(sigmoid_x)-1]         
-          c = p_ref1x
-
-          d = r_[b,c]+D*ones(( len(r_[b,c]) )) #step_length*ones(2*len(r_[b,c]))#                            for debuging
-          p_ref_x = r_[a,d]
-
-      #end while len(p_ref)
- 
-      [COMx, COMx_dot] = Sagital_x_Preview_Controller.getCOM_ref(p_ref_x[k-1:k+NL])
-    
-      # SumGd = dot(Gd,p_ref_x[k:k+NL])
- 
-      # e = p_x - p_ref_x[k-1]
-  
-      # sum_e_x = sum_e_x + e
-  
-      # u =  - Gi*sum_e_x  - SumGd -dot( Gx , x )
-
-      # x = dot(A,x) + (B*u)[:,newaxis] # COM state: x[0]-position, x[1]-velocity x[2]-acceleration
-      
-      # p_x = dot(C,x) # scalar, ZMP point (of model)
 
   #######################################################
   #                                                     #
@@ -189,47 +178,8 @@ while not rospy.is_shutdown():
   #                                                     #
   #######################################################
 
-      while len(p_ref_y) < k+NL:
- 
-          if left == 1:
-
-              a = p_ref_y[0:len(p_ref_y)-1]
-  
-              b = sigmoid_y[0:len(sigmoid_y)-1][::-1]      
-              c = p_ref0[0:len(p_ref1y)]
-              d = r_[b,c]#step_width/2*ones(3*len(p_ref1y))#                              for debuging
-   
-              p_ref_y = r_[a,d]
-
-              left = 0
-
-          elif left == 0:
-
-              a = p_ref_y[0:len(p_ref_y)-1]
-
-              b = sigmoid_y[0:len(sigmoid_y)-1]         
-              c = p_ref1y[0:len(p_ref1y)]
-              d = r_[b,c]#step_width/2*ones(3*len(p_ref1y))#                                 for debuging
-
-              p_ref_y = r_[a,d]
-
-              left = 1
-
-
-      #end while len(p_ref_y)
-      [COMy, COMy_dot] = Lateral_y_Preview_Controller.getCOM_ref(p_ref_y[k-1:k+NL])
-
-      # SumGd = dot(Gd,p_ref_y[k:k+NL])
- 
-      # e = p_y - p_ref_y[k-1]
-  
-      # sum_e_y = sum_e_y + e
-  
-      # u =  - Gi*sum_e_y  - SumGd -dot( Gx , y )
-
-      # y = dot(A,y) + (B*u)[:,newaxis] # COM state: y[0]-position, y[1]-velocity y[2]-acceleration
-      
-      # p_y = dot(C,y) # scalar, ZMP point (of model)
+      p_ref_y = Preview_Lateral_y.update_Preview()
+      [COMy, COMy_dot] = Lateral_y_Preview_Controller.getCOM_ref( p_ref_y )
 
   #######################################################
   #                                                     #
@@ -305,72 +255,130 @@ while not rospy.is_shutdown():
       out.leg = Leg                                                           #1           for debuging
 
       pub_zmp.publish(out) 
-  
+      ##
      # rospy.loginfo('COMy=%f' %out.COMy )
   #######################################################
   #                                                     #
   # command control                                     #
   #                                                     #
   ####################################################### 
-      if swing_pre_step < 0.00001 and pre_step and k>1:
-         first_step = 1
-         pre_step = 0
-         rospy.loginfo("done pre step")
-         rospy.loginfo("time:")
-         rospy.loginfo(rospy.get_time())
+      
+      # pre_step:  
 
-         plot(p_ref_x)
-         plot(p_ref_y)
-         plot(swing_z_v)
-         #show()
-         p_ref_x = p_ref_x[k:len(p_ref_x)]
-         p_ref_y = p_ref_y[k:len(p_ref_y)]
-         k = 0
-         
+          
+      if pre_step:
+          if (samples_in_step <= k): # swing_pre_step < 0.00001 and pre_step and k>1:
+            # completed pre_step
+            rospy.loginfo("done pre step")
+            rospy.loginfo("time:")
+            rospy.loginfo(rospy.get_time())
 
-      if swing_z_t < 0.00001 and k>1 and not pre_step:
-         step_done = 1
-         steps_count = steps_count + 1
-         rospy.loginfo("done step number = %d" % (steps_count) )
-         rospy.loginfo("time:")
-         rospy.loginfo(rospy.get_time())
-         
+            # start first step:
+            pre_step = 0
+            first_step = 1
+            step_phase = 1 # Double-Support left leg in front
+            k = 1
+            
+      elif first_step:
+            if (samples_in_step <= k):   #swing_z_t < 0.00001 and k>1 and not pre_step:
+              # completed start steps (pre_step + first_step)
+              step_done = 1
+              steps_count = steps_count + 1
+              rospy.loginfo("done first step, number = %d" % (steps_count) )
+              rospy.loginfo("time:")
+              rospy.loginfo(rospy.get_time())
+          
+              first_step = 0
+              k = 1
+              distance_x_ref = p_ref_x[0]
+              step_phase = 3 # Double-Support right leg in front
 
-         plot(swing_z_v)
-        # show()
-       
+              if ns.walk:
+                # make a full step:
+                full_step = 1
+                # TODO: update ZMP_profiles with new parameters: step time,length...
+                # Load new step to preview buffer:
+                Preview_Sagital_x.load_NewStep( p_ref_x_forward_step + distance_x_ref, p_ref_x_forward_step )
+                Preview_Lateral_y.load_NewStep( p_ref_y_step_right, r_[ p_ref_y_step_left, p_ref_y_step_right ] )
+              else:
+                # last step:
+                last_step = 1
+                # TODO: add stop ZMP_profiles
 
-         #rospy.loginfo(steps_count)
-         p_ref_x = p_ref_x[k:len(p_ref_x)]
-         p_ref_y = p_ref_y[k:len(p_ref_y)]    
-         k = 0
-         if steps_count >= 0:
-            Leg = int(Leg!=1)
-         rospy.loginfo("Right Leg = %d" % (Leg))
-         #rospy.loginfo(Leg)
-         if steps_count > -1:
-            plot(p_ref_x)
-            plot(p_ref_y)
-            plot(swing_x_v)
-            plot(swing_z_v)
-           # show()
-            #rospy.loginfo("exited")
-            # exit()                        # uncomment TO STOP AFTER ONE STEP
+
+      else:
+          if full_step:
+              if (samples_in_step <= k):
+                # completed a full step
+                step_done = 1
+                steps_count = steps_count + 1
+                rospy.loginfo("done step number = %d" % (steps_count) )
+                rospy.loginfo("time:")
+                rospy.loginfo(rospy.get_time())
+
+                k = 1
+                distance_x_ref = p_ref_x[0]
+                if step_phase >= 3:
+                  step_phase = 1 # Double-Support left leg in front
+                else:
+                  step_phase = 3 # Double-Support right leg in front
+                rospy.loginfo("step phase = %d" % (step_phase))
+
+                if ns.walk:
+                  # make a full step:
+                  full_step = 1
+                  # TODO: update ZMP_profiles with new parameters: step time,length...
+                  # Load new step to preview buffer:
+                  Preview_Sagital_x.load_NewStep( p_ref_x_forward_step + distance_x_ref, p_ref_x_forward_step )
+                  if step_phase == 1:
+                    Preview_Lateral_y.load_NewStep( p_ref_y_step_left, r_[ p_ref_y_step_right,p_ref_y_step_left ] )
+                  else:
+                    Preview_Lateral_y.load_NewStep( p_ref_y_step_right, r_[ p_ref_y_step_left, p_ref_y_step_right ] )
+                
+                else:
+                  # last step:
+                  last_step = 1
+
+          elif last_step:
+              if (samples_in_step <= k):
+                # ?? TODO: allow another step cycle for stop step -> if (2*samples_in_step <= k):
+                distance_x_ref = p_ref_x[0]
+                go = 0
+                rospy.loginfo("stoped walking")
+
+          else:
+             rospy.loginfo("Error: Problem step state not found. step phase = %d" % (step_phase))
+
+
+
+          # if steps_count >= 0:
+          #     Leg = int(Leg!=1)
+          # rospy.loginfo("Right Leg = %d" % (Leg))
+          #rospy.loginfo(Leg)
+          # if steps_count > -1:
+          #     plot(p_ref_x)
+          #     plot(p_ref_y)
+          #     plot(swing_x_v)
+          #     plot(swing_z_v)
+          #     # show()
+          #     #rospy.loginfo("exited")
+          #     # exit()                        # uncomment TO STOP AFTER ONE STEP
    
-
-      if first_step and step_done and ns.walk:
-         first_step = 0
-         full_step = 1
-         
-      if ns.walk == 0 and step_done and not last_step:
-         last_step = 1
-         first_step = 0
-         full_step = 0
-         last_step_mes = p_ref_x[k] 
+      # # full step:
+      # if first_step and step_done and ns.walk:
+      #    first_step = 0
+      #    full_step = 1
+      
+      # # last step:   
+      # if ns.walk == 0 and step_done and not last_step:
+      #    last_step = 1
+      #    first_step = 0
+      #    full_step = 0
+      #    #last_step_mes = p_ref_x[k] 
     
-      if p_ref_x[k] >= last_step_mes+step_length and last_step:
-         go = 0
-         rospy.loginfo("stoped walking")
+      # if p_ref_x[k] >= last_step_mes+step_length and last_step:
+      #    go = 0
+      #    rospy.loginfo("stoped walking")
 
 
       #rospy.loginfo(k)

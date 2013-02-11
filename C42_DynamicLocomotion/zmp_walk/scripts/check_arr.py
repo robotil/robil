@@ -45,7 +45,7 @@ step_time = 10
 sample_time = 0.01
 p_ref_y_old_correction = 0 # step_width/2 # for old version
 
-preview_buffer_i = 2500
+preview_buffer_i = 300
 
 ## Testing zmp_profiles:
 
@@ -75,8 +75,8 @@ p_ref_y = r_[ p_ref_y_old_correction + p_ref_y_start, p_ref_y_old_correction + p
 Preview_Sagital_x = ZMP_Preview_Buffer('Sagital X', 720, 4*step_time/sample_time, 0 ) #name, preview_sample_size, max_step_samples, precede_time_samples
 Preview_Lateral_y = ZMP_Preview_Buffer('Lateral Y', 720, 4*step_time/sample_time, 0 ) #name, preview_sample_size, max_step_samples, precede_time_samples
 
-Preview_Sagital_x.build_NewStep( p_ref_x_start, p_res_x_forward_step)
-Preview_Lateral_y.build_NewStep( p_ref_y_start, r_[ p_ref_y_step_right, p_ref_y_step_left ] )
+Preview_Sagital_x.load_NewStep( p_ref_x_start, p_res_x_forward_step)
+Preview_Lateral_y.load_NewStep( p_ref_y_start, r_[ p_ref_y_step_right, p_ref_y_step_left ] )
 
 count = 0
 for num in range(0,preview_buffer_i):

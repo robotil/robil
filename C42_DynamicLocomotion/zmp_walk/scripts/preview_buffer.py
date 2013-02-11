@@ -64,12 +64,12 @@ class ZMP_Preview_Buffer:
             return (False)
 
 
-    def build_NewStep(self, new_step, following_steps_cycle): 
+    def load_NewStep(self, new_step, following_steps_cycle): 
         # new_step is the step that we are starting to perform now.
         # following_steps_cycle is a/are step/s to perform after new_step that will repeat 
         #  them selves until filling the required space in the buffer.
-        # !!!Attention!!! continuity should be kept from new_step to following_steps_cycle and 
-        #                 between begining and end of following_steps_cycle      
+        # is handled by off_set <-- !!!Attention!!! continuity should be kept from new_step to 
+        #        following_steps_cycle and between begining and end of following_steps_cycle      
         self.start_index = 0
         step_length = len(new_step)
         self.end_of_step_preview = step_length+self.preview_size
