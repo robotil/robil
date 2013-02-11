@@ -3,10 +3,12 @@ FILE(REMOVE_RECURSE
   "srv_gen"
   "msg_gen"
   "srv_gen"
-  "src/c21_Vision_and_Lidar/msg"
-  "src/c21_Vision_and_Lidar/srv"
+  "src/C21_VisionAndLidar/msg"
+  "src/C21_VisionAndLidar/srv"
   "CMakeFiles/ROSBUILD_gensrv_cpp"
-  "srv_gen/cpp/include/c21_Vision_and_Lidar/C21.h"
+  "srv_gen/cpp/include/C21_VisionAndLidar/C21.h"
+  "srv_gen/cpp/include/C21_VisionAndLidar/C21_Pan.h"
+  "srv_gen/cpp/include/C21_VisionAndLidar/C21_Pic.h"
 )
 
 # Per-language clean rules from dependency scanning.

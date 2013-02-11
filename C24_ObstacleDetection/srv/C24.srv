@@ -1,6 +1,2 @@
-C24_ObstacleDetection/C0C24_AZI azimuth
-C24_ObstacleDetection/C0C24_CAM camera_sample_rate
-C24_ObstacleDetection/C0C24_LAZ laser_sample_rate
-C24_ObstacleDetection/C0C24_SIZ minimum_obstacle_size
 ---
 C24_ObstacleDetection/C24C0_PATH map

@@ -2,8 +2,8 @@ provides a 2d map where each cell represents a 25 cm square
 
 How to Check:
 ============
-run the node with the DRC simulation
-
+run the node with the DRC simulation, make sure C21 runs before starting
+rosrun C21_VisionAndLidar C21
 rosrun C22_GroundRecognitionAndMapping C22
 
 test with
