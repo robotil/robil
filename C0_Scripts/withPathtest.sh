@@ -12,16 +12,16 @@ rm $PKILL
 #echo $C34_PID
 #echo "Done "
 #sleep 1
-rosrun C22_GroundRecognitionAndMapping C22 &
-C22_PID=$!
-echo $C22_PID
-sleep 3
+#rosrun C22_GroundRecognitionAndMapping C22 &
+#C22_PID=$!
+#echo $C22_PID
+#sleep 3
 echo "Starting C31"
 rosrun C31_PathPlanner gpp&
 C31_PID=$!
 echo $C31_PID
 echo "Done "
-echo $C22_PID $C31_PID  >> $PKILL
+echo $C31_PID  >> $PKILL
 #echo $C22_PID $C31_PID $C34_PID >> $PKILL
 
 rosservice call executer/run T pln
