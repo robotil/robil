@@ -5,7 +5,7 @@ C35_Monitoring
 3. When running a Monitoring task (e.g., MonitorTime(param=563a39ca-99df-45dc-a369-73c7af2fe951)), the task monitors the node with the id given in param. If the node takes longer than (T*average_computed_time) for that node, it exists with failure, which terminates the monitored node (the monitoring node is always the monitored node's sibling in the BTree, and their parent is always a parallel node).
 
 
-How to Check:
+How to Check (outdated):
 ============
 Requires python ver 2.7.3. In order to test the code run the following:
 1. roslaunch C46_MountVehicle atlas_profile_lower.launch
@@ -15,6 +15,16 @@ Requires python ver 2.7.3. In order to test the code run the following:
 5. in designer load tree located in C35_monitoring/src/tests/simple_monitoring_example.xml
 6. run the tree
 
+How to Check (skill4):
+============
+Requires python ver 2.7.3. In order to test the code run the following:
+1. Launch drc sim
+2. run designer and executer
+3. run all relevant nodes for skill4
+4. rosrun C35_Monitoring C35_Node.py
+5. in designer load tree located in C35_monitoring/src/tests/skill4.xml
+6. run the tree
+
 Known Bugs:
 ==========
 
@@ -22,3 +32,5 @@ Known Bugs:
 Known Limitations:
 =================
 TODO - the module still doesn't update its statistics, given runtime information. This means that the threshold for monitored nodes doesn't change during runtime.
+xml file is hardcoded, instead of being given as cmd line argument.
+Not sure yet how multiple monitoring nodes within the same subtree are handled. Should be checked.

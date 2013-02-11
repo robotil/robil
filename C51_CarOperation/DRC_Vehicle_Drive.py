@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 import roslib; roslib.load_manifest('C51_CarOperation')
 import rospy
+from LogData import LOG
 from datetime import datetime
 import numpy as np
 from geometry_msgs.msg import Twist
@@ -12,7 +13,7 @@ from math import *
 from Point2Point import P2P
 from geometry_msgs.msg import Pose
 import sys
-from C31_PathPlanner.srv import C31_GetPath
+#from C31_PathPlanner.srv import C31_GetPath
 from tf.transformations import euler_from_quaternion
 import numpy
 import matplotlib.pyplot as plt
@@ -55,12 +56,10 @@ class node:
         Steer=SW()      #steering wheel online
         #----------------hand brake released --------------------------#
         while not rospy.is_shutdown():
-            olist=[]
-            clist=[]
-            erlist=[]
+            DATA=LOG()
             i=0
             for object in self.path:
-                #print self.path
+                DATA.WayPoint(object)
                 flag=b=m=0
                 if(object[1]-self.world.pose.position.y==0): #define the normal to the way points for: "isPassedNormal" function
                     b=object[0]
@@ -83,16 +82,15 @@ class node:
                     m1=360
                 #print "alpha is: %f,next alpha is: %f distance is: %f"%(al, m1, self.DistanceToWP(object))
                 if (abs(al-m1)>20 and self.DistanceToWP(object)>5) :
-                    olist=listUpt(olist, object)
                     print "-------------------------------"
                     print "Driving to way point x=%f, y=%f" %(object[0],object[1])
                     while (isPassedNormal(self.world.pose.position.x, self.world.pose.position.y, m, b,flag)):
-                        clist=listUpt(clist, [self.world.pose.position.x, self.world.pose.position.y])
+                        DATA.MyPath(self.world.pose.position.x, self.world.pose.position.y)
                         [speed, Cspeed]=P2P(self.DistanceToWP(object), self.OrientationErrorToWP(object)) 
-                        #print "-------------------------------"                    #print object                    #print "Distance: %f, Or error: %f" %(Distance, dOrientation)                    #print "GAS: %f, SW: %f" %(speed*0.03, Cspeed*4*pi)                    #rospy.sleep(0.05)
                         driveC.gas(speed)
                         Steer.turn(Cspeed)
-                    erlist=listUpt(erlist, [self.world.pose.position.x, self.world.pose.position.y])
+                    DATA.DistanceError([self.world.pose.position.x-object[0], self.world.pose.position.y-object[1]])
+                    DATA.PassedWayPoint(object)
                     print "arrived at Way point"
                 i+=1
             #self.path=getPath() #Note - the module is still not ready to be fully operable because it always considers your location as (0,0) and does not update your location.
@@ -104,15 +102,15 @@ class node:
                 break
         #------------------Pull hand brake - off -------------------------#
         hb.pullHB()   
-        #plotGraph(olist, clist, erlist, self.path)       
+        #plotGraph(DATA)       
 
 class handB:
     handbrake=1
     pub=0
     sub=0
     def __init__(self):
-        self.pub = rospy.Publisher('golf_cart/hand_brake/cmd', Float64)
-        self.sub = rospy.Subscriber('/golf_cart/hand_brake/state', Float64, self.handbrakeCallback)
+        self.pub = rospy.Publisher('drc_vehicle/hand_brake/cmd', Float64)
+        self.sub = rospy.Subscriber('/drc_vehicle/hand_brake/state', Float64, self.handbrakeCallback)
     def handbrakeCallback(self, data):
         self.handbrake=data.data
 
@@ -121,16 +119,17 @@ class handB:
             self.pub.publish(0.0)
 
     def pullHB(self):
-        while self.handbrake<0.5 :
-            self.pub.publish(1.0)
+        self.pub.publish(1.0)
+        #while self.handbrake<0.5 :
+
 
 class Drive:
     status=-11
     pub=0
     sub=0
     def __init__(self):
-        self.pub = rospy.Publisher('golf_cart/gas_pedal/cmd', Float64)
-        self.sub = rospy.Subscriber('/golf_cart/gas_pedal/state', Float64, self.gasCallback)
+        self.pub = rospy.Publisher('drc_vehicle/gas_pedal/cmd', Float64)
+        self.sub = rospy.Subscriber('/drc_vehicle/gas_pedal/state', Float64, self.gasCallback)
     def gasCallback(self, data):
         self.status=data.data
 
@@ -142,8 +141,8 @@ class SW:
     pub=0
     sub=0
     def __init__(self):
-        self.pub = rospy.Publisher('golf_cart/hand_wheel/cmd', Float64)
-        self.sub = rospy.Subscriber('/golf_cart/hand_wheel/state', Float64, self.SWCallback)
+        self.pub = rospy.Publisher('drc_vehicle/hand_wheel/cmd', Float64)
+        self.sub = rospy.Subscriber('/drc_vehicle/hand_wheel/state', Float64, self.SWCallback)
     def SWCallback(self, data):
         self.status=data.data
 
@@ -190,9 +189,14 @@ def getPath():
 if __name__ == '__main__':
     try:
         rospy.init_node('talker')
-        array=getPath()
+        #array=getPath()
+        #array=[(10, 19), (0, 0)]
+        array=[(26, -16),  (-20, -20), (-10, -10), (0, 0)]
+        #array=[(6, -6)  , (0, 0)]
+
         d=node(array)
         d.talker()   
+        #print array
     except rospy.ROSInterruptException: pass
 
 

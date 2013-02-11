@@ -1,0 +1,5 @@
+<plan descriptions="./plans/TaskDescriptions.xml">
+   <seq name="Walk" x="404.5" y="83.5" collapsed="false" id="84b5e1a4-56dc-464b-94d7-c660bb414075"> 
+         <tsk name="QuasiStaticWalking" x="433.5" y="299.5" test_time="0" test_result="true" id="699259ce-182d-4a16-ad83-4001975974bc" />
+   </seq>
+</plan>
