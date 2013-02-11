@@ -1,15 +1,15 @@
-V0.0.0.66
+V0.0.0.67
 =================================================
 C0_RobilTask     		    0.4
 C0_Scripts     		    	    0.10
 C10_Common     	    	    	    0.1
 C11_Agent     	    	    	    0.5
 C11_OperatorControl     	    0.8
-C21_VisionAndLidar     	    	    0.8
-C22_GroundRecognitionAndMapping     0.4
+C21_VisionAndLidar     	    	    0.9
+C22_GroundRecognitionAndMapping     0.5
 C23_ObjectRecognition     	    0.5
-C24_ObstacleDetection     	    0.4
-C25_GlobalPosition     	    	    0.4
+C24_ObstacleDetection     	    0.5
+C25_GlobalPosition     	    	    0.5
 C31_PathPlanner     	    	    0.5
 C34_BTExecuter     	    	    0.4
 C34_Designer     	    	    0.13
