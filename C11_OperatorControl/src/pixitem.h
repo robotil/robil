@@ -14,6 +14,7 @@ public:
 	~CPixItem();
 	QRectF boundingRect() const;
 	void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget);
+	void SetColor(int color);
 	//void mousePress(QPointF p);
 	//bool isContain(QPointF p);
 	static void drawLineTo(const QPointF &endPoint);

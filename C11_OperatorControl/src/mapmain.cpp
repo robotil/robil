@@ -87,6 +87,20 @@ CMapMain::~CMapMain()
 {
 
 }
+
+void CMapMain::UpdateGrid(int grid[48][48])
+{
+	for(int i=0; i<48; i++)
+	{
+		for(int j=0; j<48; j++)
+		{
+			PixColor[i][j] = grid[i][j];
+			pPixItem[i][j]->SetColor(grid[i][j]);
+		}
+	}
+	update();
+}
+
 void CMapMain::AddPix()
 {
 	startX = 175;

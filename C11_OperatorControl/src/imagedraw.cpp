@@ -105,6 +105,11 @@ void ImageDraw::OnImgReceived(std::string fileName)
 	emit SigOnNewImg(myImage);
 }
 
+void ImageDraw::OnOccupancyGridReceived(int grid[48][48])
+{
+	ui.mapWidget->UpdateGrid(grid);
+}
+
 void ImageDraw::SltOnNewImg(QImage image)
 {
 //	QLabel* lbl = new QLabel(this);

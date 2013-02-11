@@ -16,6 +16,7 @@ public:
 	~CGridItem();
 	void AddPix();
 	void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget);
+	void UpdateGrid(int grid[48][48]);
 
 private:
 	int pos[2];

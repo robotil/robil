@@ -22,6 +22,7 @@ public:
 	CMapMain(QWidget *parent = 0, Qt::WFlags flags = 0);
 	CMapMain(int arr[48][48],QWidget *parent = 0, Qt::WFlags flags = 0);
 	~CMapMain();
+	void UpdateGrid(int grid[48][48]);
 	static void drawLine();
 
 private:

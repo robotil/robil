@@ -21,6 +21,18 @@ void CGridItem::AddPix()
 {
 	
 }
+
+void CGridItem::UpdateGrid(int grid[48][48])
+{
+	for(int i=0; i<48; i++)
+	{
+		for(int j=0; j<48;j++)
+		{
+			pPixItem[i][j]->SetColor(grid[i][j]);
+		}
+	}
+}
+
 QRectF CGridItem::boundingRect()  const
 {
     return QRectF(175,400,600,600);

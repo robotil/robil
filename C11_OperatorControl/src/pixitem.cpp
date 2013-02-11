@@ -25,6 +25,11 @@ QRectF CPixItem::boundingRect()  const
     return QRectF(0, 0,12, 12);
 }
 
+void CPixItem::SetColor(int color)
+{
+	PixColor = color;
+}
+
 QBrush CPixItem::TransEnumToBrush()
 {
 	/*clr_gray_20,
