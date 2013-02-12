@@ -1,4 +1,4 @@
-V0.0.0.67
+V0.0.0.68
 =================================================
 C0_RobilTask     		    0.4
 C0_Scripts     		    	    0.10
@@ -16,8 +16,8 @@ C34_Designer     	    	    0.13
 C34_Executer     	    	    0.6
 C35_Monitoring     	    	    0.3
 C41_BodyControl     	    	    0.1
-C41_QuasiStaticWalking     	    0.3
-C41_QuasiStaticWalking_tools        0.2
+C41_QuasiStaticWalking     	    0.4
+C41_QuasiStaticWalking_tools        0.3
 C42_DynamicLocomotion               0.1
 C42_LocomotionAndStability          0.1
 C43_LocalBodyPVA     		    0.1
