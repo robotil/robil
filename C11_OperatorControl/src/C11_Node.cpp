@@ -56,6 +56,7 @@ bool C11_Node::init() {
 		//status_subscriber = nh_->subscribe("c11_stt",1000,&StatusMessageCallback);
 
 		c11_push_img =	nh_->advertiseService("C11/push_img", &C11_Node::push_img_proccess, this);
+		c11_push_occupancy_grid = nh_->advertiseService("C11/push_occupancy_grid", &C11_Node::push_occupancy_grid_proccess, this);
 		LoadMissionClient = nh_->serviceClient<C10_Common::mission_selection>("MissionSelection");
 
 
@@ -138,6 +139,22 @@ bool C11_Node::push_img_proccess(C10_Common::push_img::Request  &req,
 		res.ACK.mes = 0;
 		return false;
 	}
+}
+
+bool C11_Node::push_occupancy_grid_proccess(C10_Common::push_occupancy_grid::Request  &req,
+                  		  C10_Common::push_occupancy_grid::Response &res )
+{
+	int grid[48][48];
+	for(int i=0; i<48; i++)
+	{
+		for(int j=0; j<48;j++)
+		{
+			grid[i][j] = req.OGD.row[47-i].column[j].status;
+		}
+	}
+	pIC11_Node_Subscriber->OnOccupancyGridReceived(grid);
+	res.ACK.mes = 1;
+	return true;
 }
 
 void C11_Node::LoadMission(int index)

@@ -14,6 +14,7 @@
 //#include "C11_Agent/C34C11_STT.h"
 #include "C10_Common/mission_selection.h"
 #include "C10_Common/push_img.h"
+#include "C10_Common/push_occupancy_grid.h"
 #include "C11_Node_Subscriber.h"
 #include <image_transport/image_transport.h>
 #include <sensor_msgs/image_encodings.h>
@@ -62,6 +63,8 @@ public:
 
           bool push_img_proccess(C10_Common::push_img::Request  &req,
         		  C10_Common::push_img::Response &res );
+          bool push_occupancy_grid_proccess(C10_Common::push_occupancy_grid::Request  &req,
+                  		  C10_Common::push_occupancy_grid::Response &res );
 
 Q_SIGNALS:
         void loggingUpdated();
@@ -71,6 +74,7 @@ private:
   ros::NodeHandle *nh_;
   ros::ServiceServer service;
   ros::ServiceServer c11_push_img;
+  ros::ServiceServer c11_push_occupancy_grid;
   ros::ServiceClient LoadMissionClient;// = _node.serviceClient<C11_Agent::mission_selection>("C11/mission_selection");
   image_transport::ImageTransport* it_;
   image_transport::Subscriber panoramic_image;
