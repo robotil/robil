@@ -13,9 +13,15 @@
 #include "C11_PushServer.hpp"
 //#include "TaskProxyConnectionByActionLib.h"
 #include "C34_Executer/run.h"
+#include "C34_Executer/stop.h"
 #include "C34_Executer/resume.h"
 #include <sstream>
 #include <stdlib.h>
+
+ros::NodeHandle* pn;
+ros::Subscriber status_subscriber;
+std::string tree_id_str;
+ros::ServiceClient c34StopClient;
 
 
 bool PathPlan(C11_Agent::C11::Request& req,
@@ -25,6 +31,23 @@ bool PathPlan(C11_Agent::C11::Request& req,
 
 return true;
 
+}
+
+void StopExecuteMessageCallback(const std_msgs::StringConstPtr& msg)
+{
+	ROS_INFO(msg->data.data());
+	if(!tree_id_str.empty())
+	c34StopClient = pn->serviceClient<C34_Executer::stop>("executer/stop");
+	C34_Executer::stop srv34Stop;
+	srv34Stop.request.tree_id = tree_id_str;
+	if (!c34StopClient.call(srv34Stop))
+	{
+		ROS_ERROR("stop of mission error, exiting\n");
+	}
+	else
+	{
+		ROS_INFO("Stop request sent\n");
+	}
 }
 
 
@@ -40,12 +63,12 @@ bool MissionSelection(C10_Common::mission_selection::Request& req,
 
    	C34_Executer::run srv34Run;
 
-   	std::string ostr;
+ //  	std::string ostr;
    	std::stringstream out;
    	out <<"id"<< req.MSN.MSN << std::endl;
-   	ostr= out.str();
-   	ROS_INFO(ostr.data());
-   	srv34Run.request.tree_id = ostr;
+   	tree_id_str = out.str();
+   	ROS_INFO(tree_id_str.data());
+   	srv34Run.request.tree_id = tree_id_str;
    	//srv34.request.tree_id << req.MSN.MSN << std::endl;
 
    	//ostr << "skill3.xml";
@@ -69,13 +92,15 @@ bool MissionSelection(C10_Common::mission_selection::Request& req,
 
    ros::ServiceClient c34ResumeClient = _node.serviceClient<C34_Executer::resume>("executer/resume");
    C34_Executer::resume srv34Resume;
-   srv34Resume.request.tree_id = ostr;
+   srv34Resume.request.tree_id = tree_id_str;
    if (!c34ResumeClient.call(srv34Resume))
 	{
 		ROS_ERROR("resume of mission error, exiting\n");
 		return false;
 	}
    ROS_INFO("resume of mission success");
+
+   status_subscriber = pn->subscribe("executer/stop_stream",1000,&StopExecuteMessageCallback);
 
    return true;
 
@@ -96,13 +121,13 @@ bool AskForImage(C11_Agent::ask_for_image::Request& req,
 int main(int argc, char **argv)
 {
 
-  
+	tree_id_str="";
   ros::init(argc, argv, "C11_Agent");
 
 
 
   ros::NodeHandle n;
-
+  pn = &n;
 
    
    ros::Publisher stt_pub = n.advertise<C11_Agent::C34C11_STT>("c11_stt", 1000);

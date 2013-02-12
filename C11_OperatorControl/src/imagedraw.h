@@ -31,6 +31,7 @@ public:
 	//C11_Node_Subscriber implementation
 	virtual void OnImgReceived(QImage image);
 	virtual void OnImgReceived(std::string fileName);
+	virtual void OnOccupancyGridReceived(int grid[48][48]);
 
 protected:
 	void CloseOpenedImages();
