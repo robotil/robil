@@ -48,27 +48,42 @@
 C22_Node::C22_Node():
 	pointCloud_sub(nh_,"/C21/C22",1),
 	pos_sub(nh_,"/ground_truth_odom",1),
-	sync( MySyncPolicy( 10000 ),pointCloud_sub, pos_sub){
+	sync( MySyncPolicy( 10 ),pointCloud_sub, pos_sub){
 
 	sync.registerCallback( boost::bind( &C22_Node::callback, this, _1, _2) );
 	_myMatrix=new MapMatrix();
 	_myPlanes=new std::vector<pclPlane*>();
-	ROS_INFO("finished subscribing\n");
+	ROS_INFO("C22 Online\n");
 	//test1=nh_.subscribe("/C21/C22",1,&C22_Node::callback2,this);
 	//test2=nh_.subscribe("/ground_truth_odom",1,&C22_Node::callback3,this);
 	service = nh_.advertiseService("C22", &C22_Node::proccess, this); //Specifying what to do when a reconstructed 3d scene is requested
 	service2 = nh_.advertiseService("C22/C24", &C22_Node::proccess2, this); //Specifying what to do when a reconstructed 3d scene is requested
+	pcl::PointCloud<pcl::PointXYZ>::Ptr basic_cloud_ptr (new pcl::PointCloud<pcl::PointXYZ>);
+	/*std::cout << "Genarating example point clouds.\n\n";
+	// We're going to make an ellipse extruded along the z-axis. The color for
+	for (float z(-1.0); z <= 1.0; z += 0.05)
+	{
+	  for (float angle(0.0); angle <= 360.0; angle += 5.0)
+	  {
+	    pcl::PointXYZ basic_point;
+	    basic_point.x = 0.5 * std::cos (pcl::deg2rad(angle));
+	    basic_point.y = std::sin (pcl::deg2rad(angle));
+	    basic_point.z = z;
+	    basic_cloud_ptr->points.push_back(basic_point);
 
+	  }
+	}
+	basic_cloud_ptr->width = (int) basic_cloud_ptr->points.size ();
+	basic_cloud_ptr->height = 1;
+	boost::shared_ptr<pcl::visualization::PCLVisualizer> myviewer (new pcl::visualization::PCLVisualizer ("3D Viewer"));
+	viewer=myviewer;
+	viewer->setBackgroundColor (0, 0, 0);
+	viewer->addPointCloud<pcl::PointXYZ> (basic_cloud_ptr, "reconstruction");
+	viewer->addCoordinateSystem ( 1.0 );
+	viewer->initCameraParameters ();
+*/
 }
 
-void C22_Node::callback2(const C21_VisionAndLidar::C21_C22::ConstPtr& pclMsg){
-	ROS_INFO("callback2\n");
-}
-
-
-void C22_Node::callback3(const nav_msgs::Odometry::ConstPtr& pos_msg){
-	ROS_INFO("callback3\n");
-}
 /**
  * The call back function executed when a service is requested
  * it must return true in order to work properly
@@ -77,8 +92,13 @@ void C22_Node::callback3(const nav_msgs::Odometry::ConstPtr& pos_msg){
  */
 bool C22_Node::proccess(C22_GroundRecognitionAndMapping::C22::Request  &req,
 	C22_GroundRecognitionAndMapping::C22::Response &res ){
-	ROS_INFO("recived request, trying to fetch data\n");
+	//ROS_INFO("recived request, trying to fetch data\n");
 	res.drivingPath.row.resize(_myMatrix->data->size());
+	res.drivingPath.robotPos.x=robotPos.x;
+	res.drivingPath.robotPos.y=robotPos.y;
+	res.drivingPath.robotPos.z=robotPos.z;
+	res.drivingPath.xOffset=_myMatrix->xOffset;
+	res.drivingPath.yOffset=_myMatrix->yOffset;
 	for(int i=0;i<_myMatrix->data->size();i++){
 		res.drivingPath.row.at(i).column.resize(_myMatrix->data->at(i)->size());
 		for(int j=0;j<_myMatrix->data->at(i)->size();j++){
@@ -123,7 +143,6 @@ bool C22_Node::proccess2(C22_GroundRecognitionAndMapping::C22C24::Request  &req,
  * The call back function executed when a new point cloud has arrived
  */
 void C22_Node::callback(const C21_VisionAndLidar::C21_C22::ConstPtr& pclMsg,const nav_msgs::Odometry::ConstPtr& pos_msg){
-	ROS_INFO("callback\n");
 	 pcl::PointCloud<pcl::PointXYZ>cloud;
 	 pcl::fromROSMsg<pcl::PointXYZ>(pclMsg->cloud,cloud);
 	 pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_backup(cloud.makeShared());
@@ -138,22 +157,30 @@ void C22_Node::callback(const C21_VisionAndLidar::C21_C22::ConstPtr& pclMsg,cons
 	 vg.setLeafSize (0.05f, 0.05f, 0.05f);
 	 vg.filter (*cloud_filtered);
 	 tf::Transform trans;
-	 trans.setOrigin(tf::Vector3(pclMsg->pose.position.x,pclMsg->pose.position.y,pclMsg->pose.position.z));
-	 trans.setRotation(tf::Quaternion(pclMsg->pose.orientation.x,pclMsg->pose.orientation.y,pclMsg->pose.orientation.z,pclMsg->pose.orientation.w));
+	 trans.setOrigin(tf::Vector3(pclMsg->pose.position.x,pclMsg->pose.position.z,pclMsg->pose.position.y));
+	 trans.setRotation(tf::Quaternion(pclMsg->pose.orientation.x,pclMsg->pose.orientation.z,pclMsg->pose.orientation.y,pclMsg->pose.orientation.w));
 	 tf::Transform trans2;
-	 	 trans2.setOrigin(tf::Vector3(pos_msg->pose.pose.position.x,pos_msg->pose.pose.position.y,pos_msg->pose.pose.position.z));
-	 	 trans2.setRotation(tf::Quaternion(pos_msg->pose.pose.orientation.x,pos_msg->pose.pose.orientation.y,pos_msg->pose.pose.orientation.z,pos_msg->pose.pose.orientation.w));
-	 Eigen::Matrix4f headTopelvis,pelvisToWorld;
+	 	 trans2.setOrigin(tf::Vector3(pos_msg->pose.pose.position.x,pos_msg->pose.pose.position.z,pos_msg->pose.pose.position.y));
+	 	 trans2.setRotation(tf::Quaternion(pos_msg->pose.pose.orientation.x,pos_msg->pose.pose.orientation.z,pos_msg->pose.pose.orientation.y,pos_msg->pose.pose.orientation.w));
+	 tf::Transform trans3;
+	 	 trans3.setOrigin(tf::Vector3(0.0,-0.002, 0.035 ));
+	 	 trans3.setRotation(tf::Quaternion(0,0,0,1));
+	 Eigen::Matrix4f sensorToHead,headTopelvis,pelvisToWorld;
+	 pcl_ros::transformAsMatrix(trans3, sensorToHead);
 	 pcl_ros::transformAsMatrix(trans, headTopelvis);
 	 pcl_ros::transformAsMatrix(trans2, pelvisToWorld);
-
+	 robotPos.x=pos_msg->pose.pose.position.x;
+	 robotPos.y=pos_msg->pose.pose.position.y;
+	 robotPos.z=pos_msg->pose.pose.position.z;
 	 // transform pointcloud from sensor frame to fixed robot frame
+	 pcl::transformPointCloud(*cloud_filtered, *cloud_filtered, sensorToHead);
 	 pcl::transformPointCloud(*cloud_filtered, *cloud_filtered, headTopelvis);
 	 pcl::transformPointCloud(*cloud_filtered, *cloud_filtered, pelvisToWorld);
-
-
-
-	_myMatrix->clearMatrix();
+	/*	viewer->spinOnce (100);
+		if(!viewer->updatePointCloud(cloud_filtered,"reconstruction"))
+			viewer->addPointCloud(cloud_filtered, "reconstruction");*/
+	 _myMatrix->updateMapRelationToWorld(pos_msg->pose.pose.position.x,pos_msg->pose.pose.position.y);
+	 //_myMatrix->clearMatrix();
 	 pcl::PointCloud<pcl::PointXYZ>::Ptr cloudf_backup(cloud_filtered->makeShared());
 
 	  /*
