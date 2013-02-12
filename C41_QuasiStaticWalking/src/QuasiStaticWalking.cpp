@@ -46,7 +46,7 @@ public:
 		while(!pelvis_leg_target_cli_.waitForExistence(ros::Duration(0.1))){
 			ROS_INFO("Waiting for the pelvis_leg_target server");
 		}
-		if(!getPath_cli_.waitForExistence(ros::Duration(0.1))){
+		while(!getPath_cli_.waitForExistence(ros::Duration(0.1))){
 			ROS_INFO("Waiting for the /C31_GlobalPathPlanner/getPath server");
 		}
 
