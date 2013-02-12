@@ -6,13 +6,18 @@ import java.util.Date;
 import document.Document;
 import elements.GElement;
 
+/**
+ * Stores a copy of all elements & arrows in specified document
+ * @author blackpc
+ *
+ */
 class Snapshot {
 	
 	private Date _date;
 	private Document _document;
 	private int _sequenceNumber;
-	ArrayList<GElement> _elements;
-	ArrayList<GElement> _arrows;
+	private ArrayList<GElement> _elements;
+	private ArrayList<GElement> _arrows;
 	
 	private Snapshot(Document document, ArrayList<GElement> elements, ArrayList<GElement> arrows, int sequenceNumber) {
 		this._date 		= new Date();
@@ -22,36 +27,65 @@ class Snapshot {
 		this._sequenceNumber = sequenceNumber;
 	}
 	
+	/**
+	 * Restores saved state for related document
+	 */
 	public void activate() {
-		this._document.elements = this._elements;
-		this._document.arrays  	= this._arrows;
-
-		for (GElement element : this._elements) 
-			element.setView(this._document.view);
+		// ***************************************************************************
+		// *** Clones elements & arrows from snapshot, and replace document's elements
+		// *** Note: snapshot's elements & arrows must remain immutable
+		// ***************************************************************************
 		
-		for (GElement element : this._arrows) 
-			element.setView(this._document.view);
+		// Cloned elements & arrows
+		ArrayList<GElement> elements = new ArrayList<GElement>();
+		ArrayList<GElement> arrows   = new ArrayList<GElement>();
+		
+		// Set elements & arrows to allow cloning
+		_document.elements = _elements;
+		_document.arrays  	= _arrows;
+		
+		// Clone elements & arrows
+		_document.cloneElements(elements, arrows);
+		
+		// Replace elements & arrows by clones
+		_document.elements = elements;
+		_document.arrays  	= arrows;		
 
-		this._document.repaint();
+		// ***************************************************************************
+		// *** Set the right view
+		// ***************************************************************************
+		for (GElement element : elements) 
+			element.setView(_document.view);
+		
+		for (GElement element : arrows) 
+			element.setView(_document.view);
+
+		_document.repaint();
 	}
 	
+	/**
+	 * Creates snapshot from specified document
+	 * @param document Target document
+	 * @param sequenceNumber Sequence number of new snapshot
+	 * @return Snapshot
+	 */
 	public static Snapshot create(Document document, int sequenceNumber) {
 		ArrayList<GElement> elements = new ArrayList<GElement>();
 		ArrayList<GElement> arrows   = new ArrayList<GElement>();
 		document.cloneElements(elements, arrows);
-		
-		// assert elements.size() == document.elements.size() : elements;
-		// assert arrows.size() == document.arrays.size() : arrows;
-		
 		return new Snapshot(document, elements, arrows, sequenceNumber);
 	}
 	
+	/**
+	 * The date & time the snapshot was taken
+	 * @return
+	 */
 	public Date getDate() {
 		return _date;
 	}
 	
 	@Override
 	public String toString() {
-		return Integer.toString(this._sequenceNumber) + "X" + _date.getTime();
+		return Integer.toString(_sequenceNumber) + "X" + _date.getTime();
 	}
 }

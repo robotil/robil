@@ -4,6 +4,11 @@ import java.util.Stack;
 
 import document.Document;
 
+/**
+ * Stores and manages history of document, enabling undoing or redoing changes made to a document
+ * @author blackpc
+ *
+ */
 public class HistoryManager {
 	
 	private Document _document;
@@ -14,33 +19,48 @@ public class HistoryManager {
 	private Stack<Snapshot> _undoStack = new Stack<Snapshot>();
 	private Stack<Snapshot> _redoStack = new Stack<Snapshot>();
 	
+	/**
+	 * Makes snapshot of current state
+	 */
+	private void updateCurrentSnapshot() {
+		_currentSnapshot = Snapshot.create(_document, _sequenceNumber);
+		_sequenceNumber++;
+	}
+	
+	/**
+	 * Initializes the manager to allow undo & redo actions
+	 * Must be called before any undo/redo/createSnapshot actions 
+	 * @param document Target document
+	 * @throws HistoryManagerNotReadyException
+	 */
 	public void init(Document document) throws HistoryManagerNotReadyException {
-		
 		_document = document;
 		_ready = true;
 		_sequenceNumber = 0;
 		// createSnapshot();
 		updateCurrentSnapshot();
-		System.out.println("New history session created at ");
-		
 	}
 	
-	private void updateCurrentSnapshot() {
-		_currentSnapshot = Snapshot.create(this._document, this._sequenceNumber);
-		_sequenceNumber++;
-	}
-	
+	/**
+	 * Creates new snapshot, must be called before the change of document's elements
+	 * @throws HistoryManagerNotReadyException
+	 */
 	public void createSnapshot() throws HistoryManagerNotReadyException {
 		if (!isReady())
 			throw new HistoryManagerNotReadyException();
 
 		_redoStack.clear();
-		_undoStack.push(this._currentSnapshot);
+		_undoStack.push(_currentSnapshot);
 		updateCurrentSnapshot();
 		System.out.println("Snapshot saved");
 	
 	}
 	
+	/**
+	 * Undo last change
+	 * @throws HistoryStackEmptyException
+	 * @throws HistoryManagerNotReadyException
+	 */
 	public void undo() throws HistoryStackEmptyException, HistoryManagerNotReadyException {
 		if (_undoStack.isEmpty())
 			throw new HistoryStackEmptyException();
@@ -48,45 +68,66 @@ public class HistoryManager {
 		if (!isReady())
 			throw new HistoryManagerNotReadyException();
 		
-		_redoStack.push(this._currentSnapshot);
+		_redoStack.push(_currentSnapshot);
 		
-		this._currentSnapshot = _undoStack.pop();
-		this._currentSnapshot.activate();
-
-		// _sequenceNumber--;
+		_currentSnapshot = _undoStack.pop();
+		_currentSnapshot.activate();
 	}
 	
+	/**
+	 * Redo last undo action
+	 * @throws HistoryStackEmptyException
+	 * @throws HistoryManagerNotReadyException
+	 */
 	public void redo() throws Exception {
 		if (_redoStack.isEmpty())
-			throw new Exception("Redo stack is empty");
+			throw new HistoryStackEmptyException();
 		
 		if (!isReady())
 			throw new HistoryManagerNotReadyException();
 		
-		_undoStack.push(this._currentSnapshot);
+		_undoStack.push(_currentSnapshot);
 		
-		this._currentSnapshot = _redoStack.pop();
-		this._currentSnapshot.activate();
+		_currentSnapshot = _redoStack.pop();
+		_currentSnapshot.activate();
 
 		_sequenceNumber++;
 	}
 	
+	/**
+	 * Returns number of available undo steps
+	 */
 	public int getUndoCount() {
 		return _undoStack.size();
 	}
 	
+	/**
+	 * Is undo action available 
+	 * @return
+	 */
 	public boolean hasUndo() {
 		return _undoStack.size() > 0 && isReady();
 	}
 	
+	/**
+	 * Is redo action available
+	 * @return
+	 */
 	public boolean hasRedo() {
 		return _redoStack.size() > 0 && isReady();
 	}
 
+	/**
+	 * Is manager redo for work
+	 * @return
+	 */
 	public boolean isReady() {
 		return _ready;
 	}
 	
+	/**
+	 * Prints information about current state, undo & redo stacks to standard output
+	 */
 	public void printStacks() {
 		
 		for (Snapshot snapShot : this._undoStack)

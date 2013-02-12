@@ -272,6 +272,7 @@ public class Document extends JPanel {
 	public ArrayList<GElement> elements = new ArrayList<GElement>();
 	public View view = new View();
 	public TaskDescription task_description = null;
+	private boolean _documentChanged = false;
 	private double lastX = 0;
 	private double lastY = 0;
 	private String _taskDescriptionFilename;
@@ -437,6 +438,7 @@ public class Document extends JPanel {
 	public boolean compile(String destination, boolean updateCurrentWorkingFile, boolean createJustNamesXml) {
 		// if (updateCurrentWorkingFile)
 		String originalDestination = this.absoluteFilePath;
+		boolean saved = false;
 		
 		setCurrentWorkingFile(destination);
 		
@@ -486,7 +488,7 @@ public class Document extends JPanel {
 						+ destination);
 			}
 	
-			boolean saved = saveXmlToFile(xml, getCurrentWorkingFile(), true);
+			saved = saveXmlToFile(xml, getCurrentWorkingFile(), true);
 			if (saved && createJustNamesXml)
 				saveXmlToFile(createXml(rootTask, tabulation, true),
 						getCurrentWorkingFileForXmlWithJustNames(), false);		
@@ -497,6 +499,7 @@ public class Document extends JPanel {
 			if (!updateCurrentWorkingFile)
 				this.absoluteFilePath = originalDestination;
 			
+			onDocumentSave(saved);
 		}
 	}
 
@@ -547,23 +550,7 @@ public class Document extends JPanel {
 	public void cloneElements(ArrayList<GElement> outElements, ArrayList<GElement> outArrows) {
 		
 		HashMap<GElement, GElement> clonedElements = new HashMap<GElement, GElement>();
-		
-		// Copy arrows
-//		for (GElement arrow : arrays) {
-//			GElement clonedSource = arrow.getAsArrow().source.clone();
-//			ArrayList<GElement> clonedTargets = new ArrayList<GElement>();
-//			
-//			clonedElements.put(arrow.getAsArrow().source, clonedSource);
-//			
-//			for (GElement target : arrow.getAsArrow().targets) {
-//				
-//				clonedElements.put(target, target.clone());
-//				clonedTargets.add(clonedElements.get(target));
-//			}
-//			
-//			outArrows.add(arrow.getAsArrow().clone(clonedSource, clonedTargets));
-//		}
-//		
+
 		GElement clonedElement;
 		
 		// Copy elements
@@ -774,7 +761,7 @@ public class Document extends JPanel {
 			return null;
 		}
 
-		return new String(splitted[splitted.length - 1]);
+		return (_documentChanged ? "*" : "") + new String(splitted[splitted.length - 1]);
 	}
 
 	public ArrayList<GElement> getSubElements(GElement el) {
@@ -1166,14 +1153,24 @@ public class Document extends JPanel {
 		
 		// System.out.println("Undo count = " + _historyManager.getUndoCount());
 		
-		if (!_treeChangeEvent)
-			_historyManager.printStacks();
+		if (!_buildTime) {
+			_documentChanged = true;
+			updateTabTitle();
+		}
 		
 		updateUndoRedoButtonsState();
 	}
 
 	private void onDocumentLoad(String fileName) {
+		_documentChanged = false;
+		updateTabTitle();
+	}
+	
+	private void onDocumentSave(boolean successfuly) {
+		if (successfuly)
+			_documentChanged = false;
 		
+		updateTabTitle();
 	}
 	
 	public void undo() {
@@ -1185,8 +1182,10 @@ public class Document extends JPanel {
 		}
 		
 		_historyManager.printStacks();
+		_documentChanged = true;
 		
 		updateUndoRedoButtonsState();
+		updateTabTitle();
 	}
 	
 	public void redo() {
@@ -1198,13 +1197,20 @@ public class Document extends JPanel {
 			}
 		
 		_historyManager.printStacks();
+		_documentChanged = true;
 		
 		updateUndoRedoButtonsState();
+		updateTabTitle();
 	}
 
 	private void updateUndoRedoButtonsState() {
 		this.mainWindow.toolbar.setUndoButtonState(_historyManager.hasUndo());
 		this.mainWindow.toolbar.setRedoButtonState(_historyManager.hasRedo());
+	}
+	
+	private void updateTabTitle() {
+		this.mainWindow.setTabName(this, getShortFilePath());
+		System.out.println("Tab name updated to: " + getShortFilePath());
 	}
 	
 	@Override

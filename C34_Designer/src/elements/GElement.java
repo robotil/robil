@@ -185,6 +185,10 @@ public abstract class GElement {
 		return this instanceof Arrow;
 	}
 	
+	public boolean isDecorator() {
+		return this instanceof Decorator;
+	}
+	
 	public Task getAsTask() {
 		if (!isTask())
 			return null;

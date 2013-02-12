@@ -128,40 +128,78 @@ public class DesignerPopupMenu extends JPopupMenu {
 		return menu;
 	}
 	
+	public void createArrowMenu() {
+		add(createJointMenuItem());
+		add(createDecoratorMenuItem());
+		add(new JSeparator());
+		add(createRemoveMenuItem());
+	}
+	
+	public void createDecoratorMenu() {
+		add(createModifyMenuItem());
+		add(createRemoveMenuItem());
+	}
+	
+	public void createTaskMenu() {
+		add(createModifyMenuItem());
+		if (!this._element.isTaskType())
+			add(createCollapseCheckBox());
+		
+		add(new JSeparator());
+		add(createRemoveMenuItem());
+		add(createCopyMenuItem());
+		add(createCopyToPopup());
+	}
+	
+	/**
+	 * Creates a popup menu for selected element
+	 * @param designer BTDesigner object
+	 * @param document Target document
+	 * @param element Selected element
+	 */
 	public DesignerPopupMenu(BTDesigner designer, Document document, GElement element) {
 		_designer = designer;
 		_document = document;
 		_element = element;
-		
-		// JMenuItem item = new JMenuItem("Copy to...");
-		
-		if (!element.isArrow())
-			add(createModifyMenuItem());
-		
-		if (element.isArrow()) {
-			add(createJointMenuItem());
-			add(createDecoratorMenuItem());
-		}
-		
-		
-		if (!element.isTaskType() && !element.isArrow())
-			add(createCollapseCheckBox());
-		
-		add(new JSeparator());
-		
-		add(createRemoveMenuItem());
-		
-		if (!element.isArrow())
-			add(createCopyMenuItem());
-		
-		if (!element.isArrow())
-			add(createCopyToPopup());
-		
 
+//		if (!element.isArrow() && !element.isDecorator())
+//			add(createModifyMenuItem());
+//		
+//		if (element.isArrow() && !element.isDecorator()) {
+//			add(createJointMenuItem());
+//			add(createDecoratorMenuItem());
+//		}
+//		
+//		if (!element.isTaskType() && !element.isArrow() && !element.isDecorator())
+//			add(createCollapseCheckBox());
+//		
+//		add(new JSeparator());
+//		
+//		add(createRemoveMenuItem());
+//		
+//		if (!element.isArrow())
+//			add(createCopyMenuItem());
+//		
+//		if (!element.isArrow())
+//			add(createCopyToPopup());
+		
+		if (element.isArrow())
+			createArrowMenu();
+		
+		if (element.isTask()) 
+			createTaskMenu();
+		
+		if (element.isDecorator())
+			createDecoratorMenu();
 		
 		initPopupMenu();
 	}
 	
+	/**
+	 * Creates popup menu when the document is clicked, but none elements selected
+	 * @param designer BTDesigner object
+	 * @param document Target document
+	 */
 	public DesignerPopupMenu(BTDesigner designer, Document document) {
 		_designer = designer;
 		_document = document;

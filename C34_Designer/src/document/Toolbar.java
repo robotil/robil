@@ -25,6 +25,7 @@ import document.actions.RedoAction;
 import document.actions.RemoveAction;
 import document.actions.RunAction;
 import document.actions.SaveImageAction;
+import document.actions.SaveXMLAction;
 import document.actions.ToolAction;
 import document.actions.UndoAction;
 import elements.Arrow;
@@ -144,6 +145,14 @@ public class Toolbar extends JPanel {
 		btn.setIcon(new ImageIcon(getClass().getClassLoader().getResource("icons/open.png")));
 		btn.addActionListener(new OpenFileAction(designer));
 		buttons.add(btn);
+		
+		btn = new JButton();
+		btn.setText("");
+		btn.setActionCommand("file_save");
+		btn.setIcon(new ImageIcon(getClass().getClassLoader().getResource("icons/save.png")));
+		btn.addActionListener(new SaveXMLAction(designer));
+		buttons.add(btn);
+		
 		btn = new JButton();
 		btn.setText("");
 		btn.setIcon(new ImageIcon(getClass().getClassLoader().getResource("icons/save_image.png")));

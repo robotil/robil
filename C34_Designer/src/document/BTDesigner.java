@@ -48,7 +48,7 @@ public class BTDesigner extends JFrame {
 
 	private static final long serialVersionUID = 5495864869110385684L;
 
-	public final static String VERSION = "0.2.0";
+	public final static String VERSION = "0.2.1";
 
 	public static void main(String[] args) throws Exception {
 
@@ -283,6 +283,14 @@ public class BTDesigner extends JFrame {
 		}
 
 		this.tabbedPane.setTitleAt(index, name);
+	}
+	
+	public void setTabName(Document document, String name) {
+		for (int i = 0; i < this.tabs.size(); i++)
+			if (this.tabs.get(i).doc.equals(document)) {
+				setTabName(i, name);
+				return;
+			}
 	}
 
 	public void close() throws Exception {

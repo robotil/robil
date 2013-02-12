@@ -1,5 +1,3 @@
 <plan descriptions="./plans/TaskDescriptions.xml">
-   <swi name="Noname" x="419.5" y="87.5" collapsed="false" id="821745f6-eb83-4ce6-94da-f1a8dae927af"> 
-         <tsk name="Noname" x="374.5" y="275.5" test_time="0" test_result="true" id="9aba4c05-cce0-4418-8327-59a72ed62b2e" />
-   </swi>
+   <tsk name="Noname" x="342.5" y="155.5" test_time="0" test_result="true" id="38c91c35-dac1-4013-b536-105c8664c352" />
 </plan>
