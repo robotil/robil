@@ -1,4 +1,10 @@
 provides a 2d map where each cell represents a 25 cm square
+The map now spreads on 25 meters
+The service now returns the robot's position in the world and the map offsets (minimal tracked x&y)
+
+the robot's position on the map can be calculated as follows:
+row=(robotPos.y-yOffset)*4
+col=(robotPos.x-xOffset)*4
 
 How to Check:
 ============
