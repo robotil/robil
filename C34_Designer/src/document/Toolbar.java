@@ -18,6 +18,7 @@ import javax.swing.border.TitledBorder;
 import document.actions.CompileAction;
 import document.actions.ExportTasksAction;
 import document.actions.ModifyAction;
+import document.actions.NewWindowAction;
 import document.actions.OpenFileAction;
 import document.actions.OpenTaskDescriptionEditorAction;
 import document.actions.PointAction;
@@ -35,24 +36,8 @@ import elements.Joint;
 import elements.Task;
 
 public class Toolbar extends JPanel {
-	/**
-	 * 
-	 */
+	
 	private static final long serialVersionUID = 850819550411875827L;
-
-	{
-		// try {
-		// UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
-		// } catch (ClassNotFoundException e) {
-		// e.printStackTrace();
-		// } catch (InstantiationException e) {
-		// e.printStackTrace();
-		// } catch (IllegalAccessException e) {
-		// e.printStackTrace();
-		// } catch (UnsupportedLookAndFeelException e) {
-		// e.printStackTrace();
-		// }
-	}
 
 	private Document document = null;
 	private JLabel _statusBarLabel;
@@ -124,91 +109,149 @@ public class Toolbar extends JPanel {
 
 		JButton btn = new JButton();
 		
-		_undoButton = new JButton();
-		_undoButton.setText("");
-		_undoButton.addActionListener(new UndoAction(designer));
-		_undoButton.setIcon(new ImageIcon(getClass().getClassLoader().getResource("icons/undo.png")));
-		buttons.add(_undoButton);
-
-		_redoButton = new JButton();
-		_redoButton.setText("");
-		_redoButton.addActionListener(new RedoAction(designer));
-		_redoButton.setIcon(new ImageIcon(getClass().getClassLoader().getResource("icons/redo.png")));
-		buttons.add(_redoButton);
-		
-		pnl = new JPanel();
-		pnl.setPreferredSize(new Dimension(15, 0));
-		buttons.add(pnl);
+		btn = new JButton();
+		btn.setToolTipText("New document");
+		btn.setIcon(new ImageIcon(getClass().getClassLoader().getResource("icons/new_tab.png")));
+		btn.addActionListener(new NewWindowAction(designer));
+		buttons.add(btn);
 		
 		btn = new JButton();
-		btn.setText("");
+		btn.setToolTipText("Open plan");
 		btn.setIcon(new ImageIcon(getClass().getClassLoader().getResource("icons/open.png")));
 		btn.addActionListener(new OpenFileAction(designer));
 		buttons.add(btn);
 		
 		btn = new JButton();
-		btn.setText("");
+		btn.setToolTipText("Save plan");
 		btn.setActionCommand("file_save");
 		btn.setIcon(new ImageIcon(getClass().getClassLoader().getResource("icons/save.png")));
 		btn.addActionListener(new SaveXMLAction(designer));
 		buttons.add(btn);
 		
+		pnl = new JPanel();
+		pnl.setPreferredSize(new Dimension(10, 0));
+		buttons.add(pnl);
+		
+		_undoButton = new JButton();
+		_undoButton.setToolTipText("Undo");
+		_undoButton.addActionListener(new UndoAction(designer));
+		_undoButton.setIcon(new ImageIcon(getClass().getClassLoader().getResource("icons/undo.png")));
+		buttons.add(_undoButton);
+
+		_redoButton = new JButton();
+		_redoButton.setToolTipText("Redo");
+		_redoButton.addActionListener(new RedoAction(designer));
+		_redoButton.setIcon(new ImageIcon(getClass().getClassLoader().getResource("icons/redo.png")));
+		buttons.add(_redoButton);
+		
+		pnl = new JPanel();
+		pnl.setPreferredSize(new Dimension(10, 0));
+		buttons.add(pnl);
+		
 		btn = new JButton();
-		btn.setText("");
+		btn.setToolTipText("Save image");
 		btn.setIcon(new ImageIcon(getClass().getClassLoader().getResource("icons/save_image.png")));
 		btn.addActionListener(new SaveImageAction(designer));
 		buttons.add(btn);
+		
 		btn = new JButton();
-		btn.setText("");
+		btn.setToolTipText("Compile");
 		btn.setIcon(new ImageIcon(getClass().getClassLoader().getResource("icons/compile.png")));
 		btn.addActionListener(new CompileAction(designer));
 		buttons.add(btn);
+		
 		btn = new JButton();
-		btn.setText("");
+		btn.setToolTipText("Play");
 		btn.setIcon(new ImageIcon(getClass().getClassLoader().getResource("icons/play.png")));
 		btn.setActionCommand("run_run_plan");
 		btn.addActionListener(new RunAction(designer));
 		buttons.add(btn);
+		
 		pnl = new JPanel();
-		pnl.setPreferredSize(new Dimension(15, 0));
+		pnl.setPreferredSize(new Dimension(10, 0));
 		buttons.add(pnl);
 
 		btn = new JButton();
-		btn.setText("");
+		btn.setToolTipText("Remove element");
 		btn.setIcon(new ImageIcon(getClass().getClassLoader().getResource("icons/remove.png")));
 		btn.addActionListener(new RemoveAction(designer));
 		buttons.add(btn);
+		
 		btn = new JButton();
-		btn.setText("");
+		btn.setToolTipText("Modify element");
 		btn.setIcon(new ImageIcon(getClass().getClassLoader().getResource("icons/modify.png")));
 		btn.addActionListener(new ModifyAction(designer));
 		buttons.add(btn);
+		
+		pnl = new JPanel();
+		pnl.setPreferredSize(new Dimension(10, 0));
+		buttons.add(pnl);
+		
 		btn = new JButton();
-		btn.setText("");
+		btn.setToolTipText("Move");
 		btn.setIcon(new ImageIcon(getClass().getClassLoader().getResource("icons/move.png")));
 		btn.addActionListener(new PointAction(designer));
 		buttons.add(btn);
 		
+//		for (GElement.Creator c : this.creators) {
+//			btn = new JButton();
+//			btn.setText(c.getToolbarName());
+//			btn.addActionListener(new ToolAction(designer, c));
+//			buttons.add(btn);
+//		}
+		
+		// **************************************
+		// *** Creators
+		// **************************************
+		
+		GElement.Creator c;
+		
+		// Task
+		c = creators.get(0);
+		btn = new JButton();
+		btn.setToolTipText(c.getToolbarName());
+		btn.addActionListener(new ToolAction(designer, c));
+		btn.setIcon(new ImageIcon(getClass().getClassLoader().getResource("icons/task.png")));
+		buttons.add(btn);
+		
+		// Arrow
+		c = creators.get(1);
+		btn = new JButton();
+		btn.setToolTipText(c.getToolbarName());
+		btn.addActionListener(new ToolAction(designer, c));
+		btn.setIcon(new ImageIcon(getClass().getClassLoader().getResource("icons/arrow.png")));
+		buttons.add(btn);
+		
+		// Decorator
+		c = creators.get(2);
+		btn = new JButton();
+		btn.setToolTipText(c.getToolbarName());
+		btn.addActionListener(new ToolAction(designer, c));
+		btn.setIcon(new ImageIcon(getClass().getClassLoader().getResource("icons/decorator.png")));
+		buttons.add(btn);
+		
+		// Joint
+		c = creators.get(3);
+		btn = new JButton();
+		btn.setToolTipText(c.getToolbarName());
+		btn.addActionListener(new ToolAction(designer, c));
+		btn.setIcon(new ImageIcon(getClass().getClassLoader().getResource("icons/joint.png")));
+		buttons.add(btn);
+		
+
 		pnl = new JPanel();
 		pnl.setPreferredSize(new Dimension(15, 0));
 		buttons.add(pnl);
 
-		for (GElement.Creator c : this.creators) {
-			btn = new JButton();
-			btn.setText(c.getToolbarName());
-			btn.addActionListener(new ToolAction(designer, c));
-			buttons.add(btn);
-		}
-
-		pnl = new JPanel();
-		pnl.setPreferredSize(new Dimension(15, 0));
-		buttons.add(pnl);
-
-		btn = new JButton("Export tasks");
+		btn = new JButton("");
+		btn.setToolTipText("Export tasks");
+		btn.setIcon(new ImageIcon(getClass().getClassLoader().getResource("icons/export.png")));
 		btn.addActionListener(new ExportTasksAction(designer));
 		buttons.add(btn);
 
-		btn = new JButton("Task description editor");
+		btn = new JButton("");
+		btn.setToolTipText("Task description editor");
+		btn.setIcon(new ImageIcon(getClass().getClassLoader().getResource("icons/editor.png")));
 		btn.addActionListener(new OpenTaskDescriptionEditorAction(designer));
 		buttons.add(btn);
 

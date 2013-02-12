@@ -95,6 +95,7 @@ public class RosPipe {
 	private void send(RosTargets target, String... args) throws IOException {
 		String roscommand = convertRosEnumToString(target);
 
+		@SuppressWarnings("unused")
 		int emptyCounter = 0;
 		for (String s : args) {
 			if (s.trim().equals(""))
@@ -105,7 +106,7 @@ public class RosPipe {
 		ArrayList<String> arg_list = new ArrayList<String>();
 		arg_list.add(roscommand);
 
-		int j = 1;
+		// int j = 1;
 		for (int i = 0; i < args.length; ++i) {
 			if (args[i].trim().equals("") == false)
 				arg_list.add(args[i]);

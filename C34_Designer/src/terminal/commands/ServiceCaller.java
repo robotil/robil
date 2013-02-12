@@ -97,6 +97,7 @@ public class ServiceCaller extends RosCommand {
 		return ret;
 	}
 
+	@SuppressWarnings("unused")
 	public ArrayList<String> callService(String serviceName, String... args) {
 		ArrayList<String> ret = new ArrayList<String>();
 

@@ -173,7 +173,7 @@ public class Task extends GElement implements View.ChangesListener {
 						getProperty().collapsed = ModifyDialog.this.chkCollapse
 								.isSelected();
 
-						if (Task.this.type == TYPE_task
+						if (Task.this.type.equalsIgnoreCase(TYPE_task)
 								&& Task.this.taskDescriptionProvider != null) {
 							TaskDescription.Task updateTask = new TaskDescription.Task();
 							updateTask.algorithm = ModifyDialog.this.txtTaskDescAlgoritm
@@ -264,7 +264,7 @@ public class Task extends GElement implements View.ChangesListener {
 			add(lbl2);
 			add(this.cType);
 
-			if (Task.this.type != TYPE_task) {
+			if (!Task.this.type.equalsIgnoreCase(TYPE_task)) {
 				add(this.chkCollapse);
 			} else {
 				add(lbl3);
@@ -530,8 +530,13 @@ public class Task extends GElement implements View.ChangesListener {
 	public GElement clone() {
 		Task n = new Task();
 		cloneInit(n);
-		n.text = this.text;
-		n.type = this.type;
+		
+		if (this.text != null)
+			n.text = new String(this.text);
+		
+		if (this.type != null)
+			n.type = new String(this.type);
+		
 		n.seqNumber = this.seqNumber;
 		return n;
 	}
@@ -611,15 +616,15 @@ public class Task extends GElement implements View.ChangesListener {
 		}
 
 		Border border = null;
-		if (this.type == TYPE_selector)
+		if (this.type.equalsIgnoreCase(TYPE_selector))
 			border = new Sel(loc.x, loc.y, size.width, size.height);
-		if (this.type == TYPE_sequenser)
+		if (this.type.equalsIgnoreCase(TYPE_sequenser))
 			border = new Seq(loc.x, loc.y, size.width, size.height);
-		if (this.type == TYPE_task)
+		if (this.type.equalsIgnoreCase(TYPE_task))
 			border = new Tsk(loc.x, loc.y, size.width, size.height);
-		if (this.type == TYPE_parallel)
+		if (this.type.equalsIgnoreCase(TYPE_parallel))
 			border = new Par(loc.x, loc.y, size.width, size.height);
-		if (this.type == TYPE_switch)
+		if (this.type.equalsIgnoreCase(TYPE_switch))
 			border = new Swi(loc.x, loc.y, size.width, size.height);
 		border.paint(g);
 
@@ -646,8 +651,8 @@ public class Task extends GElement implements View.ChangesListener {
 			// tdim.height);
 		}
 
-		Vec typesize = new Vec(20, 20).scale(this.view.zoom);
-		Vec typeloc = getLocation().sub(typesize.scale(0.5));
+		// Vec typesize = new Vec(20, 20).scale(this.view.zoom);
+		// Vec typeloc = getLocation().sub(typesize.scale(0.5));
 
 		if (this.property.collapsed) {
 			f = new Font(this.font.getFamily(), this.font.getStyle(),
@@ -669,7 +674,7 @@ public class Task extends GElement implements View.ChangesListener {
 		}
 
 		// ADDED Draw tooltip
-		if (this.type.equals(TYPE_task) && this.property.leftClicked
+		if (this.type.equalsIgnoreCase(TYPE_task) && this.property.leftClicked
 				&& this.taskDescriptionProvider != null) {
 			String cleanName = getNameWithoutParameters();
 

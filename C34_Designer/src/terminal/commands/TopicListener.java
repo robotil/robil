@@ -21,6 +21,7 @@ public class TopicListener extends RosCommand {
 	public ArrayList<String> autocomplete(String command) {
 
 		String[] args = command.split(" ");
+		@SuppressWarnings("unused")
 		String topic = "";
 		ArrayList<String> ret = new ArrayList<String>();
 
@@ -49,6 +50,7 @@ public class TopicListener extends RosCommand {
 		return ret;
 	}
 
+	@SuppressWarnings("unused")
 	@Override
 	public void execute(String command) {
 		if (this.pipe.isAlreadyRunning()) {

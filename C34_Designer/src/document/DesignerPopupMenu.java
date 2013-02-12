@@ -3,7 +3,6 @@ package document;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
-import javax.swing.Action;
 import javax.swing.ImageIcon;
 import javax.swing.JCheckBoxMenuItem;
 import javax.swing.JMenu;
@@ -17,8 +16,9 @@ import javax.swing.event.PopupMenuListener;
 
 import document.BTDesigner.DesignerTab;
 import document.actions.CopyToAction;
+
+import elements.Arrow;
 import elements.GElement;
-import elements.Task;
 
 public class DesignerPopupMenu extends JPopupMenu {
 
@@ -65,6 +65,18 @@ public class DesignerPopupMenu extends JPopupMenu {
 			@Override
 			public void actionPerformed(ActionEvent arg0) {
 				_document.remove(_element);
+			}
+		});
+		return menu;
+	}
+	
+	private JMenuItem createRemoveSubtreeMenuItem() {
+		JMenuItem menu = new JMenuItem("Remove subtree");
+		menu.setIcon(new ImageIcon(getClass().getClassLoader().getResource("icons/remove.png")));
+		menu.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent arg0) {
+				_document.removeSubTree(_element);
 			}
 		});
 		return menu;
@@ -128,9 +140,21 @@ public class DesignerPopupMenu extends JPopupMenu {
 		return menu;
 	}
 	
+	private JMenuItem createReconnectMenuItem() {
+		JMenuItem menu = new JMenuItem("Reconnect");
+		menu.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent arg) {
+				DesignerPopupMenu.this._document.creator = new Arrow.Reconector((Arrow) DesignerPopupMenu.this._element);
+			}
+		});
+		return menu;
+	}
+	
 	public void createArrowMenu() {
 		add(createJointMenuItem());
 		add(createDecoratorMenuItem());
+		add(createReconnectMenuItem());
 		add(new JSeparator());
 		add(createRemoveMenuItem());
 	}
@@ -142,13 +166,17 @@ public class DesignerPopupMenu extends JPopupMenu {
 	
 	public void createTaskMenu() {
 		add(createModifyMenuItem());
+		add(createCopyMenuItem());
+		add(createCopyToPopup());
 		if (!this._element.isTaskType())
 			add(createCollapseCheckBox());
 		
 		add(new JSeparator());
+		add(new JSeparator());
+		
 		add(createRemoveMenuItem());
-		add(createCopyMenuItem());
-		add(createCopyToPopup());
+		if (!this._element.isTaskType())
+			add(createRemoveSubtreeMenuItem());
 	}
 	
 	/**
@@ -162,27 +190,6 @@ public class DesignerPopupMenu extends JPopupMenu {
 		_document = document;
 		_element = element;
 
-//		if (!element.isArrow() && !element.isDecorator())
-//			add(createModifyMenuItem());
-//		
-//		if (element.isArrow() && !element.isDecorator()) {
-//			add(createJointMenuItem());
-//			add(createDecoratorMenuItem());
-//		}
-//		
-//		if (!element.isTaskType() && !element.isArrow() && !element.isDecorator())
-//			add(createCollapseCheckBox());
-//		
-//		add(new JSeparator());
-//		
-//		add(createRemoveMenuItem());
-//		
-//		if (!element.isArrow())
-//			add(createCopyMenuItem());
-//		
-//		if (!element.isArrow())
-//			add(createCopyToPopup());
-		
 		if (element.isArrow())
 			createArrowMenu();
 		

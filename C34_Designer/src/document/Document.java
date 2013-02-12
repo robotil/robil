@@ -13,7 +13,6 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -24,9 +23,9 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
-import java.util.Vector;
 
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.xml.parsers.DocumentBuilderFactory;
 
@@ -47,8 +46,9 @@ import elements.Task;
 import elements.Vec;
 import elements.View;
 
-@SuppressWarnings("serial")
 public class Document extends JPanel {
+
+	private static final long serialVersionUID = 2195280758622734696L;
 
 	public class MouseHandler extends MouseAdapter {
 
@@ -135,12 +135,15 @@ public class Document extends JPanel {
 						GElement el = Document.this.creator.newInstance();
 						if (el instanceof Arrow) {
 							Arrow a = (Arrow) el;
+							onBeforeTreeChange(TreeChangeType.ArrowModify, el);
 							if (getArrow(a.getSource(), a.getTarget()).size() > 0
 									|| getArrow(a.getTarget(), a.getSource())
 											.size() > 0)
 								el = null;
+							onTreeChange(TreeChangeType.ArrowModify, el);
 						}
 						if (el != null) {
+							onBeforeTreeChange(TreeChangeType.ArrowModify, el);
 							el.setView(Document.this.view);
 							if (el instanceof View.ChangesListener)
 								((View.ChangesListener) el).onViewChange();
@@ -148,6 +151,7 @@ public class Document extends JPanel {
 							add(el);
 							el.modify();
 							repaint();
+							onTreeChange(TreeChangeType.ArrowModify, el);
 						}
 						if (Document.this.cleanToolSelectionAfterUse)
 							toolSelectionClean();
@@ -192,14 +196,6 @@ public class Document extends JPanel {
 				}
 				if (Document.this.selectedElement == null)
 					return;
-				// /*DEBUG*/{
-				// ArrayList<GElement> s = getSubElements(selectedElement);
-				// System.out.print("Sub elements: ");
-				// for(GElement ee: s){
-				// if(ee instanceof Task) System.out.print( ((Task)ee).text +" ");
-				// }
-				// System.out.println();
-				// }
 	
 				Document.this.selectedElement.getProperty().leftClicked = false;
 				Document.this.selectedElement = null;
@@ -239,8 +235,7 @@ public class Document extends JPanel {
 			if (notches > 0 && Document.this.view.zoom > 5)
 				return;
 			double old_zoom = Document.this.view.zoom;
-			double new_zoom = Document.this.view.zoom = Document.this.view.zoom
-					+ (notches * 0.1);
+			double new_zoom = Document.this.view.zoom = Document.this.view.zoom + (notches * 0.1);
 			Vec m = new Vec(e.getPoint());
 			Vec d = Document.this.view.loc.sub(m).scale(1.0 / old_zoom)
 					.scale(new_zoom);
@@ -252,7 +247,7 @@ public class Document extends JPanel {
 	}
 
 	private enum TreeChangeType {
-		Add, AddArrow, Remove, RemoveArrow, SubTreeRemove, TreeCopy
+		Add, AddArrow, Remove, RemoveArrow, SubTreeRemove, TreeCopy, ArrowModify
 	}
 
 	public static final String tabulation = "   ";
@@ -557,6 +552,10 @@ public class Document extends JPanel {
 		for (GElement element : elements) {
 			clonedElement = element.clone();
 			clonedElements.put(element, clonedElement);
+			
+			if (clonedElement.isTaskType())
+				clonedElement.getAsTask().setTaskDescriptionProvider(task_description);
+			
 			outElements.add(clonedElement);
 		}
 		
@@ -1177,9 +1176,7 @@ public class Document extends JPanel {
 		try {
 			if (_historyManager.hasUndo())
 				_historyManager.undo();
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
+		} catch (Exception e) { return; }
 		
 		_historyManager.printStacks();
 		_documentChanged = true;
@@ -1192,9 +1189,7 @@ public class Document extends JPanel {
 		if (_historyManager.hasRedo())
 			try {
 				_historyManager.redo();
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
+			} catch (Exception e) { return; }
 		
 		_historyManager.printStacks();
 		_documentChanged = true;
@@ -1549,8 +1544,26 @@ public class Document extends JPanel {
 		return "";
 	}
 
-	public void close() {
-		// this._historyManager.close();
+	public boolean close() {
+		if (_documentChanged) {
+			int dialogResult = JOptionPane.showConfirmDialog(
+					this.mainWindow, "Document '" + getShortFilePath().replace("*", "") + 
+					"' has unsaved changes, save document before close?",
+					"Document has unsaved changes",
+					JOptionPane.YES_NO_CANCEL_OPTION);
+
+			switch (dialogResult) {
+			case JOptionPane.YES_OPTION:
+				compile();
+				return true;
+			case JOptionPane.NO_OPTION:
+				return true;
+			case JOptionPane.CANCEL_OPTION:
+				return false;
+			}
+		}
+		
+		return true;
 	}
 
 }

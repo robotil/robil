@@ -40,9 +40,6 @@ public class PropertiesEditor extends JPanel implements ActionListener {
 	}
 
 	class PropertiesTableModel extends AbstractTableModel {
-		/**
-		 * 
-		 */
 		private static final long serialVersionUID = 4416884143948906001L;
 
 		private String[] columnNames = { "Property", "Value" };
@@ -216,6 +213,7 @@ public class PropertiesEditor extends JPanel implements ActionListener {
 	private JCheckBox cellCheck;
 
 	private ButtonGroup buttonGroup;
+	@SuppressWarnings("unused")
 	private JTextArea output;
 
 	private JPanel pnlButtons;
@@ -351,6 +349,7 @@ public class PropertiesEditor extends JPanel implements ActionListener {
 		}
 	}
 
+	@SuppressWarnings("unused")
 	private JCheckBox addCheckBox(String text) {
 		JCheckBox checkBox = new JCheckBox(text);
 		checkBox.addActionListener(this);
@@ -358,6 +357,7 @@ public class PropertiesEditor extends JPanel implements ActionListener {
 		return checkBox;
 	}
 
+	@SuppressWarnings("unused")
 	private JRadioButton addRadio(String text) {
 		JRadioButton b = new JRadioButton(text);
 		b.addActionListener(this);

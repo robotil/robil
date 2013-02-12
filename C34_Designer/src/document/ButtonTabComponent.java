@@ -85,8 +85,12 @@ public class ButtonTabComponent extends JPanel {
 			int i = ButtonTabComponent.this.pane
 					.indexOfTabComponent(ButtonTabComponent.this);
 			if (i != -1) {
-				ButtonTabComponent.this.pane.remove(i);
-				designer.tabs.get(i).doc.close();
+				if (designer.tabs.get(i).doc.close())
+					ButtonTabComponent.this.pane.remove(i);
+				else
+					return;
+				
+				// designer.tabs.get(i).doc.close();
 			}
 			
 			ButtonTabComponent.this.designer.tabs.remove(i);

@@ -31,8 +31,10 @@ public final class LogManager {
 
 		_outputStream.flush();
 
+		Scanner scanner = null;
+		
 		try {
-			Scanner scanner = new Scanner(new File(_outputFileName), "utf8");
+			scanner = new Scanner(new File(_outputFileName), "utf8");
 			StringBuilder stringBuilder = new StringBuilder();
 
 			while (scanner.hasNextLine())
@@ -43,6 +45,8 @@ public final class LogManager {
 		} catch (Exception e) {
 			e.printStackTrace();
 			return "Output file not found";
+		} finally {
+			scanner.close();
 		}
 	}
 
@@ -55,7 +59,7 @@ public final class LogManager {
 		_outputStream = createPrintStreamToFile(outputFileName);
 
 		System.setOut(_outputStream);
-		// System.setErr(_outputStream);
+		System.setErr(_outputStream);
 	}
 
 }

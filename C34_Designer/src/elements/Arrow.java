@@ -288,8 +288,11 @@ public class Arrow extends GElement {
 	public boolean segmentUnderMouse(GElement s, GElement e, Vec m) {
 		Vec c1 = s.getCenter();
 		Vec c2 = e.getCenter();
-		double mix = Math.min(c1.x, c2.x), miy = Math.min(c1.y, c2.y), max = Math
-				.max(c1.x, c2.x), may = Math.max(c1.y, c2.y);
+		double mix = Math.min(c1.x, c2.x);
+		// double miy = Math.min(c1.y, c2.y);
+		double max = Math.max(c1.x, c2.x); 
+		// double may = Math.max(c1.y, c2.y);
+		
 		if (!(mix <= m.x && m.x <= max /* && miy<=m.y && m.y<=may */))
 			return false;
 		return Vec.distance(c1, c2, m) < 4;

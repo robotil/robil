@@ -20,6 +20,7 @@ public class RosLogger extends RosCommand {
 	public ArrayList<String> autocomplete(String command) {
 
 		String[] args = command.split(" ");
+		@SuppressWarnings("unused")
 		String topic = "";
 		ArrayList<String> ret = new ArrayList<String>();
 
@@ -41,6 +42,7 @@ public class RosLogger extends RosCommand {
 			this.sys.println("ERROR: The previous process is running");
 			return;
 		}
+		@SuppressWarnings("unused")
 		String[] args = command.split(" ");
 
 		if (this.thread.isInterrupted()) {

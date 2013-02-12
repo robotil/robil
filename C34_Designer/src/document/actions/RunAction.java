@@ -81,6 +81,7 @@ public class RunAction extends AbstractDesignerAction implements ActionListener 
 		this.designer.rosExecutor.runBehaviorTree(id, fileName);
 	}
 
+	@SuppressWarnings("unused")
 	private void runPlanXML(String id, String xml) {
 		System.out.println("RUN PLAN XML : " + xml);
 

@@ -8,6 +8,7 @@ import java.util.Map;
 
 public class Tooltip extends GElement {
 
+	@SuppressWarnings("unused")
 	private String _title;
 	private String _message;
 	private GElement _parent;

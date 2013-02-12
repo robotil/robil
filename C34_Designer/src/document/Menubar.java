@@ -10,16 +10,20 @@ import javax.swing.JMenuItem;
 import javax.swing.KeyStroke;
 
 import document.actions.ArrowReconnectAction;
+import document.actions.CloseTabAction;
 import document.actions.CompileAction;
 import document.actions.CopyTreeAction;
 import document.actions.LoadAndOpenAction;
 import document.actions.LogConsoleAction;
 import document.actions.ModifyAction;
 import document.actions.NewWindowAction;
+import document.actions.NextTabAction;
 import document.actions.OpenFileAction;
 import document.actions.OpenTerminalAction;
 import document.actions.PointAction;
+import document.actions.PreviousTabAction;
 import document.actions.PropertiesAction;
+import document.actions.RedoAction;
 import document.actions.RemoveAction;
 import document.actions.RemoveSubtreeAction;
 import document.actions.RunAction;
@@ -27,12 +31,12 @@ import document.actions.SaveImageAction;
 import document.actions.SaveXMLAction;
 import document.actions.TestAction;
 import document.actions.ToolAction;
+import document.actions.UndoAction;
 
 public class Menubar extends JMenuBar {
 
-	/**
-	 * 
-	 */
+	private JMenuItem _undoMenuItem;
+	private JMenuItem _redoMenuItem;
 	private static final long serialVersionUID = 8066873848483126226L;
 
 	public Menubar(BTDesigner designer) {
@@ -45,6 +49,23 @@ public class Menubar extends JMenuBar {
 	private JMenu buildEditMenu(BTDesigner designer) {
 		JMenu menu = new JMenu("Edit");
 
+		JMenuItem undo = new JMenuItem("Undo");
+		undo.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_Z,ActionEvent.CTRL_MASK));
+		undo.setIcon(new ImageIcon(getClass().getClassLoader().getResource("icons/undo.png")));
+		undo.addActionListener(new UndoAction(designer));
+		
+		JMenuItem redo = new JMenuItem("Redo");
+		redo.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_R,ActionEvent.CTRL_MASK));
+		redo.setIcon(new ImageIcon(getClass().getClassLoader().getResource("icons/redo.png")));
+		redo.addActionListener(new RedoAction(designer));
+		
+		
+		menu.add(undo);
+		menu.add(redo);
+		
+		_undoMenuItem = undo;
+		_redoMenuItem = redo;
+		
 		menu.setMnemonic(KeyEvent.VK_E);
 		menu.add(buildToolsMenu(designer));
 		menu.add(buildElementsCreatorMenu(designer));
@@ -415,7 +436,30 @@ public class Menubar extends JMenuBar {
 		menuItemAbout.setToolTipText("About the software");
 		menu.add(menuItemAbout);
 
+		JMenuItem nextTab = new JMenuItem("Next tab");
+		nextTab.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_2, ActionEvent.CTRL_MASK));
+		nextTab.addActionListener(new NextTabAction(designer));
+		menu.add(nextTab);
+		
+		JMenuItem prevTab = new JMenuItem("Previous tab");
+		prevTab.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_1, ActionEvent.CTRL_MASK));
+		prevTab.addActionListener(new PreviousTabAction(designer));
+		menu.add(prevTab);
+		
+		JMenuItem closeTab = new JMenuItem("Close tab");
+		closeTab.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_W, ActionEvent.CTRL_MASK));
+		closeTab.addActionListener(new CloseTabAction(designer));
+		menu.add(closeTab);
+		
 		return menu;
+	}
+	
+	public JMenuItem getUndoButton() {
+		return _undoMenuItem;
+	}
+	
+	public JMenuItem getRedoButton() {
+		return _redoMenuItem;
 	}
 
 }

@@ -48,7 +48,7 @@ public class BTDesigner extends JFrame {
 
 	private static final long serialVersionUID = 5495864869110385684L;
 
-	public final static String VERSION = "0.2.1";
+	public final static String VERSION = "0.2.3";
 
 	public static void main(String[] args) throws Exception {
 
@@ -77,7 +77,11 @@ public class BTDesigner extends JFrame {
 			@Override
 			public void windowClosing(WindowEvent arg0) {
 				try {
-					btd.close();
+					if (btd.close()) {
+						btd.setVisible(false);
+						btd.dispose();
+						System.exit(0);
+					}
 				} catch (Exception e) {
 					e.printStackTrace();
 				}
@@ -96,7 +100,7 @@ public class BTDesigner extends JFrame {
 			public void windowOpened(WindowEvent e) {}
 		});
 		
-		btd.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		btd.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
 		btd.setVisible(true);
 	}
 
@@ -249,6 +253,10 @@ public class BTDesigner extends JFrame {
 		}
 	}
 	
+	public void setActiveTab(int index) {
+		tabbedPane.setSelectedIndex(index);
+	}
+	
 	public DesignerTab getActiveTab() {
 
 		// if (activeTab == null) {
@@ -271,6 +279,10 @@ public class BTDesigner extends JFrame {
 		return null;
 	}
 
+	public int selectedDocumentIndex() {
+		return this.tabbedPane.getSelectedIndex();
+	}
+	
 	public int getNumberOfDocuments() {
 		return this.tabs.size();
 	}
@@ -293,10 +305,38 @@ public class BTDesigner extends JFrame {
 			}
 	}
 
-	public void close() throws Exception {
+	public boolean close() throws Exception {
 		for (DesignerTab tab : this.tabs) {
-			tab.doc.close();
+			if (!tab.doc.close())
+				return false;
 		}
+		return true;
 	}
 
+	public void nextTab() {
+		if (getNumberOfDocuments() <= 1) 
+			return;
+		
+		setActiveTab((selectedDocumentIndex() + 1) % getNumberOfDocuments());
+	}
+
+	public void previousTab() {
+		if (getNumberOfDocuments() <= 1) 
+			return;
+		
+		setActiveTab((selectedDocumentIndex() - 1) % getNumberOfDocuments());
+	}
+
+	public void closeCurrentTab() {
+		if (getNumberOfDocuments() <= 0)
+			return;
+		
+		int selectedIndex = selectedDocumentIndex();
+		
+		if (this.tabs.get(selectedIndex).doc.close()) {
+			this.tabbedPane.remove(selectedIndex);
+			this.tabs.remove(selectedIndex);
+		}
+		
+	}
 }

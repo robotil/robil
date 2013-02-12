@@ -43,6 +43,7 @@ public class LogConsoleWindow extends JTextPane {
 
 	private String logFile;
 
+	@SuppressWarnings("unused")
 	private JScrollPane scroll;
 
 	public LogConsoleWindow() {
@@ -104,7 +105,7 @@ public class LogConsoleWindow extends JTextPane {
 
 			String line = null;
 			while ((line = reader.readLine()) != null) {
-
+				line.charAt(0);
 			}
 
 		} catch (FileNotFoundException ex) {
@@ -136,18 +137,22 @@ public class LogConsoleWindow extends JTextPane {
 		this.scroll = scrollPane;
 	}
 
+	@SuppressWarnings("unused")
 	private void writeError(String txt) {
 		append(Color.RED, txt + "\n", StyleConstants.Foreground);
 	}
 
+	@SuppressWarnings("unused")
 	private void writeInformation(String txt) {
 		append(Color.GREEN, txt + "\n", StyleConstants.Foreground);
 	}
 
+	@SuppressWarnings("unused")
 	private void writeNormal(String txt) {
 		append(Color.BLACK, txt + "\n", StyleConstants.Foreground);
 	}
 
+	@SuppressWarnings("unused")
 	private void writePlanRun(String txt) {
 		append(Color.YELLOW, txt + "\n", StyleConstants.Background);
 	}

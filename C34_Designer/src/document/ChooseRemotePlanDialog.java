@@ -69,8 +69,10 @@ public class ChooseRemotePlanDialog extends JDialog implements ActionListener {
 		return value;
 	}
 
+	@SuppressWarnings("rawtypes")
 	private JList list;
 
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	private ChooseRemotePlanDialog(Frame frame, Component locationComp,
 			String labelText, String title, String[] data, String initialValue,
 			String longValue) {

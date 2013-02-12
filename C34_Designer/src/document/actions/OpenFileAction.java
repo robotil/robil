@@ -3,10 +3,7 @@ package document.actions;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
-import javax.swing.JOptionPane;
-
 import document.BTDesigner;
-import document.Document;
 import document.Parameters;
 
 public class OpenFileAction extends AbstractDesignerAction implements
