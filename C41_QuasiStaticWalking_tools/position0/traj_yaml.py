@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-import roslib; roslib.load_manifest('tutorial_atlas_control')
+import roslib; roslib.load_manifest('position0')
 import rospy, yaml, sys
 from osrf_msgs.msg import JointCommands
 from sensor_msgs.msg import JointState
