@@ -58,7 +58,7 @@ class Joint_Stiffness_Controller:
 
         self.last_set_point = 0 # set point
         self.last_command = 0
-         
+
         self.num_of_samples = 0      
 
     def UpdateState(self, position, velocity, effort, time_stamp):
@@ -127,11 +127,11 @@ class Joint_Stiffness_Controller:
         else:
             if self.last_set_point*set_point < 0: # if set_point command is jittering around zero
                 command = 0
-                rospy.loginfo("JSC_'%s' method getCMD: set_point = %f, last_set_point = %f, JITTER" %(self.name,set_point,self.last_set_point))
+                #rospy.loginfo("JSC_'%s' method getCMD: set_point = %f, last_set_point = %f, JITTER" %(self.name,set_point,self.last_set_point))
             else:
                 command = set_point
                 self.ResetStateSum()
-                rospy.loginfo("JSC_'%s' method getCMD: set_point = %f, last_set_point = %f, CHANGED" %(self.name,set_point,self.last_set_point))
+                #rospy.loginfo("JSC_'%s' method getCMD: set_point = %f, last_set_point = %f, CHANGED" %(self.name,set_point,self.last_set_point))
 
             self.last_set_point = set_point            
             
@@ -250,8 +250,8 @@ class Position_Stiffness_Controller:
                                            # does not work all the time. Added to if statement to check Fint_sum value.
                                            # Problem may have occured because rxplot of contact force was open!!! 
 
-            rospy.loginfo("PSC_'%s' method getCMD: update interval = %f, force samples = %d, force_avg = %f" %  \
-                          (self.name,time_from_avg_start,self.num_of_samples,force_avg))
+            # rospy.loginfo("PSC_'%s' method getCMD: update interval = %f, force samples = %d, force_avg = %f" %  \
+            #               (self.name,time_from_avg_start,self.num_of_samples,force_avg))
             
             # Check trigger event if event has not yet occured and updates trigger_event accordingly
             if self.triggered_controller and not(self.trigger_event):
@@ -286,8 +286,8 @@ class Position_Stiffness_Controller:
 
         self.last_X_m = command_out
         self.last_X_0 = X_0
-        rospy.loginfo("PSC_'%s' method getCMD: bypass_in2out-%s, X_0 = %f, output cmd = %f, force_des = %f, force_avg = %f " %  \
-                          (self.name, self.bypass_in2out, X_0, command_out, force_des, self.getAvgForce()))
+        # rospy.loginfo("PSC_'%s' method getCMD: bypass_in2out-%s, X_0 = %f, output cmd = %f, force_des = %f, force_avg = %f " %  \
+        #                   (self.name, self.bypass_in2out, X_0, command_out, force_des, self.getAvgForce()))
 
         return command_out 
 

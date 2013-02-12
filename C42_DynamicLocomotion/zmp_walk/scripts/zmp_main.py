@@ -26,10 +26,7 @@ from std_msgs.msg import Int32
 from preview_controller import ZMP_Preview_Controller
 from zmp_profiles import *
 from preview_buffer import ZMP_Preview_Buffer
-
-
-rospy.init_node('zmp_movement_plan')  #('ZMP_node')
-rospy.loginfo("started ZMP node")
+import tf
 
 class namespace: pass
 ns = namespace()
@@ -56,15 +53,54 @@ def place_in_Pos_and_Ori(x,y,z,r,p,w):
     res.x = x; res.y = y; res.z = z; res.r = r; res.p = p; res.w = w;
     return (res)
 
+def getRobot_State(step_phase):
+    # # tf frames:
+    # if ( step_phase == 1 ) or ( step_phase == 2 ): 
+    #     # stance = left, swing = right
+    #     base_frame = 'l_foot'
+    #     # frames to transform: stance hip, com_m, pelvis_m, swing_hip, swing_foot
+    #     get_frames = [ 'l_uleg', 'com', 'pelvis', 'r_uleg', 'r_foot' ] # DRC (from tf) names    
+    # elif ( step_phase == 3 ) or ( step_phase == 4 ): 
+    #     # stance = right, swing = left
+    #     base_frame = 'r_foot'
+    #     swing_foot_frame = 'l_foot'
+    #     # frames to transform: stance hip, com_m, pelvis_m, swing_hip, swing_foot
+    #     get_frames = [ 'r_uleg', 'com', 'pelvis', 'l_uleg', 'l_foot' ] # DRC (from tf) names    
+    # # get transforms:
+    # for i in range(0,4):
+    #     try:
+    #       (trans,rot) = listener.lookupTransform(base_frame, get_frames[num], rospy.Time(0))  #  rospy.Time(0) to use latest availble transform 
+    #     except (tf.LookupException, tf.ConnectivityException, tf.ExtrapolationException) as ex:
+    #       print ex
+    #       continue
+
+    res = walking_trajectory()
+    res.stance_hip = place_in_Position(1,2,3)
+    res.pelvis_d = place_in_Orientation(0,0,0)
+    res.swing_foot = place_in_Pos_and_Ori(0,0,0,0,0,0)
+    res.swing_hip = place_in_Position(0,0,0)
+    res.pelvis_m = place_in_Orientation(0,0,0)
+    res.com_m = place_in_Position(0,0,0)
+    return (res)
+
+
+rospy.init_node('zmp_movement_plan')  #('ZMP_node')
+rospy.loginfo("started ZMP node")
+
 pub_zmp = rospy.Publisher('zmp_out', walking_trajectory ) #traj)
 sub_command = rospy.Subscriber('zmp_walk_command' , Int32 , listn_to_command)
+ns.listener = tf.TransformListener()
 
-interval = rospy.Rate(100)
+rate = 100  # [Hz]
+dt = 1.0/rate # [sec] # sample time (was named time_step)
+interval = rospy.Rate(rate)
 out = walking_trajectory () #traj()
 
 zc = 0#0.8455 # [m] COM height
 
-dt = 0.01  # [sec] # sample time (was named time_step)
+# rospy.loginfo("dt = %f" % (dt) )
+# # Wait 0.1 second
+# rospy.sleep(1)
 
 # Walking Parameters 
 
@@ -91,57 +127,32 @@ Preview_Lateral_y = ZMP_Preview_Buffer('Lateral Y', NL, 4*step_time/dt, 0 ) #nam
 p_ref_x = zeros(NL)
 p_ref_y = zeros(NL)
 
-# t1 = arange(0 , step_time-2*half_trans_ratio*step_time+dt , dt)    # arange(0 , step_time-2*0.1*step_time+dt , dt)
-# t0x = arange(0 , 2*step_time-half_trans_ratio*step_time+dt   , dt) # arange(0 , 2*step_time-0.1*step_time+dt   , dt)
-# t0y = arange(0 , step_time-half_trans_ratio*step_time+dt   , dt)   # arange(0 , step_time-0.1*step_time+dt   , dt)
+step_phase = 1 # Double-Support left leg in front
 
-# p_ref1x = step_length*ones(( len(t1) ))
-# p_ref1y = step_width*ones(( len(t1) ))
-# p_ref0 = zeros(( len(t1)-1 ))
-# p_ref0_0x = zeros(( len(t0x)-1 ))
-# p_ref0_0y = (step_width/2)*ones(( len(t0y)-1 ))
+# init state:
+robot_state = getRobot_State(step_phase)
 
-
-# out.COMx = 0         
-# out.COMy = 0
-# out.COMz = zc -bend_knees       
-# out.Swing_x = 0       
-# out.Swing_y = 0
-# out.Swing_z = bend_knees
 
 # init output message (before starting to walk)
-out.stance_hip = place_in_Position(0,0,0)
-out.pelvis_d = place_in_Orientation(0,0,0)
-out.swing_foot = place_in_Pos_and_Ori(0,0,0,0,0,0)
-out.swing_hip = place_in_Position(0,0,0)
-out.pelvis_m = place_in_Orientation(0,0,0)
+out.stance_hip = robot_state.stance_hip
+out.pelvis_d = robot_state.pelvis_d
+out.swing_foot = robot_state.swing_foot
+out.swing_hip = robot_state.swing_hip
+out.pelvis_m = robot_state.pelvis_m
 
 out.zmp_ref = place_in_Position(0,0,0)
 out.zmp_pc = place_in_Position(0,0,0)
 out.com_ref = place_in_Position(0,0,0)
 out.com_dot_ref = place_in_Position(0,0,0)
-out.com_m = place_in_Position(0,0,0)
+out.com_m = robot_state.com_m
 
-out.step_phase = 1
+out.step_phase = step_phase
 
 # Main Loop
 
 go = 0
-# Leg = 1
-# left = 1 # when Leg=1 right leg is swing leg
-# ka=0
-while not rospy.is_shutdown():
 
-  # if(ka>6):
-  #  out.COMx =  out.COMx #0.04*sin( 6.28*0.0008*(ka-6) )#out.COMx #  0.02*cos( 6.28*0.0008*(ka-6) )#out.COMx   #
-  #  out.COMy =  out.COMy    #0.04*sin( 6.28*0.0008*(ka-6) )  #
-  #  out.COMz = out.COMz  
-  #  out.Swing_x = out.Swing_x     
-  #  out.Swing_y = out.Swing_y
-  #  out.Swing_z = out.Swing_z  
-  #  out.leg = Leg 
-  # # rospy.loginfo(out.COMy)
-  # ka = ka +1
+while not rospy.is_shutdown():
   
   pub_zmp.publish(out) 
   interval.sleep()
@@ -175,8 +186,7 @@ while not rospy.is_shutdown():
 
       distance_x_ref = 0 # the accumelated ZMP ref distance past, is updated at the end of each step 
                          # and used as initial starting point for the next step
-      step_phase = 1 # Double-Support left leg in front
-
+      
       # create ZMP_ref profiles: 
       # 1) to start walking (pre_step + first_step)
       p_ref_x_start = Start_sagital_x(0, step_length, trans_ratio_of_step, trans_slope_steepens_factor, step_time, dt)
@@ -270,6 +280,8 @@ while not rospy.is_shutdown():
       
       swing_x_v = r_[ swing_x_v , swing_x_t_more_double_support ]
       swing_z_v = r_[ swing_z_v , swing_z_t_more_double_support ]
+
+
   #######################################################
   #                                                     #
   # publish zmp                                         #

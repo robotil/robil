@@ -26,7 +26,7 @@ from sensor_msgs.msg import JointState
 from zmp_walk.msg import walking_trajectory
 import rospy, math, sys
 from Impedance_Control import Joint_Stiffness_Controller
-
+from pylab import *
 
 class Nasmpace: pass
 ns = Nasmpace()
@@ -44,8 +44,12 @@ JSC_r_leg_mhx = Joint_Stiffness_Controller('r_leg_mhx', 8000, 1) # joint name, s
 #################################################################################
 #                     request from IK and publish angles                        #
 #################################################################################
+def temp(hip, pelivs_m):
+    ankle = array([hip.x, hip.y, hip.z])
+    #rospy.loginfo("IK_Caller : ankle[0] = %f, ankle[1] = %f, ankle[2] = %f" % (ankle[0], ankle[1], ankle[2]) )
 
 def get_from_zmp(msg):
+    temp(msg.stance_hip, msg.pelvis_m)
 
     return
     # if msg.leg==1: #right swing leg

@@ -25,6 +25,6 @@ Position      com_dot_ref   # desired COM velocity (x,y,z) [m/sec] in "world" sy
 Position      com_m         # measured COM position (x,y,z)
 
 # Step phase information:
-int32        step_phase     # 1 = Double-Support left leg in front, 2 = lift right swing leg
-                            # 3 = Double-Support right leg in front, 4 = lift left swing leg 
+int32        step_phase     # left leg is stance:  1 = Double-Support left leg in front, 2 = lift right swing leg
+                            # right leg is stance: 3 = Double-Support right leg in front, 4 = lift left swing leg 
 
