@@ -75,4 +75,4 @@ class ZMP_Preview_Controller:
         
         self.p = dot(self.C, self.x) # scalar, ZMP point (of model)
 
-        return (self.x[0], self.x[1]) 
+        return (self.x[0], self.x[1], self.p) 

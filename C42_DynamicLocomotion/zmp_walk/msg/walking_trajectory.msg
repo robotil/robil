@@ -1,6 +1,6 @@
 # This message contains information of desired limb positions and orientation
 # to be used by Inverse Kinematics function.
-# The positions and orientations are relative to "forward stance foot".
+# The positions and orientations are relative to "forward stance foot" if not stated different.
 # => stance_foot (x,y,z,r,p,w)=(0,0,0,0,0,0)
 # x-forward, y-left side of robot, z-up, r-roll around x, p-pitch around y, w-yaw around z
 # Units are [meter] and [rad]. 
@@ -15,9 +15,13 @@ Pos_and_Ori   swing_foot    # desired swing foot position and orientation (x,y,z
 Position      swing_hip     # desired swing hip position (x,y,z) 
 Orientation   pelvis_m      # measured pelvis orientation(r,p,w) 
 
+# ZMP preview controller:
+Position      zmp_ref       # ZMP reference position (x,y,z) in "world" system. z=const 
+Position      zmp_pc        # ZMP from preview controller, position (x,y,z) in "world" system. z=const
+
 # COM information:
-Position      com_ref       # desired COM position (x,y,z)
-Position      com_dot_ref   # desired COM velocity (x,y,z) [m/sec]
+Position      com_ref       # desired COM position (x,y,z) in "world" system
+Position      com_dot_ref   # desired COM velocity (x,y,z) [m/sec] in "world" system
 Position      com_m         # measured COM position (x,y,z)
 
 # Step phase information:

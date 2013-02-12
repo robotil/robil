@@ -3,7 +3,5 @@
   (:export
    "<LEGANGLE>"
    "LEGANGLE"
-   "<TRAJ>"
-   "TRAJ"
   ))
 

@@ -12,7 +12,7 @@
   <node pkg="hrl_kinematics" type="test_stability" name="test_stability"/>
 
   <!-- Leg IK server -->
-  <node pkg="leg_ik" type="leg_ik_server3D.py" name="leg_ik_server" />
+  <!-- node pkg="leg_ik" type="leg_ik_server3D.py" name="leg_ik_server" /-->
   
 
 </launch>

@@ -21,7 +21,7 @@ import roslib; roslib.load_manifest('zmp_walk') #roslib.load_manifest('leg_ik')
 import rospy, sys #,os.path
 from pylab import *
 # from numpy import * # no need after line above
-from zmp_walk.msg import traj
+from zmp_walk.msg import walking_trajectory, Position, Orientation, Pos_and_Ori  #traj
 from std_msgs.msg import Int32
 from preview_controller import ZMP_Preview_Controller
 from zmp_profiles import *
@@ -41,11 +41,26 @@ def listn_to_command(zmp_walk_command):
     rospy.loginfo("time:")
     rospy.loginfo(rospy.get_time())
 
-pub_zmp = rospy.Publisher('zmp_out', traj)
+def place_in_Position(x,y,z):
+    res = Position()
+    res.x = x; res.y = y; res.z = z;
+    return (res)
+
+def place_in_Orientation(r,p,w):
+    res = Orientation()
+    res.r = r; res.p = p; res.w = w;
+    return (res)
+
+def place_in_Pos_and_Ori(x,y,z,r,p,w):
+    res = Pos_and_Ori()
+    res.x = x; res.y = y; res.z = z; res.r = r; res.p = p; res.w = w;
+    return (res)
+
+pub_zmp = rospy.Publisher('zmp_out', walking_trajectory ) #traj)
 sub_command = rospy.Subscriber('zmp_walk_command' , Int32 , listn_to_command)
 
 interval = rospy.Rate(100)
-out = traj()
+out = walking_trajectory () #traj()
 
 zc = 0#0.8455 # [m] COM height
 
@@ -53,8 +68,8 @@ dt = 0.01  # [sec] # sample time (was named time_step)
 
 # Walking Parameters 
 
-step_length = 0.0001 #0.01  # [m]
-step_width  = 0.175  # 0.178  # [m]
+step_length = 0.1 #0.01  # [m]
+step_width  = 0.18  # 0.178  # [m]
 step_time   = 8 #1   # [sec]
 bend_knees  = 0.04  # [m]    
 step_height = 0.0001 #0.03 #0.05  # [m] 
@@ -64,7 +79,7 @@ trans_slope_steepens_factor = 2 # 1 transition Sigmoid slope (a)
 
 # Preview Controllers:
 Sagital_x_Preview_Controller = ZMP_Preview_Controller('X_sagital','sagital_x',0.0) # name, parameters_folder_name, initial position of COM 
-Lateral_y_Preview_Controller = ZMP_Preview_Controller('Y_lateral','lateral_y',step_width/2) # name, parameters_folder_name, initial position of COM
+Lateral_y_Preview_Controller = ZMP_Preview_Controller('Y_lateral','lateral_y',0.0) # name, parameters_folder_name, initial position of COM
 
 NL = Lateral_y_Preview_Controller.getBufferSize() 
 
@@ -87,31 +102,46 @@ p_ref_y = zeros(NL)
 # p_ref0_0y = (step_width/2)*ones(( len(t0y)-1 ))
 
 
-out.COMx = 0         
-out.COMy = 0
-out.COMz = zc -bend_knees       
-out.Swing_x = 0       
-out.Swing_y = 0
-out.Swing_z = bend_knees
+# out.COMx = 0         
+# out.COMy = 0
+# out.COMz = zc -bend_knees       
+# out.Swing_x = 0       
+# out.Swing_y = 0
+# out.Swing_z = bend_knees
+
+# init output message (before starting to walk)
+out.stance_hip = place_in_Position(0,0,0)
+out.pelvis_d = place_in_Orientation(0,0,0)
+out.swing_foot = place_in_Pos_and_Ori(0,0,0,0,0,0)
+out.swing_hip = place_in_Position(0,0,0)
+out.pelvis_m = place_in_Orientation(0,0,0)
+
+out.zmp_ref = place_in_Position(0,0,0)
+out.zmp_pc = place_in_Position(0,0,0)
+out.com_ref = place_in_Position(0,0,0)
+out.com_dot_ref = place_in_Position(0,0,0)
+out.com_m = place_in_Position(0,0,0)
+
+out.step_phase = 1
 
 # Main Loop
 
 go = 0
-Leg = 1
-left = 1 # when Leg=1 right leg is swing leg
-ka=0
+# Leg = 1
+# left = 1 # when Leg=1 right leg is swing leg
+# ka=0
 while not rospy.is_shutdown():
 
-  if(ka>6):
-   out.COMx =  out.COMx #0.04*sin( 6.28*0.0008*(ka-6) )#out.COMx #  0.02*cos( 6.28*0.0008*(ka-6) )#out.COMx   #
-   out.COMy =  out.COMy    #0.04*sin( 6.28*0.0008*(ka-6) )  #
-   out.COMz = out.COMz  
-   out.Swing_x = out.Swing_x     
-   out.Swing_y = out.Swing_y
-   out.Swing_z = out.Swing_z  
-   out.leg = Leg 
-  # rospy.loginfo(out.COMy)
-  ka = ka +1
+  # if(ka>6):
+  #  out.COMx =  out.COMx #0.04*sin( 6.28*0.0008*(ka-6) )#out.COMx #  0.02*cos( 6.28*0.0008*(ka-6) )#out.COMx   #
+  #  out.COMy =  out.COMy    #0.04*sin( 6.28*0.0008*(ka-6) )  #
+  #  out.COMz = out.COMz  
+  #  out.Swing_x = out.Swing_x     
+  #  out.Swing_y = out.Swing_y
+  #  out.Swing_z = out.Swing_z  
+  #  out.leg = Leg 
+  # # rospy.loginfo(out.COMy)
+  # ka = ka +1
   
   pub_zmp.publish(out) 
   interval.sleep()
@@ -169,7 +199,7 @@ while not rospy.is_shutdown():
   #######################################################
 
       p_ref_x = Preview_Sagital_x.update_Preview()
-      [COMx, COMx_dot] = Sagital_x_Preview_Controller.getCOM_ref( p_ref_x )
+      [COMx, COMx_dot, p_pre_con_x] = Sagital_x_Preview_Controller.getCOM_ref( p_ref_x )
 
 
   #######################################################
@@ -179,7 +209,7 @@ while not rospy.is_shutdown():
   #######################################################
 
       p_ref_y = Preview_Lateral_y.update_Preview()
-      [COMy, COMy_dot] = Lateral_y_Preview_Controller.getCOM_ref( p_ref_y )
+      [COMy, COMy_dot, p_pre_con_y] = Lateral_y_Preview_Controller.getCOM_ref( p_ref_y )
 
   #######################################################
   #                                                     #
@@ -245,18 +275,23 @@ while not rospy.is_shutdown():
   # publish zmp                                         #
   #                                                     #
   #######################################################
+      
+      out.stance_hip = place_in_Position( 0, 0, 0 )
+      out.pelvis_d = place_in_Orientation( 0, 0, 0 )
+      out.swing_foot = place_in_Pos_and_Ori(0,0,0,0,0,0)
+      out.swing_hip = place_in_Position(0,0,0)
+      out.pelvis_m = place_in_Orientation(0,0,0)
 
-      out.COMx = COMx
-      out.COMy = COMy - step_width/2
-      out.COMz = zc -bend_knees
-      out.Swing_x = swing_x_t_more_double_support
-      out.Swing_y = swing_y
-      out.Swing_z = swing_z_t_more_double_support + bend_knees
-      out.leg = Leg                                                           #1           for debuging
+      out.zmp_ref = place_in_Position( p_ref_x[0], p_ref_y[0], 0)
+      out.zmp_pc = place_in_Position( p_pre_con_x, p_pre_con_y, 0)
+      out.com_ref = place_in_Position( COMx, COMy, 0)
+      out.com_dot_ref = place_in_Position( COMx_dot, COMy_dot, 0)
+      out.com_m = place_in_Position( 0, 0, 0 )
 
-      pub_zmp.publish(out) 
-      ##
-     # rospy.loginfo('COMy=%f' %out.COMy )
+      out.step_phase = 1
+
+      pub_zmp.publish(out)
+
   #######################################################
   #                                                     #
   # command control                                     #
@@ -284,7 +319,7 @@ while not rospy.is_shutdown():
               # completed start steps (pre_step + first_step)
               step_done = 1
               steps_count = steps_count + 1
-              rospy.loginfo("done first step, number = %d" % (steps_count) )
+              rospy.loginfo("done first step, number = %d, walk = %d" % (steps_count, ns.walk) )
               rospy.loginfo("time:")
               rospy.loginfo(rospy.get_time())
           
@@ -296,6 +331,7 @@ while not rospy.is_shutdown():
               if ns.walk:
                 # make a full step:
                 full_step = 1
+                rospy.loginfo("starting full step, walk = %d" % (ns.walk) )
                 # TODO: update ZMP_profiles with new parameters: step time,length...
                 # Load new step to preview buffer:
                 Preview_Sagital_x.load_NewStep( p_ref_x_forward_step + distance_x_ref, p_ref_x_forward_step )
