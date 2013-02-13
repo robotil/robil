@@ -24,16 +24,19 @@ public class PropertiesEditorAction implements ActionListener {
 	@Override
 	public void actionPerformed(ActionEvent a) {
 
+		//------------------ OPEN -----------------------
 		if (a.getActionCommand().equals("open_properties_dialog")) {
 			PropertiesEditor.show(PropertiesXmlHandler.lastPath);
-		} else if (a.getActionCommand().equals("load_properties")) {
+			
+		} else 
+		//------------------ LOAD -----------------------	
+		if (a.getActionCommand().equals("load_properties")) {
 			try {
-				String path = Dialogs.openFile("Load Properties File", "xml",
-						".");
-
-				if (path != null) {
-					PropertiesXmlHandler.lastPath = path;
-				}
+//				String path = Dialogs.openFile("Load Properties File", "xml", ".");
+//
+//				if (path != null) {
+//					PropertiesXmlHandler.lastPath = path;
+//				}
 				PropertiesXmlHandler
 						.loadAndSetProperties(PropertiesXmlHandler.lastPath);
 
@@ -43,23 +46,26 @@ public class PropertiesEditorAction implements ActionListener {
 				JOptionPane.showMessageDialog(null, "Error loading file",
 						"Load properties", JOptionPane.ERROR_MESSAGE);
 			}
-		} else if (a.getActionCommand().equals("save_properties")) {
+		} else 
+		//------------------ SAVE -----------------------------	
+		if (a.getActionCommand().equals("save_properties")) {
 			try {
-				String path = Dialogs.saveFile("Save Properties", "xml");
-
-				if (path == null || path.equals("")) {
-					return;
-				}
+//				String path = Dialogs.saveFile("Save Properties", "xml");
+//
+//				if (path == null || path.equals("")) {
+//					return;
+//				}
 
 				// updateTable();
 
 				PropertiesXmlHandler.setParametersFromTable(this.table);
-				PropertiesXmlHandler.saveToFile(path);
+				PropertiesXmlHandler.saveToFile(PropertiesXmlHandler.lastPath);
 
 				JOptionPane.showMessageDialog(null, "Properties file saved");
+				this.frame.dispose();
+				
 			} catch (Exception ex) {
-				JOptionPane.showMessageDialog(null, "Error saving file",
-						"Save properties", JOptionPane.ERROR_MESSAGE);
+				JOptionPane.showMessageDialog(null, "Error saving file", "Save properties", JOptionPane.ERROR_MESSAGE);
 			}
 
 		} else if (a.getActionCommand().equals("cancel_properties")) {

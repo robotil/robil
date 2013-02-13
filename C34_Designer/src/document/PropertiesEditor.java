@@ -103,19 +103,9 @@ public class PropertiesEditor extends JPanel implements ActionListener {
 
 		@Override
 		public Object getValueAt(int row, int col) {
-			System.out.println(String.format("<%d,%d>=%s", row, col,
-					this.data[row][col]));
+			//System.out.println(String.format("<%d,%d>=%s", row, col,this.data[row][col]));
 			return this.data[row][col];
 		}
-
-		/*
-		 * JTable uses this method to determine the default renderer/ editor for
-		 * each cell. If we didn't implement this method, then the last column
-		 * would contain text ("true"/"false"), rather than a check box.
-		 */
-		// public Class getColumnClass(int c) {
-		// return getValueAt(0, c).getClass();
-		// }
 
 		/*
 		 * Don't need to implement this method unless your table's editable.
@@ -226,24 +216,7 @@ public class PropertiesEditor extends JPanel implements ActionListener {
 
 	private final int KEY_INDEX = 0;
 
-	// private void outputSelection() {
-	// output.append(String.format("Lead: %d, %d. ", table.getSelectionModel()
-	// .getLeadSelectionIndex(), table.getColumnModel()
-	// .getSelectionModel().getLeadSelectionIndex()));
-	// output.append("Rows:");
-	// for (int c : table.getSelectedRows()) {
-	// output.append(String.format(" %d", c));
-	// }
-	// output.append(". Columns:");
-	// for (int c : table.getSelectedColumns()) {
-	// output.append(String.format(" %d", c));
-	// }
-	// output.append(".\n");
-	// }
-
 	private final int VALUE_INDEX = 1;
-
-	public static String lastPath = "BTDesigner.xml";
 
 	public PropertiesEditor(String path, JFrame frame) {
 		super();
@@ -259,19 +232,8 @@ public class PropertiesEditor extends JPanel implements ActionListener {
 				.addListSelectionListener(new ColumnListener());
 		this.table.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 		add(new JScrollPane(this.table));
-		// add(new JLabel("Selection Mode"));
-		// buttonGroup = new ButtonGroup();
-		// addRadio("Multiple Interval Selection").setSelected(true);
-		// addRadio("Single Selection");
-		// addRadio("Single Interval Selection");
-		//
-		// add(new JLabel("Selection Options"));
-		// rowCheck = addCheckBox("Row Selection");
-		// rowCheck.setSelected(true);
-		// columnCheck = addCheckBox("Column Selection");
-		// cellCheck = addCheckBox("Cell Selection");
-		// cellCheck.setEnabled(false);
 
+		//BUTTONS
 		this.btnCancel = new JButton("Cancel");
 		this.btnCancel.setActionCommand("cancel_properties");
 		this.btnCancel.addActionListener(new PropertiesEditorAction(this.table,
@@ -289,9 +251,7 @@ public class PropertiesEditor extends JPanel implements ActionListener {
 		this.pnlButtons.add(this.btnCancel, BorderLayout.WEST);
 		this.pnlButtons.add(this.btnLoad, BorderLayout.CENTER);
 		this.pnlButtons.add(this.btnSave, BorderLayout.EAST);
-		// output = new JTextArea(5, 40);
-		// output.setEditable(false);
-		// add(new JScrollPane(output));
+
 		add(this.pnlButtons);
 
 	}
@@ -307,22 +267,19 @@ public class PropertiesEditor extends JPanel implements ActionListener {
 			// In MIS mode, column selection allowed must be the
 			// opposite of row selection allowed.
 			if (!this.cellCheck.isEnabled()) {
-				this.table.setColumnSelectionAllowed(!this.rowCheck
-						.isSelected());
+				this.table.setColumnSelectionAllowed(!this.rowCheck.isSelected());
 			}
 		} else if ("Column Selection" == command) {
 			this.table.setColumnSelectionAllowed(this.columnCheck.isSelected());
 			// In MIS mode, row selection allowed must be the
 			// opposite of column selection allowed.
 			if (!this.cellCheck.isEnabled()) {
-				this.table.setRowSelectionAllowed(!this.columnCheck
-						.isSelected());
+				this.table.setRowSelectionAllowed(!this.columnCheck.isSelected());
 			}
 		} else if ("Cell Selection" == command) {
 			this.table.setCellSelectionEnabled(this.cellCheck.isSelected());
 		} else if ("Multiple Interval Selection" == command) {
-			this.table
-					.setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
+			this.table.setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
 			// If cell selection is on, turn it off.
 			if (this.cellCheck.isSelected()) {
 				this.cellCheck.setSelected(false);
@@ -331,8 +288,7 @@ public class PropertiesEditor extends JPanel implements ActionListener {
 			// And don't let it be turned back on.
 			this.cellCheck.setEnabled(false);
 		} else if ("Single Interval Selection" == command) {
-			this.table
-					.setSelectionMode(ListSelectionModel.SINGLE_INTERVAL_SELECTION);
+			this.table.setSelectionMode(ListSelectionModel.SINGLE_INTERVAL_SELECTION);
 			// Cell selection is ok in this mode.
 			this.cellCheck.setEnabled(true);
 		} else if ("Single Selection" == command) {
