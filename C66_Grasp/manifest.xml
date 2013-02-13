@@ -13,8 +13,7 @@
   <depend package="roscpp"/>
   <depend package="tf"/>
   <depend package="C0_RobilTask"/>
-  <depend package="actionlib"/>
-  <depend package="actionlib_msgs"/>
+  <depend package="move_hand"/>
 </package>
 
 
