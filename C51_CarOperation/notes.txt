@@ -1,11 +1,49 @@
 =====================================================================
-!###-----------C51 Car Operation - high level Driving--------------#!
+!###-----------C51 Car Operation - high level Driving------------###!
 =====================================================================
 
+----------------------------------------------------------------------------
+visit our wiki at: http://www.robil.org/trac_robil/wiki/WalkingdexterityPage
+----------------------------------------------------------------------------
+
 A fuzzy logic controller was implemented in Python code.
-Verify you have 2 files needed for the operation:
-	1. DRC_Vehicle_Drive.py
-	2. Point2Point.py
+Verify you have 3 folders, in the /src folder, needed for car operation:
+	1. InitDrive
+	2. WayPointsDriving
+	3. FinishDrive
+These 3 folders contain the python code.
+
+!#Prepare C51 module for use #!
+-------------------------------
+In order to use the module you are advised to perform the following steps.
+1. Compile the module. This is done by going to the C51_CarOperation folder and typing the command:
+	$ rosmake
+This step will generate the msg files needed.
+2. A simple roslaunch file was created to start the DRC simulator with: atlas, drc vehicle, stand pipe,
+   fire hose, C51 Init drive server, C51 Drive way point path server and C51 Finish Drive server.
+   In order for the roslaunch file to be operational you will have to make the three server files executable.
+   This is done by:
+	$ roscd C51_CarOperation/src/InitDrive/
+	$ chmod +x DRC_Vehicle_Init_server.py
+
+	$ roscd C51_CarOperation/src/Drive/WayPointsDriving
+	$ chmod +x DRC_Vehicle_Drive_server.py
+
+	$ roscd C51_CarOperation/src/Drive/FinishDrive
+	$ chmod +x DRC_Vehicle_Finish_server.py
+
+   now your roslaunch is operational, you can try to open the DRC by using:
+	$ roslaunch C51_CarOperation C51_completeLuanch.launch
+
+3. After launching the DRC simulator and activating the servers you may want to call the servers using the corresponding clients.
+   You may go to the specific folder and type
+	$ python DRC_Vehicle_xxxx_client.py
+
+   You can turn the clients into executable as well and then you can run the file by:
+	$ rosrun C51_CarOperation DRC_Vehicle_xxxxx_client.py
+
+
+
 
 !# Drive using decision making's C31 - Path Planning #!
 -------------------------------------------------------
@@ -41,19 +79,28 @@ Run the following scripts in the terminal (you will need several terminals):
 
 !#Execute the "DRC Vehicle Drive" script in order to drive car#!
 ---------------------------------------------------------
-go to C51_CarOperation by:
-    roscd C51_CarOperation
-run the python file in the terminal by:
-     python DRC_Vehicle_Drive.py 
+* I assume the you have already set up the module C51_CarOperation.
+* If you have'nt please follow the instruction written in: "Prepare C51 module for use"
 
-The DRC Vehicle Cart should now drive through the way points using the car's controller.
+1. Initialize car for use! you should see the hand brake go up as it is realesed, and the brake pedal pressed.
+	$ rosrun C51_CarOperation DRC_Drive_Init_client.py
+In case you do not see any reaction from the pedal or the hand brake, run the client again (sometimes the controllers do not correspond)
+
+2. Drive car thru way points.
+	$ rosrun C51_CarOperation DRC_Drive_Drive_client.py
+In case the car is not driving in a normal speed (the brake pedal was not released) stop the client (ctrl+c) and run it again.
+
+3. Finish the driving process. Pull the hand brake and relieve the pedals.
+	$ rosrun C51_CarOperation DRC_Drive_Finish_client.py
+In case you do not see any reaction from the pedal or the hand brake, run the client again (sometimes the controllers do not correspond)
+
 
 ==============================
 !!!!!!!!Important Notes!!!!!!!
 ==============================
 
-    * The driving operation is operated for now using the DRC Vehicle controllers and not by the robot. Once 		dexterity will finish module C52_CarDriving an update will be released.
-    * It is possible to drive using decision's making module C32 only once since the way points given are not in 	absolute coordinates, but in relative coordinates. Tasks can not be performed, only to verify   	 	 	operability for integration purposes.
+    * The driving operation is operated for now using the DRC Vehicle controllers and not by the robot. Once dexterity will finish module C52_CarDriving an update will be released.
+    * It is possible to drive using decision's making module C32 only once since the way points given are not in absolute coordinates, but in relative coordinates. Tasks can not be performed, only to verify   	 	 	operability for integration purposes.
     * If desired, it is possible to drive through a pre given  set of way points as described below. 
 	In this format of driving, obstacle avoidance is still an issue. 
 
