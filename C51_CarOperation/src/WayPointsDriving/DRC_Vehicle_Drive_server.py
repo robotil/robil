@@ -130,7 +130,7 @@ class Drive(object):
                         self._feedback.LastWPpassed = object
                         self._feedback.MyLoc4LastWP= [self.world.pose.pose.position.x, self.world.pose.pose.position.y]
                         print self._feedback
-                        self._as.publish_feedback(self._feedback)
+                        #self._as.publish_feedback(self._feedback)
                         print "arrived at Way point"
                     i+=1
                 #self.path=getPath() #Note - the module is still not ready to be fully operable because it always considers your location as (0,0) and does not update your location.
