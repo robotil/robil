@@ -1,6 +1,0 @@
-C25_GlobalPosition/C0C25_AZI azimuth
-C25_GlobalPosition/C0C25_CAM camera_sample_rate
-C25_GlobalPosition/C0C25_LAZ laser_sample_rate
----
-C25_GlobalPosition/C25C0_ROP robotPosition
-C25_GlobalPosition/C25C0_OPO qualityOfError

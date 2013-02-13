@@ -71,7 +71,6 @@ class Drive(object):
         # helper variables
         success = False
         #Perform job
-        print "here"
         if goal.PerformJob:
             
             '''Library ----------------------------------
@@ -85,7 +84,6 @@ class Drive(object):
             success = True
             self.sub = rospy.Subscriber('/ground_truth_odom', Odometry,self.callback ) #get atlas location
             while not rospy.is_shutdown():
-                print "entered"
                 DATA=LOG()
                 i=0
                 brakeP.brake(0)
@@ -121,7 +119,8 @@ class Drive(object):
                         while (self.isPassedNormal(self.world.pose.pose.position.x,self.world.pose.pose.position.y, m, b,flag)):
                             if self._as.is_preempt_requested():
                                 success = False
-                                exit_Callback()
+                                rospy.loginfo('%s: Preempted' % self._action_name)
+                                self._as.set_preempted()
                             DATA.MyPath(self.world.pose.pose.position.x, self.world.pose.pose.position.y)
                             [speed, Cspeed]=P2P(self.DistanceToWP(object), self.OrientationErrorToWP(object)) 
                             gasP.gas(speed)
@@ -131,7 +130,7 @@ class Drive(object):
                         self._feedback.LastWPpassed = object
                         self._feedback.MyLoc4LastWP= [self.world.pose.pose.position.x, self.world.pose.pose.position.y]
                         print self._feedback
-                        #self._as.publish_feedback(self._feedback)
+                        self._as.publish_feedback(self._feedback)
                         print "arrived at Way point"
                     i+=1
                 #self.path=getPath() #Note - the module is still not ready to be fully operable because it always considers your location as (0,0) and does not update your location.
