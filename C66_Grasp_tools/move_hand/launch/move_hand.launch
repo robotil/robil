@@ -1,0 +1,6 @@
+<launch>
+	<node name="traj_vector_server" pkg="traj_splitter_to_vector" type="traj_vector_server" cwd="node" output="screen" />
+	<node name="arms_val_calc" pkg="arms_val_calc" type="arms_val_calc" cwd="node" output="screen" />
+	<node name="move_hand" pkg="move_hand" type="move_hand" cwd="node" output="screen" />
+
+</launch>
