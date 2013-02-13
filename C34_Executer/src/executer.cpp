@@ -6,6 +6,7 @@
  */
 
 #include "ros/ros.h"
+#include "ros/package.h"
 #include "BTExecuter.h"
 #include "TaskProxyConnectionByActionLib.h"
 
@@ -255,6 +256,17 @@ int main(int argc, char** argv){
 	RUN_SERVICE(save_file)
 #undef RUN_SERVICE
 
+	if(true){
+		std::cout<<"Set current path to "<< ros::package::getPath("C34_Designer") <<" ... ";
+		cd::Request req; cd::Response res;
+		req.path = ros::package::getPath("C34_Designer");
+		command_cd(req,res);
+		if(res.location == "\""+req.path+"\"") std::cout<<"OK";
+		else{
+			std::cout<<"ERROR : "<<res.location;
+		}
+		std::cout<<std::endl;
+	}
 	if(params.contains("help")){
 		help_msg::Request req; help_msg::Response res;
 		command_help(req,res);
