@@ -55,7 +55,8 @@ public class TaskDescriptionEditor extends JFrame {
 	private JTextField _txtCreateTaskName = new JTextField();
 
 	private JTextArea _txtCreateTaskDescription = new JTextArea();
-	private JList<String> _lstTasks = new JList<String>();
+	//VERSION_PROBLME private JList<String> _lstTasks = new JList<String>();
+	private JList _lstTasks = new JList();
 
 	private TaskDescription _tasks;
 
@@ -284,14 +285,15 @@ public class TaskDescriptionEditor extends JFrame {
 		panel.setLayout(new GridBagLayout());
 		GridBagConstraints c = new GridBagConstraints();
 
-		this._lstTasks = new JList<String>();
+		//VERSION_PROBLME this._lstTasks = new JList<String>();
+		this._lstTasks = new JList();
 		this._lstTasks.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 		this._lstTasks.addListSelectionListener(new ListSelectionListener() {
 
 			@Override
 			public void valueChanged(ListSelectionEvent e) {
-				selectTask(TaskDescriptionEditor.this._lstTasks
-						.getSelectedValue());
+				//VERSION_PROBLME selectTask(TaskDescriptionEditor.this._lstTasks	.getSelectedValue());
+				selectTask(TaskDescriptionEditor.this._lstTasks	.getSelectedValue().toString());
 			}
 		});
 
@@ -334,8 +336,8 @@ public class TaskDescriptionEditor extends JFrame {
 				addActionListener(new ActionListener() {
 					@Override
 					public void actionPerformed(ActionEvent e) {
-						deleteTask(TaskDescriptionEditor.this._lstTasks
-								.getSelectedValue());
+						//VERSION_PROBLME deleteTask(TaskDescriptionEditor.this._lstTasks	.getSelectedValue());
+						deleteTask(TaskDescriptionEditor.this._lstTasks	.getSelectedValue().toString());
 					}
 				});
 			}
@@ -391,7 +393,8 @@ public class TaskDescriptionEditor extends JFrame {
 	}
 
 	private void refreshTasks() {
-		DefaultListModel<String> listModel = new DefaultListModel<String>();
+		//VERSION_PROBLME DefaultListModel<String> listModel = new DefaultListModel<String>();
+		DefaultListModel listModel = new DefaultListModel();
 
 		for (String taskName : this._tasks.getNames())
 			if (!taskName.trim().equals(""))

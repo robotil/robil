@@ -11,12 +11,15 @@ import javax.swing.DefaultComboBoxModel;
 import javax.swing.JComboBox;
 import javax.swing.JTextField;
 
-public class JAutoSuggestComboBox extends JComboBox<String> {
+//VERSION_PROBLME public class JAutoSuggestComboBox extends JComboBox<String> {
+public class JAutoSuggestComboBox extends JComboBox {
 	private static final long serialVersionUID = 3397382953165041968L;
 
-	private static DefaultComboBoxModel<String> getSuggestedModel(
+	//VERSION_PROBLME private static DefaultComboBoxModel<String> getSuggestedModel(
+	private static DefaultComboBoxModel getSuggestedModel(
 			List<String> list, String text) {
-		final DefaultComboBoxModel<String> model = new DefaultComboBoxModel<String>();
+		//VERSION_PROBLME final DefaultComboBoxModel<String> model = new DefaultComboBoxModel<String>();
+		final DefaultComboBoxModel model = new DefaultComboBoxModel();
 
 		for (final String s : list)
 			if (s.toLowerCase().startsWith(text.toLowerCase()))
@@ -36,7 +39,8 @@ public class JAutoSuggestComboBox extends JComboBox<String> {
 	// frame.setVisible(true);
 	// }
 	private final JTextField _textField;
-	private JComboBox<String> _comboBox = new JComboBox<String>();
+	//VERSION_PROBLME private JComboBox<String> _comboBox = new JComboBox<String>();
+	private JComboBox _comboBox = new JComboBox();
 	private Vector<String> _itemsList = new Vector<String>();
 
 	private boolean _hideFlag = false;
@@ -88,11 +92,11 @@ public class JAutoSuggestComboBox extends JComboBox<String> {
 								.getText();
 						if (text.length() == 0) {
 							JAutoSuggestComboBox.this._comboBox.hidePopup();
-							setModel(new DefaultComboBoxModel<String>(
-									JAutoSuggestComboBox.this._itemsList), "");
+							//VERSION_PROBLME setModel(new DefaultComboBoxModel<String>(JAutoSuggestComboBox.this._itemsList), "");
+							setModel(new DefaultComboBoxModel(JAutoSuggestComboBox.this._itemsList), "");
 						} else {
-							final DefaultComboBoxModel<String> model = getSuggestedModel(
-									JAutoSuggestComboBox.this._itemsList, text);
+							//VERSION_PROBLME final DefaultComboBoxModel<String> model = getSuggestedModel(JAutoSuggestComboBox.this._itemsList, text);
+							final DefaultComboBoxModel model = getSuggestedModel(JAutoSuggestComboBox.this._itemsList, text);
 							if (model.getSize() == 0
 									|| JAutoSuggestComboBox.this._hideFlag) {
 								JAutoSuggestComboBox.this._comboBox.hidePopup();
@@ -108,7 +112,8 @@ public class JAutoSuggestComboBox extends JComboBox<String> {
 		});
 
 		this._itemsList = items;
-		setModel(new DefaultComboBoxModel<String>(this._itemsList), "");
+		//VERSION_PROBLME setModel(new DefaultComboBoxModel<String>(this._itemsList), "");
+		setModel(new DefaultComboBoxModel(this._itemsList), "");
 	}
 
 	public String getText() {
@@ -116,7 +121,8 @@ public class JAutoSuggestComboBox extends JComboBox<String> {
 				.getText();
 	}
 
-	private void setModel(DefaultComboBoxModel<String> mdl, String str) {
+	//VERSION_PROBLME 	private void setModel(DefaultComboBoxModel<String> mdl, String str) {
+	private void setModel(DefaultComboBoxModel mdl, String str) {
 		this._comboBox.setModel(mdl);
 		this._comboBox.setSelectedIndex(-1);
 		this._textField.setText(str);

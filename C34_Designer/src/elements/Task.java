@@ -88,10 +88,12 @@ public class Task extends GElement implements View.ChangesListener {
 
 		JAutoSuggestComboBox txtName = null;
 
-		JComboBox<String> cType = null;;
+		//VERSION_PROBLME JComboBox<String> cType = null;
+		JComboBox cType = null;
 
 		JTextField txtDbgTime = null;
-		JComboBox<String> txtDbgResult = null;
+		//VERSION_PROBLME JComboBox<String> txtDbgResult = null;
+		JComboBox txtDbgResult = null;
 		JCheckBox chkCollapse = null;
 		JTextArea txtTaskDescAlgoritm;
 		JScrollPane txtTaskDescScroll;
@@ -132,12 +134,12 @@ public class Task extends GElement implements View.ChangesListener {
 			// txtName.setStrict(false);
 			this.txtName.setText(Task.this.text);
 
-			this.cType = new JComboBox<String>(new String[] { TYPE_sequenser,
-					TYPE_selector, TYPE_task, TYPE_parallel, TYPE_switch });
+			//VERSION_PROBLME this.cType = new JComboBox<String>(new String[] { TYPE_sequenser,TYPE_selector, TYPE_task, TYPE_parallel, TYPE_switch });
+			this.cType = new JComboBox(new String[] { TYPE_sequenser,TYPE_selector, TYPE_task, TYPE_parallel, TYPE_switch });
 			this.cType.setSelectedItem(Task.this.type);
 			this.txtDbgTime = new JTextField("" + getProperty().test_time);
-			this.txtDbgResult = new JComboBox<String>(new String[] { "true",
-					"false" });
+			//VERSION_PROBLME this.txtDbgResult = new JComboBox<String>(new String[] { "true","false" });
+			this.txtDbgResult = new JComboBox(new String[] { "true","false" });
 			this.txtDbgResult.setSelectedItem("" + getProperty().test_result);
 
 			this.txtTaskDescAlgoritm = new JTextArea();
