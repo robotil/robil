@@ -1,0 +1,13 @@
+#goal definition
+int32 PerformJob
+---
+#result definition
+int32 Success
+---
+#feedback
+
+geometry_msgs/Point[] WayPointsGiven
+geometry_msgs/Point LastWPpassed
+geometry_msgs/Point MyLoc4LastWP
+
+
