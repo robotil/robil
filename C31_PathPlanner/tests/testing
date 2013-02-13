@@ -1,0 +1,14 @@
+#!/bin/bash
+
+function test_it {
+	tf=$(tempfile)
+	c=$(head -1 $1)
+	echo "$c" > $tf
+	$c 2>&1 >> $tf
+    diff $1 $tf > $tf.diff && (echo "PASS"; rm $tf.diff) || echo "ERROR: log in $tf.diff"
+	rm $tf
+}
+
+
+for f in test_result*; do echo -n "TEST: $f ... "; test_it $f; done
+

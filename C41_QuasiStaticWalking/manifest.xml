@@ -14,6 +14,12 @@
   <depend package="roslib"/>
   <depend package="std_msgs"/>
   <depend package="actionlib_msgs"/>
+  <depend package="geometry_msgs"/>
+  <depend package="sensor_msgs"/>
+  <depend package="nav_msgs"/>
+  <depend package="move_pelvis"/>
+  <depend package="pelvis_leg_target"/>
+  <depend package="C31_PathPlanner"/>
 
 </package>
 

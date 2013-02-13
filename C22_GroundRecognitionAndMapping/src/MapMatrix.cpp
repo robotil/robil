@@ -13,19 +13,22 @@
 #include <pcl/point_types.h>
 using namespace std;
 
+//c24 added includes
 MapMatrix::MapMatrix() {
-	data=new std::vector<std::vector<MapSquare*>*>();
+	data=new std::deque<std::deque<MapSquare*>*>();
 	for (int i=0;i<NUMOFSQUARES;i++){
-		data->push_back(new std::vector<MapSquare*>());
+		data->push_back(new std::deque<MapSquare*>());
 		for (int j=0;j<NUMOFSQUARES;j++){
 			data->at(i)->push_back(new MapSquare());
 		}
 	}
+	xOffset=0;
+	yOffset=0;
 }
 
 MapMatrix::~MapMatrix() {
 	while(data->size()!=0){
-		std::vector<MapSquare*> *temp=data->back();
+		std::deque<MapSquare*> *temp=data->back();
 		while(temp->size()!=0){
 			MapSquare* temp1=temp->back();
 			temp->pop_back();
@@ -76,16 +79,90 @@ void MapMatrix::clearMatrix(){
 }
 
 bool MapMatrix::inMatrixRange(pcl::PointXYZ p){
-	if (p.x<0 || (p.x >= SIZEOFMAP)
-			||(p.z<0) || (p.z>=SIZEOFMAP))
+	if (p.x<0+xOffset || (p.x >= NUMOFSQUARES*SIZEOFSQUARE+xOffset)
+			||(p.z<0+yOffset) || (p.z>=NUMOFSQUARES*SIZEOFSQUARE+yOffset))
 		return false;
 	return true;
 }
 
 
+void MapMatrix::updateMapRelationToWorld(float x,float y){
+
+	//calculate the map offsets according to the robot's global position and update bound
+	int newOffsetX=xOffset;
+	int newOffsetY=yOffset;
+	if(xOffset> x-BOUNDOFUPDATE)
+		newOffsetX= x-BOUNDOFUPDATE;
+	if(xOffset+NUMOFSQUARES*SIZEOFSQUARE< x+BOUNDOFUPDATE)
+		newOffsetX=x+BOUNDOFUPDATE;
+	if(yOffset> y-BOUNDOFUPDATE)
+		newOffsetY= y-BOUNDOFUPDATE;
+	if(yOffset+NUMOFSQUARES*SIZEOFSQUARE< y+BOUNDOFUPDATE)
+		newOffsetY=y+BOUNDOFUPDATE;
+	//move the map to the right directions
+	//std::cout<<"x:"<<x<<" y:"<<y<<std::endl;
+	//std::cout<<"x offset"<<newOffsetX<<" y offset"<<newOffsetY<<std::endl;
+	if(std::abs(newOffsetY-yOffset)>=NUMOFSQUARES*SIZEOFSQUARE || std::abs(newOffsetX-xOffset)>=NUMOFSQUARES*SIZEOFSQUARE){
+		yOffset=newOffsetY;
+		xOffset=newOffsetX;
+		clearMatrix();
+		return;
+	}
+	moveMapHarisontaly(((int)newOffsetY-yOffset)*(1/SIZEOFSQUARE));
+	moveMapVerticaly(((int)newOffsetX-xOffset)*(1/SIZEOFSQUARE));
+	yOffset=newOffsetY;
+	xOffset=newOffsetX;
+}
+
+void MapMatrix::moveMapHarisontaly(int times){
+	if(times<0){
+		for (int i=0;i<std::abs(times);i++){
+			data->pop_back();
+			std::deque<MapSquare*>* temp=new std::deque<MapSquare*>;
+			for (int j=0;j<NUMOFSQUARES;j++){
+				temp->push_back(new MapSquare);
+			}
+			data->push_front(temp);
+		}
+	}else{
+		for (int i=0;i<std::abs(times);i++){
+			data->pop_front();
+			std::deque<MapSquare*>* temp=new std::deque<MapSquare*>;
+			for (int j=0;j<NUMOFSQUARES;j++){
+				temp->push_back(new MapSquare);
+			}
+			data->push_back(temp);
+		}
+	}
+}
+
+void MapMatrix::moveMapVerticaly(int times){
+	if(times<0){
+		for (int i=0;i<std::abs(times);i++){
+			for (int j=0;j<NUMOFSQUARES;j++){
+				data->at(j)->pop_back();
+				data->at(j)->push_front(new MapSquare);
+			}
+		}
+	}else{
+		for (int i=0;i<std::abs(times);i++){
+			for (int j=0;j<NUMOFSQUARES;j++){
+				data->at(j)->pop_front();
+				data->at(j)->push_back(new MapSquare);
+			}
+		}
+	}
+}
+
+
+//c24 changes + need to use type of the imu message which is const OdometryConstPtr& pos_msg
+/*
+ * the main idea here will be, having all planes, and the imu normal (coordinates and angle)
+ * going on each plane and compare its normal with the one from the imu, then we need to decide
+ * how similar they should be, and if they are similar (meaning also part of the ground) then "erase"
+ * this plane and going to the next plane etc.
+ */
 void MapMatrix::computeMMatrix(std::vector<pclPlane*>* mapPlanes,pcl::PointCloud<pcl::PointXYZ>::Ptr map_cloud){ //update way of calculating x and y indices of mapMatrix
-	int xIndex,yIndex;
-	data->at(0)->at(SIZEOFMAP*2)->square_status=BLOCKED;
 
 	for (unsigned int i=0; i< mapPlanes->size();i++){ //goes through all planes
 		pcl::PointIndices::Ptr inliers = mapPlanes->at(i)->inliers;
@@ -94,24 +171,31 @@ void MapMatrix::computeMMatrix(std::vector<pclPlane*>* mapPlanes,pcl::PointCloud
 		double angle=calcSlopeZ(tempPlane->coefficient_x,tempPlane->coefficient_z,tempPlane->coefficient_y);
 		for (unsigned int j=0; j< inliers->indices.size();j++){ //goes through all indices in the plane i
 			pcl::PointXYZ p = map_cloud->points[inliers->indices[j]];
-			p.x+= (SIZEOFMAP/2);	//adapt x axis to matrix
+			//p.x+= (SIZEOFMAP/2);	//adapt x axis to matrix
 			//p.z+= BEHIND;	//adapt y axis to matrix
 			if (inMatrixRange(p)){
-				xIndex = p.x *4;	//added for now instead of previous three lines
-				yIndex = p.z *4;	//same as above
-				MapSquare* ms=data->at(yIndex)->at(xIndex);
+				int xIndex,yIndex;
+				xIndex = (p.x -xOffset)*(1/SIZEOFSQUARE);	//added for now instead of previous three lines
+				yIndex = (p.z-yOffset) *(1/SIZEOFSQUARE);	//same as above
+				//std::cout<<"xOffset:"<<xOffset<<" yOffset:"<<yOffset<<"\n";
+				//std::cout<<"indexX:"<<xIndex<<" indexY"<<yIndex<<"\n";
+
+				MapSquare* ms=data->at(xIndex)->at(yIndex);
+				ms->rating++;
 				if(!ms->hasPlane(tempPlane)){
 					MPlane* newPlane=new MPlane(pcl::PointXYZ(p.x,p.y,p.z),coff);
-
 					ms->square_Planes->push_back(newPlane);
 					if (angle>30){
-						ms->square_status = BLOCKED;
+						//ms->square_status = BLOCKED;
 					}
 					else{
 						if(ms->square_status!=BLOCKED){
 							ms->square_status = AVAILABLE;
 						}
 					}
+				}else{
+					MPlane* temp=ms->getPlane(tempPlane);
+					temp->rating++;
 				}
 			}
 		}

@@ -12,6 +12,11 @@
   <depend package="roscpp"/>
   <depend package="std_msgs"/>
   <depend package="rospy"/>
+  <depend package="C0_RobilTask"/>
+  <depend package="C21_VisionAndLidar"/>
+  <depend package="C22_GroundRecognitionAndMapping"/>
+  <depend package="C34_Executer"/>
+  <depend package="C10_Common"/>
 
 </package>
 

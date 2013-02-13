@@ -1,76 +1,39 @@
 
 #include <actionlib/server/simple_action_server.h>
-#include <RobilTask/RobilTask.h>
-#include <RobilTask/RobilTaskAction.h>
+#include <C0_RobilTask/RobilTask.h>
+#include <C0_RobilTask/RobilTaskAction.h>
 
 using namespace std;
-using namespace RobilTask;
+using namespace C0_RobilTask;
 
-class LocalizationTrackServer{
-
-    typedef RobilTask::RobilTaskGoalConstPtr GOAL;
-    typedef RobilTask::RobilTaskFeedback FEEDBACK;
-    typedef RobilTask::RobilTaskResult RESULT;
-    typedef actionlib::SimpleActionServer<RobilTask::RobilTaskAction> Server;
-    
-protected:
-    ros::NodeHandle _node;
-    Server _server;
-    string _name;
-    FEEDBACK _feedback;
-    RESULT _result;
-
+class LocalizationTrackServer: public RobilTask{
 public:
     LocalizationTrackServer():
-        _server(_node, name, boost::bind(&SimpleTaskServer::task, this, _1), false),
-        _name("/LocalizationTrack")
+        RobilTask("/LocalizationTrack")
     {
-        _server.start();
-        ROS_INFO("instance of LocalizationTrackServer started.");
+       
     }
 
-    void task(const GOAL &goal){
-        int32_t success = PLAN;
-        string plan ="";
-        
-        /* GET TASK PARAMETERS */
-        ROS_INFO("%s: Start: task name = %s", _name.c_str(), goal->name.c_str());
-        ROS_INFO("%s: Start: task id = %s", _name.c_str(), goal->uid.c_str());
-        ROS_INFO("%s: Start: task params = %s", _name.c_str(), goal->parameters.c_str());
-        
-        /* HERE PROCESS TASK PARAMETERS */
+     TaskResult task(const string& name, const string& uid, Arguments& args){
+       /* HERE PROCESS TASK PARAMETERS */
+	    
+	while(true){
+		if (isPreempt()){
 
-        /* NUMBER OF ITERATIONS IN TASK LOOP */
-        for(int times =0; times < 100; times++){
-            if (_server.isPreemptRequested() || !ros::ok()){
-            
-                /* HERE PROCESS PREEMPTION OR INTERAPT */
-            
-                ROS_INFO("%s: Preempted", _name.c_str());
-                _server.setPreempted();
-                success = FAULT;
-                break;
-            }
-            
-            /* HERE PROCESS TASK */
+			/* HERE PROCESS PREEMPTION OR INTERAPT */
 
-            /* SLEEP BETWEEN LOOP ITERATIONS */
-            boost::this_thread::sleep(boost::posix_time::millisec(100));
-        }
+			return TaskResult::Preempted();
+		}
+		 /* HERE PROCESS TASK */
 
-        if(success)
-        {
-            _result.success = success;
-            ROS_INFO("%s: Succeeded", _name.c_str());
-            if(success == PLAN){
-                ROS_INFO("%s: New plan", _name.c_str());
-                _result.plan = plan;
-            }
-            _server.setSucceeded(_result);
-        }else{
-            ROS_INFO("%s: Aborted", _name.c_str());
-            _server.setAborted(_result);
-        }
+		 ROS_INFO(STR(_name<<": in progress..."));
+		 
+		 //ON SUCCESS : return TaskResult(SUCCESS, "Alright");
+		 //ON FALURE  : return TaskResult(FAULT, "Some problem detected");
+		 
+		 /* SLEEP BETWEEN LOOP ITERATIONS */
+		sleep(100);
+	}
+	return TaskResult::FAULT();
     }
-
 };

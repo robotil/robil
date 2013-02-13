@@ -12,6 +12,7 @@
 #include "MapSquare.h"
 MapSquare::MapSquare(){
 	  square_status=UNCHARTED;
+	  rating=0;
 	  square_Planes=new std::vector<MPlane*>();
 }
 
@@ -38,6 +39,14 @@ bool MapSquare::hasPlane(MPlane* other){
 			  return true;
 	  }
 	  return false;
+}
+
+MPlane* MapSquare::getPlane(MPlane* other){
+	  for(unsigned int i=0; i<square_Planes->size();i++){
+		  if(square_Planes->at(i)->isEqualTo(other))
+			  return square_Planes->at(i);
+	  }
+	  return 0;
 }
 
 std::string MapSquare::toString(){

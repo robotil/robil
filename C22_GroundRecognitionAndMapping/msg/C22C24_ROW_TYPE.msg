@@ -1,0 +1,1 @@
+C22C24_MAP_SQUARE[] column

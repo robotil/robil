@@ -15,8 +15,16 @@ ImageDraw::ImageDraw(int argc, char** argv, QWidget *parent, Qt::WFlags flags)
 	IsUpdateCurrentImg = false;
 
 	connect(this,SIGNAL(SigOnNewImg(QImage)),this,SLOT(SltOnNewImg(QImage)),Qt::QueuedConnection);
+	connect(ui.btnPlayPause,SIGNAL(clicked(bool)),this,SLOT(SltOnPlayPauseClick(bool)));
 
 	C11node.init();
+
+//	QString fileName = QFileDialog::getOpenFileName(this,
+//	     tr("Open Image"), "", tr("Image Files (*.png *.jpg *.bmp)"));
+//
+//	QImage image;
+//	image.load(fileName);
+//	SltOnNewImg(image);
 }
 
 ImageDraw::~ImageDraw()
@@ -28,7 +36,7 @@ void ImageDraw::CreateNewImageArea(QString imageName)
 {
 	CloseOpenedImages();
 
-	QRectF rect(0,0,726,428);
+	QRectF rect(0,0,520,428);
 	QGraphicsScene* pScene = new QGraphicsScene(rect,this);
 
 	QDateTime dateTime = QDateTime::currentDateTime();
@@ -89,16 +97,32 @@ void ImageDraw::OnImgReceived(QImage image)
 
 }
 
+void ImageDraw::OnImgReceived(std::string fileName)
+{
+	QImage myImage;
+	QString qfileName = QString::fromStdString(fileName);
+	myImage.load(qfileName);
+	emit SigOnNewImg(myImage);
+}
+
+void ImageDraw::OnOccupancyGridReceived(int grid[48][48])
+{
+	ui.mapWidget->UpdateGrid(grid);
+}
+
 void ImageDraw::SltOnNewImg(QImage image)
 {
+//	QLabel* lbl = new QLabel(this);
+//	lbl->setPixmap(QPixmap::fromImage(image));
+//	ui.layImages->addWidget(lbl);
 	if(!IsUpdateCurrentImg)
 	{
-		IsUpdateCurrentImg = true;
+//		IsUpdateCurrentImg = true;
 		std::cout << "Step4" << std::endl;
 		CloseOpenedImages();
 
 		std::cout << "Step5" << std::endl;
-		QRectF rect(0,0,726,428);
+		QRectF rect(0,0,image.size().width(),image.size().height());
 		QGraphicsScene* pScene = new QGraphicsScene(rect,this);
 
 		QDateTime dateTime = QDateTime::currentDateTime();
@@ -132,13 +156,13 @@ void ImageDraw::SltOnNewImg(QImage image)
 	}
 	else
 	{
-		QDateTime dateTime = QDateTime::currentDateTime();
-		QString dateStr = dateTime.toString("dd.MM.yyyy");
-		QString timeStr = dateTime.toString("hh:mm:ss");
-		QString DateTimeStr = dateStr + " " + timeStr;
-
-		CGraphicsView* pCGraphicsView = ImageAreas[ImageAreaCount-1];
-		pCGraphicsView->UpdateImage(image,DateTimeStr);
+//		QDateTime dateTime = QDateTime::currentDateTime();
+//		QString dateStr = dateTime.toString("dd.MM.yyyy");
+//		QString timeStr = dateTime.toString("hh:mm:ss");
+//		QString DateTimeStr = dateStr + " " + timeStr;
+//
+//		CGraphicsView* pCGraphicsView = ImageAreas[ImageAreaCount-1];
+//		pCGraphicsView->UpdateImage(image,DateTimeStr);
 	}
 }
 
@@ -169,4 +193,29 @@ void ImageDraw::SltOnOpenUImgClick()
 	image = image.scaled(696,529);
 	ui.graphicsView->setBackgroundBrush(image);
 	update();*/
+}
+
+void ImageDraw::SltOnPlayPauseClick(bool checked)
+{
+	if(checked)
+	{
+		QString curMission = ui.cmbMissions->currentText();
+		if(!curMission.isEmpty())
+		{
+			int index=0;
+			if(curMission == "Task1")
+			{
+				index = 0;
+			}
+			else if(curMission == "Task2")
+			{
+				index = 1;
+			}
+			else if(curMission == "Task3")
+			{
+				index = 2;
+			}
+			C11node.LoadMission(index);
+		}
+	}
 }

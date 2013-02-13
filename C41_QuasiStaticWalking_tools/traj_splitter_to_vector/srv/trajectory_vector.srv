@@ -1,0 +1,8 @@
+geometry_msgs/Vector3 Position
+geometry_msgs/Vector3 Angle
+int64 segments_number
+float64 total_time 
+---
+geometry_msgs/Vector3[] PositionArray
+geometry_msgs/Vector3[] AngleArray
+float64[] dt
