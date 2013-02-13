@@ -32,10 +32,10 @@ CMAKE_COMMAND = /usr/bin/cmake
 RM = /usr/bin/cmake -E remove -f
 
 # The top-level source directory on which CMake was run.
-CMAKE_SOURCE_DIR = /home/lar2/Desktop/rosworkspace/c21_Vision_and_Lidar
+CMAKE_SOURCE_DIR = /home/lar1/Desktop/robilworkspace/C21_VisionAndLidar
 
 # The top-level build directory on which CMake was run.
-CMAKE_BINARY_DIR = /home/lar2/Desktop/rosworkspace/c21_Vision_and_Lidar
+CMAKE_BINARY_DIR = /home/lar1/Desktop/robilworkspace/C21_VisionAndLidar
 
 # Include any dependencies generated for this target.
 include CMakeFiles/test2.dir/depend.make
@@ -53,6 +53,7 @@ CMakeFiles/test2.dir/src/C21SceneTest.o: /opt/ros/fuerte/share/roslang/manifest.
 CMakeFiles/test2.dir/src/C21SceneTest.o: /opt/ros/fuerte/share/roscpp/manifest.xml
 CMakeFiles/test2.dir/src/C21SceneTest.o: /opt/ros/fuerte/share/std_msgs/manifest.xml
 CMakeFiles/test2.dir/src/C21SceneTest.o: /opt/ros/fuerte/share/geometry_msgs/manifest.xml
+CMakeFiles/test2.dir/src/C21SceneTest.o: /opt/ros/fuerte/share/nav_msgs/manifest.xml
 CMakeFiles/test2.dir/src/C21SceneTest.o: /opt/ros/fuerte/share/sensor_msgs/manifest.xml
 CMakeFiles/test2.dir/src/C21SceneTest.o: /opt/ros/fuerte/share/rospy/manifest.xml
 CMakeFiles/test2.dir/src/C21SceneTest.o: /opt/ros/fuerte/stacks/vision_opencv/opencv2/manifest.xml
@@ -85,17 +86,17 @@ CMakeFiles/test2.dir/src/C21SceneTest.o: /opt/ros/fuerte/stacks/dynamic_reconfig
 CMakeFiles/test2.dir/src/C21SceneTest.o: /opt/ros/fuerte/stacks/dynamic_reconfigure/srv_gen/generated
 CMakeFiles/test2.dir/src/C21SceneTest.o: /opt/ros/fuerte/stacks/geometry/tf/msg_gen/generated
 CMakeFiles/test2.dir/src/C21SceneTest.o: /opt/ros/fuerte/stacks/geometry/tf/srv_gen/generated
-	$(CMAKE_COMMAND) -E cmake_progress_report /home/lar2/Desktop/rosworkspace/c21_Vision_and_Lidar/CMakeFiles $(CMAKE_PROGRESS_1)
+	$(CMAKE_COMMAND) -E cmake_progress_report /home/lar1/Desktop/robilworkspace/C21_VisionAndLidar/CMakeFiles $(CMAKE_PROGRESS_1)
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Building CXX object CMakeFiles/test2.dir/src/C21SceneTest.o"
-	/usr/bin/c++   $(CXX_DEFINES) $(CXX_FLAGS) -DBT_USE_DOUBLE_PRECISION -DBT_EULER_DEFAULT_ZYX -W -Wall -Wno-unused-parameter -fno-strict-aliasing -pthread -o CMakeFiles/test2.dir/src/C21SceneTest.o -c /home/lar2/Desktop/rosworkspace/c21_Vision_and_Lidar/src/C21SceneTest.cpp
+	/usr/bin/c++   $(CXX_DEFINES) $(CXX_FLAGS) -DBT_USE_DOUBLE_PRECISION -DBT_EULER_DEFAULT_ZYX -W -Wall -Wno-unused-parameter -fno-strict-aliasing -pthread -o CMakeFiles/test2.dir/src/C21SceneTest.o -c /home/lar1/Desktop/robilworkspace/C21_VisionAndLidar/src/C21SceneTest.cpp
 
 CMakeFiles/test2.dir/src/C21SceneTest.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/test2.dir/src/C21SceneTest.i"
-	/usr/bin/c++  $(CXX_DEFINES) $(CXX_FLAGS) -DBT_USE_DOUBLE_PRECISION -DBT_EULER_DEFAULT_ZYX -W -Wall -Wno-unused-parameter -fno-strict-aliasing -pthread -E /home/lar2/Desktop/rosworkspace/c21_Vision_and_Lidar/src/C21SceneTest.cpp > CMakeFiles/test2.dir/src/C21SceneTest.i
+	/usr/bin/c++  $(CXX_DEFINES) $(CXX_FLAGS) -DBT_USE_DOUBLE_PRECISION -DBT_EULER_DEFAULT_ZYX -W -Wall -Wno-unused-parameter -fno-strict-aliasing -pthread -E /home/lar1/Desktop/robilworkspace/C21_VisionAndLidar/src/C21SceneTest.cpp > CMakeFiles/test2.dir/src/C21SceneTest.i
 
 CMakeFiles/test2.dir/src/C21SceneTest.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/test2.dir/src/C21SceneTest.s"
-	/usr/bin/c++  $(CXX_DEFINES) $(CXX_FLAGS) -DBT_USE_DOUBLE_PRECISION -DBT_EULER_DEFAULT_ZYX -W -Wall -Wno-unused-parameter -fno-strict-aliasing -pthread -S /home/lar2/Desktop/rosworkspace/c21_Vision_and_Lidar/src/C21SceneTest.cpp -o CMakeFiles/test2.dir/src/C21SceneTest.s
+	/usr/bin/c++  $(CXX_DEFINES) $(CXX_FLAGS) -DBT_USE_DOUBLE_PRECISION -DBT_EULER_DEFAULT_ZYX -W -Wall -Wno-unused-parameter -fno-strict-aliasing -pthread -S /home/lar1/Desktop/robilworkspace/C21_VisionAndLidar/src/C21SceneTest.cpp -o CMakeFiles/test2.dir/src/C21SceneTest.s
 
 CMakeFiles/test2.dir/src/C21SceneTest.o.requires:
 .PHONY : CMakeFiles/test2.dir/src/C21SceneTest.o.requires
@@ -180,6 +181,6 @@ CMakeFiles/test2.dir/clean:
 .PHONY : CMakeFiles/test2.dir/clean
 
 CMakeFiles/test2.dir/depend:
-	cd /home/lar2/Desktop/rosworkspace/c21_Vision_and_Lidar && $(CMAKE_COMMAND) -E cmake_depends "Unix Makefiles" /home/lar2/Desktop/rosworkspace/c21_Vision_and_Lidar /home/lar2/Desktop/rosworkspace/c21_Vision_and_Lidar /home/lar2/Desktop/rosworkspace/c21_Vision_and_Lidar /home/lar2/Desktop/rosworkspace/c21_Vision_and_Lidar /home/lar2/Desktop/rosworkspace/c21_Vision_and_Lidar/CMakeFiles/test2.dir/DependInfo.cmake --color=$(COLOR)
+	cd /home/lar1/Desktop/robilworkspace/C21_VisionAndLidar && $(CMAKE_COMMAND) -E cmake_depends "Unix Makefiles" /home/lar1/Desktop/robilworkspace/C21_VisionAndLidar /home/lar1/Desktop/robilworkspace/C21_VisionAndLidar /home/lar1/Desktop/robilworkspace/C21_VisionAndLidar /home/lar1/Desktop/robilworkspace/C21_VisionAndLidar /home/lar1/Desktop/robilworkspace/C21_VisionAndLidar/CMakeFiles/test2.dir/DependInfo.cmake --color=$(COLOR)
 .PHONY : CMakeFiles/test2.dir/depend
 

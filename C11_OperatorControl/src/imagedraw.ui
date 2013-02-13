@@ -1056,6 +1056,9 @@
         </widget>
        </item>
        <item>
+        <widget class="CMapMain" name="mapWidget" native="true"/>
+       </item>
+       <item>
         <spacer name="horizontalSpacer_6">
          <property name="orientation">
           <enum>Qt::Horizontal</enum>
@@ -1107,6 +1110,14 @@
   </widget>
  </widget>
  <layoutdefault spacing="6" margin="11"/>
+ <customwidgets>
+  <customwidget>
+   <class>CMapMain</class>
+   <extends>QWidget</extends>
+   <header>mapmain.h</header>
+   <container>1</container>
+  </customwidget>
+ </customwidgets>
  <resources>
   <include location="imagedraw.qrc"/>
  </resources>

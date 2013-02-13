@@ -12,11 +12,13 @@ ros-fuerte-qt-gui-core
 You may install them using: sudo apt-get install
 
 //CHECK INSTRUCTIONS:
-1. Run Gazibo simulator
-2. Run C21_VisionAndLidar
-3. Run C34_Executor
-4. Run C11_Agent
-5. Run C11_OperatorControl
-6. Push 'Play' button
-7. The icon should be cnahged to 'Pause'
-8. After few seconds image should be received.
+1. Run Gazibo simulator - roslaunch atlas_utils atlas.launch
+2. Run C21_VisionAndLidar - rosrun C21_VisionAndLidar C21
+3. Run C22_GroundRecognitionAndMapping - rosrun C22_GroundRecognitionAndMapping C22
+4. Run C34_Executor - rosrun C34_Executer executer
+5. Run C11_Agent - rosrun C11_Agent C11_Agent
+6. Run C11_OperatorControl - roslaunch C11_OperatorControl C11.launch
+7. Push 'Play' button
+8. The icon should be cnahged to 'Pause'
+9. After few seconds image should be received.
+10. After few seconds occupancy grid should be updated.

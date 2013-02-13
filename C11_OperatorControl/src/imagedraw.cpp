@@ -105,6 +105,11 @@ void ImageDraw::OnImgReceived(std::string fileName)
 	emit SigOnNewImg(myImage);
 }
 
+void ImageDraw::OnOccupancyGridReceived(int grid[48][48])
+{
+	ui.mapWidget->UpdateGrid(grid);
+}
+
 void ImageDraw::SltOnNewImg(QImage image)
 {
 //	QLabel* lbl = new QLabel(this);
@@ -192,22 +197,25 @@ void ImageDraw::SltOnOpenUImgClick()
 
 void ImageDraw::SltOnPlayPauseClick(bool checked)
 {
-	QString curMission = ui.cmbMissions->currentText();
-	if(!curMission.isEmpty())
+	if(checked)
 	{
-		int index=0;
-		if(curMission == "Task1")
+		QString curMission = ui.cmbMissions->currentText();
+		if(!curMission.isEmpty())
 		{
-			index = 0;
+			int index=0;
+			if(curMission == "Task1")
+			{
+				index = 0;
+			}
+			else if(curMission == "Task2")
+			{
+				index = 1;
+			}
+			else if(curMission == "Task3")
+			{
+				index = 2;
+			}
+			C11node.LoadMission(index);
 		}
-		else if(curMission == "Task2")
-		{
-			index = 1;
-		}
-		else if(curMission == "Task3")
-		{
-			index = 2;
-		}
-		C11node.LoadMission(index);
 	}
 }

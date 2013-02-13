@@ -13,6 +13,7 @@
   <depend package="roscpp"/>
   <depend package="roslib"/>
   <depend package="C21_VisionAndLidar"/>
+  <depend package="C22_GroundRecognitionAndMapping"/>
 
 </package>
 

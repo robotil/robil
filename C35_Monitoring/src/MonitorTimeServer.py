@@ -67,13 +67,13 @@ class MonitorTimeServer(object):
 
 #			print "Node with id=%s has ended after %f seconds" % (node_id, MonitorTimeServer._node_execution_times_by_id[node_id])
 			if self._monitored_node_id == node_id:    
-				rospy.loginfo("The node we are monitoring has ended! Time:%f",MonitorTimeServer._node_execution_times_by_id.get(node_id))
+				rospy.loginfo("The node we are monitoring has ended! Time:%f, Node_id:%s",MonitorTimeServer._node_execution_times_by_id.get(node_id),self._monitored_node_id)
 				self._monitored_task_finished_on_time = True
 		else:			#This means a task has started
 #			print "Node with id=%s has begun." % node_id
 			MonitorTimeServer._node_start_times_by_id[node_id] = time.time()
 			if self._monitored_node_id == node_id: 
-				rospy.loginfo("The node we are monitoring has started! Time:%f",MonitorTimeServer._node_start_times_by_id.get(node_id))
+				rospy.loginfo("The node we are monitoring has started! Time:%f, Node_id:%s",MonitorTimeServer._node_start_times_by_id.get(node_id),self._monitored_node_id)
 #		print MonitorTimeServer._node_start_times_by_id
 #		print MonitorTimeServer._node_execution_times_by_id
 #		print "------------------------Done Callback------------------------"
