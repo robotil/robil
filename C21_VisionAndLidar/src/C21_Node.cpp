@@ -60,7 +60,6 @@ public:
 		rightpub = it_.advertise("C21/right_camera/image", 1);
 		c22pub= nh_.advertise<C21_VisionAndLidar::C21_C22>("C21/C22", 1000);
 		//set compression data to png
-		ROS_INFO("finished subscribing\n");
 		sync.registerCallback( boost::bind( &C21_Node::callback, this, _1, _2,_3 ) );  //Specifying what to do with the data
 		_panMutex=new boost::mutex();
 		_cloudMutex=new boost::mutex();
@@ -68,7 +67,7 @@ public:
 		pano_service = nh_.advertiseService("C21/Panorama", &C21_Node::pano_proccess, this);
 		pic_service= nh_.advertiseService("C21/Pic", &C21_Node::pic_proccess, this);
 		pan_imgs=new std::vector<cv::Mat>();
-		ROS_INFO("service on\n");
+		ROS_INFO("C21 Online\n");
 		//boost::thread panorama(&C21_Node::publishPanorama,this);
 	  }
 
@@ -82,7 +81,7 @@ public:
 	  bool proccess(C21_VisionAndLidar::C21::Request  &req,
 			C21_VisionAndLidar::C21::Response &res )
 	  {
-		  ROS_INFO("recived request, tying to fetch data\n");
+		  //ROS_INFO("recived request, tying to fetch data\n");
 		  _cloudMutex->lock();
 		  pcl::toROSMsg(my_answer,res.scene_full_resolution_msg.cloud);
 		  _cloudMutex->unlock();
@@ -151,7 +150,7 @@ public:
 	  void callback(const sensor_msgs::ImageConstPtr& left_msg,const sensor_msgs::ImageConstPtr& right_msg,const sensor_msgs::PointCloud2::ConstPtr &cloud){
 		tf::StampedTransform transform;
 		try{
-		  listener.lookupTransform("/left_camera_optical_frame", "/pelvis",
+		  listener.lookupTransform("/head","/pelvis",
 								   ros::Time(0), transform);
 		}
 		catch (tf::TransformException ex){
@@ -163,15 +162,14 @@ public:
 		msg.cloud=*cloud;
 		tf::Vector3 orig=transform.getOrigin();
 		tf::Quaternion rot=transform.getRotation();
-		msg.pose.position.x=orig.x();
-		msg.pose.position.y=orig.y();
-		msg.pose.position.z=orig.z();
-		msg.pose.orientation.x=rot.x();
-		msg.pose.orientation.y=rot.y();
-		msg.pose.orientation.z=rot.z();
-		msg.pose.orientation.w=rot.w();
+		msg.pose.position.x=orig.getX();
+		msg.pose.position.y=orig.getY();
+		msg.pose.position.z=orig.getZ();
+		msg.pose.orientation.x=rot.getX();
+		msg.pose.orientation.y=rot.getY();
+		msg.pose.orientation.z=rot.getZ();
+		msg.pose.orientation.w=rot.getW();
 		c22pub.publish(msg);
-		std::cout<<" position x:"<<msg.pose.position.x<<" y:"<<msg.pose.position.y<<" z:"<<msg.pose.position.z<<"\n";
 		 cv_bridge::CvImagePtr left;
 		 cv_bridge::CvImagePtr right;
 		try
@@ -202,7 +200,7 @@ public:
 		my_answer.swap(out);
 		//pcl::io::savePCDFile("cloud.pcd",out,true);
 		_cloudMutex->unlock();
-
+		//std::cout<<" position x:"<<msg.pose.position.x<<" y:"<<msg.pose.position.y<<" z:"<<msg.pose.position.z<<"\n";
 	  }
 
 private:

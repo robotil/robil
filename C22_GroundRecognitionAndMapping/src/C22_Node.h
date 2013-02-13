@@ -45,8 +45,8 @@ private:
   ros::ServiceServer service2;
   MapMatrix * _myMatrix;
   std::vector<pclPlane*>* _myPlanes;
-  ros::Subscriber test1;
-  ros::Subscriber test2;
+  boost::shared_ptr<pcl::visualization::PCLVisualizer> viewer;
+  geometry_msgs::Point robotPos;
 public:
 
 	/**
@@ -75,6 +75,4 @@ public:
 	   * @param right_msg ROS mesage with image data from the right camera topic
 	   */
 	  void callback(const C21_VisionAndLidar::C21_C22::ConstPtr& pclMsg,const nav_msgs::Odometry::ConstPtr& pos_msg);
-	  void callback2(const C21_VisionAndLidar::C21_C22::ConstPtr& pclMsg);
-	  void callback3(const nav_msgs::Odometry::ConstPtr& pos_msg);
 };
