@@ -4,33 +4,41 @@ import java.util.ArrayList;
 
 import terminal.Terminal;
 
-
 //------------- PROGRAM --------------------------------
-public class Test extends Command{
+public class Test extends Command {
 
-	public void stop(){}
-	
 	/**
 	 * @param terminal
 	 */
 	public Test(Terminal terminal) {
 		super(terminal, "test");
 	}
-	public boolean isRelatedTo(String command){
-        return isNameOfProgram(command, name);
-    }
-    public void execute(String command){
-        sys.println("TEST PROGRAM");
-        return;
-    }
-    
-    public boolean isAutoCompleteAvailable(String command){
-        return isPartOfName(command,name);
-    }
-    public ArrayList<String> autocomplete(String command){
-    	ArrayList<String> ret = new ArrayList<String>();
-    	ret.add(name);
-        return ret;
-    }
-    
+
+	@Override
+	public ArrayList<String> autocomplete(String command) {
+		ArrayList<String> ret = new ArrayList<String>();
+		ret.add(this.name);
+		return ret;
+	}
+
+	@Override
+	public void execute(String command) {
+		this.sys.println("TEST PROGRAM");
+		return;
+	}
+
+	@Override
+	public boolean isAutoCompleteAvailable(String command) {
+		return isPartOfName(command, this.name);
+	}
+
+	@Override
+	public boolean isRelatedTo(String command) {
+		return isNameOfProgram(command, this.name);
+	}
+
+	@Override
+	public void stop() {
+	}
+
 }

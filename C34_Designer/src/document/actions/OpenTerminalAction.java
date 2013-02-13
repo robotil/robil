@@ -38,6 +38,7 @@ public class OpenTerminalAction implements ActionListener {
 
 		/* Create and display the form */
 		java.awt.EventQueue.invokeLater(new Runnable() {
+			@Override
 			public void run() {
 				new Terminal().setVisible(true);
 			}
