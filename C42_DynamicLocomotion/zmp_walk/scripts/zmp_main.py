@@ -113,13 +113,13 @@ zc = 0#0.8455 # [m] COM height
 
 # Walking Parameters 
 
-step_length = 0.0001 #0.01  # [m]
-step_width  = 0.168  # 0.178  # [m]
-step_time   = 8 #1   # [sec]
+step_length = 0.03 #0.01  # [m]
+step_width  = 0.17  # 0.178  # [m]
+step_time   = 1.2 #1   # [sec]
 bend_knees  = 0.04  # [m]    
-step_height = 0.0001#0.03 #0.05  # [m] 
+step_height = 0.03#0.03 #0.05  # [m] 
 trans_ratio_of_step = 1.0 #0.8 # units fraction: 0-1.0 ; fraction of step time to be used for transition. 1.0 = all of step time is transition 
-trans_slope_steepens_factor = 1 #2 # 1 transition Sigmoid slope (a)
+trans_slope_steepens_factor = 0.68 #2 # 1 transition Sigmoid slope (a)
 pelvis_des = place_in_Orientation( 0, 0, 0 ) # pelvis desired rotation (0,0,0)<=>stand up straight
 
 # Preview Controllers:
