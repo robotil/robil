@@ -77,6 +77,7 @@ class BTTaskProxyCreator{
 public:
 	typedef boost::shared_ptr<BTTaskProxyCreator> Ref;
 	virtual BTTask* create(std::string BTNAME)=0;
+	virtual bool isDynamic(std::string BTNAME){return false;}
 	virtual bool canCreate(std::string BTNAME){return true;}
 	virtual std::string nameOfCreator(){return "unknown";}
 	virtual ~BTTaskProxyCreator(){}

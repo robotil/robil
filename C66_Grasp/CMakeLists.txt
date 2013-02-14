@@ -25,13 +25,12 @@ rosbuild_genmsg()
 #uncomment if you have defined services
 #rosbuild_gensrv()
 
-rosbuild_add_boost_directories()
-rosbuild_add_executable(C66_Grasp src/C66_Grasp_server.cpp)
-rosbuild_add_executable(C66_Grasp_client src/C66_Grasp_client.cpp)
-rosbuild_add_executable(C66_Grasp_node src/C66_Grasp_node.cpp)
+#rosbuild_add_boost_directories()
+rosbuild_add_executable(PickUp src/PickUp.cpp)
+#rosbuild_add_executable(client src/client.cpp)
 #common commands for building c++ executables and libraries
 #rosbuild_add_library(${PROJECT_NAME} src/example.cpp)
 #target_link_libraries(${PROJECT_NAME} another_library)
-rosbuild_link_boost(${PROJECT_NAME} thread)
+#rosbuild_link_boost(${PROJECT_NAME} thread)
 #rosbuild_add_executable(example examples/example.cpp)
 #target_link_libraries(example ${PROJECT_NAME})

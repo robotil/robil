@@ -2,15 +2,19 @@ package terminal.lineprocessors;
 
 public class DummyLineProcessor implements LineProcessor {
 
-	public DummyLineProcessor() {}
+	public DummyLineProcessor() {
+	}
 
 	@Override
-	public void onStart() {}
+	public void onEnd() {
+	}
 
 	@Override
-	public void onNewLine(String line) {}
+	public void onNewLine(String line) {
+	}
 
 	@Override
-	public void onEnd() {}
+	public void onStart() {
+	}
 
 }

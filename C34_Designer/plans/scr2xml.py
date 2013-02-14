@@ -23,8 +23,17 @@ if len(includedText)>0:
 
 #print text
 
-def onError_VariableNameDoesNotFound(w):
-	print "ERROR: ",onError_VariableNameDoesNotFound,w
+import inspect
+def __LINE__():
+    try:
+        raise Exception
+    except:
+        return sys.exc_info()[2].tb_frame.f_back.f_lineno
+def __FILE__():
+    return inspect.currentframe().f_code.co_filename
+    
+def onError_VariableNameDoesNotFound(w, repl, fromsrc):
+	print "ERROR: ",onError_VariableNameDoesNotFound,w,'in',repl,'from line:',fromsrc
 	pass
 def onError_VariableIsNotArray(w):
 	print "ERROR: ",onError_VariableIsNotArray,w
@@ -195,23 +204,48 @@ def compileXml( TAB, text, func, repl, defaultName):
 				else:
 					t = t.replace(k,repl[w])
 			else:
-				onError_VariableNameDoesNotFound(ww);
+				onError_VariableNameDoesNotFound(w, repl,__LINE__());
 				break
 		return t
 		
 	def parseValues(dic, args, fname):
-		if '=' not in args: return
-		te = args.split('=')
-		if len(te)==2: dic[te[0]]=te[1]
-		k=fname+'.'+te[0]
-		for x in xrange(1,len(te)-1):
-			v = te[x][::-1]
-			kk = v[v.find(','):][::-1]
-			kk = fname+'.'+kk
-			v = v[:v.find(',')][::-1]
-			dic[k]=v
-			k=kk
-		dic[k]=te[-1]
+		key=fname+'.'
+		val=''
+		s=0;
+		m=True
+		for l,i in zip(args,xrange(len(args))):
+			theLast = i==len(args)-1
+			if theLast:
+				if m: 
+					if l!=' ': key=key+l
+				else: 
+					val=val+l
+				dic[key.strip()]=val.strip()
+				continue
+			if s==0:
+				if l=='=':
+					m = not m
+					continue
+				if l == ',':
+					m = not m
+					dic[key.strip()]=val.strip()
+					key=fname+'.'; val=''
+					continue
+				if l in '([{':
+					s=s+1
+				if l in '}])':
+					s=s-1
+				if m:
+					if l!=' ': key=key+l
+				else:
+					val=val+l
+			else:
+				if l in '([{':
+					s=s+1
+				if l in '}])':
+					s=s-1
+				val=val+l
+		#print dic
 		
 	def getAttribs(t):
 		att = re.findall(r'attr\[[^]]+\]',t)
@@ -265,7 +299,7 @@ def compileXml( TAB, text, func, repl, defaultName):
 		else:
 			if fname.upper().find('NEXT')==0:
 				if args not in repl:
-					onError_VariableNameDoesNotFound(args);
+					onError_VariableNameDoesNotFound(args, repl,__LINE__());
 					return ret
 				if not isArray(repl[args]):
 					onError_VariableIsNotArray(args+'='+repl[args]);
@@ -319,7 +353,7 @@ def compileXml( TAB, text, func, repl, defaultName):
 			fname,args,decors = getPrefix(line)
 			if fname.upper().find('FOR')==0:
 				if args not in repl:
-					onError_VariableNameDoesNotFound(args)
+					onError_VariableNameDoesNotFound(args, repl,__LINE__())
 					continue
 				if not isArray(repl[args]):
 					onError_VariableIsNotArray(args+'='+repl[args])
@@ -346,7 +380,7 @@ def compileXml( TAB, text, func, repl, defaultName):
 					if args_k[-1]!='#': vv = repl[args_k]
 					else:
 						if args_k[:-1] not in repl:
-							onError_VariableNameDoesNotFound(args)
+							onError_VariableNameDoesNotFound(args, repl,__LINE__())
 							continue
 						val = repl[args_k[:-1]]
 						if not isArray(val):
@@ -369,5 +403,5 @@ if 'root' not in func:
 	exit(1)
 		
 print '<plan>'
-compileXml( '', "root", func , {'A':'[10,11]'}, "")
+compileXml( '', "root", func , {}, "")
 print '</plan>'

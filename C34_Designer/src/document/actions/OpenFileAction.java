@@ -1,19 +1,10 @@
 package document.actions;
 
-import document.BTDesigner;
-import document.Document;
-import document.Parameters;
-
-import java.awt.FileDialog;
-import java.awt.Frame;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.io.File;
-import java.io.FilenameFilter;
 
-import javax.swing.JFileChooser;
-import javax.swing.JOptionPane;
-import javax.swing.filechooser.FileNameExtensionFilter;
+import document.BTDesigner;
+import document.Parameters;
 
 public class OpenFileAction extends AbstractDesignerAction implements
 		ActionListener {
@@ -22,13 +13,14 @@ public class OpenFileAction extends AbstractDesignerAction implements
 		super(designer);
 	}
 
+	@Override
 	public void actionPerformed(ActionEvent a) {
 
-		if (designer.getNumberOfDocuments() == 0) {
-			JOptionPane.showMessageDialog(null, "Please open a new window",
-					"Open Plan", JOptionPane.INFORMATION_MESSAGE);
-			return;
-		}
+//		if (this.designer.getNumberOfDocuments() == 0) {
+//			JOptionPane.showMessageDialog(null, "Please open a new window",
+//					"Open Plan", JOptionPane.INFORMATION_MESSAGE);
+//			return;
+//		}
 
 		String fileName = Dialogs.openFile("Open XML", "xml",
 				Parameters.path_to_plans);
@@ -36,11 +28,14 @@ public class OpenFileAction extends AbstractDesignerAction implements
 			return;
 		}
 
-		Document document = super.getActiveTab().doc;
+		// new NewWindowAction(designer).actionPerformed(a);
 		
-		document.loadPlan(fileName);
-
-		String shortName = document.getShortFilePath();
-		designer.setTabName(designer.tabbedPane.getSelectedIndex(), shortName);
+		
+//		Document document = super.getActiveTab().doc;
+//		document.loadPlan(fileName);
+//		String shortName = document.getShortFilePath();
+//		this.designer.setTabName(this.designer.tabbedPane.getSelectedIndex(), shortName);
+		
+		designer.addnewDocumentTab(fileName);
 	}
 }
