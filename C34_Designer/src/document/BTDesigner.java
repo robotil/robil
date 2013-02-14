@@ -52,7 +52,7 @@ public class BTDesigner extends JFrame {
 
 	public static void main(String[] args) throws Exception {
 
-		LogManager.redirectStandardAndErrorOutput("std_err_output.txt");
+		LogManager.redirectStandardAndErrorOutput("BTDesigner_stdout.log");
 
 		for (javax.swing.UIManager.LookAndFeelInfo info : javax.swing.UIManager
 				.getInstalledLookAndFeels()) {

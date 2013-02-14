@@ -64,13 +64,12 @@ public class RosStackStreamListener implements Runnable {
 				processor, "echo", RosExecutor.STACK_STREAM);
 
 		try {
+			System.out.println("Try to connect to ROS topic: "+RosExecutor.STACK_STREAM);
 			pipe.sendAndReceive();
 		} catch (IOException ex) {
-			System.err
-					.println("ROS COMMUNICATION CRITICAL ERROR: on listening to "
+			System.err.println("ROS COMMUNICATION CRITICAL ERROR: on listening to "
 							+ RosExecutor.STACK_STREAM);
-			System.out
-					.println("WARNING: Designer can not connect to Executer ROS node. You can continue edit and testing plans, but you can't run them."
+			System.out.println("WARNING: Designer can not connect to Executer ROS node. You can continue edit and testing plans, but you can't run them."
 							+ "\n........ For correct this problem try launch Designer by ROS command : $ roslaunch C34_Designer start.launch");
 		}
 	}

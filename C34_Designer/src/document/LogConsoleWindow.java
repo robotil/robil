@@ -6,6 +6,8 @@ package document;
 //
 
 import java.awt.Color;
+import java.awt.event.WindowEvent;
+import java.awt.event.WindowListener;
 import java.io.BufferedReader;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -26,51 +28,97 @@ import logger.LogManager;
 public class LogConsoleWindow extends JTextPane {
 
 	private static final long serialVersionUID = 7243421902696150132L;
+	
+	private static LogConsoleWindow pane = null;
 
 	public static void show(String logFile) {
 		// logFile = LogManager.getOutputFileName();
 
-		LogConsoleWindow pane = new LogConsoleWindow();
-		JScrollPane scroll = new JScrollPane(pane);
-		pane.setScrollPane(scroll);
-
-		JFrame f = new JFrame("Log Console");
-		f.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-		f.setContentPane(scroll);
-		f.setSize(600, 400);
-		f.setVisible(true);
+		if(pane==null){
+			System.out.println("Create Log Window");
+			pane = new LogConsoleWindow();
+		}
+		pane.frame.setVisible(true);
+	
 	}
 
 	private String logFile;
 
 	@SuppressWarnings("unused")
 	private JScrollPane scroll;
-
+	private JFrame frame;
+	Thread thread = null;
+	
 	public LogConsoleWindow() {
-		new Thread(new Runnable() {
+		JScrollPane scroll = new JScrollPane(this);
+		this.setScrollPane(scroll);
 
+		frame = new JFrame("Log Console");
+		frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+		frame.setContentPane(scroll);
+		frame.setSize(600, 400);
+		frame.addWindowListener(new WindowListener() {
+			private boolean isClosed = true;
+			public void windowOpened(WindowEvent arg0) {}
+			public void windowIconified(WindowEvent arg0) {}
+			public void windowDeiconified(WindowEvent arg0) {}
+			public void windowDeactivated(WindowEvent arg0) {}
+			public void windowClosing(WindowEvent arg0) {
+				System.out.println("Log Window Closed");
+				isClosed = true;
+				thread = null;
+			}
+			public void windowClosed(WindowEvent arg0) {}
+			public void windowActivated(WindowEvent arg0) {
+				if(isClosed){
+					System.out.println("Log Window Open");
+					isClosed = false;
+					runThread();
+				}
+			}
+		});
+	}
+	
+	private void runThread(){
+		new Thread() {
 			@Override
 			public void run() {
-
+				thread = this;
+				LogManager.LineCounter lastline = new LogManager.LineCounter(0);
+				long vlines=0;
 				while (true) {
-					String outputContent = LogManager.getOutputContent();
-
-					if (!outputContent.equals(getText())) {
-						setText(LogManager.getOutputContent());
-
-						// Scroll down
-						// scrollRectToVisible(new
-						// Rectangle(0,getDocument().getLength(),1,1));
+					if(thread==null) return;
+					long ll = lastline.number;
+					String outputContent = LogManager.getOutputContent(lastline);
+				
+					if(outputContent.length()!=0){
+						String currentContent = getText();
+						currentContent = currentContent+outputContent;
+						vlines+= lastline.number-ll;
+						int linelimit = Parameters.log_preview_lines_limit;
+						if(vlines > linelimit){
+							int c=0, p=currentContent.indexOf('\n', 0), l=p;
+							while(c<(vlines-linelimit) && p>=0){
+								l=p;
+								c++;
+								p=currentContent.indexOf('\n', l+1);
+							}
+							vlines = vlines - c;
+							currentContent = currentContent.substring(l+1);
+						}
+						setText(currentContent);
+						
 						setCaretPosition(getDocument().getLength());
 					}
 
 					try {
-						Thread.sleep(500);
+						//System.out.println("lastline "+(lastline.number));
+						Thread.sleep(100);
 					} catch (InterruptedException e) {
 					}
 				}
 			}
-		}).start();
+		}.start();
 	}
 
 	private void append(Color c, String s, Object style) { // better

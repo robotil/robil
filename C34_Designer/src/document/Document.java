@@ -1397,11 +1397,18 @@ public class Document extends JPanel {
 	}
 
 	public void setRunning(ArrayList<String> ids) {
-		for (GElement e : this.elements)
+		for (GElement e : this.elements){
+			if(Parameters.log_print_running_tasks_id)
+				System.out.print("select as running : "+ids+". ");
 			if (ids.contains(e.id.toString())) {
-				// System.out.println("id = "+e.id+" found.");
+				if(Parameters.log_print_running_tasks_id)
+					System.out.println("id="+e.id+" found.");
 				e.getProperty().running = true;
+			}else{
+				if(Parameters.log_print_running_tasks_id)
+					System.out.println("not found.");
 			}
+		}
 		repaint();
 	}
 

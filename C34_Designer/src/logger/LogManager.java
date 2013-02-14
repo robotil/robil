@@ -22,7 +22,13 @@ public final class LogManager {
 		}
 	}
 
-	public static String getOutputContent() {
+	public static class LineCounter{
+		public long number;
+		public LineCounter(long n) {
+			number = n;
+		}
+	}
+	public static String getOutputContent(LineCounter fromline) {
 		if (_outputFileName == null)
 			return "Output filename not set";
 
@@ -37,8 +43,14 @@ public final class LogManager {
 			scanner = new Scanner(new File(_outputFileName), "utf8");
 			StringBuilder stringBuilder = new StringBuilder();
 
-			while (scanner.hasNextLine())
-				stringBuilder.append(scanner.nextLine() + "\n");
+			long linen =0;
+			while (scanner.hasNextLine()){
+				String line = scanner.nextLine();
+				if(linen >= fromline.number)
+					stringBuilder.append(line + "\n");
+				linen+=1;
+			}
+			fromline.number = linen;
 
 			return stringBuilder.toString();
 
@@ -55,11 +67,13 @@ public final class LogManager {
 	}
 
 	public static void redirectStandardAndErrorOutput(String outputFileName) {
+		System.out.println("Redirect all output to "+new File(outputFileName).getAbsolutePath());
 		_outputFileName = outputFileName;
 		_outputStream = createPrintStreamToFile(outputFileName);
 
 		System.setOut(_outputStream);
 		System.setErr(_outputStream);
+		System.out.println("Redirect all output to "+new File(outputFileName).getAbsolutePath());
 	}
 
 }
