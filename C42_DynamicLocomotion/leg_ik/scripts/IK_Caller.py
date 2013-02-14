@@ -28,6 +28,7 @@ import rospy, math, sys
 from Impedance_Control import Joint_Stiffness_Controller
 from pylab import *
 from leg_ik_func import swing_leg_ik,stance_leg_ik
+from IKException import IKReachException
 
 class Nasmpace: pass
 ns = Nasmpace()
@@ -47,17 +48,23 @@ JSC_r_leg_mhx = Joint_Stiffness_Controller('r_leg_mhx', 8000, 1) # joint name, s
 #################################################################################
 
 def get_from_zmp(msg):
-   
-    if ( msg.step_phase == 1 ) or ( msg.step_phase == 2 ): # left leg is stance
-        # [mhx,lhy,uhz,kny,lax,uay]
-        right_leg_angles = swing_leg_ik(msg.swing_foot,msg.swing_hip,msg.pelvis_m)
-        left_leg_angles = stance_leg_ik(msg.stance_hip,msg.pelvis_d)
-    elif ( msg.step_phase == 3 ) or ( msg.step_phase == 4 ): # right leg is stance
-        # [mhx,lhy,uhz,kny,lax,uay]
-        left_leg_angles = swing_leg_ik(msg.swing_foot,msg.swing_hip,msg.pelvis_m)
-        right_leg_angles = stance_leg_ik(msg.stance_hip,msg.pelvis_d)
+    try:
+        if ( msg.step_phase == 1 ) or ( msg.step_phase == 2 ): # left leg is stance
+            # [mhx,lhy,uhz,kny,lax,uay]
+            right_leg_angles = swing_leg_ik(msg.swing_foot,msg.swing_hip,msg.pelvis_m)
+            left_leg_angles = stance_leg_ik(msg.stance_hip,msg.pelvis_d)
+        elif ( msg.step_phase == 3 ) or ( msg.step_phase == 4 ): # right leg is stance
+            # [mhx,lhy,uhz,kny,lax,uay]
+            left_leg_angles = swing_leg_ik(msg.swing_foot,msg.swing_hip,msg.pelvis_m)
+            right_leg_angles = stance_leg_ik(msg.stance_hip,msg.pelvis_d)
 
-    
+    except IKReachException as exc:
+        rospy.loginfo('IKException: %s leg is out of reach, req pos: %f ,%f, %f',exc.foot,exc.requested_pos[0],exc.requested_pos[1],exc.requested_pos[2])
+        return
+
+
+
+        
     ns.l_leg_lax.publish( left_leg_angles[4] ) #JSC_l_leg_lax.getCMD(ns.LegAng.ang.lax) )
     ns.l_leg_uay.publish( left_leg_angles[5] )
     ns.l_leg_kny.publish( left_leg_angles[3] )

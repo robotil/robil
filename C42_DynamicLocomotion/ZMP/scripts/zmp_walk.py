@@ -2,8 +2,9 @@
 
 ###################################################################################
 ####	                                                                         ##
-####	zmp control main                                                         ##
-####	last updated - Israel 25/12/12	                                         ##
+####	zmp_walk.py (based on zmp_main.py)                                       ##
+####	Created - Yuval 04/2/2013	                                               ##
+####  last updated - Yuval 04/2/2013                                           ##
 ####                                                                             ##
 ####    run this script to initiate zmp node           	                         ##
 ####    to start walking: rostopic pub /zmp_walk_command std_msgs/Int32 1        ##
@@ -16,13 +17,10 @@
 ####	                                                                  	 ##
 ###################################################################################			
 
-# Ros Parameters Initialization
-
-import roslib; roslib.load_manifest('leg_ik')
+import roslib; roslib.load_manifest('zmp_walk') #roslib.load_manifest('leg_ik')
 import rospy, sys,os.path
 from pylab import *
-# from numpy import * # no need after line above
-from leg_ik.msg import *
+#from leg_ik.msg import *
 from std_msgs.msg import Int32
 
 rospy.init_node('ZMP_node')
