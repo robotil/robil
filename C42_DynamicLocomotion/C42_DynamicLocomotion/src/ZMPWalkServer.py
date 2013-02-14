@@ -19,6 +19,7 @@ class ZmpWlkServer(object):
   _result   = C42_DynamicLocomotion.msg.C42_ZmpWlkResult()
     
   def __init__(self):
+    rospy.loginfo('zmp initialized')
     self.walk_pub = rospy.Publisher('zmp_walk_command',Int32)
     self._action_name = "/ZmpWalk"
     self._as = actionlib.SimpleActionServer(self._action_name, C42_DynamicLocomotion.msg.C42_ZmpWlkAction, execute_cb=self.task)
@@ -61,12 +62,14 @@ class ZmpWlkServer(object):
 
   #def task(self, goal):
   def task(self, goal):
-    
+    #init_zmp.init_pose_with_trajectory_controllers()
+    #init_zmp.main()
+    rospy.loginfo("pos init")
     pth = self._get_path()
     self._nxt_wp.x = pth.path.points[1].x#2
     self._nxt_wp.y = pth.path.points[1].y#0
-    init_zmp.main()
     # start executing the action
+    init_zmp.main()
     self.walk_pub.publish(Int32(1))
     
     #### LOG TASK PARAMETERS ####

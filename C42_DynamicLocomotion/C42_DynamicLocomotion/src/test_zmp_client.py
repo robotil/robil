@@ -26,7 +26,7 @@ def zmp_client():
     client.send_goal(goal)
     # Waits for the server to finish performing the action.
     client.wait_for_result()
-
+    rospy.loginfo("server has finished the task")
     # Prints out the result of executing the action
     return client.get_result()  # A FibonacciResult
 
@@ -37,6 +37,7 @@ if __name__ == '__main__':
         result = C42_DynamicLocomotion.msg.C42_ZmpWlkResult()
         rospy.init_node('zmp_test_client_py')
         result = zmp_client()
+
         print result
         #print "Target reached, Position: x = ", result.res_pos.x,"y = ",result.res_pos.y
         print "distance from goal:",result.dis
