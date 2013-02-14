@@ -66,7 +66,7 @@ public class PropertiesXmlHandler {
 	public static void loadAndSetProperties(String path) throws IOException,
 			ParserConfigurationException, SAXException {
 		
-		System.out.println("Load properties from "+path);
+		System.out.println("Load properties from "+new File(path).getAbsolutePath());
 		File xmlFile = new File(path);
 		DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
 		DocumentBuilder db = dbFactory.newDocumentBuilder();
@@ -98,7 +98,7 @@ public class PropertiesXmlHandler {
 			TransformerException, ParserConfigurationException,
 			TransformerConfigurationException {
 		try {
-			System.out.println("Save properties to "+path);
+			System.out.println("Save properties to "+new File(path).getAbsolutePath());
 			File xmlFile = new File(path);
 			DocumentBuilderFactory dbFactory = DocumentBuilderFactory
 					.newInstance();
