@@ -1,0 +1,10 @@
+(cl:defpackage hrl_kinematics-srv
+  (:use )
+  (:export
+   "SUPPORTLEGS_STATUS"
+   "<SUPPORTLEGS_STATUS-REQUEST>"
+   "SUPPORTLEGS_STATUS-REQUEST"
+   "<SUPPORTLEGS_STATUS-RESPONSE>"
+   "SUPPORTLEGS_STATUS-RESPONSE"
+  ))
+

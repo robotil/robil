@@ -1,0 +1,14 @@
+<package>
+  <description brief="launch">
+
+     launch
+
+  </description>
+  <author>DARPA</author>
+  <license>BSD</license>
+  <review status="unreviewed" notes=""/>
+  <url>http://ros.org/wiki/launch</url>
+
+</package>
+
+

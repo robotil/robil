@@ -1,0 +1,17 @@
+<package>
+  <description brief="zmp_walk">
+
+     zmp_walk
+
+  </description>
+  <author>Yuval Sahpiro</author>
+  <license>BSD</license>
+  <review status="unreviewed" notes=""/>
+  <url>http://ros.org/wiki/zmp_walk</url>
+  <depend package="std_msgs"/>
+  <depend package="rospy"/>
+  <depend package="tf"/>
+
+</package>
+
+

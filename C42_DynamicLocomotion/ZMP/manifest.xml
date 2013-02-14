@@ -1,0 +1,17 @@
+<package>
+  <description brief="ZMP">
+
+     ZMP
+
+  </description>
+  <author>Izzy</author>
+  <license>BSD</license>
+  <review status="unreviewed" notes=""/>
+  <url>http://ros.org/wiki/ZMP</url>
+  <depend package="rospy"/>
+  <depend package="std_msgs"/>
+
+
+</package>
+
+

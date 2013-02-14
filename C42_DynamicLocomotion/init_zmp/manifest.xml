@@ -1,0 +1,15 @@
+<package>
+  <description brief="init_zmp">
+
+     init_zmp
+
+  </description>
+  <author>DARPA</author>
+  <license>BSD</license>
+  <review status="unreviewed" notes=""/>
+  <url>http://ros.org/wiki/joint_control_tutorial</url>
+  <depend package="atlas_utils"/>
+
+</package>
+
+
