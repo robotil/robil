@@ -25,6 +25,9 @@ public class RunAction extends AbstractDesignerAction implements ActionListener 
 			runPlan();
 		} else if (a.getActionCommand().equals("run_resume_plan")) {
 			resumePlan();
+		}else if (a.getActionCommand().equals("run_runresume_plan")) {
+			runPlan();
+			resumePlan();
 		} else if (a.getActionCommand().equals("run_stop_plan")) {
 			stopPlan();
 		} else if (a.getActionCommand().equals("run_pause_plan")) {

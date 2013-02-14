@@ -15,6 +15,11 @@ public class Parameters {
 	public static String path_to_plans_on_executer = "{LOCALPATH}";
 	public static boolean enableLinkConnection = true;
 	public static boolean enableTaskIdRegeneration = false;
+	public static boolean log_print_ros_commands = false;
+	public static boolean log_print_ros_output = false;
+	public static int log_ros_progress_print_level = 0;
+	public static int log_preview_lines_limit=500;
+	public static boolean log_print_running_tasks_id=false;
 	
 	
 	
