@@ -14,6 +14,7 @@ import tf
 import roslib;
 from pylab import *
 from numpy import *
+from IKException import IKReachException
 #import scipy as Sci
 #import scipy.linalg   
 
@@ -95,10 +96,10 @@ def swing_leg_ik(swing_foot,swing_hip,pelvis_m):
 
        
     else:
-
-       rospy.loginfo("swing leg is out of reach") 
-
-       rospy.loginfo("swing_x = %f, swing_y = %f, swing_z = %f" %  (swing_x, swing_y, swing_z) ) 
+      raise IKReachException('swing',[swing_x,swing_y,swing_z])
+      return
+       # rospy.loginfo("swing leg is out of reach") 
+       # rospy.loginfo("swing_x = %f, swing_y = %f, swing_z = %f" %  (swing_x, swing_y, swing_z) ) 
     
     res = [mhx,lhy,uhz,kny,lax,uay]
     #rospy.loginfo("SwingAngl : mhx[0] = %f, lhy[1] = %f, uhz[2] = %f, kny[3] = %f, lax[4] = %f, uay[5] = %f" % (res[0], res[1], res[2], res[3], res[4], res[5]) )
@@ -172,8 +173,8 @@ def stance_leg_ik(stance_hip,pelvis_d):
 
  
     else:
-
-        rospy.loginfo("stance leg is out of reach") 
+        raise IKReachException('stance',[swing_x,swing_y,swing_z])
+        # rospy.loginfo("stance leg is out of reach") 
      
    
     res = [mhx,lhy,uhz,kny,lax,uay]
