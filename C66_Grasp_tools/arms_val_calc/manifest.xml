@@ -1,0 +1,18 @@
+<package>
+  <description brief="arms_val_calc">
+
+     arms_val_calc
+
+  </description>
+  <author>Amit</author>
+  <license>BSD</license>
+  <review status="unreviewed" notes=""/>
+  <url>http://ros.org/wiki/calc_COM_traj</url>
+  <depend package="roscpp"/>
+  <depend package="kdl"/>
+  <depend package="sensor_msgs"/>
+  <rosdep name="eigen"/>
+
+</package>
+
+
