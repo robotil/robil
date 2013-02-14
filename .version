@@ -1,4 +1,4 @@
-V0.0.0.72
+V0.0.0.73
 =================================================
 C0_RobilTask     		    0.4
 C0_Scripts     		    	    0.10
@@ -25,7 +25,7 @@ C45_PostureControl     		    0.6
 C46_MountVehicle     		    0.4
 C47_DismountVehicle     	    0.2
 C48_StandUp     	    	    0.1
-C51_CarOperation     	    	    0.3
+C51_CarOperation     	    	    0.4
 C65_CloseValve     	    	    0.1
 C66_Grasp     	    	    	    0.2
 C66_Grasp_tools     	    	    0.1
