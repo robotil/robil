@@ -64,7 +64,11 @@ def swing_leg_ik(swing_foot,swing_hip,pelvis_m):
 
        L1 = swing_x**2+swing_y**2+swing_z**2
        L = round(L1,5)
-       kny = math.acos(round((L-l1**2-l2**2),3)/round((2*l1*l2),3))
+       #kny = math.acos(round((L-l1**2-l2**2),3)/round((2*l1*l2),3))
+       des_cos_qky = round((L-l1**2-l2**2),3)/round((2*l1*l2),3);
+       cos_qky = max(min(0.9998,des_cos_qky),-0.9998)
+       kny = math.acos(cos_qky);
+
        mhx = math.atan2(swing_y,-swing_z) # math.atan2(-swing_y,swing_z) - math.pi # gave angle of 6.28 insted of 0
        ztilda = swing_z*math.cos(mhx) - swing_y*math.sin(mhx)
        cosinus = round(- (l1*ztilda+l2*math.cos(kny)*ztilda+swing_x*l2*math.sin(kny))/(swing_x**2+ztilda**2),3)
@@ -173,7 +177,7 @@ def stance_leg_ik(stance_hip,pelvis_d):
 
  
     else:
-        raise IKReachException('stance',[swing_x,swing_y,swing_z])
+        raise IKReachException('stance',[hip_x,hip_y,hip_z])
         # rospy.loginfo("stance leg is out of reach") 
      
    
