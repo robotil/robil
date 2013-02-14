@@ -19,82 +19,69 @@
 #############################################################################
 
 import roslib; roslib.load_manifest('leg_ik')
-from leg_ik.srv import *
-from leg_ik.msg import *
+# from leg_ik.srv import *
+# from leg_ik.msg import *
 from std_msgs.msg import Float64
 from sensor_msgs.msg import JointState
+from zmp_walk.msg import walking_trajectory
 import rospy, math, sys
 from Impedance_Control import Joint_Stiffness_Controller
+from pylab import *
+from leg_ik_func import swing_leg_ik,stance_leg_ik
 
 class Nasmpace: pass
 ns = Nasmpace()
-ns.LegAng = LegIkResponse()
+#ns.LegAng = LegIkResponse()
 
 JSC_l_leg_lax = Joint_Stiffness_Controller('l_leg_lax', 4000, 1) # joint name, stiffness, update_period [sec]
 JSC_l_leg_mhx = Joint_Stiffness_Controller('l_leg_mhx', 8000, 1) # joint name, stiffness, update_period [sec]
 JSC_r_leg_lax = Joint_Stiffness_Controller('r_leg_lax', 4000, 1) # joint name, stiffness, update_period [sec]
 JSC_r_leg_mhx = Joint_Stiffness_Controller('r_leg_mhx', 8000, 1) # joint name, stiffness, update_period [sec]
 
-swing_leg_ik = rospy.ServiceProxy('swing_leg_ik', LegIk)
-stance_leg_ik = rospy.ServiceProxy('stance_leg_ik', LegIk)
+
+# swing_leg_ik = rospy.ServiceProxy('swing_leg_ik', LegIk)
+# stance_leg_ik = rospy.ServiceProxy('stance_leg_ik', LegIk)
 
 #################################################################################
 #                     request from IK and publish angles                        #
 #################################################################################
 
 def get_from_zmp(msg):
+   
+    if ( msg.step_phase == 1 ) or ( msg.step_phase == 2 ): # left leg is stance
+        # [mhx,lhy,uhz,kny,lax,uay]
+        right_leg_angles = swing_leg_ik(msg.swing_foot,msg.swing_hip,msg.pelvis_m)
+        left_leg_angles = stance_leg_ik(msg.stance_hip,msg.pelvis_d)
+    elif ( msg.step_phase == 3 ) or ( msg.step_phase == 4 ): # right leg is stance
+        # [mhx,lhy,uhz,kny,lax,uay]
+        left_leg_angles = swing_leg_ik(msg.swing_foot,msg.swing_hip,msg.pelvis_m)
+        right_leg_angles = stance_leg_ik(msg.stance_hip,msg.pelvis_d)
+
     
-    if msg.leg==1: #right swing leg
+    ns.l_leg_lax.publish( left_leg_angles[4] ) #JSC_l_leg_lax.getCMD(ns.LegAng.ang.lax) )
+    ns.l_leg_uay.publish( left_leg_angles[5] )
+    ns.l_leg_kny.publish( left_leg_angles[3] )
+    ns.l_leg_uhz.publish( left_leg_angles[2] )
+    ns.l_leg_lhy.publish( left_leg_angles[1] )
+    ns.l_leg_mhx.publish( left_leg_angles[0] ) #JSC_l_leg_mhx.getCMD(ns.LegAng.ang.mhx) )
 
-        ns.LegAng = stance_leg_ik(msg)
+    ns.r_leg_lax.publish( right_leg_angles[4] ) #JSC_r_leg_lax.getCMD(ns.LegAng.ang.lax + lax_stance) )
+    ns.r_leg_uay.publish( right_leg_angles[5] )
+    ns.r_leg_kny.publish( right_leg_angles[3] )
+    ns.r_leg_uhz.publish( right_leg_angles[2] )
+    ns.r_leg_lhy.publish( right_leg_angles[1] )
+    ns.r_leg_mhx.publish( right_leg_angles[0] ) #JJSC_r_leg_mhx.getCMD(ns.LegAng.ang.mhx + mhx_stance) )
+        
+    ns.back_mby.publish( 0.0 )
+    ns.back_ubx.publish( 0.0 )
+    ns.back_lbz.publish( 0.0 )
 
-        ns.l_leg_lax.publish(ns.LegAng.ang.lax) #JSC_l_leg_lax.getCMD(ns.LegAng.ang.lax) )
-        ns.l_leg_uay.publish(ns.LegAng.ang.uay)
-        ns.l_leg_kny.publish(ns.LegAng.ang.kny)
-        ns.l_leg_uhz.publish(ns.LegAng.ang.uhz)
-        ns.l_leg_lhy.publish(ns.LegAng.ang.lhy)
-        ns.l_leg_mhx.publish(ns.LegAng.ang.mhx) #JSC_l_leg_mhx.getCMD(ns.LegAng.ang.mhx) )
-        ns.back_mby.publish(ns.LegAng.ang.mby)
-        ns.back_ubx.publish(ns.LegAng.ang.ubx)
+    #     rospy.loginfo("JC L_leg: lax = %f effort = %f, uay = %f, kny = %f, uhz = %f, lhy = %f, mhx = %f effort = %f, mby = %f, ubx= %f" %  \
+    #                       (ns.LegAng.ang.lax, JSC_l_leg_lax.latest_effort, ns.LegAng.ang.uay, ns.LegAng.ang.kny, ns.LegAng.ang.uhz, \
+    #                        ns.LegAng.ang.lhy, ns.LegAng.ang.mhx, JSC_l_leg_mhx.latest_effort, ns.LegAng.ang.mby, ns.LegAng.ang.ubx))
 
-        lax_stance = ns.LegAng.ang.lax
-        mhx_stance = ns.LegAng.ang.mhx
-        lhy_stance = ns.LegAng.ang.lhy
-     
-        ns.LegAng = swing_leg_ik(msg)
-
-        ns.r_leg_lax.publish(ns.LegAng.ang.lax + lax_stance) #JSC_r_leg_lax.getCMD(ns.LegAng.ang.lax + lax_stance) )
-        ns.r_leg_uay.publish(ns.LegAng.ang.uay)
-        ns.r_leg_kny.publish(ns.LegAng.ang.kny)
-        ns.r_leg_uhz.publish(ns.LegAng.ang.uhz)
-        ns.r_leg_lhy.publish(ns.LegAng.ang.lhy)
-        ns.r_leg_mhx.publish(ns.LegAng.ang.mhx + mhx_stance) #JJSC_r_leg_mhx.getCMD(ns.LegAng.ang.mhx + mhx_stance) )
-
-    else:  #left swing leg
-
-        ns.LegAng = stance_leg_ik(msg)
     
-        ns.r_leg_lax.publish(ns.LegAng.ang.lax)
-        ns.r_leg_uay.publish(ns.LegAng.ang.uay)
-        ns.r_leg_kny.publish(ns.LegAng.ang.kny)
-        ns.r_leg_uhz.publish(ns.LegAng.ang.uhz)
-        ns.r_leg_lhy.publish(ns.LegAng.ang.lhy)
-        ns.r_leg_mhx.publish(ns.LegAng.ang.mhx)
-        ns.back_mby.publish(ns.LegAng.ang.mby)
-        ns.back_ubx.publish(ns.LegAng.ang.ubx)
-        
-        lax_stance = ns.LegAng.ang.lax
-        mhx_stance = ns.LegAng.ang.mhx
-        lhy_stance = ns.LegAng.ang.lhy
-        
-        ns.LegAng = swing_leg_ik(msg)
 
-        ns.l_leg_lax.publish(ns.LegAng.ang.lax + lax_stance)
-        ns.l_leg_uay.publish(ns.LegAng.ang.uay)
-        ns.l_leg_kny.publish(ns.LegAng.ang.kny)
-        ns.l_leg_uhz.publish(ns.LegAng.ang.uhz)
-        ns.l_leg_lhy.publish(ns.LegAng.ang.lhy  )  #+ lhy_stance
-        ns.l_leg_mhx.publish(ns.LegAng.ang.mhx + mhx_stance)
 
 ##########################################################################################
 # request from joint_states publisher joints state to update Stiffness Controllers state #
@@ -117,7 +104,7 @@ def get_joint_states(msg):
     JSC_l_leg_mhx.UpdateState(msg.position[JSC_l_leg_mhx.JS_i], msg.velocity[JSC_l_leg_mhx.JS_i], msg.effort[JSC_l_leg_mhx.JS_i], msg.header.stamp)
     JSC_r_leg_lax.UpdateState(msg.position[JSC_r_leg_lax.JS_i], msg.velocity[JSC_r_leg_lax.JS_i], msg.effort[JSC_r_leg_lax.JS_i], msg.header.stamp)
     JSC_r_leg_mhx.UpdateState(msg.position[JSC_r_leg_mhx.JS_i], msg.velocity[JSC_r_leg_mhx.JS_i], msg.effort[JSC_r_leg_mhx.JS_i], msg.header.stamp)
-    #rospy.loginfo("Stiffness Controllers joint state updated ")
+    #rospy.loginfo("Stiffness Controllers joint state updated ")   
 
 #######################################################################################
 #                                 init publishers                                     #
@@ -126,8 +113,8 @@ def get_joint_states(msg):
 def LEG_IK():
 
     rospy.init_node('LEG_IK')
-    rospy.wait_for_service('swing_leg_ik')
-    rospy.wait_for_service('stance_leg_ik')
+    # rospy.wait_for_service('swing_leg_ik')
+    # rospy.wait_for_service('stance_leg_ik')
     
 
     ns.r_leg_lax = rospy.Publisher('/r_leg_lax_position_controller/command', Float64)
@@ -146,6 +133,7 @@ def LEG_IK():
 
     ns.back_mby = rospy.Publisher('/back_mby_position_controller/command', Float64)
     ns.back_ubx = rospy.Publisher('/back_ubx_position_controller/command', Float64)
+    ns.back_lbz = rospy.Publisher('/back_lbz_position_controller/command', Float64)
 
     rospy.loginfo( "LEG_IK node is ready" )
 
@@ -154,7 +142,7 @@ def LEG_IK():
   
 
 
-    sub1=rospy.Subscriber("zmp_out", traj, get_from_zmp)
+    sub1=rospy.Subscriber("zmp_out", walking_trajectory, get_from_zmp) # traj, get_from_zmp)
     sub2=rospy.Subscriber("joint_states", JointState, get_joint_states)
 
     rospy.spin()
@@ -162,77 +150,3 @@ def LEG_IK():
 if __name__ == '__main__':
 
     LEG_IK()
-
-    
-########################################################################################
-#               code to init with bended knees, dumped because done via init node
-########################################################################################
-
-#def leg_ik_init(h):
-
-    #res = LegIkInitResponse()
-
-    #l1=round(0.37700,6) #u_leg
-   # l2=round(0.42200,6) #l_leg
-   # eps = 0.00000001
-
-   # swing_x = 0
-   # swing_y = 0
-   # swing_z = 0 -l1 -l2 +h
-    #res = LegIkResponse()
-
-   # if round((swing_x**2+swing_y**2+swing_z**2),5)<=round((l1+l2)**2,5):
-
-     #   L1=swing_x**2+swing_y**2+swing_z**2
-     #   L=round(L1,5)
-     #   res.ang.kny = math.acos(round((L-l1**2-l2**2),3)/round((2*l1*l2),3))
-
-        #alph = math.atan2(x,-z)
-        #beth = math.acos((l1**2 + L - l2**2)/(2*l1*math.sqrt(L)))
-     #   ztilda = swing_z*math.cos(res.ang.mhx) - swing_y*math.sin(res.ang.mhx)
-     #   cosinus = round(- (l1*ztilda+l2*math.cos(res.ang.kny)*ztilda+swing_x*l2*math.sin(res.ang.kny))/(swing_x**2+ztilda**2),3)
-     #   sinus = round((-swing_x*l1-swing_x*l2*math.cos(res.ang.kny)+ztilda*l2*math.sin(res.ang.kny))/(swing_x**2+ztilda**2),3)
-     #   res.ang.lhy = math.atan2(sinus,cosinus) 
-        
-     #   res.ang.uhz = 0.0
-     #   res.ang.mhx = math.atan2(-swing_y,swing_z) - math.pi
-     #   res.ang.lax = 0.0
-     #   res.ang.uay =   -(res.ang.kny + res.ang.lhy) 
-
-     #   res.ang.mby = -res.ang.lhy/4
-    #    res.ang.ubx = 0
-    #    
-
-   # else:
-
-     #   rospy.loginfo("out of reach") 
-     
-    #return res
-
-###################################
-
-  #rospy.loginfo( "going to bend knees" )
-   # for i in range(1,100):
-
-    #    ns.LegAng = leg_ik_init(0.0002*i)
-        
-    #    ns.l_leg_lax.publish(ns.LegAng.ang.lax)
-    #    ns.l_leg_uay.publish(ns.LegAng.ang.uay)
-     #   ns.l_leg_kny.publish(ns.LegAng.ang.kny)
-     #   ns.l_leg_uhz.publish(ns.LegAng.ang.uhz)
-     #   ns.l_leg_lhy.publish(ns.LegAng.ang.lhy)
-     #   ns.l_leg_mhx.publish(ns.LegAng.ang.mhx)
-
-    #    ns.r_leg_lax.publish(ns.LegAng.ang.lax)
-     #   ns.r_leg_uay.publish(ns.LegAng.ang.uay)
-     #   ns.r_leg_kny.publish(ns.LegAng.ang.kny)
-     #   ns.r_leg_uhz.publish(ns.LegAng.ang.uhz)
-     #   ns.r_leg_lhy.publish(ns.LegAng.ang.lhy)
-     #   ns.r_leg_mhx.publish(ns.LegAng.ang.mhx)
-        
-    #    ns.back_mby.publish(ns.LegAng.ang.mby)
-    #    ns.back_ubx.publish(ns.LegAng.ang.ubx)
-
-    #    rospy.sleep(0.01)
-   # rospy.loginfo( "bended knees" )
-

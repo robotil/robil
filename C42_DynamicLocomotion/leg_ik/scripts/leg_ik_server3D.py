@@ -10,8 +10,8 @@
 import roslib; roslib.load_manifest('leg_ik')
 #roslib.load_manifest('using_tf_with_com')
 roslib.load_manifest('hrl_kinematics')
-from leg_ik.srv import *
-from leg_ik.msg import *
+# from leg_ik.srv import *
+# from leg_ik.msg import *
 #from using_tf_with_com.msg import *
 from hrl_kinematics.msg import *
 #from ZMP.msg import *
@@ -23,6 +23,7 @@ from geometry_msgs.msg import *
 from sensor_msgs.msg import *
 from nav_msgs.msg import *
 import tf
+from Impedance_Control import Position_Stiffness_Controller
 
 
 class Nasmpace5: pass
@@ -33,6 +34,9 @@ ns.EIz = 0.0
 ns.COMx_d = 0.0
 ns.COMy_d = 0.0
 ns.COMz_d = 0.0
+
+PSC_right_swing_leg = Position_Stiffness_Controller('R_Swing Leg', 50000, True, False) # name, stiffness, triggered_controller, bypass_input2output [True/False]
+PSC_left_swing_leg = Position_Stiffness_Controller('L_Swing Leg', 30000, True, False) # name, stiffness, triggered_controller, bypass_input2output [True/False]
 
 ###################################################################
 ##                                                                #
@@ -65,53 +69,86 @@ def get_com(msg):
   ns.EIy = (ns.EIy + ns.EPy)*ns.dt
   ns.EIz = (ns.EIz + ns.EPz)*ns.dt
 
+##########################################################################################
+# request from foot contact publisher to update Position Stiffness Controllers avg force #
+##########################################################################################
+
+def get_r_foot_contact(msg):
+    
+    PSC_right_swing_leg.UpdateForce(msg.force.z)
+    
+    #rospy.loginfo("Stiffness Controllers joint state updated ")  
+
+def get_l_foot_contact(msg):
+    
+    PSC_left_swing_leg.UpdateForce(msg.force.z) 
+
 ###################################################################
 #                       Swing leg IK                              #                                   
 ###################################################################
 
-def swing_leg_ik(req):
+# def swing_leg_ik(req):
 
-    #print "Returning leg joint angles"
+#     #print "Returning leg joint angles"
 
-    l1=round(0.37700,6) #u_leg
-    l2=round(0.42200,6) #l_leg
-   # eps = 0.00000001
+#     l1=round(0.37700,6) #u_leg
+#     l2=round(0.42200,6) #l_leg
+#    # eps = 0.00000001
 
-    swing_x = req.pos.Swing_x
-    swing_y = req.pos.Swing_y
-    swing_z = req.pos.Swing_z  -l1 -l2
-    res = LegIkResponse()
+#     ## Desired Force Profile on swing leg
+#     half_robot_weight = 864.75/2 # units [N], half robots weight without feet
+#     com_y_max = 0.095 # maximal movement of COM in y direction
+#     min_support_force = 200 # minimal weight that we want to keep on swing leg while shifting weight to stance leg
+#     desired_normal_force = half_robot_weight - abs(req.pos.COMy/com_y_max) * (half_robot_weight - min_support_force)
 
-    if round((swing_x**2+swing_y**2+swing_z**2),5)<=round((l1+l2)**2,5):
-
-        L1=swing_x**2+swing_y**2+swing_z**2
-        L=round(L1,5)
-        res.ang.kny = math.acos(round((L-l1**2-l2**2),3)/round((2*l1*l2),3))
-        #alph = math.atan2(x,-z)
-        #beth = math.acos((l1**2 + L - l2**2)/(2*l1*math.sqrt(L)))
-        ztilda = swing_z*math.cos(res.ang.mhx) - swing_y*math.sin(res.ang.mhx)
-        cosinus = round(- (l1*ztilda+l2*math.cos(res.ang.kny)*ztilda+swing_x*l2*math.sin(res.ang.kny))/(swing_x**2+ztilda**2),3)
-        sinus = round((-swing_x*l1-swing_x*l2*math.cos(res.ang.kny)+ztilda*l2*math.sin(res.ang.kny))/(swing_x**2+ztilda**2),3)
-        res.ang.lhy = math.atan2(sinus,cosinus) 
-        res.ang.uhz = 0.0
-        res.ang.mhx = math.atan2(swing_y,-swing_z)  # math.atan2(-swing_y,swing_z) - math.pi # gave angle of 6.28 insted of 0
-        res.ang.lax = -res.ang.mhx
-        res.ang.uay = -(res.ang.lhy+res.ang.kny)
-
-       # rospy.loginfo([res.ang.lhy,res.ang.mhx]) 
-
-        
-
-    else:
-
-        rospy.loginfo("swing leg is out of reach") 
-    rospy.loginfo("Swing Leg IK angles: ay=%f,kny=%f,hip_y=%f,ax=%f,hip_x=%f " %(res.ang.uay,res.ang.kny,res.ang.lhy,res.ang.lax,res.ang.mhx)) 
-    #    rospy.loginfo("swing_x,swing_y,swing_z") 
-    #    rospy.loginfo([swing_x,swing_y,swing_z])
-    rospy.loginfo("Swing Leg position: swing_x=%f,swing_y=%f,swing_z=%f " %(swing_x,swing_y,swing_z))  
+#     # for debug:
+#     PSC_right_swing_leg.ByPassON()
+#     PSC_left_swing_leg.ByPassON()
+#     if req.pos.leg == 0: # if left leg is swing
+#         PSC_right_swing_leg.ByPassON()  # bypass controller
+#         # PSC_left_swing_leg.ByPassOFF()
+#         swing_z = PSC_left_swing_leg.getCMD(req.pos.Swing_z, desired_normal_force)  -l1 -l2 # the height of bend knees is subtracted in zmp_main
+#     else:
+#         # PSC_right_swing_leg.ByPassOFF()
+#         PSC_left_swing_leg.ByPassON()  # bypass controller
+#         swing_z = PSC_right_swing_leg.getCMD(req.pos.Swing_z, desired_normal_force)  -l1 -l2 # the height of bend knees is subtracted in zmp_main
 
 
-    return res
+
+#     swing_x = req.pos.Swing_x
+#     swing_y = req.pos.Swing_y
+
+#     #swing_z = req.pos.Swing_z-l1 -l2 # the height of bend knees is subtracted in zmp_main 
+#       # TODO: change code so that published ZMP_des contains swing leg ankle position relative to body coord.
+#     res = LegIkResponse()
+
+#     if round((swing_x**2+swing_y**2+swing_z**2),5)<=round((l1+l2)**2,5):
+
+#         L1=swing_x**2+swing_y**2+swing_z**2
+#         L=round(L1,5)
+#         res.ang.kny = math.acos(round((L-l1**2-l2**2),3)/round((2*l1*l2),3))
+#         #alph = math.atan2(x,-z)
+#         #beth = math.acos((l1**2 + L - l2**2)/(2*l1*math.sqrt(L)))
+#         ztilda = swing_z*math.cos(res.ang.mhx) - swing_y*math.sin(res.ang.mhx)
+#         cosinus = round(- (l1*ztilda+l2*math.cos(res.ang.kny)*ztilda+swing_x*l2*math.sin(res.ang.kny))/(swing_x**2+ztilda**2),3)
+#         sinus = round((-swing_x*l1-swing_x*l2*math.cos(res.ang.kny)+ztilda*l2*math.sin(res.ang.kny))/(swing_x**2+ztilda**2),3)
+#         res.ang.lhy = math.atan2(sinus,cosinus) 
+#         res.ang.uhz = 0.0
+#         res.ang.mhx = math.atan2(swing_y,-swing_z)  # math.atan2(-swing_y,swing_z) - math.pi # gave angle of 6.28 insted of 0
+#         res.ang.lax = -res.ang.mhx
+#         res.ang.uay = -(res.ang.lhy+res.ang.kny)
+
+#        # rospy.loginfo([res.ang.lhy,res.ang.mhx]) 
+
+#     else:
+
+#         rospy.loginfo("swing leg is out of reach") 
+
+#     #    rospy.loginfo("swing_x,swing_y,swing_z") 
+#     #    rospy.loginfo([swing_x,swing_y,swing_z]) 
+
+
+#     return res
 
 
   
@@ -119,103 +156,93 @@ def swing_leg_ik(req):
 #                       Stance leg IK                             #                                   
 ###################################################################
 
-def stance_leg_ik(req):
+# def stance_leg_ik(req):
 
-    l1=round(0.37700,6) #u_leg
-    l2=round(0.42200,6) #l_leg
-       #eps = 0.00000001
+#     l1=round(0.37700,6) #u_leg
+#     l2=round(0.42200,6) #l_leg
+#        #eps = 0.00000001
     
-    right_leg_is_swing = req.pos.leg
+#     right_leg_is_swing = req.pos.leg
     
-    if right_leg_is_swing: 
-        hip_frame = 'l_uleg'
-    else:
-        hip_frame = 'r_uleg'
+#     if right_leg_is_swing: 
+#         hip_frame = 'l_uleg'
+#     else:
+#         hip_frame = 'r_uleg'
        
-    com_frame = 'com' 
-            # while listener.waitForTransform (base_frame, hip_frame, rospy.Time(0), 0.1, 0.01) and not rospy.is_shutdown():
-            # rospy.loginfo("Not ready for Forward Kinematics transform")
-            
-            #try:
-    (delta,rot) = ns.listener.lookupTransform(com_frame, hip_frame, rospy.Time(0)) # delta is hip - CoM
-            # except (tf.LookupException, tf.ConnectivityException, tf.ExtrapolationException) as ex:
-            # print ex
-            # continue
+#     com_frame = 'com' 
+
+#     (delta,rot) = ns.listener.lookupTransform(com_frame, hip_frame, rospy.Time(0))   # delta is hip - CoM
   
-    delX = 0.020318 -delta[0] # Yuval Comm
+#     delX = 0 # 0.020318 -delta[0] # Yuval Comm
 
-    #rospy.loginfo('delta[0]=%f' %(delta[0])) 
+#     #rospy.loginfo('delta[0]=%f' %(delta[0])) 
 
-    # # Yuval Comm
-    if right_leg_is_swing:
-        delY = 0.089139 - delta[1]
-    else:
-        delY = 0.089139 + delta[1]
-   # delY = 0 # Yuval added
+#     # # # Yuval Comm
+#     # if right_leg_is_swing:
+#     #     delY = 0.089139 - delta[1]
+#     # else:
+#     #     delY = 0.089139 + delta[1]
+#     delY = 0 # Yuval added
 
 
-    #rospy.loginfo('delta[1]=%f' %(delta[1])) 
-    delZ = 0#delta[2]
+#     #rospy.loginfo('delta[1]=%f' %(delta[1])) 
+#     delZ = 0#delta[2]
      
-    ns.COMx_d = req.pos.COMx
-    ns.COMy_d = req.pos.COMy
-    ns.COMz_d = req.pos.COMz
+#     ns.COMx_d = req.pos.COMx
+#     ns.COMy_d = req.pos.COMy
+#     ns.COMz_d = req.pos.COMz
     
-    hip_x = ns.COMx_d + delX    
-    hip_y = ns.COMy_d + delY
-    hip_z = ns.COMz_d + delZ + l1 +l2
+#     hip_x = ns.COMx_d + delX    
+#     hip_y = ns.COMy_d + delY
+#     hip_z = ns.COMz_d + delZ + l1 +l2
    
-    # rospy.loginfo('delX=%f' %delX) 
-    # rospy.loginfo('delY=%f' %delY) 
-    # rospy.loginfo('delZ=%f' %delZ) 
+#     # rospy.loginfo('delX=%f' %delX) 
+#     # rospy.loginfo('delY=%f' %delY) 
+#     # rospy.loginfo('delZ=%f' %delZ) 
 
+#     L1=hip_x**2+hip_y**2+hip_z**2
+#     L=round(L1,6)
 
-    L1=hip_x**2+hip_y**2+hip_z**2
-    L=round(L1,6)
+#     res = LegIkResponse()
+#     if round((hip_x**2+hip_y**2+hip_z**2),3)<=round((l1+l2)**2,3):
+#         res.ang.lax = math.atan2(hip_y,hip_z)
+#         res.ang.kny = math.acos(round((L-l1**2-l2**2),3)/round((2*l1*l2),3))
+#         ztilda = hip_z*math.cos(res.ang.lax) + hip_y*math.sin(res.ang.lax)
 
-    res = LegIkResponse()
-    if round((hip_x**2+hip_y**2+hip_z**2),3)<=round((l1+l2)**2,3):
-        res.ang.lax = math.atan2(hip_y,hip_z)
+#         cosinus = round((-l1*math.sin(res.ang.kny)*hip_x+ztilda*l2+l1*ztilda*math.cos(res.ang.kny))/L,3)
+#         sinus = round( -(l2*hip_x+l1*math.cos(res.ang.kny)*hip_x+ztilda*l1*math.sin(res.ang.kny))/L,3)
 
-        des_cos_qky = round((L-l1**2-l2**2),3)/round((2*l1*l2),3);
-        cos_qky = max(min(0.9998,des_cos_qky),-0.9998)
-        res.ang.kny = math.acos(cos_qky);
+#         res.ang.uay = math.atan2(sinus,cosinus)
 
-        #res.ang.kny = math.acos(round((L-l1**2-l2**2),3)/round((2*l1*l2),3))
-        ztilda = hip_z*math.cos(res.ang.lax) + hip_y*math.sin(res.ang.lax)
+#         th4 = res.ang.kny
+#         th5 = res.ang.uay
+#         th6 = res.ang.lax
 
-        cosinus = round((-l1*math.sin(res.ang.kny)*hip_x+ztilda*l2+l1*ztilda*math.cos(res.ang.kny))/L,3)
-        sinus = round( -(l2*hip_x+l1*math.cos(res.ang.kny)*hip_x+ztilda*l1*math.sin(res.ang.kny))/L,3)
+#         res.ang.mhx = -math.atan2(math.sin(th6),math.cos(th4+ th5)*math.cos(th6)) 
+#         res.ang.lhy = -math.atan2(math.sin(th4 + th5)*math.cos(th6),math.sqrt(( math.cos(th4 + th5) )**2+( math.sin(th4+th5)*math.sin(th6) )**2))
+#         res.ang.uhz = 0 #need to change
 
-        res.ang.uay = math.atan2(sinus,cosinus)
+#         res.ang.mby =  0 #-res.ang.lhy/4
+#         res.ang.ubx =  0 #res.ang.lax/4
+#     else:
 
-        th4 = res.ang.kny
-        th5 = res.ang.uay
-        th6 = res.ang.lax
-
-        res.ang.mhx = -math.atan2(math.sin(th6),math.cos(th4+ th5)*math.cos(th6)) 
-        res.ang.lhy = -math.atan2(math.sin(th4 + th5)*math.cos(th6),math.sqrt(( math.cos(th4 + th5) )**2+( math.sin(th4+th5)*math.sin(th6) )**2))
-        res.ang.uhz = 0 #need to change
-
-        res.ang.mby =  0#-res.ang.lhy/4
-        res.ang.ubx =  0#res.ang.lax
-    else:
-
-        rospy.loginfo("stance leg is out of reach") 
-    rospy.loginfo("Stance Leg IK angles: ay=%f,kny=%f,hip_y=%f,ax=%f,hip_x=%f, " %(res.ang.uay,res.ang.kny,res.ang.lhy,res.ang.lax,res.ang.mhx))   
-   # rospy.loginfo("lax,kny,uay") 
-   # rospy.loginfo([res.ang.lax,res.ang.kny,res.ang.uay]) 
+#         rospy.loginfo("stance leg is out of reach") 
+     
+#    # rospy.loginfo("lax,kny,uay") 
+#    # rospy.loginfo([res.ang.lax,res.ang.kny,res.ang.uay]) 
  
-    return res
+#     return res
 ###################################################################
 #                       Server parameters                         #                                   
 ###################################################################
 def leg_ik_server():
     rospy.init_node('leg_ik_server')
     
-    s1 = rospy.Service('swing_leg_ik', LegIk, swing_leg_ik)
-    s2 = rospy.Service('stance_leg_ik', LegIk, stance_leg_ik)
-    s3 =rospy.Subscriber('/test_stability/CoM', CoM_Array_msg, get_com)
+    # s1 = rospy.Service('swing_leg_ik', LegIk, swing_leg_ik)
+    # s2 = rospy.Service('stance_leg_ik', LegIk, stance_leg_ik)
+    s3 = rospy.Subscriber('/test_stability/CoM', CoM_Array_msg, get_com)
+    s4 = rospy.Subscriber('/atlas/r_foot_contact', Wrench, get_r_foot_contact)
+    s5 = rospy.Subscriber('/atlas/l_foot_contact', Wrench, get_l_foot_contact)
     ns.listener = tf.TransformListener()
     rospy.loginfo("Leg ik server ready") 
     rospy.spin()

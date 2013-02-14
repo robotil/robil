@@ -115,10 +115,10 @@ void TestStabilityNode::jointStateCb(const sensor_msgs::JointStateConstPtr& stat
 
   // print info
   tf::Point com = test_stability_.get_pCOM();
-  if (stable)
-    ROS_INFO("Pose is stable, pCOM at %f %f", com.x(), com.y());
-  else
-    ROS_INFO("Pose is NOT stable, pCOM at %f %f", com.x(), com.y());
+  //if (stable)
+  //  ROS_INFO("Pose is stable, pCOM at %f %f", com.x(), com.y());
+  //else
+  //  ROS_INFO("Pose is NOT stable, pCOM at %f %f", com.x(), com.y());
 
   // publish visualization:
 
