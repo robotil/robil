@@ -18,6 +18,8 @@ public slots:
 	void SltImageAreaOpened(int);
 	void SltOnNewImg(QImage img);
 	void SltOnPlayPauseClick(bool);
+	void SltOnCreateClick(bool);
+	void SltOnPathClick(bool);
 
 signals:
 	void SigOnNewImg(QImage img);

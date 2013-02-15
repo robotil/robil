@@ -45,32 +45,32 @@ QBrush CPixItem::TransEnumToBrush()
 				br=QBrush(Qt::white/*QColor(248,248,248)*/);//clr_white
 				break;
 			}
-		case 1:
+		case 3:
 			{
 				br=QBrush(QColor(50,50,50));//clr_gray_10
 				break;
 			}
-		case 2:
+		case 4:
 			{
 				br=br=QBrush(QColor(80,80,80));//clr_gray_20
 				break;
 			}
-		case 3:
+		case 5:
 			{
 				br=QBrush(QColor(141,141,141));//clr_gray_30
 				break;
 			}
-		case 4:
+		case 6:
 			{
 				br=QBrush(QColor(200,200,200));//clr_gray_40
 				break;
 			}
-		case 5:
+		case 1:
 			{
 				br=QBrush(Qt::red/*QColor(50,50,50)*/);
 				break;
 			}
-		case 6:
+		case 2:
 			{
 				br=QBrush(Qt::black);//black
 				break;

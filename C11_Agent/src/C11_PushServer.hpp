@@ -30,6 +30,7 @@ public:
 
 	TaskResult panoramic_image_task()
 	{
+		ROS_INFO("C11_Agent: panoramic_image_task begin!\n");
 		ros::ServiceClient c21Client = _node.serviceClient<C21_VisionAndLidar::C21_Pic>("C21/Pic");
 
 		C21_VisionAndLidar::C21_Pic srv21;
@@ -39,6 +40,7 @@ public:
 			ROS_ERROR("couldn't get a picture, exiting\n");
 			return TaskResult::FAULT();
 		}
+		ROS_INFO("C11_Agent: panoramic_image received!\n");
 
 		ros::ServiceClient c11Client = _node.serviceClient<C10_Common::push_img>("C11/push_img");
 
@@ -52,17 +54,20 @@ public:
 			return TaskResult::FAULT();
 
 		}
+		ROS_INFO("C11_Agent: panoramic_image sent!\n");
 
 		 if (srv11.response.ACK.mes != 1) {
 			ROS_ERROR("C11 ack is fault, exiting\n");
 			return TaskResult::FAULT();
 		 }
+		 ROS_INFO("C11_Agent: panoramic_image_task end!\n");
 
 		 return TaskResult::SUCCESS ();
 	}
 
 	TaskResult occupancy_grid_task()
 	{
+		ROS_INFO("C11_Agent: occupancy_grid_task begin!\n");
 		ros::ServiceClient c22Client = _node.serviceClient<C22_GroundRecognitionAndMapping::C22>("C22");
 		C22_GroundRecognitionAndMapping::C22 srv22;
 		if (!c22Client.call(srv22))
@@ -70,6 +75,9 @@ public:
 			ROS_ERROR("couldn't get a occupancy grid, exiting\n");
 			return TaskResult::FAULT();
 		}
+
+		ROS_INFO("C11_Agent: occupancy_grid received!\n");
+
 		ros::ServiceClient c11Client = _node.serviceClient<C10_Common::push_occupancy_grid>("C11/push_occupancy_grid");
 
 		C10_Common::push_occupancy_grid srv11;
@@ -82,11 +90,14 @@ public:
 
 		}
 
+		ROS_INFO("C11_Agent: occupancy_grid sent!\n");
+
 		 if (srv11.response.ACK.mes != 1) {
 			ROS_ERROR("C11 ack is fault, exiting\n");
 			return TaskResult::FAULT();
 		 }
 
+		ROS_INFO("C11_Agent: occupancy_grid_task end!\n");
 		return TaskResult::SUCCESS ();
 	}
 
