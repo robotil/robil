@@ -2,8 +2,8 @@
 #include <QFileDialog>
 #include <QDateTime>
 #include <QGraphicsTextItem>
-#include "cnode.h"
-#include "figure.h"
+//#include "cnode.h"
+//#include "figure.h"
 #include "imagedraw.h"
 
 ImageDraw::ImageDraw(int argc, char** argv, QWidget *parent, Qt::WFlags flags)
@@ -16,6 +16,8 @@ ImageDraw::ImageDraw(int argc, char** argv, QWidget *parent, Qt::WFlags flags)
 
 	connect(this,SIGNAL(SigOnNewImg(QImage)),this,SLOT(SltOnNewImg(QImage)),Qt::QueuedConnection);
 	connect(ui.btnPlayPause,SIGNAL(clicked(bool)),this,SLOT(SltOnPlayPauseClick(bool)));
+	connect(ui.btnCreate,SIGNAL(clicked(bool)),this,SLOT(SltOnCreateClick(bool)));
+	connect(ui.btnPath,SIGNAL(clicked(bool)),this,SLOT(SltOnPathClick(bool)));
 
 	C11node.init();
 
@@ -217,5 +219,31 @@ void ImageDraw::SltOnPlayPauseClick(bool checked)
 			}
 			C11node.LoadMission(index);
 		}
+	}
+}
+
+void ImageDraw::SltOnCreateClick(bool checked)
+{
+	if(checked)
+	{
+		ui.btnPath->setEnabled(true);
+		ui.btnNoGo->setEnabled(true);
+		ui.btnDoor->setEnabled(true);
+		ui.btnCarInt->setEnabled(true);
+	}
+	else
+	{
+		ui.btnPath->setEnabled(true);
+		ui.btnNoGo->setEnabled(true);
+		ui.btnDoor->setEnabled(true);
+		ui.btnCarInt->setEnabled(true);
+	}
+}
+
+void ImageDraw::SltOnPathClick(bool checked)
+{
+	if(checked)
+	{
+		ui.mapWidget->setMode(E_PATH_MODE);
 	}
 }

@@ -1,6 +1,7 @@
 #include <QMouseEvent>
 #include <iostream>
-#include "cline.h"
+#include <QGraphicsTextItem>
+//#include "cline.h"
 #include "graphicsview.h"
 
 CGraphicsView::CGraphicsView(int id, QString imageName, QString dateTimeStr, QWidget *parent)
@@ -23,7 +24,9 @@ CGraphicsView::CGraphicsView(int id, QString imageName, QString dateTimeStr, QWi
 CGraphicsView::CGraphicsView(int id, QImage image, QString dateTimeStr, QWidget *parent)
 {
 	std::cout << "Step61" << std::endl;
+//	QRectF rect(0,0,520,428);
 	IsOpened = true;
+//	setSceneRect(rect);
 	Id = id;
 	DateTimeStr = dateTimeStr;
 	if(image.isNull())
@@ -57,6 +60,8 @@ CGraphicsView::CGraphicsView(int id, QImage image, QString dateTimeStr, QWidget 
 	setRenderHint(QPainter::Antialiasing);
 	setCacheMode(QGraphicsView::CacheBackground);
 	setViewportUpdateMode(QGraphicsView::BoundingRectViewportUpdate);
+	setMaximumHeight(428);
+	setMinimumHeight(428);
 	std::cout << "Step65" << std::endl;
 }
 
@@ -69,7 +74,8 @@ void CGraphicsView::setScene(QGraphicsScene * theScene)
 {
 	QGraphicsView::setScene(theScene);
 	DateTimeItem = new QGraphicsTextItem(DateTimeStr,NULL);
-	DateTimeItem->setPos(320,398);
+	QRectF rect = sceneRect();
+	DateTimeItem->setPos(rect.width()-200,rect.height()-30);
 	DateTimeItem->setDefaultTextColor(Qt::white);
 	scene()->addItem(DateTimeItem);
 	scene()->setSceneRect(geometry());
@@ -108,13 +114,14 @@ void CGraphicsView::OpenView()
 	if(!IsOpened)
 	{
 //		Image.scaled(520,320);
-		QRectF rect(0,0,520,428);
+//		QRectF rect(0,0,520,428);
 		IsOpened = true;
-		setSceneRect(rect);
-		resize(520,428);
+//		setSceneRect(rect);
+//		resize(520,428);
+		QRectF rect = sceneRect();
 		setMaximumHeight(428);
 		setMinimumHeight(428);
-		DateTimeItem->setPos(320,398);
+		DateTimeItem->setPos(rect.width()-200,rect.height()-30);
 	}
 }
 
@@ -123,13 +130,14 @@ void CGraphicsView::MinimizeView()
 	if(IsOpened)
 	{
 //		Image.scaled(520,320);
-		QRectF rect(0,0,520,100);
+//		QRectF rect(0,0,520,100);
 		IsOpened = false;
-		setSceneRect(rect);
-		resize(520,100);
+//		setSceneRect(rect);
+//		resize(520,100);
+		QRectF rect = sceneRect();
 		setMaximumHeight(100);
 		setMinimumHeight(100);
-		DateTimeItem->setPos(320,70);
+		DateTimeItem->setPos(rect.width()-200,rect.height()-30);
 	}
 }
 
