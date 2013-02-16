@@ -1,0 +1,26 @@
+provides the robots position in the simulation and the corrosponding imu data 
+
+How to Check:
+============
+run the node with the DRC simulation
+
+rosrun C25_GlobalPosition C25
+
+test with
+
+rosrun C25_GlobalPosition C25_test
+rostopic echo /C25/publish 
+one can use the gazebo to look at the actual position of the robot
+
+Known Bugs:
+==========
+
+
+
+Known Limitations:
+=================
+
+
+
+
+
