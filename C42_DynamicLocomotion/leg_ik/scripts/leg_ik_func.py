@@ -52,7 +52,8 @@ def swing_leg_ik(swing_foot,swing_hip,pelvis_m):
                         
                         [-sin(swing_foot.p), cos(swing_foot.p)*sin(swing_foot.r),cos(swing_foot.p)*cos(swing_foot.r)]])
 
-    des_pos = dot(linalg.inv(Rrpw_pelvis_m),(xankle-xhip))
+    #des_pos = dot(linalg.inv(Rrpw_pelvis_m),(xankle-xhip))
+    des_pos = (xankle-xhip)
     
     
     swing_x = des_pos[0]
@@ -179,6 +180,7 @@ def stance_leg_ik(stance_hip,pelvis_d):
     else:
         raise IKReachException('stance',[hip_x,hip_y,hip_z])
         # rospy.loginfo("stance leg is out of reach") 
+        return
      
    
     res = [mhx,lhy,uhz,kny,lax,uay]
