@@ -11,7 +11,7 @@ int main(int argc, char **argv)
   }
   
   C23_Node my_node(argv[1],argv[2]);
-  my_node.detectAndTrack(CAR_DRIVER);
+ // my_node.detectAndTrack(CAR_DRIVER);
   TrackObjectServer trackObject(my_node);
   //SearchObjectServer(my_node);
  
