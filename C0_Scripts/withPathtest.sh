@@ -23,8 +23,8 @@ echo $C31_PID
 echo "Done "
 echo $C31_PID  >> $PKILL
 #echo $C22_PID $C31_PID $C34_PID >> $PKILL
-
-rosservice call executer/run T pln
+cd $CURR_WD
+rosservice call executer/run T /userhome/mhallak/git/robil/C0_Scripts/pln
 rosservice call executer/resume T
-rosservice call executer/run T1 /tmp/pln1
+rosservice call executer/run T1 /userhome/mhallak/git/robil/C0_Scripts/pln1
 rosservice call executer/resume T1
