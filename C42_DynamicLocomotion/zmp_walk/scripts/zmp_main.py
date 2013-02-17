@@ -113,7 +113,7 @@ zc = 0#0.8455 # [m] COM height
 
 # Walking Parameters 
 
-step_length = 0.1 #0.01  # [m]
+step_length = 0.02 #0.01  # [m]
 step_width  = 0.171  # 0.178  # [m]
 step_time   = 0.8 #1   # [sec]
 bend_knees  = 0.04  # [m]    
@@ -425,9 +425,11 @@ while not rospy.is_shutdown():
               k = 1
               distance_x_ref = p_ref_x[0]
               step_phase = 3 # Double-Support right leg in front
-              exit()######################################################
+              rospy.sleep(4)
+              #exit()######################################################
               if ns.walk:
                 # make a full step:
+                #exit()
                 full_step = 1
                 rospy.loginfo("starting full step, walk = %d" % (ns.walk) )
                 # TODO: update ZMP_profiles with new parameters: step time,length...
@@ -439,8 +441,9 @@ while not rospy.is_shutdown():
                 last_step = 1
                 # TODO: add stop ZMP_profiles
 
-
+      
       else:
+          #exit()######################################################
           if full_step:
               if (samples_in_step <= k):
                 # completed a full step
@@ -449,7 +452,7 @@ while not rospy.is_shutdown():
                 rospy.loginfo("done step number = %d" % (steps_count) )
                 rospy.loginfo("time:")
                 rospy.loginfo(rospy.get_time())
-
+                rospy.sleep(4)
                 k = 1
                 distance_x_ref = p_ref_x[0]
                 if step_phase >= 3:
