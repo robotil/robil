@@ -58,7 +58,7 @@ public class RosExecutor {
 
 	public void stepBehaviorTree(String btName) {
 		ServiceCaller caller = new ServiceCaller();
-		System.out.println("step " + btName);
+		System.out.println("Step " + btName);
 		caller.callService(STEP, btName);
 	}
 
