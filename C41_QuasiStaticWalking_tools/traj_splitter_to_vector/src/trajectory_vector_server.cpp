@@ -18,6 +18,7 @@ public:
 	bool split(traj_splitter_to_vector::trajectory_vector::Request &req,
 			traj_splitter_to_vector::trajectory_vector::Response &res )
 	{
+		ROS_INFO("Splitting trajectory");
 		int segments_number 	= req.segments_number ;
 		double total_time 		= req.total_time  ; //seconds
 		res.dt.resize(segments_number);
