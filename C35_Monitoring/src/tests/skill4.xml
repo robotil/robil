@@ -1,49 +1,49 @@
 <plan descriptions="./plans/TaskDescriptions.xml">
-   <par name="skill4" x="1242.9041941024773" y="87.51775582231849" collapsed="false" id="38e95426-0932-40d2-aefa-270a3dcd9298">
-         <par name="Perception" x="1024.114720418267" y="172.51775582231804" collapsed="false" id="50ae34a1-b4f6-42b9-a59e-23a1de45eaca">
-               <tsk name="LocalizationTrack" x="856.1147204182666" y="213.5177558223181" test_time="0" test_result="true" id="b680e465-1580-4fcd-964d-4ac78748b7d3" />
-               <tsk name="ObstacleDetection" x="1035.114720418267" y="234.51775582231804" test_time="0" test_result="true" id="56806741-11f0-45f8-992b-3a81f261bd49" />
+   <par name="skill4" x="1137.975622673905" y="-277.26795846339576" collapsed="false" id="38e95426-0932-40d2-aefa-270a3dcd9298"> 
+         <par name="Perception" x="919.1861489896949" y="-192.2679584633962" collapsed="false" id="50ae34a1-b4f6-42b9-a59e-23a1de45eaca"> 
+               <tsk name="LocalizationTrack" x="751.1861489896944" y="-151.2679584633961" test_time="0" test_result="true" id="b680e465-1580-4fcd-964d-4ac78748b7d3" />
+               <tsk name="ObstacleDetection" x="930.1861489896949" y="-130.2679584633962" test_time="0" test_result="true" id="56806741-11f0-45f8-992b-3a81f261bd49" />
          </par>
-         <seq name="Mission" x="1442.9041941024789" y="168.5177558223182" collapsed="false" id="e6b9d1db-cbf5-4efb-8b22-f2c2e6130a3e">
-               <seq name="DriveMission" x="1481.642289340574" y="325.1844224889851" collapsed="false" id="19ac91a7-5f3b-47d5-a2bb-9ef59c48c5ae">
-                     <seq name="EnterToCar" x="806.4029409696481" y="453.97640243886025" collapsed="false" id="6858f335-90b6-4a6f-90c6-90a5e8c43825">
-                           <seq name="SearchObjectsFromOutside" x="422.5720945720928" y="562.8409645909633" collapsed="false" id="9da2c4ed-8bd2-46f3-a4d0-7149016f2bee">
-                                 <tsk name="SearchObject(target=Doorway,selfPosition=external)" x="187.5568674525146" y="591.8137040261772" test_time="0" test_result="true" id="d770574f-83c9-45b6-b68b-a41e06d24a88" />
-                                 <tsk name="SearchObject(target=Wheel)" x="189.79431679431485" y="750.8409645909626" test_time="0" test_result="true" id="234c69e0-fb57-4135-8d52-8132400ccb6a" />
+         <seq name="Mission" x="1337.9756226739066" y="-196.26795846339598" collapsed="false" id="e6b9d1db-cbf5-4efb-8b22-f2c2e6130a3e"> 
+               <seq name="DriveMission" x="1376.7137179120018" y="-39.60129179672913" collapsed="false" id="19ac91a7-5f3b-47d5-a2bb-9ef59c48c5ae"> 
+                     <seq name="EnterToCar" x="701.4743695410758" y="89.19068815314608" collapsed="false" id="6858f335-90b6-4a6f-90c6-90a5e8c43825"> 
+                           <seq name="SearchObjectsFromOutside" x="317.6435231435206" y="198.05525030524905" collapsed="false" id="9da2c4ed-8bd2-46f3-a4d0-7149016f2bee"> 
+                                 <tsk name="TrackObject(target=Doorway,selfPosition=external)" x="82.62829602394243" y="227.027989740463" test_time="0" test_result="true" id="d770574f-83c9-45b6-b68b-a41e06d24a88" />
+                                 <tsk name="TrackObject(target=Wheel)" x="84.86574536574267" y="386.05525030524836" test_time="0" test_result="true" id="234c69e0-fb57-4135-8d52-8132400ccb6a" />
                            </seq>
-                           <par name="Entry" x="684.4227953842434" y="671.8406931189395" collapsed="false" id="9b82d340-6893-4e68-a676-4d1658aae8d0">
-                                 <seq name="Mission" x="612.6038961038957" y="735.1620879120877" collapsed="false" id="ae9c53ae-b42c-4f21-ba6a-7b1fa8741c2d">
-                                       <tsk name="MountVehicle(param=Mount)" x="480.26029122173406" y="818.6180823963249" test_time="0" test_result="true" id="3c7ef23c-ffa3-4d42-aaf5-1c1a6147b5b8" />
+                           <par name="Entry" x="579.4942239556711" y="307.0549788332253" collapsed="false" id="9b82d340-6893-4e68-a676-4d1658aae8d0"> 
+                                 <seq name="Mission" x="507.6753246753235" y="370.3763736263735" collapsed="false" id="ae9c53ae-b42c-4f21-ba6a-7b1fa8741c2d"> 
+                                       <tsk name="MountVehicle(param=Mount)" x="375.3317197931618" y="453.8323681106107" test_time="0" test_result="true" id="3c7ef23c-ffa3-4d42-aaf5-1c1a6147b5b8" />
                                  </seq>
-                                 <tsk name="MonitorTime(param=ae9c53ae-b42c-4f21-ba6a-7b1fa8741c2d)" x="693.9466049080527" y="768.8645026427473" test_time="0" test_result="true" id="6004f2ac-2f5f-45d5-b9c6-c3896d9acf43" />
+                                 <tsk name="MonitorTime(param=ae9c53ae-b42c-4f21-ba6a-7b1fa8741c2d)" x="589.0180334794804" y="404.0787883570331" test_time="0" test_result="true" id="6004f2ac-2f5f-45d5-b9c6-c3896d9acf43" />
                            </par>
-                           <seq name="SearchObjectsFromInside" x="901.0934620934592" y="598.0460927960888" collapsed="false" id="e3a15675-85ff-4ceb-a59a-13b98e908d6f">
-                                 <tsk name="SearchObject(target=Wheel)" x="860.9823509823462" y="678.8238705738667" test_time="0" test_result="true" id="f49d86d1-1c85-4f22-b006-e83f220eafbb" />
+                           <seq name="SearchObjectsFromInside" x="796.164890664887" y="233.2603785103746" collapsed="false" id="e3a15675-85ff-4ceb-a59a-13b98e908d6f"> 
+                                 <tsk name="TrackObject(target=Wheel)" x="756.0537795537741" y="314.03815628815244" test_time="0" test_result="true" id="f49d86d1-1c85-4f22-b006-e83f220eafbb" />
                            </seq>
                      </seq>
-                     <seq name="InCar" x="1430.8840475823313" y="465.3346056391667" collapsed="false" id="cee78399-ac08-4713-9a85-542b10c3e7ff">
-                           <par name="Driving" x="1385.8840475823258" y="538.3126276171887" collapsed="false" id="6207a22b-f609-4f49-9579-2e83f0c45e36">
-                              <dec name="!L!" x="1330.1697618680373" y="588.312627617189">
-                                    <seq name="Driving" x="1374.09283879112" y="676.7961441007067" collapsed="false" id="3121acdd-f660-4d53-96b2-47029c756b6f">
-                                          <tsk name="PathPlanningFocus(target=FORWARD)" x="979.4687786407375" y="770.7059185367953" test_time="0" test_result="true" id="5668a95a-a827-472a-bae2-b4fff00a36a7" />
-                                          <seq name="@4" x="1448.3242313242367" y="757.9368131868152" collapsed="false" id="70f216a5-7259-412e-a108-658b5d28d109">
-                                                <tsk name="InitDrive" x="1269.355996685853" y="863.4202042510849" test_time="0" test_result="true" id="6e5cc7d2-bc5b-46c9-b6fc-9adb8ab9b935" />
-                                                <sel name="@5" x="1446.3242313242365" y="818.9368131868156" collapsed="false" id="44efb3a3-36bc-460c-a765-923a3b1d891f">
-                                                      <tsk name="WayPointsDriving" x="1355.8559966858493" y="863.4277230480882" test_time="0" test_result="true" id="398165c8-1786-4ce4-b98b-37e5282d9a26" />
-                                                      <tsk name="FinishDrive" x="1542.8956598956706" y="862.7939560439597" test_time="0" test_result="true" id="e69475b5-c614-47bf-89b5-def175bd06cf" />
+                     <seq name="InCar" x="1325.955476153759" y="100.54889135345252" collapsed="false" id="cee78399-ac08-4713-9a85-542b10c3e7ff"> 
+                           <par name="Driving" x="1280.9554761537536" y="173.52691333147447" collapsed="false" id="6207a22b-f609-4f49-9579-2e83f0c45e36"> 
+                              <dec name="!L!" x="1225.241190439465" y="223.52691333147482"> 
+                                    <seq name="Driving" x="1269.1642673625477" y="312.01042981499245" collapsed="false" id="3121acdd-f660-4d53-96b2-47029c756b6f"> 
+                                          <tsk name="PathPlanningFocus(target=FORWARD)" x="874.5402072121653" y="405.92020425108103" test_time="0" test_result="true" id="5668a95a-a827-472a-bae2-b4fff00a36a7" />
+                                          <seq name="@4" x="1343.3956598956645" y="393.151098901101" collapsed="false" id="70f216a5-7259-412e-a108-658b5d28d109"> 
+                                                <tsk name="InitDrive" x="1164.4274252572807" y="498.6344899653707" test_time="0" test_result="true" id="6e5cc7d2-bc5b-46c9-b6fc-9adb8ab9b935" />
+                                                <sel name="@5" x="1341.3956598956643" y="454.15109890110136" collapsed="false" id="44efb3a3-36bc-460c-a765-923a3b1d891f"> 
+                                                      <tsk name="WayPointsDriving" x="1250.927425257277" y="498.64200876237396" test_time="0" test_result="true" id="398165c8-1786-4ce4-b98b-37e5282d9a26" />
+                                                      <tsk name="FinishDrive" x="1437.9670884670984" y="498.0082417582455" test_time="0" test_result="true" id="e69475b5-c614-47bf-89b5-def175bd06cf" />
                                                 </sel>
-                                                <tsk name="FinishDrive" x="1542.8956598956706" y="862.7939560439597" test_time="0" test_result="true" id="e69475b5-c614-47bf-89b5-def175bd06cf" />
+                                                <tsk name="FinishDrive" x="1437.9670884670984" y="498.0082417582455" test_time="0" test_result="true" id="e69475b5-c614-47bf-89b5-def175bd06cf" />
                                           </seq>
                                     </seq>
                               </dec>
-                                 <tsk name="PathPlanning" x="1405.884047582328" y="578.312627617189" test_time="0" test_result="true" id="32da76e3-cd3b-456e-84d4-9dfe611b91c6" />
+                                 <tsk name="PathPlanning" x="1300.9554761537559" y="213.52691333147482" test_time="0" test_result="true" id="32da76e3-cd3b-456e-84d4-9dfe611b91c6" />
                            </par>
                      </seq>
-                     <par name="ForMonitoring" x="1644.362137862136" y="416.3489010989007" collapsed="false" id="028d6796-014d-48f3-b66b-adb10c16e483">
-                           <seq name="ExitFromCar" x="1693.2036928493383" y="492.6073548198277" collapsed="false" id="b9e18714-4869-422c-bc38-cb2dca88c530">
-                                 <tsk name="DismountVechicle(param=Dismount)" x="1702.7751214207738" y="614.6513108637806" test_time="0" test_result="true" id="bf3df02a-9fe8-414b-8906-a9c8f49fbbb3" />
+                     <par name="ForMonitoring" x="1539.4335664335638" y="51.56318681318646" collapsed="false" id="028d6796-014d-48f3-b66b-adb10c16e483"> 
+                           <seq name="ExitFromCar" x="1588.275121420766" y="127.8216405341135" collapsed="false" id="b9e18714-4869-422c-bc38-cb2dca88c530"> 
+                                 <tsk name="DismountVechicle(param=Dismount)" x="1597.8465499922015" y="249.8655965780664" test_time="0" test_result="true" id="bf3df02a-9fe8-414b-8906-a9c8f49fbbb3" />
                            </seq>
-                           <tsk name="MonitorTime(param=b9e18714-4869-422c-bc38-cb2dca88c530)" x="1953.7027972027959" y="570.6346153846141" test_time="0" test_result="true" id="cca761ab-b52d-43e8-a753-b4c458aea4db" />
+                           <tsk name="MonitorTime(param=b9e18714-4869-422c-bc38-cb2dca88c530)" x="1848.7742257742239" y="205.8489010988999" test_time="0" test_result="true" id="cca761ab-b52d-43e8-a753-b4c458aea4db" />
                      </par>
                </seq>
          </seq>
