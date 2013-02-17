@@ -6,6 +6,8 @@ import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
 
+import document.Parameters;
+
 import terminal.lineprocessors.LineProcessor;
 
 public class RosPipe {
@@ -53,13 +55,13 @@ public class RosPipe {
 	private void printArgArray(List<String> args) {
 		String result = "Arg: ";
 		for (String string : args) {
-			result = result + string + "!";
+			result = result + string + " ! ";
 		}
 
 		System.err.println(result);
 	}
 
-	private void receive(RosTargets target, LineProcessor processor)
+	private void receive(RosTargets target, String streamid, LineProcessor processor )
 			throws IOException {
 
 		if (this.process == null) {
@@ -80,6 +82,8 @@ public class RosPipe {
 				if (this.thread.isInterrupted()) {
 					return;
 				}
+				if(Parameters.log_print_ros_output)
+					System.out.println("new line from ros stream ("+streamid+") "+convertRosEnumToString(target)+": "+line);
 				processor.onNewLine(line);
 			}
 		} catch (IOException e) {
@@ -92,7 +96,7 @@ public class RosPipe {
 		}
 	}
 
-	private void send(RosTargets target, String... args) throws IOException {
+	private void send(RosTargets target, String stream_id, String... args) throws IOException {
 		String roscommand = convertRosEnumToString(target);
 
 		@SuppressWarnings("unused")
@@ -111,7 +115,11 @@ public class RosPipe {
 			if (args[i].trim().equals("") == false)
 				arg_list.add(args[i]);
 		}
-		printArgArray(arg_list);
+		
+		if(Parameters.log_print_ros_commands){
+			System.out.print("Ros command ("+stream_id+") ");
+			printArgArray(arg_list);
+		}
 		ProcessBuilder pb = new ProcessBuilder(arg_list);
 
 		try {
@@ -129,19 +137,27 @@ public class RosPipe {
 		sendAndReceive(this.target, this.processor, this.args);
 	}
 
+	static long stream_id_counter=0;
 	private void sendAndReceive(RosTargets target, LineProcessor processor,
 			String... args) throws IOException {
+		
+		stream_id_counter++;
+		Long sid = new Long(stream_id_counter);
 
 		if (this.thread.isInterrupted()) {
 			return;
 		}
-		send(target, args);
+		if(Parameters.log_ros_progress_print_level > 1)
+			System.out.println("   send message to ros.");
+		send(target, sid.toString(), args);
 
 		if (this.thread.isInterrupted()) {
 			return;
 		}
 
-		receive(target, processor);
+		if(Parameters.log_ros_progress_print_level > 1)
+			System.out.println("   listen output stream from ros.");
+		receive(target, sid.toString(), processor);
 
 	}
 

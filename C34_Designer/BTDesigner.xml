@@ -1,14 +1,20 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <parameters>
-<enableLinkConnection value="true"/>
+<log_print_ros_output value="true"/>
 <path_to_images value="./images"/>
 <path_to_lookup value="./plans/lookup.xml"/>
+<test_result value="true"/>
+<log_ros_progress_print_level value="10"/>
+<path_to_address value="./plans/TaskList.xml"/>
+<path_to_plans_on_executer value="plans/{FILENAME}"/>
+<path_to_undo value="./.undo"/>
+<enableLinkConnection value="true"/>
 <executer_service value="/executer"/>
+<log_print_ros_commands value="true"/>
+<log_preview_lines_limit value="500"/>
 <path_to_plans value="./plans"/>
 <enableTaskIdRegeneration value="false"/>
-<test_result value="true"/>
-<path_to_address value="./plans/TaskList.xml"/>
-<path_to_plans_on_executer value="{LOCALPATH}"/>
-<path_to_description value="./plans/TaskDescriptions.xml"/>
+<log_print_running_tasks_id value="true"/>
 <test_time value="0"/>
+<path_to_description value="./plans/TaskDescriptions.xml"/>
 </parameters>

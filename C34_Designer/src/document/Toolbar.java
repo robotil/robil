@@ -163,7 +163,7 @@ public class Toolbar extends JPanel {
 		btn = new JButton();
 		btn.setToolTipText("Play");
 		btn.setIcon(new ImageIcon(getClass().getClassLoader().getResource("icons/play.png")));
-		btn.setActionCommand("run_run_plan");
+		btn.setActionCommand("run_runresume_plan");
 		btn.addActionListener(new RunAction(designer));
 		buttons.add(btn);
 		
