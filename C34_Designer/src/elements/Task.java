@@ -591,6 +591,7 @@ public class Task extends GElement implements View.ChangesListener {
 	@Override
 	public void modify() {
 		ModifyDialog dlg = new ModifyDialog();
+		dlg.setAlwaysOnTop(true);
 		dlg.setVisible(true);
 		onViewChange();
 	}

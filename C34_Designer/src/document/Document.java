@@ -34,6 +34,7 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
+import document.actions.Dialogs;
 import document.description.TaskDescription;
 import document.history.HistoryManager;
 import document.history.HistoryManagerNotReadyException;
@@ -268,6 +269,7 @@ public class Document extends JPanel {
 	public View view = new View();
 	public TaskDescription task_description = null;
 	private boolean _documentChanged = false;
+	private boolean _shouldBeSavedAs = false;
 	private double lastX = 0;
 	private double lastY = 0;
 	private String _taskDescriptionFilename;
@@ -283,6 +285,10 @@ public class Document extends JPanel {
 
 	private Map<String, GElement> loadedElements = new HashMap<String, GElement>();
 
+	/**
+	 * Creates new empty, unsaved document
+	 * @param mw Parent BTDesginer window
+	 */
 	public Document(BTDesigner mw) {
 
 		this.absoluteFilePath = new File(Parameters.path_to_plans, getTempFileName()).getAbsolutePath();
@@ -300,8 +306,15 @@ public class Document extends JPanel {
 		} catch (HistoryManagerNotReadyException e) {
 			e.printStackTrace();
 		}
+		
+		_shouldBeSavedAs = true;
 	}
 	
+	/**
+	 * Load specified document
+	 * @param mw Parent BTDesginer window
+	 * @param fileName Plan to load
+	 */
 	public Document(BTDesigner mw, String fileName) {
 		try {
 			this.absoluteFilePath = new File(fileName).getCanonicalFile().getAbsolutePath();
@@ -325,6 +338,7 @@ public class Document extends JPanel {
 			e.printStackTrace();
 		}
 		
+		_shouldBeSavedAs = false;
 	}
 
 	
@@ -428,6 +442,24 @@ public class Document extends JPanel {
 
 	public void compile() {
 		compile(getCurrentWorkingFile(), true, true);
+	}
+	
+	public void save() {
+		String fileName = getCurrentWorkingFile();
+		
+		if (_shouldBeSavedAs) {
+			fileName = Dialogs.saveFile("Save XML", "xml", getShortFilePath().replace("*", ""), Parameters.path_to_plans);
+			if (!fileName.equals("")) {
+				fileName = getCurrentWorkingFile();
+				_shouldBeSavedAs = false;
+			}
+		}
+			
+		compile(fileName, true, true);
+	}
+	
+	public void save(String fileName) {
+		compile(fileName, true, true);
 	}
 
 	public boolean compile(String destination, boolean updateCurrentWorkingFile, boolean createJustNamesXml) {
@@ -1235,7 +1267,7 @@ public class Document extends JPanel {
 
 	private String parsePlanPath(String pattern) {
 
-		String planFileName = new File(getCurrentWorkingFile()).getName();
+		String planFileName = new File(getAbsoluteFilePath()).getName();
 		planFileName = planFileName.replaceAll("\\.[^\\.]+$", "");
 		return pattern.replace("{PLANFILENAME}", planFileName);
 	}
@@ -1550,7 +1582,7 @@ public class Document extends JPanel {
 					this.mainWindow, "Document '" + getShortFilePath().replace("*", "") + 
 					"' has unsaved changes, save document before close?",
 					"Document has unsaved changes",
-					JOptionPane.YES_NO_CANCEL_OPTION);
+					JOptionPane.YES_NO_CANCEL_OPTION, JOptionPane.QUESTION_MESSAGE);
 
 			switch (dialogResult) {
 			case JOptionPane.YES_OPTION:
