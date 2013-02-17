@@ -16,8 +16,7 @@ public class Utils {
 		return getMatchedInstances(txt, regex, 4, 1);
 	}
 
-	public static ArrayList<String> getMatchedInstances(String txt,
-			String regex, int beginIndex, int endIndex) {
+	public static ArrayList<String> getMatchedInstances(String txt,String regex, int beginIndex, int endIndex) {
 		ArrayList<String> ids = new ArrayList<String>();
 
 		Pattern pattern = Pattern.compile(regex);

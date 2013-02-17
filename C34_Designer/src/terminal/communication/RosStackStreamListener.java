@@ -35,8 +35,7 @@ public class RosStackStreamListener implements Runnable {
 				}
 
 				doc.cleanRunning();
-				doc.setRunning(Utils.getMatchedInstances(this.buffer,
-						Utils.componentIdRegex));
+				doc.setRunning(Utils.getMatchedInstances(this.buffer,Utils.componentIdRegex));
 
 				this.buffer = "";
 				return;
