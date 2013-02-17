@@ -11,6 +11,7 @@
   <depend package="roslib"/>
   <depend package="roscpp"/>
   <depend package="C22_GroundRecognitionAndMapping"/>
+  <depend package="C23_ObjectRecognition"/>
   <depend package="C0_RobilTask"/>
 
 </package>

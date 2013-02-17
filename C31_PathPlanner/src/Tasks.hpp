@@ -73,7 +73,7 @@ public:
 			GPSPath gpspath;
 			for(size_t i=0;i<session.results.path.size();i++){
 				const Vec2d& wp = session.results.path[i];
-				gpspath.push_back(_planner.cast(wp));
+				gpspath.push_back(planner.cast(wp));
 			}
 			//TODO: fill message by planner results
 		}
