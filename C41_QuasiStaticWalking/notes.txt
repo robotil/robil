@@ -1,5 +1,10 @@
-C41 – FootPlacement
-C0C42_DES – Destination Coordinate
-C42C0_DS: Destination Success [0 1]
-C25C42_RBPOS: robot global position.
-C22C42_RBMAP: ground position and surface shape.
+C41 – QuasiStaticWalking:
+-------------------------------------------
+Prerequisites:
+1) Center of Mass must be lowered before running. Let the robot descend after launching the module.
+2) /C31_GlobalPathPlanner/getPath must be running
+
+To run:
+2) Launch:
+roslaunch C41_QuasiStaticWalking C41_QuasiStaticWalking.launch
+2) Call action QuasiStaticWalking with no parameters.

@@ -32,10 +32,10 @@ CMAKE_COMMAND = /usr/bin/cmake
 RM = /usr/bin/cmake -E remove -f
 
 # The top-level source directory on which CMake was run.
-CMAKE_SOURCE_DIR = /home/lar2/Desktop/rosworkspace/c21_Vision_and_Lidar
+CMAKE_SOURCE_DIR = /home/lar1/Desktop/robilworkspace/C21_VisionAndLidar
 
 # The top-level build directory on which CMake was run.
-CMAKE_BINARY_DIR = /home/lar2/Desktop/rosworkspace/c21_Vision_and_Lidar
+CMAKE_BINARY_DIR = /home/lar1/Desktop/robilworkspace/C21_VisionAndLidar
 
 # Utility rule file for ROSBUILD_gensrv_lisp.
 
@@ -45,25 +45,32 @@ include CMakeFiles/ROSBUILD_gensrv_lisp.dir/progress.make
 CMakeFiles/ROSBUILD_gensrv_lisp: srv_gen/lisp/C21.lisp
 CMakeFiles/ROSBUILD_gensrv_lisp: srv_gen/lisp/_package.lisp
 CMakeFiles/ROSBUILD_gensrv_lisp: srv_gen/lisp/_package_C21.lisp
+CMakeFiles/ROSBUILD_gensrv_lisp: srv_gen/lisp/C21_Pan.lisp
+CMakeFiles/ROSBUILD_gensrv_lisp: srv_gen/lisp/_package.lisp
+CMakeFiles/ROSBUILD_gensrv_lisp: srv_gen/lisp/_package_C21_Pan.lisp
+CMakeFiles/ROSBUILD_gensrv_lisp: srv_gen/lisp/C21_Pic.lisp
+CMakeFiles/ROSBUILD_gensrv_lisp: srv_gen/lisp/_package.lisp
+CMakeFiles/ROSBUILD_gensrv_lisp: srv_gen/lisp/_package_C21_Pic.lisp
 
 srv_gen/lisp/C21.lisp: srv/C21.srv
 srv_gen/lisp/C21.lisp: /opt/ros/fuerte/share/roslisp/rosbuild/scripts/genmsg_lisp.py
 srv_gen/lisp/C21.lisp: /opt/ros/fuerte/share/roslib/bin/gendeps
-srv_gen/lisp/C21.lisp: msg/C21C0_3DF.msg
-srv_gen/lisp/C21.lisp: /opt/ros/fuerte/share/sensor_msgs/msg/PointCloud2.msg
-srv_gen/lisp/C21.lisp: msg/C0C21_AZI.msg
-srv_gen/lisp/C21.lisp: /opt/ros/fuerte/share/std_msgs/msg/Header.msg
-srv_gen/lisp/C21.lisp: msg/C0C21_LAZ.msg
-srv_gen/lisp/C21.lisp: msg/C0C21_SIZ.msg
-srv_gen/lisp/C21.lisp: /opt/ros/fuerte/share/sensor_msgs/msg/PointField.msg
-srv_gen/lisp/C21.lisp: msg/C21C0_3DR.msg
-srv_gen/lisp/C21.lisp: msg/C0C21_CAM.msg
 srv_gen/lisp/C21.lisp: msg/C0C21_RES.msg
+srv_gen/lisp/C21.lisp: msg/C21C0_3DR.msg
+srv_gen/lisp/C21.lisp: msg/C0C21_LAZ.msg
+srv_gen/lisp/C21.lisp: /opt/ros/fuerte/share/std_msgs/msg/Header.msg
+srv_gen/lisp/C21.lisp: msg/C0C21_AZI.msg
+srv_gen/lisp/C21.lisp: msg/C21C0_3DF.msg
+srv_gen/lisp/C21.lisp: /opt/ros/fuerte/share/sensor_msgs/msg/PointField.msg
+srv_gen/lisp/C21.lisp: msg/C0C21_CAM.msg
+srv_gen/lisp/C21.lisp: msg/C0C21_SIZ.msg
+srv_gen/lisp/C21.lisp: /opt/ros/fuerte/share/sensor_msgs/msg/PointCloud2.msg
 srv_gen/lisp/C21.lisp: manifest.xml
 srv_gen/lisp/C21.lisp: /opt/ros/fuerte/share/roslang/manifest.xml
 srv_gen/lisp/C21.lisp: /opt/ros/fuerte/share/roscpp/manifest.xml
 srv_gen/lisp/C21.lisp: /opt/ros/fuerte/share/std_msgs/manifest.xml
 srv_gen/lisp/C21.lisp: /opt/ros/fuerte/share/geometry_msgs/manifest.xml
+srv_gen/lisp/C21.lisp: /opt/ros/fuerte/share/nav_msgs/manifest.xml
 srv_gen/lisp/C21.lisp: /opt/ros/fuerte/share/sensor_msgs/manifest.xml
 srv_gen/lisp/C21.lisp: /opt/ros/fuerte/share/rospy/manifest.xml
 srv_gen/lisp/C21.lisp: /opt/ros/fuerte/stacks/vision_opencv/opencv2/manifest.xml
@@ -96,18 +103,128 @@ srv_gen/lisp/C21.lisp: /opt/ros/fuerte/stacks/dynamic_reconfigure/msg_gen/genera
 srv_gen/lisp/C21.lisp: /opt/ros/fuerte/stacks/dynamic_reconfigure/srv_gen/generated
 srv_gen/lisp/C21.lisp: /opt/ros/fuerte/stacks/geometry/tf/msg_gen/generated
 srv_gen/lisp/C21.lisp: /opt/ros/fuerte/stacks/geometry/tf/srv_gen/generated
-	$(CMAKE_COMMAND) -E cmake_progress_report /home/lar2/Desktop/rosworkspace/c21_Vision_and_Lidar/CMakeFiles $(CMAKE_PROGRESS_1)
+	$(CMAKE_COMMAND) -E cmake_progress_report /home/lar1/Desktop/robilworkspace/C21_VisionAndLidar/CMakeFiles $(CMAKE_PROGRESS_1)
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --blue --bold "Generating srv_gen/lisp/C21.lisp, srv_gen/lisp/_package.lisp, srv_gen/lisp/_package_C21.lisp"
-	/opt/ros/fuerte/share/roslisp/rosbuild/scripts/genmsg_lisp.py /home/lar2/Desktop/rosworkspace/c21_Vision_and_Lidar/srv/C21.srv
+	/opt/ros/fuerte/share/roslisp/rosbuild/scripts/genmsg_lisp.py /home/lar1/Desktop/robilworkspace/C21_VisionAndLidar/srv/C21.srv
 
 srv_gen/lisp/_package.lisp: srv_gen/lisp/C21.lisp
 
 srv_gen/lisp/_package_C21.lisp: srv_gen/lisp/C21.lisp
 
+srv_gen/lisp/C21_Pan.lisp: srv/C21_Pan.srv
+srv_gen/lisp/C21_Pan.lisp: /opt/ros/fuerte/share/roslisp/rosbuild/scripts/genmsg_lisp.py
+srv_gen/lisp/C21_Pan.lisp: /opt/ros/fuerte/share/roslib/bin/gendeps
+srv_gen/lisp/C21_Pan.lisp: /opt/ros/fuerte/share/sensor_msgs/msg/Image.msg
+srv_gen/lisp/C21_Pan.lisp: msg/C21_PANORAMA.msg
+srv_gen/lisp/C21_Pan.lisp: /opt/ros/fuerte/share/std_msgs/msg/Header.msg
+srv_gen/lisp/C21_Pan.lisp: manifest.xml
+srv_gen/lisp/C21_Pan.lisp: /opt/ros/fuerte/share/roslang/manifest.xml
+srv_gen/lisp/C21_Pan.lisp: /opt/ros/fuerte/share/roscpp/manifest.xml
+srv_gen/lisp/C21_Pan.lisp: /opt/ros/fuerte/share/std_msgs/manifest.xml
+srv_gen/lisp/C21_Pan.lisp: /opt/ros/fuerte/share/geometry_msgs/manifest.xml
+srv_gen/lisp/C21_Pan.lisp: /opt/ros/fuerte/share/nav_msgs/manifest.xml
+srv_gen/lisp/C21_Pan.lisp: /opt/ros/fuerte/share/sensor_msgs/manifest.xml
+srv_gen/lisp/C21_Pan.lisp: /opt/ros/fuerte/share/rospy/manifest.xml
+srv_gen/lisp/C21_Pan.lisp: /opt/ros/fuerte/stacks/vision_opencv/opencv2/manifest.xml
+srv_gen/lisp/C21_Pan.lisp: /opt/ros/fuerte/stacks/vision_opencv/cv_bridge/manifest.xml
+srv_gen/lisp/C21_Pan.lisp: /opt/ros/fuerte/share/ros/core/rosbuild/manifest.xml
+srv_gen/lisp/C21_Pan.lisp: /opt/ros/fuerte/share/roslib/manifest.xml
+srv_gen/lisp/C21_Pan.lisp: /opt/ros/fuerte/share/rosconsole/manifest.xml
+srv_gen/lisp/C21_Pan.lisp: /opt/ros/fuerte/stacks/pluginlib/manifest.xml
+srv_gen/lisp/C21_Pan.lisp: /opt/ros/fuerte/share/message_filters/manifest.xml
+srv_gen/lisp/C21_Pan.lisp: /opt/ros/fuerte/stacks/image_common/image_transport/manifest.xml
+srv_gen/lisp/C21_Pan.lisp: /opt/ros/fuerte/share/rosbag/manifest.xml
+srv_gen/lisp/C21_Pan.lisp: /opt/ros/fuerte/stacks/bond_core/bond/manifest.xml
+srv_gen/lisp/C21_Pan.lisp: /opt/ros/fuerte/stacks/bond_core/smclib/manifest.xml
+srv_gen/lisp/C21_Pan.lisp: /opt/ros/fuerte/stacks/bond_core/bondcpp/manifest.xml
+srv_gen/lisp/C21_Pan.lisp: /opt/ros/fuerte/stacks/nodelet_core/nodelet/manifest.xml
+srv_gen/lisp/C21_Pan.lisp: /opt/ros/fuerte/share/rosservice/manifest.xml
+srv_gen/lisp/C21_Pan.lisp: /opt/ros/fuerte/stacks/dynamic_reconfigure/manifest.xml
+srv_gen/lisp/C21_Pan.lisp: /opt/ros/fuerte/stacks/nodelet_core/nodelet_topic_tools/manifest.xml
+srv_gen/lisp/C21_Pan.lisp: /opt/ros/fuerte/stacks/bullet/manifest.xml
+srv_gen/lisp/C21_Pan.lisp: /opt/ros/fuerte/stacks/geometry/angles/manifest.xml
+srv_gen/lisp/C21_Pan.lisp: /opt/ros/fuerte/share/rostest/manifest.xml
+srv_gen/lisp/C21_Pan.lisp: /opt/ros/fuerte/share/roswtf/manifest.xml
+srv_gen/lisp/C21_Pan.lisp: /opt/ros/fuerte/stacks/geometry/tf/manifest.xml
+srv_gen/lisp/C21_Pan.lisp: /opt/ros/fuerte/stacks/common_rosdeps/manifest.xml
+srv_gen/lisp/C21_Pan.lisp: /opt/ros/fuerte/stacks/perception_pcl/pcl_ros/manifest.xml
+srv_gen/lisp/C21_Pan.lisp: /opt/ros/fuerte/share/pcl/manifest.xml
+srv_gen/lisp/C21_Pan.lisp: /opt/ros/fuerte/stacks/bond_core/bond/msg_gen/generated
+srv_gen/lisp/C21_Pan.lisp: /opt/ros/fuerte/stacks/nodelet_core/nodelet/srv_gen/generated
+srv_gen/lisp/C21_Pan.lisp: /opt/ros/fuerte/stacks/dynamic_reconfigure/msg_gen/generated
+srv_gen/lisp/C21_Pan.lisp: /opt/ros/fuerte/stacks/dynamic_reconfigure/srv_gen/generated
+srv_gen/lisp/C21_Pan.lisp: /opt/ros/fuerte/stacks/geometry/tf/msg_gen/generated
+srv_gen/lisp/C21_Pan.lisp: /opt/ros/fuerte/stacks/geometry/tf/srv_gen/generated
+	$(CMAKE_COMMAND) -E cmake_progress_report /home/lar1/Desktop/robilworkspace/C21_VisionAndLidar/CMakeFiles $(CMAKE_PROGRESS_2)
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --blue --bold "Generating srv_gen/lisp/C21_Pan.lisp, srv_gen/lisp/_package.lisp, srv_gen/lisp/_package_C21_Pan.lisp"
+	/opt/ros/fuerte/share/roslisp/rosbuild/scripts/genmsg_lisp.py /home/lar1/Desktop/robilworkspace/C21_VisionAndLidar/srv/C21_Pan.srv
+
+srv_gen/lisp/_package.lisp: srv_gen/lisp/C21_Pan.lisp
+
+srv_gen/lisp/_package_C21_Pan.lisp: srv_gen/lisp/C21_Pan.lisp
+
+srv_gen/lisp/C21_Pic.lisp: srv/C21_Pic.srv
+srv_gen/lisp/C21_Pic.lisp: /opt/ros/fuerte/share/roslisp/rosbuild/scripts/genmsg_lisp.py
+srv_gen/lisp/C21_Pic.lisp: /opt/ros/fuerte/share/roslib/bin/gendeps
+srv_gen/lisp/C21_Pic.lisp: /opt/ros/fuerte/share/sensor_msgs/msg/Image.msg
+srv_gen/lisp/C21_Pic.lisp: /opt/ros/fuerte/share/std_msgs/msg/Header.msg
+srv_gen/lisp/C21_Pic.lisp: msg/C21_PICTURE.msg
+srv_gen/lisp/C21_Pic.lisp: manifest.xml
+srv_gen/lisp/C21_Pic.lisp: /opt/ros/fuerte/share/roslang/manifest.xml
+srv_gen/lisp/C21_Pic.lisp: /opt/ros/fuerte/share/roscpp/manifest.xml
+srv_gen/lisp/C21_Pic.lisp: /opt/ros/fuerte/share/std_msgs/manifest.xml
+srv_gen/lisp/C21_Pic.lisp: /opt/ros/fuerte/share/geometry_msgs/manifest.xml
+srv_gen/lisp/C21_Pic.lisp: /opt/ros/fuerte/share/nav_msgs/manifest.xml
+srv_gen/lisp/C21_Pic.lisp: /opt/ros/fuerte/share/sensor_msgs/manifest.xml
+srv_gen/lisp/C21_Pic.lisp: /opt/ros/fuerte/share/rospy/manifest.xml
+srv_gen/lisp/C21_Pic.lisp: /opt/ros/fuerte/stacks/vision_opencv/opencv2/manifest.xml
+srv_gen/lisp/C21_Pic.lisp: /opt/ros/fuerte/stacks/vision_opencv/cv_bridge/manifest.xml
+srv_gen/lisp/C21_Pic.lisp: /opt/ros/fuerte/share/ros/core/rosbuild/manifest.xml
+srv_gen/lisp/C21_Pic.lisp: /opt/ros/fuerte/share/roslib/manifest.xml
+srv_gen/lisp/C21_Pic.lisp: /opt/ros/fuerte/share/rosconsole/manifest.xml
+srv_gen/lisp/C21_Pic.lisp: /opt/ros/fuerte/stacks/pluginlib/manifest.xml
+srv_gen/lisp/C21_Pic.lisp: /opt/ros/fuerte/share/message_filters/manifest.xml
+srv_gen/lisp/C21_Pic.lisp: /opt/ros/fuerte/stacks/image_common/image_transport/manifest.xml
+srv_gen/lisp/C21_Pic.lisp: /opt/ros/fuerte/share/rosbag/manifest.xml
+srv_gen/lisp/C21_Pic.lisp: /opt/ros/fuerte/stacks/bond_core/bond/manifest.xml
+srv_gen/lisp/C21_Pic.lisp: /opt/ros/fuerte/stacks/bond_core/smclib/manifest.xml
+srv_gen/lisp/C21_Pic.lisp: /opt/ros/fuerte/stacks/bond_core/bondcpp/manifest.xml
+srv_gen/lisp/C21_Pic.lisp: /opt/ros/fuerte/stacks/nodelet_core/nodelet/manifest.xml
+srv_gen/lisp/C21_Pic.lisp: /opt/ros/fuerte/share/rosservice/manifest.xml
+srv_gen/lisp/C21_Pic.lisp: /opt/ros/fuerte/stacks/dynamic_reconfigure/manifest.xml
+srv_gen/lisp/C21_Pic.lisp: /opt/ros/fuerte/stacks/nodelet_core/nodelet_topic_tools/manifest.xml
+srv_gen/lisp/C21_Pic.lisp: /opt/ros/fuerte/stacks/bullet/manifest.xml
+srv_gen/lisp/C21_Pic.lisp: /opt/ros/fuerte/stacks/geometry/angles/manifest.xml
+srv_gen/lisp/C21_Pic.lisp: /opt/ros/fuerte/share/rostest/manifest.xml
+srv_gen/lisp/C21_Pic.lisp: /opt/ros/fuerte/share/roswtf/manifest.xml
+srv_gen/lisp/C21_Pic.lisp: /opt/ros/fuerte/stacks/geometry/tf/manifest.xml
+srv_gen/lisp/C21_Pic.lisp: /opt/ros/fuerte/stacks/common_rosdeps/manifest.xml
+srv_gen/lisp/C21_Pic.lisp: /opt/ros/fuerte/stacks/perception_pcl/pcl_ros/manifest.xml
+srv_gen/lisp/C21_Pic.lisp: /opt/ros/fuerte/share/pcl/manifest.xml
+srv_gen/lisp/C21_Pic.lisp: /opt/ros/fuerte/stacks/bond_core/bond/msg_gen/generated
+srv_gen/lisp/C21_Pic.lisp: /opt/ros/fuerte/stacks/nodelet_core/nodelet/srv_gen/generated
+srv_gen/lisp/C21_Pic.lisp: /opt/ros/fuerte/stacks/dynamic_reconfigure/msg_gen/generated
+srv_gen/lisp/C21_Pic.lisp: /opt/ros/fuerte/stacks/dynamic_reconfigure/srv_gen/generated
+srv_gen/lisp/C21_Pic.lisp: /opt/ros/fuerte/stacks/geometry/tf/msg_gen/generated
+srv_gen/lisp/C21_Pic.lisp: /opt/ros/fuerte/stacks/geometry/tf/srv_gen/generated
+	$(CMAKE_COMMAND) -E cmake_progress_report /home/lar1/Desktop/robilworkspace/C21_VisionAndLidar/CMakeFiles $(CMAKE_PROGRESS_3)
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --blue --bold "Generating srv_gen/lisp/C21_Pic.lisp, srv_gen/lisp/_package.lisp, srv_gen/lisp/_package_C21_Pic.lisp"
+	/opt/ros/fuerte/share/roslisp/rosbuild/scripts/genmsg_lisp.py /home/lar1/Desktop/robilworkspace/C21_VisionAndLidar/srv/C21_Pic.srv
+
+srv_gen/lisp/_package.lisp: srv_gen/lisp/C21_Pic.lisp
+
+srv_gen/lisp/_package_C21_Pic.lisp: srv_gen/lisp/C21_Pic.lisp
+
 ROSBUILD_gensrv_lisp: CMakeFiles/ROSBUILD_gensrv_lisp
 ROSBUILD_gensrv_lisp: srv_gen/lisp/C21.lisp
 ROSBUILD_gensrv_lisp: srv_gen/lisp/_package.lisp
 ROSBUILD_gensrv_lisp: srv_gen/lisp/_package_C21.lisp
+ROSBUILD_gensrv_lisp: srv_gen/lisp/C21_Pan.lisp
+ROSBUILD_gensrv_lisp: srv_gen/lisp/_package.lisp
+ROSBUILD_gensrv_lisp: srv_gen/lisp/_package_C21_Pan.lisp
+ROSBUILD_gensrv_lisp: srv_gen/lisp/C21_Pic.lisp
+ROSBUILD_gensrv_lisp: srv_gen/lisp/_package.lisp
+ROSBUILD_gensrv_lisp: srv_gen/lisp/_package_C21_Pic.lisp
 ROSBUILD_gensrv_lisp: CMakeFiles/ROSBUILD_gensrv_lisp.dir/build.make
 .PHONY : ROSBUILD_gensrv_lisp
 
@@ -120,6 +237,6 @@ CMakeFiles/ROSBUILD_gensrv_lisp.dir/clean:
 .PHONY : CMakeFiles/ROSBUILD_gensrv_lisp.dir/clean
 
 CMakeFiles/ROSBUILD_gensrv_lisp.dir/depend:
-	cd /home/lar2/Desktop/rosworkspace/c21_Vision_and_Lidar && $(CMAKE_COMMAND) -E cmake_depends "Unix Makefiles" /home/lar2/Desktop/rosworkspace/c21_Vision_and_Lidar /home/lar2/Desktop/rosworkspace/c21_Vision_and_Lidar /home/lar2/Desktop/rosworkspace/c21_Vision_and_Lidar /home/lar2/Desktop/rosworkspace/c21_Vision_and_Lidar /home/lar2/Desktop/rosworkspace/c21_Vision_and_Lidar/CMakeFiles/ROSBUILD_gensrv_lisp.dir/DependInfo.cmake --color=$(COLOR)
+	cd /home/lar1/Desktop/robilworkspace/C21_VisionAndLidar && $(CMAKE_COMMAND) -E cmake_depends "Unix Makefiles" /home/lar1/Desktop/robilworkspace/C21_VisionAndLidar /home/lar1/Desktop/robilworkspace/C21_VisionAndLidar /home/lar1/Desktop/robilworkspace/C21_VisionAndLidar /home/lar1/Desktop/robilworkspace/C21_VisionAndLidar /home/lar1/Desktop/robilworkspace/C21_VisionAndLidar/CMakeFiles/ROSBUILD_gensrv_lisp.dir/DependInfo.cmake --color=$(COLOR)
 .PHONY : CMakeFiles/ROSBUILD_gensrv_lisp.dir/depend
 

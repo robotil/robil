@@ -11,6 +11,7 @@
 #include "MPlane.h"
 #include "MapMatrix.h"
 #include "C22_GroundRecognitionAndMapping/C22.h"
+#include <C21_VisionAndLidar/C21_C22.h>
 #include "sensor_msgs/PointCloud.h"
 #include <pcl/correspondence.h>
 #include <pcl/point_cloud.h>
@@ -26,14 +27,26 @@
 #include <iostream>
 #include <boost/thread/thread.hpp>
 #include <pcl/sample_consensus/sac_model_plane.h>
+#include "nav_msgs/Odometry.h"
+#include <message_filters/subscriber.h>
+#include <message_filters/synchronizer.h>
+#include <message_filters/time_synchronizer.h>
+#include <message_filters/sync_policies/approximate_time.h>
 class C22_Node{
 private:
   ros::NodeHandle nh_;
-  ros::Subscriber pointCloud_sub;
+  typedef message_filters::sync_policies::ApproximateTime<
+		  C21_VisionAndLidar::C21_C22, nav_msgs::Odometry
+    > MySyncPolicy;
+  message_filters::Subscriber<C21_VisionAndLidar::C21_C22> pointCloud_sub;
+  message_filters::Subscriber<nav_msgs::Odometry> pos_sub;
+    message_filters::Synchronizer< MySyncPolicy > sync;
   ros::ServiceServer service;
   ros::ServiceServer service2;
   MapMatrix * _myMatrix;
   std::vector<pclPlane*>* _myPlanes;
+  boost::shared_ptr<pcl::visualization::PCLVisualizer> viewer;
+  geometry_msgs::Point robotPos;
 public:
 
 	/**
@@ -61,6 +74,5 @@ public:
 	   * @param left_msg ROS mesage with image data from the left camera topic
 	   * @param right_msg ROS mesage with image data from the right camera topic
 	   */
-	  void callback(const sensor_msgs::PointCloud2& pclMsg);
-
+	  void callback(const C21_VisionAndLidar::C21_C22::ConstPtr& pclMsg,const nav_msgs::Odometry::ConstPtr& pos_msg);
 };

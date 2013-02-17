@@ -66,17 +66,17 @@
         <effects/>
         <algorithm>C45 - need to sync with C46 requirements for mounting on the vehicle</algorithm>
     </task>
-    <task name="WayPointsDriving">
-        <conditions/>
-        <constraints/>
-        <effects/>
-        <algorithm>C51 - way point driver, asks path from C31 and drives according to it</algorithm>
-    </task>
     <task name="PathPlanning">
         <conditions/>
         <constraints/>
         <effects/>
         <algorithm>C31 calculates paths on occupancy grids, fails when it's no longer possible to do so</algorithm>
+    </task>
+    <task name="WayPointsDriving">
+        <conditions/>
+        <constraints/>
+        <effects/>
+        <algorithm>C51 - way point driver, asks path from C31 and drives according to it</algorithm>
     </task>
     <task name="PlaceFeetOnPedals">
         <conditions/>

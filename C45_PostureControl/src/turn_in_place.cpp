@@ -52,17 +52,20 @@ public:
 		/*actionlib::SimpleClientGoalState state1 = ac.getState();
 		ROS_INFO("Status: %s", state1.toString().c_str());*/
 		ac.cancelAllGoals();
+		ros::Time t1 = ros::Time::now();
 		ac.sendGoal(goal_to_maintain/*, boost::bind(&turn_in_place::doneCB, this, _1, _2),
 				boost::bind(&turn_in_place::activeCB, this), boost::bind(&turn_in_place::feedbackCB, this, _1)*/);
 		ROS_INFO("Goal sent");
-		ros::Duration(1.0).sleep();
-		if(ac.waitForResult(ros::Duration(5.0))){
+		//ros::Duration(1.0).sleep();
+		if(ac.waitForResult(ros::Duration(3.0))){
 			ROS_INFO("Finished in 5 seconds");
 		}else{
 			ros::Duration(3.0).sleep(); //
 			ROS_INFO("Did not finish");
 		}
+		ros::Duration end = ros::Time::now() - t1;
 
+		ROS_INFO("Time took for goal: %d", end.sec);
 		actionlib::SimpleClientGoalState state = ac.getState();
 		if(state == actionlib::SimpleClientGoalState::ACTIVE){
 			ROS_INFO("Goal canceled Status: %s", state.toString().c_str());
@@ -78,22 +81,20 @@ public:
 
 		param = "direction=0";
 		goal_to_maintain2.parameters = param;
+		t1 = ros::Time::now();
 		ac.sendGoal(goal_to_maintain2);
 		ROS_INFO("Goal sent");
 
 		ros::Duration(1.0).sleep();
-		if(ac.waitForResult(ros::Duration(5.0))){
+		if(ac.waitForResult(ros::Duration(3.0))){
 			ROS_INFO("Finished in 5 seconds");
 		}else{
 			ros::Duration(3.0).sleep(); //
 			ROS_INFO("Did not finish");
 		}
-		if(ac.waitForResult(ros::Duration(5.0))){
-			ROS_INFO("Finished in 5 seconds");
-		}else{
-			ros::Duration(3.0).sleep(); //
-			ROS_INFO("Did not finish");
-		}
+		end = ros::Time::now() - t1;
+
+		ROS_INFO("Time took for goal: %d", end.sec);
 		state = ac.getState();
 		if(state == actionlib::SimpleClientGoalState::ACTIVE){
 			ROS_INFO("Goal canceled. Status: %s", state.toString().c_str());
@@ -107,16 +108,20 @@ public:
 
 		param = "direction=1";
 		goal_to_maintain2.parameters = param;
+		t1 = ros::Time::now();
 		ac.sendGoal(goal_to_maintain2);
 		ROS_INFO("Goal sent");
 
 		ros::Duration(1.0).sleep();
-		if(ac.waitForResult(ros::Duration(5.0))){
+		if(ac.waitForResult(ros::Duration(3.0))){
 			ROS_INFO("Finished in 5 seconds");
 		}else{
 			ros::Duration(3.0).sleep(); //
 			ROS_INFO("Did not finish");
 		}
+		end = ros::Time::now() - t1;
+
+		ROS_INFO("Time took for goal: %d", end.sec);
 		state = ac.getState();
 		if(state == actionlib::SimpleClientGoalState::ACTIVE){
 			ROS_INFO("Goal canceled. Status: %s", state.toString().c_str());
@@ -130,16 +135,20 @@ public:
 
 		param = "direction=-1";
 		goal_to_maintain2.parameters = param;
+		t1 = ros::Time::now();
 		ac.sendGoal(goal_to_maintain2);
 		ROS_INFO("Goal sent");
 
 		ros::Duration(1.0).sleep();
-		if(ac.waitForResult(ros::Duration(5.0))){
+		if(ac.waitForResult(ros::Duration(3.0))){
 			ROS_INFO("Finished in 5 seconds");
 		}else{
 			ros::Duration(3.0).sleep(); //
 			ROS_INFO("Did not finish");
 		}
+		end = ros::Time::now() - t1;
+
+		ROS_INFO("Time took for goal: %d", end.sec);
 
 		state = ac.getState();
 		if(state == actionlib::SimpleClientGoalState::ACTIVE){
