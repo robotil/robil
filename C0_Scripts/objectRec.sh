@@ -26,3 +26,5 @@ echo $C23_PID  >> $PKILL
 
 rosservice call executer/run O /userhome/mhallak/git/robil/C34_Designer/plans/trackObject.xml
 rosservice call executer/resume O
+rosservice call executer/run S /userhome/mhallak/git/robil/C34_Designer/plans/searchObject.xml
+rosservice call executer/resume S
