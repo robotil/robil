@@ -1,76 +1,52 @@
 
 #include <actionlib/server/simple_action_server.h>
-#include <RobilTask/RobilTask.h>
-#include <RobilTask/RobilTaskAction.h>
+#include <C0_RobilTask/RobilTask.h>
+#include <C0_RobilTask/RobilTaskAction.h>
+#include <C0_RobilTask/StringOperations.h>
 
 using namespace std;
-using namespace RobilTask;
+using namespace C0_RobilTask;
 
-class TrackObjectServer{
-
-    typedef RobilTask::RobilTaskGoalConstPtr GOAL;
-    typedef RobilTask::RobilTaskFeedback FEEDBACK;
-    typedef RobilTask::RobilTaskResult RESULT;
-    typedef actionlib::SimpleActionServer<RobilTask::RobilTaskAction> Server;
-    
-protected:
-    ros::NodeHandle _node;
-    Server _server;
-    string _name;
-    FEEDBACK _feedback;
-    RESULT _result;
-
+class TrackObjectServer:public RobilTask{
+	C23_Node& myNode;
 public:
-    TrackObjectServer():
-        _server(_node, name, boost::bind(&SimpleTaskServer::task, this, _1), false),
-        _name("/TrackObject")
+    TrackObjectServer(C23_Node& nodeRef, string name ="/TrackObject"):
+        RobilTask(name), myNode(nodeRef)
     {
-        _server.start();
-        ROS_INFO("instance of TrackObjectServer started.");
+
     }
 
-    void task(const GOAL &goal){
-        int32_t success = PLAN;
-        string plan ="";
+    template<class A> castArg(const std::string& p){
+		A a; std::stringstream s(p); s>>a; return a;
+	}
+    TaskResult task(const string& name, const string& uid, Arguments& args){
         
         /* GET TASK PARAMETERS */
-        ROS_INFO("%s: Start: task name = %s", _name.c_str(), goal->name.c_str());
-        ROS_INFO("%s: Start: task id = %s", _name.c_str(), goal->uid.c_str());
-        ROS_INFO("%s: Start: task params = %s", _name.c_str(), goal->parameters.c_str());
+        // check if argument exitsts : args.find("arg_name")!=args.end()
+        // get argument : args["arg_name"]
+        // cast argument to int : castArg<int>(args["arg_name"]);
+        // cast argument to double : castArg<double>(args["arg_name"]);
         
         /* HERE PROCESS TASK PARAMETERS */
 
-        /* NUMBER OF ITERATIONS IN TASK LOOP */
-        for(int times =0; times < 100; times++){
-            if (_server.isPreemptRequested() || !ros::ok()){
-            
+        while(true){
+            if (isPreempt()){
+
                 /* HERE PROCESS PREEMPTION OR INTERAPT */
-            
-                ROS_INFO("%s: Preempted", _name.c_str());
-                _server.setPreempted();
-                success = FAULT;
-                break;
+
+            	return TaskResult::Preempted();
             }
             
             /* HERE PROCESS TASK */
+			
+			//return TaskResult(SUCCESS, "OK");
+			//return TaskResult(FAULT, "Unexpected ..... ");
 
             /* SLEEP BETWEEN LOOP ITERATIONS */
-            boost::this_thread::sleep(boost::posix_time::millisec(100));
+            sleep(1000);
         }
 
-        if(success)
-        {
-            _result.success = success;
-            ROS_INFO("%s: Succeeded", _name.c_str());
-            if(success == PLAN){
-                ROS_INFO("%s: New plan", _name.c_str());
-                _result.plan = plan;
-            }
-            _server.setSucceeded(_result);
-        }else{
-            ROS_INFO("%s: Aborted", _name.c_str());
-            _server.setAborted(_result);
-        }
+        return TaskResult::FAULT();
     }
 
 };
