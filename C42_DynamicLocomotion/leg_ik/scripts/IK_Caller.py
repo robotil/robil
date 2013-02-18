@@ -83,10 +83,9 @@ def get_from_zmp(msg):
             PSC_right_swing_leg.ByPassON()  # bypass controller
 
             swing_fixed = copy.deepcopy(msg.swing_foot)
-            swing_fixed.z = PSC_left_swing_leg.getCMD(msg.swing_foot.z, desired_normal_force)
+            swing_fixed.z = PSC_left_swing_leg.getCMD(msg.swing_foot.z, desired_normal_force) 
 
-            PSC_left_swing_leg.getCMD(msg.swing_fixed.z, desired_normal_force) 
-            left_leg_angles = swing_leg_ik(msg.swing_foot,msg.swing_hip,msg.pelvis_m)
+            left_leg_angles = swing_leg_ik(swing_fixed,msg.swing_hip,msg.pelvis_m)
             right_leg_angles = stance_leg_ik(msg.stance_hip,msg.pelvis_d)
 
     except IKReachException as exc:
