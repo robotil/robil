@@ -1,5 +1,5 @@
-#ifndef __TRACK_OBJECT__HPP
-#define __TRACK_OBJECT__HPP
+#ifndef __SEARCH_OBJECT__HPP
+#define __SEARCH_OBJECT__HPP
 
 #include <actionlib/server/simple_action_server.h>
 #include <C0_RobilTask/RobilTask.h>
@@ -10,7 +10,7 @@
 using namespace std;
 using namespace C0_RobilTask;
 
-class TrackObjectServer: public RobilTask {
+class SearchObjectServer: public RobilTask {
 
 protected:
     //ros::NodeHandle _node;
@@ -25,9 +25,9 @@ protected:
 
 public:
     TrackObjectServer(C23_Node &detector):
-        RobilTask("/TrackObject"),
+        RobilTask("/SearchObject"),
         _detector(&detector),
-        _name("/TrackObject")
+        _name("/SearchObject")
         //, boost::bind(&TrackObjectServer::dataChanged, this, _1)
     {
         ROS_INFO("instance of TrackObjectServer started.");
@@ -84,7 +84,7 @@ public:
             _detector->stopDetection();
             return TaskResult::Preempted();
         } else {
-            char* str = "TrackObject was called without an object";
+            char* str = "SearchObject was called without an object";
             ROS_INFO("%s.\n", str);
             return TaskResult(FAULT, str);
         }
