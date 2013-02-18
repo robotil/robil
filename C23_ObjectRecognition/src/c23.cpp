@@ -17,8 +17,7 @@ int main(int argc, char **argv)
  
    ROS_INFO("C23 made topic at %s %s \n",argv[1],argv[2]);
  
-  while(ros::ok()){
-	  ros::spin();
-  }
+  ros::spin();
+
   return 0;
 }
