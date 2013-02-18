@@ -15,6 +15,7 @@ public class RosStackStreamListener implements Runnable {
 
 		@Override
 		public void onEnd() {
+			
 		}
 
 		@Override
@@ -24,18 +25,16 @@ public class RosStackStreamListener implements Runnable {
 			if (line.contains("---")) {
 
 				String planID = this.buffer.substring(
-						"data: ExeStack: changed : ".length(),
-						this.buffer.indexOf(" code="));
+						"data: ExeStack: changed : ".length(), this.buffer.indexOf(" code="));
 
-				Document doc = RosStackStreamListener.this.designer
-						.getDocumentOfRunningPlan(planID);
+				Document doc = 
+						RosStackStreamListener.this.designer.getDocumentOfRunningPlan(planID);
 
-				if (doc == null) {
+				if (doc == null)
 					return;
-				}
-
+				
 				doc.cleanRunning();
-				doc.setRunning(Utils.getMatchedInstances(this.buffer,Utils.componentIdRegex));
+				doc.setRunning(Utils.getMatchedInstances(this.buffer, Utils.componentIdRegex));
 
 				this.buffer = "";
 				return;

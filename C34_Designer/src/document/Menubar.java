@@ -1,9 +1,11 @@
 package document;
 
 import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 
 import javax.swing.ImageIcon;
+import javax.swing.JCheckBoxMenuItem;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
@@ -37,15 +39,32 @@ public class Menubar extends JMenuBar {
 
 	private JMenuItem _undoMenuItem;
 	private JMenuItem _redoMenuItem;
+	private JCheckBoxMenuItem _debugViewMenuItem;
+	
 	private static final long serialVersionUID = 8066873848483126226L;
 
 	public Menubar(BTDesigner designer) {
 		add(buildFileMenu(designer));
 		add(buildEditMenu(designer));
+		add(buildViewMenu(designer));
 		add(buildRunMenu(designer));
 		add(buildWindowMenu(designer));
 	}
 
+	private JMenu buildViewMenu(final BTDesigner designer) {
+		JMenu menu = new JMenu("View");
+		_debugViewMenuItem = new JCheckBoxMenuItem("Enable debug view");
+		_debugViewMenuItem.setSelected(false);
+		_debugViewMenuItem.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent arg) {
+				designer.getActiveTab().doc.repaint();
+			}
+		});
+		menu.add(_debugViewMenuItem);
+		return menu;
+	}
+	
 	private JMenu buildEditMenu(BTDesigner designer) {
 		JMenu menu = new JMenu("Edit");
 
@@ -59,7 +78,6 @@ public class Menubar extends JMenuBar {
 		redo.setIcon(new ImageIcon(getClass().getClassLoader().getResource("icons/redo.png")));
 		redo.addActionListener(new RedoAction(designer));
 		
-		
 		menu.add(undo);
 		menu.add(redo);
 		
@@ -70,11 +88,9 @@ public class Menubar extends JMenuBar {
 		menu.add(buildToolsMenu(designer));
 		menu.add(buildElementsCreatorMenu(designer));
 
-		ImageIcon icon = new ImageIcon(getClass().getClassLoader().getResource(
-				"icons/copy.png"));
+		ImageIcon icon = new ImageIcon(getClass().getClassLoader().getResource("icons/copy.png"));
 		JMenuItem menuItemCopy = new JMenuItem("Copy", KeyEvent.VK_C);
-		menuItemCopy.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_1,
-				ActionEvent.ALT_MASK));
+		menuItemCopy.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_1, ActionEvent.ALT_MASK));
 		menuItemCopy.setToolTipText("Copy selected sub-tree");
 		menuItemCopy.setIcon(icon);
 		menuItemCopy.addActionListener(new CopyTreeAction(designer));
@@ -460,6 +476,10 @@ public class Menubar extends JMenuBar {
 	
 	public JMenuItem getRedoButton() {
 		return _redoMenuItem;
+	}
+	
+	public JCheckBoxMenuItem getDebugViewMenuItem() {
+		return _debugViewMenuItem;
 	}
 
 }

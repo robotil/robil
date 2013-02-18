@@ -52,8 +52,6 @@ public class HistoryManager {
 		_redoStack.clear();
 		_undoStack.push(_currentSnapshot);
 		updateCurrentSnapshot();
-		System.out.println("Snapshot saved");
-	
 	}
 	
 	/**

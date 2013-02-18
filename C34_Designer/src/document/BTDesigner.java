@@ -14,6 +14,7 @@ import javax.swing.BorderFactory;
 import javax.swing.ImageIcon;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
+import javax.swing.JMenu;
 import javax.swing.JPanel;
 import javax.swing.JTabbedPane;
 import javax.swing.event.ChangeEvent;
@@ -105,6 +106,7 @@ public class BTDesigner extends JFrame {
 	}
 
 	ArrayList<DesignerTab> tabs = new ArrayList<DesignerTab>();
+	Menubar _menu;
 	DesignerTab activeTab;
 
 	public RosExecutor rosExecutor = new RosExecutor(this);
@@ -133,10 +135,10 @@ public class BTDesigner extends JFrame {
 		GridBagConstraints c = new GridBagConstraints();
 		setLayout(new GridBagLayout());
 
-		Menubar menuBar = new Menubar(this);
+		_menu = new Menubar(this);
 		JPanel panelMenus = new JPanel(new BorderLayout());
 		// panelMenus.setBorder(BorderFactory.createEmptyBorder(10,10,10,10));
-		panelMenus.add(menuBar, BorderLayout.NORTH);
+		panelMenus.add(_menu, BorderLayout.NORTH);
 		panelMenus.add(this.toolbar, BorderLayout.SOUTH);
 
 		// add(panelMenus, BorderLayout.NORTH);
@@ -180,7 +182,7 @@ public class BTDesigner extends JFrame {
 			}
 		});
 		
-		this.setJMenuBar(menuBar);
+		this.setJMenuBar(_menu);
 
 		// add new tab
 		// addNewDocumentTab();
@@ -303,6 +305,10 @@ public class BTDesigner extends JFrame {
 				setTabName(i, name);
 				return;
 			}
+	}
+	
+	public Menubar getMenubar() {
+		return this._menu;
 	}
 
 	public boolean close() throws Exception {
