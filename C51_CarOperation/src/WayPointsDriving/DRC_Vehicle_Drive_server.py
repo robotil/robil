@@ -236,7 +236,7 @@ class SW:
 
 if __name__ == '__main__':
     try:
-        rospy.init_node('Drive')
+        rospy.init_node('WayPointsDriving')
         Drive(rospy.get_name(), [])   
         rospy.spin()
     except rospy.ROSInterruptException: 
