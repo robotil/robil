@@ -14,7 +14,7 @@ def Drive_client():
     client.wait_for_server()
 
     # Creates a goal to send to the action server.
-    goal = C51_CarOperation.msg.DriveGoal(1)
+    goal = C51_CarOperation.msg.DriveGoal(name='moshe',uid='5',parameters='xyz')
 
     # Sends the goal to the action server.
     client.send_goal(goal)
