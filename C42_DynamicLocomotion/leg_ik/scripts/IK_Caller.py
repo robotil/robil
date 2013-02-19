@@ -71,21 +71,23 @@ def get_from_zmp(msg):
 
         if ( msg.step_phase == 1 ) or ( msg.step_phase == 2 ): # left leg is stance
             # [mhx,lhy,uhz,kny,lax,uay]
-            PSC_left_swing_leg.ByPassON()# bypass controller
-
-            swing_fixed = copy.deepcopy(msg.swing_foot)
-            swing_fixed.z = PSC_right_swing_leg.getCMD(msg.swing_foot.z, desired_normal_force)  
+            # PSC_left_swing_leg.ByPassON()# bypass controller
+            # PSC_right_swing_leg.ByPassOFF()
+            # swing_fixed = copy.deepcopy(msg.swing_foot)
+            # swing_fixed.z = PSC_right_swing_leg.getCMD(msg.swing_foot.z, desired_normal_force)  
             
-            right_leg_angles = swing_leg_ik(swing_fixed,msg.swing_hip,msg.pelvis_m)
+            # right_leg_angles = swing_leg_ik(swing_fixed,msg.swing_hip,msg.pelvis_m)
+            right_leg_angles = swing_leg_ik(msg.swing_foot,msg.swing_hip,msg.pelvis_m)
             left_leg_angles = stance_leg_ik(msg.stance_hip,msg.pelvis_d)
         elif ( msg.step_phase == 3 ) or ( msg.step_phase == 4 ): # right leg is stance
             # [mhx,lhy,uhz,kny,lax,uay]
-            PSC_right_swing_leg.ByPassON()  # bypass controller
+            # PSC_right_swing_leg.ByPassON()  # bypass controller
+            # PSC_left_swing_leg.ByPassOFF()
+            # swing_fixed = copy.deepcopy(msg.swing_foot)
+            # swing_fixed.z = PSC_left_swing_leg.getCMD(msg.swing_foot.z, desired_normal_force) 
 
-            swing_fixed = copy.deepcopy(msg.swing_foot)
-            swing_fixed.z = PSC_left_swing_leg.getCMD(msg.swing_foot.z, desired_normal_force) 
-
-            left_leg_angles = swing_leg_ik(swing_fixed,msg.swing_hip,msg.pelvis_m)
+            # left_leg_angles = swing_leg_ik(swing_fixed,msg.swing_hip,msg.pelvis_m)
+            left_leg_angles = swing_leg_ik(msg.swing_foot,msg.swing_hip,msg.pelvis_m)
             right_leg_angles = stance_leg_ik(msg.stance_hip,msg.pelvis_d)
 
     except IKReachException as exc:
