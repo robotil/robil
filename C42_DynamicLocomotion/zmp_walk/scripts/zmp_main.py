@@ -113,13 +113,13 @@ zc = 0#0.8455 # [m] COM height
 
 # Walking Parameters 
 
-step_length = 0.02 #0.01  # [m]
-step_width  = 0.171  # 0.178  # [m]
+step_length = 0.03 #0.01  # [m]
+step_width  = 0.165  # 0.178  # [m]
 step_time   = 0.8 #1   # [sec]
 bend_knees  = 0.04  # [m]    
 step_height = 0.05 #0.03 #0.05  # [m] 
 trans_ratio_of_step = 1.0 #0.8 # units fraction: 0-1.0 ; fraction of step time to be used for transition. 1.0 = all of step time is transition 
-trans_slope_steepens_factor = 0.8 #2 # 1 transition Sigmoid slope (a)
+trans_slope_steepens_factor = 8/step_time #2 # 1 transition Sigmoid slope (a)
 pelvis_des = place_in_Orientation( 0, 0, 0 ) # pelvis desired rotation (0,0,0)<=>stand up straight
 
 # Preview Controllers:
@@ -214,7 +214,7 @@ while not rospy.is_shutdown():
       rospy.loginfo("started walking")
       rospy.loginfo("time:")
       rospy.loginfo(rospy.get_time())
-      #D     = 0.0
+      D     = 0.0
 
       k     = 1
       samples_in_step = ceil (step_time / dt)
@@ -368,7 +368,7 @@ while not rospy.is_shutdown():
       elif ( step_phase == 1 ) or ( step_phase == 3 ): # if swing foot is on the ground
           out.swing_foot = rs.swing_foot  
 
-      out.stance_hip.x = COMx + stance_hip_0.x 
+      out.stance_hip.x = COMx + stance_hip_0.x-D 
       out.stance_hip.y = COMy + stance_hip_0.y
       out.stance_hip.z = stance_hip_0.z
 
@@ -417,6 +417,7 @@ while not rospy.is_shutdown():
               # completed start steps (pre_step + first_step)
               step_done = 1
               steps_count = steps_count + 1
+              D = step_length
               rospy.loginfo("done first step, number = %d, walk = %d" % (steps_count, ns.walk) )
               rospy.loginfo("time:")
               rospy.loginfo(rospy.get_time())
@@ -425,7 +426,7 @@ while not rospy.is_shutdown():
               k = 1
               distance_x_ref = p_ref_x[0]
               step_phase = 3 # Double-Support right leg in front
-              rospy.sleep(4)
+              #rospy.sleep(4)
               #exit()######################################################
               if ns.walk:
                 # make a full step:
@@ -449,10 +450,11 @@ while not rospy.is_shutdown():
                 # completed a full step
                 step_done = 1
                 steps_count = steps_count + 1
+                D = D + step_length
                 rospy.loginfo("done step number = %d" % (steps_count) )
                 rospy.loginfo("time:")
                 rospy.loginfo(rospy.get_time())
-                rospy.sleep(4)
+                #rospy.sleep(4)
                 k = 1
                 distance_x_ref = p_ref_x[0]
                 if step_phase >= 3:
