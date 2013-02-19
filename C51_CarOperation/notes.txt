@@ -54,7 +54,7 @@ Please note that you need modules C22, C31, C34 and C51 in your rosworkspace com
 ----------------------
 Create a folder called "tmp" in C34_Executer folder :
     a.) Create a file named pln (add no extensions). Fill the file with:
-	<plan><seq name="S"><tsk name="!PathPlanning"id="IDPP"/></seq></plan>
+	<plan><seq name="S"><tsk name="!PathPlanning"id="IDPP" /></seq></plan>
     b.) Create a file named pln1 (add no extensions). Fill the file with: 
 	<plan><seq name="S"><tsk name="PathPlanningFocus(x=10,y=10)" id="IDPPF" /></seq></plan> 
 	!!! - Note - the (x,y) values are the goal of the planner.
