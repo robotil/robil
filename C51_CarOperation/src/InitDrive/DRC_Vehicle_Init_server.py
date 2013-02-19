@@ -109,7 +109,7 @@ class SW:
 
 if __name__ == '__main__':
     try:
-        rospy.init_node('InitDrive_server')
+        rospy.init_node('InitDrive')
         InitDrive(rospy.get_name())   
         rospy.spin()
     except rospy.ROSInterruptException: 

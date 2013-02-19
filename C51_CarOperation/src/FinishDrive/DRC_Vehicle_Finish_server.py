@@ -109,7 +109,7 @@ class SW:
 
 if __name__ == '__main__':
     try:
-        rospy.init_node('FinishDrive_server')
+        rospy.init_node('FinishDrive')
         FinishDrive(rospy.get_name())   
         rospy.spin()
     except rospy.ROSInterruptException: 
