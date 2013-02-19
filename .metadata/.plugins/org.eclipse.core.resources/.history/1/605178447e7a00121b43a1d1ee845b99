@@ -1,0 +1,77 @@
+package terminal.communication;
+
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+/**
+ * 
+ * @author blackpc
+ *
+ */
+public class StackStreamMessage {
+
+	public enum ChangeType {
+		TaskStarted(0),
+		TaskFinished(1);
+
+		private int _code;
+		
+		ChangeType(int code) {
+			_code = code;
+		}
+		
+		public int getCode() {
+			return _code;
+		}
+		
+		public static ChangeType typeOf(int code) {
+			if (code == 0)
+				return ChangeType.TaskStarted;
+			else 
+				return ChangeType.TaskFinished;
+		}
+	}
+	
+	public enum TaskFinishReason {
+		Normal,
+		Failure
+	}
+	
+	private ChangeType _changeType;
+	private String _taskName;
+	private String _taskParameters;
+	private String _planLabel;
+	
+	public String getTaskParameters() {
+		return _taskParameters;
+	}
+	
+	public void setTaskParameters(String taskParameters) {
+		this._taskParameters = taskParameters;
+	}
+	
+	public String getTaskName() {
+		return _taskName;
+	}
+	
+	public void setTaskName(String taskName) {
+		this._taskName = taskName;
+	}
+
+	public ChangeType getChangeType() {
+		return _changeType;
+	}
+
+	public void setChangeType(ChangeType changeType) {
+		this._changeType = changeType;
+	}
+	
+	public void setChangeType(int typeCode) {
+		this._changeType = ChangeType.typeOf(typeCode);
+	}
+	
+	@Override
+	public String toString() {
+		return String.format("Change type: %d(%s)\nTask name: %s\nParameters: %s", getChangeType().getCode(), getChangeType(), getTaskName(), getTaskParameters());
+	}
+}

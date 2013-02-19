@@ -7,14 +7,13 @@
 *.slo
 *.lo
 *.o
-
 # Compiled Dynamic libraries
 *.so
 !libBTExecuter.so
-
 # Compiled Static libraries
 *.lai
 *.la
 *.a
-
 *~
+/OpencvTests/
+/TestCppProject/

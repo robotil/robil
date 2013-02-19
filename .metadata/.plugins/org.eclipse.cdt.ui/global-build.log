@@ -1,0 +1,906 @@
+10:52:26 **** Build of configuration Debug for project OpencvTests ****
+make start 
+cc   start.o   -o start
+start.o: In function `main':
+/home/blackpc/workspace/robil_updated/OpencvTests/Debug/../start.cpp:9: undefined reference to `std::cout'
+/home/blackpc/workspace/robil_updated/OpencvTests/Debug/../start.cpp:9: undefined reference to `std::basic_ostream<char, std::char_traits<char> >& std::operator<< <std::char_traits<char> >(std::basic_ostream<char, std::char_traits<char> >&, char const*)'
+/home/blackpc/workspace/robil_updated/OpencvTests/Debug/../start.cpp:9: undefined reference to `std::basic_ostream<char, std::char_traits<char> >& std::endl<char, std::char_traits<char> >(std::basic_ostream<char, std::char_traits<char> >&)'
+/home/blackpc/workspace/robil_updated/OpencvTests/Debug/../start.cpp:9: undefined reference to `std::ostream::operator<<(std::ostream& (*)(std::ostream&))'
+start.o: In function `__static_initialization_and_destruction_0':
+/usr/include/c++/4.7/iostream:75: undefined reference to `std::ios_base::Init::Init()'
+/usr/include/c++/4.7/iostream:75: undefined reference to `std::ios_base::Init::~Init()'
+start.o: In function `cv::Mat::~Mat()':
+/usr/include/opencv2/core/mat.hpp:297: undefined reference to `cv::fastFree(void*)'
+start.o: In function `cv::Mat::release()':
+/usr/include/opencv2/core/mat.hpp:382: undefined reference to `cv::Mat::deallocate()'
+start.o:(.eh_frame+0xcb): undefined reference to `__gxx_personality_v0'
+collect2: error: ld returned 1 exit status
+make: *** [start] Error 1
+10:53:03 **** Incremental Build of configuration Debug for project OpencvTests ****
+make all 
+Building target: OpencvTests
+Invoking: GCC C++ Linker
+g++  -o "OpencvTests"  ./start.o   
+./start.o: In function `cv::Mat::~Mat()':
+/usr/include/opencv2/core/mat.hpp:297: undefined reference to `cv::fastFree(void*)'
+./start.o: In function `cv::Mat::release()':
+/usr/include/opencv2/core/mat.hpp:382: undefined reference to `cv::Mat::deallocate()'
+collect2: error: ld returned 1 exit status
+make: *** [OpencvTests] Error 1
+10:54:57 **** Incremental Build of configuration Debug for project OpencvTests ****
+make all 
+Building target: OpencvTests
+Invoking: GCC C++ Linker
+g++ -L/opt/ros/groovy/lib/ -o "OpencvTests"  ./start.o   -lopencv_core
+Finished building target: OpencvTests
+ 
+10:55:06 **** Incremental Build of configuration Debug for project OpencvTests ****
+make all 
+Building file: ../start.cpp
+Invoking: GCC C++ Compiler
+g++ -O0 -g3 -Wall -c -fmessage-length=0 -MMD -MP -MF"start.d" -MT"start.d" -o "start.o" "../start.cpp"
+Finished building: ../start.cpp
+ 
+Building target: OpencvTests
+Invoking: GCC C++ Linker
+g++ -L/opt/ros/groovy/lib/ -o "OpencvTests"  ./start.o   -lopencv_core
+Finished building target: OpencvTests
+ 
+10:56:29 **** Incremental Build of configuration Debug for project OpencvTests ****
+make all 
+Building file: ../start.cpp
+Invoking: GCC C++ Compiler
+g++ -O0 -g3 -Wall -c -fmessage-length=0 -MMD -MP -MF"start.d" -MT"start.d" -o "start.o" "../start.cpp"
+../start.cpp:14:25: warning: missing terminating " character [enabled by default]
+../start.cpp:14:2: error: missing terminating " character
+../start.cpp: In function ‘int main(int, char**)’:
+../start.cpp:15:2: error: expected ‘)’ before ‘cv’
+make: *** [start.o] Error 1
+10:57:19 **** Incremental Build of configuration Debug for project OpencvTests ****
+make all 
+Building file: ../start.cpp
+Invoking: GCC C++ Compiler
+g++ -O0 -g3 -Wall -c -fmessage-length=0 -MMD -MP -MF"start.d" -MT"start.d" -o "start.o" "../start.cpp"
+Finished building: ../start.cpp
+ 
+Building target: OpencvTests
+Invoking: GCC C++ Linker
+g++ -L/opt/ros/groovy/lib/ -o "OpencvTests"  ./start.o   -lopencv_core
+./start.o: In function `main':
+/home/blackpc/workspace/robil_updated/OpencvTests/Debug/../start.cpp:14: undefined reference to `cv::namedWindow(std::string const&, int)'
+/home/blackpc/workspace/robil_updated/OpencvTests/Debug/../start.cpp:15: undefined reference to `cv::imshow(std::string const&, cv::_InputArray const&)'
+collect2: error: ld returned 1 exit status
+make: *** [OpencvTests] Error 1
+10:58:45 **** Incremental Build of configuration Debug for project OpencvTests ****
+make all 
+Building target: OpencvTests
+Invoking: GCC C++ Linker
+g++ -L/opt/ros/groovy/lib/ -o "OpencvTests"  ./start.o   -lopencv_core -lopencv_imgproc -lopencv_highgui
+Finished building target: OpencvTests
+ 
+10:58:50 **** Incremental Build of configuration Debug for project OpencvTests ****
+make all 
+make: Nothing to be done for `all'.
+10:59:33 **** Incremental Build of configuration Debug for project OpencvTests ****
+make all 
+Building file: ../start.cpp
+Invoking: GCC C++ Compiler
+g++ -O0 -g3 -Wall -c -fmessage-length=0 -MMD -MP -MF"start.d" -MT"start.d" -o "start.o" "../start.cpp"
+Finished building: ../start.cpp
+ 
+Building target: OpencvTests
+Invoking: GCC C++ Linker
+g++ -L/opt/ros/groovy/lib/ -o "OpencvTests"  ./start.o   -lopencv_core -lopencv_imgproc -lopencv_highgui
+Finished building target: OpencvTests
+ 
+10:59:40 **** Incremental Build of configuration Debug for project OpencvTests ****
+make all 
+Building file: ../start.cpp
+Invoking: GCC C++ Compiler
+g++ -O0 -g3 -Wall -c -fmessage-length=0 -MMD -MP -MF"start.d" -MT"start.d" -o "start.o" "../start.cpp"
+Finished building: ../start.cpp
+ 
+Building target: OpencvTests
+Invoking: GCC C++ Linker
+g++ -L/opt/ros/groovy/lib/ -o "OpencvTests"  ./start.o   -lopencv_core -lopencv_imgproc -lopencv_highgui
+Finished building target: OpencvTests
+ 
+11:02:38 **** Incremental Build of configuration Debug for project OpencvTests ****
+make all 
+Building file: ../start.cpp
+Invoking: GCC C++ Compiler
+g++ -O0 -g3 -Wall -c -fmessage-length=0 -MMD -MP -MF"start.d" -MT"start.d" -o "start.o" "../start.cpp"
+Finished building: ../start.cpp
+ 
+Building target: OpencvTests
+Invoking: GCC C++ Linker
+g++ -L/opt/ros/groovy/lib/ -o "OpencvTests"  ./start.o   -lopencv_core -lopencv_imgproc -lopencv_highgui
+Finished building target: OpencvTests
+ 
+11:02:41 **** Incremental Build of configuration Debug for project OpencvTests ****
+make all 
+make: Nothing to be done for `all'.
+11:03:39 **** Incremental Build of configuration Debug for project OpencvTests ****
+make all 
+Building file: ../start.cpp
+Invoking: GCC C++ Compiler
+g++ -O0 -g3 -Wall -c -fmessage-length=0 -MMD -MP -MF"start.d" -MT"start.d" -o "start.o" "../start.cpp"
+Finished building: ../start.cpp
+ 
+Building target: OpencvTests
+Invoking: GCC C++ Linker
+g++ -L/opt/ros/groovy/lib/ -o "OpencvTests"  ./start.o   -lopencv_core -lopencv_imgproc -lopencv_highgui
+Finished building target: OpencvTests
+ 
+11:03:59 **** Incremental Build of configuration Debug for project OpencvTests ****
+make all 
+Building file: ../start.cpp
+Invoking: GCC C++ Compiler
+g++ -O0 -g3 -Wall -c -fmessage-length=0 -MMD -MP -MF"start.d" -MT"start.d" -o "start.o" "../start.cpp"
+Finished building: ../start.cpp
+ 
+Building target: OpencvTests
+Invoking: GCC C++ Linker
+g++ -L/opt/ros/groovy/lib/ -o "OpencvTests"  ./start.o   -lopencv_core -lopencv_imgproc -lopencv_highgui
+Finished building target: OpencvTests
+ 
+11:21:38 **** Incremental Build of configuration Debug for project OpencvTests ****
+make all 
+Building file: ../start.cpp
+Invoking: GCC C++ Compiler
+g++ -O0 -g3 -Wall -c -fmessage-length=0 -MMD -MP -MF"start.d" -MT"start.d" -o "start.o" "../start.cpp"
+Finished building: ../start.cpp
+ 
+Building target: OpencvTests
+Invoking: GCC C++ Linker
+g++ -L/opt/ros/groovy/lib/ -o "OpencvTests"  ./start.o   -lopencv_core -lopencv_imgproc -lopencv_highgui
+Finished building target: OpencvTests
+ 
+11:21:43 **** Incremental Build of configuration Debug for project OpencvTests ****
+make all 
+Building file: ../start.cpp
+Invoking: GCC C++ Compiler
+g++ -O0 -g3 -Wall -c -fmessage-length=0 -MMD -MP -MF"start.d" -MT"start.d" -o "start.o" "../start.cpp"
+Finished building: ../start.cpp
+ 
+Building target: OpencvTests
+Invoking: GCC C++ Linker
+g++ -L/opt/ros/groovy/lib/ -o "OpencvTests"  ./start.o   -lopencv_core -lopencv_imgproc -lopencv_highgui
+Finished building target: OpencvTests
+ 
+11:22:12 **** Incremental Build of configuration Debug for project OpencvTests ****
+make all 
+Building file: ../start.cpp
+Invoking: GCC C++ Compiler
+g++ -O0 -g3 -Wall -c -fmessage-length=0 -MMD -MP -MF"start.d" -MT"start.d" -o "start.o" "../start.cpp"
+Finished building: ../start.cpp
+ 
+Building target: OpencvTests
+Invoking: GCC C++ Linker
+g++ -L/opt/ros/groovy/lib/ -o "OpencvTests"  ./start.o   -lopencv_core -lopencv_imgproc -lopencv_highgui
+Finished building target: OpencvTests
+ 
+11:22:24 **** Incremental Build of configuration Debug for project OpencvTests ****
+make all 
+Building file: ../start.cpp
+Invoking: GCC C++ Compiler
+g++ -O0 -g3 -Wall -c -fmessage-length=0 -MMD -MP -MF"start.d" -MT"start.d" -o "start.o" "../start.cpp"
+Finished building: ../start.cpp
+ 
+Building target: OpencvTests
+Invoking: GCC C++ Linker
+g++ -L/opt/ros/groovy/lib/ -o "OpencvTests"  ./start.o   -lopencv_core -lopencv_imgproc -lopencv_highgui
+Finished building target: OpencvTests
+ 
+
+**** Build of configuration Debug for project OpencvTests ****
+
+make all 
+Building file: ../start.cpp
+Invoking: GCC C++ Compiler
+g++ -O0 -g3 -Wall -c -fmessage-length=0 -MMD -MP -MF"start.d" -MT"start.d" -o "start.o" "../start.cpp"
+Finished building: ../start.cpp
+ 
+Building target: OpencvTests
+Invoking: GCC C++ Linker
+g++ -L/opt/ros/groovy/lib/ -o "OpencvTests"  ./start.o   -lopencv_core -lopencv_imgproc -lopencv_highgui
+Finished building target: OpencvTests
+ 
+
+**** Build Finished ****
+
+**** Build of configuration Debug for project OpencvTests ****
+
+make all 
+make: Nothing to be done for `all'.
+
+**** Build Finished ****
+
+**** Build of configuration Debug for project OpencvTests ****
+
+make all 
+Building file: ../start.cpp
+Invoking: GCC C++ Compiler
+g++ -O0 -g3 -Wall -c -fmessage-length=0 -MMD -MP -MF"start.d" -MT"start.d" -o "start.o" "../start.cpp"
+Finished building: ../start.cpp
+ 
+Building target: OpencvTests
+Invoking: GCC C++ Linker
+g++ -L/opt/ros/groovy/lib/ -o "OpencvTests"  ./start.o   -lopencv_core -lopencv_imgproc -lopencv_highgui
+Finished building target: OpencvTests
+ 
+
+**** Build Finished ****
+
+**** Build of configuration Debug for project OpencvTests ****
+
+make all 
+Building file: ../start.cpp
+Invoking: GCC C++ Compiler
+g++ -O0 -g3 -Wall -c -fmessage-length=0 -MMD -MP -MF"start.d" -MT"start.d" -o "start.o" "../start.cpp"
+../start.cpp: In function ‘int main(int, char**)’:
+../start.cpp:41:2: error: ‘gpu’ has not been declared
+../start.cpp:41:14: error: expected ‘;’ before ‘g’
+make: *** [start.o] Error 1
+
+**** Build Finished ****
+
+**** Build of configuration Debug for project OpencvTests ****
+
+make all 
+Building file: ../start.cpp
+Invoking: GCC C++ Compiler
+g++ -O0 -g3 -Wall -c -fmessage-length=0 -MMD -MP -MF"start.d" -MT"start.d" -o "start.o" "../start.cpp"
+../start.cpp: In function ‘int main(int, char**)’:
+../start.cpp:41:2: error: ‘gpu’ has not been declared
+../start.cpp:41:14: error: expected ‘;’ before ‘g’
+make: *** [start.o] Error 1
+
+**** Build Finished ****
+
+**** Build of configuration Debug for project OpencvTests ****
+
+make all 
+Building file: ../start.cpp
+Invoking: GCC C++ Compiler
+g++ -O0 -g3 -Wall -c -fmessage-length=0 -MMD -MP -MF"start.d" -MT"start.d" -o "start.o" "../start.cpp"
+../start.cpp: In function ‘int main(int, char**)’:
+../start.cpp:24:12: error: invalid initialization of non-const reference of type ‘cv::Mat&’ from an rvalue of type ‘cv::Mat’
+In file included from ../start.cpp:3:0:
+/usr/include/opencv2/core/core.hpp:2400:19: error: in passing argument 1 of ‘void cv::line(cv::Mat&, cv::Point, cv::Point, const Scalar&, int, int, int)’
+../start.cpp:31:12: error: invalid initialization of non-const reference of type ‘cv::Mat&’ from an rvalue of type ‘cv::Mat’
+In file included from ../start.cpp:3:0:
+/usr/include/opencv2/core/core.hpp:2400:19: error: in passing argument 1 of ‘void cv::line(cv::Mat&, cv::Point, cv::Point, const Scalar&, int, int, int)’
+../start.cpp:38:12: error: invalid initialization of non-const reference of type ‘cv::Mat&’ from an rvalue of type ‘cv::Mat’
+In file included from ../start.cpp:3:0:
+/usr/include/opencv2/core/core.hpp:2400:19: error: in passing argument 1 of ‘void cv::line(cv::Mat&, cv::Point, cv::Point, const Scalar&, int, int, int)’
+../start.cpp:40:16: error: invalid initialization of reference of type ‘cv::InputArray {aka const cv::_InputArray&}’ from expression of type ‘cv::gpu::GpuMat’
+In file included from ../start.cpp:4:0:
+/usr/include/opencv2/highgui/highgui.hpp:92:19: error: in passing argument 2 of ‘void cv::imshow(const string&, cv::InputArray)’
+make: *** [start.o] Error 1
+
+**** Build Finished ****
+
+**** Build of configuration Debug for project OpencvTests ****
+
+make all 
+Building file: ../start.cpp
+Invoking: GCC C++ Compiler
+g++ -O0 -g3 -Wall -c -fmessage-length=0 -MMD -MP -MF"start.d" -MT"start.d" -o "start.o" "../start.cpp"
+../start.cpp: In function ‘int main(int, char**)’:
+../start.cpp:16:6: warning: unused variable ‘thickness’ [-Wunused-variable]
+../start.cpp:17:6: warning: unused variable ‘lineType’ [-Wunused-variable]
+Finished building: ../start.cpp
+ 
+Building target: OpencvTests
+Invoking: GCC C++ Linker
+g++ -L/opt/ros/groovy/lib/ -o "OpencvTests"  ./start.o   -lopencv_core -lopencv_gpu -lopencv_imgproc -lopencv_highgui
+./start.o: In function `main':
+/home/blackpc/workspace/robil_updated/OpencvTests/Debug/../start.cpp:40: undefined reference to `cv::gpu::GpuMat::operator cv::Mat() const'
+collect2: error: ld returned 1 exit status
+make: *** [OpencvTests] Error 1
+
+**** Build Finished ****
+
+**** Build of configuration Debug for project OpencvTests ****
+
+make all 
+Building file: ../start.cpp
+Invoking: GCC C++ Compiler
+g++ -O0 -g3 -Wall -c -fmessage-length=0 -MMD -MP -MF"start.d" -MT"start.d" -o "start.o" "../start.cpp"
+../start.cpp: In function ‘int main(int, char**)’:
+../start.cpp:16:6: warning: unused variable ‘thickness’ [-Wunused-variable]
+../start.cpp:17:6: warning: unused variable ‘lineType’ [-Wunused-variable]
+Finished building: ../start.cpp
+ 
+Building target: OpencvTests
+Invoking: GCC C++ Linker
+g++ -L/opt/ros/groovy/lib/ -o "OpencvTests"  ./start.o   -lopencv_core -lopencv_gpu -lopencv_imgproc -lopencv_highgui
+./start.o: In function `main':
+/home/blackpc/workspace/robil_updated/OpencvTests/Debug/../start.cpp:40: undefined reference to `cv::gpu::GpuMat::operator cv::Mat() const'
+collect2: error: ld returned 1 exit status
+make: *** [OpencvTests] Error 1
+
+**** Build Finished ****
+
+**** Build of configuration Debug for project OpencvTests ****
+
+make all 
+Building file: ../start.cpp
+Invoking: GCC C++ Compiler
+g++ -O0 -g3 -Wall -c -fmessage-length=0 -MMD -MP -MF"start.d" -MT"start.d" -o "start.o" "../start.cpp"
+../start.cpp: In function ‘int main(int, char**)’:
+../start.cpp:16:6: warning: unused variable ‘thickness’ [-Wunused-variable]
+../start.cpp:17:6: warning: unused variable ‘lineType’ [-Wunused-variable]
+Finished building: ../start.cpp
+ 
+Building target: OpencvTests
+Invoking: GCC C++ Linker
+g++ -L/opt/ros/groovy/lib/ -o "OpencvTests"  ./start.o   -lopencv_core -lopencv_gpu -lopencv_imgproc -lopencv_highgui
+./start.o: In function `main':
+/home/blackpc/workspace/robil_updated/OpencvTests/Debug/../start.cpp:40: undefined reference to `cv::gpu::GpuMat::operator cv::Mat() const'
+collect2: error: ld returned 1 exit status
+make: *** [OpencvTests] Error 1
+
+**** Build Finished ****
+
+**** Build of configuration Debug for project OpencvTests ****
+
+make all 
+Building file: ../start.cpp
+Invoking: GCC C++ Compiler
+g++ -O0 -g3 -Wall -c -fmessage-length=0 -MMD -MP -MF"start.d" -MT"start.d" -o "start.o" "../start.cpp"
+../start.cpp: In function ‘int main(int, char**)’:
+../start.cpp:40:10: error: no match for ‘operator*’ in ‘*m’
+../start.cpp:40:10: note: candidates are:
+In file included from /usr/include/opencv2/core/core.hpp:4341:0,
+                 from ../start.cpp:3:
+/usr/include/opencv2/core/operations.hpp:576:17: note: template<class _Tp, int m, int n> cv::Matx<_Tp, m, n> cv::operator*(const cv::Matx<_Tp, m, n>&, int)
+/usr/include/opencv2/core/operations.hpp:576:17: note:   template argument deduction/substitution failed:
+../start.cpp:40:10: note:   ‘cv::gpu::GpuMat’ is not derived from ‘const cv::Matx<_Tp, m, n>’
+In file included from /usr/include/opencv2/core/core.hpp:4341:0,
+                 from ../start.cpp:3:
+/usr/include/opencv2/core/operations.hpp:582:17: note: template<class _Tp, int m, int n> cv::Matx<_Tp, m, n> cv::operator*(const cv::Matx<_Tp, m, n>&, float)
+/usr/include/opencv2/core/operations.hpp:582:17: note:   template argument deduction/substitution failed:
+../start.cpp:40:10: note:   ‘cv::gpu::GpuMat’ is not derived from ‘const cv::Matx<_Tp, m, n>’
+In file included from /usr/include/opencv2/core/core.hpp:4341:0,
+                 from ../start.cpp:3:
+/usr/include/opencv2/core/operations.hpp:588:17: note: template<class _Tp, int m, int n> cv::Matx<_Tp, m, n> cv::operator*(const cv::Matx<_Tp, m, n>&, double)
+/usr/include/opencv2/core/operations.hpp:588:17: note:   template argument deduction/substitution failed:
+../start.cpp:40:10: note:   ‘cv::gpu::GpuMat’ is not derived from ‘const cv::Matx<_Tp, m, n>’
+In file included from /usr/include/opencv2/core/core.hpp:4341:0,
+                 from ../start.cpp:3:
+/usr/include/opencv2/core/operations.hpp:594:17: note: template<class _Tp, int m, int n> cv::Matx<_Tp, m, n> cv::operator*(int, const cv::Matx<_Tp, m, n>&)
+/usr/include/opencv2/core/operations.hpp:594:17: note:   template argument deduction/substitution failed:
+../start.cpp:40:10: note:   cannot convert ‘m’ (type ‘cv::gpu::GpuMat’) to type ‘int’
+In file included from /usr/include/opencv2/core/core.hpp:4341:0,
+                 from ../start.cpp:3:
+/usr/include/opencv2/core/operations.hpp:600:17: note: template<class _Tp, int m, int n> cv::Matx<_Tp, m, n> cv::operator*(float, const cv::Matx<_Tp, m, n>&)
+/usr/include/opencv2/core/operations.hpp:600:17: note:   template argument deduction/substitution failed:
+../start.cpp:40:10: note:   cannot convert ‘m’ (type ‘cv::gpu::GpuMat’) to type ‘float’
+In file included from /usr/include/opencv2/core/core.hpp:4341:0,
+                 from ../start.cpp:3:
+/usr/include/opencv2/core/operations.hpp:606:17: note: template<class _Tp, int m, int n> cv::Matx<_Tp, m, n> cv::operator*(double, const cv::Matx<_Tp, m, n>&)
+/usr/include/opencv2/core/operations.hpp:606:17: note:   template argument deduction/substitution failed:
+../start.cpp:40:10: note:   cannot convert ‘m’ (type ‘cv::gpu::GpuMat’) to type ‘double’
+In file included from /usr/include/opencv2/core/core.hpp:4341:0,
+                 from ../start.cpp:3:
+/usr/include/opencv2/core/operations.hpp:619:17: note: template<class _Tp, int m, int n, int l> cv::Matx<_Tp, m, n> cv::operator*(const cv::Matx<_Tp, m, nm>&, const cv::Matx<_Tp, l, n>&)
+/usr/include/opencv2/core/operations.hpp:619:17: note:   template argument deduction/substitution failed:
+../start.cpp:40:10: note:   ‘cv::gpu::GpuMat’ is not derived from ‘const cv::Matx<_Tp, m, nm>’
+In file included from /usr/include/opencv2/core/core.hpp:4341:0,
+                 from ../start.cpp:3:
+/usr/include/opencv2/core/operations.hpp:626:13: note: template<class _Tp> cv::Point_<_Tp> cv::operator*(const cv::Matx<_Tp, 2, 2>&, const cv::Point_<_Tp>&)
+/usr/include/opencv2/core/operations.hpp:626:13: note:   template argument deduction/substitution failed:
+../start.cpp:40:10: note:   ‘cv::gpu::GpuMat’ is not derived from ‘const cv::Matx<_Tp, 2, 2>’
+In file included from /usr/include/opencv2/core/core.hpp:4341:0,
+                 from ../start.cpp:3:
+/usr/include/opencv2/core/operations.hpp:634:14: note: template<class _Tp> cv::Point3_<_Tp> cv::operator*(const cv::Matx<_Tp, 3, 3>&, const cv::Point3_<_Tp>&)
+/usr/include/opencv2/core/operations.hpp:634:14: note:   template argument deduction/substitution failed:
+../start.cpp:40:10: note:   ‘cv::gpu::GpuMat’ is not derived from ‘const cv::Matx<_Tp, 3, 3>’
+In file included from /usr/include/opencv2/core/core.hpp:4341:0,
+                 from ../start.cpp:3:
+/usr/include/opencv2/core/operations.hpp:642:14: note: template<class _Tp> cv::Point3_<_Tp> cv::operator*(const cv::Matx<_Tp, 3, 3>&, const cv::Point_<_Tp>&)
+/usr/include/opencv2/core/operations.hpp:642:14: note:   template argument deduction/substitution failed:
+../start.cpp:40:10: note:   ‘cv::gpu::GpuMat’ is not derived from ‘const cv::Matx<_Tp, 3, 3>’
+In file included from /usr/include/opencv2/core/core.hpp:4341:0,
+                 from ../start.cpp:3:
+/usr/include/opencv2/core/operations.hpp:650:17: note: template<class _Tp> cv::Matx<T2, 4, 1> cv::operator*(const cv::Matx<_Tp, 4, 4>&, const cv::Point3_<_Tp>&)
+/usr/include/opencv2/core/operations.hpp:650:17: note:   template argument deduction/substitution failed:
+../start.cpp:40:10: note:   ‘cv::gpu::GpuMat’ is not derived from ‘const cv::Matx<_Tp, 4, 4>’
+In file included from /usr/include/opencv2/core/core.hpp:4341:0,
+                 from ../start.cpp:3:
+/usr/include/opencv2/core/operations.hpp:657:8: note: template<class _Tp> cv::Scalar cv::operator*(const cv::Matx<_Tp, 4, 4>&, const Scalar&)
+/usr/include/opencv2/core/operations.hpp:657:8: note:   template argument deduction/substitution failed:
+../start.cpp:40:10: note:   ‘cv::gpu::GpuMat’ is not derived from ‘const cv::Matx<_Tp, 4, 4>’
+In file included from /usr/include/opencv2/core/core.hpp:4341:0,
+                 from ../start.cpp:3:
+/usr/include/opencv2/core/operations.hpp:1157:1: note: template<class _Tp, int cn> cv::Vec<_Tp, cn> cv::operator*(const cv::Vec<_Tp, cn>&, int)
+/usr/include/opencv2/core/operations.hpp:1157:1: note:   template argument deduction/substitution failed:
+../start.cpp:40:10: note:   ‘cv::gpu::GpuMat’ is not derived from ‘const cv::Vec<_Tp, cn>’
+In file included from /usr/include/opencv2/core/core.hpp:4341:0,
+                 from ../start.cpp:3:
+/usr/include/opencv2/core/operations.hpp:1163:1: note: template<class _Tp, int cn> cv::Vec<_Tp, cn> cv::operator*(int, const cv::Vec<_Tp, cn>&)
+/usr/include/opencv2/core/operations.hpp:1163:1: note:   template argument deduction/substitution failed:
+../start.cpp:40:10: note:   cannot convert ‘m’ (type ‘cv::gpu::GpuMat’) to type ‘int’
+In file included from /usr/include/opencv2/core/core.hpp:4341:0,
+                 from ../start.cpp:3:
+/usr/include/opencv2/core/operations.hpp:1169:1: note: template<class _Tp, int cn> cv::Vec<_Tp, cn> cv::operator*(const cv::Vec<_Tp, cn>&, float)
+/usr/include/opencv2/core/operations.hpp:1169:1: note:   template argument deduction/substitution failed:
+../start.cpp:40:10: note:   ‘cv::gpu::GpuMat’ is not derived from ‘const cv::Vec<_Tp, cn>’
+In file included from /usr/include/opencv2/core/core.hpp:4341:0,
+                 from ../start.cpp:3:
+/usr/include/opencv2/core/operations.hpp:1175:1: note: template<class _Tp, int cn> cv::Vec<_Tp, cn> cv::operator*(float, const cv::Vec<_Tp, cn>&)
+/usr/include/opencv2/core/operations.hpp:1175:1: note:   template argument deduction/substitution failed:
+../start.cpp:40:10: note:   cannot convert ‘m’ (type ‘cv::gpu::GpuMat’) to type ‘float’
+In file included from /usr/include/opencv2/core/core.hpp:4341:0,
+                 from ../start.cpp:3:
+/usr/include/opencv2/core/operations.hpp:1181:1: note: template<class _Tp, int cn> cv::Vec<_Tp, cn> cv::operator*(const cv::Vec<_Tp, cn>&, double)
+/usr/include/opencv2/core/operations.hpp:1181:1: note:   template argument deduction/substitution failed:
+../start.cpp:40:10: note:   ‘cv::gpu::GpuMat’ is not derived from ‘const cv::Vec<_Tp, cn>’
+In file included from /usr/include/opencv2/core/core.hpp:4341:0,
+                 from ../start.cpp:3:
+/usr/include/opencv2/core/operations.hpp:1187:1: note: template<class _Tp, int cn> cv::Vec<_Tp, cn> cv::operator*(double, const cv::Vec<_Tp, cn>&)
+/usr/include/opencv2/core/operations.hpp:1187:1: note:   template argument deduction/substitution failed:
+../start.cpp:40:10: note:   cannot convert ‘m’ (type ‘cv::gpu::GpuMat’) to type ‘double’
+In file included from /usr/include/opencv2/core/core.hpp:4341:0,
+                 from ../start.cpp:3:
+/usr/include/opencv2/core/operations.hpp:1308:14: note: template<class _Tp> cv::Complex<_Tp> cv::operator*(const cv::Complex<_Tp>&, const cv::Complex<_Tp>&)
+/usr/include/opencv2/core/operations.hpp:1308:14: note:   template argument deduction/substitution failed:
+../start.cpp:40:10: note:   ‘cv::gpu::GpuMat’ is not derived from ‘const cv::Complex<_Tp>’
+In file included from /usr/include/opencv2/core/core.hpp:4341:0,
+                 from ../start.cpp:3:
+/usr/include/opencv2/core/operations.hpp:1312:14: note: template<class _Tp> cv::Complex<_Tp> cv::operator*(const cv::Complex<_Tp>&, _Tp)
+/usr/include/opencv2/core/operations.hpp:1312:14: note:   template argument deduction/substitution failed:
+../start.cpp:40:10: note:   ‘cv::gpu::GpuMat’ is not derived from ‘const cv::Complex<_Tp>’
+In file included from /usr/include/opencv2/core/core.hpp:4341:0,
+                 from ../start.cpp:3:
+/usr/include/opencv2/core/operations.hpp:1316:14: note: template<class _Tp> cv::Complex<_Tp> cv::operator*(_Tp, const cv::Complex<_Tp>&)
+/usr/include/opencv2/core/operations.hpp:1316:14: note:   template argument deduction/substitution failed:
+../start.cpp:40:10: note:   candidate expects 2 arguments, 1 provided
+In file included from /usr/include/opencv2/core/core.hpp:4341:0,
+                 from ../start.cpp:3:
+/usr/include/opencv2/core/operations.hpp:1470:50: note: template<class _Tp> cv::Point_<_Tp> cv::operator*(const cv::Point_<_Tp>&, int)
+/usr/include/opencv2/core/operations.hpp:1470:50: note:   template argument deduction/substitution failed:
+../start.cpp:40:10: note:   ‘cv::gpu::GpuMat’ is not derived from ‘const cv::Point_<_Tp>’
+In file included from /usr/include/opencv2/core/core.hpp:4341:0,
+                 from ../start.cpp:3:
+/usr/include/opencv2/core/operations.hpp:1473:50: note: template<class _Tp> cv::Point_<_Tp> cv::operator*(int, const cv::Point_<_Tp>&)
+/usr/include/opencv2/core/operations.hpp:1473:50: note:   template argument deduction/substitution failed:
+../start.cpp:40:10: note:   cannot convert ‘m’ (type ‘cv::gpu::GpuMat’) to type ‘int’
+In file included from /usr/include/opencv2/core/core.hpp:4341:0,
+                 from ../start.cpp:3:
+/usr/include/opencv2/core/operations.hpp:1476:50: note: template<class _Tp> cv::Point_<_Tp> cv::operator*(const cv::Point_<_Tp>&, float)
+/usr/include/opencv2/core/operations.hpp:1476:50: note:   template argument deduction/substitution failed:
+../start.cpp:40:10: note:   ‘cv::gpu::GpuMat’ is not derived from ‘const cv::Point_<_Tp>’
+In file included from /usr/include/opencv2/core/core.hpp:4341:0,
+                 from ../start.cpp:3:
+/usr/include/opencv2/core/operations.hpp:1479:50: note: template<class _Tp> cv::Point_<_Tp> cv::operator*(float, const cv::Point_<_Tp>&)
+/usr/include/opencv2/core/operations.hpp:1479:50: note:   template argument deduction/substitution failed:
+../start.cpp:40:10: note:   cannot convert ‘m’ (type ‘cv::gpu::GpuMat’) to type ‘float’
+In file included from /usr/include/opencv2/core/core.hpp:4341:0,
+                 from ../start.cpp:3:
+/usr/include/opencv2/core/operations.hpp:1482:50: note: template<class _Tp> cv::Point_<_Tp> cv::operator*(const cv::Point_<_Tp>&, double)
+/usr/include/opencv2/core/operations.hpp:1482:50: note:   template argument deduction/substitution failed:
+../start.cpp:40:10: note:   ‘cv::gpu::GpuMat’ is not derived from ‘const cv::Point_<_Tp>’
+In file included from /usr/include/opencv2/core/core.hpp:4341:0,
+                 from ../start.cpp:3:
+/usr/include/opencv2/core/operations.hpp:1485:50: note: template<class _Tp> cv::Point_<_Tp> cv::operator*(double, const cv::Point_<_Tp>&)
+/usr/include/opencv2/core/operations.hpp:1485:50: note:   template argument deduction/substitution failed:
+../start.cpp:40:10: note:   cannot convert ‘m’ (type ‘cv::gpu::GpuMat’) to type ‘double’
+In file included from /usr/include/opencv2/core/core.hpp:4341:0,
+                 from ../start.cpp:3:
+/usr/include/opencv2/core/operations.hpp:1589:51: note: template<class _Tp> cv::Point3_<_Tp> cv::operator*(const cv::Point3_<_Tp>&, int)
+/usr/include/opencv2/core/operations.hpp:1589:51: note:   template argument deduction/substitution failed:
+../start.cpp:40:10: note:   ‘cv::gpu::GpuMat’ is not derived from ‘const cv::Point3_<_Tp>’
+In file included from /usr/include/opencv2/core/core.hpp:4341:0,
+                 from ../start.cpp:3:
+/usr/include/opencv2/core/operations.hpp:1594:51: note: template<class _Tp> cv::Point3_<_Tp> cv::operator*(int, const cv::Point3_<_Tp>&)
+/usr/include/opencv2/core/operations.hpp:1594:51: note:   template argument deduction/substitution failed:
+../start.cpp:40:10: note:   cannot convert ‘m’ (type ‘cv::gpu::GpuMat’) to type ‘int’
+In file included from /usr/include/opencv2/core/core.hpp:4341:0,
+                 from ../start.cpp:3:
+/usr/include/opencv2/core/operations.hpp:1599:51: note: template<class _Tp> cv::Point3_<_Tp> cv::operator*(const cv::Point3_<_Tp>&, float)
+/usr/include/opencv2/core/operations.hpp:1599:51: note:   template argument deduction/substitution failed:
+../start.cpp:40:10: note:   ‘cv::gpu::GpuMat’ is not derived from ‘const cv::Point3_<_Tp>’
+In file included from /usr/include/opencv2/core/core.hpp:4341:0,
+                 from ../start.cpp:3:
+/usr/include/opencv2/core/operations.hpp:1604:51: note: template<class _Tp> cv::Point3_<_Tp> cv::operator*(float, const cv::Point3_<_Tp>&)
+/usr/include/opencv2/core/operations.hpp:1604:51: note:   template argument deduction/substitution failed:
+../start.cpp:40:10: note:   cannot convert ‘m’ (type ‘cv::gpu::GpuMat’) to type ‘float’
+In file included from /usr/include/opencv2/core/core.hpp:4341:0,
+                 from ../start.cpp:3:
+/usr/include/opencv2/core/operations.hpp:1609:51: note: template<class _Tp> cv::Point3_<_Tp> cv::operator*(const cv::Point3_<_Tp>&, double)
+/usr/include/opencv2/core/operations.hpp:1609:51: note:   template argument deduction/substitution failed:
+../start.cpp:40:10: note:   ‘cv::gpu::GpuMat’ is not derived from ‘const cv::Point3_<_Tp>’
+In file included from /usr/include/opencv2/core/core.hpp:4341:0,
+                 from ../start.cpp:3:
+/usr/include/opencv2/core/operations.hpp:1614:51: note: template<class _Tp> cv::Point3_<_Tp> cv::operator*(double, const cv::Point3_<_Tp>&)
+/usr/include/opencv2/core/operations.hpp:1614:51: note:   template argument deduction/substitution failed:
+../start.cpp:40:10: note:   cannot convert ‘m’ (type ‘cv::gpu::GpuMat’) to type ‘double’
+In file included from /usr/include/opencv2/core/core.hpp:4341:0,
+                 from ../start.cpp:3:
+/usr/include/opencv2/core/operations.hpp:1642:49: note: template<class _Tp> cv::Size_<_Tp> cv::operator*(const cv::Size_<_Tp>&, _Tp)
+/usr/include/opencv2/core/operations.hpp:1642:49: note:   template argument deduction/substitution failed:
+../start.cpp:40:10: note:   ‘cv::gpu::GpuMat’ is not derived from ‘const cv::Size_<_Tp>’
+In file included from /usr/include/opencv2/core/core.hpp:4341:0,
+                 from ../start.cpp:3:
+/usr/include/opencv2/core/operations.hpp:1872:51: note: template<class _Tp> cv::Scalar_<_Tp> cv::operator*(const cv::Scalar_<_Tp>&, _Tp)
+/usr/include/opencv2/core/operations.hpp:1872:51: note:   template argument deduction/substitution failed:
+../start.cpp:40:10: note:   ‘cv::gpu::GpuMat’ is not derived from ‘const cv::Scalar_<_Tp>’
+In file included from /usr/include/opencv2/core/core.hpp:4341:0,
+                 from ../start.cpp:3:
+/usr/include/opencv2/core/operations.hpp:1880:51: note: template<class _Tp> cv::Scalar_<_Tp> cv::operator*(_Tp, const cv::Scalar_<_Tp>&)
+/usr/include/opencv2/core/operations.hpp:1880:51: note:   template argument deduction/substitution failed:
+../start.cpp:40:10: note:   candidate expects 2 arguments, 1 provided
+In file included from /usr/include/opencv2/core/core.hpp:4341:0,
+                 from ../start.cpp:3:
+/usr/include/opencv2/core/operations.hpp:1893:1: note: template<class _Tp> cv::Scalar_<_Tp> cv::operator*(const cv::Scalar_<_Tp>&, const cv::Scalar_<_Tp>&)
+/usr/include/opencv2/core/operations.hpp:1893:1: note:   template argument deduction/substitution failed:
+../start.cpp:40:10: note:   ‘cv::gpu::GpuMat’ is not derived from ‘const cv::Scalar_<_Tp>’
+In file included from /usr/include/opencv2/core/core.hpp:4342:0,
+                 from ../start.cpp:3:
+/usr/include/opencv2/core/mat.hpp:1236:20: note: cv::MatExpr cv::operator*(const cv::Mat&, const cv::Mat&)
+/usr/include/opencv2/core/mat.hpp:1236:20: note:   candidate expects 2 arguments, 1 provided
+/usr/include/opencv2/core/mat.hpp:1237:20: note: cv::MatExpr cv::operator*(const cv::Mat&, double)
+/usr/include/opencv2/core/mat.hpp:1237:20: note:   candidate expects 2 arguments, 1 provided
+/usr/include/opencv2/core/mat.hpp:1238:20: note: cv::MatExpr cv::operator*(double, const cv::Mat&)
+/usr/include/opencv2/core/mat.hpp:1238:20: note:   candidate expects 2 arguments, 1 provided
+/usr/include/opencv2/core/mat.hpp:1239:20: note: cv::MatExpr cv::operator*(const cv::MatExpr&, const cv::Mat&)
+/usr/include/opencv2/core/mat.hpp:1239:20: note:   candidate expects 2 arguments, 1 provided
+/usr/include/opencv2/core/mat.hpp:1240:20: note: cv::MatExpr cv::operator*(const cv::Mat&, const cv::MatExpr&)
+/usr/include/opencv2/core/mat.hpp:1240:20: note:   candidate expects 2 arguments, 1 provided
+/usr/include/opencv2/core/mat.hpp:1241:20: note: cv::MatExpr cv::operator*(const cv::MatExpr&, double)
+/usr/include/opencv2/core/mat.hpp:1241:20: note:   candidate expects 2 arguments, 1 provided
+/usr/include/opencv2/core/mat.hpp:1242:20: note: cv::MatExpr cv::operator*(double, const cv::MatExpr&)
+/usr/include/opencv2/core/mat.hpp:1242:20: note:   candidate expects 2 arguments, 1 provided
+/usr/include/opencv2/core/mat.hpp:1243:20: note: cv::MatExpr cv::operator*(const cv::MatExpr&, const cv::MatExpr&)
+/usr/include/opencv2/core/mat.hpp:1243:20: note:   candidate expects 2 arguments, 1 provided
+In file included from /usr/include/opencv2/core/core.hpp:59:0,
+                 from ../start.cpp:3:
+/usr/include/c++/4.7/complex:399:5: note: template<class _Tp> std::complex<_Tp> std::operator*(const _Tp&, const std::complex<_Tp>&)
+/usr/include/c++/4.7/complex:399:5: note:   template argument deduction/substitution failed:
+../start.cpp:40:10: note:   candidate expects 2 arguments, 1 provided
+In file included from /usr/include/opencv2/core/core.hpp:59:0,
+                 from ../start.cpp:3:
+/usr/include/c++/4.7/complex:390:5: note: template<class _Tp> std::complex<_Tp> std::operator*(const std::complex<_Tp>&, const _Tp&)
+/usr/include/c++/4.7/complex:390:5: note:   template argument deduction/substitution failed:
+../start.cpp:40:10: note:   ‘cv::gpu::GpuMat’ is not derived from ‘const std::complex<_Tp>’
+In file included from /usr/include/opencv2/core/core.hpp:59:0,
+                 from ../start.cpp:3:
+/usr/include/c++/4.7/complex:381:5: note: template<class _Tp> std::complex<_Tp> std::operator*(const std::complex<_Tp>&, const std::complex<_Tp>&)
+/usr/include/c++/4.7/complex:381:5: note:   template argument deduction/substitution failed:
+../start.cpp:40:10: note:   ‘cv::gpu::GpuMat’ is not derived from ‘const std::complex<_Tp>’
+../start.cpp:16:6: warning: unused variable ‘thickness’ [-Wunused-variable]
+../start.cpp:17:6: warning: unused variable ‘lineType’ [-Wunused-variable]
+make: *** [start.o] Error 1
+
+**** Build Finished ****
+
+**** Build of configuration Debug for project OpencvTests ****
+
+make all 
+Building file: ../start.cpp
+Invoking: GCC C++ Compiler
+g++ -O0 -g3 -Wall -c -fmessage-length=0 -MMD -MP -MF"start.d" -MT"start.d" -o "start.o" "../start.cpp"
+../start.cpp: In function ‘int main(int, char**)’:
+../start.cpp:40:11: error: no matching function for call to ‘cv::Mat::Mat(cv::gpu::GpuMat*)’
+../start.cpp:40:11: note: candidates are:
+In file included from ../start.cpp:3:0:
+/usr/include/opencv2/core/core.hpp:1622:37: note: template<class _Tp> cv::Mat::Mat(const cv::MatCommaInitializer_<_Tp>&)
+/usr/include/opencv2/core/core.hpp:1622:37: note:   template argument deduction/substitution failed:
+../start.cpp:40:11: note:   mismatched types ‘const cv::MatCommaInitializer_<_Tp>’ and ‘cv::gpu::GpuMat*’
+In file included from ../start.cpp:3:0:
+/usr/include/opencv2/core/core.hpp:1620:37: note: template<class _Tp> cv::Mat::Mat(const cv::Point3_<_Tp>&, bool)
+/usr/include/opencv2/core/core.hpp:1620:37: note:   template argument deduction/substitution failed:
+../start.cpp:40:11: note:   mismatched types ‘const cv::Point3_<_Tp>’ and ‘cv::gpu::GpuMat*’
+In file included from ../start.cpp:3:0:
+/usr/include/opencv2/core/core.hpp:1618:37: note: template<class _Tp> cv::Mat::Mat(const cv::Point_<_Tp>&, bool)
+/usr/include/opencv2/core/core.hpp:1618:37: note:   template argument deduction/substitution failed:
+../start.cpp:40:11: note:   mismatched types ‘const cv::Point_<_Tp>’ and ‘cv::gpu::GpuMat*’
+In file included from ../start.cpp:3:0:
+/usr/include/opencv2/core/core.hpp:1615:51: note: template<class _Tp, int m, int n> cv::Mat::Mat(const cv::Matx<_Tp, m, n>&, bool)
+/usr/include/opencv2/core/core.hpp:1615:51: note:   template argument deduction/substitution failed:
+../start.cpp:40:11: note:   mismatched types ‘const cv::Matx<_Tp, m, n>’ and ‘cv::gpu::GpuMat*’
+In file included from ../start.cpp:3:0:
+/usr/include/opencv2/core/core.hpp:1612:44: note: template<class _Tp, int n> cv::Mat::Mat(const cv::Vec<_Tp, cn>&, bool)
+/usr/include/opencv2/core/core.hpp:1612:44: note:   template argument deduction/substitution failed:
+../start.cpp:40:11: note:   mismatched types ‘const cv::Vec<_Tp, cn>’ and ‘cv::gpu::GpuMat*’
+In file included from ../start.cpp:3:0:
+/usr/include/opencv2/core/core.hpp:1610:37: note: template<class _Tp> cv::Mat::Mat(const std::vector<_Tp>&, bool)
+/usr/include/opencv2/core/core.hpp:1610:37: note:   template argument deduction/substitution failed:
+../start.cpp:40:11: note:   mismatched types ‘const std::vector<_Tp>’ and ‘cv::gpu::GpuMat*’
+In file included from ../start.cpp:3:0:
+/usr/include/opencv2/core/core.hpp:1608:5: note: cv::Mat::Mat(const IplImage*, bool)
+/usr/include/opencv2/core/core.hpp:1608:5: note:   no known conversion for argument 1 from ‘cv::gpu::GpuMat*’ to ‘const IplImage* {aka const _IplImage*}’
+/usr/include/opencv2/core/core.hpp:1606:5: note: cv::Mat::Mat(const CvMatND*, bool)
+/usr/include/opencv2/core/core.hpp:1606:5: note:   no known conversion for argument 1 from ‘cv::gpu::GpuMat*’ to ‘const CvMatND*’
+In file included from /usr/include/opencv2/core/core.hpp:4342:0,
+                 from ../start.cpp:3:
+/usr/include/opencv2/core/mat.hpp:172:8: note: cv::Mat::Mat(const CvMat*, bool)
+/usr/include/opencv2/core/mat.hpp:172:8: note:   no known conversion for argument 1 from ‘cv::gpu::GpuMat*’ to ‘const CvMat*’
+In file included from ../start.cpp:3:0:
+/usr/include/opencv2/core/core.hpp:1602:5: note: cv::Mat::Mat(const cv::Mat&, const cv::Range*)
+/usr/include/opencv2/core/core.hpp:1602:5: note:   candidate expects 2 arguments, 1 provided
+/usr/include/opencv2/core/core.hpp:1601:5: note: cv::Mat::Mat(const cv::Mat&, const Rect&)
+/usr/include/opencv2/core/core.hpp:1601:5: note:   candidate expects 2 arguments, 1 provided
+/usr/include/opencv2/core/core.hpp:1600:5: note: cv::Mat::Mat(const cv::Mat&, const cv::Range&, const cv::Range&)
+/usr/include/opencv2/core/core.hpp:1600:5: note:   candidate expects 3 arguments, 1 provided
+/usr/include/opencv2/core/core.hpp:1597:5: note: cv::Mat::Mat(int, const int*, int, void*, const size_t*)
+/usr/include/opencv2/core/core.hpp:1597:5: note:   candidate expects 5 arguments, 1 provided
+In file included from /usr/include/opencv2/core/core.hpp:4342:0,
+                 from ../start.cpp:3:
+/usr/include/opencv2/core/mat.hpp:149:8: note: cv::Mat::Mat(cv::Size, int, void*, size_t)
+/usr/include/opencv2/core/mat.hpp:149:8: note:   candidate expects 4 arguments, 1 provided
+/usr/include/opencv2/core/mat.hpp:127:8: note: cv::Mat::Mat(int, int, int, void*, size_t)
+/usr/include/opencv2/core/mat.hpp:127:8: note:   candidate expects 5 arguments, 1 provided
+/usr/include/opencv2/core/mat.hpp:109:8: note: cv::Mat::Mat(const cv::Mat&)
+/usr/include/opencv2/core/mat.hpp:109:8: note:   no known conversion for argument 1 from ‘cv::gpu::GpuMat*’ to ‘const cv::Mat&’
+/usr/include/opencv2/core/mat.hpp:101:8: note: cv::Mat::Mat(int, const int*, int, const Scalar&)
+/usr/include/opencv2/core/mat.hpp:101:8: note:   candidate expects 4 arguments, 1 provided
+/usr/include/opencv2/core/mat.hpp:94:8: note: cv::Mat::Mat(int, const int*, int)
+/usr/include/opencv2/core/mat.hpp:94:8: note:   candidate expects 3 arguments, 1 provided
+/usr/include/opencv2/core/mat.hpp:86:8: note: cv::Mat::Mat(cv::Size, int, const Scalar&)
+/usr/include/opencv2/core/mat.hpp:86:8: note:   candidate expects 3 arguments, 1 provided
+/usr/include/opencv2/core/mat.hpp:71:8: note: cv::Mat::Mat(int, int, int, const Scalar&)
+/usr/include/opencv2/core/mat.hpp:71:8: note:   candidate expects 4 arguments, 1 provided
+/usr/include/opencv2/core/mat.hpp:79:8: note: cv::Mat::Mat(cv::Size, int)
+/usr/include/opencv2/core/mat.hpp:79:8: note:   candidate expects 2 arguments, 1 provided
+/usr/include/opencv2/core/mat.hpp:64:8: note: cv::Mat::Mat(int, int, int)
+/usr/include/opencv2/core/mat.hpp:64:8: note:   candidate expects 3 arguments, 1 provided
+/usr/include/opencv2/core/mat.hpp:58:8: note: cv::Mat::Mat()
+/usr/include/opencv2/core/mat.hpp:58:8: note:   candidate expects 0 arguments, 1 provided
+../start.cpp:16:6: warning: unused variable ‘thickness’ [-Wunused-variable]
+../start.cpp:17:6: warning: unused variable ‘lineType’ [-Wunused-variable]
+make: *** [start.o] Error 1
+
+**** Build Finished ****
+
+**** Build of configuration Debug for project OpencvTests ****
+
+make all 
+Building file: ../start.cpp
+Invoking: GCC C++ Compiler
+g++ -O0 -g3 -Wall -c -fmessage-length=0 -MMD -MP -MF"start.d" -MT"start.d" -o "start.o" "../start.cpp"
+../start.cpp: In function ‘int main(int, char**)’:
+../start.cpp:17:6: warning: unused variable ‘thickness’ [-Wunused-variable]
+../start.cpp:18:6: warning: unused variable ‘lineType’ [-Wunused-variable]
+Finished building: ../start.cpp
+ 
+Building target: OpencvTests
+Invoking: GCC C++ Linker
+g++ -L/opt/ros/groovy/lib/ -o "OpencvTests"  ./start.o   -lopencv_core -lopencv_gpu -lopencv_imgproc -lopencv_highgui
+./start.o: In function `main':
+/home/blackpc/workspace/robil_updated/OpencvTests/Debug/../start.cpp:41: undefined reference to `cv::gpu::GpuMat::operator cv::Mat() const'
+collect2: error: ld returned 1 exit status
+make: *** [OpencvTests] Error 1
+
+**** Build Finished ****
+
+**** Build of configuration Debug for project OpencvTests ****
+
+make all 
+Building file: ../start.cpp
+Invoking: GCC C++ Compiler
+g++ -O0 -g3 -Wall -c -fmessage-length=0 -MMD -MP -MF"start.d" -MT"start.d" -o "start.o" "../start.cpp"
+../start.cpp: In function ‘int main(int, char**)’:
+../start.cpp:17:6: warning: unused variable ‘thickness’ [-Wunused-variable]
+../start.cpp:18:6: warning: unused variable ‘lineType’ [-Wunused-variable]
+Finished building: ../start.cpp
+ 
+Building target: OpencvTests
+Invoking: GCC C++ Linker
+g++ -L/opt/ros/groovy/lib/ -o "OpencvTests"  ./start.o   -lopencv_core -lopencv_gpu -lopencv_imgproc -lopencv_highgui
+./start.o: In function `main':
+/home/blackpc/workspace/robil_updated/OpencvTests/Debug/../start.cpp:41: undefined reference to `cv::gpu::GpuMat::operator cv::Mat() const'
+collect2: error: ld returned 1 exit status
+make: *** [OpencvTests] Error 1
+
+**** Build Finished ****
+
+**** Build of configuration Debug for project OpencvTests ****
+
+make all 
+Building file: ../start.cpp
+Invoking: GCC C++ Compiler
+g++ -O0 -g3 -Wall -c -fmessage-length=0 -MMD -MP -MF"start.d" -MT"start.d" -o "start.o" "../start.cpp"
+../start.cpp: In function ‘int main(int, char**)’:
+../start.cpp:18:6: warning: unused variable ‘thickness’ [-Wunused-variable]
+../start.cpp:19:6: warning: unused variable ‘lineType’ [-Wunused-variable]
+Finished building: ../start.cpp
+ 
+Building target: OpencvTests
+Invoking: GCC C++ Linker
+g++ -L/opt/ros/groovy/lib/ -o "OpencvTests"  ./start.o   -lopencv_core -lopencv_gpu -lopencv_imgproc -lopencv_highgui
+./start.o: In function `main':
+/home/blackpc/workspace/robil_updated/OpencvTests/Debug/../start.cpp:42: undefined reference to `cv::gpu::GpuMat::operator cv::Mat() const'
+collect2: error: ld returned 1 exit status
+make: *** [OpencvTests] Error 1
+
+**** Build Finished ****
+
+**** Build of configuration Debug for project OpencvTests ****
+
+make all 
+Building file: ../start.cpp
+Invoking: GCC C++ Compiler
+g++ -O0 -g3 -Wall -c -fmessage-length=0 -MMD -MP -MF"start.d" -MT"start.d" -o "start.o" "../start.cpp"
+../start.cpp: In function ‘int main(int, char**)’:
+../start.cpp:18:6: warning: unused variable ‘thickness’ [-Wunused-variable]
+../start.cpp:19:6: warning: unused variable ‘lineType’ [-Wunused-variable]
+Finished building: ../start.cpp
+ 
+Building target: OpencvTests
+Invoking: GCC C++ Linker
+g++ -L/opt/ros/groovy/lib/ -o "OpencvTests"  ./start.o   -lopencv_core -lopencv_gpu -lopencv_imgproc -lopencv_highgui
+./start.o: In function `main':
+/home/blackpc/workspace/robil_updated/OpencvTests/Debug/../start.cpp:42: undefined reference to `cv::gpu::GpuMat::operator cv::Mat() const'
+collect2: error: ld returned 1 exit status
+make: *** [OpencvTests] Error 1
+
+**** Build Finished ****
+
+**** Build of configuration Debug for project OpencvTests ****
+
+make all 
+Building file: ../start.cpp
+Invoking: GCC C++ Compiler
+g++ -O0 -g3 -Wall -c -fmessage-length=0 -MMD -MP -MF"start.d" -MT"start.d" -o "start.o" "../start.cpp"
+../start.cpp: In function ‘int main(int, char**)’:
+../start.cpp:18:6: warning: unused variable ‘thickness’ [-Wunused-variable]
+../start.cpp:19:6: warning: unused variable ‘lineType’ [-Wunused-variable]
+Finished building: ../start.cpp
+ 
+Building target: OpencvTests
+Invoking: GCC C++ Linker
+g++ -L/opt/ros/groovy/lib/ -o "OpencvTests"  ./start.o   -lopencv_core -lopencv_gpu -lopencv_imgproc -lopencv_highgui
+Finished building target: OpencvTests
+ 
+
+**** Build Finished ****
+
+**** Build of configuration Debug for project OpencvTests ****
+
+make all 
+Building file: ../start.cpp
+Invoking: GCC C++ Compiler
+g++ -O0 -g3 -Wall -c -fmessage-length=0 -MMD -MP -MF"start.d" -MT"start.d" -o "start.o" "../start.cpp"
+../start.cpp: In function ‘int main(int, char**)’:
+../start.cpp:18:6: warning: unused variable ‘thickness’ [-Wunused-variable]
+../start.cpp:19:6: warning: unused variable ‘lineType’ [-Wunused-variable]
+Finished building: ../start.cpp
+ 
+Building target: OpencvTests
+Invoking: GCC C++ Linker
+g++ -L/opt/ros/groovy/lib/ -o "OpencvTests"  ./start.o   -lopencv_core -lopencv_gpu -lopencv_imgproc -lopencv_highgui
+./start.o: In function `main':
+/home/blackpc/workspace/robil_updated/OpencvTests/Debug/../start.cpp:43: undefined reference to `cv::gpu::GpuMat::operator cv::Mat() const'
+collect2: error: ld returned 1 exit status
+make: *** [OpencvTests] Error 1
+
+**** Build Finished ****
+
+**** Build of configuration Debug for project OpencvTests ****
+
+make all 
+Building target: OpencvTests
+Invoking: GCC C++ Linker
+g++ -L/opt/ros/groovy/lib/ -o "OpencvTests"  ./start.o   -lopencv_core -lopencv_imgproc -lopencv_highgui -lopencv_gpu
+./start.o: In function `main':
+/home/blackpc/workspace/robil_updated/OpencvTests/Debug/../start.cpp:43: undefined reference to `cv::gpu::GpuMat::operator cv::Mat() const'
+collect2: error: ld returned 1 exit status
+make: *** [OpencvTests] Error 1
+
+**** Build Finished ****
+
+**** Build of configuration Debug for project OpencvTests ****
+
+make all 
+Building target: OpencvTests
+Invoking: GCC C++ Linker
+g++ -L/opt/ros/groovy/lib/ -o "OpencvTests"  ./start.o   -lopencv_core -lopencv_imgproc -lopencv_highgui -lopencv_gpu
+./start.o: In function `main':
+/home/blackpc/workspace/robil_updated/OpencvTests/Debug/../start.cpp:43: undefined reference to `cv::gpu::GpuMat::operator cv::Mat() const'
+collect2: error: ld returned 1 exit status
+make: *** [OpencvTests] Error 1
+
+**** Build Finished ****
+
+**** Build of configuration Debug for project OpencvTests ****
+
+make all 
+Building file: ../start.cpp
+Invoking: GCC C++ Compiler
+g++ -O0 -g3 -Wall -c -fmessage-length=0 -MMD -MP -MF"start.d" -MT"start.d" -o "start.o" "../start.cpp"
+../start.cpp: In function ‘int main(int, char**)’:
+../start.cpp:18:6: warning: unused variable ‘thickness’ [-Wunused-variable]
+../start.cpp:19:6: warning: unused variable ‘lineType’ [-Wunused-variable]
+Finished building: ../start.cpp
+ 
+Building target: OpencvTests
+Invoking: GCC C++ Linker
+g++ -L/opt/ros/groovy/lib/ -o "OpencvTests"  ./start.o   -lopencv_core -lopencv_imgproc -lopencv_highgui -lopencv_gpu
+./start.o: In function `main':
+/home/blackpc/workspace/robil_updated/OpencvTests/Debug/../start.cpp:43: undefined reference to `cv::gpu::GpuMat::operator cv::Mat() const'
+collect2: error: ld returned 1 exit status
+make: *** [OpencvTests] Error 1
+
+**** Build Finished ****
+
+**** Build of configuration Debug for project OpencvTests ****
+
+make all 
+Building file: ../start.cpp
+Invoking: GCC C++ Compiler
+g++ -O0 -g3 -Wall -c -fmessage-length=0 -MMD -MP -MF"start.d" -MT"start.d" -o "start.o" "../start.cpp"
+../start.cpp:9:21: error: ‘gpu’ is not a namespace-name
+../start.cpp:9:24: error: expected namespace-name before ‘;’ token
+../start.cpp: In function ‘int main(int, char**)’:
+../start.cpp:12:2: error: ‘gpu’ has not been declared
+../start.cpp:12:14: error: expected ‘;’ before ‘m’
+../start.cpp:39:8: error: ‘GpuMat’ does not name a type
+../start.cpp:44:2: error: ‘gpu’ has not been declared
+../start.cpp:44:14: error: expected ‘;’ before ‘g’
+../start.cpp:16:6: warning: unused variable ‘thickness’ [-Wunused-variable]
+../start.cpp:17:6: warning: unused variable ‘lineType’ [-Wunused-variable]
+make: *** [start.o] Error 1
+
+**** Build Finished ****
+
+**** Build of configuration Debug for project OpencvTests ****
+
+make all 
+Building file: ../start.cpp
+Invoking: GCC C++ Compiler
+g++ -O0 -g3 -Wall -c -fmessage-length=0 -MMD -MP -MF"start.d" -MT"start.d" -o "start.o" "../start.cpp"
+../start.cpp: In function ‘int main(int, char**)’:
+../start.cpp:16:6: warning: unused variable ‘thickness’ [-Wunused-variable]
+../start.cpp:17:6: warning: unused variable ‘lineType’ [-Wunused-variable]
+Finished building: ../start.cpp
+ 
+Building target: OpencvTests
+Invoking: GCC C++ Linker
+g++ -L/opt/ros/groovy/lib/ -o "OpencvTests"  ./start.o   -lopencv_core -lopencv_imgproc -lopencv_highgui -lopencv_gpu
+Finished building target: OpencvTests
+ 
+
+**** Build Finished ****
+
+**** Build of configuration Debug for project OpencvTests ****
+
+make all 
+Building file: ../start.cpp
+Invoking: GCC C++ Compiler
+g++ -O0 -g3 -Wall -c -fmessage-length=0 -MMD -MP -MF"start.d" -MT"start.d" -o "start.o" "../start.cpp"
+Finished building: ../start.cpp
+ 
+Building target: OpencvTests
+Invoking: GCC C++ Linker
+g++ -L/opt/ros/groovy/lib/ -o "OpencvTests"  ./start.o   -lopencv_core -lopencv_imgproc -lopencv_highgui -lopencv_gpu
+Finished building target: OpencvTests
+ 
+
+**** Build Finished ****
+
+**** Build of configuration Debug for project OpencvTests ****
+
+make all 
+Building file: ../start.cpp
+Invoking: GCC C++ Compiler
+g++ -O0 -g3 -Wall -c -fmessage-length=0 -MMD -MP -MF"start.d" -MT"start.d" -o "start.o" "../start.cpp"
+Finished building: ../start.cpp
+ 
+Building target: OpencvTests
+Invoking: GCC C++ Linker
+g++ -L/opt/ros/groovy/lib/ -o "OpencvTests"  ./start.o   -lopencv_core -lopencv_imgproc -lopencv_highgui -lopencv_gpu
+Finished building target: OpencvTests
+ 
+
+**** Build Finished ****
+
+**** Build of configuration Debug for project OpencvTests ****
+
+make all 
+make: Nothing to be done for `all'.
+
+**** Build Finished ****

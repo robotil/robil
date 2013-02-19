@@ -1,0 +1,50 @@
+package terminal.communication;
+
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+/**
+ * 
+ * @author blackpc
+ *
+ */
+public class StackStreamMessageParser {
+	
+	private static final String MESSAGE_TASK_ID_PATTERN = "(.*)";
+	private static final String MESSAGE_FORMAT_PATTERN = 
+			//                         label  code        taskName   parameters----------------  
+			"data: ExeStack: changed : (\\w+) code=(\\d), node=(\\w+)\\((.*?)(\\)\\(|\\)\\s\\[)\\s?" + MESSAGE_TASK_ID_PATTERN; // [id=PP_ID]($Task(PathPlanning) [id=PP_ID]:FAILURE(1000)$)";
+	
+	private final Pattern _messageRegexPattern = Pattern.compile(MESSAGE_FORMAT_PATTERN);
+	
+	
+	public StackStreamMessage parse(String inputString) {
+		StackStreamMessage message = new StackStreamMessage();
+		
+		Matcher m = _messageRegexPattern.matcher(inputString);
+		
+		if (m.find()) {
+			message.setPlanLabel(m.group(1));
+			message.setChangeType(Integer.parseInt(m.group(2)));
+			message.setTaskName(m.group(3));
+			message.setTaskParameters(m.group(4));
+			message.setTaskId(m.group(5));
+		} else
+			message = null; // No match
+		
+		return message;
+	}
+	
+	public static void main(String[] args) {
+		// data: ExeStack: changed : P1 code=1, node=Task(PathPlanning)
+		String testInputString = "data: ExeStack: changed : P1 code=1, node=Task(PathPlanning(x=1,y=2)) [";
+		
+		StackStreamMessageParser parser = new StackStreamMessageParser();
+		StackStreamMessage message = parser.parse(testInputString);
+		
+		if (message == null)
+			System.out.println("Couldn't parse message.");
+		else
+			System.out.println(message);
+	}
+}

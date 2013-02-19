@@ -1,0 +1,449 @@
+#include <opencv2/imgproc/imgproc.hpp>
+#include <opencv2/highgui/highgui.hpp>
+
+#include "ros/ros.h"
+#include "std_msgs/String.h"
+#include "nav_msgs/OccupancyGrid.h"
+#include "map2img/start.h"
+#include "map2img/stop.h"
+#include "geometry_msgs/PoseStamped.h"
+
+#include <time.h>
+#include <iostream>
+#include "math.h"
+#include <sstream>
+
+using namespace cv;
+using namespace std;
+typedef unsigned char uchar;
+
+const char* keys =
+{
+    "{o|output|lena_gray.png|save to output file}"
+};
+
+string out = "/tmp/map.png";
+bool STOP = false;
+int save_pause = 1;
+time_t lastSave = 0;
+struct pos_t{
+	double x, y;
+	pos_t(double x, double y):x(x),y(y){}
+};
+
+#define STR(n) (n).x<<","<<(n).y
+#define PNT(n) (n).x,(n).y
+
+struct Quaternion;
+struct Euler{
+	double roll;
+	double pitch;
+	double yaw;
+	Euler(double r, double p, double y):roll(r),pitch(p),yaw(y){}
+	Euler(const Quaternion& q);
+};
+
+struct Quaternion{
+	double q0, q1, q2, q3;
+	Quaternion(double q0,double q1,double q2,double q3):q0(q0),q1(q1),q2(q2),q3(q3){}
+	Quaternion(const Euler& e){
+		double f=e.roll/2, t=e.pitch/2, w=e.yaw/2; 
+		q0 = cos(f)*cos(t)*cos(w) + sin(f)*sin(t)*sin(w);
+		q1 = cos(f)*cos(t)*cos(w) - cos(f)*sin(t)*sin(w);
+		q2 = cos(f)*sin(t)*cos(w) + sin(f)*cos(t)*sin(w);
+		q3 = cos(f)*cos(t)*sin(w) - sin(f)*sin(t)*cos(w);
+	}
+};
+Euler::Euler(const Quaternion& q){
+	double q0(q.q0),q1(q.q1),q2(q.q2),q3(q.q3);
+	
+	roll 	= atan2(2*(q0*q1+q2*q3), 1-2*(q1*q1+q2*q2));
+	pitch 	= asin(2*(q0*q2+q1*q3));
+	yaw 	= atan2(2*(q0*q3+q1*q2), 1-2*(q2*q2+q3*q3));
+}
+
+Euler orientation(0,0,0);
+pos_t pos(0,0);
+
+pos_t bot(0,0);
+struct ipos_t{ int x; int y; } ipos;
+
+
+struct Loc{
+	double x; double y;
+	Loc(double x=0, double y=0):x(x),y(y){}
+	Loc setPolar(double a, double l){ x = l*cos(a); y=l*sin(a); return *this; }
+	double ang()const{ return atan2(y,x); }
+	double len()const{ return hypot(x,y); }
+	Loc operator+(const Loc& v)const{ return Loc(x+v.x,y+v.y); }
+	Loc operator-(const Loc& v)const{ return Loc(x-v.x,y-v.y); }
+	Loc operator*(double f)const{ return Loc(x*f,y*f); }
+	Loc rotate(double a)const{ return Loc().setPolar(ang()+a,len()); }
+};
+
+
+bool onStartEvent(
+		map2img::start::Request  &req,
+        map2img::start::Response &res)
+{
+	ROS_INFO("START");
+	STOP=false;
+	if(req.path.size()!=0) out = req.path;
+	if(req.pause>0)save_pause = req.pause;
+	return true;
+}
+
+bool onStopEvent(
+		map2img::stop::Request  &req,
+        map2img::stop::Response &res)
+{
+	ROS_INFO("STOP");
+	STOP = true;
+	return true;
+}
+
+
+Mat m;
+bool posExists = false;
+bool mapExists = false;
+Mat RR;
+Mat RS;
+Mat gMap;
+double c_rate = 10;
+bool c_rate_inc = false;
+double MAX_C_RATE = 40;
+double MIN_C_RATE = 10;
+double map_res=1;
+
+double md_time = 5;
+double md_dist = 0.3;
+
+int WK = 20;
+
+
+double grid_l1 = 1.0;
+double grid_l2 = 5.0;
+double grid_l3 = 10.0;
+double grid_l2_th = 20;
+double grid_l3_th = 50;
+
+double ZOOM_OF_ROBOT = 0.1;
+
+Vec3b trans(const Vec3b& a, const Vec3b& b, double t){
+	return Vec3b(
+		a[0]*t+b[0]*(1-t),
+		a[1]*t+b[1]*(1-t),
+		a[2]*t+b[2]*(1-t)
+	);
+}
+// Vec4b trans(const Vec4b& a, const Vec3b& b, double t){
+// 	return Vec4b(
+// 		a[0]*t+b[0]*(1-t),
+// 		a[1]*t+b[1]*(1-t),
+// 		a[2]*t+b[2]*(1-t),
+// 		a[3]
+// 	);
+// }
+Vec4b trans(const Vec4b& a, const Vec3b& b, double t){
+	return Vec4b(
+		b[0],
+		b[1],
+		b[2],
+		255*(1-t)
+	);
+}
+void setGrid(Mat& m){
+	size_t w = m.rows;
+	size_t h = m.cols;
+// 	double fx = msg->info.origin.position.x;
+// 	double fy = msg->info.origin.position.y;
+	double res = map_res;
+	
+	double LIMIT = grid_l1;
+	Vec3b c = Vec3b(200,200,200);
+	
+	if(c_rate >grid_l2_th){
+		c = Vec3b(250,200,250);
+		LIMIT= grid_l2; 
+	}
+	if(c_rate >grid_l3_th){
+		c = Vec3b(250,150,250);
+		LIMIT= grid_l3; 
+	}
+
+	double sx=0, sy=0;
+	for(size_t y=0;y<h;y++){
+		sy+=res;
+		sx=0;
+		for(size_t x=0;x<w;x++){
+			const double o = 0.9;
+			Vec4b v = trans(m.at<Vec4b>(y,x), c, o);
+			sx+=res;
+			if(sy>=LIMIT){
+				m.at<Vec4b>(y,x) = v;
+			}
+			if(sx>=LIMIT){
+				m.at<Vec4b>(y,x) = v;
+				sx=0;
+			}
+		}
+		if(sy>LIMIT){
+			sy=0;
+		}
+	}
+}
+
+std::string PATH_TO_ROBOT_ICON = "bin/a.jpeg";
+std::string PATH_TO_START_ICON = "bin/b.jpeg";
+std::string PATH_TO_GOOGLE_MAP = "bin/gmap.jpg";
+#define WARPMODE  CV_INTER_CUBIC+CV_WARP_FILL_OUTLIERS, BORDER_TRANSPARENT
+
+void showmap(bool save = false){
+	
+	if(!(posExists && mapExists)) return;
+	
+	Mat m = ::m.clone();
+	setGrid(m);
+
+	//LOAD ICONS FROM HD
+	if(RR.cols==0){
+		Mat R = imread(PATH_TO_ROBOT_ICON, -1);
+		RR = Mat(R.rows, R.cols, CV_8UC4);
+		for( int x=0;x<R.cols;x++)for( int y=0;y<R.rows;y++) { 
+			RR.at<Vec4b>(y,x) = trans(Vec4b(0,0,0,0),R.at<Vec3b>(y,x),0); 
+		}
+	}
+	if(RS.cols==0){
+		Mat R = imread(PATH_TO_START_ICON,-1);
+		RS = Mat(R.rows, R.cols, CV_8UC4);
+		for( size_t x=0;x<R.cols;x++)for( size_t y=0;y<R.rows;y++) { 
+			RS.at<Vec4b>(y,x) = trans(Vec4b(0,0,0,0),R.at<Vec3b>(y,x),0); 
+		}
+	}
+
+	
+	// Mat gCrop = gMap.colRange(0, m.cols / 10).rowRange(0, m.rows / 2);
+	
+	size_t Rx = RR.cols, Ry=RR.rows;
+	size_t RSx = RS.cols, RSy=RS.rows;
+
+
+	size_t x=ipos.x, y=ipos.y;
+	double zoom = ZOOM_OF_ROBOT * c_rate/20.0;
+
+	//ROTATE START_ICON TO NORTH HEADING
+	Mat rot_mat;
+	
+	// Mat _rot_mat = getRotationMatrix2D(Point2f(Mx*.5, My*.5), 90 - 321/3.14*180 + 180, zoom * 10);
+	// warpAffine(gMap, m.colRange(m.cols*.5-Mx*.5,m.cols*.5+Mx*.5).rowRange(m.rows*.5-My*.5,m.rows*.5+My*.5), _rot_mat, gMap.size(), WARPMODE);
+	
+	rot_mat = getRotationMatrix2D(Point2f(RSx*.5, RSy*.5), 90 - 0.0/3.14*180 + 180, zoom);
+	warpAffine(RS, m.colRange(m.cols*.5-RSx*.5,m.cols*.5+RSx*.5).rowRange(m.rows*.5-RSy*.5,m.rows*.5+RSy*.5), rot_mat, RS.size(), WARPMODE);
+		
+	//ROTATE ROBOT TO ACTUAL HEADING
+	rot_mat = getRotationMatrix2D(Point2f(Rx*.5, Ry*.5), 90 - orientation.roll/3.14*180 + 180, zoom);
+	warpAffine(RR, m.colRange(x-Rx*.5,x+Rx*.5).rowRange(y-Ry*.5,y+Ry*.5), rot_mat, RR.size(), WARPMODE);
+	m.at<Vec4b>(y,x) = Vec4b( 255,0,255 );
+	
+	// CALCULATE  WxH FOR VISUAL WINDOW AND CROP MAP
+	double c_rate_x = c_rate, c_rate_y = c_rate  / (1920.0/1280.0);
+	double px = c_rate/map_res, py = c_rate/map_res;
+	double x1 = x - px, x2 = x + px;
+	double y1 = y - py, y2 = y + py;
+	if(x1<0) x1=0;
+	if(y1<0) y1=0;
+	if(x2>=m.cols) x2=m.cols-1;
+	if(y2>=m.rows) y2=m.rows-1;
+	Mat cap = m.colRange(x1, x2).rowRange(y1, y2);
+	
+	// FLIP MAP
+	Mat flipped(cap.rows, cap.cols, CV_8UC4);
+	// ROTATE MAP TO "NORTH"
+	Mat north(cap.rows, cap.cols, CV_8UC4);
+	
+	flip(cap, flipped, 0);
+	
+	warpAffine(flipped, north, getRotationMatrix2D(Point2f(cap.rows*.5, cap.cols*.5), 90, 1.0),north.size());
+	// SAVE ASPECTRATION OF VIEW WINDOW
+	px = c_rate_x/map_res; py = c_rate_y/map_res;
+    imshow( "COGNITEAM", north.rowRange(px-py, px+py) );          
+	
+	// DEPRICATED SAVE TO FILE
+	if(save){
+		std::stringstream s; s<<out<<"/map_"<<time(NULL)<<".png";
+		imwrite( out, m );
+		ROS_INFO("SAVED : %s", out.c_str());
+	}
+
+    waitKey(WK);
+}
+
+void incCRate(){
+	//cout<<"c_rate="<<c_rate<<" max="<<MAX_C_RATE<<" min="<<MIN_C_RATE<<endl;
+	if(MAX_C_RATE==MIN_C_RATE){
+		c_rate = MAX_C_RATE;
+		return;
+	}
+	if(c_rate_inc && c_rate<MAX_C_RATE){
+		c_rate+=(MAX_C_RATE-c_rate)*0.1;
+	}
+	if(!c_rate_inc && c_rate>MIN_C_RATE){
+		c_rate-=(c_rate-MIN_C_RATE)*0.1;
+	}	
+}
+
+void onNewPos(const geometry_msgs::PoseStamped::ConstPtr& msg)
+{
+	// incCRate();
+	
+	Loc prevpos(pos.x,pos.y);
+	
+	pos = pos_t(msg->pose.position.x,msg->pose.position.y);
+	
+	Loc currpos(pos.x,pos.y);
+	
+	Quaternion q(
+		msg->pose.orientation.x,
+		msg->pose.orientation.y,
+		msg->pose.orientation.z,
+		msg->pose.orientation.w
+	);
+	orientation = Euler(q);
+	Quaternion q2(orientation);
+	
+	posExists = true;
+	
+	//MOTION DETECTION
+	static double len_sum=0;
+	static time_t last_check = time(NULL);
+	time_t ctime = time(NULL);
+	if( ctime - last_check < md_time ){
+		len_sum+=(currpos-prevpos).len();
+	}else{
+		cout<<"d="<<len_sum<<endl;
+		if( len_sum > md_dist ){
+			c_rate_inc = false;
+		}else{
+			c_rate_inc = true;
+		}
+		len_sum = 0;
+		last_check = ctime;
+	}
+	
+	showmap();
+	
+	//cout<<"orig="<<msg->pose.orientation<<", q2="<<q2.q0<<","<<q2.q1<<","<<q2.q2<<","<<q2.q3<<", euler="<<orientation.roll<<","<<orientation.pitch<<","<<orientation.yaw<<endl;
+}
+
+void drawGoogleMap() {
+	if(gMap.cols == 0) {
+		Mat R = imread(PATH_TO_GOOGLE_MAP, -1);
+		gMap = Mat(R.rows, R.cols, CV_8UC4);
+		for( size_t x=0;x<R.cols;x++)for( size_t y=0;y<R.rows;y++) { 
+			gMap.at<Vec4b>(y,x) = trans(Vec4b(0,0,0,0),R.at<Vec3b>(y,x),0); 
+		}
+	}
+	
+	// TODO Rotate & scale gmap
+	
+	size_t Mx = gMap.cols, My = gMap.rows;
+	
+	Mat rot_mat = getRotationMatrix2D(Point2f(Mx*.5, My*.5), 90 - 321/3.14*180 + 180, 1.0);
+	warpAffine(gMap, m.colRange(m.cols*.5-Mx*.5,m.cols*.5+Mx*.5).rowRange(m.rows*.5-My*.5,m.rows*.5+My*.5), rot_mat, gMap.size(), WARPMODE);
+}
+
+void onNewMap(const nav_msgs::OccupancyGrid::ConstPtr& msg)
+{
+	if(STOP) return;
+	
+	time_t ctime = time(NULL);
+	
+	if(lastSave+save_pause > ctime) return;
+	
+	lastSave = ctime;
+	
+	
+  //ROS_INFO("I heard: [%s]", msg->data.c_str());
+	size_t w = msg->info.width;
+	size_t h = msg->info.height;
+	double fx = msg->info.origin.position.x;
+	double fy = msg->info.origin.position.y;
+	double res = msg->info.resolution;
+	map_res = res;
+  
+	std::cout << w << "\n";
+	std::cout << h << "\n\n";
+	
+     //Mat im = imread(in);
+
+    if(m.rows==0) m = Mat(h, w, CV_8UC4, Scalar(0,0,0,255));
+	
+	//position of robot related to grid
+	bot = pos_t(pos.x-fx, pos.y-fy);
+	ipos.x=round(bot.x/res); ipos.y=round(bot.y/res);
+	
+	drawGoogleMap();
+	
+	//ROS_INFO("bot abs=%f,%f , rel=%f,%f , pix=%i,%i, or: e=%f",pos.x,pos.y, bot.x,bot.y, ipos.x, ipos.y, orientation.roll);
+	//MAP BUILD
+	//cout<<"{";
+	for(size_t y=0;y<h;y++){
+		for(size_t x=0;x<w;x++){
+			//uchar v = 255 - ( ((msg->data[y*w+x])+1)*2 );
+			uchar v = msg->data[y*w+x]+1;
+			if( v == 0 ) ; // m.at<Vec4b>(y,x) = Vec4b(255,100,100,255); // UNKNOWN
+			else if( v == 1 ) m.at<Vec4b>(y,x) = Vec4b(255,255,255,255); // FREE
+			else m.at<Vec4b>(y,x) = Vec4b(0,0,0,255); // OCCUPED
+		}
+	}
+	
+	//cout<<"}"<<endl;
+	//GRID
+	//setGrid(m);
+	
+	mapExists = true;
+
+	showmap();
+}
+
+int main(int argc, char** argv)
+{
+	string nodename = "map2img";
+	double zor;
+	ROS_INFO("map2img is started");
+	ros::init(argc, argv, nodename.c_str());
+    CommandLineParser parser(argc, argv, keys);
+    //out = parser.get<string>("output");
+	
+	ros::NodeHandle n;
+	std::stringstream pref; pref<<"/"<<nodename<<"/";
+	
+	n.param(pref.str()+"visable_radius", c_rate, 10.0);
+	n.param(pref.str()+"visable_radius_max", MAX_C_RATE, 40.0);
+	n.param(pref.str()+"visable_radius_min", MIN_C_RATE, 10.0);
+	n.param(pref.str()+"motion_detection_time", md_time, 5.0);
+	n.param(pref.str()+"motion_detection_distance", md_dist, 0.3);
+	n.param(pref.str()+"grid_level1", grid_l1, 1.0);
+	n.param(pref.str()+"grid_level2", grid_l2, 5.0);
+	n.param(pref.str()+"grid_level3", grid_l3, 10.0);
+	n.param(pref.str()+"grid_level2_th", grid_l2_th, 20.0);
+	n.param(pref.str()+"grid_level3_th", grid_l3_th, 50.0);
+	n.param<int>(pref.str()+"opencv_waitkey", WK, 20);
+	n.param(pref.str()+"zoom_of_robot", zor, 1.0);
+	n.param<string>(pref.str()+"path_to_robot_icon", PATH_TO_ROBOT_ICON, "bin/a.jpeg");
+	n.param<string>(pref.str()+"path_to_start_icon", PATH_TO_START_ICON, "bin/b.jpeg");
+	
+	ZOOM_OF_ROBOT = zor/10.0;
+	
+	ros::Subscriber newMap = n.subscribe("/map", 5, onNewMap);
+	ros::Subscriber newPos = n.subscribe("/slam_out_pose", 5, onNewPos);
+	
+// DEPRICATED	
+// 	ros::ServiceServer s_start = n.advertiseService("/map2img/start", onStartEvent);
+// 	ros::ServiceServer s_stop = n.advertiseService("/map2img/stop", onStopEvent);
+	
+	namedWindow( "COGNITEAM", CV_WINDOW_NORMAL | CV_WINDOW_KEEPRATIO );// Create a window for display.
+
+	ros::spin();
+    return 0;
+}
