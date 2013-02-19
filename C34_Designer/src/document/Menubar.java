@@ -11,35 +11,14 @@ import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 import javax.swing.KeyStroke;
 
-import document.actions.ArrowReconnectAction;
-import document.actions.CloseTabAction;
-import document.actions.CompileAction;
-import document.actions.CopyTreeAction;
-import document.actions.LoadAndOpenAction;
-import document.actions.LogConsoleAction;
-import document.actions.ModifyAction;
-import document.actions.NewWindowAction;
-import document.actions.NextTabAction;
-import document.actions.OpenFileAction;
-import document.actions.OpenTerminalAction;
-import document.actions.PointAction;
-import document.actions.PreviousTabAction;
-import document.actions.PropertiesAction;
-import document.actions.RedoAction;
-import document.actions.RemoveAction;
-import document.actions.RemoveSubtreeAction;
-import document.actions.RunAction;
-import document.actions.SaveImageAction;
-import document.actions.SaveXMLAction;
-import document.actions.TestAction;
-import document.actions.ToolAction;
-import document.actions.UndoAction;
+import document.actions.*;
 
 public class Menubar extends JMenuBar {
 
 	private JMenuItem _undoMenuItem;
 	private JMenuItem _redoMenuItem;
 	private JCheckBoxMenuItem _debugViewMenuItem;
+	private JCheckBoxMenuItem _runtimeViewMenuItem;
 	
 	private static final long serialVersionUID = 8066873848483126226L;
 
@@ -59,9 +38,26 @@ public class Menubar extends JMenuBar {
 			@Override
 			public void actionPerformed(ActionEvent arg) {
 				designer.getActiveTab().doc.repaint();
+				
+				if (_debugViewMenuItem.isSelected())
+					_runtimeViewMenuItem.setSelected(false);
 			}
 		});
 		menu.add(_debugViewMenuItem);
+		
+		_runtimeViewMenuItem = new JCheckBoxMenuItem("Enable runtime view");
+		_runtimeViewMenuItem.setSelected(false);
+		_runtimeViewMenuItem.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent arg) {
+				designer.getActiveTab().doc.repaint();
+				
+				if (_runtimeViewMenuItem.isSelected())
+					_debugViewMenuItem.setSelected(false);
+			}
+		});
+		menu.add(_runtimeViewMenuItem);
+		
 		return menu;
 	}
 	
@@ -480,6 +476,10 @@ public class Menubar extends JMenuBar {
 	
 	public JCheckBoxMenuItem getDebugViewMenuItem() {
 		return _debugViewMenuItem;
+	}
+	
+	public JCheckBoxMenuItem getRuntimeViewMenuItem() {
+		return _runtimeViewMenuItem;
 	}
 
 }

@@ -16,6 +16,9 @@ import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Date;
 import java.util.Map;
 import java.util.Vector;
 
@@ -503,6 +506,56 @@ public class Task extends GElement implements View.ChangesListener {
 //			}
 		}
 	}
+	
+	/**
+	 * Holds run result
+	 * @author blackpc
+	 */
+	public class TaskResult {
+		private int _code = 0;
+		private String _description = "";
+		private Date _dateTime;
+		
+		public TaskResult() { this(0, ""); }
+		
+		public TaskResult(int code) { this(code, ""); }
+		
+		public TaskResult(int code, String description) {
+			_code = code;
+			_description = description;
+			_dateTime = new Date();
+		}
+		
+		public int getCode() {
+			return _code;
+		}
+		
+		public void setCode(int code) {
+			this._code = code;
+		}
+		
+		public String getDescription() {
+			return _description;
+		}
+		
+		public void setDescription(String description) {
+			this._description = description;
+		}
+		
+		public Date getTime() {
+			return this._dateTime;
+		}
+		
+		public boolean isFailure() {
+			return this._code > 0;
+		}
+		
+		@Override
+		public String toString() {
+			SimpleDateFormat dateFormat = new SimpleDateFormat("HH:mm:ss");
+			return String.format("[%s] %d (%s)", dateFormat.format(getTime()), getCode(), getDescription());
+		}
+	}
 
 	public final static String TYPE_task = "task";
 	public final static String TYPE_selector = "selector";
@@ -515,9 +568,12 @@ public class Task extends GElement implements View.ChangesListener {
 	public Font font = new Font("sansserif", Font.BOLD, 10);
 	public int seqNumber = 0;
 	private TaskDescription taskDescriptionProvider;
-	private final Tooltip _tooltip;	
+	private Tooltip _tooltip;	
 	private Tooltip _debugInfo;
+	private Tooltip _runtimeInfo;
 	private Document _document;
+	private ArrayList<TaskResult> _results = new ArrayList<TaskResult>();
+	
 
 	final int shortTextLen = 25;
 
@@ -525,10 +581,15 @@ public class Task extends GElement implements View.ChangesListener {
 		this.property.size = new Vec(100, 100);
 		this._tooltip = new Tooltip(this);
 		this._debugInfo = new Tooltip(this, ToolTipDesign.DebugInfo);
+		this._runtimeInfo = new Tooltip(this, ToolTipDesign.RuntimeInfo);
 	}
 
 	private boolean isDebugViewEnabled() {
 		return !(this._document == null) && this._document.isDebugViewEnabled();
+	}
+	
+	private boolean isRuntimeViewEnabled() {
+		return !(this._document == null) && this._document.isRuntimeViewEnabled();
 	}
 	
 	@Override
@@ -593,6 +654,29 @@ public class Task extends GElement implements View.ChangesListener {
 		return this.text;
 	}
 
+	public String getRunResultsString(boolean addColorFormat) {
+		if (_results.size() == 0)
+			return "";
+		
+		StringBuilder output = new StringBuilder();
+		
+		for (TaskResult result : _results) {
+			if (result.isFailure() && addColorFormat)
+				output.append("$RED$");
+			
+			output.append(result);
+			output.append("\n");
+		}
+		
+		return output.toString();
+	}
+	
+	public void addRunResult(int code, String description) {
+		_results.add(new TaskResult(code, description));
+		this._runtimeInfo.setMessage(getRunResultsString(true));
+		this._document.repaint();
+	}
+	
 	@Override
 	public void modify() {
 		ModifyDialog dlg = new ModifyDialog();
@@ -706,8 +790,11 @@ public class Task extends GElement implements View.ChangesListener {
 			this._tooltip.paint(g);
 		else if (this.type.equalsIgnoreCase(TYPE_task) && isDebugViewEnabled()) {
 			// Draw debug info tooltip
-			this._debugInfo.setMessage(String.format("Duration: %d\nDebug: %b", this.property.test_time, this.property.test_result));
+			this._debugInfo.setMessage(String.format("Duration: %d\n%sDebug: %b", this.property.test_time, !this.property.test_result ? "$RED$" : "",this.property.test_result));
 			this._debugInfo.paint(g);
+		} else if (this.type.equalsIgnoreCase(TYPE_task) && isRuntimeViewEnabled()) {
+			// this._runtimeInfo.setMessage(getRunResultsString());
+			this._runtimeInfo.paint(g);
 		}
 		
 		gp.restore();

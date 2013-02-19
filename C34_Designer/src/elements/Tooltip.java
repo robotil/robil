@@ -10,7 +10,8 @@ public class Tooltip extends GElement {
 
 	public enum ToolTipDesign {
 		Default,
-		DebugInfo
+		DebugInfo,
+		RuntimeInfo
 	}
 	
 	@SuppressWarnings("unused")
@@ -43,16 +44,22 @@ public class Tooltip extends GElement {
 	}
 
 	private void drawMultiLineString(Graphics2D g, String string, int x, int y) {
-		for (String line : string.split("\n"))
-			if (this._design == ToolTipDesign.DebugInfo && line.contains("false")) {
-				// Special case
-				Color originalColor = g.getColor();
+		for (String line : string.split("\n")) {
+			Color originalColor = g.getColor();
+			
+			if (line.contains("$RED$")) 
 				g.setColor(Color.RED);
-				g.drawString(line, x, y += g.getFontMetrics().getHeight());
-				g.setColor(originalColor);
-			} else		 
-				// Regular case
-				g.drawString(line, x, y += g.getFontMetrics().getHeight());
+			
+			if (line.contains("$GREEN$"))
+				g.setColor(Color.GREEN);
+			
+			if (line.contains("$BLUE$"))
+				g.setColor(Color.BLUE);
+			
+			g.drawString(line.replaceAll("\\$.*?\\$", ""), x, y += g.getFontMetrics().getHeight());
+			
+			g.setColor(originalColor);
+		}
 	}
 
 	private int getLinesCountHeight(String string) {
@@ -76,11 +83,15 @@ public class Tooltip extends GElement {
 
 	@Override
 	public void paint(Graphics2D g) {
+		
+		if (this._message.trim().equals(""))
+			return;
+		
 		updatePosition(g);
 
 		Composite oldComposite = g.getComposite();
 
-		AlphaComposite ac = AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 0.7F);
+		AlphaComposite ac = AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 0.8F);
 		g.setComposite(ac);
 
 		switch (_design) {
@@ -92,6 +103,12 @@ public class Tooltip extends GElement {
 			break;
 		case DebugInfo:
 			g.setColor(Color.WHITE);
+			g.fillRoundRect((int) this.property.loc.x, (int) this.property.loc.y, (int) this.property.size.x, (int) this.property.size.y, 10, 10);
+			g.setColor(Color.BLACK);
+			drawMultiLineString(g, this._message, (int) this._textPosition.x, (int) this._textPosition.y);
+			break;
+		case RuntimeInfo:
+			g.setColor(Color.YELLOW);
 			g.fillRoundRect((int) this.property.loc.x, (int) this.property.loc.y, (int) this.property.size.x, (int) this.property.size.y, 10, 10);
 			g.setColor(Color.BLACK);
 			drawMultiLineString(g, this._message, (int) this._textPosition.x, (int) this._textPosition.y);

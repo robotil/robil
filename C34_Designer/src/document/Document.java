@@ -21,6 +21,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
+import java.util.Random;
 import java.util.Set;
 import java.util.UUID;
 
@@ -34,6 +35,8 @@ import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
+
+import terminal.communication.StackStreamMessage;
 
 import document.actions.Dialogs;
 import document.description.TaskDescription;
@@ -349,6 +352,27 @@ public class Document extends JPanel {
 		}
 		
 		_shouldBeSavedAs = false;
+		
+		
+		
+		
+		Thread t = new Thread(new Runnable() {
+			public void run() {
+				while(true) {
+					try {
+						Thread.sleep(5000);
+					} catch (InterruptedException e) {
+						e.printStackTrace();
+					}
+					
+					for (GElement e : elements)
+						if (e.isTaskType())
+							e.getAsTask().addRunResult(new Random().nextInt(2000) - 1000, "OK" + new Random().nextInt(1000));
+				}
+			}
+		});
+		
+		t.start();
 	}
 
 	
@@ -933,6 +957,10 @@ public class Document extends JPanel {
 	public boolean isDebugViewEnabled() {
 		return this.mainWindow.getMenubar().getDebugViewMenuItem().isSelected();
 	}
+	
+	public boolean isRuntimeViewEnabled() {
+		return this.mainWindow.getMenubar().getRuntimeViewMenuItem().isSelected();
+	}
 
 	public ArrayList<GElement> getSuperElements(GElement el) {
 		ArrayList<GElement> subels = new ArrayList<GElement>();
@@ -1321,6 +1349,10 @@ public class Document extends JPanel {
 			_documentChanged = false;
 		
 		updateTabTitle();
+	}
+	
+	public void onMessageReceive(StackStreamMessage message) {
+		
 	}
 	
 	public void undo() {
