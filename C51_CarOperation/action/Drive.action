@@ -1,0 +1,14 @@
+#goal definition
+int32 PerformJob
+---
+#result definition
+int32 Success
+---
+#feedback
+
+#float32[] WayPointsGiven
+float32[] LastWPpassed
+#float32 LastWPpassed_Y
+float32[] MyLoc4LastWP
+#float32 MyLoc4LastWP_Y
+

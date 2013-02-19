@@ -32,352 +32,507 @@ CMAKE_COMMAND = /usr/bin/cmake
 RM = /usr/bin/cmake -E remove -f
 
 # The top-level source directory on which CMake was run.
-CMAKE_SOURCE_DIR = /home/lar2/Desktop/rosworkspace/c21_Vision_and_Lidar
+CMAKE_SOURCE_DIR = /home/lar1/Desktop/robilworkspace/C21_VisionAndLidar
 
 # The top-level build directory on which CMake was run.
-CMAKE_BINARY_DIR = /home/lar2/Desktop/rosworkspace/c21_Vision_and_Lidar
+CMAKE_BINARY_DIR = /home/lar1/Desktop/robilworkspace/C21_VisionAndLidar
 
 # Utility rule file for ROSBUILD_genmsg_py.
 
 # Include the progress variables for this target.
 include CMakeFiles/ROSBUILD_genmsg_py.dir/progress.make
 
-CMakeFiles/ROSBUILD_genmsg_py: src/c21_Vision_and_Lidar/msg/__init__.py
+CMakeFiles/ROSBUILD_genmsg_py: src/C21_VisionAndLidar/msg/__init__.py
 
-src/c21_Vision_and_Lidar/msg/__init__.py: src/c21_Vision_and_Lidar/msg/_C0C21_CAM.py
-src/c21_Vision_and_Lidar/msg/__init__.py: src/c21_Vision_and_Lidar/msg/_C0C21_AZI.py
-src/c21_Vision_and_Lidar/msg/__init__.py: src/c21_Vision_and_Lidar/msg/_C0C21_RES.py
-src/c21_Vision_and_Lidar/msg/__init__.py: src/c21_Vision_and_Lidar/msg/_C21C0_3DR.py
-src/c21_Vision_and_Lidar/msg/__init__.py: src/c21_Vision_and_Lidar/msg/_C0C21_SIZ.py
-src/c21_Vision_and_Lidar/msg/__init__.py: src/c21_Vision_and_Lidar/msg/_C21C0_3DF.py
-src/c21_Vision_and_Lidar/msg/__init__.py: src/c21_Vision_and_Lidar/msg/_C0C21_LAZ.py
-	$(CMAKE_COMMAND) -E cmake_progress_report /home/lar2/Desktop/rosworkspace/c21_Vision_and_Lidar/CMakeFiles $(CMAKE_PROGRESS_1)
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --blue --bold "Generating src/c21_Vision_and_Lidar/msg/__init__.py"
-	/opt/ros/fuerte/share/rospy/rosbuild/scripts/genmsg_py.py --initpy /home/lar2/Desktop/rosworkspace/c21_Vision_and_Lidar/msg/C0C21_CAM.msg /home/lar2/Desktop/rosworkspace/c21_Vision_and_Lidar/msg/C0C21_AZI.msg /home/lar2/Desktop/rosworkspace/c21_Vision_and_Lidar/msg/C0C21_RES.msg /home/lar2/Desktop/rosworkspace/c21_Vision_and_Lidar/msg/C21C0_3DR.msg /home/lar2/Desktop/rosworkspace/c21_Vision_and_Lidar/msg/C0C21_SIZ.msg /home/lar2/Desktop/rosworkspace/c21_Vision_and_Lidar/msg/C21C0_3DF.msg /home/lar2/Desktop/rosworkspace/c21_Vision_and_Lidar/msg/C0C21_LAZ.msg
+src/C21_VisionAndLidar/msg/__init__.py: src/C21_VisionAndLidar/msg/_C21C0_3DR.py
+src/C21_VisionAndLidar/msg/__init__.py: src/C21_VisionAndLidar/msg/_C0C21_SIZ.py
+src/C21_VisionAndLidar/msg/__init__.py: src/C21_VisionAndLidar/msg/_C0C21_LAZ.py
+src/C21_VisionAndLidar/msg/__init__.py: src/C21_VisionAndLidar/msg/_C0C21_RES.py
+src/C21_VisionAndLidar/msg/__init__.py: src/C21_VisionAndLidar/msg/_C0C21_CAM.py
+src/C21_VisionAndLidar/msg/__init__.py: src/C21_VisionAndLidar/msg/_C21_PICTURE.py
+src/C21_VisionAndLidar/msg/__init__.py: src/C21_VisionAndLidar/msg/_C0C21_AZI.py
+src/C21_VisionAndLidar/msg/__init__.py: src/C21_VisionAndLidar/msg/_C21_PANORAMA.py
+src/C21_VisionAndLidar/msg/__init__.py: src/C21_VisionAndLidar/msg/_C21_C22.py
+src/C21_VisionAndLidar/msg/__init__.py: src/C21_VisionAndLidar/msg/_C21C0_3DF.py
+	$(CMAKE_COMMAND) -E cmake_progress_report /home/lar1/Desktop/robilworkspace/C21_VisionAndLidar/CMakeFiles $(CMAKE_PROGRESS_1)
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --blue --bold "Generating src/C21_VisionAndLidar/msg/__init__.py"
+	/opt/ros/fuerte/share/rospy/rosbuild/scripts/genmsg_py.py --initpy /home/lar1/Desktop/robilworkspace/C21_VisionAndLidar/msg/C21C0_3DR.msg /home/lar1/Desktop/robilworkspace/C21_VisionAndLidar/msg/C0C21_SIZ.msg /home/lar1/Desktop/robilworkspace/C21_VisionAndLidar/msg/C0C21_LAZ.msg /home/lar1/Desktop/robilworkspace/C21_VisionAndLidar/msg/C0C21_RES.msg /home/lar1/Desktop/robilworkspace/C21_VisionAndLidar/msg/C0C21_CAM.msg /home/lar1/Desktop/robilworkspace/C21_VisionAndLidar/msg/C21_PICTURE.msg /home/lar1/Desktop/robilworkspace/C21_VisionAndLidar/msg/C0C21_AZI.msg /home/lar1/Desktop/robilworkspace/C21_VisionAndLidar/msg/C21_PANORAMA.msg /home/lar1/Desktop/robilworkspace/C21_VisionAndLidar/msg/C21_C22.msg /home/lar1/Desktop/robilworkspace/C21_VisionAndLidar/msg/C21C0_3DF.msg
 
-src/c21_Vision_and_Lidar/msg/_C0C21_CAM.py: msg/C0C21_CAM.msg
-src/c21_Vision_and_Lidar/msg/_C0C21_CAM.py: /opt/ros/fuerte/share/rospy/rosbuild/scripts/genmsg_py.py
-src/c21_Vision_and_Lidar/msg/_C0C21_CAM.py: /opt/ros/fuerte/share/roslib/bin/gendeps
-src/c21_Vision_and_Lidar/msg/_C0C21_CAM.py: manifest.xml
-src/c21_Vision_and_Lidar/msg/_C0C21_CAM.py: /opt/ros/fuerte/share/roslang/manifest.xml
-src/c21_Vision_and_Lidar/msg/_C0C21_CAM.py: /opt/ros/fuerte/share/roscpp/manifest.xml
-src/c21_Vision_and_Lidar/msg/_C0C21_CAM.py: /opt/ros/fuerte/share/std_msgs/manifest.xml
-src/c21_Vision_and_Lidar/msg/_C0C21_CAM.py: /opt/ros/fuerte/share/geometry_msgs/manifest.xml
-src/c21_Vision_and_Lidar/msg/_C0C21_CAM.py: /opt/ros/fuerte/share/sensor_msgs/manifest.xml
-src/c21_Vision_and_Lidar/msg/_C0C21_CAM.py: /opt/ros/fuerte/share/rospy/manifest.xml
-src/c21_Vision_and_Lidar/msg/_C0C21_CAM.py: /opt/ros/fuerte/stacks/vision_opencv/opencv2/manifest.xml
-src/c21_Vision_and_Lidar/msg/_C0C21_CAM.py: /opt/ros/fuerte/stacks/vision_opencv/cv_bridge/manifest.xml
-src/c21_Vision_and_Lidar/msg/_C0C21_CAM.py: /opt/ros/fuerte/share/ros/core/rosbuild/manifest.xml
-src/c21_Vision_and_Lidar/msg/_C0C21_CAM.py: /opt/ros/fuerte/share/roslib/manifest.xml
-src/c21_Vision_and_Lidar/msg/_C0C21_CAM.py: /opt/ros/fuerte/share/rosconsole/manifest.xml
-src/c21_Vision_and_Lidar/msg/_C0C21_CAM.py: /opt/ros/fuerte/stacks/pluginlib/manifest.xml
-src/c21_Vision_and_Lidar/msg/_C0C21_CAM.py: /opt/ros/fuerte/share/message_filters/manifest.xml
-src/c21_Vision_and_Lidar/msg/_C0C21_CAM.py: /opt/ros/fuerte/stacks/image_common/image_transport/manifest.xml
-src/c21_Vision_and_Lidar/msg/_C0C21_CAM.py: /opt/ros/fuerte/share/rosbag/manifest.xml
-src/c21_Vision_and_Lidar/msg/_C0C21_CAM.py: /opt/ros/fuerte/stacks/bond_core/bond/manifest.xml
-src/c21_Vision_and_Lidar/msg/_C0C21_CAM.py: /opt/ros/fuerte/stacks/bond_core/smclib/manifest.xml
-src/c21_Vision_and_Lidar/msg/_C0C21_CAM.py: /opt/ros/fuerte/stacks/bond_core/bondcpp/manifest.xml
-src/c21_Vision_and_Lidar/msg/_C0C21_CAM.py: /opt/ros/fuerte/stacks/nodelet_core/nodelet/manifest.xml
-src/c21_Vision_and_Lidar/msg/_C0C21_CAM.py: /opt/ros/fuerte/share/rosservice/manifest.xml
-src/c21_Vision_and_Lidar/msg/_C0C21_CAM.py: /opt/ros/fuerte/stacks/dynamic_reconfigure/manifest.xml
-src/c21_Vision_and_Lidar/msg/_C0C21_CAM.py: /opt/ros/fuerte/stacks/nodelet_core/nodelet_topic_tools/manifest.xml
-src/c21_Vision_and_Lidar/msg/_C0C21_CAM.py: /opt/ros/fuerte/stacks/bullet/manifest.xml
-src/c21_Vision_and_Lidar/msg/_C0C21_CAM.py: /opt/ros/fuerte/stacks/geometry/angles/manifest.xml
-src/c21_Vision_and_Lidar/msg/_C0C21_CAM.py: /opt/ros/fuerte/share/rostest/manifest.xml
-src/c21_Vision_and_Lidar/msg/_C0C21_CAM.py: /opt/ros/fuerte/share/roswtf/manifest.xml
-src/c21_Vision_and_Lidar/msg/_C0C21_CAM.py: /opt/ros/fuerte/stacks/geometry/tf/manifest.xml
-src/c21_Vision_and_Lidar/msg/_C0C21_CAM.py: /opt/ros/fuerte/stacks/common_rosdeps/manifest.xml
-src/c21_Vision_and_Lidar/msg/_C0C21_CAM.py: /opt/ros/fuerte/stacks/perception_pcl/pcl_ros/manifest.xml
-src/c21_Vision_and_Lidar/msg/_C0C21_CAM.py: /opt/ros/fuerte/share/pcl/manifest.xml
-src/c21_Vision_and_Lidar/msg/_C0C21_CAM.py: /opt/ros/fuerte/stacks/bond_core/bond/msg_gen/generated
-src/c21_Vision_and_Lidar/msg/_C0C21_CAM.py: /opt/ros/fuerte/stacks/nodelet_core/nodelet/srv_gen/generated
-src/c21_Vision_and_Lidar/msg/_C0C21_CAM.py: /opt/ros/fuerte/stacks/dynamic_reconfigure/msg_gen/generated
-src/c21_Vision_and_Lidar/msg/_C0C21_CAM.py: /opt/ros/fuerte/stacks/dynamic_reconfigure/srv_gen/generated
-src/c21_Vision_and_Lidar/msg/_C0C21_CAM.py: /opt/ros/fuerte/stacks/geometry/tf/msg_gen/generated
-src/c21_Vision_and_Lidar/msg/_C0C21_CAM.py: /opt/ros/fuerte/stacks/geometry/tf/srv_gen/generated
-	$(CMAKE_COMMAND) -E cmake_progress_report /home/lar2/Desktop/rosworkspace/c21_Vision_and_Lidar/CMakeFiles $(CMAKE_PROGRESS_2)
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --blue --bold "Generating src/c21_Vision_and_Lidar/msg/_C0C21_CAM.py"
-	/opt/ros/fuerte/share/rospy/rosbuild/scripts/genmsg_py.py --noinitpy /home/lar2/Desktop/rosworkspace/c21_Vision_and_Lidar/msg/C0C21_CAM.msg
+src/C21_VisionAndLidar/msg/_C21C0_3DR.py: msg/C21C0_3DR.msg
+src/C21_VisionAndLidar/msg/_C21C0_3DR.py: /opt/ros/fuerte/share/rospy/rosbuild/scripts/genmsg_py.py
+src/C21_VisionAndLidar/msg/_C21C0_3DR.py: /opt/ros/fuerte/share/roslib/bin/gendeps
+src/C21_VisionAndLidar/msg/_C21C0_3DR.py: /opt/ros/fuerte/share/sensor_msgs/msg/PointField.msg
+src/C21_VisionAndLidar/msg/_C21C0_3DR.py: /opt/ros/fuerte/share/std_msgs/msg/Header.msg
+src/C21_VisionAndLidar/msg/_C21C0_3DR.py: /opt/ros/fuerte/share/sensor_msgs/msg/PointCloud2.msg
+src/C21_VisionAndLidar/msg/_C21C0_3DR.py: manifest.xml
+src/C21_VisionAndLidar/msg/_C21C0_3DR.py: /opt/ros/fuerte/share/roslang/manifest.xml
+src/C21_VisionAndLidar/msg/_C21C0_3DR.py: /opt/ros/fuerte/share/roscpp/manifest.xml
+src/C21_VisionAndLidar/msg/_C21C0_3DR.py: /opt/ros/fuerte/share/std_msgs/manifest.xml
+src/C21_VisionAndLidar/msg/_C21C0_3DR.py: /opt/ros/fuerte/share/geometry_msgs/manifest.xml
+src/C21_VisionAndLidar/msg/_C21C0_3DR.py: /opt/ros/fuerte/share/nav_msgs/manifest.xml
+src/C21_VisionAndLidar/msg/_C21C0_3DR.py: /opt/ros/fuerte/share/sensor_msgs/manifest.xml
+src/C21_VisionAndLidar/msg/_C21C0_3DR.py: /opt/ros/fuerte/share/rospy/manifest.xml
+src/C21_VisionAndLidar/msg/_C21C0_3DR.py: /opt/ros/fuerte/stacks/vision_opencv/opencv2/manifest.xml
+src/C21_VisionAndLidar/msg/_C21C0_3DR.py: /opt/ros/fuerte/stacks/vision_opencv/cv_bridge/manifest.xml
+src/C21_VisionAndLidar/msg/_C21C0_3DR.py: /opt/ros/fuerte/share/ros/core/rosbuild/manifest.xml
+src/C21_VisionAndLidar/msg/_C21C0_3DR.py: /opt/ros/fuerte/share/roslib/manifest.xml
+src/C21_VisionAndLidar/msg/_C21C0_3DR.py: /opt/ros/fuerte/share/rosconsole/manifest.xml
+src/C21_VisionAndLidar/msg/_C21C0_3DR.py: /opt/ros/fuerte/stacks/pluginlib/manifest.xml
+src/C21_VisionAndLidar/msg/_C21C0_3DR.py: /opt/ros/fuerte/share/message_filters/manifest.xml
+src/C21_VisionAndLidar/msg/_C21C0_3DR.py: /opt/ros/fuerte/stacks/image_common/image_transport/manifest.xml
+src/C21_VisionAndLidar/msg/_C21C0_3DR.py: /opt/ros/fuerte/share/rosbag/manifest.xml
+src/C21_VisionAndLidar/msg/_C21C0_3DR.py: /opt/ros/fuerte/stacks/bond_core/bond/manifest.xml
+src/C21_VisionAndLidar/msg/_C21C0_3DR.py: /opt/ros/fuerte/stacks/bond_core/smclib/manifest.xml
+src/C21_VisionAndLidar/msg/_C21C0_3DR.py: /opt/ros/fuerte/stacks/bond_core/bondcpp/manifest.xml
+src/C21_VisionAndLidar/msg/_C21C0_3DR.py: /opt/ros/fuerte/stacks/nodelet_core/nodelet/manifest.xml
+src/C21_VisionAndLidar/msg/_C21C0_3DR.py: /opt/ros/fuerte/share/rosservice/manifest.xml
+src/C21_VisionAndLidar/msg/_C21C0_3DR.py: /opt/ros/fuerte/stacks/dynamic_reconfigure/manifest.xml
+src/C21_VisionAndLidar/msg/_C21C0_3DR.py: /opt/ros/fuerte/stacks/nodelet_core/nodelet_topic_tools/manifest.xml
+src/C21_VisionAndLidar/msg/_C21C0_3DR.py: /opt/ros/fuerte/stacks/bullet/manifest.xml
+src/C21_VisionAndLidar/msg/_C21C0_3DR.py: /opt/ros/fuerte/stacks/geometry/angles/manifest.xml
+src/C21_VisionAndLidar/msg/_C21C0_3DR.py: /opt/ros/fuerte/share/rostest/manifest.xml
+src/C21_VisionAndLidar/msg/_C21C0_3DR.py: /opt/ros/fuerte/share/roswtf/manifest.xml
+src/C21_VisionAndLidar/msg/_C21C0_3DR.py: /opt/ros/fuerte/stacks/geometry/tf/manifest.xml
+src/C21_VisionAndLidar/msg/_C21C0_3DR.py: /opt/ros/fuerte/stacks/common_rosdeps/manifest.xml
+src/C21_VisionAndLidar/msg/_C21C0_3DR.py: /opt/ros/fuerte/stacks/perception_pcl/pcl_ros/manifest.xml
+src/C21_VisionAndLidar/msg/_C21C0_3DR.py: /opt/ros/fuerte/share/pcl/manifest.xml
+src/C21_VisionAndLidar/msg/_C21C0_3DR.py: /opt/ros/fuerte/stacks/bond_core/bond/msg_gen/generated
+src/C21_VisionAndLidar/msg/_C21C0_3DR.py: /opt/ros/fuerte/stacks/nodelet_core/nodelet/srv_gen/generated
+src/C21_VisionAndLidar/msg/_C21C0_3DR.py: /opt/ros/fuerte/stacks/dynamic_reconfigure/msg_gen/generated
+src/C21_VisionAndLidar/msg/_C21C0_3DR.py: /opt/ros/fuerte/stacks/dynamic_reconfigure/srv_gen/generated
+src/C21_VisionAndLidar/msg/_C21C0_3DR.py: /opt/ros/fuerte/stacks/geometry/tf/msg_gen/generated
+src/C21_VisionAndLidar/msg/_C21C0_3DR.py: /opt/ros/fuerte/stacks/geometry/tf/srv_gen/generated
+	$(CMAKE_COMMAND) -E cmake_progress_report /home/lar1/Desktop/robilworkspace/C21_VisionAndLidar/CMakeFiles $(CMAKE_PROGRESS_2)
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --blue --bold "Generating src/C21_VisionAndLidar/msg/_C21C0_3DR.py"
+	/opt/ros/fuerte/share/rospy/rosbuild/scripts/genmsg_py.py --noinitpy /home/lar1/Desktop/robilworkspace/C21_VisionAndLidar/msg/C21C0_3DR.msg
 
-src/c21_Vision_and_Lidar/msg/_C0C21_AZI.py: msg/C0C21_AZI.msg
-src/c21_Vision_and_Lidar/msg/_C0C21_AZI.py: /opt/ros/fuerte/share/rospy/rosbuild/scripts/genmsg_py.py
-src/c21_Vision_and_Lidar/msg/_C0C21_AZI.py: /opt/ros/fuerte/share/roslib/bin/gendeps
-src/c21_Vision_and_Lidar/msg/_C0C21_AZI.py: manifest.xml
-src/c21_Vision_and_Lidar/msg/_C0C21_AZI.py: /opt/ros/fuerte/share/roslang/manifest.xml
-src/c21_Vision_and_Lidar/msg/_C0C21_AZI.py: /opt/ros/fuerte/share/roscpp/manifest.xml
-src/c21_Vision_and_Lidar/msg/_C0C21_AZI.py: /opt/ros/fuerte/share/std_msgs/manifest.xml
-src/c21_Vision_and_Lidar/msg/_C0C21_AZI.py: /opt/ros/fuerte/share/geometry_msgs/manifest.xml
-src/c21_Vision_and_Lidar/msg/_C0C21_AZI.py: /opt/ros/fuerte/share/sensor_msgs/manifest.xml
-src/c21_Vision_and_Lidar/msg/_C0C21_AZI.py: /opt/ros/fuerte/share/rospy/manifest.xml
-src/c21_Vision_and_Lidar/msg/_C0C21_AZI.py: /opt/ros/fuerte/stacks/vision_opencv/opencv2/manifest.xml
-src/c21_Vision_and_Lidar/msg/_C0C21_AZI.py: /opt/ros/fuerte/stacks/vision_opencv/cv_bridge/manifest.xml
-src/c21_Vision_and_Lidar/msg/_C0C21_AZI.py: /opt/ros/fuerte/share/ros/core/rosbuild/manifest.xml
-src/c21_Vision_and_Lidar/msg/_C0C21_AZI.py: /opt/ros/fuerte/share/roslib/manifest.xml
-src/c21_Vision_and_Lidar/msg/_C0C21_AZI.py: /opt/ros/fuerte/share/rosconsole/manifest.xml
-src/c21_Vision_and_Lidar/msg/_C0C21_AZI.py: /opt/ros/fuerte/stacks/pluginlib/manifest.xml
-src/c21_Vision_and_Lidar/msg/_C0C21_AZI.py: /opt/ros/fuerte/share/message_filters/manifest.xml
-src/c21_Vision_and_Lidar/msg/_C0C21_AZI.py: /opt/ros/fuerte/stacks/image_common/image_transport/manifest.xml
-src/c21_Vision_and_Lidar/msg/_C0C21_AZI.py: /opt/ros/fuerte/share/rosbag/manifest.xml
-src/c21_Vision_and_Lidar/msg/_C0C21_AZI.py: /opt/ros/fuerte/stacks/bond_core/bond/manifest.xml
-src/c21_Vision_and_Lidar/msg/_C0C21_AZI.py: /opt/ros/fuerte/stacks/bond_core/smclib/manifest.xml
-src/c21_Vision_and_Lidar/msg/_C0C21_AZI.py: /opt/ros/fuerte/stacks/bond_core/bondcpp/manifest.xml
-src/c21_Vision_and_Lidar/msg/_C0C21_AZI.py: /opt/ros/fuerte/stacks/nodelet_core/nodelet/manifest.xml
-src/c21_Vision_and_Lidar/msg/_C0C21_AZI.py: /opt/ros/fuerte/share/rosservice/manifest.xml
-src/c21_Vision_and_Lidar/msg/_C0C21_AZI.py: /opt/ros/fuerte/stacks/dynamic_reconfigure/manifest.xml
-src/c21_Vision_and_Lidar/msg/_C0C21_AZI.py: /opt/ros/fuerte/stacks/nodelet_core/nodelet_topic_tools/manifest.xml
-src/c21_Vision_and_Lidar/msg/_C0C21_AZI.py: /opt/ros/fuerte/stacks/bullet/manifest.xml
-src/c21_Vision_and_Lidar/msg/_C0C21_AZI.py: /opt/ros/fuerte/stacks/geometry/angles/manifest.xml
-src/c21_Vision_and_Lidar/msg/_C0C21_AZI.py: /opt/ros/fuerte/share/rostest/manifest.xml
-src/c21_Vision_and_Lidar/msg/_C0C21_AZI.py: /opt/ros/fuerte/share/roswtf/manifest.xml
-src/c21_Vision_and_Lidar/msg/_C0C21_AZI.py: /opt/ros/fuerte/stacks/geometry/tf/manifest.xml
-src/c21_Vision_and_Lidar/msg/_C0C21_AZI.py: /opt/ros/fuerte/stacks/common_rosdeps/manifest.xml
-src/c21_Vision_and_Lidar/msg/_C0C21_AZI.py: /opt/ros/fuerte/stacks/perception_pcl/pcl_ros/manifest.xml
-src/c21_Vision_and_Lidar/msg/_C0C21_AZI.py: /opt/ros/fuerte/share/pcl/manifest.xml
-src/c21_Vision_and_Lidar/msg/_C0C21_AZI.py: /opt/ros/fuerte/stacks/bond_core/bond/msg_gen/generated
-src/c21_Vision_and_Lidar/msg/_C0C21_AZI.py: /opt/ros/fuerte/stacks/nodelet_core/nodelet/srv_gen/generated
-src/c21_Vision_and_Lidar/msg/_C0C21_AZI.py: /opt/ros/fuerte/stacks/dynamic_reconfigure/msg_gen/generated
-src/c21_Vision_and_Lidar/msg/_C0C21_AZI.py: /opt/ros/fuerte/stacks/dynamic_reconfigure/srv_gen/generated
-src/c21_Vision_and_Lidar/msg/_C0C21_AZI.py: /opt/ros/fuerte/stacks/geometry/tf/msg_gen/generated
-src/c21_Vision_and_Lidar/msg/_C0C21_AZI.py: /opt/ros/fuerte/stacks/geometry/tf/srv_gen/generated
-	$(CMAKE_COMMAND) -E cmake_progress_report /home/lar2/Desktop/rosworkspace/c21_Vision_and_Lidar/CMakeFiles $(CMAKE_PROGRESS_3)
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --blue --bold "Generating src/c21_Vision_and_Lidar/msg/_C0C21_AZI.py"
-	/opt/ros/fuerte/share/rospy/rosbuild/scripts/genmsg_py.py --noinitpy /home/lar2/Desktop/rosworkspace/c21_Vision_and_Lidar/msg/C0C21_AZI.msg
+src/C21_VisionAndLidar/msg/_C0C21_SIZ.py: msg/C0C21_SIZ.msg
+src/C21_VisionAndLidar/msg/_C0C21_SIZ.py: /opt/ros/fuerte/share/rospy/rosbuild/scripts/genmsg_py.py
+src/C21_VisionAndLidar/msg/_C0C21_SIZ.py: /opt/ros/fuerte/share/roslib/bin/gendeps
+src/C21_VisionAndLidar/msg/_C0C21_SIZ.py: manifest.xml
+src/C21_VisionAndLidar/msg/_C0C21_SIZ.py: /opt/ros/fuerte/share/roslang/manifest.xml
+src/C21_VisionAndLidar/msg/_C0C21_SIZ.py: /opt/ros/fuerte/share/roscpp/manifest.xml
+src/C21_VisionAndLidar/msg/_C0C21_SIZ.py: /opt/ros/fuerte/share/std_msgs/manifest.xml
+src/C21_VisionAndLidar/msg/_C0C21_SIZ.py: /opt/ros/fuerte/share/geometry_msgs/manifest.xml
+src/C21_VisionAndLidar/msg/_C0C21_SIZ.py: /opt/ros/fuerte/share/nav_msgs/manifest.xml
+src/C21_VisionAndLidar/msg/_C0C21_SIZ.py: /opt/ros/fuerte/share/sensor_msgs/manifest.xml
+src/C21_VisionAndLidar/msg/_C0C21_SIZ.py: /opt/ros/fuerte/share/rospy/manifest.xml
+src/C21_VisionAndLidar/msg/_C0C21_SIZ.py: /opt/ros/fuerte/stacks/vision_opencv/opencv2/manifest.xml
+src/C21_VisionAndLidar/msg/_C0C21_SIZ.py: /opt/ros/fuerte/stacks/vision_opencv/cv_bridge/manifest.xml
+src/C21_VisionAndLidar/msg/_C0C21_SIZ.py: /opt/ros/fuerte/share/ros/core/rosbuild/manifest.xml
+src/C21_VisionAndLidar/msg/_C0C21_SIZ.py: /opt/ros/fuerte/share/roslib/manifest.xml
+src/C21_VisionAndLidar/msg/_C0C21_SIZ.py: /opt/ros/fuerte/share/rosconsole/manifest.xml
+src/C21_VisionAndLidar/msg/_C0C21_SIZ.py: /opt/ros/fuerte/stacks/pluginlib/manifest.xml
+src/C21_VisionAndLidar/msg/_C0C21_SIZ.py: /opt/ros/fuerte/share/message_filters/manifest.xml
+src/C21_VisionAndLidar/msg/_C0C21_SIZ.py: /opt/ros/fuerte/stacks/image_common/image_transport/manifest.xml
+src/C21_VisionAndLidar/msg/_C0C21_SIZ.py: /opt/ros/fuerte/share/rosbag/manifest.xml
+src/C21_VisionAndLidar/msg/_C0C21_SIZ.py: /opt/ros/fuerte/stacks/bond_core/bond/manifest.xml
+src/C21_VisionAndLidar/msg/_C0C21_SIZ.py: /opt/ros/fuerte/stacks/bond_core/smclib/manifest.xml
+src/C21_VisionAndLidar/msg/_C0C21_SIZ.py: /opt/ros/fuerte/stacks/bond_core/bondcpp/manifest.xml
+src/C21_VisionAndLidar/msg/_C0C21_SIZ.py: /opt/ros/fuerte/stacks/nodelet_core/nodelet/manifest.xml
+src/C21_VisionAndLidar/msg/_C0C21_SIZ.py: /opt/ros/fuerte/share/rosservice/manifest.xml
+src/C21_VisionAndLidar/msg/_C0C21_SIZ.py: /opt/ros/fuerte/stacks/dynamic_reconfigure/manifest.xml
+src/C21_VisionAndLidar/msg/_C0C21_SIZ.py: /opt/ros/fuerte/stacks/nodelet_core/nodelet_topic_tools/manifest.xml
+src/C21_VisionAndLidar/msg/_C0C21_SIZ.py: /opt/ros/fuerte/stacks/bullet/manifest.xml
+src/C21_VisionAndLidar/msg/_C0C21_SIZ.py: /opt/ros/fuerte/stacks/geometry/angles/manifest.xml
+src/C21_VisionAndLidar/msg/_C0C21_SIZ.py: /opt/ros/fuerte/share/rostest/manifest.xml
+src/C21_VisionAndLidar/msg/_C0C21_SIZ.py: /opt/ros/fuerte/share/roswtf/manifest.xml
+src/C21_VisionAndLidar/msg/_C0C21_SIZ.py: /opt/ros/fuerte/stacks/geometry/tf/manifest.xml
+src/C21_VisionAndLidar/msg/_C0C21_SIZ.py: /opt/ros/fuerte/stacks/common_rosdeps/manifest.xml
+src/C21_VisionAndLidar/msg/_C0C21_SIZ.py: /opt/ros/fuerte/stacks/perception_pcl/pcl_ros/manifest.xml
+src/C21_VisionAndLidar/msg/_C0C21_SIZ.py: /opt/ros/fuerte/share/pcl/manifest.xml
+src/C21_VisionAndLidar/msg/_C0C21_SIZ.py: /opt/ros/fuerte/stacks/bond_core/bond/msg_gen/generated
+src/C21_VisionAndLidar/msg/_C0C21_SIZ.py: /opt/ros/fuerte/stacks/nodelet_core/nodelet/srv_gen/generated
+src/C21_VisionAndLidar/msg/_C0C21_SIZ.py: /opt/ros/fuerte/stacks/dynamic_reconfigure/msg_gen/generated
+src/C21_VisionAndLidar/msg/_C0C21_SIZ.py: /opt/ros/fuerte/stacks/dynamic_reconfigure/srv_gen/generated
+src/C21_VisionAndLidar/msg/_C0C21_SIZ.py: /opt/ros/fuerte/stacks/geometry/tf/msg_gen/generated
+src/C21_VisionAndLidar/msg/_C0C21_SIZ.py: /opt/ros/fuerte/stacks/geometry/tf/srv_gen/generated
+	$(CMAKE_COMMAND) -E cmake_progress_report /home/lar1/Desktop/robilworkspace/C21_VisionAndLidar/CMakeFiles $(CMAKE_PROGRESS_3)
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --blue --bold "Generating src/C21_VisionAndLidar/msg/_C0C21_SIZ.py"
+	/opt/ros/fuerte/share/rospy/rosbuild/scripts/genmsg_py.py --noinitpy /home/lar1/Desktop/robilworkspace/C21_VisionAndLidar/msg/C0C21_SIZ.msg
 
-src/c21_Vision_and_Lidar/msg/_C0C21_RES.py: msg/C0C21_RES.msg
-src/c21_Vision_and_Lidar/msg/_C0C21_RES.py: /opt/ros/fuerte/share/rospy/rosbuild/scripts/genmsg_py.py
-src/c21_Vision_and_Lidar/msg/_C0C21_RES.py: /opt/ros/fuerte/share/roslib/bin/gendeps
-src/c21_Vision_and_Lidar/msg/_C0C21_RES.py: manifest.xml
-src/c21_Vision_and_Lidar/msg/_C0C21_RES.py: /opt/ros/fuerte/share/roslang/manifest.xml
-src/c21_Vision_and_Lidar/msg/_C0C21_RES.py: /opt/ros/fuerte/share/roscpp/manifest.xml
-src/c21_Vision_and_Lidar/msg/_C0C21_RES.py: /opt/ros/fuerte/share/std_msgs/manifest.xml
-src/c21_Vision_and_Lidar/msg/_C0C21_RES.py: /opt/ros/fuerte/share/geometry_msgs/manifest.xml
-src/c21_Vision_and_Lidar/msg/_C0C21_RES.py: /opt/ros/fuerte/share/sensor_msgs/manifest.xml
-src/c21_Vision_and_Lidar/msg/_C0C21_RES.py: /opt/ros/fuerte/share/rospy/manifest.xml
-src/c21_Vision_and_Lidar/msg/_C0C21_RES.py: /opt/ros/fuerte/stacks/vision_opencv/opencv2/manifest.xml
-src/c21_Vision_and_Lidar/msg/_C0C21_RES.py: /opt/ros/fuerte/stacks/vision_opencv/cv_bridge/manifest.xml
-src/c21_Vision_and_Lidar/msg/_C0C21_RES.py: /opt/ros/fuerte/share/ros/core/rosbuild/manifest.xml
-src/c21_Vision_and_Lidar/msg/_C0C21_RES.py: /opt/ros/fuerte/share/roslib/manifest.xml
-src/c21_Vision_and_Lidar/msg/_C0C21_RES.py: /opt/ros/fuerte/share/rosconsole/manifest.xml
-src/c21_Vision_and_Lidar/msg/_C0C21_RES.py: /opt/ros/fuerte/stacks/pluginlib/manifest.xml
-src/c21_Vision_and_Lidar/msg/_C0C21_RES.py: /opt/ros/fuerte/share/message_filters/manifest.xml
-src/c21_Vision_and_Lidar/msg/_C0C21_RES.py: /opt/ros/fuerte/stacks/image_common/image_transport/manifest.xml
-src/c21_Vision_and_Lidar/msg/_C0C21_RES.py: /opt/ros/fuerte/share/rosbag/manifest.xml
-src/c21_Vision_and_Lidar/msg/_C0C21_RES.py: /opt/ros/fuerte/stacks/bond_core/bond/manifest.xml
-src/c21_Vision_and_Lidar/msg/_C0C21_RES.py: /opt/ros/fuerte/stacks/bond_core/smclib/manifest.xml
-src/c21_Vision_and_Lidar/msg/_C0C21_RES.py: /opt/ros/fuerte/stacks/bond_core/bondcpp/manifest.xml
-src/c21_Vision_and_Lidar/msg/_C0C21_RES.py: /opt/ros/fuerte/stacks/nodelet_core/nodelet/manifest.xml
-src/c21_Vision_and_Lidar/msg/_C0C21_RES.py: /opt/ros/fuerte/share/rosservice/manifest.xml
-src/c21_Vision_and_Lidar/msg/_C0C21_RES.py: /opt/ros/fuerte/stacks/dynamic_reconfigure/manifest.xml
-src/c21_Vision_and_Lidar/msg/_C0C21_RES.py: /opt/ros/fuerte/stacks/nodelet_core/nodelet_topic_tools/manifest.xml
-src/c21_Vision_and_Lidar/msg/_C0C21_RES.py: /opt/ros/fuerte/stacks/bullet/manifest.xml
-src/c21_Vision_and_Lidar/msg/_C0C21_RES.py: /opt/ros/fuerte/stacks/geometry/angles/manifest.xml
-src/c21_Vision_and_Lidar/msg/_C0C21_RES.py: /opt/ros/fuerte/share/rostest/manifest.xml
-src/c21_Vision_and_Lidar/msg/_C0C21_RES.py: /opt/ros/fuerte/share/roswtf/manifest.xml
-src/c21_Vision_and_Lidar/msg/_C0C21_RES.py: /opt/ros/fuerte/stacks/geometry/tf/manifest.xml
-src/c21_Vision_and_Lidar/msg/_C0C21_RES.py: /opt/ros/fuerte/stacks/common_rosdeps/manifest.xml
-src/c21_Vision_and_Lidar/msg/_C0C21_RES.py: /opt/ros/fuerte/stacks/perception_pcl/pcl_ros/manifest.xml
-src/c21_Vision_and_Lidar/msg/_C0C21_RES.py: /opt/ros/fuerte/share/pcl/manifest.xml
-src/c21_Vision_and_Lidar/msg/_C0C21_RES.py: /opt/ros/fuerte/stacks/bond_core/bond/msg_gen/generated
-src/c21_Vision_and_Lidar/msg/_C0C21_RES.py: /opt/ros/fuerte/stacks/nodelet_core/nodelet/srv_gen/generated
-src/c21_Vision_and_Lidar/msg/_C0C21_RES.py: /opt/ros/fuerte/stacks/dynamic_reconfigure/msg_gen/generated
-src/c21_Vision_and_Lidar/msg/_C0C21_RES.py: /opt/ros/fuerte/stacks/dynamic_reconfigure/srv_gen/generated
-src/c21_Vision_and_Lidar/msg/_C0C21_RES.py: /opt/ros/fuerte/stacks/geometry/tf/msg_gen/generated
-src/c21_Vision_and_Lidar/msg/_C0C21_RES.py: /opt/ros/fuerte/stacks/geometry/tf/srv_gen/generated
-	$(CMAKE_COMMAND) -E cmake_progress_report /home/lar2/Desktop/rosworkspace/c21_Vision_and_Lidar/CMakeFiles $(CMAKE_PROGRESS_4)
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --blue --bold "Generating src/c21_Vision_and_Lidar/msg/_C0C21_RES.py"
-	/opt/ros/fuerte/share/rospy/rosbuild/scripts/genmsg_py.py --noinitpy /home/lar2/Desktop/rosworkspace/c21_Vision_and_Lidar/msg/C0C21_RES.msg
+src/C21_VisionAndLidar/msg/_C0C21_LAZ.py: msg/C0C21_LAZ.msg
+src/C21_VisionAndLidar/msg/_C0C21_LAZ.py: /opt/ros/fuerte/share/rospy/rosbuild/scripts/genmsg_py.py
+src/C21_VisionAndLidar/msg/_C0C21_LAZ.py: /opt/ros/fuerte/share/roslib/bin/gendeps
+src/C21_VisionAndLidar/msg/_C0C21_LAZ.py: manifest.xml
+src/C21_VisionAndLidar/msg/_C0C21_LAZ.py: /opt/ros/fuerte/share/roslang/manifest.xml
+src/C21_VisionAndLidar/msg/_C0C21_LAZ.py: /opt/ros/fuerte/share/roscpp/manifest.xml
+src/C21_VisionAndLidar/msg/_C0C21_LAZ.py: /opt/ros/fuerte/share/std_msgs/manifest.xml
+src/C21_VisionAndLidar/msg/_C0C21_LAZ.py: /opt/ros/fuerte/share/geometry_msgs/manifest.xml
+src/C21_VisionAndLidar/msg/_C0C21_LAZ.py: /opt/ros/fuerte/share/nav_msgs/manifest.xml
+src/C21_VisionAndLidar/msg/_C0C21_LAZ.py: /opt/ros/fuerte/share/sensor_msgs/manifest.xml
+src/C21_VisionAndLidar/msg/_C0C21_LAZ.py: /opt/ros/fuerte/share/rospy/manifest.xml
+src/C21_VisionAndLidar/msg/_C0C21_LAZ.py: /opt/ros/fuerte/stacks/vision_opencv/opencv2/manifest.xml
+src/C21_VisionAndLidar/msg/_C0C21_LAZ.py: /opt/ros/fuerte/stacks/vision_opencv/cv_bridge/manifest.xml
+src/C21_VisionAndLidar/msg/_C0C21_LAZ.py: /opt/ros/fuerte/share/ros/core/rosbuild/manifest.xml
+src/C21_VisionAndLidar/msg/_C0C21_LAZ.py: /opt/ros/fuerte/share/roslib/manifest.xml
+src/C21_VisionAndLidar/msg/_C0C21_LAZ.py: /opt/ros/fuerte/share/rosconsole/manifest.xml
+src/C21_VisionAndLidar/msg/_C0C21_LAZ.py: /opt/ros/fuerte/stacks/pluginlib/manifest.xml
+src/C21_VisionAndLidar/msg/_C0C21_LAZ.py: /opt/ros/fuerte/share/message_filters/manifest.xml
+src/C21_VisionAndLidar/msg/_C0C21_LAZ.py: /opt/ros/fuerte/stacks/image_common/image_transport/manifest.xml
+src/C21_VisionAndLidar/msg/_C0C21_LAZ.py: /opt/ros/fuerte/share/rosbag/manifest.xml
+src/C21_VisionAndLidar/msg/_C0C21_LAZ.py: /opt/ros/fuerte/stacks/bond_core/bond/manifest.xml
+src/C21_VisionAndLidar/msg/_C0C21_LAZ.py: /opt/ros/fuerte/stacks/bond_core/smclib/manifest.xml
+src/C21_VisionAndLidar/msg/_C0C21_LAZ.py: /opt/ros/fuerte/stacks/bond_core/bondcpp/manifest.xml
+src/C21_VisionAndLidar/msg/_C0C21_LAZ.py: /opt/ros/fuerte/stacks/nodelet_core/nodelet/manifest.xml
+src/C21_VisionAndLidar/msg/_C0C21_LAZ.py: /opt/ros/fuerte/share/rosservice/manifest.xml
+src/C21_VisionAndLidar/msg/_C0C21_LAZ.py: /opt/ros/fuerte/stacks/dynamic_reconfigure/manifest.xml
+src/C21_VisionAndLidar/msg/_C0C21_LAZ.py: /opt/ros/fuerte/stacks/nodelet_core/nodelet_topic_tools/manifest.xml
+src/C21_VisionAndLidar/msg/_C0C21_LAZ.py: /opt/ros/fuerte/stacks/bullet/manifest.xml
+src/C21_VisionAndLidar/msg/_C0C21_LAZ.py: /opt/ros/fuerte/stacks/geometry/angles/manifest.xml
+src/C21_VisionAndLidar/msg/_C0C21_LAZ.py: /opt/ros/fuerte/share/rostest/manifest.xml
+src/C21_VisionAndLidar/msg/_C0C21_LAZ.py: /opt/ros/fuerte/share/roswtf/manifest.xml
+src/C21_VisionAndLidar/msg/_C0C21_LAZ.py: /opt/ros/fuerte/stacks/geometry/tf/manifest.xml
+src/C21_VisionAndLidar/msg/_C0C21_LAZ.py: /opt/ros/fuerte/stacks/common_rosdeps/manifest.xml
+src/C21_VisionAndLidar/msg/_C0C21_LAZ.py: /opt/ros/fuerte/stacks/perception_pcl/pcl_ros/manifest.xml
+src/C21_VisionAndLidar/msg/_C0C21_LAZ.py: /opt/ros/fuerte/share/pcl/manifest.xml
+src/C21_VisionAndLidar/msg/_C0C21_LAZ.py: /opt/ros/fuerte/stacks/bond_core/bond/msg_gen/generated
+src/C21_VisionAndLidar/msg/_C0C21_LAZ.py: /opt/ros/fuerte/stacks/nodelet_core/nodelet/srv_gen/generated
+src/C21_VisionAndLidar/msg/_C0C21_LAZ.py: /opt/ros/fuerte/stacks/dynamic_reconfigure/msg_gen/generated
+src/C21_VisionAndLidar/msg/_C0C21_LAZ.py: /opt/ros/fuerte/stacks/dynamic_reconfigure/srv_gen/generated
+src/C21_VisionAndLidar/msg/_C0C21_LAZ.py: /opt/ros/fuerte/stacks/geometry/tf/msg_gen/generated
+src/C21_VisionAndLidar/msg/_C0C21_LAZ.py: /opt/ros/fuerte/stacks/geometry/tf/srv_gen/generated
+	$(CMAKE_COMMAND) -E cmake_progress_report /home/lar1/Desktop/robilworkspace/C21_VisionAndLidar/CMakeFiles $(CMAKE_PROGRESS_4)
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --blue --bold "Generating src/C21_VisionAndLidar/msg/_C0C21_LAZ.py"
+	/opt/ros/fuerte/share/rospy/rosbuild/scripts/genmsg_py.py --noinitpy /home/lar1/Desktop/robilworkspace/C21_VisionAndLidar/msg/C0C21_LAZ.msg
 
-src/c21_Vision_and_Lidar/msg/_C21C0_3DR.py: msg/C21C0_3DR.msg
-src/c21_Vision_and_Lidar/msg/_C21C0_3DR.py: /opt/ros/fuerte/share/rospy/rosbuild/scripts/genmsg_py.py
-src/c21_Vision_and_Lidar/msg/_C21C0_3DR.py: /opt/ros/fuerte/share/roslib/bin/gendeps
-src/c21_Vision_and_Lidar/msg/_C21C0_3DR.py: /opt/ros/fuerte/share/sensor_msgs/msg/PointField.msg
-src/c21_Vision_and_Lidar/msg/_C21C0_3DR.py: /opt/ros/fuerte/share/std_msgs/msg/Header.msg
-src/c21_Vision_and_Lidar/msg/_C21C0_3DR.py: /opt/ros/fuerte/share/sensor_msgs/msg/PointCloud2.msg
-src/c21_Vision_and_Lidar/msg/_C21C0_3DR.py: manifest.xml
-src/c21_Vision_and_Lidar/msg/_C21C0_3DR.py: /opt/ros/fuerte/share/roslang/manifest.xml
-src/c21_Vision_and_Lidar/msg/_C21C0_3DR.py: /opt/ros/fuerte/share/roscpp/manifest.xml
-src/c21_Vision_and_Lidar/msg/_C21C0_3DR.py: /opt/ros/fuerte/share/std_msgs/manifest.xml
-src/c21_Vision_and_Lidar/msg/_C21C0_3DR.py: /opt/ros/fuerte/share/geometry_msgs/manifest.xml
-src/c21_Vision_and_Lidar/msg/_C21C0_3DR.py: /opt/ros/fuerte/share/sensor_msgs/manifest.xml
-src/c21_Vision_and_Lidar/msg/_C21C0_3DR.py: /opt/ros/fuerte/share/rospy/manifest.xml
-src/c21_Vision_and_Lidar/msg/_C21C0_3DR.py: /opt/ros/fuerte/stacks/vision_opencv/opencv2/manifest.xml
-src/c21_Vision_and_Lidar/msg/_C21C0_3DR.py: /opt/ros/fuerte/stacks/vision_opencv/cv_bridge/manifest.xml
-src/c21_Vision_and_Lidar/msg/_C21C0_3DR.py: /opt/ros/fuerte/share/ros/core/rosbuild/manifest.xml
-src/c21_Vision_and_Lidar/msg/_C21C0_3DR.py: /opt/ros/fuerte/share/roslib/manifest.xml
-src/c21_Vision_and_Lidar/msg/_C21C0_3DR.py: /opt/ros/fuerte/share/rosconsole/manifest.xml
-src/c21_Vision_and_Lidar/msg/_C21C0_3DR.py: /opt/ros/fuerte/stacks/pluginlib/manifest.xml
-src/c21_Vision_and_Lidar/msg/_C21C0_3DR.py: /opt/ros/fuerte/share/message_filters/manifest.xml
-src/c21_Vision_and_Lidar/msg/_C21C0_3DR.py: /opt/ros/fuerte/stacks/image_common/image_transport/manifest.xml
-src/c21_Vision_and_Lidar/msg/_C21C0_3DR.py: /opt/ros/fuerte/share/rosbag/manifest.xml
-src/c21_Vision_and_Lidar/msg/_C21C0_3DR.py: /opt/ros/fuerte/stacks/bond_core/bond/manifest.xml
-src/c21_Vision_and_Lidar/msg/_C21C0_3DR.py: /opt/ros/fuerte/stacks/bond_core/smclib/manifest.xml
-src/c21_Vision_and_Lidar/msg/_C21C0_3DR.py: /opt/ros/fuerte/stacks/bond_core/bondcpp/manifest.xml
-src/c21_Vision_and_Lidar/msg/_C21C0_3DR.py: /opt/ros/fuerte/stacks/nodelet_core/nodelet/manifest.xml
-src/c21_Vision_and_Lidar/msg/_C21C0_3DR.py: /opt/ros/fuerte/share/rosservice/manifest.xml
-src/c21_Vision_and_Lidar/msg/_C21C0_3DR.py: /opt/ros/fuerte/stacks/dynamic_reconfigure/manifest.xml
-src/c21_Vision_and_Lidar/msg/_C21C0_3DR.py: /opt/ros/fuerte/stacks/nodelet_core/nodelet_topic_tools/manifest.xml
-src/c21_Vision_and_Lidar/msg/_C21C0_3DR.py: /opt/ros/fuerte/stacks/bullet/manifest.xml
-src/c21_Vision_and_Lidar/msg/_C21C0_3DR.py: /opt/ros/fuerte/stacks/geometry/angles/manifest.xml
-src/c21_Vision_and_Lidar/msg/_C21C0_3DR.py: /opt/ros/fuerte/share/rostest/manifest.xml
-src/c21_Vision_and_Lidar/msg/_C21C0_3DR.py: /opt/ros/fuerte/share/roswtf/manifest.xml
-src/c21_Vision_and_Lidar/msg/_C21C0_3DR.py: /opt/ros/fuerte/stacks/geometry/tf/manifest.xml
-src/c21_Vision_and_Lidar/msg/_C21C0_3DR.py: /opt/ros/fuerte/stacks/common_rosdeps/manifest.xml
-src/c21_Vision_and_Lidar/msg/_C21C0_3DR.py: /opt/ros/fuerte/stacks/perception_pcl/pcl_ros/manifest.xml
-src/c21_Vision_and_Lidar/msg/_C21C0_3DR.py: /opt/ros/fuerte/share/pcl/manifest.xml
-src/c21_Vision_and_Lidar/msg/_C21C0_3DR.py: /opt/ros/fuerte/stacks/bond_core/bond/msg_gen/generated
-src/c21_Vision_and_Lidar/msg/_C21C0_3DR.py: /opt/ros/fuerte/stacks/nodelet_core/nodelet/srv_gen/generated
-src/c21_Vision_and_Lidar/msg/_C21C0_3DR.py: /opt/ros/fuerte/stacks/dynamic_reconfigure/msg_gen/generated
-src/c21_Vision_and_Lidar/msg/_C21C0_3DR.py: /opt/ros/fuerte/stacks/dynamic_reconfigure/srv_gen/generated
-src/c21_Vision_and_Lidar/msg/_C21C0_3DR.py: /opt/ros/fuerte/stacks/geometry/tf/msg_gen/generated
-src/c21_Vision_and_Lidar/msg/_C21C0_3DR.py: /opt/ros/fuerte/stacks/geometry/tf/srv_gen/generated
-	$(CMAKE_COMMAND) -E cmake_progress_report /home/lar2/Desktop/rosworkspace/c21_Vision_and_Lidar/CMakeFiles $(CMAKE_PROGRESS_5)
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --blue --bold "Generating src/c21_Vision_and_Lidar/msg/_C21C0_3DR.py"
-	/opt/ros/fuerte/share/rospy/rosbuild/scripts/genmsg_py.py --noinitpy /home/lar2/Desktop/rosworkspace/c21_Vision_and_Lidar/msg/C21C0_3DR.msg
+src/C21_VisionAndLidar/msg/_C0C21_RES.py: msg/C0C21_RES.msg
+src/C21_VisionAndLidar/msg/_C0C21_RES.py: /opt/ros/fuerte/share/rospy/rosbuild/scripts/genmsg_py.py
+src/C21_VisionAndLidar/msg/_C0C21_RES.py: /opt/ros/fuerte/share/roslib/bin/gendeps
+src/C21_VisionAndLidar/msg/_C0C21_RES.py: manifest.xml
+src/C21_VisionAndLidar/msg/_C0C21_RES.py: /opt/ros/fuerte/share/roslang/manifest.xml
+src/C21_VisionAndLidar/msg/_C0C21_RES.py: /opt/ros/fuerte/share/roscpp/manifest.xml
+src/C21_VisionAndLidar/msg/_C0C21_RES.py: /opt/ros/fuerte/share/std_msgs/manifest.xml
+src/C21_VisionAndLidar/msg/_C0C21_RES.py: /opt/ros/fuerte/share/geometry_msgs/manifest.xml
+src/C21_VisionAndLidar/msg/_C0C21_RES.py: /opt/ros/fuerte/share/nav_msgs/manifest.xml
+src/C21_VisionAndLidar/msg/_C0C21_RES.py: /opt/ros/fuerte/share/sensor_msgs/manifest.xml
+src/C21_VisionAndLidar/msg/_C0C21_RES.py: /opt/ros/fuerte/share/rospy/manifest.xml
+src/C21_VisionAndLidar/msg/_C0C21_RES.py: /opt/ros/fuerte/stacks/vision_opencv/opencv2/manifest.xml
+src/C21_VisionAndLidar/msg/_C0C21_RES.py: /opt/ros/fuerte/stacks/vision_opencv/cv_bridge/manifest.xml
+src/C21_VisionAndLidar/msg/_C0C21_RES.py: /opt/ros/fuerte/share/ros/core/rosbuild/manifest.xml
+src/C21_VisionAndLidar/msg/_C0C21_RES.py: /opt/ros/fuerte/share/roslib/manifest.xml
+src/C21_VisionAndLidar/msg/_C0C21_RES.py: /opt/ros/fuerte/share/rosconsole/manifest.xml
+src/C21_VisionAndLidar/msg/_C0C21_RES.py: /opt/ros/fuerte/stacks/pluginlib/manifest.xml
+src/C21_VisionAndLidar/msg/_C0C21_RES.py: /opt/ros/fuerte/share/message_filters/manifest.xml
+src/C21_VisionAndLidar/msg/_C0C21_RES.py: /opt/ros/fuerte/stacks/image_common/image_transport/manifest.xml
+src/C21_VisionAndLidar/msg/_C0C21_RES.py: /opt/ros/fuerte/share/rosbag/manifest.xml
+src/C21_VisionAndLidar/msg/_C0C21_RES.py: /opt/ros/fuerte/stacks/bond_core/bond/manifest.xml
+src/C21_VisionAndLidar/msg/_C0C21_RES.py: /opt/ros/fuerte/stacks/bond_core/smclib/manifest.xml
+src/C21_VisionAndLidar/msg/_C0C21_RES.py: /opt/ros/fuerte/stacks/bond_core/bondcpp/manifest.xml
+src/C21_VisionAndLidar/msg/_C0C21_RES.py: /opt/ros/fuerte/stacks/nodelet_core/nodelet/manifest.xml
+src/C21_VisionAndLidar/msg/_C0C21_RES.py: /opt/ros/fuerte/share/rosservice/manifest.xml
+src/C21_VisionAndLidar/msg/_C0C21_RES.py: /opt/ros/fuerte/stacks/dynamic_reconfigure/manifest.xml
+src/C21_VisionAndLidar/msg/_C0C21_RES.py: /opt/ros/fuerte/stacks/nodelet_core/nodelet_topic_tools/manifest.xml
+src/C21_VisionAndLidar/msg/_C0C21_RES.py: /opt/ros/fuerte/stacks/bullet/manifest.xml
+src/C21_VisionAndLidar/msg/_C0C21_RES.py: /opt/ros/fuerte/stacks/geometry/angles/manifest.xml
+src/C21_VisionAndLidar/msg/_C0C21_RES.py: /opt/ros/fuerte/share/rostest/manifest.xml
+src/C21_VisionAndLidar/msg/_C0C21_RES.py: /opt/ros/fuerte/share/roswtf/manifest.xml
+src/C21_VisionAndLidar/msg/_C0C21_RES.py: /opt/ros/fuerte/stacks/geometry/tf/manifest.xml
+src/C21_VisionAndLidar/msg/_C0C21_RES.py: /opt/ros/fuerte/stacks/common_rosdeps/manifest.xml
+src/C21_VisionAndLidar/msg/_C0C21_RES.py: /opt/ros/fuerte/stacks/perception_pcl/pcl_ros/manifest.xml
+src/C21_VisionAndLidar/msg/_C0C21_RES.py: /opt/ros/fuerte/share/pcl/manifest.xml
+src/C21_VisionAndLidar/msg/_C0C21_RES.py: /opt/ros/fuerte/stacks/bond_core/bond/msg_gen/generated
+src/C21_VisionAndLidar/msg/_C0C21_RES.py: /opt/ros/fuerte/stacks/nodelet_core/nodelet/srv_gen/generated
+src/C21_VisionAndLidar/msg/_C0C21_RES.py: /opt/ros/fuerte/stacks/dynamic_reconfigure/msg_gen/generated
+src/C21_VisionAndLidar/msg/_C0C21_RES.py: /opt/ros/fuerte/stacks/dynamic_reconfigure/srv_gen/generated
+src/C21_VisionAndLidar/msg/_C0C21_RES.py: /opt/ros/fuerte/stacks/geometry/tf/msg_gen/generated
+src/C21_VisionAndLidar/msg/_C0C21_RES.py: /opt/ros/fuerte/stacks/geometry/tf/srv_gen/generated
+	$(CMAKE_COMMAND) -E cmake_progress_report /home/lar1/Desktop/robilworkspace/C21_VisionAndLidar/CMakeFiles $(CMAKE_PROGRESS_5)
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --blue --bold "Generating src/C21_VisionAndLidar/msg/_C0C21_RES.py"
+	/opt/ros/fuerte/share/rospy/rosbuild/scripts/genmsg_py.py --noinitpy /home/lar1/Desktop/robilworkspace/C21_VisionAndLidar/msg/C0C21_RES.msg
 
-src/c21_Vision_and_Lidar/msg/_C0C21_SIZ.py: msg/C0C21_SIZ.msg
-src/c21_Vision_and_Lidar/msg/_C0C21_SIZ.py: /opt/ros/fuerte/share/rospy/rosbuild/scripts/genmsg_py.py
-src/c21_Vision_and_Lidar/msg/_C0C21_SIZ.py: /opt/ros/fuerte/share/roslib/bin/gendeps
-src/c21_Vision_and_Lidar/msg/_C0C21_SIZ.py: manifest.xml
-src/c21_Vision_and_Lidar/msg/_C0C21_SIZ.py: /opt/ros/fuerte/share/roslang/manifest.xml
-src/c21_Vision_and_Lidar/msg/_C0C21_SIZ.py: /opt/ros/fuerte/share/roscpp/manifest.xml
-src/c21_Vision_and_Lidar/msg/_C0C21_SIZ.py: /opt/ros/fuerte/share/std_msgs/manifest.xml
-src/c21_Vision_and_Lidar/msg/_C0C21_SIZ.py: /opt/ros/fuerte/share/geometry_msgs/manifest.xml
-src/c21_Vision_and_Lidar/msg/_C0C21_SIZ.py: /opt/ros/fuerte/share/sensor_msgs/manifest.xml
-src/c21_Vision_and_Lidar/msg/_C0C21_SIZ.py: /opt/ros/fuerte/share/rospy/manifest.xml
-src/c21_Vision_and_Lidar/msg/_C0C21_SIZ.py: /opt/ros/fuerte/stacks/vision_opencv/opencv2/manifest.xml
-src/c21_Vision_and_Lidar/msg/_C0C21_SIZ.py: /opt/ros/fuerte/stacks/vision_opencv/cv_bridge/manifest.xml
-src/c21_Vision_and_Lidar/msg/_C0C21_SIZ.py: /opt/ros/fuerte/share/ros/core/rosbuild/manifest.xml
-src/c21_Vision_and_Lidar/msg/_C0C21_SIZ.py: /opt/ros/fuerte/share/roslib/manifest.xml
-src/c21_Vision_and_Lidar/msg/_C0C21_SIZ.py: /opt/ros/fuerte/share/rosconsole/manifest.xml
-src/c21_Vision_and_Lidar/msg/_C0C21_SIZ.py: /opt/ros/fuerte/stacks/pluginlib/manifest.xml
-src/c21_Vision_and_Lidar/msg/_C0C21_SIZ.py: /opt/ros/fuerte/share/message_filters/manifest.xml
-src/c21_Vision_and_Lidar/msg/_C0C21_SIZ.py: /opt/ros/fuerte/stacks/image_common/image_transport/manifest.xml
-src/c21_Vision_and_Lidar/msg/_C0C21_SIZ.py: /opt/ros/fuerte/share/rosbag/manifest.xml
-src/c21_Vision_and_Lidar/msg/_C0C21_SIZ.py: /opt/ros/fuerte/stacks/bond_core/bond/manifest.xml
-src/c21_Vision_and_Lidar/msg/_C0C21_SIZ.py: /opt/ros/fuerte/stacks/bond_core/smclib/manifest.xml
-src/c21_Vision_and_Lidar/msg/_C0C21_SIZ.py: /opt/ros/fuerte/stacks/bond_core/bondcpp/manifest.xml
-src/c21_Vision_and_Lidar/msg/_C0C21_SIZ.py: /opt/ros/fuerte/stacks/nodelet_core/nodelet/manifest.xml
-src/c21_Vision_and_Lidar/msg/_C0C21_SIZ.py: /opt/ros/fuerte/share/rosservice/manifest.xml
-src/c21_Vision_and_Lidar/msg/_C0C21_SIZ.py: /opt/ros/fuerte/stacks/dynamic_reconfigure/manifest.xml
-src/c21_Vision_and_Lidar/msg/_C0C21_SIZ.py: /opt/ros/fuerte/stacks/nodelet_core/nodelet_topic_tools/manifest.xml
-src/c21_Vision_and_Lidar/msg/_C0C21_SIZ.py: /opt/ros/fuerte/stacks/bullet/manifest.xml
-src/c21_Vision_and_Lidar/msg/_C0C21_SIZ.py: /opt/ros/fuerte/stacks/geometry/angles/manifest.xml
-src/c21_Vision_and_Lidar/msg/_C0C21_SIZ.py: /opt/ros/fuerte/share/rostest/manifest.xml
-src/c21_Vision_and_Lidar/msg/_C0C21_SIZ.py: /opt/ros/fuerte/share/roswtf/manifest.xml
-src/c21_Vision_and_Lidar/msg/_C0C21_SIZ.py: /opt/ros/fuerte/stacks/geometry/tf/manifest.xml
-src/c21_Vision_and_Lidar/msg/_C0C21_SIZ.py: /opt/ros/fuerte/stacks/common_rosdeps/manifest.xml
-src/c21_Vision_and_Lidar/msg/_C0C21_SIZ.py: /opt/ros/fuerte/stacks/perception_pcl/pcl_ros/manifest.xml
-src/c21_Vision_and_Lidar/msg/_C0C21_SIZ.py: /opt/ros/fuerte/share/pcl/manifest.xml
-src/c21_Vision_and_Lidar/msg/_C0C21_SIZ.py: /opt/ros/fuerte/stacks/bond_core/bond/msg_gen/generated
-src/c21_Vision_and_Lidar/msg/_C0C21_SIZ.py: /opt/ros/fuerte/stacks/nodelet_core/nodelet/srv_gen/generated
-src/c21_Vision_and_Lidar/msg/_C0C21_SIZ.py: /opt/ros/fuerte/stacks/dynamic_reconfigure/msg_gen/generated
-src/c21_Vision_and_Lidar/msg/_C0C21_SIZ.py: /opt/ros/fuerte/stacks/dynamic_reconfigure/srv_gen/generated
-src/c21_Vision_and_Lidar/msg/_C0C21_SIZ.py: /opt/ros/fuerte/stacks/geometry/tf/msg_gen/generated
-src/c21_Vision_and_Lidar/msg/_C0C21_SIZ.py: /opt/ros/fuerte/stacks/geometry/tf/srv_gen/generated
-	$(CMAKE_COMMAND) -E cmake_progress_report /home/lar2/Desktop/rosworkspace/c21_Vision_and_Lidar/CMakeFiles $(CMAKE_PROGRESS_6)
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --blue --bold "Generating src/c21_Vision_and_Lidar/msg/_C0C21_SIZ.py"
-	/opt/ros/fuerte/share/rospy/rosbuild/scripts/genmsg_py.py --noinitpy /home/lar2/Desktop/rosworkspace/c21_Vision_and_Lidar/msg/C0C21_SIZ.msg
+src/C21_VisionAndLidar/msg/_C0C21_CAM.py: msg/C0C21_CAM.msg
+src/C21_VisionAndLidar/msg/_C0C21_CAM.py: /opt/ros/fuerte/share/rospy/rosbuild/scripts/genmsg_py.py
+src/C21_VisionAndLidar/msg/_C0C21_CAM.py: /opt/ros/fuerte/share/roslib/bin/gendeps
+src/C21_VisionAndLidar/msg/_C0C21_CAM.py: manifest.xml
+src/C21_VisionAndLidar/msg/_C0C21_CAM.py: /opt/ros/fuerte/share/roslang/manifest.xml
+src/C21_VisionAndLidar/msg/_C0C21_CAM.py: /opt/ros/fuerte/share/roscpp/manifest.xml
+src/C21_VisionAndLidar/msg/_C0C21_CAM.py: /opt/ros/fuerte/share/std_msgs/manifest.xml
+src/C21_VisionAndLidar/msg/_C0C21_CAM.py: /opt/ros/fuerte/share/geometry_msgs/manifest.xml
+src/C21_VisionAndLidar/msg/_C0C21_CAM.py: /opt/ros/fuerte/share/nav_msgs/manifest.xml
+src/C21_VisionAndLidar/msg/_C0C21_CAM.py: /opt/ros/fuerte/share/sensor_msgs/manifest.xml
+src/C21_VisionAndLidar/msg/_C0C21_CAM.py: /opt/ros/fuerte/share/rospy/manifest.xml
+src/C21_VisionAndLidar/msg/_C0C21_CAM.py: /opt/ros/fuerte/stacks/vision_opencv/opencv2/manifest.xml
+src/C21_VisionAndLidar/msg/_C0C21_CAM.py: /opt/ros/fuerte/stacks/vision_opencv/cv_bridge/manifest.xml
+src/C21_VisionAndLidar/msg/_C0C21_CAM.py: /opt/ros/fuerte/share/ros/core/rosbuild/manifest.xml
+src/C21_VisionAndLidar/msg/_C0C21_CAM.py: /opt/ros/fuerte/share/roslib/manifest.xml
+src/C21_VisionAndLidar/msg/_C0C21_CAM.py: /opt/ros/fuerte/share/rosconsole/manifest.xml
+src/C21_VisionAndLidar/msg/_C0C21_CAM.py: /opt/ros/fuerte/stacks/pluginlib/manifest.xml
+src/C21_VisionAndLidar/msg/_C0C21_CAM.py: /opt/ros/fuerte/share/message_filters/manifest.xml
+src/C21_VisionAndLidar/msg/_C0C21_CAM.py: /opt/ros/fuerte/stacks/image_common/image_transport/manifest.xml
+src/C21_VisionAndLidar/msg/_C0C21_CAM.py: /opt/ros/fuerte/share/rosbag/manifest.xml
+src/C21_VisionAndLidar/msg/_C0C21_CAM.py: /opt/ros/fuerte/stacks/bond_core/bond/manifest.xml
+src/C21_VisionAndLidar/msg/_C0C21_CAM.py: /opt/ros/fuerte/stacks/bond_core/smclib/manifest.xml
+src/C21_VisionAndLidar/msg/_C0C21_CAM.py: /opt/ros/fuerte/stacks/bond_core/bondcpp/manifest.xml
+src/C21_VisionAndLidar/msg/_C0C21_CAM.py: /opt/ros/fuerte/stacks/nodelet_core/nodelet/manifest.xml
+src/C21_VisionAndLidar/msg/_C0C21_CAM.py: /opt/ros/fuerte/share/rosservice/manifest.xml
+src/C21_VisionAndLidar/msg/_C0C21_CAM.py: /opt/ros/fuerte/stacks/dynamic_reconfigure/manifest.xml
+src/C21_VisionAndLidar/msg/_C0C21_CAM.py: /opt/ros/fuerte/stacks/nodelet_core/nodelet_topic_tools/manifest.xml
+src/C21_VisionAndLidar/msg/_C0C21_CAM.py: /opt/ros/fuerte/stacks/bullet/manifest.xml
+src/C21_VisionAndLidar/msg/_C0C21_CAM.py: /opt/ros/fuerte/stacks/geometry/angles/manifest.xml
+src/C21_VisionAndLidar/msg/_C0C21_CAM.py: /opt/ros/fuerte/share/rostest/manifest.xml
+src/C21_VisionAndLidar/msg/_C0C21_CAM.py: /opt/ros/fuerte/share/roswtf/manifest.xml
+src/C21_VisionAndLidar/msg/_C0C21_CAM.py: /opt/ros/fuerte/stacks/geometry/tf/manifest.xml
+src/C21_VisionAndLidar/msg/_C0C21_CAM.py: /opt/ros/fuerte/stacks/common_rosdeps/manifest.xml
+src/C21_VisionAndLidar/msg/_C0C21_CAM.py: /opt/ros/fuerte/stacks/perception_pcl/pcl_ros/manifest.xml
+src/C21_VisionAndLidar/msg/_C0C21_CAM.py: /opt/ros/fuerte/share/pcl/manifest.xml
+src/C21_VisionAndLidar/msg/_C0C21_CAM.py: /opt/ros/fuerte/stacks/bond_core/bond/msg_gen/generated
+src/C21_VisionAndLidar/msg/_C0C21_CAM.py: /opt/ros/fuerte/stacks/nodelet_core/nodelet/srv_gen/generated
+src/C21_VisionAndLidar/msg/_C0C21_CAM.py: /opt/ros/fuerte/stacks/dynamic_reconfigure/msg_gen/generated
+src/C21_VisionAndLidar/msg/_C0C21_CAM.py: /opt/ros/fuerte/stacks/dynamic_reconfigure/srv_gen/generated
+src/C21_VisionAndLidar/msg/_C0C21_CAM.py: /opt/ros/fuerte/stacks/geometry/tf/msg_gen/generated
+src/C21_VisionAndLidar/msg/_C0C21_CAM.py: /opt/ros/fuerte/stacks/geometry/tf/srv_gen/generated
+	$(CMAKE_COMMAND) -E cmake_progress_report /home/lar1/Desktop/robilworkspace/C21_VisionAndLidar/CMakeFiles $(CMAKE_PROGRESS_6)
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --blue --bold "Generating src/C21_VisionAndLidar/msg/_C0C21_CAM.py"
+	/opt/ros/fuerte/share/rospy/rosbuild/scripts/genmsg_py.py --noinitpy /home/lar1/Desktop/robilworkspace/C21_VisionAndLidar/msg/C0C21_CAM.msg
 
-src/c21_Vision_and_Lidar/msg/_C21C0_3DF.py: msg/C21C0_3DF.msg
-src/c21_Vision_and_Lidar/msg/_C21C0_3DF.py: /opt/ros/fuerte/share/rospy/rosbuild/scripts/genmsg_py.py
-src/c21_Vision_and_Lidar/msg/_C21C0_3DF.py: /opt/ros/fuerte/share/roslib/bin/gendeps
-src/c21_Vision_and_Lidar/msg/_C21C0_3DF.py: /opt/ros/fuerte/share/sensor_msgs/msg/PointField.msg
-src/c21_Vision_and_Lidar/msg/_C21C0_3DF.py: /opt/ros/fuerte/share/std_msgs/msg/Header.msg
-src/c21_Vision_and_Lidar/msg/_C21C0_3DF.py: /opt/ros/fuerte/share/sensor_msgs/msg/PointCloud2.msg
-src/c21_Vision_and_Lidar/msg/_C21C0_3DF.py: manifest.xml
-src/c21_Vision_and_Lidar/msg/_C21C0_3DF.py: /opt/ros/fuerte/share/roslang/manifest.xml
-src/c21_Vision_and_Lidar/msg/_C21C0_3DF.py: /opt/ros/fuerte/share/roscpp/manifest.xml
-src/c21_Vision_and_Lidar/msg/_C21C0_3DF.py: /opt/ros/fuerte/share/std_msgs/manifest.xml
-src/c21_Vision_and_Lidar/msg/_C21C0_3DF.py: /opt/ros/fuerte/share/geometry_msgs/manifest.xml
-src/c21_Vision_and_Lidar/msg/_C21C0_3DF.py: /opt/ros/fuerte/share/sensor_msgs/manifest.xml
-src/c21_Vision_and_Lidar/msg/_C21C0_3DF.py: /opt/ros/fuerte/share/rospy/manifest.xml
-src/c21_Vision_and_Lidar/msg/_C21C0_3DF.py: /opt/ros/fuerte/stacks/vision_opencv/opencv2/manifest.xml
-src/c21_Vision_and_Lidar/msg/_C21C0_3DF.py: /opt/ros/fuerte/stacks/vision_opencv/cv_bridge/manifest.xml
-src/c21_Vision_and_Lidar/msg/_C21C0_3DF.py: /opt/ros/fuerte/share/ros/core/rosbuild/manifest.xml
-src/c21_Vision_and_Lidar/msg/_C21C0_3DF.py: /opt/ros/fuerte/share/roslib/manifest.xml
-src/c21_Vision_and_Lidar/msg/_C21C0_3DF.py: /opt/ros/fuerte/share/rosconsole/manifest.xml
-src/c21_Vision_and_Lidar/msg/_C21C0_3DF.py: /opt/ros/fuerte/stacks/pluginlib/manifest.xml
-src/c21_Vision_and_Lidar/msg/_C21C0_3DF.py: /opt/ros/fuerte/share/message_filters/manifest.xml
-src/c21_Vision_and_Lidar/msg/_C21C0_3DF.py: /opt/ros/fuerte/stacks/image_common/image_transport/manifest.xml
-src/c21_Vision_and_Lidar/msg/_C21C0_3DF.py: /opt/ros/fuerte/share/rosbag/manifest.xml
-src/c21_Vision_and_Lidar/msg/_C21C0_3DF.py: /opt/ros/fuerte/stacks/bond_core/bond/manifest.xml
-src/c21_Vision_and_Lidar/msg/_C21C0_3DF.py: /opt/ros/fuerte/stacks/bond_core/smclib/manifest.xml
-src/c21_Vision_and_Lidar/msg/_C21C0_3DF.py: /opt/ros/fuerte/stacks/bond_core/bondcpp/manifest.xml
-src/c21_Vision_and_Lidar/msg/_C21C0_3DF.py: /opt/ros/fuerte/stacks/nodelet_core/nodelet/manifest.xml
-src/c21_Vision_and_Lidar/msg/_C21C0_3DF.py: /opt/ros/fuerte/share/rosservice/manifest.xml
-src/c21_Vision_and_Lidar/msg/_C21C0_3DF.py: /opt/ros/fuerte/stacks/dynamic_reconfigure/manifest.xml
-src/c21_Vision_and_Lidar/msg/_C21C0_3DF.py: /opt/ros/fuerte/stacks/nodelet_core/nodelet_topic_tools/manifest.xml
-src/c21_Vision_and_Lidar/msg/_C21C0_3DF.py: /opt/ros/fuerte/stacks/bullet/manifest.xml
-src/c21_Vision_and_Lidar/msg/_C21C0_3DF.py: /opt/ros/fuerte/stacks/geometry/angles/manifest.xml
-src/c21_Vision_and_Lidar/msg/_C21C0_3DF.py: /opt/ros/fuerte/share/rostest/manifest.xml
-src/c21_Vision_and_Lidar/msg/_C21C0_3DF.py: /opt/ros/fuerte/share/roswtf/manifest.xml
-src/c21_Vision_and_Lidar/msg/_C21C0_3DF.py: /opt/ros/fuerte/stacks/geometry/tf/manifest.xml
-src/c21_Vision_and_Lidar/msg/_C21C0_3DF.py: /opt/ros/fuerte/stacks/common_rosdeps/manifest.xml
-src/c21_Vision_and_Lidar/msg/_C21C0_3DF.py: /opt/ros/fuerte/stacks/perception_pcl/pcl_ros/manifest.xml
-src/c21_Vision_and_Lidar/msg/_C21C0_3DF.py: /opt/ros/fuerte/share/pcl/manifest.xml
-src/c21_Vision_and_Lidar/msg/_C21C0_3DF.py: /opt/ros/fuerte/stacks/bond_core/bond/msg_gen/generated
-src/c21_Vision_and_Lidar/msg/_C21C0_3DF.py: /opt/ros/fuerte/stacks/nodelet_core/nodelet/srv_gen/generated
-src/c21_Vision_and_Lidar/msg/_C21C0_3DF.py: /opt/ros/fuerte/stacks/dynamic_reconfigure/msg_gen/generated
-src/c21_Vision_and_Lidar/msg/_C21C0_3DF.py: /opt/ros/fuerte/stacks/dynamic_reconfigure/srv_gen/generated
-src/c21_Vision_and_Lidar/msg/_C21C0_3DF.py: /opt/ros/fuerte/stacks/geometry/tf/msg_gen/generated
-src/c21_Vision_and_Lidar/msg/_C21C0_3DF.py: /opt/ros/fuerte/stacks/geometry/tf/srv_gen/generated
-	$(CMAKE_COMMAND) -E cmake_progress_report /home/lar2/Desktop/rosworkspace/c21_Vision_and_Lidar/CMakeFiles $(CMAKE_PROGRESS_7)
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --blue --bold "Generating src/c21_Vision_and_Lidar/msg/_C21C0_3DF.py"
-	/opt/ros/fuerte/share/rospy/rosbuild/scripts/genmsg_py.py --noinitpy /home/lar2/Desktop/rosworkspace/c21_Vision_and_Lidar/msg/C21C0_3DF.msg
+src/C21_VisionAndLidar/msg/_C21_PICTURE.py: msg/C21_PICTURE.msg
+src/C21_VisionAndLidar/msg/_C21_PICTURE.py: /opt/ros/fuerte/share/rospy/rosbuild/scripts/genmsg_py.py
+src/C21_VisionAndLidar/msg/_C21_PICTURE.py: /opt/ros/fuerte/share/roslib/bin/gendeps
+src/C21_VisionAndLidar/msg/_C21_PICTURE.py: manifest.xml
+src/C21_VisionAndLidar/msg/_C21_PICTURE.py: /opt/ros/fuerte/share/roslang/manifest.xml
+src/C21_VisionAndLidar/msg/_C21_PICTURE.py: /opt/ros/fuerte/share/roscpp/manifest.xml
+src/C21_VisionAndLidar/msg/_C21_PICTURE.py: /opt/ros/fuerte/share/std_msgs/manifest.xml
+src/C21_VisionAndLidar/msg/_C21_PICTURE.py: /opt/ros/fuerte/share/geometry_msgs/manifest.xml
+src/C21_VisionAndLidar/msg/_C21_PICTURE.py: /opt/ros/fuerte/share/nav_msgs/manifest.xml
+src/C21_VisionAndLidar/msg/_C21_PICTURE.py: /opt/ros/fuerte/share/sensor_msgs/manifest.xml
+src/C21_VisionAndLidar/msg/_C21_PICTURE.py: /opt/ros/fuerte/share/rospy/manifest.xml
+src/C21_VisionAndLidar/msg/_C21_PICTURE.py: /opt/ros/fuerte/stacks/vision_opencv/opencv2/manifest.xml
+src/C21_VisionAndLidar/msg/_C21_PICTURE.py: /opt/ros/fuerte/stacks/vision_opencv/cv_bridge/manifest.xml
+src/C21_VisionAndLidar/msg/_C21_PICTURE.py: /opt/ros/fuerte/share/ros/core/rosbuild/manifest.xml
+src/C21_VisionAndLidar/msg/_C21_PICTURE.py: /opt/ros/fuerte/share/roslib/manifest.xml
+src/C21_VisionAndLidar/msg/_C21_PICTURE.py: /opt/ros/fuerte/share/rosconsole/manifest.xml
+src/C21_VisionAndLidar/msg/_C21_PICTURE.py: /opt/ros/fuerte/stacks/pluginlib/manifest.xml
+src/C21_VisionAndLidar/msg/_C21_PICTURE.py: /opt/ros/fuerte/share/message_filters/manifest.xml
+src/C21_VisionAndLidar/msg/_C21_PICTURE.py: /opt/ros/fuerte/stacks/image_common/image_transport/manifest.xml
+src/C21_VisionAndLidar/msg/_C21_PICTURE.py: /opt/ros/fuerte/share/rosbag/manifest.xml
+src/C21_VisionAndLidar/msg/_C21_PICTURE.py: /opt/ros/fuerte/stacks/bond_core/bond/manifest.xml
+src/C21_VisionAndLidar/msg/_C21_PICTURE.py: /opt/ros/fuerte/stacks/bond_core/smclib/manifest.xml
+src/C21_VisionAndLidar/msg/_C21_PICTURE.py: /opt/ros/fuerte/stacks/bond_core/bondcpp/manifest.xml
+src/C21_VisionAndLidar/msg/_C21_PICTURE.py: /opt/ros/fuerte/stacks/nodelet_core/nodelet/manifest.xml
+src/C21_VisionAndLidar/msg/_C21_PICTURE.py: /opt/ros/fuerte/share/rosservice/manifest.xml
+src/C21_VisionAndLidar/msg/_C21_PICTURE.py: /opt/ros/fuerte/stacks/dynamic_reconfigure/manifest.xml
+src/C21_VisionAndLidar/msg/_C21_PICTURE.py: /opt/ros/fuerte/stacks/nodelet_core/nodelet_topic_tools/manifest.xml
+src/C21_VisionAndLidar/msg/_C21_PICTURE.py: /opt/ros/fuerte/stacks/bullet/manifest.xml
+src/C21_VisionAndLidar/msg/_C21_PICTURE.py: /opt/ros/fuerte/stacks/geometry/angles/manifest.xml
+src/C21_VisionAndLidar/msg/_C21_PICTURE.py: /opt/ros/fuerte/share/rostest/manifest.xml
+src/C21_VisionAndLidar/msg/_C21_PICTURE.py: /opt/ros/fuerte/share/roswtf/manifest.xml
+src/C21_VisionAndLidar/msg/_C21_PICTURE.py: /opt/ros/fuerte/stacks/geometry/tf/manifest.xml
+src/C21_VisionAndLidar/msg/_C21_PICTURE.py: /opt/ros/fuerte/stacks/common_rosdeps/manifest.xml
+src/C21_VisionAndLidar/msg/_C21_PICTURE.py: /opt/ros/fuerte/stacks/perception_pcl/pcl_ros/manifest.xml
+src/C21_VisionAndLidar/msg/_C21_PICTURE.py: /opt/ros/fuerte/share/pcl/manifest.xml
+src/C21_VisionAndLidar/msg/_C21_PICTURE.py: /opt/ros/fuerte/stacks/bond_core/bond/msg_gen/generated
+src/C21_VisionAndLidar/msg/_C21_PICTURE.py: /opt/ros/fuerte/stacks/nodelet_core/nodelet/srv_gen/generated
+src/C21_VisionAndLidar/msg/_C21_PICTURE.py: /opt/ros/fuerte/stacks/dynamic_reconfigure/msg_gen/generated
+src/C21_VisionAndLidar/msg/_C21_PICTURE.py: /opt/ros/fuerte/stacks/dynamic_reconfigure/srv_gen/generated
+src/C21_VisionAndLidar/msg/_C21_PICTURE.py: /opt/ros/fuerte/stacks/geometry/tf/msg_gen/generated
+src/C21_VisionAndLidar/msg/_C21_PICTURE.py: /opt/ros/fuerte/stacks/geometry/tf/srv_gen/generated
+	$(CMAKE_COMMAND) -E cmake_progress_report /home/lar1/Desktop/robilworkspace/C21_VisionAndLidar/CMakeFiles $(CMAKE_PROGRESS_7)
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --blue --bold "Generating src/C21_VisionAndLidar/msg/_C21_PICTURE.py"
+	/opt/ros/fuerte/share/rospy/rosbuild/scripts/genmsg_py.py --noinitpy /home/lar1/Desktop/robilworkspace/C21_VisionAndLidar/msg/C21_PICTURE.msg
 
-src/c21_Vision_and_Lidar/msg/_C0C21_LAZ.py: msg/C0C21_LAZ.msg
-src/c21_Vision_and_Lidar/msg/_C0C21_LAZ.py: /opt/ros/fuerte/share/rospy/rosbuild/scripts/genmsg_py.py
-src/c21_Vision_and_Lidar/msg/_C0C21_LAZ.py: /opt/ros/fuerte/share/roslib/bin/gendeps
-src/c21_Vision_and_Lidar/msg/_C0C21_LAZ.py: manifest.xml
-src/c21_Vision_and_Lidar/msg/_C0C21_LAZ.py: /opt/ros/fuerte/share/roslang/manifest.xml
-src/c21_Vision_and_Lidar/msg/_C0C21_LAZ.py: /opt/ros/fuerte/share/roscpp/manifest.xml
-src/c21_Vision_and_Lidar/msg/_C0C21_LAZ.py: /opt/ros/fuerte/share/std_msgs/manifest.xml
-src/c21_Vision_and_Lidar/msg/_C0C21_LAZ.py: /opt/ros/fuerte/share/geometry_msgs/manifest.xml
-src/c21_Vision_and_Lidar/msg/_C0C21_LAZ.py: /opt/ros/fuerte/share/sensor_msgs/manifest.xml
-src/c21_Vision_and_Lidar/msg/_C0C21_LAZ.py: /opt/ros/fuerte/share/rospy/manifest.xml
-src/c21_Vision_and_Lidar/msg/_C0C21_LAZ.py: /opt/ros/fuerte/stacks/vision_opencv/opencv2/manifest.xml
-src/c21_Vision_and_Lidar/msg/_C0C21_LAZ.py: /opt/ros/fuerte/stacks/vision_opencv/cv_bridge/manifest.xml
-src/c21_Vision_and_Lidar/msg/_C0C21_LAZ.py: /opt/ros/fuerte/share/ros/core/rosbuild/manifest.xml
-src/c21_Vision_and_Lidar/msg/_C0C21_LAZ.py: /opt/ros/fuerte/share/roslib/manifest.xml
-src/c21_Vision_and_Lidar/msg/_C0C21_LAZ.py: /opt/ros/fuerte/share/rosconsole/manifest.xml
-src/c21_Vision_and_Lidar/msg/_C0C21_LAZ.py: /opt/ros/fuerte/stacks/pluginlib/manifest.xml
-src/c21_Vision_and_Lidar/msg/_C0C21_LAZ.py: /opt/ros/fuerte/share/message_filters/manifest.xml
-src/c21_Vision_and_Lidar/msg/_C0C21_LAZ.py: /opt/ros/fuerte/stacks/image_common/image_transport/manifest.xml
-src/c21_Vision_and_Lidar/msg/_C0C21_LAZ.py: /opt/ros/fuerte/share/rosbag/manifest.xml
-src/c21_Vision_and_Lidar/msg/_C0C21_LAZ.py: /opt/ros/fuerte/stacks/bond_core/bond/manifest.xml
-src/c21_Vision_and_Lidar/msg/_C0C21_LAZ.py: /opt/ros/fuerte/stacks/bond_core/smclib/manifest.xml
-src/c21_Vision_and_Lidar/msg/_C0C21_LAZ.py: /opt/ros/fuerte/stacks/bond_core/bondcpp/manifest.xml
-src/c21_Vision_and_Lidar/msg/_C0C21_LAZ.py: /opt/ros/fuerte/stacks/nodelet_core/nodelet/manifest.xml
-src/c21_Vision_and_Lidar/msg/_C0C21_LAZ.py: /opt/ros/fuerte/share/rosservice/manifest.xml
-src/c21_Vision_and_Lidar/msg/_C0C21_LAZ.py: /opt/ros/fuerte/stacks/dynamic_reconfigure/manifest.xml
-src/c21_Vision_and_Lidar/msg/_C0C21_LAZ.py: /opt/ros/fuerte/stacks/nodelet_core/nodelet_topic_tools/manifest.xml
-src/c21_Vision_and_Lidar/msg/_C0C21_LAZ.py: /opt/ros/fuerte/stacks/bullet/manifest.xml
-src/c21_Vision_and_Lidar/msg/_C0C21_LAZ.py: /opt/ros/fuerte/stacks/geometry/angles/manifest.xml
-src/c21_Vision_and_Lidar/msg/_C0C21_LAZ.py: /opt/ros/fuerte/share/rostest/manifest.xml
-src/c21_Vision_and_Lidar/msg/_C0C21_LAZ.py: /opt/ros/fuerte/share/roswtf/manifest.xml
-src/c21_Vision_and_Lidar/msg/_C0C21_LAZ.py: /opt/ros/fuerte/stacks/geometry/tf/manifest.xml
-src/c21_Vision_and_Lidar/msg/_C0C21_LAZ.py: /opt/ros/fuerte/stacks/common_rosdeps/manifest.xml
-src/c21_Vision_and_Lidar/msg/_C0C21_LAZ.py: /opt/ros/fuerte/stacks/perception_pcl/pcl_ros/manifest.xml
-src/c21_Vision_and_Lidar/msg/_C0C21_LAZ.py: /opt/ros/fuerte/share/pcl/manifest.xml
-src/c21_Vision_and_Lidar/msg/_C0C21_LAZ.py: /opt/ros/fuerte/stacks/bond_core/bond/msg_gen/generated
-src/c21_Vision_and_Lidar/msg/_C0C21_LAZ.py: /opt/ros/fuerte/stacks/nodelet_core/nodelet/srv_gen/generated
-src/c21_Vision_and_Lidar/msg/_C0C21_LAZ.py: /opt/ros/fuerte/stacks/dynamic_reconfigure/msg_gen/generated
-src/c21_Vision_and_Lidar/msg/_C0C21_LAZ.py: /opt/ros/fuerte/stacks/dynamic_reconfigure/srv_gen/generated
-src/c21_Vision_and_Lidar/msg/_C0C21_LAZ.py: /opt/ros/fuerte/stacks/geometry/tf/msg_gen/generated
-src/c21_Vision_and_Lidar/msg/_C0C21_LAZ.py: /opt/ros/fuerte/stacks/geometry/tf/srv_gen/generated
-	$(CMAKE_COMMAND) -E cmake_progress_report /home/lar2/Desktop/rosworkspace/c21_Vision_and_Lidar/CMakeFiles $(CMAKE_PROGRESS_8)
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --blue --bold "Generating src/c21_Vision_and_Lidar/msg/_C0C21_LAZ.py"
-	/opt/ros/fuerte/share/rospy/rosbuild/scripts/genmsg_py.py --noinitpy /home/lar2/Desktop/rosworkspace/c21_Vision_and_Lidar/msg/C0C21_LAZ.msg
+src/C21_VisionAndLidar/msg/_C0C21_AZI.py: msg/C0C21_AZI.msg
+src/C21_VisionAndLidar/msg/_C0C21_AZI.py: /opt/ros/fuerte/share/rospy/rosbuild/scripts/genmsg_py.py
+src/C21_VisionAndLidar/msg/_C0C21_AZI.py: /opt/ros/fuerte/share/roslib/bin/gendeps
+src/C21_VisionAndLidar/msg/_C0C21_AZI.py: manifest.xml
+src/C21_VisionAndLidar/msg/_C0C21_AZI.py: /opt/ros/fuerte/share/roslang/manifest.xml
+src/C21_VisionAndLidar/msg/_C0C21_AZI.py: /opt/ros/fuerte/share/roscpp/manifest.xml
+src/C21_VisionAndLidar/msg/_C0C21_AZI.py: /opt/ros/fuerte/share/std_msgs/manifest.xml
+src/C21_VisionAndLidar/msg/_C0C21_AZI.py: /opt/ros/fuerte/share/geometry_msgs/manifest.xml
+src/C21_VisionAndLidar/msg/_C0C21_AZI.py: /opt/ros/fuerte/share/nav_msgs/manifest.xml
+src/C21_VisionAndLidar/msg/_C0C21_AZI.py: /opt/ros/fuerte/share/sensor_msgs/manifest.xml
+src/C21_VisionAndLidar/msg/_C0C21_AZI.py: /opt/ros/fuerte/share/rospy/manifest.xml
+src/C21_VisionAndLidar/msg/_C0C21_AZI.py: /opt/ros/fuerte/stacks/vision_opencv/opencv2/manifest.xml
+src/C21_VisionAndLidar/msg/_C0C21_AZI.py: /opt/ros/fuerte/stacks/vision_opencv/cv_bridge/manifest.xml
+src/C21_VisionAndLidar/msg/_C0C21_AZI.py: /opt/ros/fuerte/share/ros/core/rosbuild/manifest.xml
+src/C21_VisionAndLidar/msg/_C0C21_AZI.py: /opt/ros/fuerte/share/roslib/manifest.xml
+src/C21_VisionAndLidar/msg/_C0C21_AZI.py: /opt/ros/fuerte/share/rosconsole/manifest.xml
+src/C21_VisionAndLidar/msg/_C0C21_AZI.py: /opt/ros/fuerte/stacks/pluginlib/manifest.xml
+src/C21_VisionAndLidar/msg/_C0C21_AZI.py: /opt/ros/fuerte/share/message_filters/manifest.xml
+src/C21_VisionAndLidar/msg/_C0C21_AZI.py: /opt/ros/fuerte/stacks/image_common/image_transport/manifest.xml
+src/C21_VisionAndLidar/msg/_C0C21_AZI.py: /opt/ros/fuerte/share/rosbag/manifest.xml
+src/C21_VisionAndLidar/msg/_C0C21_AZI.py: /opt/ros/fuerte/stacks/bond_core/bond/manifest.xml
+src/C21_VisionAndLidar/msg/_C0C21_AZI.py: /opt/ros/fuerte/stacks/bond_core/smclib/manifest.xml
+src/C21_VisionAndLidar/msg/_C0C21_AZI.py: /opt/ros/fuerte/stacks/bond_core/bondcpp/manifest.xml
+src/C21_VisionAndLidar/msg/_C0C21_AZI.py: /opt/ros/fuerte/stacks/nodelet_core/nodelet/manifest.xml
+src/C21_VisionAndLidar/msg/_C0C21_AZI.py: /opt/ros/fuerte/share/rosservice/manifest.xml
+src/C21_VisionAndLidar/msg/_C0C21_AZI.py: /opt/ros/fuerte/stacks/dynamic_reconfigure/manifest.xml
+src/C21_VisionAndLidar/msg/_C0C21_AZI.py: /opt/ros/fuerte/stacks/nodelet_core/nodelet_topic_tools/manifest.xml
+src/C21_VisionAndLidar/msg/_C0C21_AZI.py: /opt/ros/fuerte/stacks/bullet/manifest.xml
+src/C21_VisionAndLidar/msg/_C0C21_AZI.py: /opt/ros/fuerte/stacks/geometry/angles/manifest.xml
+src/C21_VisionAndLidar/msg/_C0C21_AZI.py: /opt/ros/fuerte/share/rostest/manifest.xml
+src/C21_VisionAndLidar/msg/_C0C21_AZI.py: /opt/ros/fuerte/share/roswtf/manifest.xml
+src/C21_VisionAndLidar/msg/_C0C21_AZI.py: /opt/ros/fuerte/stacks/geometry/tf/manifest.xml
+src/C21_VisionAndLidar/msg/_C0C21_AZI.py: /opt/ros/fuerte/stacks/common_rosdeps/manifest.xml
+src/C21_VisionAndLidar/msg/_C0C21_AZI.py: /opt/ros/fuerte/stacks/perception_pcl/pcl_ros/manifest.xml
+src/C21_VisionAndLidar/msg/_C0C21_AZI.py: /opt/ros/fuerte/share/pcl/manifest.xml
+src/C21_VisionAndLidar/msg/_C0C21_AZI.py: /opt/ros/fuerte/stacks/bond_core/bond/msg_gen/generated
+src/C21_VisionAndLidar/msg/_C0C21_AZI.py: /opt/ros/fuerte/stacks/nodelet_core/nodelet/srv_gen/generated
+src/C21_VisionAndLidar/msg/_C0C21_AZI.py: /opt/ros/fuerte/stacks/dynamic_reconfigure/msg_gen/generated
+src/C21_VisionAndLidar/msg/_C0C21_AZI.py: /opt/ros/fuerte/stacks/dynamic_reconfigure/srv_gen/generated
+src/C21_VisionAndLidar/msg/_C0C21_AZI.py: /opt/ros/fuerte/stacks/geometry/tf/msg_gen/generated
+src/C21_VisionAndLidar/msg/_C0C21_AZI.py: /opt/ros/fuerte/stacks/geometry/tf/srv_gen/generated
+	$(CMAKE_COMMAND) -E cmake_progress_report /home/lar1/Desktop/robilworkspace/C21_VisionAndLidar/CMakeFiles $(CMAKE_PROGRESS_8)
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --blue --bold "Generating src/C21_VisionAndLidar/msg/_C0C21_AZI.py"
+	/opt/ros/fuerte/share/rospy/rosbuild/scripts/genmsg_py.py --noinitpy /home/lar1/Desktop/robilworkspace/C21_VisionAndLidar/msg/C0C21_AZI.msg
+
+src/C21_VisionAndLidar/msg/_C21_PANORAMA.py: msg/C21_PANORAMA.msg
+src/C21_VisionAndLidar/msg/_C21_PANORAMA.py: /opt/ros/fuerte/share/rospy/rosbuild/scripts/genmsg_py.py
+src/C21_VisionAndLidar/msg/_C21_PANORAMA.py: /opt/ros/fuerte/share/roslib/bin/gendeps
+src/C21_VisionAndLidar/msg/_C21_PANORAMA.py: manifest.xml
+src/C21_VisionAndLidar/msg/_C21_PANORAMA.py: /opt/ros/fuerte/share/roslang/manifest.xml
+src/C21_VisionAndLidar/msg/_C21_PANORAMA.py: /opt/ros/fuerte/share/roscpp/manifest.xml
+src/C21_VisionAndLidar/msg/_C21_PANORAMA.py: /opt/ros/fuerte/share/std_msgs/manifest.xml
+src/C21_VisionAndLidar/msg/_C21_PANORAMA.py: /opt/ros/fuerte/share/geometry_msgs/manifest.xml
+src/C21_VisionAndLidar/msg/_C21_PANORAMA.py: /opt/ros/fuerte/share/nav_msgs/manifest.xml
+src/C21_VisionAndLidar/msg/_C21_PANORAMA.py: /opt/ros/fuerte/share/sensor_msgs/manifest.xml
+src/C21_VisionAndLidar/msg/_C21_PANORAMA.py: /opt/ros/fuerte/share/rospy/manifest.xml
+src/C21_VisionAndLidar/msg/_C21_PANORAMA.py: /opt/ros/fuerte/stacks/vision_opencv/opencv2/manifest.xml
+src/C21_VisionAndLidar/msg/_C21_PANORAMA.py: /opt/ros/fuerte/stacks/vision_opencv/cv_bridge/manifest.xml
+src/C21_VisionAndLidar/msg/_C21_PANORAMA.py: /opt/ros/fuerte/share/ros/core/rosbuild/manifest.xml
+src/C21_VisionAndLidar/msg/_C21_PANORAMA.py: /opt/ros/fuerte/share/roslib/manifest.xml
+src/C21_VisionAndLidar/msg/_C21_PANORAMA.py: /opt/ros/fuerte/share/rosconsole/manifest.xml
+src/C21_VisionAndLidar/msg/_C21_PANORAMA.py: /opt/ros/fuerte/stacks/pluginlib/manifest.xml
+src/C21_VisionAndLidar/msg/_C21_PANORAMA.py: /opt/ros/fuerte/share/message_filters/manifest.xml
+src/C21_VisionAndLidar/msg/_C21_PANORAMA.py: /opt/ros/fuerte/stacks/image_common/image_transport/manifest.xml
+src/C21_VisionAndLidar/msg/_C21_PANORAMA.py: /opt/ros/fuerte/share/rosbag/manifest.xml
+src/C21_VisionAndLidar/msg/_C21_PANORAMA.py: /opt/ros/fuerte/stacks/bond_core/bond/manifest.xml
+src/C21_VisionAndLidar/msg/_C21_PANORAMA.py: /opt/ros/fuerte/stacks/bond_core/smclib/manifest.xml
+src/C21_VisionAndLidar/msg/_C21_PANORAMA.py: /opt/ros/fuerte/stacks/bond_core/bondcpp/manifest.xml
+src/C21_VisionAndLidar/msg/_C21_PANORAMA.py: /opt/ros/fuerte/stacks/nodelet_core/nodelet/manifest.xml
+src/C21_VisionAndLidar/msg/_C21_PANORAMA.py: /opt/ros/fuerte/share/rosservice/manifest.xml
+src/C21_VisionAndLidar/msg/_C21_PANORAMA.py: /opt/ros/fuerte/stacks/dynamic_reconfigure/manifest.xml
+src/C21_VisionAndLidar/msg/_C21_PANORAMA.py: /opt/ros/fuerte/stacks/nodelet_core/nodelet_topic_tools/manifest.xml
+src/C21_VisionAndLidar/msg/_C21_PANORAMA.py: /opt/ros/fuerte/stacks/bullet/manifest.xml
+src/C21_VisionAndLidar/msg/_C21_PANORAMA.py: /opt/ros/fuerte/stacks/geometry/angles/manifest.xml
+src/C21_VisionAndLidar/msg/_C21_PANORAMA.py: /opt/ros/fuerte/share/rostest/manifest.xml
+src/C21_VisionAndLidar/msg/_C21_PANORAMA.py: /opt/ros/fuerte/share/roswtf/manifest.xml
+src/C21_VisionAndLidar/msg/_C21_PANORAMA.py: /opt/ros/fuerte/stacks/geometry/tf/manifest.xml
+src/C21_VisionAndLidar/msg/_C21_PANORAMA.py: /opt/ros/fuerte/stacks/common_rosdeps/manifest.xml
+src/C21_VisionAndLidar/msg/_C21_PANORAMA.py: /opt/ros/fuerte/stacks/perception_pcl/pcl_ros/manifest.xml
+src/C21_VisionAndLidar/msg/_C21_PANORAMA.py: /opt/ros/fuerte/share/pcl/manifest.xml
+src/C21_VisionAndLidar/msg/_C21_PANORAMA.py: /opt/ros/fuerte/stacks/bond_core/bond/msg_gen/generated
+src/C21_VisionAndLidar/msg/_C21_PANORAMA.py: /opt/ros/fuerte/stacks/nodelet_core/nodelet/srv_gen/generated
+src/C21_VisionAndLidar/msg/_C21_PANORAMA.py: /opt/ros/fuerte/stacks/dynamic_reconfigure/msg_gen/generated
+src/C21_VisionAndLidar/msg/_C21_PANORAMA.py: /opt/ros/fuerte/stacks/dynamic_reconfigure/srv_gen/generated
+src/C21_VisionAndLidar/msg/_C21_PANORAMA.py: /opt/ros/fuerte/stacks/geometry/tf/msg_gen/generated
+src/C21_VisionAndLidar/msg/_C21_PANORAMA.py: /opt/ros/fuerte/stacks/geometry/tf/srv_gen/generated
+	$(CMAKE_COMMAND) -E cmake_progress_report /home/lar1/Desktop/robilworkspace/C21_VisionAndLidar/CMakeFiles $(CMAKE_PROGRESS_9)
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --blue --bold "Generating src/C21_VisionAndLidar/msg/_C21_PANORAMA.py"
+	/opt/ros/fuerte/share/rospy/rosbuild/scripts/genmsg_py.py --noinitpy /home/lar1/Desktop/robilworkspace/C21_VisionAndLidar/msg/C21_PANORAMA.msg
+
+src/C21_VisionAndLidar/msg/_C21_C22.py: msg/C21_C22.msg
+src/C21_VisionAndLidar/msg/_C21_C22.py: /opt/ros/fuerte/share/rospy/rosbuild/scripts/genmsg_py.py
+src/C21_VisionAndLidar/msg/_C21_C22.py: /opt/ros/fuerte/share/roslib/bin/gendeps
+src/C21_VisionAndLidar/msg/_C21_C22.py: /opt/ros/fuerte/share/sensor_msgs/msg/Image.msg
+src/C21_VisionAndLidar/msg/_C21_C22.py: /opt/ros/fuerte/share/sensor_msgs/msg/PointCloud2.msg
+src/C21_VisionAndLidar/msg/_C21_C22.py: /opt/ros/fuerte/share/std_msgs/msg/Header.msg
+src/C21_VisionAndLidar/msg/_C21_C22.py: /opt/ros/fuerte/share/geometry_msgs/msg/Pose.msg
+src/C21_VisionAndLidar/msg/_C21_C22.py: /opt/ros/fuerte/share/sensor_msgs/msg/PointField.msg
+src/C21_VisionAndLidar/msg/_C21_C22.py: /opt/ros/fuerte/share/geometry_msgs/msg/Point.msg
+src/C21_VisionAndLidar/msg/_C21_C22.py: /opt/ros/fuerte/share/geometry_msgs/msg/Quaternion.msg
+src/C21_VisionAndLidar/msg/_C21_C22.py: manifest.xml
+src/C21_VisionAndLidar/msg/_C21_C22.py: /opt/ros/fuerte/share/roslang/manifest.xml
+src/C21_VisionAndLidar/msg/_C21_C22.py: /opt/ros/fuerte/share/roscpp/manifest.xml
+src/C21_VisionAndLidar/msg/_C21_C22.py: /opt/ros/fuerte/share/std_msgs/manifest.xml
+src/C21_VisionAndLidar/msg/_C21_C22.py: /opt/ros/fuerte/share/geometry_msgs/manifest.xml
+src/C21_VisionAndLidar/msg/_C21_C22.py: /opt/ros/fuerte/share/nav_msgs/manifest.xml
+src/C21_VisionAndLidar/msg/_C21_C22.py: /opt/ros/fuerte/share/sensor_msgs/manifest.xml
+src/C21_VisionAndLidar/msg/_C21_C22.py: /opt/ros/fuerte/share/rospy/manifest.xml
+src/C21_VisionAndLidar/msg/_C21_C22.py: /opt/ros/fuerte/stacks/vision_opencv/opencv2/manifest.xml
+src/C21_VisionAndLidar/msg/_C21_C22.py: /opt/ros/fuerte/stacks/vision_opencv/cv_bridge/manifest.xml
+src/C21_VisionAndLidar/msg/_C21_C22.py: /opt/ros/fuerte/share/ros/core/rosbuild/manifest.xml
+src/C21_VisionAndLidar/msg/_C21_C22.py: /opt/ros/fuerte/share/roslib/manifest.xml
+src/C21_VisionAndLidar/msg/_C21_C22.py: /opt/ros/fuerte/share/rosconsole/manifest.xml
+src/C21_VisionAndLidar/msg/_C21_C22.py: /opt/ros/fuerte/stacks/pluginlib/manifest.xml
+src/C21_VisionAndLidar/msg/_C21_C22.py: /opt/ros/fuerte/share/message_filters/manifest.xml
+src/C21_VisionAndLidar/msg/_C21_C22.py: /opt/ros/fuerte/stacks/image_common/image_transport/manifest.xml
+src/C21_VisionAndLidar/msg/_C21_C22.py: /opt/ros/fuerte/share/rosbag/manifest.xml
+src/C21_VisionAndLidar/msg/_C21_C22.py: /opt/ros/fuerte/stacks/bond_core/bond/manifest.xml
+src/C21_VisionAndLidar/msg/_C21_C22.py: /opt/ros/fuerte/stacks/bond_core/smclib/manifest.xml
+src/C21_VisionAndLidar/msg/_C21_C22.py: /opt/ros/fuerte/stacks/bond_core/bondcpp/manifest.xml
+src/C21_VisionAndLidar/msg/_C21_C22.py: /opt/ros/fuerte/stacks/nodelet_core/nodelet/manifest.xml
+src/C21_VisionAndLidar/msg/_C21_C22.py: /opt/ros/fuerte/share/rosservice/manifest.xml
+src/C21_VisionAndLidar/msg/_C21_C22.py: /opt/ros/fuerte/stacks/dynamic_reconfigure/manifest.xml
+src/C21_VisionAndLidar/msg/_C21_C22.py: /opt/ros/fuerte/stacks/nodelet_core/nodelet_topic_tools/manifest.xml
+src/C21_VisionAndLidar/msg/_C21_C22.py: /opt/ros/fuerte/stacks/bullet/manifest.xml
+src/C21_VisionAndLidar/msg/_C21_C22.py: /opt/ros/fuerte/stacks/geometry/angles/manifest.xml
+src/C21_VisionAndLidar/msg/_C21_C22.py: /opt/ros/fuerte/share/rostest/manifest.xml
+src/C21_VisionAndLidar/msg/_C21_C22.py: /opt/ros/fuerte/share/roswtf/manifest.xml
+src/C21_VisionAndLidar/msg/_C21_C22.py: /opt/ros/fuerte/stacks/geometry/tf/manifest.xml
+src/C21_VisionAndLidar/msg/_C21_C22.py: /opt/ros/fuerte/stacks/common_rosdeps/manifest.xml
+src/C21_VisionAndLidar/msg/_C21_C22.py: /opt/ros/fuerte/stacks/perception_pcl/pcl_ros/manifest.xml
+src/C21_VisionAndLidar/msg/_C21_C22.py: /opt/ros/fuerte/share/pcl/manifest.xml
+src/C21_VisionAndLidar/msg/_C21_C22.py: /opt/ros/fuerte/stacks/bond_core/bond/msg_gen/generated
+src/C21_VisionAndLidar/msg/_C21_C22.py: /opt/ros/fuerte/stacks/nodelet_core/nodelet/srv_gen/generated
+src/C21_VisionAndLidar/msg/_C21_C22.py: /opt/ros/fuerte/stacks/dynamic_reconfigure/msg_gen/generated
+src/C21_VisionAndLidar/msg/_C21_C22.py: /opt/ros/fuerte/stacks/dynamic_reconfigure/srv_gen/generated
+src/C21_VisionAndLidar/msg/_C21_C22.py: /opt/ros/fuerte/stacks/geometry/tf/msg_gen/generated
+src/C21_VisionAndLidar/msg/_C21_C22.py: /opt/ros/fuerte/stacks/geometry/tf/srv_gen/generated
+	$(CMAKE_COMMAND) -E cmake_progress_report /home/lar1/Desktop/robilworkspace/C21_VisionAndLidar/CMakeFiles $(CMAKE_PROGRESS_10)
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --blue --bold "Generating src/C21_VisionAndLidar/msg/_C21_C22.py"
+	/opt/ros/fuerte/share/rospy/rosbuild/scripts/genmsg_py.py --noinitpy /home/lar1/Desktop/robilworkspace/C21_VisionAndLidar/msg/C21_C22.msg
+
+src/C21_VisionAndLidar/msg/_C21C0_3DF.py: msg/C21C0_3DF.msg
+src/C21_VisionAndLidar/msg/_C21C0_3DF.py: /opt/ros/fuerte/share/rospy/rosbuild/scripts/genmsg_py.py
+src/C21_VisionAndLidar/msg/_C21C0_3DF.py: /opt/ros/fuerte/share/roslib/bin/gendeps
+src/C21_VisionAndLidar/msg/_C21C0_3DF.py: /opt/ros/fuerte/share/sensor_msgs/msg/PointField.msg
+src/C21_VisionAndLidar/msg/_C21C0_3DF.py: /opt/ros/fuerte/share/std_msgs/msg/Header.msg
+src/C21_VisionAndLidar/msg/_C21C0_3DF.py: /opt/ros/fuerte/share/sensor_msgs/msg/PointCloud2.msg
+src/C21_VisionAndLidar/msg/_C21C0_3DF.py: manifest.xml
+src/C21_VisionAndLidar/msg/_C21C0_3DF.py: /opt/ros/fuerte/share/roslang/manifest.xml
+src/C21_VisionAndLidar/msg/_C21C0_3DF.py: /opt/ros/fuerte/share/roscpp/manifest.xml
+src/C21_VisionAndLidar/msg/_C21C0_3DF.py: /opt/ros/fuerte/share/std_msgs/manifest.xml
+src/C21_VisionAndLidar/msg/_C21C0_3DF.py: /opt/ros/fuerte/share/geometry_msgs/manifest.xml
+src/C21_VisionAndLidar/msg/_C21C0_3DF.py: /opt/ros/fuerte/share/nav_msgs/manifest.xml
+src/C21_VisionAndLidar/msg/_C21C0_3DF.py: /opt/ros/fuerte/share/sensor_msgs/manifest.xml
+src/C21_VisionAndLidar/msg/_C21C0_3DF.py: /opt/ros/fuerte/share/rospy/manifest.xml
+src/C21_VisionAndLidar/msg/_C21C0_3DF.py: /opt/ros/fuerte/stacks/vision_opencv/opencv2/manifest.xml
+src/C21_VisionAndLidar/msg/_C21C0_3DF.py: /opt/ros/fuerte/stacks/vision_opencv/cv_bridge/manifest.xml
+src/C21_VisionAndLidar/msg/_C21C0_3DF.py: /opt/ros/fuerte/share/ros/core/rosbuild/manifest.xml
+src/C21_VisionAndLidar/msg/_C21C0_3DF.py: /opt/ros/fuerte/share/roslib/manifest.xml
+src/C21_VisionAndLidar/msg/_C21C0_3DF.py: /opt/ros/fuerte/share/rosconsole/manifest.xml
+src/C21_VisionAndLidar/msg/_C21C0_3DF.py: /opt/ros/fuerte/stacks/pluginlib/manifest.xml
+src/C21_VisionAndLidar/msg/_C21C0_3DF.py: /opt/ros/fuerte/share/message_filters/manifest.xml
+src/C21_VisionAndLidar/msg/_C21C0_3DF.py: /opt/ros/fuerte/stacks/image_common/image_transport/manifest.xml
+src/C21_VisionAndLidar/msg/_C21C0_3DF.py: /opt/ros/fuerte/share/rosbag/manifest.xml
+src/C21_VisionAndLidar/msg/_C21C0_3DF.py: /opt/ros/fuerte/stacks/bond_core/bond/manifest.xml
+src/C21_VisionAndLidar/msg/_C21C0_3DF.py: /opt/ros/fuerte/stacks/bond_core/smclib/manifest.xml
+src/C21_VisionAndLidar/msg/_C21C0_3DF.py: /opt/ros/fuerte/stacks/bond_core/bondcpp/manifest.xml
+src/C21_VisionAndLidar/msg/_C21C0_3DF.py: /opt/ros/fuerte/stacks/nodelet_core/nodelet/manifest.xml
+src/C21_VisionAndLidar/msg/_C21C0_3DF.py: /opt/ros/fuerte/share/rosservice/manifest.xml
+src/C21_VisionAndLidar/msg/_C21C0_3DF.py: /opt/ros/fuerte/stacks/dynamic_reconfigure/manifest.xml
+src/C21_VisionAndLidar/msg/_C21C0_3DF.py: /opt/ros/fuerte/stacks/nodelet_core/nodelet_topic_tools/manifest.xml
+src/C21_VisionAndLidar/msg/_C21C0_3DF.py: /opt/ros/fuerte/stacks/bullet/manifest.xml
+src/C21_VisionAndLidar/msg/_C21C0_3DF.py: /opt/ros/fuerte/stacks/geometry/angles/manifest.xml
+src/C21_VisionAndLidar/msg/_C21C0_3DF.py: /opt/ros/fuerte/share/rostest/manifest.xml
+src/C21_VisionAndLidar/msg/_C21C0_3DF.py: /opt/ros/fuerte/share/roswtf/manifest.xml
+src/C21_VisionAndLidar/msg/_C21C0_3DF.py: /opt/ros/fuerte/stacks/geometry/tf/manifest.xml
+src/C21_VisionAndLidar/msg/_C21C0_3DF.py: /opt/ros/fuerte/stacks/common_rosdeps/manifest.xml
+src/C21_VisionAndLidar/msg/_C21C0_3DF.py: /opt/ros/fuerte/stacks/perception_pcl/pcl_ros/manifest.xml
+src/C21_VisionAndLidar/msg/_C21C0_3DF.py: /opt/ros/fuerte/share/pcl/manifest.xml
+src/C21_VisionAndLidar/msg/_C21C0_3DF.py: /opt/ros/fuerte/stacks/bond_core/bond/msg_gen/generated
+src/C21_VisionAndLidar/msg/_C21C0_3DF.py: /opt/ros/fuerte/stacks/nodelet_core/nodelet/srv_gen/generated
+src/C21_VisionAndLidar/msg/_C21C0_3DF.py: /opt/ros/fuerte/stacks/dynamic_reconfigure/msg_gen/generated
+src/C21_VisionAndLidar/msg/_C21C0_3DF.py: /opt/ros/fuerte/stacks/dynamic_reconfigure/srv_gen/generated
+src/C21_VisionAndLidar/msg/_C21C0_3DF.py: /opt/ros/fuerte/stacks/geometry/tf/msg_gen/generated
+src/C21_VisionAndLidar/msg/_C21C0_3DF.py: /opt/ros/fuerte/stacks/geometry/tf/srv_gen/generated
+	$(CMAKE_COMMAND) -E cmake_progress_report /home/lar1/Desktop/robilworkspace/C21_VisionAndLidar/CMakeFiles $(CMAKE_PROGRESS_11)
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --blue --bold "Generating src/C21_VisionAndLidar/msg/_C21C0_3DF.py"
+	/opt/ros/fuerte/share/rospy/rosbuild/scripts/genmsg_py.py --noinitpy /home/lar1/Desktop/robilworkspace/C21_VisionAndLidar/msg/C21C0_3DF.msg
 
 ROSBUILD_genmsg_py: CMakeFiles/ROSBUILD_genmsg_py
-ROSBUILD_genmsg_py: src/c21_Vision_and_Lidar/msg/__init__.py
-ROSBUILD_genmsg_py: src/c21_Vision_and_Lidar/msg/_C0C21_CAM.py
-ROSBUILD_genmsg_py: src/c21_Vision_and_Lidar/msg/_C0C21_AZI.py
-ROSBUILD_genmsg_py: src/c21_Vision_and_Lidar/msg/_C0C21_RES.py
-ROSBUILD_genmsg_py: src/c21_Vision_and_Lidar/msg/_C21C0_3DR.py
-ROSBUILD_genmsg_py: src/c21_Vision_and_Lidar/msg/_C0C21_SIZ.py
-ROSBUILD_genmsg_py: src/c21_Vision_and_Lidar/msg/_C21C0_3DF.py
-ROSBUILD_genmsg_py: src/c21_Vision_and_Lidar/msg/_C0C21_LAZ.py
+ROSBUILD_genmsg_py: src/C21_VisionAndLidar/msg/__init__.py
+ROSBUILD_genmsg_py: src/C21_VisionAndLidar/msg/_C21C0_3DR.py
+ROSBUILD_genmsg_py: src/C21_VisionAndLidar/msg/_C0C21_SIZ.py
+ROSBUILD_genmsg_py: src/C21_VisionAndLidar/msg/_C0C21_LAZ.py
+ROSBUILD_genmsg_py: src/C21_VisionAndLidar/msg/_C0C21_RES.py
+ROSBUILD_genmsg_py: src/C21_VisionAndLidar/msg/_C0C21_CAM.py
+ROSBUILD_genmsg_py: src/C21_VisionAndLidar/msg/_C21_PICTURE.py
+ROSBUILD_genmsg_py: src/C21_VisionAndLidar/msg/_C0C21_AZI.py
+ROSBUILD_genmsg_py: src/C21_VisionAndLidar/msg/_C21_PANORAMA.py
+ROSBUILD_genmsg_py: src/C21_VisionAndLidar/msg/_C21_C22.py
+ROSBUILD_genmsg_py: src/C21_VisionAndLidar/msg/_C21C0_3DF.py
 ROSBUILD_genmsg_py: CMakeFiles/ROSBUILD_genmsg_py.dir/build.make
 .PHONY : ROSBUILD_genmsg_py
 
@@ -390,6 +545,6 @@ CMakeFiles/ROSBUILD_genmsg_py.dir/clean:
 .PHONY : CMakeFiles/ROSBUILD_genmsg_py.dir/clean
 
 CMakeFiles/ROSBUILD_genmsg_py.dir/depend:
-	cd /home/lar2/Desktop/rosworkspace/c21_Vision_and_Lidar && $(CMAKE_COMMAND) -E cmake_depends "Unix Makefiles" /home/lar2/Desktop/rosworkspace/c21_Vision_and_Lidar /home/lar2/Desktop/rosworkspace/c21_Vision_and_Lidar /home/lar2/Desktop/rosworkspace/c21_Vision_and_Lidar /home/lar2/Desktop/rosworkspace/c21_Vision_and_Lidar /home/lar2/Desktop/rosworkspace/c21_Vision_and_Lidar/CMakeFiles/ROSBUILD_genmsg_py.dir/DependInfo.cmake --color=$(COLOR)
+	cd /home/lar1/Desktop/robilworkspace/C21_VisionAndLidar && $(CMAKE_COMMAND) -E cmake_depends "Unix Makefiles" /home/lar1/Desktop/robilworkspace/C21_VisionAndLidar /home/lar1/Desktop/robilworkspace/C21_VisionAndLidar /home/lar1/Desktop/robilworkspace/C21_VisionAndLidar /home/lar1/Desktop/robilworkspace/C21_VisionAndLidar /home/lar1/Desktop/robilworkspace/C21_VisionAndLidar/CMakeFiles/ROSBUILD_genmsg_py.dir/DependInfo.cmake --color=$(COLOR)
 .PHONY : CMakeFiles/ROSBUILD_genmsg_py.dir/depend
 

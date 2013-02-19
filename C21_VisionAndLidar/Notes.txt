@@ -12,6 +12,10 @@ rosrun C21_VisionAndLidar test1
 
 rosrun C21_VisionAndLidar test2
 
+rosrun C21_VisionAndLidar test3
+
+rosrun C21_VisionAndLidar test4
+
 Known Bugs:
 ==========
 

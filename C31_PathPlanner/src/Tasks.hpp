@@ -73,7 +73,7 @@ public:
 			GPSPath gpspath;
 			for(size_t i=0;i<session.results.path.size();i++){
 				const Vec2d& wp = session.results.path[i];
-				gpspath.push_back(_planner.cast(wp));
+				gpspath.push_back(planner.cast(wp));
 			}
 			//TODO: fill message by planner results
 		}
@@ -178,27 +178,24 @@ public:
 
 		C22_GroundRecognitionAndMapping::C22 c22;
 		/*
-			C0C22_AZI azimuth_msg
-				float32 azimuth
-			C0C22_CAM camera_sample_rate_msg
-				int32 frameRatePerSec
-			C0C22_LAZ laser_sample_rate_msg
-				int32 sampleRatePerSec
-			C0C22_SAF safety_requirements
-				int32 safety_req
-			---
-			C22C0_PATH drivingPath
-				C22_ROW_TYPE[] row
-					C22_MAP_SQUARE[] column
-						int32 status
-						int32 AVAILABLE=0
-						int32 BLOCKED=1
-						int32 UNCHARTED=2
-						C22_PLANE_TYPE[] planes
-							float32 x
-							float32 y
-							float32 z
-							float32 d
+			C22_GroundRecognitionAndMapping/C22C0_PATH drivingPath
+			C22_GroundRecognitionAndMapping/C22_ROW_TYPE[] row
+				C22_GroundRecognitionAndMapping/C22_MAP_SQUARE[] column
+				int32 AVAILABLE=0
+				int32 BLOCKED=1
+				int32 UNCHARTED=2
+				int32 status
+				C22_GroundRecognitionAndMapping/C22_PLANE_TYPE[] planes
+					float32 x
+					float32 y
+					float32 z
+					float32 d
+			int32 xOffset
+			int32 yOffset
+			geometry_msgs/Point robotPos
+				float64 x
+				float64 y
+				float64 z
 		*/
 		SYNCH(SET_CURRENT_TIME(statistic.time_map_lastRequest));
 		if (c22Client.call(c22)){
@@ -225,7 +222,8 @@ public:
     	return false;
     }
     void requestNewLocation(){ //REQ. HAS BE NOT external synchronizationed on _mtx
-		//TODO: write real algorithm for requestNewLocation
+		//TODO: [CURRENTLLY NOT ACTUAL] write real algorithm for requestNewLocation
+		//......we get location from map message
     	SYNCH(SET_CURRENT_TIME(statistic.time_location_lastRequest));
 		//onNewLocation(NEW_ROBOT_LOCATION_GPS)
     }

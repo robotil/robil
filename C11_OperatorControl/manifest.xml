@@ -14,8 +14,10 @@
   <depend package="rospy"/>
   <depend package="sensor_msgs"/>
   <depend package="image_transport"/>
+  <depend package="opencv2"/>
+  <depend package="cv_bridge"/>
   <depend package="C11_Agent"/>
-  <depend package="C21_VisionAndLidar"/>
+  <depend package="C10_Common"/>
 </package>
 
 

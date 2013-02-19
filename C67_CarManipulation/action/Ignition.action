@@ -1,0 +1,9 @@
+#goal definition
+# 1:Ignition ON, 2:Ignition OFF 
+uint8 operation
+---
+#result definition
+bool success
+---
+#feedback
+bool busy

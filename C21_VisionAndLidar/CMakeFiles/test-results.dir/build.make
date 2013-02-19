@@ -32,10 +32,10 @@ CMAKE_COMMAND = /usr/bin/cmake
 RM = /usr/bin/cmake -E remove -f
 
 # The top-level source directory on which CMake was run.
-CMAKE_SOURCE_DIR = /home/lar2/Desktop/rosworkspace/c21_Vision_and_Lidar
+CMAKE_SOURCE_DIR = /home/lar1/Desktop/robilworkspace/C21_VisionAndLidar
 
 # The top-level build directory on which CMake was run.
-CMAKE_BINARY_DIR = /home/lar2/Desktop/rosworkspace/c21_Vision_and_Lidar
+CMAKE_BINARY_DIR = /home/lar1/Desktop/robilworkspace/C21_VisionAndLidar
 
 # Utility rule file for test-results.
 
@@ -43,7 +43,7 @@ CMAKE_BINARY_DIR = /home/lar2/Desktop/rosworkspace/c21_Vision_and_Lidar
 include CMakeFiles/test-results.dir/progress.make
 
 CMakeFiles/test-results:
-	/opt/ros/fuerte/share/rosunit/bin/summarize_results.py --nodeps c21_Vision_and_Lidar
+	/opt/ros/fuerte/share/rosunit/bin/summarize_results.py --nodeps C21_VisionAndLidar
 
 test-results: CMakeFiles/test-results
 test-results: CMakeFiles/test-results.dir/build.make
@@ -58,6 +58,6 @@ CMakeFiles/test-results.dir/clean:
 .PHONY : CMakeFiles/test-results.dir/clean
 
 CMakeFiles/test-results.dir/depend:
-	cd /home/lar2/Desktop/rosworkspace/c21_Vision_and_Lidar && $(CMAKE_COMMAND) -E cmake_depends "Unix Makefiles" /home/lar2/Desktop/rosworkspace/c21_Vision_and_Lidar /home/lar2/Desktop/rosworkspace/c21_Vision_and_Lidar /home/lar2/Desktop/rosworkspace/c21_Vision_and_Lidar /home/lar2/Desktop/rosworkspace/c21_Vision_and_Lidar /home/lar2/Desktop/rosworkspace/c21_Vision_and_Lidar/CMakeFiles/test-results.dir/DependInfo.cmake --color=$(COLOR)
+	cd /home/lar1/Desktop/robilworkspace/C21_VisionAndLidar && $(CMAKE_COMMAND) -E cmake_depends "Unix Makefiles" /home/lar1/Desktop/robilworkspace/C21_VisionAndLidar /home/lar1/Desktop/robilworkspace/C21_VisionAndLidar /home/lar1/Desktop/robilworkspace/C21_VisionAndLidar /home/lar1/Desktop/robilworkspace/C21_VisionAndLidar /home/lar1/Desktop/robilworkspace/C21_VisionAndLidar/CMakeFiles/test-results.dir/DependInfo.cmake --color=$(COLOR)
 .PHONY : CMakeFiles/test-results.dir/depend
 

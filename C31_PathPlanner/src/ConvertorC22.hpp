@@ -38,14 +38,17 @@ static Gps2Grid extractLocation(C22_GroundRecognitionAndMapping::C22::Response &
 	GPSPoint gps(0,0);
 	Waypoint wp(0,0);
 
-	//TODO: TEMPORAL CODE
-
 	size_t h = res.drivingPath.row.size();
 	if(h){
 		
 		ROS_INFO("start converting message to location");
-		size_t w = res.drivingPath.row.at(0).column.size();
-		wp.x = w/2;
+		//size_t w = res.drivingPath.row.at(0).column.size();
+		
+		wp.y=( res.drivingPath.robotPos.y - res.drivingPath.yOffset )*4;
+		wp.x=( res.drivingPath.robotPos.x - res.drivingPath.xOffset )*4;
+		
+		gps.x = res.drivingPath.robotPos.x;
+		gps.y = res.drivingPath.robotPos.y;
 	}
 	return Gps2Grid(gps,wp);
 };
@@ -54,13 +57,18 @@ static MapProperties extractMapProperties(C22_GroundRecognitionAndMapping::C22::
 	GPSPoint gps(0,0);
 	Waypoint wp(0,0);
 
-	//TODO: TEMPORAL CODE
-
 	size_t h = res.drivingPath.row.size();
 	if(h){
 		ROS_INFO("start converting message to MapProperties");
-		size_t w = res.drivingPath.row.at(0).column.size();
-		wp.x = w/2;
+		//size_t w = res.drivingPath.row.at(0).column.size();
+		//wp.x = w/2;
+		
+		wp.y = 0;
+		wp.x = 0;
+		
+		gps.x = res.drivingPath.xOffset;
+		gps.y = res.drivingPath.yOffset;
+		
 	}
 	return MapProperties(0.12, gps, wp);
 };

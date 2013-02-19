@@ -1,5 +1,5 @@
 #!/bin/sh
-#This script should start the perception modules
+#This script should kill all the running modules
 
 CURR_WD=$PWD
 PKILLF=$CURR_WD'/.killme.txt'

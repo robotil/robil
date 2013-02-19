@@ -95,5 +95,7 @@ SET(CMAKE_DEPEND_INFO_FILES
   "CMakeFiles/test-results-run.dir/DependInfo.cmake"
   "CMakeFiles/test1.dir/DependInfo.cmake"
   "CMakeFiles/test2.dir/DependInfo.cmake"
+  "CMakeFiles/test3.dir/DependInfo.cmake"
+  "CMakeFiles/test4.dir/DependInfo.cmake"
   "CMakeFiles/tests.dir/DependInfo.cmake"
   )
