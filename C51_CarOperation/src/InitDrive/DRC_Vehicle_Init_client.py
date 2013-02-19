@@ -7,7 +7,7 @@ import C51_CarOperation.msg
 def InitDrive_client():
     # Creates the SimpleActionClient, passing the type of the action
     # (FibonacciAction) to the constructor.
-    client = actionlib.SimpleActionClient('InitDrive_server', C51_CarOperation.msg.InitDriveAction)
+    client = actionlib.SimpleActionClient('InitDrive', C51_CarOperation.msg.InitDriveAction)
 
     # Waits until the action server has started up and started
     # listening for goals.

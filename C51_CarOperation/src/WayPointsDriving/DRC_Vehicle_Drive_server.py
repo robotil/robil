@@ -92,6 +92,8 @@ class Drive(object):
                         success = False
                         rospy.loginfo('%s: Preempted' % self._action_name)
                         self._as.set_preempted()
+			gasP.gas(0)
+			return
                     #self._feedback.WayPointsGiven.append(object)
                     DATA.WayPoint(object)
                     flag=b=m=0
@@ -121,6 +123,8 @@ class Drive(object):
                                 success = False
                                 rospy.loginfo('%s: Preempted' % self._action_name)
                                 self._as.set_preempted()
+				gasP.gas(0)
+				return
                             DATA.MyPath(self.world.pose.pose.position.x, self.world.pose.pose.position.y)
                             [speed, Cspeed]=P2P(self.DistanceToWP(object), self.OrientationErrorToWP(object)) 
                             gasP.gas(speed)
@@ -232,7 +236,7 @@ class SW:
 
 if __name__ == '__main__':
     try:
-        rospy.init_node('Drive_server')
+        rospy.init_node('Drive')
         Drive(rospy.get_name(), [])   
         rospy.spin()
     except rospy.ROSInterruptException: 
