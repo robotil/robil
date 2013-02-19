@@ -17,7 +17,7 @@ rm $PKILL
 #echo $C22_PID
 #sleep 3
 echo "Starting C23"
-rosrun C23_ObjectRecognition c23 /multisense_sl/camera/left/image_color /multisense_sl/camera/right/image_color
+rosrun C23_ObjectRecognition c23 /multisense_sl/camera/left/image_color /multisense_sl/camera/right/image_color &
 C23_PID=$!
 echo $C23_PID
 echo "Done "

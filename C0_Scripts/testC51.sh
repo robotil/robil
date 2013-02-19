@@ -14,21 +14,12 @@ echo "Setting the robot in the driver seat"
 rostopic pub --once /drc_world/robot_enter_car geometry_msgs/Pose '{}'
 echo "Done"
 echo "Initializing the car"
-rosrun C51_CarOperation DRC_Vehicle_Init_client.py &
-INIT=$!
-echo $INIT
+rosrun C51_CarOperation DRC_Vehicle_Init_client.py 
 sleep 3
 echo "Driving the car"
-rosrun C51_CarOperation DRC_Vehicle_Drive_client.py &
-DRIVE=$!
-echo $DRIVE
+rosrun C51_CarOperation DRC_Vehicle_Drive_client.py 
 echo "Done "
-sleep 1
 echo "Finishing driving"
-rosrun C51_CarOperation DRC_Vehicle_Finish_client.py &
-FIN=$!
-echo $FIN
-echo "Done "
-echo  $INIT $DRIVE $FIN >> $PKILL
+rosrun C51_CarOperation DRC_Vehicle_Finish_client.py 
 #echo $C51_PID $INIT $DRIVE $FIN >> $PKILL
 
