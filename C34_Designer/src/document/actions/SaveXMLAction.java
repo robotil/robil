@@ -32,10 +32,9 @@ public class SaveXMLAction extends AbstractDesignerAction implements
 		}
 		
 		// savePlan(fileName);
-		getActiveTab().doc.save();
+		getActiveTab().doc.save(fileName);
 	}
 
-	@SuppressWarnings("unused")
 	private void savePlan(String path) {
 		// JOptionPane.showMessageDialog(null, "Error: not implemented",
 		// "Save Plan",

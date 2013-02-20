@@ -25,6 +25,8 @@ import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.table.AbstractTableModel;
 
+import logger.Log;
+
 import document.actions.PropertiesEditorAction;
 
 public class PropertiesEditor extends JPanel implements ActionListener {
@@ -55,7 +57,7 @@ public class PropertiesEditor extends JPanel implements ActionListener {
 				PropertiesXmlHandler.loadAndSetProperties(path);
 				buildTableFromProperties();
 			} catch (Exception ex) {
-				System.err.println("Error: " + ex.getMessage());
+				Log.e("Error: " + ex.getMessage());
 			}
 		}
 
@@ -103,7 +105,7 @@ public class PropertiesEditor extends JPanel implements ActionListener {
 
 		@Override
 		public Object getValueAt(int row, int col) {
-			//System.out.println(String.format("<%d,%d>=%s", row, col,this.data[row][col]));
+			//Log.d(String.format("<%d,%d>=%s", row, col,this.data[row][col]));
 			return this.data[row][col];
 		}
 

@@ -1,3 +1,6 @@
 <plan descriptions="./plans/TaskDescriptions.xml">
-   <tsk name="Noname" />
+   <seq name="Noname"> 
+         <tsk name="Test1" />
+         <tsk name="Test1" />
+   </seq>
 </plan>

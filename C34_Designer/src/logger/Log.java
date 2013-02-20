@@ -24,6 +24,9 @@ public class Log {
 			lineBuilder.append(".");
 			lineBuilder.append(callingMethod.getMethodName());
 			
+			lineBuilder.append(":");
+			lineBuilder.append(callingMethod.getLineNumber());
+			
 			lineBuilder.append("]");
 		}
 		

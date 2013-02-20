@@ -40,7 +40,9 @@ public class OpenTerminalAction implements ActionListener {
 		java.awt.EventQueue.invokeLater(new Runnable() {
 			@Override
 			public void run() {
-				new Terminal().setVisible(true);
+				Terminal terminal = new Terminal();
+				terminal.setVisible(true);
+				terminal.setLocation(100, 100);
 			}
 		});
 	}

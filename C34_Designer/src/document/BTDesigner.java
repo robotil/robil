@@ -20,6 +20,7 @@ import javax.swing.JTabbedPane;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
+import logger.Log;
 import logger.LogManager;
 import terminal.communication.RosExecutor;
 
@@ -54,7 +55,7 @@ public class BTDesigner extends JFrame {
 	public static void main(String[] args) throws Exception {
 
 		LogManager.redirectStandardAndErrorOutput("BTDesigner_stdout.log");
-
+		
 		for (javax.swing.UIManager.LookAndFeelInfo info : javax.swing.UIManager
 				.getInstalledLookAndFeels()) {
 			if ("GTK+".equals(info.getName())) {
@@ -103,6 +104,8 @@ public class BTDesigner extends JFrame {
 		
 		btd.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
 		btd.setVisible(true);
+		
+		Log.d("BTDesigner loaded");
 	}
 
 	ArrayList<DesignerTab> tabs = new ArrayList<DesignerTab>();

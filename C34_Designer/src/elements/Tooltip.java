@@ -93,7 +93,7 @@ public class Tooltip extends GElement {
 
 		AlphaComposite ac = AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 0.8F);
 		g.setComposite(ac);
-
+		
 		switch (_design) {
 		case Default:
 			g.setColor(Color.BLACK);
