@@ -7,27 +7,21 @@
 *.slo
 *.lo
 *.o
-
 # Compiled Dynamic libraries
 *.so
 !libBTExecuter.so
-
 # Compiled Static libraries
 *.lai
 *.la
 *.a
-
 *~
-
 #"Compiled" python files
 *.pyc
-
 #QT Creator files
 qtcreator-build/
-
 #ROS auto-make files
 build/
 bin/
 msg_gen/
 srv_gen/
-
+/.metadata/
