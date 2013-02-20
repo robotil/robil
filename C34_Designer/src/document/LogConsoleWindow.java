@@ -23,6 +23,7 @@ import javax.swing.text.SimpleAttributeSet;
 import javax.swing.text.StyleConstants;
 import javax.swing.text.StyleContext;
 
+import logger.Log;
 import logger.LogManager;
 
 public class LogConsoleWindow extends JTextPane {
@@ -35,7 +36,7 @@ public class LogConsoleWindow extends JTextPane {
 		// logFile = LogManager.getOutputFileName();
 
 		if(pane==null){
-			System.out.println("Create Log Window");
+			Log.d("Create Log Window");
 			pane = new LogConsoleWindow();
 		}
 		pane.frame.setVisible(true);
@@ -64,14 +65,14 @@ public class LogConsoleWindow extends JTextPane {
 			public void windowDeiconified(WindowEvent arg0) {}
 			public void windowDeactivated(WindowEvent arg0) {}
 			public void windowClosing(WindowEvent arg0) {
-				System.out.println("Log Window Closed");
+				Log.d("Log Window Closed");
 				isClosed = true;
 				thread = null;
 			}
 			public void windowClosed(WindowEvent arg0) {}
 			public void windowActivated(WindowEvent arg0) {
 				if(isClosed){
-					System.out.println("Log Window Open");
+					Log.d("Log Window Open");
 					isClosed = false;
 					runThread();
 				}
@@ -112,7 +113,7 @@ public class LogConsoleWindow extends JTextPane {
 					}
 
 					try {
-						//System.out.println("lastline "+(lastline.number));
+						//Log.d("lastline "+(lastline.number));
 						Thread.sleep(100);
 					} catch (InterruptedException e) {
 					}
@@ -161,7 +162,7 @@ public class LogConsoleWindow extends JTextPane {
 					+ " cannot be found", "Open Log Console",
 					JOptionPane.ERROR_MESSAGE);
 		} catch (IOException ex) {
-			System.err.println("Error in reading logfile " + ex.getMessage());
+			Log.e("Error in reading logfile " + ex.getMessage());
 		} finally {
 			try {
 				if (reader == null) {
@@ -170,7 +171,7 @@ public class LogConsoleWindow extends JTextPane {
 
 				reader.close();
 			} catch (IOException ex) {
-				System.err.println(ex.getMessage());
+				Log.e(ex.getMessage());
 			}
 		}
 	}

@@ -177,7 +177,7 @@ public class TaskDescription {
 				continue;
 			NodeList nnl = ((Element) nl.item(i))
 					.getElementsByTagName(STR_TASK);
-			// System.out.println("task : "+nnl.getLength());
+
 			for (int ii = 0; ii < nnl.getLength(); ii++) {
 				Task def = new Task();
 				if (def.parse(nnl.item(ii))) {
@@ -326,7 +326,6 @@ public class TaskDescription {
 	// String fname = "/tmp/task_desc";
 	// TaskDescription td = new TaskDescription(fname);
 	// td.save("/tmp/res.xml");
-	// System.out.println("TEST FINISHED.");
 	// }
 
 }

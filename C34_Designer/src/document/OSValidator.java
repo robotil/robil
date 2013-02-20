@@ -1,5 +1,7 @@
 package document;
 
+import logger.Log;
+
 public class OSValidator {
 
 	public static boolean isMac() {
@@ -36,15 +38,15 @@ public class OSValidator {
 
 	public static void main(String[] args) {
 		if (isWindows()) {
-			System.out.println("This is Windows");
+			Log.d("This is Windows");
 		} else if (isMac()) {
-			System.out.println("This is Mac");
+			Log.d("This is Mac");
 		} else if (isUnix()) {
-			System.out.println("This is Unix or Linux");
+			Log.d("This is Unix or Linux");
 		} else if (isSolaris()) {
-			System.out.println("This is Solaris");
+			Log.d("This is Solaris");
 		} else {
-			System.out.println("Your OS is not support!!");
+			Log.d("Your OS is not support!!");
 		}
 	}
 

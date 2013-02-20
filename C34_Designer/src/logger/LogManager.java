@@ -77,13 +77,13 @@ public final class LogManager {
 	}
 
 	public static void redirectStandardAndErrorOutput(String outputFileName) {
-		System.out.println("Redirect all output to " + new File(outputFileName).getAbsolutePath());
+		System.out.println("Redirecting all output to " + new File(outputFileName).getAbsolutePath());
 		_outputFileName = outputFileName;
 		_outputStream = createPrintStreamToFile(outputFileName);
 
 		System.setOut(_outputStream);
 		System.setErr(_outputStream);
-		System.out.println("Redirect all output to " + new File(outputFileName).getAbsolutePath());
+		System.out.println("Redirecting all output to " + new File(outputFileName).getAbsolutePath());
 		
 		_outputRedirected = true;
 	}
