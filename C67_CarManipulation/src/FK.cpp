@@ -1,0 +1,230 @@
+/*
+FK.cpp Forward Kinematics file
+*/
+#include <math.h>
+#include <iostream>
+#include <string>
+#include "FK.h"
+
+void Matrix::RotateX(double A[4][4], double val)
+{
+	double B[3][3] = {{1,0,0},{0,cos(val),-sin(val)},{0,sin(val),cos(val)}};
+	int i,j;
+	for(i=0;i<3;i++)
+		for(j=0;j<3;j++)
+			A[i][j] = B[i][j];
+}
+void Matrix::RotateY(double A[4][4], double val)
+{
+	double B[3][3] = {{cos(val),0,sin(val)},{0,1,0},{-sin(val),0,cos(val)}};
+	int i,j;
+	for(i=0;i<3;i++)
+		for(j=0;j<3;j++)
+			A[i][j] = B[i][j];
+}
+void Matrix::RotateZ(double A[4][4], double val)
+{
+	double B[3][3] = {{cos(val),-sin(val),0},{sin(val),cos(val),0},{0,0,1}};
+	int i,j;
+	for(i=0;i<3;i++)
+		for(j=0;j<3;j++)
+			A[i][j] = B[i][j];
+}
+void Matrix::RotateYZ(double A[4][4], double val)
+{
+	double B[3][3] = {{cos(val), -rz*sin(val), ry*sin(val)}, {rz*sin(val), ry*ry*(1-cos(val))+cos(val), ry*rz*(1-cos(val))},
+		{-ry*sin(val), ry*rz*(1-cos(val)), rz*rz*(1-cos(val))+cos(val)}};
+	int i,j;
+	for(i=0;i<3;i++)
+		for(j=0;j<3;j++)
+			A[i][j] = B[i][j];
+}
+void Matrix::Update(double A[4][4], int Type, double val)
+{
+	A[3][0] = A[3][1] = A[3][2] = 0;
+	A[dx] = A[dy] = A[dz] = 0;
+	A[3][3] = 1;
+	switch(Type)
+	{
+		case q1:
+		RotateZ(A,val);
+		A[dx] = x1;
+		break;
+		
+		case q2:
+		RotateY(A,val);
+		A[dz] = z2;
+		break;
+		
+		case q3:
+		RotateX(A,val);
+		A[dz] = z3;
+		break;
+		
+		case q4:
+		RotateYZ(A,val);
+		A[dx] = x4;
+		A[dy] = y4;
+		A[dz] = z4;
+		break;
+		
+		case q5:
+		RotateX(A,val);
+		A[dy] = y5;
+		A[dz] = z5;
+		break;
+		
+		case q6:
+		RotateY(A,val);
+		A[dy] = y6;
+		break;
+		
+		case q7:
+		RotateX(A,val);
+		A[dy] = y7;
+		A[dz] = z7;
+		break;
+		
+		case q8:
+		RotateY(A,val);
+		A[dy] = y8;
+		A[dz] = z8;
+		break;
+		
+		case q9:
+		RotateX(A,val);
+		A[dy] = y9;
+		break;
+		
+		default:
+		break;
+	}
+}
+
+void Matrix::Get(int Type, double val)
+{
+	Update(T, Type, val); 
+}
+void Matrix::Multiply(int Type, double val)
+{
+	double B[4][4];
+	double C[4][4];
+	int i,j,k;
+	Update(B, Type, val);
+	for (i=0; i<4; i++)
+		for (j=0; j<4 ; j++)
+		{
+	 		C[i][j] = 0;
+	 		for (k=0; k<4; k++)
+	 			C[i][j] += T[i][k]*B[k][j];
+	 	}
+	for (i=0; i<4; i++)
+		for (j=0; j<4 ; j++)
+			T[i][j] = C[i][j];		
+	
+}
+void Matrix::Multiply(Matrix A)
+{
+	double B[4][4];
+	int i,j,k;
+	
+	for (i=0; i<4; i++)
+		for (j=0; j<4 ; j++)
+		{
+	 		B[i][j] = 0;
+	 		for (k=0; k<4; k++)
+	 			B[i][j] += T[i][k]*A.T[k][j];
+	 	}
+	for (i=0; i<4; i++)
+		for (j=0; j<4 ; j++)
+			T[i][j] = B[i][j];		
+	
+}
+void Matrix::Inverse()
+{
+	double B[4][4];
+	int i,j;
+	//rotary matrix transpose
+	for (i=0; i<3; i++)
+		for (j=0; j<3 ; j++)
+			B[i][j] = T[j][i];
+	//position
+	B[0][3] = B[1][3] = B[2][3] = 0;
+	for(i=0;i<3;i++)
+	{
+		B[0][3] += -T[i][0]*T[i][3]; 
+		B[1][3] += -T[i][1]*T[i][3];
+		B[2][3] += -T[i][2]*T[i][3]; 
+	}
+	// result to T (we only pass 3,4 matrix)
+	for (i=0; i<3; i++)
+		for (j=0; j<4 ; j++)
+			T[i][j] = B[i][j];	
+	
+}
+void Matrix::Print()
+{
+	std::cout.precision(6);
+	std::cout.setf (std::ios::fixed , std::ios::floatfield );    
+	for(int i=0;i<4;i++)
+	{
+		for (int j = 0;j<4;j++)
+			std::cout << T[i][j] << " ,";
+		std::cout << std::endl;
+	}
+}
+
+void RPY::ToRPY(Matrix T)
+{
+	x = T.T[0][3];	
+	y = T.T[1][3];
+	z = T.T[2][3];
+	R = atan2(T.T[2][1],T.T[2][2]);
+	Y = atan2(T.T[1][0],T.T[0][0]);
+	P = atan2(-T.T[2][0],cos(Y)*T.T[0][0] + sin(Y)*T.T[1][0]);
+	
+	if (cos(P) < 0)
+	{
+		R = atan2(-T.T[2][1],-T.T[2][2]);
+		Y = atan2(-T.T[1][0],-T.T[0][0]);
+		P = atan2(-T.T[2][0],cos(Y)*T.T[0][0] + sin(Y)*T.T[1][0]);
+	}
+	
+}
+
+Matrix RPY::FromRPY()
+{
+	int i,j;
+	double B[4][4] = {{cos(Y)*cos(P),cos(Y)*sin(P)*sin(R)-sin(Y)*cos(R),cos(Y)*sin(P)*cos(R)+sin(Y)*sin(R),x},
+	{sin(Y)*cos(P), sin(Y)*sin(P)*sin(R)+cos(Y)*cos(R), sin(Y)*sin(P)*cos(R)-cos(Y)*sin(R), y},
+	{-sin(P), cos(P)*sin(R), cos(P)*cos(R),z},{0,0,0,1}};
+	
+	Matrix T = Matrix();
+	for (i=0; i<4; i++)
+		for (j=0; j<4 ; j++)
+			T.T[i][j] = B[i][j];	
+	
+	return T;
+}
+
+void RPY::Print()
+{
+	std::cout << "RPY(" << x << ", "<< y << ", " << z << ", " << R << ", " << P << ", " << Y << ")\n";
+}
+
+Matrix DestinationRhand(double mq1,double mq2,double mq3,double mq4, RPY Target)
+{
+	Matrix T = Matrix();
+	T.Get(q1,mq1);
+	T.Multiply(q2,mq2);
+	T.Multiply(q3,mq3);
+	T.Multiply(q4,mq4);
+	T.Inverse();
+	
+	Matrix A = Matrix();
+	A = Target.FromRPY();
+	T.Multiply(A);
+
+	return T;
+}
+
