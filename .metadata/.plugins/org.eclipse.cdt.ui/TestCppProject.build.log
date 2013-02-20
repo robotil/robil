@@ -1,0 +1,6 @@
+11:29:42 **** Build of configuration Debug for project TestCppProject ****
+make Test 
+make: *** No rule to make target `Test'.  Stop.
+
+11:29:42 Build Finished (took 65ms)
+

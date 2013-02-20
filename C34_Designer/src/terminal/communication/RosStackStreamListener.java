@@ -11,32 +11,39 @@ public class RosStackStreamListener implements Runnable {
 
 	private class StackStreamProcessror implements LineProcessor {
 
-		String buffer = "";
+		private String buffer = "";
+		private StackStreamMessageParser _messageParser = new StackStreamMessageParser();
 
 		@Override
 		public void onEnd() {
+			
 		}
 
 		@Override
 		public void onNewLine(String line) {
 
+			
 			// end of message found: process the message data
 			if (line.contains("---")) {
-
+				StackStreamMessage message = new StackStreamMessage();
+				
 				String planID = this.buffer.substring(
-						"data: ExeStack: changed : ".length(),
-						this.buffer.indexOf(" code="));
+						"data: ExeStack: changed : ".length(), this.buffer.indexOf(" code="));
 
-				Document doc = RosStackStreamListener.this.designer
-						.getDocumentOfRunningPlan(planID);
+				Document doc = 
+						RosStackStreamListener.this.designer.getDocumentOfRunningPlan(planID);
 
-				if (doc == null) {
+				if (doc == null)
 					return;
-				}
-
+				
 				doc.cleanRunning();
-				doc.setRunning(Utils.getMatchedInstances(this.buffer,Utils.componentIdRegex));
+				doc.setRunning(Utils.getMatchedInstances(this.buffer, Utils.componentIdRegex));
 
+				if (_messageParser.tryParse(buffer, message))
+					doc.onMessageReceive(message);
+				else
+					System.out.println("Failed to parse message from ros stack-stream\nBuffer: \n" + buffer + "\n\n===============================\n");
+				
 				this.buffer = "";
 				return;
 			}

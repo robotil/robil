@@ -1,0 +1,43 @@
+package terminal.communication.tests;
+
+import static org.junit.Assert.*;
+
+import org.junit.Test;
+
+import terminal.communication.StackStreamMessage;
+import terminal.communication.StackStreamMessageParser;
+
+public class StackSteamMessageParserTest {
+
+	StackStreamMessageParser _parser = new StackStreamMessageParser(); 
+
+	@Test
+	public void testParseTaskNameWithParametersSuccess() {
+		String testInputString = 
+				"data: ExeStack: changed : P1 code=1, node=Task(PathPlanningFocus(x=1, y=2)) " +
+				"[id=1d3b4a-345fcd3]($Task(PathPlanningFocus(x=1, y=2)) [id=1d3b4a-345fcd3]:FAILURE(1):Map is not ready$)";
+		
+		StackStreamMessage message = _parser.parse(testInputString);
+		
+		assertNotNull("Message is null", message);
+		assertEquals("P1", message.getPlanLabel());
+		assertEquals("Task", message.getTaskName());
+		assertEquals("PathPlanningFocus(x=1, y=2)", message.getTaskParameters());
+		assertEquals("1d3b4a-345fcd3", message.getTaskId());
+		assertSame(StackStreamMessage.TaskFinishReason.Success, message.getTaskFinishReason());
+		assertEquals(1, message.getTaskResultCode());
+	}
+	
+	@Test
+	public void testParseTaskFailure() {
+		String testInputString = "data: ExeStack: changed : P1 code=1, " +
+				"node=Sequence(S)($Sequence(S):FAILURE(1)$)(";
+		
+		StackStreamMessage message = _parser.parse(testInputString);
+		
+		assertNotNull("Message is null", message);
+		assertEquals("P1", message.getPlanLabel());
+		assertEquals("Sequence", message.getTaskName());
+		assertEquals("S", message.getTaskParameters());
+	}
+}

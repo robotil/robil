@@ -1,0 +1,8 @@
+<plan descriptions="./plans/TaskDescriptions.xml">
+   <seq name="Noname"> 
+         <tsk name="ObstacleDetection" />
+         <tsk name="Noname" />
+         <tsk name="Noname" />
+         <tsk name="Noname" />
+   </seq>
+</plan>

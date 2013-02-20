@@ -39,7 +39,7 @@ public class LogConsoleWindow extends JTextPane {
 			pane = new LogConsoleWindow();
 		}
 		pane.frame.setVisible(true);
-	
+		pane.frame.setLocation(10, 10);
 	}
 
 	private String logFile;

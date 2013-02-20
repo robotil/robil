@@ -8,20 +8,31 @@ import java.util.Map;
 
 public class Tooltip extends GElement {
 
+	public enum ToolTipDesign {
+		Default,
+		DebugInfo,
+		RuntimeInfo
+	}
+	
 	@SuppressWarnings("unused")
 	private String _title;
 	private String _message;
-	private GElement _parent;
+	private final GElement _parent;
+	private final ToolTipDesign _design;
 
 	private Vec _textPosition = new Vec(0, 0);
 
-	public Tooltip(GElement parent) {
-		super();
+	public Tooltip(GElement parent, ToolTipDesign design) {
 		this._parent = parent;
 		this._title = "";
 		this._message = "";
+		this._design = design;
 	}
-
+	
+	public Tooltip(GElement parent) {
+		this(parent, ToolTipDesign.Default);
+	}
+	
 	@Override
 	public GElement clone() {
 		return null;
@@ -33,8 +44,22 @@ public class Tooltip extends GElement {
 	}
 
 	private void drawMultiLineString(Graphics2D g, String string, int x, int y) {
-		for (String line : string.split("\n"))
-			g.drawString(line, x, y += g.getFontMetrics().getHeight());
+		for (String line : string.split("\n")) {
+			Color originalColor = g.getColor();
+			
+			if (line.contains("$RED$")) 
+				g.setColor(Color.RED);
+			
+			if (line.contains("$GREEN$"))
+				g.setColor(Color.GREEN);
+			
+			if (line.contains("$BLUE$"))
+				g.setColor(Color.BLUE);
+			
+			g.drawString(line.replaceAll("\\$.*?\\$", ""), x, y += g.getFontMetrics().getHeight());
+			
+			g.setColor(originalColor);
+		}
 	}
 
 	private int getLinesCountHeight(String string) {
@@ -58,26 +83,53 @@ public class Tooltip extends GElement {
 
 	@Override
 	public void paint(Graphics2D g) {
+		
+		if (this._message.trim().equals(""))
+			return;
+		
 		updatePosition(g);
 
 		Composite oldComposite = g.getComposite();
 
-		AlphaComposite ac = java.awt.AlphaComposite.getInstance(
-				AlphaComposite.SRC_OVER, 0.7F);
+		AlphaComposite ac = AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 0.8F);
 		g.setComposite(ac);
 
-		g.setColor(Color.BLACK);
-		g.fillRoundRect((int) this.property.loc.x, (int) this.property.loc.y,
-				(int) this.property.size.x, (int) this.property.size.y, 10, 10);
-		g.setColor(Color.WHITE);
-		drawMultiLineString(g, this._message, (int) this._textPosition.x,
-				(int) this._textPosition.y);
+		switch (_design) {
+		case Default:
+			g.setColor(Color.BLACK);
+			g.fillRoundRect((int) this.property.loc.x, (int) this.property.loc.y, (int) this.property.size.x, (int) this.property.size.y, 10, 10);
+			g.setColor(Color.WHITE);
+			drawMultiLineString(g, this._message, (int) this._textPosition.x, (int) this._textPosition.y);
+			break;
+		case DebugInfo:
+			g.setColor(Color.WHITE);
+			g.fillRoundRect((int) this.property.loc.x, (int) this.property.loc.y, (int) this.property.size.x, (int) this.property.size.y, 10, 10);
+			g.setColor(Color.BLACK);
+			drawMultiLineString(g, this._message, (int) this._textPosition.x, (int) this._textPosition.y);
+			break;
+		case RuntimeInfo:
+			g.setColor(Color.YELLOW);
+			g.fillRoundRect((int) this.property.loc.x, (int) this.property.loc.y, (int) this.property.size.x, (int) this.property.size.y, 10, 10);
+			g.setColor(Color.BLACK);
+			drawMultiLineString(g, this._message, (int) this._textPosition.x, (int) this._textPosition.y);
+			break;
+		}
+		
 		g.setComposite(oldComposite);
 	}
 
 	public void setMessage(String title, String message) {
-		this._title = title;
+		this._title = "";
+		this._message = (title.trim().length() > 0 ? title + ":\n" : "") + message;
+	}
+	
+	public void setMessage(String message) {
+		this._title = "";
 		this._message = message;
+	}
+	
+	public void setWordHighlighting(String word, Color color) {
+		
 	}
 
 	public void updatePosition(Graphics2D g) {

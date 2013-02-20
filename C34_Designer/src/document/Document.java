@@ -21,6 +21,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
+import java.util.Random;
 import java.util.Set;
 import java.util.UUID;
 
@@ -28,12 +29,16 @@ import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
 
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
+import terminal.communication.StackStreamMessage;
+
+import document.actions.Dialogs;
 import document.description.TaskDescription;
 import document.history.HistoryManager;
 import document.history.HistoryManagerNotReadyException;
@@ -268,12 +273,14 @@ public class Document extends JPanel {
 	public View view = new View();
 	public TaskDescription task_description = null;
 	private boolean _documentChanged = false;
+	private boolean _shouldBeSavedAs = false;
 	private double lastX = 0;
 	private double lastY = 0;
 	private String _taskDescriptionFilename;
 	private String _taskDescriptionFilenameOriginal;
 	private Boolean _taskDescriptionExists = false;
 	private Boolean _buildTime = false;
+	private Boolean _debugView = false;
 	private String absoluteFilePath = "plan.xml";
 	private Vec _mousePosition = new Vec(0, 0);
 	private HistoryManager _historyManager = new HistoryManager();
@@ -283,6 +290,10 @@ public class Document extends JPanel {
 
 	private Map<String, GElement> loadedElements = new HashMap<String, GElement>();
 
+	/**
+	 * Creates new empty, unsaved document
+	 * @param mw Parent BTDesginer window
+	 */
 	public Document(BTDesigner mw) {
 
 		this.absoluteFilePath = new File(Parameters.path_to_plans, getTempFileName()).getAbsolutePath();
@@ -295,13 +306,28 @@ public class Document extends JPanel {
 		addMouseMotionListener(mh);
 		addMouseWheelListener(mh);
 		
+		this._taskDescriptionFilename = parsePlanPath(Parameters.path_to_description);
+		try {
+			this.task_description = new TaskDescription(this._taskDescriptionFilename);
+			System.out.println("Task descriptions file loaded from " + this._taskDescriptionFilename + ", descriptions count = " + this.task_description.getNames().size());
+		} catch (Exception ex) {
+			ex.printStackTrace();
+		}
+		
 		try {
 			this._historyManager.init(this);
 		} catch (HistoryManagerNotReadyException e) {
 			e.printStackTrace();
 		}
+		
+		_shouldBeSavedAs = true;
 	}
 	
+	/**
+	 * Load specified document
+	 * @param mw Parent BTDesginer window
+	 * @param fileName Plan to load
+	 */
 	public Document(BTDesigner mw, String fileName) {
 		try {
 			this.absoluteFilePath = new File(fileName).getCanonicalFile().getAbsolutePath();
@@ -325,6 +351,28 @@ public class Document extends JPanel {
 			e.printStackTrace();
 		}
 		
+		_shouldBeSavedAs = false;
+		
+		
+		
+		
+		Thread t = new Thread(new Runnable() {
+			public void run() {
+				while(true) {
+					try {
+						Thread.sleep(5000);
+					} catch (InterruptedException e) {
+						e.printStackTrace();
+					}
+					
+					for (GElement e : elements)
+						if (e.isTaskType())
+							e.getAsTask().addRunResult(new Random().nextInt(2000) - 1000, "OK" + new Random().nextInt(1000));
+				}
+			}
+		});
+		
+		t.start();
 	}
 
 	
@@ -348,10 +396,18 @@ public class Document extends JPanel {
 	public void createTask() {
 		GElement el = new Task.Creator().newInstance();
 		el.setView(Document.this.view);
+		
+		if (el.isTask()) {
+			el.getAsTask().setDocument(this);
+			el.getAsTask().setTaskDescriptionProvider(task_description);
+		}
+		
 		if (el instanceof View.ChangesListener)
 			((View.ChangesListener) el).onViewChange();
+		
 		el.getProperty().setCenter(getMousePos());
 		el.modify();
+		
 		add(el);
 		repaint();
 	}
@@ -429,6 +485,24 @@ public class Document extends JPanel {
 	public void compile() {
 		compile(getCurrentWorkingFile(), true, true);
 	}
+	
+	public void save() {
+		String fileName = getCurrentWorkingFile();
+		
+		if (_shouldBeSavedAs) {
+			fileName = Dialogs.saveFile("Save XML", "xml", getShortFilePath().replace("*", ""), Parameters.path_to_plans);
+			if (!fileName.equals("")) {
+				fileName = getCurrentWorkingFile();
+				_shouldBeSavedAs = false;
+			}
+		}
+			
+		compile(fileName, true, true);
+	}
+	
+	public void save(String fileName) {
+		compile(fileName, true, true);
+	}
 
 	public boolean compile(String destination, boolean updateCurrentWorkingFile, boolean createJustNamesXml) {
 		// if (updateCurrentWorkingFile)
@@ -452,9 +526,8 @@ public class Document extends JPanel {
 				}
 			}
 			for (GElement ea : this.elements)
-				if (ea instanceof Task) {
-					if (((Task) ea).type != Task.TYPE_task
-							&& getArrow(ea, null).size() == 0) {
+				if (ea.isTask()) {
+					if (!ea.isTaskType() && getArrow(ea, null).size() == 0) {
 						this.tip.setText("ERROR: Sequenser, Parallel or Selector in BT are a NON TERMINAL nodes");
 						return false;
 					}
@@ -501,22 +574,48 @@ public class Document extends JPanel {
 	public void copyTree(GElement el) {
 		onBeforeTreeChange(TreeChangeType.TreeCopy, el);
 
-		el.setView(this.view);
+//		el.setView(this.view);
+//		
+//		ArrayList<GElement> targets = searchAllSubelements(el);
+//		targets.add(el);
+//		
+//		HashMap<GElement, GElement> link = new HashMap<GElement, GElement>();
+//		for (GElement t : targets) {
+//			GElement n = t.clone();
+//			link.put(t, n);
+//			add(n);
+//			n.getProperty().loc = n.getProperty().loc.add(new Vec(10, 10));
+//			n.getProperty().leftClicked = false;
+//		}
+//		
+//		for (GElement t : targets) 
+//			link.get(t).cloneReconnect(link);
 		
-		ArrayList<GElement> targets = searchAllSubelements(el);
-		targets.add(el);
+		ArrayList<GElement> sourceElements = new ArrayList<GElement>();
+		ArrayList<GElement> sourceArrows  = arrays;
+		ArrayList<GElement> outElements = new ArrayList<GElement>();
+		ArrayList<GElement> outArrows = new ArrayList<GElement>();
 		
-		HashMap<GElement, GElement> link = new HashMap<GElement, GElement>();
-		for (GElement t : targets) {
-			GElement n = t.clone();
-			link.put(t, n);
-			add(n);
-			n.getProperty().loc = n.getProperty().loc.add(new Vec(10, 10));
-			n.getProperty().leftClicked = false;
+		// Take only tasks
+		for (GElement element : searchAllSubelements(el))
+			if (element.isTask())
+				sourceElements.add(element);
+		
+		sourceElements.add(el);
+		
+		cloneElements(sourceElements, sourceArrows, outElements, outArrows);
+		
+		for (GElement arrow : outArrows) {
+			// add(arrow);
+			add(arrow);
+			arrow.setView(this.view);
 		}
 		
-		for (GElement t : targets) 
-			link.get(t).cloneReconnect(link);
+		for (GElement element : outElements) {
+			// add(element);
+			add(element);
+			element.setView(this.view);
+		}
 		
 		onTreeChange(TreeChangeType.TreeCopy, el);
 	}
@@ -524,21 +623,47 @@ public class Document extends JPanel {
 	public void copyTree(GElement el, Document sourceDocument) {
 		onBeforeTreeChange(TreeChangeType.TreeCopy, el);
 
-		ArrayList<GElement> targets = sourceDocument.searchAllSubelements(el);
-		targets.add(el);
+//		ArrayList<GElement> targets = sourceDocument.searchAllSubelements(el);
+//		targets.add(el);
+//		
+//		HashMap<GElement, GElement> link = new HashMap<GElement, GElement>();
+//		for (GElement t : targets) {
+//			GElement n = t.clone();
+//			link.put(t, n);
+//			add(n);
+//			n.getProperty().loc = n.getProperty().loc.add(new Vec(10, 10));
+//			n.getProperty().leftClicked = false;
+//		}
+//		
+//		for (GElement t : targets) 
+//			link.get(t).cloneReconnect(link);
 		
-		HashMap<GElement, GElement> link = new HashMap<GElement, GElement>();
-		for (GElement t : targets) {
-			GElement n = t.clone();
-			link.put(t, n);
-			add(n);
-			n.getProperty().loc = n.getProperty().loc.add(new Vec(10, 10));
-			n.getProperty().leftClicked = false;
+		ArrayList<GElement> sourceElements = new ArrayList<GElement>();
+		ArrayList<GElement> sourceArrows  = sourceDocument.arrays;
+		ArrayList<GElement> outElements = new ArrayList<GElement>();
+		ArrayList<GElement> outArrows = new ArrayList<GElement>();
+		
+		// Take only tasks
+		for (GElement element : sourceDocument.searchAllSubelements(el))
+			if (element.isTask())
+				sourceElements.add(element);
+		
+		sourceElements.add(el);
+		
+		cloneElements(sourceElements, sourceArrows, outElements, outArrows);
+		
+		for (GElement arrow : outArrows) {
+			// add(arrow);
+			add(arrow);
+			arrow.setView(this.view);
 		}
 		
-		for (GElement t : targets) 
-			link.get(t).cloneReconnect(link);
-		
+		for (GElement element : outElements) {
+			// add(element);
+			add(element);
+			element.setView(this.view);
+		}
+
 		onTreeChange(TreeChangeType.TreeCopy, el);
 	}
 	
@@ -572,6 +697,44 @@ public class Document extends JPanel {
 			outArrows.add(clonedArrow);
 		}
 	}
+	
+	public void cloneElements(ArrayList<GElement> sourceElements, ArrayList<GElement> sourceArrows, ArrayList<GElement> outElements, ArrayList<GElement> outArrows) {
+		
+		HashMap<GElement, GElement> clonedElements = new HashMap<GElement, GElement>();
+	
+		GElement clonedElement;
+		
+		// Copy elements
+		for (GElement element : sourceElements) {
+			clonedElement = element.clone();
+			clonedElements.put(element, clonedElement);
+			
+			if (clonedElement.isTaskType())
+				clonedElement.getAsTask().setTaskDescriptionProvider(task_description);
+			
+			outElements.add(clonedElement);
+		}
+		
+		for (GElement arrow : sourceArrows) {
+			ArrayList<GElement> clonedTargets = new ArrayList<GElement>();
+			
+			if (!clonedElements.containsKey(arrow.getAsArrow().source))
+				continue;
+			
+			for (GElement target : arrow.getAsArrow().targets)
+				if (clonedElements.containsKey(target))
+					clonedTargets.add(clonedElements.get(target));
+				else
+					continue;
+			
+			Arrow clonedArrow = arrow.getAsArrow().clone(
+				clonedElements.get(arrow.getAsArrow().source), 
+				clonedTargets);
+			
+			outArrows.add(clonedArrow);
+		}
+	}
+
 
 	public String createXml(Task root, String tab) {
 		String res = createXml(root, tab, false);
@@ -790,6 +953,14 @@ public class Document extends JPanel {
 		}
 		return uniq(subels);
 	}
+	
+	public boolean isDebugViewEnabled() {
+		return this.mainWindow.getMenubar().getDebugViewMenuItem().isSelected();
+	}
+	
+	public boolean isRuntimeViewEnabled() {
+		return this.mainWindow.getMenubar().getRuntimeViewMenuItem().isSelected();
+	}
 
 	public ArrayList<GElement> getSuperElements(GElement el) {
 		ArrayList<GElement> subels = new ArrayList<GElement>();
@@ -907,6 +1078,10 @@ public class Document extends JPanel {
 							nge.id = UUID.fromString(e.getAttribute("id"));
 							this.loadedElements.put(nge.id.toString(), nge);
 						}
+						
+						if (nge.isTask())
+							nge.getAsTask().setDocument(this);
+						
 						add(nge);
 						loadPlan(e, nge);
 					} else if (ge instanceof Arrow) {
@@ -964,6 +1139,10 @@ public class Document extends JPanel {
 							a.add(nge);
 							se = nge;
 						}
+						
+						if (nge.isTask())
+							nge.getAsTask().setDocument(this);
+						
 						add(nge);
 						if (e.hasAttribute("x") && e.hasAttribute("y")) {
 							this.lastX = nge.getProperty().loc.x = Double
@@ -1172,13 +1351,16 @@ public class Document extends JPanel {
 		updateTabTitle();
 	}
 	
+	public void onMessageReceive(StackStreamMessage message) {
+		
+	}
+	
 	public void undo() {
 		try {
 			if (_historyManager.hasUndo())
 				_historyManager.undo();
 		} catch (Exception e) { return; }
 		
-		_historyManager.printStacks();
 		_documentChanged = true;
 		
 		updateUndoRedoButtonsState();
@@ -1191,7 +1373,6 @@ public class Document extends JPanel {
 				_historyManager.redo();
 			} catch (Exception e) { return; }
 		
-		_historyManager.printStacks();
 		_documentChanged = true;
 		
 		updateUndoRedoButtonsState();
@@ -1205,7 +1386,6 @@ public class Document extends JPanel {
 	
 	private void updateTabTitle() {
 		this.mainWindow.setTabName(this, getShortFilePath());
-		System.out.println("Tab name updated to: " + getShortFilePath());
 	}
 	
 	@Override
@@ -1235,7 +1415,7 @@ public class Document extends JPanel {
 
 	private String parsePlanPath(String pattern) {
 
-		String planFileName = new File(getCurrentWorkingFile()).getName();
+		String planFileName = new File(getAbsoluteFilePath()).getName();
 		planFileName = planFileName.replaceAll("\\.[^\\.]+$", "");
 		return pattern.replace("{PLANFILENAME}", planFileName);
 	}
@@ -1559,7 +1739,7 @@ public class Document extends JPanel {
 					this.mainWindow, "Document '" + getShortFilePath().replace("*", "") + 
 					"' has unsaved changes, save document before close?",
 					"Document has unsaved changes",
-					JOptionPane.YES_NO_CANCEL_OPTION);
+					JOptionPane.YES_NO_CANCEL_OPTION, JOptionPane.QUESTION_MESSAGE);
 
 			switch (dialogResult) {
 			case JOptionPane.YES_OPTION:

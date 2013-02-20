@@ -1,0 +1,296 @@
+<plan descriptions="./plans/TaskDescriptions.xml">
+   < name="event1"> 
+         < name="Monitor(target=LiveLock)"> 
+         </>
+         < name="Mission"> 
+               < name="Modifed_Event2"> 
+                     < name="PathPlanning"> 
+                     </>
+                  <dec name="!L!"> 
+                        < name="Mission"> 
+                              < name="StandUp"> 
+                              </>
+                              < name="@3"> 
+                                    < name="Monitor(target=Falling)"> 
+                                    </>
+                                 <dec name="!L!"> 
+                                       < name="SearchObjectAndGo"> 
+                                             < name="SearchObject(target=CarEntry)"> 
+                                             </>
+                                             < name="@5"> 
+                                                   < name="TrackObject(target=CarEntry)"> 
+                                                   </>
+                                                   < name="SearchPathAndGo"> 
+                                                         < name="PathPlanningFocus(target=CarEntry)"> 
+                                                         </>
+                                                         < name="TurnTo(target=CarEntry)"> 
+                                                         </>
+                                                         < name="OperatorCheckPoint"> 
+                                                            <dec name="L"> 
+                                                                  < name="Stabilization"> 
+                                                                        < name="Monitor(target=Stable)"> 
+                                                                        </>
+                                                                        < name="PostureControl(pose=stabilization)"> 
+                                                                        </>
+                                                                  </>
+                                                            </dec>
+                                                            <dec name="T"> 
+                                                                  < name="TimeControl"> 
+                                                                        < name="OperatorRequest"> 
+                                                                              < name="PushHMI(data=panoramic_image)"> 
+                                                                              </>
+                                                                              < name="PushHMI(data=occupancy_grid)"> 
+                                                                              </>
+                                                                              < name="PushHMI(data=path)"> 
+                                                                              </>
+                                                                              < name="HMIResponce"> 
+                                                                              </>
+                                                                        </>
+                                                                        < name="Monitor(target=Timeout)"> 
+                                                                        </>
+                                                                  </>
+                                                            </dec>
+                                                         </>
+                                                      <dec name="!L!"> 
+                                                            < name="Move"> 
+                                                                  < name="AdvanceByWalkingAlongPath"> 
+                                                                        < name="FollowPath"> 
+                                                                        </>
+                                                                        < name="Exceptions"> 
+                                                                           <dec name="F:1"> 
+                                                                                 < name="whilePlaceToThreadIn"> 
+                                                                                 </>
+                                                                           </dec>
+                                                                           <dec name="F:2"> 
+                                                                                 < name="untilSpeedAveregeIsLowerThen(kmh=?)"> 
+                                                                                 </>
+                                                                           </dec>
+                                                                           <dec name="F:2"> 
+                                                                                 < name="untilOperatorIntervention"> 
+                                                                                 </>
+                                                                           </dec>
+                                                                           <dec name="F:2"> 
+                                                                                 < name="whileSolution"> 
+                                                                                 </>
+                                                                           </dec>
+                                                                        </>
+                                                                  </>
+                                                                  < name="NoPlaceToTreadIn"> 
+                                                                        < name="PlanDetour"> 
+                                                                        </>
+                                                                        < name="Stop"> 
+                                                                        </>
+                                                                        < name="OperatorCheckPoint"> 
+                                                                           <dec name="L"> 
+                                                                                 < name="Stabilization"> 
+                                                                                       < name="Monitor(target=Stable)"> 
+                                                                                       </>
+                                                                                       < name="PostureControl(pose=stabilization)"> 
+                                                                                       </>
+                                                                                 </>
+                                                                           </dec>
+                                                                           <dec name="T"> 
+                                                                                 < name="TimeControl"> 
+                                                                                       < name="OperatorRequest"> 
+                                                                                             < name="PushHMI(data=panoramic_image)"> 
+                                                                                             </>
+                                                                                             < name="HMIResponce"> 
+                                                                                             </>
+                                                                                       </>
+                                                                                       < name="Monitor(target=Timeout)"> 
+                                                                                       </>
+                                                                                 </>
+                                                                           </dec>
+                                                                        </>
+                                                                  </>
+                                                                  < name="NoSolution"> 
+                                                                        < name="OperatorCheckPoint"> 
+                                                                           <dec name="L"> 
+                                                                                 < name="Stabilization"> 
+                                                                                       < name="Monitor(target=Stable)"> 
+                                                                                       </>
+                                                                                       < name="PostureControl(pose=stabilization)"> 
+                                                                                       </>
+                                                                                 </>
+                                                                           </dec>
+                                                                           <dec name="T"> 
+                                                                                 < name="TimeControl"> 
+                                                                                       < name="OperatorRequest"> 
+                                                                                             < name="PushHMI(data=panoramic_image)"> 
+                                                                                             </>
+                                                                                             < name="HMIResponce"> 
+                                                                                             </>
+                                                                                       </>
+                                                                                       < name="Monitor(target=Timeout)"> 
+                                                                                       </>
+                                                                                 </>
+                                                                           </dec>
+                                                                        </>
+                                                                  </>
+                                                            </>
+                                                      </dec>
+                                                   </>
+                                             </>
+                                       </>
+                                 </dec>
+                              </>
+                        </>
+                  </dec>
+               </>
+               < name="DriveMission"> 
+                     < name="EnterToCar"> 
+                           < name="DirectSensorsAtDoorway(selfposition=external)"> 
+                           </>
+                           < name="OperatorCheckPoint"> 
+                              <dec name="L"> 
+                                    < name="Stabilization"> 
+                                          < name="Monitor(target=Stable)"> 
+                                          </>
+                                          < name="PostureControl(pose=stabilization)"> 
+                                          </>
+                                    </>
+                              </dec>
+                              <dec name="T"> 
+                                    < name="TimeControl"> 
+                                          < name="OperatorRequest"> 
+                                                < name="PushHMI(data=cabin_image)"> 
+                                                </>
+                                                < name="PushHMI(data= cabin_parametrics)"> 
+                                                </>
+                                                < name="HMIResponce"> 
+                                                </>
+                                          </>
+                                          < name="Monitor(target=Timeout)"> 
+                                          </>
+                                    </>
+                              </dec>
+                           </>
+                           < name="InitEntryPosture"> 
+                           </>
+                        <dec name="!L!"> 
+                              < name="Entry"> 
+                                    < name="PerformEntry"> 
+                                    </>
+                                 <dec name="F"> 
+                                       < name="ReturnToEntryPosture"> 
+                                       </>
+                                 </dec>
+                              </>
+                        </dec>
+                     </>
+                     < name="InCar"> 
+                        <dec name="!L!"> 
+                              < name="Setting"> 
+                                 <dec name="T"> 
+                                       < name="TimeControl"> 
+                                             < name="OperatorRequest"> 
+                                                   < name="PushHMI(data=inSideCabin_image)"> 
+                                                   </>
+                                                   < name="PushHMI(data= InSideCabin_parametrics)"> 
+                                                   </>
+                                                   < name="HMIResponce"> 
+                                                   </>
+                                             </>
+                                             < name="Monitor(target=Timeout)"> 
+                                             </>
+                                       </>
+                                 </dec>
+                                    < name="TestControllers"> 
+                                          < name="GripSteeringWheel"> 
+                                          </>
+                                          < name="TestSteering"> 
+                                          </>
+                                          < name="PlaceFeetOnPedals"> 
+                                          </>
+                                          < name="TestPedals"> 
+                                          </>
+                                    </>
+                              </>
+                        </dec>
+                           < name="Driving"> 
+                              <dec name="!L!"> 
+                                    < name="Driving"> 
+                                          < name="PathPlanningFocus(target=FORWARD)"> 
+                                          </>
+                                          < name="InitDrive"> 
+                                          </>
+                                          < name="OperatorCheckPoint"> 
+                                             <dec name="L"> 
+                                                   < name="Stabilization"> 
+                                                         < name="Monitor(target=Stable)"> 
+                                                         </>
+                                                         < name="PostureControl(pose=stabilization)"> 
+                                                         </>
+                                                   </>
+                                             </dec>
+                                             <dec name="T"> 
+                                                   < name="TimeControl"> 
+                                                         < name="OperatorRequest"> 
+                                                               < name="PushHMI(data=panoramic_image)"> 
+                                                               </>
+                                                               < name="PushHMI(data= occupancy_grid)"> 
+                                                               </>
+                                                               < name="PushHMI(data= path)"> 
+                                                               </>
+                                                               < name="PushHMI(data= vehicle_parametrics)"> 
+                                                               </>
+                                                               < name="HMIResponce"> 
+                                                               </>
+                                                         </>
+                                                         < name="Monitor(target=Timeout)"> 
+                                                         </>
+                                                   </>
+                                             </dec>
+                                          </>
+                                          < name="WayPointsDriving"> 
+                                          </>
+                                    </>
+                              </dec>
+                                 < name="PathPlanning"> 
+                                 </>
+                           </>
+                     </>
+                     < name="ExitFromCar"> 
+                           < name="DirectSensorsAtDoorway(selfposition=internal)"> 
+                           </>
+                           < name="OperatorCheckPoint"> 
+                              <dec name="L"> 
+                                    < name="Stabilization"> 
+                                          < name="Monitor(target=Stable)"> 
+                                          </>
+                                          < name="PostureControl(pose=stabilization)"> 
+                                          </>
+                                    </>
+                              </dec>
+                              <dec name="T"> 
+                                    < name="TimeControl"> 
+                                          < name="OperatorRequest"> 
+                                                < name="PushHMI(data=door_image)"> 
+                                                </>
+                                                < name="PushHMI(data=door_parameters)"> 
+                                                </>
+                                                < name="HMIResponce"> 
+                                                </>
+                                          </>
+                                          < name="Monitor(target=Timeout)"> 
+                                          </>
+                                    </>
+                              </dec>
+                           </>
+                           < name="InitExitPosture"> 
+                           </>
+                        <dec name="!L!"> 
+                              < name="Exit"> 
+                                    < name="PerformExit"> 
+                                    </>
+                                 <dec name="F"> 
+                                       < name="ReturnToExitPosture"> 
+                                       </>
+                                 </dec>
+                              </>
+                        </dec>
+                     </>
+               </>
+         </>
+   </>
+</plan>

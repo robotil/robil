@@ -1,0 +1,47 @@
+package logger;
+
+import java.io.PrintStream;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+
+public class Log {
+	
+	private static void logMessage(String tag, String message) {
+		StringBuilder lineBuilder = new StringBuilder();
+		
+		StackTraceElement callingMethod = null;
+		StackTraceElement[] stackTraceElements = Thread.currentThread().getStackTrace();
+		if (stackTraceElements.length > 0)
+			callingMethod = stackTraceElements[stackTraceElements.length - 1];
+		
+		lineBuilder.append("[");
+		lineBuilder.append(new SimpleDateFormat("HH:mm:ss").format(new Date()));
+		lineBuilder.append("]");
+		
+		if (callingMethod != null) {
+			lineBuilder.append("[");
+			
+			lineBuilder.append(callingMethod.getClassName());
+			lineBuilder.append(".");
+			lineBuilder.append(callingMethod.getMethodName());
+			
+			lineBuilder.append("]");
+		}
+		
+		if (!tag.equals("")) {
+			lineBuilder.append("[");
+			lineBuilder.append(tag);
+			lineBuilder.append("]");
+		}
+		
+		lineBuilder.append(message);
+		
+		if (LogManager.isRedirected()) {
+			// Write to redirected stream & standard output
+		}
+	}
+
+	public static void d(String tag, String message) {
+		
+	}
+}

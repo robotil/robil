@@ -1,0 +1,12 @@
+package logger;
+
+public class Log {
+
+	private static void logMessage(String tag, String message) {
+		
+	}
+	
+	public static void d(String message) {
+		
+	}
+}
