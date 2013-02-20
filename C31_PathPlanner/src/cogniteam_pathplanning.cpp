@@ -354,19 +354,34 @@ AStar::Path AStar::reconstruct_path(map<AStar::QT,AStar::QT>& came_from, AStar::
 
 // -------------------------------- Inflator -------------------------------------
 
-
+namespace __Inaflator_utils{
+	using namespace std;
+	bool contains( const vector<int>& tx, const vector<int>& ty, int x, int y ){
+		for(size_t i=0;i<tx.size();i++){
+			if(tx[i]==x && ty[i]==y) return true;
+		}
+		return false;
+	}
+	void addTemplatePoint( vector<int>& tx, vector<int>& ty, int x, int y ){
+		if(!contains(tx, ty, x, y)){
+			tx.push_back(x); ty.push_back(y);
+		}
+	}
+}
 Inflator::Inflator(size_t radius, char sbv)
 : radius(radius), cellBlockValue(sbv)
 {
+	using namespace __Inaflator_utils;
+	
 	//TODO: MUST UNIQUE ON (tx,ty) => INCREACE SPEED OF INFLATION
 	//cout<<"Inflator("<<radius<<","<<(int)sbv<<")"<<endl;
 	int rr = radius*radius;
 	for(int x = -(int)radius; x<=(int)radius; x++){
 		int y = (int)round(sqrt( rr - x*x ));
-		tx.push_back(x); ty.push_back(y);
-		tx.push_back(x); ty.push_back(-y);
-		tx.push_back(y); ty.push_back(x);
-		tx.push_back(-y); ty.push_back(x);
+		addTemplatePoint(tx,ty,  x, y);
+		addTemplatePoint(tx,ty,  x,-y);
+		addTemplatePoint(tx,ty,  y, x);
+		addTemplatePoint(tx,ty, -y, x);
 	}
 	//for( size_t i=0;i<tx.size();i++){cout<<"x,y="<<tx[i]<<","<<ty[i]<<endl;}
 	//cout<<"Inflator: end"<<endl;
