@@ -34,6 +34,8 @@ include_directories (src)
 rosbuild_add_executable(dummy src/DummyTask.cpp)
 rosbuild_link_boost(dummy thread)
 
+rosbuild_add_executable(task_tester src/taskTester.cpp)
+rosbuild_link_boost(task_tester thread)
 
 
 
