@@ -11,12 +11,12 @@ from geometry_msgs.msg import Pose
 
 
 class FinishDrive(object):
-    _feedback = C51_CarOperation.msg.FinishDriveFeedback()
-    _result   = C51_CarOperation.msg.FinishDriveResult()
+    _feedback = C51_CarOperation.msg.DriveFeedback()
+    _result   = C51_CarOperation.msg.DriveResult()
     
     def __init__(self, name):    
         self._action_name = name
-        self._as = actionlib.SimpleActionServer(self._action_name, C51_CarOperation.msg.FinishDriveAction, execute_cb=self.FinishDriveCallback, auto_start=False)
+        self._as = actionlib.SimpleActionServer(self._action_name, C51_CarOperation.msg.DriveAction, execute_cb=self.FinishDriveCallback, auto_start=False)
         self._as.start()
     
     def FinishDriveCallback(self, goal):
@@ -27,7 +27,7 @@ class FinishDrive(object):
             self._as.set_preempted()
             success = False
             
-        if goal.PerformJob:
+        if success:
             #DRC Vehicles controllers online - should be replaced with C67 module
             hb=handB()         #handbrake online
             gasP=Gas() #gas pedal online
@@ -36,11 +36,10 @@ class FinishDrive(object):
             # - release on brake - and pull handbrake
             hb.pullHB()     #release handbrake
             brakeP.brake(0)
-            self._feedback.HandBrake = 1
-            self._feedback.SteeringWheel = 1
-            self._feedback.GasPedal = 1
-            self._feedback.BrakePedal = 1
-            self._result.Success = 1
+            self._feedback.complete = 100
+            self._result.success = 0
+            self._result.description = "Finished"
+            self._result.plan = "Finished"
             
             self._as.publish_feedback(self._feedback)
         if success:
