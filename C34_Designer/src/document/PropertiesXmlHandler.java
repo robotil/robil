@@ -20,6 +20,8 @@ import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 
+import logger.Log;
+
 import org.w3c.dom.Attr;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -52,7 +54,7 @@ public class PropertiesXmlHandler {
 				map.put(name, value);
 			}
 		} catch (IllegalAccessException ex) {
-			System.err.println("Error getParameters: " + ex.getMessage());
+			Log.e("Error getParameters: " + ex.getMessage());
 		}
 
 		return map;
@@ -66,7 +68,7 @@ public class PropertiesXmlHandler {
 	public static void loadAndSetProperties(String path) throws IOException,
 			ParserConfigurationException, SAXException {
 		
-		System.out.println("Load properties from "+new File(path).getAbsolutePath());
+		Log.d("Load properties from "+new File(path).getAbsolutePath());
 		File xmlFile = new File(path);
 		DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
 		DocumentBuilder db = dbFactory.newDocumentBuilder();
@@ -75,11 +77,11 @@ public class PropertiesXmlHandler {
 		doc.getDocumentElement().normalize();
 
 		NodeList list = doc.getDocumentElement().getChildNodes();
-		//System.out.println("list size = " + list.getLength());
-		System.out.println("Properties :");
+		//Log.d("list size = " + list.getLength());
+		Log.d("Properties :");
 		for (int i = 0; i < list.getLength(); ++i) {
 			Node n = list.item(i);
-			//System.out.println(n.getNodeName());
+			//Log.d(n.getNodeName());
 
 			if (n.getNodeName().trim().startsWith("#")) {
 				continue;
@@ -89,7 +91,7 @@ public class PropertiesXmlHandler {
 					.getTextContent();
 
 			if( Parameters.set(key, value) ){
-				System.out.println("   "+key+" <- "+value);
+				Log.d("   "+key+" <- "+value);
 			}
 		}
 	}
@@ -98,7 +100,7 @@ public class PropertiesXmlHandler {
 			TransformerException, ParserConfigurationException,
 			TransformerConfigurationException {
 		try {
-			System.out.println("Save properties to "+new File(path).getAbsolutePath());
+			Log.d("Save properties to "+new File(path).getAbsolutePath());
 			File xmlFile = new File(path);
 			DocumentBuilderFactory dbFactory = DocumentBuilderFactory
 					.newInstance();
@@ -123,7 +125,7 @@ public class PropertiesXmlHandler {
 			transformer.setOutputProperty("indent", "yes");
 			transformer.transform(xmlSource, result);
 		} catch (Exception ex) {
-			System.err.println(ex.getMessage());
+			Log.e(ex.getMessage());
 		}
 	}
 
@@ -131,13 +133,13 @@ public class PropertiesXmlHandler {
 
 		// get updated values from table model
 		TableModel model = table.getModel();
-		System.out.println("Update properties :");
+		Log.d("Update properties :");
 		for (int i = 0; i < model.getRowCount(); ++i) {
 			String key = model.getValueAt(i, 0).toString();
 			String value = model.getValueAt(i, 1).toString();
 
 			if( Parameters.set(key, value) ){
-				System.out.println("   "+key+" <- "+value);
+				Log.d("   "+key+" <- "+value);
 			}
 		}
 	}

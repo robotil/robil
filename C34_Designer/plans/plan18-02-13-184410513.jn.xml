@@ -1,0 +1,8 @@
+<plan descriptions="./plans/TaskDescriptions.xml">
+   < name="Perception"> 
+         < name="LocalizationTrack"> 
+         </>
+         < name="ObstacleDetection"> 
+         </>
+   </>
+</plan>

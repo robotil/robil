@@ -1,3 +1,6 @@
 <plan descriptions="./plans/TaskDescriptions.xml">
-   <tsk name="Noname" x="342.5" y="155.5" test_time="0" test_result="true" id="38c91c35-dac1-4013-b536-105c8664c352" />
+   <seq name="Noname" x="289.5" y="57.5" collapsed="false" id="83176fee-cb02-4a0f-8434-b84de4d5e79d"> 
+         <tsk name="Test1" x="185.5" y="145.5" test_time="0" test_result="true" id="7f4c4a5a-c7e3-40a7-bf1f-f006e1d58458" />
+         <tsk name="Test1" x="403.5" y="156.5" test_time="0" test_result="true" id="6bf4c0c7-8c2c-499d-aeeb-b3a88e157f14" />
+   </seq>
 </plan>
