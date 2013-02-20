@@ -22,14 +22,13 @@ protected:
 	
 	int time;
 	int retValue;
+	string outputstr;
 	
 public:
     DummyTaskServer(std::string name, std::vector<string> par):
         RobilTask(name), params(par)
     {
 		cout<<"params: "<<params<<endl;
-		cout<<"  time: "<<find(params, "time=")<<" value="<<cast<int>(value(params,"time="))<<endl;
-		cout<<"  return: "<<find(params, "return=")<<" value="<<cast<int>(value(params,"return="))<<endl;
 		
 		time = -1;
 		if( find(params, "time=").size()>0 ){
@@ -39,6 +38,11 @@ public:
 		retValue = 0;
 		if( find(params, "return=").size()>0 ){
 			retValue = cast<int>(value(params,"return="));
+		}
+		
+		outputstr="process...";
+		if( find(params, "print=").size()>0 ){
+			outputstr = value(params,"print=");
 		}
     }
 
@@ -81,7 +85,9 @@ public:
 				return TaskResult::Preempted();
 			}
 			
-			ROS_INFO("%s: process...", _name.c_str());
+			if(outputstr!="no_print"){
+				ROS_INFO("%s: %s", _name.c_str(), outputstr.c_str());
+			}
 			sleep(1);
 		}
                 
@@ -102,6 +108,18 @@ public:
 int main(int argc, char **argv)
 {
 	if(argc<0) return 1;
+	std::string tname (argv[1]);
+	
+	if(tname=="-h" || tname=="--help"){
+		cout<<"Dummy Robil Task for testing"<<endl;
+		cout<<"   run empty robil task with any name"<<endl;
+		cout<<"Syntax: dummy [TASK_NAME] [ARG1=VALUE] [ARG2=VALUE] ..."<<endl;
+		cout<<"Args:"<<endl;
+		cout<<"    time=INTEGER    : time (in millisec) for task running. if -1, wait forevere"<<endl;
+		cout<<"    return=INTEGER  : return value of task: 0 is OK, -1 is PLAN, 0< is a ERROR CODE "<<endl;
+		cout<<"    print=STRING    : print progress text. default is 'process...' and 'no_print' suppress printing."<<endl;
+		return 0;
+	}
 	
 	ROS_INFO("Start DummyTaskNode with Task %s", argv[1]);
 	
@@ -110,7 +128,7 @@ int main(int argc, char **argv)
 	
 	ROS_INFO("craete task");
 	
-	std::string tname (argv[1]);
+
 	std::vector<string> params;
 	if(argc>2){
 		for(size_t i=2; i<argc; i++){
