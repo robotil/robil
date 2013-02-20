@@ -26,7 +26,7 @@ public class RosExecutor {
 		this.workerThreads = new ArrayList<Thread>();
 		this.workerThreads.add(new Thread(new RosStackStreamListener(designer),
 				"RosStackListener"));
-		this.workerThreads.add(new Thread(new RosStopStreamListener(),
+		this.workerThreads.add(new Thread(new RosStopStreamListener(designer),
 				"RosStopListener"));
 
 		for (Thread t : this.workerThreads) {

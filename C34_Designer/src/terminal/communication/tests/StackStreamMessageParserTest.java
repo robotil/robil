@@ -8,7 +8,7 @@ import terminal.communication.StackStreamMessage;
 import terminal.communication.StackStreamMessage.ChangeType;
 import terminal.communication.StackStreamMessageParser;
 
-public class StackSteamMessageParserTest {
+public class StackStreamMessageParserTest {
 
 	StackStreamMessageParser _parser = new StackStreamMessageParser(); 
 

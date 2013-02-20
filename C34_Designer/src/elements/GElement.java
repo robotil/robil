@@ -15,6 +15,8 @@ import javax.swing.Icon;
 
 import org.w3c.dom.Element;
 
+import elements.tasks.Task;
+
 public abstract class GElement {
 
 	static abstract public class Creator {
@@ -47,7 +49,7 @@ public abstract class GElement {
 		}
 	}
 
-	static protected class GraphProp {
+	public static class GraphProp {
 		Graphics2D g;
 		Paint paint;
 		Stroke strok;
@@ -71,7 +73,7 @@ public abstract class GElement {
 		return UUID.randomUUID();
 	}
 
-	static Dimension getTextSize(Graphics graphics, Font font, String text) {
+	protected static Dimension getTextSize(Graphics graphics, Font font, String text) {
 		if (graphics == null || font == null) {
 			// Log.d("EXECPTION");
 			return new Dimension(10,10);
@@ -83,7 +85,7 @@ public abstract class GElement {
 		return size;
 	}
 
-	static Dimension getTextSize(Graphics graphics, String text) {
+	protected static Dimension getTextSize(Graphics graphics, String text) {
 		return getTextSize(graphics, graphics.getFont(), text);
 	}
 
@@ -106,11 +108,11 @@ public abstract class GElement {
 
 	abstract public void cloneReconnect(Map<GElement, GElement> link);
 
-	Vec getCenter() {
+	protected Vec getCenter() {
 		return getLocation().add(getSize().scale(0.5));
 	}
 
-	Vec getLocation() {
+	protected Vec getLocation() {
 		return this.property.loc.scale(this.view.zoom).add(this.view.loc);
 	}
 
@@ -122,7 +124,7 @@ public abstract class GElement {
 		return this.property.toString();
 	}
 
-	Vec getSize() {
+	protected Vec getSize() {
 		return this.property.size.scale(this.view.zoom);
 	}
 

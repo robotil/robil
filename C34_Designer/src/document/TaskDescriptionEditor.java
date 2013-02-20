@@ -29,6 +29,7 @@ import javax.swing.event.ListSelectionListener;
 
 import document.description.TaskDescription;
 
+@SuppressWarnings("rawtypes")
 public class TaskDescriptionEditor extends JFrame {
 
 	private static final long serialVersionUID = 844706702028498340L;
@@ -55,24 +56,24 @@ public class TaskDescriptionEditor extends JFrame {
 	private JTextField _txtCreateTaskName = new JTextField();
 
 	private JTextArea _txtCreateTaskDescription = new JTextArea();
-	//VERSION_PROBLME private JList<String> _lstTasks = new JList<String>();
+	
 	private JList _lstTasks = new JList();
 
 	private TaskDescription _tasks;
 
 	public TaskDescriptionEditor(TaskDescription tasks) {
-
-		for (javax.swing.UIManager.LookAndFeelInfo info : javax.swing.UIManager
-				.getInstalledLookAndFeels()) {
-			if ("GTK+".equals(info.getName())) {
-				try {
-					javax.swing.UIManager.setLookAndFeel(info.getClassName());
-				} catch (Exception e) {
-					e.printStackTrace();
-				}
-				break;
-			}
-		}
+//
+//		for (javax.swing.UIManager.LookAndFeelInfo info : javax.swing.UIManager
+//				.getInstalledLookAndFeels()) {
+//			if ("GTK+".equals(info.getName())) {
+//				try {
+//					javax.swing.UIManager.setLookAndFeel(info.getClassName());
+//				} catch (Exception e) {
+//					e.printStackTrace();
+//				}
+//				break;
+//			}
+//		}
 
 		UIManager.put("TextArea.margin", new Insets(10, 10, 10, 10));
 
@@ -285,14 +286,12 @@ public class TaskDescriptionEditor extends JFrame {
 		panel.setLayout(new GridBagLayout());
 		GridBagConstraints c = new GridBagConstraints();
 
-		//VERSION_PROBLME this._lstTasks = new JList<String>();
 		this._lstTasks = new JList();
 		this._lstTasks.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 		this._lstTasks.addListSelectionListener(new ListSelectionListener() {
 
 			@Override
 			public void valueChanged(ListSelectionEvent e) {
-				//VERSION_PROBLME selectTask(TaskDescriptionEditor.this._lstTasks	.getSelectedValue());
 				selectTask(TaskDescriptionEditor.this._lstTasks	.getSelectedValue().toString());
 			}
 		});
@@ -336,7 +335,6 @@ public class TaskDescriptionEditor extends JFrame {
 				addActionListener(new ActionListener() {
 					@Override
 					public void actionPerformed(ActionEvent e) {
-						//VERSION_PROBLME deleteTask(TaskDescriptionEditor.this._lstTasks	.getSelectedValue());
 						deleteTask(TaskDescriptionEditor.this._lstTasks	.getSelectedValue().toString());
 					}
 				});
@@ -392,6 +390,7 @@ public class TaskDescriptionEditor extends JFrame {
 		}
 	}
 
+	@SuppressWarnings("unchecked")
 	private void refreshTasks() {
 		//VERSION_PROBLME DefaultListModel<String> listModel = new DefaultListModel<String>();
 		DefaultListModel listModel = new DefaultListModel();
