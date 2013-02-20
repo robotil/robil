@@ -62,9 +62,19 @@ int main (int argc, char **argv)
 
 	ROS_INFO("Waiting for action server to start task %s.", tname.c_str());
 	// wait for the action server to start
-	ac.waitForServer(); //will wait for infinite time
+	//ac.waitForServer(); //will wait for infinite time
+	
+	bool serverFound = false;
+	while( !serverFound && ros::ok() ){
+		ac.waitForServer(ros::Duration(1.0));
+		if(ac.isServerConnected()){
+			ROS_INFO("... Task is found.");
+			serverFound = true;
+		}else{
+			ROS_INFO("... Task not found, retry...");
+		}
+	}
 
-	ROS_INFO("... Action server started.");
 	// send a goal to the action
 	RobilTaskGoal goal;
 		goal.name = tname;
@@ -87,7 +97,7 @@ int main (int argc, char **argv)
 		time = cast<int>(value(params, "time="));
 	}
 	bool finished = false;
-	while(time!=0){
+	while(time!=0 && ros::ok()){
 		time -- ;
 		
 		ROS_INFO("... Wait for 1 sec");
@@ -115,7 +125,7 @@ int main (int argc, char **argv)
 			ROS_INFO("... ... Task did not finish before the time out. retry...");
 	}
 
-	if(!finished){
+	if(!finished && ros::ok()){
 		ROS_INFO("Abort task.");
 		ac.cancelGoal();
 	}
