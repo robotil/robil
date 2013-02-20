@@ -302,7 +302,7 @@ public class Toolbar extends JPanel {
 	// });
 	// fileDialog.setFile("plan.png");
 	// fileDialog.setVisible(true);
-	// System.out.println("File: " + fileDialog.getFile());
+
 	// try {
 	//
 	// getSaveSnapShot( document,fileDialog.getFile());

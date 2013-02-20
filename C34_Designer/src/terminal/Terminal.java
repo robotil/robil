@@ -227,7 +227,7 @@ public class Terminal extends javax.swing.JFrame {
 		this.consoleLock.lock();
 		try {
 			String out = this.txtOut.getText();
-			// System.out.println("TERMINAL: " + out + text);
+			// Log.d("TERMINAL: " + out + text);
 			this.txtOut.setText(out + text);
 			this.txtOut.setCaretPosition(this.txtOut.getText().length() - 1);
 		} finally {

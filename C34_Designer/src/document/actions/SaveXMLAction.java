@@ -30,8 +30,9 @@ public class SaveXMLAction extends AbstractDesignerAction implements
 		if (fileName == null) {
 			return;
 		}
-		savePlan(fileName);
-
+		
+		// savePlan(fileName);
+		getActiveTab().doc.save(fileName);
 	}
 
 	private void savePlan(String path) {

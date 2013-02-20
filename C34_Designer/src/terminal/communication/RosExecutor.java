@@ -2,6 +2,8 @@ package terminal.communication;
 
 import java.util.ArrayList;
 
+import logger.Log;
+
 import terminal.commands.ServiceCaller;
 import document.BTDesigner;
 
@@ -34,19 +36,19 @@ public class RosExecutor {
 
 	public void pauseBehaviorTree(String btName) {
 		ServiceCaller caller = new ServiceCaller();
-		System.out.println("Pause " + btName);
+		Log.d("Pause " + btName);
 		caller.callService(PAUSE, btName);
 	}
 
 	public void resumeBehaviorTree(String btName) {
-		System.out.println("Resume " + btName);
+		Log.d("Resume " + btName);
 		ServiceCaller caller = new ServiceCaller();
 		caller.callService(RESUME, btName);
 	}
 
 	public void runBehaviorTree(String btName, String plan) {
 		ServiceCaller caller = new ServiceCaller();
-		System.out.println("Run " + btName);
+		Log.d("Run " + btName);
 		caller.callService(RUN, btName, plan);
 	}
 
@@ -58,13 +60,13 @@ public class RosExecutor {
 
 	public void stepBehaviorTree(String btName) {
 		ServiceCaller caller = new ServiceCaller();
-		System.out.println("Step " + btName);
+		Log.d("Step " + btName);
 		caller.callService(STEP, btName);
 	}
 
 	public void stopBehaviorTree(String btName) {
 		ServiceCaller caller = new ServiceCaller();
-		System.out.println("Stop " + btName);
+		Log.d("Stop " + btName);
 		caller.callService(STOP, btName);
 	}
 

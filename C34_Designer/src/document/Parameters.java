@@ -2,6 +2,8 @@ package document;
 
 import java.lang.reflect.Field;
 
+import logger.Log;
+
 public class Parameters {
 	public static int test_time = 0;
 	public static boolean test_result = true;
@@ -25,11 +27,11 @@ public class Parameters {
 	
 	public static boolean set(String key, String value) {
 		Class<Parameters> pclass = Parameters.class;
-		//System.out.println("class name : "+pclass.getName());
+		//Log.d("class name : "+pclass.getName());
 		try{
 			Field pfield = pclass.getField(key);
-			//System.out.println("  field name : "+pfield.getName());
-			//System.out.println("  field type : "+pfield.getType().getName());
+			//Log.d("  field name : "+pfield.getName());
+			//Log.d("  field type : "+pfield.getType().getName());
 			if(pfield.getType().getName().equals(String.class.getName())){
 				pfield.set(null, new String(value));
 			}else
@@ -45,16 +47,16 @@ public class Parameters {
 			if(pfield.getType().getName().equals(boolean.class.getName())){
 				pfield.set(null, Boolean.parseBoolean(value));
 			}else{
-				System.out.println("Parameters.set"+key+","+value+")  Unknown type of parameter : "+pfield.getType().getName());
+				Log.d("Parameters.set"+key+","+value+")  Unknown type of parameter : "+pfield.getType().getName());
 				return false;
 			}
 			return true;
 		}catch(NoSuchFieldException ex){
-			System.out.println("Parameters.set"+key+","+value+")  NoSuchFieldException : "+ex.getMessage());
+			Log.e("Parameters.set"+key+","+value+")  NoSuchFieldException : "+ex.getMessage());
 		} catch (IllegalArgumentException ex) {
-			System.out.println("Parameters.set"+key+","+value+")  IllegalArgumentException : "+ex.getMessage());
+			Log.e("Parameters.set"+key+","+value+")  IllegalArgumentException : "+ex.getMessage());
 		} catch (IllegalAccessException ex) {
-			System.out.println("Parameters.set"+key+","+value+")  IllegalAccessException : "+ex.getMessage());
+			Log.e("Parameters.set"+key+","+value+")  IllegalAccessException : "+ex.getMessage());
 		}
 		return false;
 	}

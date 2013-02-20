@@ -1,0 +1,8 @@
+<plan descriptions="./plans/TaskDescriptions.xml">
+   < name="Perception" x="322.1697191697104" y="157.22255799755408" collapsed="false" id="36987062-0668-4604-bc47-d6626a9e6be3"> 
+         < name="LocalizationTrack" x="154.1697191697104" y="198.2225579975541" test_time="30" test_result="false" id="5ae55284-2ea7-4eb8-b76a-c0db2618bc6c"> 
+         </>
+         < name="ObstacleDetection" x="333.1697191697104" y="219.22255799755408" test_time="0" test_result="true" id="37421188-f3d6-467a-8f53-824b52726e6b"> 
+         </>
+   </>
+</plan>

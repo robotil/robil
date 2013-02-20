@@ -92,6 +92,8 @@ public:
 
     TaskResult task(const string& name, const string& uid, Arguments& args){
     	//ros::this_node::getName()
+    	
+    	// TASK INPUT CHANNELS
     	ros::ServiceServer c31_PlanPath =
     			_node.advertiseService<C31_PathPlanner::C31_PlanPathRequest, C31_PathPlanner::C31_PlanPathResponse>(
     					STR(ros::this_node::getName()<<"/planPath"),boost::bind(&PathPlanningServer::srv_PlanPath,this,_1,_2)
@@ -101,9 +103,11 @@ public:
     					STR(ros::this_node::getName()<<"/getPath"),boost::bind(&PathPlanningServer::srv_GetPath,this,_1,_2)
     			);
 
+		//TASK OUTPUT CHANNELS
     	ros::ServiceClient c22Client = _node.serviceClient<C22_GroundRecognitionAndMapping::C22>("C22");
+		ros::Subscriber c23Client = _node.subscribe("C23/object_deminsions", 1000, &PathPlanningServer::callbackNewTargetLocation, this );
+		
 
-    	/* NUMBER OF ITERATIONS IN TASK LOOP */
         while(true){
             if (isPreempt()){
 
@@ -144,10 +148,8 @@ public:
 
             }
 
-
-
             /* SLEEP BETWEEN LOOP ITERATIONS */
-            sleep(1000);
+            sleep(1000); //millisec
         }
 
         return TaskResult::FAULT();
@@ -234,10 +236,14 @@ public:
     	return false;
     }
     void requestNewTargetLocation(){ //REQ. HAS BE NOT external synchronizationed on _mtx
-		//TODO: write real algorithm for requestNewTargetLocation
+		//TODO: [CURRENTLLY NOT ACTUAL] write real algorithm for requestNewTargetLocation
+		//......we get location by callback from Topic listener
     	SYNCH(SET_CURRENT_TIME(statistic.time_targetLocation_lastRequest));
     	//onNewTargetLocation(NEW_TARGET_LOCATION_GPS)
     }
+    void callbackNewTargetLocation(const C23_ObjectRecognition::C23C0_ODIM::ConstPtr & msg){
+		onNewTargetLocation( extractObjectLocation( *msg ) );
+	}
 
     //=================== NEW DATA INPUT ==================================================
     void dataChanged(){
@@ -320,23 +326,6 @@ public:
 
 			return TaskResult(FAULT, desc);
 		}
-//        /* NUMBER OF ITERATIONS IN TASK LOOP */
-//        while(true){
-//            if (isPreempt()){
-//
-//                /* HERE PROCESS PREEMPTION OR INTERAPT */
-//
-//
-//                return TaskResult::Preempted();
-//            }
-//
-//            /* HERE PROCESS TASK */
-//
-//
-//
-//            /* SLEEP BETWEEN LOOP ITERATIONS */
-//            sleep(100);
-//        }
 
         return TaskResult::FAULT();
     }

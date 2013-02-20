@@ -19,6 +19,13 @@ class Snapshot {
 	private ArrayList<GElement> _elements;
 	private ArrayList<GElement> _arrows;
 	
+	/**
+	 * Private constructor, instance of Snapshot must be create via static method create
+	 * @param document Document
+	 * @param elements Elements list
+	 * @param arrows Arrows list
+	 * @param sequenceNumber Sequence number
+	 */
 	private Snapshot(Document document, ArrayList<GElement> elements, ArrayList<GElement> arrows, int sequenceNumber) {
 		this._date 		= new Date();
 		this._document 	= document;

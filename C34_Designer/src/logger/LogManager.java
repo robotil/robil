@@ -11,7 +11,17 @@ public final class LogManager {
 
 	private static String _outputFileName;
 	private static PrintStream _outputStream;
+	
+	private static PrintStream _stdOutStream;
+	private static PrintStream _stdErrStream;
+	
+	private static boolean _outputRedirected = false;
 
+	static {
+		_stdOutStream = System.out;
+		_stdErrStream = System.err;
+	}
+	
 	private static PrintStream createPrintStreamToFile(String fileName) {
 		try {
 			return new PrintStream(new BufferedOutputStream(
@@ -67,13 +77,35 @@ public final class LogManager {
 	}
 
 	public static void redirectStandardAndErrorOutput(String outputFileName) {
-		System.out.println("Redirect all output to "+new File(outputFileName).getAbsolutePath());
+		System.out.println("Redirecting all output to " + new File(outputFileName).getAbsolutePath());
 		_outputFileName = outputFileName;
 		_outputStream = createPrintStreamToFile(outputFileName);
 
 		System.setOut(_outputStream);
 		System.setErr(_outputStream);
-		System.out.println("Redirect all output to "+new File(outputFileName).getAbsolutePath());
+		System.out.println("Redirecting all output to " + new File(outputFileName).getAbsolutePath());
+		
+		_outputRedirected = true;
+	}
+	
+	public static PrintStream getCurrentOutputStream() {
+		return System.out;
+	}
+	
+	public static PrintStream getCurrentErrorStream() {
+		return System.err;
+	}
+	
+	public static PrintStream getStdOutputStream() {
+		return _stdOutStream;
+	}
+	
+	public static PrintStream getStdErrorStream() {
+		return _stdErrStream;
+	}
+	
+	public static boolean isRedirected() {
+		return _outputRedirected;
 	}
 
 }
