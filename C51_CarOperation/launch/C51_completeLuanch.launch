@@ -3,14 +3,14 @@
 <include file="$(find atlas_utils)/launch/atlas_drc_vehicle_fire_hose.launch" />
 
 <!-- Start Drive Init server -->
-<node name="InitDrive_server" pkg="C51_CarOperation" type="DRC_Vehicle_Init_server.py" />
+<node name="InitDrive" pkg="C51_CarOperation" type="DRC_Vehicle_Init_server.py" />
 
 <!-- Start Drive Init server -->
-<node name="Drive_server" pkg="C51_CarOperation" type="DRC_Vehicle_Drive_server.py" />
+<node name="WayPointsDriving" pkg="C51_CarOperation" type="DRC_Vehicle_Drive_server.py" />
 
 
 <!-- Start Drive Finish server -->
-<node name="FinishDrive_server" pkg="C51_CarOperation" type="DRC_Vehicle_Finish_server.py" />
+<node name="FinishDrive" pkg="C51_CarOperation" type="DRC_Vehicle_Finish_server.py" />
 
 </launch>
   

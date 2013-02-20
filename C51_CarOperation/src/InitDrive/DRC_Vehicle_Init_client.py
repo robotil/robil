@@ -7,14 +7,14 @@ import C51_CarOperation.msg
 def InitDrive_client():
     # Creates the SimpleActionClient, passing the type of the action
     # (FibonacciAction) to the constructor.
-    client = actionlib.SimpleActionClient('InitDrive_server', C51_CarOperation.msg.InitDriveAction)
+    client = actionlib.SimpleActionClient('InitDrive', C51_CarOperation.msg.DriveAction)
 
     # Waits until the action server has started up and started
     # listening for goals.
     client.wait_for_server()
 
     # Creates a goal to send to the action server.
-    goal = C51_CarOperation.msg.InitDriveGoal(1)
+    goal = C51_CarOperation.msg.DriveGoal(name='moshe',uid='5',parameters='xyz')
 
     # Sends the goal to the action server.
     client.send_goal(goal)
@@ -23,7 +23,7 @@ def InitDrive_client():
     client.wait_for_result()
 
     # Prints out the result of executing the action
-    return client.get_result()  # A FibonacciResult
+    return client.get_result()  
 
 if __name__ == '__main__':
     try:

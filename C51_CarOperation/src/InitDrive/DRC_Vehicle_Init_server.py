@@ -11,12 +11,12 @@ from geometry_msgs.msg import Pose
 
 
 class InitDrive(object):
-    _feedback = C51_CarOperation.msg.InitDriveFeedback()
-    _result   = C51_CarOperation.msg.InitDriveResult()
+    _feedback = C51_CarOperation.msg.DriveFeedback()
+    _result   = C51_CarOperation.msg.DriveResult()
     
     def __init__(self, name):    
         self._action_name = name
-        self._as = actionlib.SimpleActionServer(self._action_name, C51_CarOperation.msg.InitDriveAction, execute_cb=self.InitDriveCallback, auto_start=False)
+        self._as = actionlib.SimpleActionServer(self._action_name, C51_CarOperation.msg.DriveAction, execute_cb=self.InitDriveCallback, auto_start=False)
         self._as.start()
     
     def InitDriveCallback(self, goal):
@@ -27,7 +27,7 @@ class InitDrive(object):
             self._as.set_preempted()
             success = False
             
-        if goal.PerformJob:
+        if success:
             #DRC Vehicles controllers online - should be replaced with C67 module
             hb=handB()         #handbrake online
             gasP=Gas() #gas pedal online
@@ -35,12 +35,14 @@ class InitDrive(object):
             Steer=SW()      #steering wheel online
             # - Press on brake - and release handbrake
             brakeP.brake(0)
+
+            self._feedback.complete = 50
             hb.releaseHB()     #release handbrake
-            self._feedback.HandBrake = 1
-            self._feedback.SteeringWheel = 1
-            self._feedback.GasPedal = 1
-            self._feedback.BrakePedal = 1
-            self._result.Success = 1
+
+            self._feedback.complete = 100
+            self._result.success = 0
+            self._result.description = "init car"
+            self._result.plan = "init car"
             
             self._as.publish_feedback(self._feedback)
         if success:
@@ -109,7 +111,7 @@ class SW:
 
 if __name__ == '__main__':
     try:
-        rospy.init_node('InitDrive_server')
+        rospy.init_node('InitDrive')
         InitDrive(rospy.get_name())   
         rospy.spin()
     except rospy.ROSInterruptException: 
