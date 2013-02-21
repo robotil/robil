@@ -11,9 +11,9 @@
 
 
 static GPSPoint extractObjectLocation(const C23_ObjectRecognition::C23C0_ODIM & msg ){
-// 	GPSPoint gps(msg.x,msg.y);
-	//TODO: write real code for extractObjectLocation(C23_ObjectRecognition::C23C0_ODIM)
-	GPSPoint gps(0,0);
+ 	GPSPoint gps(msg.x,msg.y);
+	//ODO: write real code for extractObjectLocation(C23_ObjectRecognition::C23C0_ODIM)
+	//GPSPoint gps(0,0);
 	return gps;
 };
 static bool isObjectDetected(const C23_ObjectRecognition::C23C0_OD & msg ){
