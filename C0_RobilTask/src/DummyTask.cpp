@@ -121,9 +121,10 @@ int main(int argc, char **argv)
 		return 0;
 	}
 	
-	ROS_INFO("Start DummyTaskNode with Task %s", argv[1]);
+	stringstream snodename; snodename<<"DummyTaskNode_"<<time(NULL);
+	ROS_INFO("Start %s with Task %s", snodename.str().c_str(),argv[1]);
 	
-	ros::init(argc, argv, "DummyTaskNode");
+	ros::init(argc, argv, snodename.str().c_str());
 	ros::NodeHandle node;
 	
 	ROS_INFO("craete task");
