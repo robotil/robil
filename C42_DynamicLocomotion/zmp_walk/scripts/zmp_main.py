@@ -417,7 +417,7 @@ while not rospy.is_shutdown():
               # completed start steps (pre_step + first_step)
               step_done = 1
               steps_count = steps_count + 1
-              D = step_length
+              D = out.com_ref.x+step_length/2#step_length
               rospy.loginfo("done first step, number = %d, walk = %d" % (steps_count, ns.walk) )
               rospy.loginfo("time:")
               rospy.loginfo(rospy.get_time())
@@ -450,7 +450,7 @@ while not rospy.is_shutdown():
                 # completed a full step
                 step_done = 1
                 steps_count = steps_count + 1
-                D = D + step_length
+                D = out.com_ref.x+step_length/2#D + step_length##############################################################
                 rospy.loginfo("done step number = %d" % (steps_count) )
                 rospy.loginfo("time:")
                 rospy.loginfo(rospy.get_time())
