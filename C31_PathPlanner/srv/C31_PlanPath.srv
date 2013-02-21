@@ -1,0 +1,7 @@
+C31_PathPlanner/C31_Map map
+C31_PathPlanner/C31_Location start
+C31_PathPlanner/C31_Location destination
+C31_PathPlanner/C31_Constraints constraints
+uint8 algorithm
+---
+C31_PathPlanner/C31_Waypoints path

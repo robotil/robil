@@ -28,10 +28,10 @@ ExeStack::ExeStack(std::string title, Ref parent):
 	changed(OnChangeCallback_CHILD_ADDED, _title);
 }
 
-void ExeStack::remove(){ if(!mtx) return;
+void ExeStack::remove(const std::string& res_desc){ if(!mtx) return;
 	boost::mutex::scoped_lock l(*mtx);
 	if(_children.size()>0) throw ExeStackException("ExeStack::remove. attempt to destroy not terminal item.");
-	changed(OnChangeCallback_CHILD_REMOVED, _title);
+	changed(OnChangeCallback_CHILD_REMOVED, _title+"($"+res_desc+"$)");
 	if(isRoot()==false){
 		Ref self = ref();
 		_parent->removeChild(this);

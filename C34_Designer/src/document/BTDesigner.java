@@ -19,6 +19,9 @@ import javax.swing.JTabbedPane;
 
 import javax.swing.KeyStroke;
 import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
+
+import logger.LogManager;
 
 import org.w3c.dom.Element;
 import org.xml.sax.SAXException;
@@ -143,21 +146,29 @@ public class BTDesigner extends JFrame {
 	}
 
 	public static void main(String[] args) {
-		org.w3c.dom.Document doc = null;
+		
+		LogManager.redirectStandardAndErrorOutput("std_err_output.txt");
+		
+//		org.w3c.dom.Document doc = null;
+//		try {
+//			doc = DocumentBuilderFactory.newInstance().newDocumentBuilder()
+//					.parse(new File("BTDesigner.xml"));
+//		} catch (javax.xml.parsers.ParserConfigurationException ex) {
+//			ex.printStackTrace();
+//		} catch (SAXException ex) {
+//			ex.printStackTrace();
+//		} catch (IOException ex) {
+//			ex.printStackTrace();
+//		}
+//		Element el = (Element) (doc.getElementsByTagName("test_time").item(0));
+//		Parameters.test_time = Integer.parseInt(el.getAttribute("value"));
+//		el = (Element) (doc.getElementsByTagName("test_result").item(0));
+//		Parameters.test_result = Boolean.parseBoolean(el.getAttribute("value"));
 		try {
-			doc = DocumentBuilderFactory.newInstance().newDocumentBuilder()
-					.parse(new File("BTDesigner.xml"));
-		} catch (javax.xml.parsers.ParserConfigurationException ex) {
-			ex.printStackTrace();
-		} catch (SAXException ex) {
-			ex.printStackTrace();
-		} catch (IOException ex) {
-			ex.printStackTrace();
+			PropertiesXmlHandler.loadAndSetProperties();
+		} catch (Exception e) {
+			e.printStackTrace();
 		}
-		Element el = (Element) (doc.getElementsByTagName("test_time").item(0));
-		Parameters.test_time = Integer.parseInt(el.getAttribute("value"));
-		el = (Element) (doc.getElementsByTagName("test_result").item(0));
-		Parameters.test_result = Boolean.parseBoolean(el.getAttribute("value"));
 
 		BTDesigner btd = new BTDesigner();
 		btd.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);

@@ -14,6 +14,7 @@ import tf
 import roslib;
 from pylab import *
 from numpy import *
+from IKException import IKReachException
 #import scipy as Sci
 #import scipy.linalg   
 
@@ -51,7 +52,8 @@ def swing_leg_ik(swing_foot,swing_hip,pelvis_m):
                         
                         [-sin(swing_foot.p), cos(swing_foot.p)*sin(swing_foot.r),cos(swing_foot.p)*cos(swing_foot.r)]])
 
-    des_pos = dot(linalg.inv(Rrpw_pelvis_m),(xankle-xhip))
+    #des_pos = dot(linalg.inv(Rrpw_pelvis_m),(xankle-xhip))
+    des_pos = (xankle-xhip)
     
     
     swing_x = des_pos[0]
@@ -63,7 +65,11 @@ def swing_leg_ik(swing_foot,swing_hip,pelvis_m):
 
        L1 = swing_x**2+swing_y**2+swing_z**2
        L = round(L1,5)
-       kny = math.acos(round((L-l1**2-l2**2),3)/round((2*l1*l2),3))
+       #kny = math.acos(round((L-l1**2-l2**2),3)/round((2*l1*l2),3))
+       des_cos_qky = round((L-l1**2-l2**2),3)/round((2*l1*l2),3);
+       cos_qky = max(min(0.9998,des_cos_qky),-0.9998)
+       kny = math.acos(cos_qky);
+
        mhx = math.atan2(swing_y,-swing_z) # math.atan2(-swing_y,swing_z) - math.pi # gave angle of 6.28 insted of 0
        ztilda = swing_z*math.cos(mhx) - swing_y*math.sin(mhx)
        cosinus = round(- (l1*ztilda+l2*math.cos(kny)*ztilda+swing_x*l2*math.sin(kny))/(swing_x**2+ztilda**2),3)
@@ -95,10 +101,10 @@ def swing_leg_ik(swing_foot,swing_hip,pelvis_m):
 
        
     else:
-
-       rospy.loginfo("swing leg is out of reach") 
-
-       rospy.loginfo("swing_x = %f, swing_y = %f, swing_z = %f" %  (swing_x, swing_y, swing_z) ) 
+      raise IKReachException('swing',[swing_x,swing_y,swing_z])
+      return
+       # rospy.loginfo("swing leg is out of reach") 
+       # rospy.loginfo("swing_x = %f, swing_y = %f, swing_z = %f" %  (swing_x, swing_y, swing_z) ) 
     
     res = [mhx,lhy,uhz,kny,lax,uay]
     #rospy.loginfo("SwingAngl : mhx[0] = %f, lhy[1] = %f, uhz[2] = %f, kny[3] = %f, lax[4] = %f, uay[5] = %f" % (res[0], res[1], res[2], res[3], res[4], res[5]) )
@@ -172,8 +178,9 @@ def stance_leg_ik(stance_hip,pelvis_d):
 
  
     else:
-
-        rospy.loginfo("stance leg is out of reach") 
+        raise IKReachException('stance',[hip_x,hip_y,hip_z])
+        # rospy.loginfo("stance leg is out of reach") 
+        return
      
    
     res = [mhx,lhy,uhz,kny,lax,uay]

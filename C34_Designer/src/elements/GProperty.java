@@ -17,6 +17,18 @@ public class GProperty {
 	public boolean test_result=Parameters.test_result;
 	
 	public boolean running=false;
+	
+	public GProperty clone(){
+		GProperty p = new GProperty();
+		p.loc = new Vec(loc);
+		p.heading= heading;
+		p.size = new Vec(size);
+		p.selected = selected;
+		p.collapsed = collapsed;
+		p.test_result = test_result;
+		p.test_time = test_time;
+		return p;
+	}
 
 	public void setXml(Element xml) {
 		

@@ -22,42 +22,81 @@ import roslib; roslib.load_manifest('leg_ik')
 # from leg_ik.srv import *
 # from leg_ik.msg import *
 from std_msgs.msg import Float64
-from sensor_msgs.msg import JointState
+from sensor_msgs.msg import *
 from zmp_walk.msg import walking_trajectory
 import rospy, math, sys
 from Impedance_Control import Joint_Stiffness_Controller
 from pylab import *
 from leg_ik_func import swing_leg_ik,stance_leg_ik
-
+from IKException import IKReachException
+from geometry_msgs.msg import *
+import copy
+from Impedance_Control import Position_Stiffness_Controller
 class Nasmpace: pass
 ns = Nasmpace()
 #ns.LegAng = LegIkResponse()
 
-JSC_l_leg_lax = Joint_Stiffness_Controller('l_leg_lax', 4000, 1) # joint name, stiffness, update_period [sec]
-JSC_l_leg_mhx = Joint_Stiffness_Controller('l_leg_mhx', 8000, 1) # joint name, stiffness, update_period [sec]
-JSC_r_leg_lax = Joint_Stiffness_Controller('r_leg_lax', 4000, 1) # joint name, stiffness, update_period [sec]
-JSC_r_leg_mhx = Joint_Stiffness_Controller('r_leg_mhx', 8000, 1) # joint name, stiffness, update_period [sec]
-
+PSC_right_swing_leg = Position_Stiffness_Controller('R_Swing Leg', 50000, True, False) # name, stiffness, triggered_controller, bypass_input2output [True/False]
+PSC_left_swing_leg = Position_Stiffness_Controller('L_Swing Leg', 30000, True, False) # name, stiffness, triggered_controller, bypass_input2output [True/False]
 
 # swing_leg_ik = rospy.ServiceProxy('swing_leg_ik', LegIk)
 # stance_leg_ik = rospy.ServiceProxy('stance_leg_ik', LegIk)
+
+
+##########################################################################################
+# request from foot contact publisher to update Position Stiffness Controllers avg force #
+##########################################################################################
+
+def get_r_foot_contact(msg):
+    
+    PSC_right_swing_leg.UpdateForce(msg.force.z)
+    
+    #rospy.loginfo("Stiffness Controllers joint state updated ")  
+
+def get_l_foot_contact(msg):
+    
+    PSC_left_swing_leg.UpdateForce(msg.force.z) 
 
 #################################################################################
 #                     request from IK and publish angles                        #
 #################################################################################
 
 def get_from_zmp(msg):
-   
-    if ( msg.step_phase == 1 ) or ( msg.step_phase == 2 ): # left leg is stance
-        # [mhx,lhy,uhz,kny,lax,uay]
-        right_leg_angles = swing_leg_ik(msg.swing_foot,msg.swing_hip,msg.pelvis_m)
-        left_leg_angles = stance_leg_ik(msg.stance_hip,msg.pelvis_d)
-    elif ( msg.step_phase == 3 ) or ( msg.step_phase == 4 ): # right leg is stance
-        # [mhx,lhy,uhz,kny,lax,uay]
-        left_leg_angles = swing_leg_ik(msg.swing_foot,msg.swing_hip,msg.pelvis_m)
-        right_leg_angles = stance_leg_ik(msg.stance_hip,msg.pelvis_d)
+    try:
+        ## Desired Force Profile on swing leg
+        half_robot_weight = 864.75/2 # units [N], half robots weight without feet
+        com_y_max = 0.085    #step_width  = 0.171/2         #0.095 # maximal movement of COM in y direction
+        min_support_force = 200 # minimal weight that we want to keep on swing leg while shifting weight to stance leg
+        desired_normal_force = half_robot_weight - abs(msg.com_ref.y/com_y_max) * (half_robot_weight - min_support_force)
 
-    
+        if ( msg.step_phase == 1 ) or ( msg.step_phase == 2 ): # left leg is stance
+            # [mhx,lhy,uhz,kny,lax,uay]
+            # PSC_left_swing_leg.ByPassON()# bypass controller
+            # PSC_right_swing_leg.ByPassOFF()
+            # swing_fixed = copy.deepcopy(msg.swing_foot)
+            # swing_fixed.z = PSC_right_swing_leg.getCMD(msg.swing_foot.z, desired_normal_force)  
+            
+            # right_leg_angles = swing_leg_ik(swing_fixed,msg.swing_hip,msg.pelvis_m)
+            right_leg_angles = swing_leg_ik(msg.swing_foot,msg.swing_hip,msg.pelvis_m)
+            left_leg_angles = stance_leg_ik(msg.stance_hip,msg.pelvis_d)
+        elif ( msg.step_phase == 3 ) or ( msg.step_phase == 4 ): # right leg is stance
+            # [mhx,lhy,uhz,kny,lax,uay]
+            # PSC_right_swing_leg.ByPassON()  # bypass controller
+            # PSC_left_swing_leg.ByPassOFF()
+            # swing_fixed = copy.deepcopy(msg.swing_foot)
+            # swing_fixed.z = PSC_left_swing_leg.getCMD(msg.swing_foot.z, desired_normal_force) 
+
+            # left_leg_angles = swing_leg_ik(swing_fixed,msg.swing_hip,msg.pelvis_m)
+            left_leg_angles = swing_leg_ik(msg.swing_foot,msg.swing_hip,msg.pelvis_m)
+            right_leg_angles = stance_leg_ik(msg.stance_hip,msg.pelvis_d)
+
+    except IKReachException as exc:
+        rospy.loginfo('IKException: %s leg is out of reach, req pos: %f ,%f, %f',exc.foot,exc.requested_pos[0],exc.requested_pos[1],exc.requested_pos[2])
+        return
+
+
+
+        
     ns.l_leg_lax.publish( left_leg_angles[4] ) #JSC_l_leg_lax.getCMD(ns.LegAng.ang.lax) )
     ns.l_leg_uay.publish( left_leg_angles[5] )
     ns.l_leg_kny.publish( left_leg_angles[3] )
@@ -87,24 +126,20 @@ def get_from_zmp(msg):
 # request from joint_states publisher joints state to update Stiffness Controllers state #
 ##########################################################################################
 
-def get_joint_states(msg):
+# def get_joint_states(msg):
     
-    if JSC_l_leg_lax.JS_i == -1: # Update joint state indexs if not updated
-        try:
-            JSC_l_leg_lax.JS_i = msg.name.index(JSC_l_leg_lax.name)       
-            JSC_l_leg_mhx.JS_i = msg.name.index(JSC_l_leg_mhx.name)        
-            JSC_r_leg_lax.JS_i = msg.name.index(JSC_r_leg_lax.name)        
-            JSC_r_leg_mhx.JS_i = msg.name.index(JSC_r_leg_mhx.name)
+#     if JSC_l_leg_lax.JS_i == -1: # Update joint state indexs if not updated
+#         try:
+#             JSC_l_leg_lax.JS_i = msg.name.index(JSC_l_leg_lax.name)       
+#             JSC_l_leg_mhx.JS_i = msg.name.index(JSC_l_leg_mhx.name)        
+#             JSC_r_leg_lax.JS_i = msg.name.index(JSC_r_leg_lax.name)        
+#             JSC_r_leg_mhx.JS_i = msg.name.index(JSC_r_leg_mhx.name)
         
-        except rospy.ROSInterruptException: pass
-        else:
-            rospy.loginfo(" update Stiffness Controllers JS_i - successful")
+#         except rospy.ROSInterruptException: pass
+#         else:
+#             rospy.loginfo(" update Stiffness Controllers JS_i - successful")
 
-    JSC_l_leg_lax.UpdateState(msg.position[JSC_l_leg_lax.JS_i], msg.velocity[JSC_l_leg_lax.JS_i], msg.effort[JSC_l_leg_lax.JS_i], msg.header.stamp)
-    JSC_l_leg_mhx.UpdateState(msg.position[JSC_l_leg_mhx.JS_i], msg.velocity[JSC_l_leg_mhx.JS_i], msg.effort[JSC_l_leg_mhx.JS_i], msg.header.stamp)
-    JSC_r_leg_lax.UpdateState(msg.position[JSC_r_leg_lax.JS_i], msg.velocity[JSC_r_leg_lax.JS_i], msg.effort[JSC_r_leg_lax.JS_i], msg.header.stamp)
-    JSC_r_leg_mhx.UpdateState(msg.position[JSC_r_leg_mhx.JS_i], msg.velocity[JSC_r_leg_mhx.JS_i], msg.effort[JSC_r_leg_mhx.JS_i], msg.header.stamp)
-    #rospy.loginfo("Stiffness Controllers joint state updated ")   
+#     #rospy.loginfo("Stiffness Controllers joint state updated ")   
 
 #######################################################################################
 #                                 init publishers                                     #
@@ -135,6 +170,9 @@ def LEG_IK():
     ns.back_ubx = rospy.Publisher('/back_ubx_position_controller/command', Float64)
     ns.back_lbz = rospy.Publisher('/back_lbz_position_controller/command', Float64)
 
+    r_cont_sub = rospy.Subscriber('/atlas/r_foot_contact', Wrench, get_r_foot_contact)
+    l_cont_sub = rospy.Subscriber('/atlas/l_foot_contact', Wrench, get_l_foot_contact)
+
     rospy.loginfo( "LEG_IK node is ready" )
 
     rospy.loginfo( "waiting 1 seconds for robot to initiate" )
@@ -143,7 +181,7 @@ def LEG_IK():
 
 
     sub1=rospy.Subscriber("zmp_out", walking_trajectory, get_from_zmp) # traj, get_from_zmp)
-    sub2=rospy.Subscriber("joint_states", JointState, get_joint_states)
+
 
     rospy.spin()
 

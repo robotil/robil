@@ -6,6 +6,7 @@ import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.Graphics2D;
 import java.awt.Point;
+import java.util.Map;
 
 import javax.swing.Icon;
 import javax.swing.JOptionPane;
@@ -136,4 +137,16 @@ public class Decorator extends GElement implements ArrayElement, View.ChangesLis
 		property.size = new Vec(getTextSize(view.graphics, font, text)).add(new Vec(10,10));
 	}
 	
+	@Override
+	public GElement clone() {
+		Decorator n = new Decorator();
+		cloneInit(n);
+		n.array = array;
+		return n;
+	}
+
+	@Override
+	public void cloneReconnect(Map<GElement, GElement> link) {
+		array = (Arrow) link.get(array);
+	}
 }

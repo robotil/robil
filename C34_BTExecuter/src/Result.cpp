@@ -17,6 +17,7 @@ void Result::print(Logger& cout){
 		cout<<tab;
 		r->_info.printFullName(cout);
 		cout<<":"<<(r->_val?"OK":"FAILURE");
+		if(r->_val==false)cout<<"("<<_error_code<<")";
 		if( r->_info.error_desc().length()>0){
 			cout<<":"; r->_info.printShortDescription(cout, leanthOfDescription);
 		}
@@ -37,6 +38,7 @@ void Result::print(std::ostream& cout){
 		cout<<tab;
 		r->_info.printFullName(cout);
 		cout<<":"<<(r->_val?"OK":"FAILURE");
+		if(r->_val==false)cout<<"("<<_error_code<<")";
 		if( r->_info.error_desc().length()>0){
 			cout<<":"; r->_info.printShortDescription(cout, leanthOfDescription);
 		}
@@ -51,6 +53,28 @@ void Result::print(std::ostream& cout){
 	}
 }
 
+void Result::printTop(Logger& cout){
+	Result* r = this;
+	std::string tab="";
+	cout<<tab;
+	r->_info.printFullName(cout);
+	cout<<":"<<(r->_val?"OK":"FAILURE");
+	if(r->_val==false)cout<<"("<<_error_code<<")";
+	if( r->_info.error_desc().length()>0){
+		cout<<":"; r->_info.printShortDescription(cout, leanthOfDescription);
+	}
+}
+void Result::printTop(std::ostream& cout){
+	Result* r = this;
+	std::string tab="";
+	cout<<tab;
+	r->_info.printFullName(cout);
+	cout<<":"<<(r->_val?"OK":"FAILURE");
+	if(r->_val==false)cout<<"("<<_error_code<<")";
+	if( r->_info.error_desc().length()>0){
+		cout<<":"; r->_info.printShortDescription(cout, leanthOfDescription);
+	}
+}
 
 
 

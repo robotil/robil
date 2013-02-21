@@ -3,6 +3,4 @@ C24_ObstacleDetection/C0C24_CAM camera_sample_rate
 C24_ObstacleDetection/C0C24_LAZ laser_sample_rate
 C24_ObstacleDetection/C0C24_SIZ minimum_obstacle_size
 ---
-C24_ObstacleDetection/C24C0_OD objectDetected
-C24_ObstacleDetection/C24C0_OPO objectPossition
-C24_ObstacleDetection/C24C0_ODIM objectDimensions
+C24_ObstacleDetection/C24C0_PATH map

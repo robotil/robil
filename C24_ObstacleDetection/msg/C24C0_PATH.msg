@@ -1,0 +1,1 @@
+C24_ROW_TYPE[] row
