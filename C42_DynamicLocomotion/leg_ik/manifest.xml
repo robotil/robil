@@ -13,6 +13,7 @@
   <depend package="control_msgs"/>
   <depend package="std_msgs"/>
   <depend package="zmp_walk"/>
+  <depend package="DRCSim2_tools"/>
 
 </package>
 
