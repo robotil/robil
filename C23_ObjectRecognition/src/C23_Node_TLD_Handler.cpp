@@ -17,6 +17,8 @@ static int drag = 0;
 C23_Node_TLD_Handler::C23_Node_TLD_Handler(TldMode mode, const char* modelPath) {
     _mode = NOT_INITIALIZED;
     tld = new tld::TLD();
+    tld->learningEnabled = true;
+    _modelPath = modelPath;
     
     
     _initialBB = NULL;
@@ -63,7 +65,7 @@ TldRetval C23_Node_TLD_Handler::init(IplImage* img) {
         _initialBB[3] = box.height;
     
     }
-
+   
     //FILE *resultsFile = NULL;
 
     //if(printResults != NULL)
@@ -76,6 +78,7 @@ TldRetval C23_Node_TLD_Handler::init(IplImage* img) {
     
     if(_mode ==TRACKING && _modelPath != NULL)
     {
+        ROS_INFO("Loading model..\n");
         tld->readFromFile(_modelPath);
         reuseFrameOnce = true;
     }
@@ -104,13 +107,19 @@ TldRetval C23_Node_TLD_Handler::saveCurrentModel(const char* path) {
 }
 
 TldRetval C23_Node_TLD_Handler::processFrame(IplImage* img, int *x, int *y, int *width, int *height, float *confident) {
+
+
     double tic = cvGetTickCount();
-    static int count = 0;
     Mat grey(img->height, img->width, CV_8UC1);
 
     cvtColor(cv::Mat(img), grey, CV_BGR2GRAY);
     tld->processImage(img);
-
+    char key = cvWaitKey(10);
+    if(key == 's') {
+        tld->writeToFile(_modelPath);
+        ROS_INFO("Saving!\n");
+        
+    }
 /*
         if(printResults != NULL)
         {
@@ -156,14 +165,15 @@ TldRetval C23_Node_TLD_Handler::processFrame(IplImage* img, int *x, int *y, int 
              CvScalar rectangleColor = (confident) ? blue : yellow;
              cvRectangle(img, tld->currBB->tl(), tld->currBB->br(), rectangleColor, 8, 8, 0);
         }
-        if(count % 100 == 0) {
-            //cvDestroyWindow(_window);
-            //cvNamedWindow("majd",CV_WINDOW_AUTOSIZE );
-            //cvShowImage("majd", img);
-            count = 0;
-            ROS_INFO("Updating window .. \n");
-        }
-        count++;
+     
+///////    My adding   /////////////////////
+
+img1 = (IplImage *) cvClone(img);
+cvShowImage("Image window", img1);
+cvReleaseImage(&img1);
+
+///////////////////////////////////////////
+
         
          return SUCCESS;
 }
