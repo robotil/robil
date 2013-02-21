@@ -191,7 +191,9 @@ def P2P(Distance, dOrientation):
                 SpeedArea+=Area
                 SpeedMoment+=Area*CM
         
-        speed=SpeedMoment/SpeedArea
-        CircularSpeed=CSpeedMoment/CSpeedArea
+	if SpeedArea!=0:
+           speed=SpeedMoment/SpeedArea
+        if CSpeedArea!=0:
+	   CircularSpeed=CSpeedMoment/CSpeedArea
         #print "Moment %f Area %f" %(CSpeedMoment, CircularSpeedArea)
         return [speed, CircularSpeed] 
