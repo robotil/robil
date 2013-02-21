@@ -9,6 +9,8 @@ import java.util.Map;
 
 import javax.swing.Icon;
 
+import elements.tasks.Task;
+
 public class Arrow extends GElement {
 
 	public interface ArrayElement {
@@ -191,12 +193,12 @@ public class Arrow extends GElement {
 	}
 
 	@Override
-	Vec getLocation() {
+	protected Vec getLocation() {
 		return this.source.getCenter();
 	}
 
 	@Override
-	Vec getSize() {
+	protected Vec getSize() {
 		if (this.targets.size() < 1)
 			return new Vec(0, 0);
 		return this.targets.get(this.targets.size() - 1).getCenter()

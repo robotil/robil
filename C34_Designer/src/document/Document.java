@@ -21,7 +21,6 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
-import java.util.Random;
 import java.util.Set;
 import java.util.UUID;
 
@@ -38,6 +37,7 @@ import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
 import terminal.communication.StackStreamMessage;
+import terminal.communication.StopStreamMessage;
 
 import document.actions.Dialogs;
 import document.description.TaskDescription;
@@ -48,9 +48,10 @@ import elements.Decorator;
 import elements.GElement;
 import elements.Joint;
 import elements.Modifier;
-import elements.Task;
 import elements.Vec;
 import elements.View;
+import elements.tasks.Task;
+import elements.tasks.TaskCreator;
 
 public class Document extends JPanel {
 
@@ -374,7 +375,7 @@ public class Document extends JPanel {
 	}
 	
 	public void createTask() {
-		GElement el = new Task.Creator().newInstance();
+		GElement el = new TaskCreator().newInstance();
 		el.setView(Document.this.view);
 		
 		if (el.isTask()) {
@@ -1334,8 +1335,20 @@ public class Document extends JPanel {
 		if (task == null)
 			return;
 		
-		task.addRunResult(message.getTaskResultCode(), message.getTaskResultDescription());
+		task.onMessageReceive(message);
 		repaint();
+	}
+	
+	public void onRun() {
+		
+	}
+	
+	public void onPause() {
+		
+	}
+	
+	public void onStop(StopStreamMessage message) {
+		Log.i("STOPSTREAM", message.toString());
 	}
 	
 	public Task findTaskById(String taskId) {
@@ -1391,6 +1404,7 @@ public class Document extends JPanel {
 			this.view.graphics = g2d;
 			riceOnViewChange();
 		}
+		
 		renumberElements(this.elements);
 		hideCollapsed();
 		paintElement(g2d, this.arrays);
@@ -1571,12 +1585,16 @@ public class Document extends JPanel {
 	public void setRunning(ArrayList<String> ids) {
 		if(Parameters.log_print_running_tasks_id)
 			Log.d("Select running tasks:");
+		
 		for (GElement e : this.elements){
+			
 			if(Parameters.log_print_running_tasks_id)
 				System.out.print("  select as running : "+ids+". ");
+			
 			if (ids.contains(e.id.toString())) {
 				if(Parameters.log_print_running_tasks_id)
 					Log.d("id="+e.id+" found.");
+				
 				e.getProperty().running = true;
 			}else{
 				if(Parameters.log_print_running_tasks_id)
