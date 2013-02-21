@@ -1,8 +1,0 @@
-<plan descriptions="./plans/TaskDescriptions.xml">
-   <par name="Noname"> 
-      <dec name="!L!"> 
-            <tsk name="Noname1" />
-      </dec>
-         <tsk name="Noname2" />
-   </par>
-</plan>

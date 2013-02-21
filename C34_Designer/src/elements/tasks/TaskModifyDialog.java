@@ -121,7 +121,7 @@ class ModifyDialog extends JDialog {
 
 					if (_task.type.equalsIgnoreCase(Task.TYPE_task)
 							&& _task.getTaskDescriptionProvider() != null) {
-						TaskDescription.Task updateTask = new TaskDescription.Task();
+						TaskDescription.TaskInfo updateTask = new TaskDescription.TaskInfo();
 						updateTask.algorithm = ModifyDialog.this.txtTaskDescAlgoritm
 								.getText();
 						_task.getTaskDescriptionProvider().put(
@@ -144,7 +144,7 @@ class ModifyDialog extends JDialog {
 
 				String typedText = _task.getNameWithoutParameters(ModifyDialog.this.txtName
 						.getText());
-				TaskDescription.Task taskDesc = _task.getTaskDescriptionProvider().get(typedText);
+				TaskDescription.TaskInfo taskDesc = _task.getTaskDescriptionProvider().get(typedText);
 
 				if (ModifyDialog.this.descriptionChanged
 						&& !ModifyDialog.this.txtTaskDescAlgoritm.getText()
@@ -218,7 +218,7 @@ class ModifyDialog extends JDialog {
 			add(this.txtDbgResult);
 
 			if (_task.getTaskDescriptionProvider() != null) {
-				TaskDescription.Task taskDesc = _task.getTaskDescriptionProvider().get(_task.getNameWithoutParameters());
+				TaskDescription.TaskInfo taskDesc = _task.getTaskDescriptionProvider().get(_task.getNameWithoutParameters());
 
 				if (taskDesc != null)
 					this.txtTaskDescAlgoritm.setText(taskDesc.algorithm);

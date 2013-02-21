@@ -28,7 +28,7 @@ import org.w3c.dom.Text;
 import org.xml.sax.SAXException;
 
 public class TaskDescription {
-	static public class Task {
+	static public class TaskInfo {
 
 		public String conditions;
 		public String constraints;
@@ -154,8 +154,8 @@ public class TaskDescription {
 
 	static final String STR_NAME = "name";
 
-	public static ArrayList<Task> parseDocument(Document doc) {
-		ArrayList<Task> list = new ArrayList<Task>();
+	public static ArrayList<TaskInfo> parseDocument(Document doc) {
+		ArrayList<TaskInfo> list = new ArrayList<TaskInfo>();
 		final Element root = doc.getDocumentElement();
 		NodeList nl = null;
 		if (root.getNodeName().equals(STR_TASK_DESCRIPTON) == false)
@@ -179,7 +179,7 @@ public class TaskDescription {
 					.getElementsByTagName(STR_TASK);
 
 			for (int ii = 0; ii < nnl.getLength(); ii++) {
-				Task def = new Task();
+				TaskInfo def = new TaskInfo();
 				if (def.parse(nnl.item(ii))) {
 					list.add(def);
 				}
@@ -190,7 +190,7 @@ public class TaskDescription {
 
 	private String _fileName = "";
 
-	Map<String, Task> map = new HashMap<String, TaskDescription.Task>();
+	Map<String, TaskInfo> map = new HashMap<String, TaskDescription.TaskInfo>();
 
 	public TaskDescription() {
 	}
@@ -202,8 +202,8 @@ public class TaskDescription {
 		Document doc = dBuilder.parse(new File(fname));
 		doc.getDocumentElement().normalize();
 
-		ArrayList<Task> tasks = parseDocument(doc);
-		for (Task task : tasks) {
+		ArrayList<TaskInfo> tasks = parseDocument(doc);
+		for (TaskInfo task : tasks) {
 			this.map.put(task.name, task);
 		}
 
@@ -211,13 +211,13 @@ public class TaskDescription {
 	}
 
 	public void addTaskDescription(String taskName, String taskDescription) {
-		Task task = new Task();
+		TaskInfo task = new TaskInfo();
 		task.algorithm = taskDescription;
 		task.name = taskName;
 		this.map.put(taskName, task);
 	}
 
-	public Task get(String taskname) {
+	public TaskInfo get(String taskname) {
 		if (this.map.containsKey(taskname))
 			return this.map.get(taskname);
 		return null;
@@ -233,7 +233,7 @@ public class TaskDescription {
 		names.add("");
 		names.add(" ");
 
-		for (Task name : this.map.values())
+		for (TaskInfo name : this.map.values())
 			names.add(name.name);
 
 		return names;
@@ -242,7 +242,7 @@ public class TaskDescription {
 	public Vector<String> getNamesVector() {
 		Vector<String> names = new Vector<String>();
 
-		for (Task name : this.map.values())
+		for (TaskInfo name : this.map.values())
 			names.add(name.name);
 
 		return names;
@@ -255,15 +255,15 @@ public class TaskDescription {
 		Document doc = dBuilder.parse(new File(fname));
 		doc.getDocumentElement().normalize();
 
-		ArrayList<Task> tasks = parseDocument(doc);
-		for (Task task : tasks) {
+		ArrayList<TaskInfo> tasks = parseDocument(doc);
+		for (TaskInfo task : tasks) {
 			this.map.put(task.name, task);
 		}
 
 		this._fileName = new File(fname).getAbsolutePath();
 	}
 
-	public void put(String taskname, Task task) {
+	public void put(String taskname, TaskInfo task) {
 		task.name = taskname;
 		this.map.put(taskname, task);
 	}
@@ -279,7 +279,7 @@ public class TaskDescription {
 		Document doc = DocumentBuilderFactory.newInstance()
 				.newDocumentBuilder().newDocument();
 		Element root = doc.createElement(STR_TASK_DESCRIPTON);
-		for (Task task : this.map.values()) {
+		for (TaskInfo task : this.map.values()) {
 			root.appendChild(task.createXmlNode(doc));
 		}
 		doc.appendChild(root);
@@ -307,7 +307,7 @@ public class TaskDescription {
 	@Override
 	public String toString() {
 		String res = "Tasks Description:";
-		for (Task task : this.map.values()) {
+		for (TaskInfo task : this.map.values()) {
 			res += "\n" + task.toString();
 		}
 		return res;

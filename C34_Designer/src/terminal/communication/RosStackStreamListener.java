@@ -23,7 +23,7 @@ public class RosStackStreamListener implements Runnable {
 				processor, "echo", RosExecutor.STACK_STREAM);
 
 		try {
-			Log.d("Try to connect to ROS topic: "+RosExecutor.STACK_STREAM);
+			Log.i("STACKSTREAM", "Try to connect to ROS topic: " + RosExecutor.STACK_STREAM);
 			pipe.sendAndReceive();
 		} catch (IOException ex) {
 			Log.e("ROS COMMUNICATION CRITICAL ERROR: on listening to "

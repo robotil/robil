@@ -1,8 +1,0 @@
-<plan descriptions="./plans/TaskDescriptions.xml">
-   <par name="Noname" x="383.9615384615383" y="56.80769230769219" collapsed="false" id="f559798b-031f-458e-9022-c7169e9c8c24"> 
-      <dec name="!L!" x="221.4999999999995" y="89.26923076923066"> 
-            <tsk name="Noname1" x="197.96153846153828" y="203.80769230769218" test_time="0" test_result="true" id="36cb624a-20e1-4ab6-99ae-a88eedd87d25" />
-      </dec>
-         <tsk name="Noname2" x="533.9615384615383" y="167.80769230769218" test_time="0" test_result="true" id="0038035f-9387-4db2-b7d9-8b1d776f53f4" />
-   </par>
-</plan>

@@ -1,13 +1,8 @@
 package elements.tasks;
 
-import java.awt.BorderLayout;
-import java.awt.Color;
-import java.awt.Graphics;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
-import java.awt.Shape;
-import java.util.UUID;
 
 import javax.swing.JDialog;
 import javax.swing.JFrame;
@@ -17,32 +12,43 @@ import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.UIManager;
-import javax.swing.text.DefaultHighlighter;
-import javax.swing.text.Highlighter.HighlightPainter;
-import javax.swing.text.JTextComponent;
-import javax.swing.text.StyledDocument;
+
+import elements.tasks.TaskResultCollection.EventListener;
+import elements.tasks.TaskResultCollection.EventListenerArgs;
 
 public class TaskRunHistoryDialog extends JDialog {
 	private static final long serialVersionUID = -4309214496648164067L;
 	
 	private final Task _task;
+	private JTextArea _txtOutput;
 	
 	public TaskRunHistoryDialog(JFrame parent, Task task) {
 		this._task = task;
 		
 		build();
-		setModalityType(ModalityType.APPLICATION_MODAL);
+		// setModalityType(ModalityType.APPLICATION_MODAL);
 		
 		if (parent != null)
 			setLocationRelativeTo(parent);
 		else
 			setLocation(100, 100);
 		
+		setEventListener();
 		
 		setTitle("Task run history");
 		setDefaultCloseOperation(DISPOSE_ON_CLOSE);
 		setSize(600, 400);
 		setVisible(true);
+	}
+
+	private void setEventListener() {
+		_task.getRunResults().addEventListener(new TaskResultCollection.EventListener() {
+			@Override
+			public void onAdd(EventListenerArgs e) {
+				_txtOutput.append(e.taskResult.toString() + "\n");
+				_txtOutput.setCaretPosition(_txtOutput.getDocument().getLength());
+			}
+		});
 	}
 
 	private void build() {
@@ -83,25 +89,19 @@ public class TaskRunHistoryDialog extends JDialog {
 		c.weighty = 1;
 		
 		// TextArea
-		JTextArea txtOutput = new JTextArea();
+		_txtOutput = new JTextArea();
 		
-		txtOutput.setEditable(false);
+		_txtOutput.setEditable(false);
 		for (TaskResult result : _task.getRunResults())
-			txtOutput.append(result + "\n");
+			_txtOutput.append(result + "\n");
 		
 		// txtOutput.getHighlighter().addHighlight(0, 10, new DefaultHighlighter.DefaultHighlightPainter(Color.RED)));
 		
-		txtOutput.setCaretPosition(txtOutput.getDocument().getLength());
+		_txtOutput.setCaretPosition(_txtOutput.getDocument().getLength());
 
-		panel.add(new JScrollPane(txtOutput), c);
+		panel.add(new JScrollPane(_txtOutput), c);
 		
 		add(panel);
 	}
 	
-	public static void main(String[] args) {
-		Task task = new Task();
-		task.id = new UUID(123123123, 12312312);
-		
-		new TaskRunHistoryDialog(null, task);
-	}
 }
