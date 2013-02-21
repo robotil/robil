@@ -84,6 +84,7 @@ public class RunAction extends AbstractDesignerAction implements ActionListener 
 		Log.i("ROSACTION", "Set active tab id to " + id);
 		getActiveTab().setID(id);
 		this.designer.rosExecutor.runBehaviorTree(id, fileName);
+		this.designer.getMenubar().setRunView();
 	}
 
 	@SuppressWarnings("unused")

@@ -33,7 +33,6 @@ import elements.Arrow;
 import elements.Decorator;
 import elements.GElement;
 import elements.Joint;
-import elements.tasks.Task;
 import elements.tasks.TaskCreator;
 
 public class Toolbar extends JPanel {
@@ -325,5 +324,6 @@ public class Toolbar extends JPanel {
 		if (this._statusBarLabel != null)
 			this._statusBarLabel.setText(msg);
 	}
+
 
 }

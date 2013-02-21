@@ -555,23 +555,6 @@ public class Document extends JPanel {
 	public void copyTree(GElement el) {
 		onBeforeTreeChange(TreeChangeType.TreeCopy, el);
 
-//		el.setView(this.view);
-//		
-//		ArrayList<GElement> targets = searchAllSubelements(el);
-//		targets.add(el);
-//		
-//		HashMap<GElement, GElement> link = new HashMap<GElement, GElement>();
-//		for (GElement t : targets) {
-//			GElement n = t.clone();
-//			link.put(t, n);
-//			add(n);
-//			n.getProperty().loc = n.getProperty().loc.add(new Vec(10, 10));
-//			n.getProperty().leftClicked = false;
-//		}
-//		
-//		for (GElement t : targets) 
-//			link.get(t).cloneReconnect(link);
-		
 		ArrayList<GElement> sourceElements = new ArrayList<GElement>();
 		ArrayList<GElement> sourceArrows  = arrays;
 		ArrayList<GElement> outElements = new ArrayList<GElement>();
@@ -604,21 +587,6 @@ public class Document extends JPanel {
 	public void copyTree(GElement el, Document sourceDocument) {
 		onBeforeTreeChange(TreeChangeType.TreeCopy, el);
 
-//		ArrayList<GElement> targets = sourceDocument.searchAllSubelements(el);
-//		targets.add(el);
-//		
-//		HashMap<GElement, GElement> link = new HashMap<GElement, GElement>();
-//		for (GElement t : targets) {
-//			GElement n = t.clone();
-//			link.put(t, n);
-//			add(n);
-//			n.getProperty().loc = n.getProperty().loc.add(new Vec(10, 10));
-//			n.getProperty().leftClicked = false;
-//		}
-//		
-//		for (GElement t : targets) 
-//			link.get(t).cloneReconnect(link);
-		
 		ArrayList<GElement> sourceElements = new ArrayList<GElement>();
 		ArrayList<GElement> sourceArrows  = sourceDocument.arrays;
 		ArrayList<GElement> outElements = new ArrayList<GElement>();
@@ -1639,6 +1607,7 @@ public class Document extends JPanel {
 			@Override
 			public void run() {
 				ArrayList<String> cmd = new ArrayList<String>();
+				mainWindow.getMenubar().setDebugView();
 				if (OSValidator.isUnix()) {
 					String[] f1 = new String[] { "./BTExecuter-lin.exe",
 							"./BTExecuter-lin.bin", "./BTExecuter-lin.a",
