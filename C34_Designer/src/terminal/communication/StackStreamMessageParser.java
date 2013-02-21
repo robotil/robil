@@ -74,7 +74,7 @@ public class StackStreamMessageParser {
 	public static void main(String[] args) {
 		LogManager.redirectStandardAndErrorOutput("test_stdoutput.txt");
 		Log.d("Test message");
-		Log.e("Test message");
+		
 		Log.i("Test message");
 	}
 }

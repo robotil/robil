@@ -5,73 +5,20 @@ import java.io.IOException;
 import logger.Log;
 
 import terminal.communication.RosPipe.RosTargets;
-import terminal.lineprocessors.LineProcessor;
+import terminal.lineprocessors.StackStreamProcessor;
 import document.BTDesigner;
-import document.Document;
 
 public class RosStackStreamListener implements Runnable {
 
-	private class StackStreamProcessror implements LineProcessor {
-
-		private String buffer = "";
-		private StackStreamMessageParser _messageParser = new StackStreamMessageParser();
-
-		@Override
-		public void onEnd() {
-			
-		}
-
-		@Override
-		public void onNewLine(String line) {
-
-			
-			// end of message found: process the message data
-			if (line.contains("---")) {
-				StackStreamMessage message = new StackStreamMessage();
-				
-				String planID = this.buffer.substring(
-						"data: ExeStack: changed : ".length(), this.buffer.indexOf(" code="));
-
-				Document doc = 
-						RosStackStreamListener.this.designer.getDocumentOfRunningPlan(planID);
-
-				if (doc == null)
-					return;
-				
-				doc.cleanRunning();
-				doc.setRunning(Utils.getMatchedInstances(this.buffer, Utils.componentIdRegex));
-
-				if (_messageParser.tryParse(buffer, message)) {
-					doc.onMessageReceive(message);
-					Log.d("Message received: ");
-					Log.d(message.toString());
-				}
-				else {
-					Log.e("Failed to parse message from ros stack-stream\nBuffer: \n" + buffer + "\n\n===============================\n");
-				}
-				
-				this.buffer = "";
-				return;
-			}
-
-			this.buffer += line + '\n';
-		}
-
-		@Override
-		public void onStart() {
-		}
-
-	}
-
-	private BTDesigner designer;
+	private BTDesigner _designer;
 
 	public RosStackStreamListener(BTDesigner designer) {
-		this.designer = designer;
+		this._designer = designer;
 	}
 
 	@Override
 	public void run() {
-		StackStreamProcessror processor = new StackStreamProcessror();
+		StackStreamProcessor processor = new StackStreamProcessor(_designer);
 		RosPipe pipe = new RosPipe(Thread.currentThread(), RosTargets.Topic,
 				processor, "echo", RosExecutor.STACK_STREAM);
 

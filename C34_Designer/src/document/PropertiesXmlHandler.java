@@ -94,6 +94,8 @@ public class PropertiesXmlHandler {
 				Log.d("   "+key+" <- "+value);
 			}
 		}
+		
+		Parameters.onLoaded();
 	}
 
 	public static void saveToFile(String path) throws IOException,
@@ -142,5 +144,7 @@ public class PropertiesXmlHandler {
 				Log.d("   "+key+" <- "+value);
 			}
 		}
+		
+		Parameters.onChanged();
 	}
 }
