@@ -7,7 +7,8 @@
 *.slo
 *.lo
 *.o
-
+*.user
+atlas_urdf_test.xml
 # Compiled Dynamic libraries
 *.so
 !libBTExecuter.so
@@ -30,3 +31,4 @@ build/
 bin/
 msg_gen/
 srv_gen/
+

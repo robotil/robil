@@ -77,7 +77,7 @@ TestStabilityNode::TestStabilityNode(Kinematics::FootSupport support)
   com_pub_ = nh_private.advertise<CoM_Array_msg>("CoM", 1000); //Yuval added
   pcom_err_pub_ = nh_private.advertise<pCoM_err_msg>("pCoM_err", 1000); //Yuval added
 
-  joint_state_sub_ = nh_.subscribe("joint_states", 1000, &TestStabilityNode::jointStateCb, this);
+  joint_state_sub_ = nh_.subscribe("/atlas/joint_states", 1000, &TestStabilityNode::jointStateCb, this);
   support_mode_srv_ = nh2_.advertiseService("support_legs", &TestStabilityNode::FootSupport_func, this);  //Yuval added
   published_CoM_ = 1; // Yuval added
 
