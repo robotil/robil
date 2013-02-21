@@ -4,7 +4,7 @@
      C46_MountVehicle
 
   </description>
-  <author>biu</author>
+  <author>Dudi</author>
   <license>BSD</license>
   <review status="unreviewed" notes=""/>
   <url>http://ros.org/wiki/C46_MountVehicle</url>
@@ -13,7 +13,7 @@
   <depend package="roscpp"/>
   <depend package="tf"/>
   <depend package="C0_RobilTask"/>
-  <depend package="atlas_utils"/>
+  <depend package="osrf_msgs"/>
 </package>
 
 
