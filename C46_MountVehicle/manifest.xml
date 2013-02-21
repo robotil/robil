@@ -15,5 +15,3 @@
   <depend package="C0_RobilTask"/>
   <depend package="osrf_msgs"/>
 </package>
-
-
