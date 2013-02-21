@@ -22,16 +22,13 @@ public class Parameters {
 	public static int log_ros_progress_print_level = 0;
 	public static int log_preview_lines_limit=500;
 	public static boolean log_print_running_tasks_id=false;
-	
-	
+	public static String log_disabled_tags = "";
 	
 	public static boolean set(String key, String value) {
 		Class<Parameters> pclass = Parameters.class;
-		//Log.d("class name : "+pclass.getName());
+		
 		try{
 			Field pfield = pclass.getField(key);
-			//Log.d("  field name : "+pfield.getName());
-			//Log.d("  field type : "+pfield.getType().getName());
 			if(pfield.getType().getName().equals(String.class.getName())){
 				pfield.set(null, new String(value));
 			}else
@@ -59,5 +56,14 @@ public class Parameters {
 			Log.e("Parameters.set"+key+","+value+")  IllegalAccessException : "+ex.getMessage());
 		}
 		return false;
+	}
+	
+	public static void onLoaded() {
+		onChanged();
+		
+	}
+	
+	public static void onChanged() {
+		Log.disableTags(Parameters.log_disabled_tags);
 	}
 }

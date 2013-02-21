@@ -2,6 +2,7 @@
 .cproject
 .project
 .pydevproject
+/.metadata/
 
 # Compiled Object files
 *.slo
@@ -24,4 +25,6 @@ build/
 bin/
 msg_gen/
 srv_gen/
-/.metadata/
+#java bin files
+*.class
+

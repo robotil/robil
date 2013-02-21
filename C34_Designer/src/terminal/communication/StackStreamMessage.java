@@ -1,9 +1,7 @@
 package terminal.communication;
 
-import javax.swing.DebugGraphics;
-
 /**
- * 
+ * Message received from stack-stream
  * @author blackpc
  *
  */
@@ -35,12 +33,24 @@ public class StackStreamMessage {
 		Success("SUCCESS"),
 		Failure("FAILURE");
 		
-		private TaskFinishReason(String name) {}
+		private String _name;
+		private TaskFinishReason(String name) { 
+			_name = name; 
+		}
 		
 		public static TaskFinishReason typeOf(String reason) {
 			if (reason != null && reason.equalsIgnoreCase("success"))
 				return TaskFinishReason.Success;
 			return TaskFinishReason.Failure;
+		}
+		
+		@Override
+		public String toString() {
+			
+			if (this == null) 
+				return "";
+			
+			return _name;
 		}
 	}
 	
@@ -49,7 +59,7 @@ public class StackStreamMessage {
 	private String _taskParameters = "";
 	private String _planLabel = "";
 	private String _taskId = "";
-	private TaskFinishReason _taskFinishReason;
+	private TaskFinishReason _taskFinishReason = TaskFinishReason.Success;
 	private int _taskResultCode;
 	private String _taskResultDescription = "";;
 	
@@ -133,16 +143,7 @@ public class StackStreamMessage {
 	
 	public StackStreamMessage clone() {
 		StackStreamMessage newMessage = new StackStreamMessage();
-		
-		newMessage.setChangeType(this.getChangeType());
-		newMessage.setPlanLabel(this.getPlanLabel());
-		newMessage.setTaskFinishReason(this.getTaskFinishReason());
-		newMessage.setTaskId(this.getTaskId());
-		newMessage.setTaskName(this.getTaskName());
-		newMessage.setTaskParameters(this.getTaskParameters());
-		newMessage.setTaskResultCode(this.getTaskResultCode());
-		newMessage.setTaskResultDescription(this.getTaskResultDescription());
-		
+		newMessage.clone(this);
 		return newMessage;
 	}
 

@@ -3,6 +3,7 @@ import roslib; roslib.load_manifest('C51_CarOperation')
 import rospy
 import actionlib
 import C51_CarOperation.msg
+from C51_CarOperation.msg import Monitoring
 from geometry_msgs.msg import Twist
 import geometry_msgs.msg
 from nav_msgs.msg import Odometry
@@ -28,6 +29,7 @@ class Drive(object):
         self._action_name = name
         self.path=pathVec
         self._as = actionlib.SimpleActionServer(self._action_name, C51_CarOperation.msg.DriveAction, execute_cb=self.DriveCallback, auto_start=False)
+        self.feedback_publisher = rospy.Publisher("C51/m_feedback", Monitoring)
         self._as.start()
         
 
@@ -131,7 +133,11 @@ class Drive(object):
                             Steer.turn(Cspeed)
                         DATA.DistanceError([self.world.pose.pose.position.x-object[0], self.world.pose.pose.position.y-object[1]])
                         DATA.PassedWayPoint(object)
-                        #self._feedback.LastWPpassed = object
+                        newMsg=Monitoring()
+                        newMsg.LastWPpassed = object
+                        newMsg.MyLoc4LastWP= [self.world.pose.pose.position.x , self.world.pose.pose.position.y]
+                        self.feedback_publisher.publish(newMsg)
+                        print newMsg,  "shmulik"
                         #self._feedback.LastWPpassed_Y = object[1]
                         #self._feedback.MyLoc4LastWP= [self.world.pose.pose.position.x , self.world.pose.pose.position.y]
                         #self._feedback.MyLoc4LastWP_Y=  self.world.pose.pose.position.y

@@ -144,6 +144,18 @@ public class DesignerPopupMenu extends JPopupMenu {
 		return menu;
 	}
 	
+	private JMenuItem createRunHistoryMenuItem() {
+		JMenuItem menu = new JMenuItem("Run history");
+		menu.setIcon(new ImageIcon(getClass().getClassLoader().getResource("icons/history.png")));
+		menu.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent arg) {
+				_element.getAsTask().showHistory(_designer);
+			}
+		});
+		return menu;
+	}
+	
 	private JMenuItem createCopyMenuItem() {
 		JMenuItem menu = new JMenuItem("Copy");
 		menu.setIcon(new ImageIcon(getClass().getClassLoader().getResource("icons/copy.png")));
@@ -216,8 +228,13 @@ public class DesignerPopupMenu extends JPopupMenu {
 	
 	private void createTaskMenu() {
 		add(createModifyMenuItem());
+		
+		if (this._element.isTaskType())
+			add(createRunHistoryMenuItem());
+		
 		add(createCopyMenuItem());
 		add(createCopyToPopup());
+		
 		if (!this._element.isTaskType())
 			add(createCollapseCheckBox());
 		

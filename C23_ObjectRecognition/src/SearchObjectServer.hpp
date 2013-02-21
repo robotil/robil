@@ -24,7 +24,7 @@ protected:
    // RESULT _result;
 
 public:
-    TrackObjectServer(C23_Node &detector):
+    SearchObjectServer(C23_Node &detector):
         RobilTask("/SearchObject"),
         _detector(&detector),
         _name("/SearchObject")
