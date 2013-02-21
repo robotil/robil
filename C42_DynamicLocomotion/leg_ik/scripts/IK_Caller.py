@@ -19,6 +19,7 @@
 #############################################################################
 
 import roslib; roslib.load_manifest('leg_ik')
+from DRCSim2_tools import drc2_tools
 # from leg_ik.srv import *
 # from leg_ik.msg import *
 from std_msgs.msg import Float64
@@ -94,26 +95,21 @@ def get_from_zmp(msg):
         rospy.loginfo('IKException: %s leg is out of reach, req pos: %f ,%f, %f',exc.foot,exc.requested_pos[0],exc.requested_pos[1],exc.requested_pos[2])
         return
 
-
-
         
-    ns.l_leg_lax.publish( left_leg_angles[4] ) #JSC_l_leg_lax.getCMD(ns.LegAng.ang.lax) )
-    ns.l_leg_uay.publish( left_leg_angles[5] )
-    ns.l_leg_kny.publish( left_leg_angles[3] )
-    ns.l_leg_uhz.publish( left_leg_angles[2] )
-    ns.l_leg_lhy.publish( left_leg_angles[1] )
-    ns.l_leg_mhx.publish( left_leg_angles[0] ) #JSC_l_leg_mhx.getCMD(ns.LegAng.ang.mhx) )
+    ns.JC.set_pos('l_leg_lax',left_leg_angles[4] ) #JSC_l_leg_lax.getCMD(ns.LegAng.ang.lax) )
+    ns.JC.set_pos('l_leg_uay',left_leg_angles[5] )
+    ns.JC.set_pos('l_leg_kny',left_leg_angles[3] )
+    ns.JC.set_pos('l_leg_uhz',left_leg_angles[2] )
+    ns.JC.set_pos('l_leg_lhy',left_leg_angles[1] )
+    ns.JC.set_pos('l_leg_mhx',left_leg_angles[0] ) #JSC_l_leg_mhx.getCMD(ns.LegAng.ang.mhx) )
 
-    ns.r_leg_lax.publish( right_leg_angles[4] ) #JSC_r_leg_lax.getCMD(ns.LegAng.ang.lax + lax_stance) )
-    ns.r_leg_uay.publish( right_leg_angles[5] )
-    ns.r_leg_kny.publish( right_leg_angles[3] )
-    ns.r_leg_uhz.publish( right_leg_angles[2] )
-    ns.r_leg_lhy.publish( right_leg_angles[1] )
-    ns.r_leg_mhx.publish( right_leg_angles[0] ) #JJSC_r_leg_mhx.getCMD(ns.LegAng.ang.mhx + mhx_stance) )
-        
-    ns.back_mby.publish( 0.0 )
-    ns.back_ubx.publish( 0.0 )
-    ns.back_lbz.publish( 0.0 )
+    ns.JC.set_pos('r_leg_lax',right_leg_angles[4] ) #JSC_r_leg_lax.getCMD(ns.LegAng.ang.lax + lax_stance) )
+    ns.JC.set_pos('r_leg_uay',right_leg_angles[5] )
+    ns.JC.set_pos('r_leg_kny',right_leg_angles[3] )
+    ns.JC.set_pos('r_leg_uhz',right_leg_angles[2] )
+    ns.JC.set_pos('r_leg_lhy',right_leg_angles[1] )
+    ns.JC.set_pos('r_leg_mhx',right_leg_angles[0] ) #JJSC_r_leg_mhx.getCMD(ns.LegAng.ang.mhx + mhx_stance) )
+    ns.JC.send_command()
 
     #     rospy.loginfo("JC L_leg: lax = %f effort = %f, uay = %f, kny = %f, uhz = %f, lhy = %f, mhx = %f effort = %f, mby = %f, ubx= %f" %  \
     #                       (ns.LegAng.ang.lax, JSC_l_leg_lax.latest_effort, ns.LegAng.ang.uay, ns.LegAng.ang.kny, ns.LegAng.ang.uhz, \
@@ -150,28 +146,7 @@ def LEG_IK():
     rospy.init_node('LEG_IK')
     # rospy.wait_for_service('swing_leg_ik')
     # rospy.wait_for_service('stance_leg_ik')
-    
-
-    ns.r_leg_lax = rospy.Publisher('/r_leg_lax_position_controller/command', Float64)
-    ns.r_leg_uay = rospy.Publisher('/r_leg_uay_position_controller/command', Float64)
-    ns.r_leg_kny = rospy.Publisher('/r_leg_kny_position_controller/command', Float64)
-    ns.r_leg_uhz = rospy.Publisher('/r_leg_uhz_position_controller/command', Float64)
-    ns.r_leg_lhy = rospy.Publisher('/r_leg_lhy_position_controller/command', Float64)
-    ns.r_leg_mhx = rospy.Publisher('/r_leg_mhx_position_controller/command', Float64)
-
-    ns.l_leg_lax = rospy.Publisher('/l_leg_lax_position_controller/command', Float64)
-    ns.l_leg_uay = rospy.Publisher('/l_leg_uay_position_controller/command', Float64)
-    ns.l_leg_kny = rospy.Publisher('/l_leg_kny_position_controller/command', Float64)
-    ns.l_leg_uhz = rospy.Publisher('/l_leg_uhz_position_controller/command', Float64)
-    ns.l_leg_lhy = rospy.Publisher('/l_leg_lhy_position_controller/command', Float64)
-    ns.l_leg_mhx = rospy.Publisher('/l_leg_mhx_position_controller/command', Float64)
-
-    ns.back_mby = rospy.Publisher('/back_mby_position_controller/command', Float64)
-    ns.back_ubx = rospy.Publisher('/back_ubx_position_controller/command', Float64)
-    ns.back_lbz = rospy.Publisher('/back_lbz_position_controller/command', Float64)
-
-    r_cont_sub = rospy.Subscriber('/atlas/r_foot_contact', Wrench, get_r_foot_contact)
-    l_cont_sub = rospy.Subscriber('/atlas/l_foot_contact', Wrench, get_l_foot_contact)
+    ns.JC = JointCommands_msg_handler()
 
     rospy.loginfo( "LEG_IK node is ready" )
 
