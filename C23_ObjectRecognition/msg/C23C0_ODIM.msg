@@ -1,2 +1,4 @@
-C23_ObjectRecognition/TBD min_dimensions
-C23_ObjectRecognition/TBD max_dimensions
+int32 x
+int32 y
+int32 width
+int32 height
