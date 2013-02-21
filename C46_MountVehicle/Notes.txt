@@ -1,0 +1,16 @@
+C46_MountVehicle
+
+# Description: robot enters the vehicle from a standing position facing the vechile
+
+Known bugs:
+* The robot falls when trying to lean on the back seat of the car
+
+Conditions:
+* Works with drc version 2.0
+
+To test the module follow these steps:
+1. roslaunch atlas_utils atlas_drc_vehicle_fire_hose.launch
+2. rosrun C46_MountVehicle MountVehicle.py
+
+Contains:
+# A test file - MountVehicle.py - to test entering the vehicle
