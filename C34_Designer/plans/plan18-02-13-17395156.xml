@@ -1,6 +1,0 @@
-<plan descriptions="./plans/TaskDescriptions.xml">
-   <sel name="Noname" x="340.5" y="113.5" collapsed="false" id="90fd2354-c639-4fe1-a1b2-372aa888e26a"> 
-         <tsk name="Noname" x="191.5" y="239.5" test_time="0" test_result="true" id="d21c830b-9792-4997-b015-a063c6fb9cd9" />
-         <tsk name="Noname" x="508.5" y="264.5" test_time="0" test_result="true" id="46547a69-b0ef-46db-b9f6-74b9b0661e4c" />
-   </sel>
-</plan>

@@ -1,6 +1,0 @@
-<plan descriptions="./plans/TaskDescriptions.xml">
-   <par name="Noname" x="260.5" y="60.5" collapsed="false" id="3abbccc9-d815-4eb2-a471-688c3c58768d"> 
-         <tsk name="Noname" x="117.5" y="117.5" test_time="0" test_result="true" id="cf13d72b-202a-4efa-87b7-e6303a739c4e" />
-         <tsk name="Noname3" x="285.5" y="126.5" test_time="0" test_result="true" id="2a8203d9-f0e0-4359-ab18-aef3be7d3cfd" />
-   </par>
-</plan>

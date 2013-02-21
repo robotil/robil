@@ -6,6 +6,8 @@ import java.awt.Composite;
 import java.awt.Graphics2D;
 import java.util.Map;
 
+import elements.tasks.Task;
+
 public class Tooltip extends GElement {
 
 	public enum ToolTipDesign {
@@ -33,9 +35,10 @@ public class Tooltip extends GElement {
 		this(parent, ToolTipDesign.Default);
 	}
 	
-	@Override
-	public GElement clone() {
-		Tooltip tooltip = new Tooltip(this._parent, this._design);
+	public GElement clone(Task parent) {
+		Tooltip tooltip = new Tooltip(parent, this._design);
+		this.cloneInit(tooltip);
+		tooltip._textPosition = new Vec(this._textPosition);
 		tooltip._message = new String(this._message);
 		tooltip._textPosition = this._textPosition;
 		tooltip._title = new String(this._title);
@@ -155,6 +158,11 @@ public class Tooltip extends GElement {
 				* this._parent.getView().zoom;
 		this._textPosition.y = this.property.loc.y + 2
 				* this._parent.getView().zoom;
+	}
+
+	@Override
+	public GElement clone() {
+		return null;
 	}
 
 }
