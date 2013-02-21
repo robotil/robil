@@ -35,7 +35,11 @@ public class Tooltip extends GElement {
 	
 	@Override
 	public GElement clone() {
-		return null;
+		Tooltip tooltip = new Tooltip(this._parent, this._design);
+		tooltip._message = new String(this._message);
+		tooltip._textPosition = this._textPosition;
+		tooltip._title = new String(this._title);
+		return tooltip;
 	}
 
 	@Override
@@ -56,6 +60,8 @@ public class Tooltip extends GElement {
 			if (line.contains("$BLUE$"))
 				g.setColor(Color.BLUE);
 			
+			// Replace colors declarations:
+			// 		$RED$, $BLUE$, $GREEN$
 			g.drawString(line.replaceAll("\\$.*?\\$", ""), x, y += g.getFontMetrics().getHeight());
 			
 			g.setColor(originalColor);

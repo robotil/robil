@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <parameters>
+<log_disabled_tags value=""/>
 <log_print_ros_output value="true"/>
 <path_to_images value="./images"/>
 <path_to_lookup value="./plans/lookup.xml"/>
