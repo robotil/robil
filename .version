@@ -1,4 +1,4 @@
-V0.0.0.87
+V0.0.0.88
 =======================================================
 C0_RobilTask     			0.5
 C0_Scripts     			        0.13
@@ -22,7 +22,7 @@ C42_DynamicLocomotion     		0.1
 C42_LocomotionAndStability     		0.1
 C43_LocalBodyPVA     			0.1
 C45_PostureControl     			0.6
-C46_MountVehicle     			0.4
+C46_MountVehicle     			0.5
 C47_DismountVehicle     		0.2
 C48_StandUp     			0.1
 C51_CarOperation     			0.8
