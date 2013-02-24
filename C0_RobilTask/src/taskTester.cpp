@@ -45,7 +45,7 @@ int main (int argc, char **argv)
 	}
 
 	ROS_INFO("Test caller for task [%s] is started.", tname.c_str());
-	stringstream sname ; sname << "task_tester"<<"_"<<tname;
+	stringstream sname ; sname << "task_tester"<<"_"<<tname<<"_"<<::time(NULL);
 	ros::init(argc, argv, sname.str().c_str());
 
 	// create the action client
