@@ -40,60 +40,7 @@ def listn_to_command(zmp_walk_command):
     rospy.loginfo("time:")
     rospy.loginfo(rospy.get_time())
 
-# def place_in_Position(x,y,z):
-#     res = Position()
-#     res.x = x; res.y = y; res.z = z;
-#     return (res)
-
-# def place_in_Orientation(r,p,w):
-#     res = Orientation()
-#     res.r = r; res.p = p; res.w = w;
-#     return (res)
-
-# def place_in_Pos_and_Ori(x,y,z,r,p,w):
-#     res = Pos_and_Ori()
-#     res.x = x; res.y = y; res.z = z; res.r = r; res.p = p; res.w = w;
-#     return (res)
-
-# def getRobot_State(step_phase):
-#     # tf frames:
-#     if ( step_phase == 1 ) or ( step_phase == 2 ): 
-#         # stance = left, swing = right
-#         base_frame = 'l_foot'
-#         # frames to transform: stance hip, com_m, pelvis_m, swing_hip, swing_foot
-#         get_frames = [ 'l_uleg', 'com', 'pelvis', 'r_uleg', 'r_foot' ] # DRC (from tf) names 
-#     elif ( step_phase == 3 ) or ( step_phase == 4 ): 
-#         # stance = right, swing = left
-#         base_frame = 'r_foot'
-#         # frames to transform: stance hip, com_m, pelvis_m, swing_hip, swing_foot
-#         get_frames = [ 'r_uleg', 'com', 'pelvis', 'l_uleg', 'l_foot' ] # DRC (from tf) names    
-#     # get transforms:
-#     tran = [ [0,0,0], [0,0,0], [0,0,0], [0,0,0], [0,0,0] ] # need to replace with previuos transform
-#     rot = [ [0,0,0], [0,0,0], [0,0,0], [0,0,0], [0,0,0] ]  # need to replace with previuos transform
-#     for i in range(0,5):
-#         successful_tf = True
-#         try:
-#           (translation,rotation) = ns.listener.lookupTransform(base_frame, get_frames[i], rospy.Time(0))  #  rospy.Time(0) to use latest availble transform 
-#         except (tf.LookupException, tf.ConnectivityException, tf.ExtrapolationException) as ex:
-#           successful_tf = False
-#           # print ex
-#           rospy.loginfo("tf exception: %s" % (ex.args))
-#           # Wait 1 second
-#           # rospy.sleep(1)
-#           continue
-#         if successful_tf:
-#             tran[i] = translation
-#             rot[i] = rotation
-
-#     res = walking_trajectory()
-#     res.stance_hip = place_in_Position( tran[0][0], tran[0][1], tran[0][2] )
-#     res.swing_foot = place_in_Pos_and_Ori( tran[4][0], tran[4][1], tran[4][2], rot[4][0], rot[4][1], rot[4][2] )
-#     res.swing_hip = place_in_Position( tran[3][0], tran[3][1], tran[3][2] ) 
-#     res.pelvis_m = place_in_Orientation( rot[2][0], rot[2][1], rot[2][2] )
-#     res.com_m = place_in_Position( tran[1][0], tran[1][1], tran[1][2] )
-#     return (res)
-
-
+# setup node:
 rospy.init_node('zmp_movement_plan')  #('ZMP_node')
 rospy.loginfo("started ZMP node")
 
@@ -101,19 +48,16 @@ pub_zmp = rospy.Publisher('zmp_out', walking_trajectory ) #traj)
 sub_command = rospy.Subscriber('zmp_walk_command' , Int32 , listn_to_command)
 ns.listener = tf.TransformListener()
 
+# sampling time:
 rate = 100  # [Hz]
 dt = 1.0/rate # [sec] # sample time (was named time_step)
 interval = rospy.Rate(rate)
-out = walking_trajectory () #traj()
 
-zc = 0#0.8455 # [m] COM height
+out = walking_trajectory () #traj() # output message of topic 'zmp_out'
 
-# rospy.loginfo("dt = %f" % (dt) )
-# # Wait 0.1 second
-# rospy.sleep(1)
+#zc = 0#0.8455 # [m] COM height
 
 # Walking Parameters 
-
 step_length = 0.03 #0.01  # [m]
 step_width  = 0.165  # 0.178  # [m]
 step_time   = 1 #1   # [sec]
@@ -124,6 +68,8 @@ trans_slope_steepens_factor = 8/step_time #2 # 1 transition Sigmoid slope (a)
 # Robot State object:
 rs = Robot_State('Robot State')
 pelvis_des = rs.place_in_Ori( 0, 0, 0 ) # pelvis desired rotation (0,0,0)<=>stand up straight
+
+max_step_time = 10.0 #[sec] the longest period of step that we plan to do
 
 # TODO: make sure robot is static (in start position) and tf is running
 # init Robot State using tf data getting hip to com relative position:
@@ -136,53 +82,12 @@ Lateral_y_Preview_Controller = ZMP_Preview_Controller('Y_lateral','lateral_y',0.
 NL = Lateral_y_Preview_Controller.getBufferSize() 
 
 # Preview Buffers:
-Preview_Sagital_x = ZMP_Preview_Buffer('Sagital X', NL, 4*step_time/dt, 0 ) #name, preview_sample_size, max_step_samples, precede_time_samples
-Preview_Lateral_y = ZMP_Preview_Buffer('Lateral Y', NL, 4*step_time/dt, 0 ) #name, preview_sample_size, max_step_samples, precede_time_samples
+Preview_Sagital_x = ZMP_Preview_Buffer('Sagital X', NL, 4*max_step_time/dt, 0 ) #name, preview_sample_size, max_step_samples, precede_time_samples
+Preview_Lateral_y = ZMP_Preview_Buffer('Lateral Y', NL, 4*max_step_time/dt, 0 ) #name, preview_sample_size, max_step_samples, precede_time_samples
 
 # init preview:
 p_ref_x = zeros(NL)
 p_ref_y = zeros(NL)
-
-# # init state:
-# # waiting for transform to be avilable
-# time_out = rospy.Duration(2)
-# polling_sleep_duration = rospy.Duration(0.01)
-# # stance = left, swing = right
-# base_frame = 'l_foot'
-# # frames to transform: stance hip, com_m, pelvis_m, swing_hip, swing_foot
-# get_frames = [ 'l_uleg', 'com', 'pelvis', 'r_uleg', 'r_foot' ] # DRC (from tf) names 
-# for i in range(0,5):
-#     while ns.listener.waitForTransform (base_frame, get_frames[i], rospy.Time(0), time_out, polling_sleep_duration) and not rospy.is_shutdown():
-#         rospy.loginfo("Not ready for Forward Kinematics transform")
-
-# rs_from_l_foot = getRobot_State(1)
-
-# #l_stance_hip_0 = Position()
-
-# com_0_from_l_foot = rs_from_l_foot.com_m
-# l_stance_hip_0 = copy.deepcopy( rs_from_l_foot.stance_hip )
-
-# rs_from_r_foot = getRobot_State(3)
-
-# com_0_from_r_foot = rs_from_r_foot.com_m
-# r_stance_hip_0 = copy.deepcopy( rs_from_r_foot.stance_hip )
-# # TODO: in order to get better readings one should repeat the lines above a few times while init position function and average the readings  
-
-# # constraint: we want hips height (z) and advance (x) to be the same
-# hip_height = 0.7999 - bend_knees #(l_stance_hip_0.z + r_stance_hip_0.z)/2
-# hip_sagital = -0.02 # (l_stance_hip_0.x + r_stance_hip_0.x)/2 # x position relative to foot
-# l_stance_hip_0.z = hip_height; r_stance_hip_0.z = hip_height;
-# l_stance_hip_0.x = hip_sagital; r_stance_hip_0.x = hip_sagital;
-
-# com2l_stance_hip = Position(); com2r_stance_hip = Position(); 
-# com2l_stance_hip.x = com_0_from_l_foot.x - l_stance_hip_0.x # to be used when using measured com. we get the relative postion of the left stance hip
-# com2l_stance_hip.y = com_0_from_l_foot.y - l_stance_hip_0.y
-# com2l_stance_hip.z = com_0_from_l_foot.z - l_stance_hip_0.z
-# com2r_stance_hip.x = com_0_from_r_foot.x - r_stance_hip_0.x # to be used when using measured com. we get the relative postion of the right stance hip
-# com2r_stance_hip.y = com_0_from_r_foot.y - r_stance_hip_0.y
-# com2r_stance_hip.z = com_0_from_r_foot.z - r_stance_hip_0.z
-# # use with measured com  e.g: com_m - com2_stance_hip + com_ref = stance hip in the foot coordinate system to be used by IK
-# # use with out e.g: stance_hip_0 + com_ref = stance hip in the foot coordinate system to be used by IK
 
 step_phase = 1 # Double-Support left leg in front
 
@@ -204,7 +109,7 @@ out.step_phase = step_phase
 # rospy.loginfo("zmp_main, stance foot: hip_x = %f, hip_y = %f, hip_z = %f, swing l-foot: foot_x = %f, foot_y = %f, foot_z = %f" \
 #                % (l_stance_hip_0.x, l_stance_hip_0.y, l_stance_hip_0.z, rs_from_r_foot.swing_foot.x, rs_from_r_foot.swing_foot.y, rs_from_r_foot.swing_foot.z) )
 # Wait 1 second
-rospy.sleep(1)
+# rospy.sleep(1)
 
 
 # Main Loop
@@ -238,8 +143,7 @@ while not rospy.is_shutdown():
       step_done = 0
       swing_x_v = []
       swing_z_v = []
-      # p_ref_x = r_[ p_ref0_0x , sigmoid_x , p_ref1x ]
-      # p_ref_y = r_[ p_ref0_0y , sigmoid_y/2+step_width/2 , p_ref1y ]
+
       swing_z_t_more_double_support = 0
       swing_x_t_more_double_support = 0
 
@@ -255,7 +159,7 @@ while not rospy.is_shutdown():
       p_ref_y_step_right = Step_onto_right_foot(0, step_width, trans_ratio_of_step, trans_slope_steepens_factor, step_time, dt)
       p_ref_y_step_left = Step_onto_left_foot(0, step_width, trans_ratio_of_step, trans_slope_steepens_factor, step_time, dt)
 
-      # Load the starting step to preview buffer:
+      # Load the starting step to the preview buffer:
       Preview_Sagital_x.load_NewStep( p_ref_x_start, p_ref_x_forward_step )
       Preview_Lateral_y.load_NewStep( p_ref_y_start, r_[ p_ref_y_step_right, p_ref_y_step_left ] ) 
 
@@ -354,10 +258,11 @@ while not rospy.is_shutdown():
 
   #######################################################
   #                                                     #
-  # publish zmp                                         #
+  # Update Robot State and publish zmp                  #
   #                                                     #
   #######################################################
       
+      # Update Robot State: getting joints locations using tf to process and store them in Robot State object 
       rs.getRobot_State(step_phase, ns.listener)
 
       stance_hip_0 = rs.place_in_Pos(0,0,0)
@@ -392,8 +297,8 @@ while not rospy.is_shutdown():
 
       out.step_phase = step_phase
 
-      rospy.loginfo("zmp_main go=1, stance foot: COMy = %f, out.hip_y = %f, stance_hip_0.y = %f, l_stance_hip_0 = %f " \
-               % (COMy, out.stance_hip.y, stance_hip_0.y, rs.l_stance_hip_0.y) )
+      # rospy.loginfo("zmp_main go=1, stance foot: COMy = %f, out.hip_y = %f, stance_hip_0.y = %f, l_stance_hip_0 = %f " \
+      #          % (COMy, out.stance_hip.y, stance_hip_0.y, rs.l_stance_hip_0.y) )
 
       pub_zmp.publish(out)
 
@@ -404,7 +309,6 @@ while not rospy.is_shutdown():
   ####################################################### 
       
       # pre_step:  
-
           
       if pre_step:
           if (samples_in_step <= k): # swing_pre_step < 0.00001 and pre_step and k>1:
@@ -495,38 +399,6 @@ while not rospy.is_shutdown():
 
           else:
              rospy.loginfo("Error: Problem step state not found. step phase = %d" % (step_phase))
-
-
-
-          # if steps_count >= 0:
-          #     Leg = int(Leg!=1)
-          # rospy.loginfo("Right Leg = %d" % (Leg))
-          #rospy.loginfo(Leg)
-          # if steps_count > -1:
-          #     plot(p_ref_x)
-          #     plot(p_ref_y)
-          #     plot(swing_x_v)
-          #     plot(swing_z_v)
-          #     # show()
-          #     #rospy.loginfo("exited")
-          #     # exit()                        # uncomment TO STOP AFTER ONE STEP
-   
-      # # full step:
-      # if first_step and step_done and ns.walk:
-      #    first_step = 0
-      #    full_step = 1
-      
-      # # last step:   
-      # if ns.walk == 0 and step_done and not last_step:
-      #    last_step = 1
-      #    first_step = 0
-      #    full_step = 0
-      #    #last_step_mes = p_ref_x[k] 
-    
-      # if p_ref_x[k] >= last_step_mes+step_length and last_step:
-      #    go = 0
-      #    rospy.loginfo("stoped walking")
-
 
       #rospy.loginfo(k)
       step_done = 0

@@ -90,12 +90,12 @@ class ZMP_Preview_Buffer:
     def update_Preview(self): 
         # return current step sequence preview and increment preview (one time cycle)
         end_index = self.start_index + self.preview_size
-        if end_index > self.end_of_step_preview: # make sure not exceed steps preview
+        if end_index > self.end_of_step_preview: # make sure not to exceed steps preview
             # may want to do some thing alse in this case like: preview = zeros(self.preview_size) ???
-            end_index = self.end_of_step_preview
+            end_index = self.end_of_step_preview # freeze preview (preview is not updated, stays on end_of_step_preview values)
             self.start_index = self.end_of_step_preview - self.preview_size
         if end_index > self.buffer_size: # make sure not exceed buffer size
-            end_index = self.buffer_size
+            end_index = self.buffer_size # freeze preview (preview is not updated, stays on end of buffer values)
             self.start_index = self.buffer_size - self.preview_size
 
         preview = self.buffer[self.start_index : end_index]
