@@ -94,9 +94,6 @@ def get_from_zmp(msg):
     except IKReachException as exc:
         rospy.loginfo('IKException: %s leg is out of reach, req pos: %f ,%f, %f',exc.foot,exc.requested_pos[0],exc.requested_pos[1],exc.requested_pos[2])
         return
-    cur_pos = ns.RL.current_pos()
-    ns.JC.set_all_pos(cur_pos)
-    print cur_pos
 
     ns.JC.set_pos('l_leg_lax',left_leg_angles[4] ) #JSC_l_leg_lax.getCMD(ns.LegAng.ang.lax) )
     ns.JC.set_pos('l_leg_uay',left_leg_angles[5] )
@@ -150,11 +147,13 @@ def LEG_IK():
     ns.RL = robot_listner()
     rospy.loginfo( "LEG_IK node is ready" )
     rospy.loginfo( "waiting 1 seconds for robot to initiate" )
-    yaml_pth = os.path.join(roslib.packages.get_pkg_dir('gen_alg'),'calibrated_controller_drc2.yaml')
+    yaml_pth = os.path.join(roslib.packages.get_pkg_dir('DRCSim2_tools'),'calibrated_controller_drc2.yaml')
     ns.JC.set_default_gains_from_yaml(yaml_pth)
     ns.JC.reset_gains()
-    rospy.sleep(1)
     sub1=rospy.Subscriber("zmp_out", walking_trajectory, get_from_zmp) # traj, get_from_zmp)
+    cur_pos = ns.RL.current_pos()
+    ns.JC.set_all_pos(cur_pos)
+    rospy.sleep(1)
 
     rospy.spin()
 
