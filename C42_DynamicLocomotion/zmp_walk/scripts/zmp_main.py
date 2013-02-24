@@ -89,8 +89,6 @@ Preview_Lateral_y = ZMP_Preview_Buffer('Lateral Y', NL, 4*max_step_time/dt, 0 ) 
 p_ref_x = zeros(NL)
 p_ref_y = zeros(NL)
 
-step_phase = 1 # Double-Support left leg in front
-
 # init output message (before starting to walk)
 out.stance_hip = copy.deepcopy( rs.l_stance_hip_0 )
 out.pelvis_d = pelvis_des
@@ -104,7 +102,11 @@ out.com_ref = rs.place_in_Pos(0,0,0)
 out.com_dot_ref = rs.place_in_Pos(0,0,0)
 out.com_m = rs.com_m
 
-out.step_phase = step_phase
+out.step_phase = rs.step_phase
+# for debug use
+out.stance_hip_m = rs.stance_hip
+out.swing_hip_m = rs.swing_hip
+out.swing_foot_m = rs.swing_foot
 
 # rospy.loginfo("zmp_main, stance foot: hip_x = %f, hip_y = %f, hip_z = %f, swing l-foot: foot_x = %f, foot_y = %f, foot_z = %f" \
 #                % (l_stance_hip_0.x, l_stance_hip_0.y, l_stance_hip_0.z, rs_from_r_foot.swing_foot.x, rs_from_r_foot.swing_foot.y, rs_from_r_foot.swing_foot.z) )
@@ -207,10 +209,10 @@ while not rospy.is_shutdown():
 
 
          if(k>k_start_swing  and k<k_stop_swing ):
-              if step_phase == 1:    # comment  to stay in step phase 1
-                  step_phase = 2
-              elif step_phase == 3:
-                  step_phase = 4
+              if rs.step_phase == 1:    # comment  to stay in step phase 1
+                  rs.step_phase = 2
+              elif rs.step_phase == 3:
+                  rs.step_phase = 4
               swing_x_t_more_double_support = -step_length_z +2*(k-k_start_swing)*step_length/(k_stop_swing - k_start_swing)
               swing_z_t_more_double_support = step_height*abs( (sin(pi/(k_stop_swing -k_start_swing)*(k - k_start_swing)))**2 ) #step_height*abs(sin(pi/(k_stop_swing -k_start_swing)*(k - k_start_swing)))  
          elif k<k_start_swing:
@@ -230,10 +232,10 @@ while not rospy.is_shutdown():
          swing_z_t = 0.06*abs(sin(pi/step_time*(k-1)*dt))
  
          if(k>k_start_swing  and k<k_stop_swing ):
-              if step_phase == 1:  # comment  to stay in step phase 1
-                  step_phase = 2
-              elif step_phase == 3:
-                  step_phase = 4
+              if rs.step_phase == 1:  # comment  to stay in step phase 1
+                  rs.step_phase = 2
+              elif rs.step_phase == 3:
+                  rs.step_phase = 4
               swing_x_t_more_double_support = (k-k_start_swing)*step_length/(k_stop_swing - k_start_swing)
               swing_z_t_more_double_support = step_height*abs( (sin(pi/(k_stop_swing -k_start_swing)*(k - k_start_swing)))**2 )  
  
@@ -263,21 +265,21 @@ while not rospy.is_shutdown():
   #######################################################
       
       # Update Robot State: getting joints locations using tf to process and store them in Robot State object 
-      rs.getRobot_State(step_phase, ns.listener)
+      rs.getRobot_State( listener = ns.listener )
 
       stance_hip_0 = rs.place_in_Pos(0,0,0)
-      if ( step_phase == 1 ) or ( step_phase == 2 ): 
+      if ( rs.step_phase == 1 ) or ( rs.step_phase == 2 ): 
           # stance = left, swing = right
           stance_hip_0 = copy.deepcopy( rs.l_stance_hip_0 )
           swing_y_0 = -step_width 
-      elif ( step_phase == 3 ) or ( step_phase == 4 ): 
+      elif ( rs.step_phase == 3 ) or ( rs.step_phase == 4 ): 
           # stance = right, swing = left
           stance_hip_0 = copy.deepcopy( rs.r_stance_hip_0 )
           swing_y_0 = step_width
 
-      if ( step_phase == 2 ) or ( step_phase == 4 ): # if swing foot is in the air
+      if ( rs.step_phase == 2 ) or ( rs.step_phase == 4 ): # if swing foot is in the air
           out.swing_foot = rs.place_in_Pos_Ori( swing_x_k, swing_y_0, swing_z_k, 0, 0, 0 )
-      elif ( step_phase == 1 ) or ( step_phase == 3 ): # if swing foot is on the ground
+      elif ( rs.step_phase == 1 ) or ( rs.step_phase == 3 ): # if swing foot is on the ground
           out.swing_foot = rs.swing_foot  
 
       out.stance_hip.x = COMx + stance_hip_0.x-D 
@@ -295,7 +297,11 @@ while not rospy.is_shutdown():
       out.com_dot_ref = rs.place_in_Pos( COMx_dot, COMy_dot, 0)
       out.com_m = rs.com_m
 
-      out.step_phase = step_phase
+      out.step_phase = rs.step_phase
+      # for debug use
+      out.stance_hip_m = rs.stance_hip
+      out.swing_hip_m = rs.swing_hip
+      out.swing_foot_m = rs.swing_foot
 
       # rospy.loginfo("zmp_main go=1, stance foot: COMy = %f, out.hip_y = %f, stance_hip_0.y = %f, l_stance_hip_0 = %f " \
       #          % (COMy, out.stance_hip.y, stance_hip_0.y, rs.l_stance_hip_0.y) )
@@ -304,7 +310,7 @@ while not rospy.is_shutdown():
 
   #######################################################
   #                                                     #
-  # command control                                     #
+  # command control - Steps state machine               #
   #                                                     #
   ####################################################### 
       
@@ -320,7 +326,7 @@ while not rospy.is_shutdown():
             # start first step:
             pre_step = 0
             first_step = 1
-            step_phase = 1 # Double-Support left leg in front
+            rs.step_phase = 1 # Double-Support left leg in front
             k = 1
             
       elif first_step:
@@ -336,7 +342,7 @@ while not rospy.is_shutdown():
               first_step = 0
               k = 1
               distance_x_ref = p_ref_x[0]
-              step_phase = 3 # Double-Support right leg in front
+              rs.step_phase = 3 # Double-Support right leg in front
               #rospy.sleep(4)
               #exit()######################################################
               if ns.walk:
@@ -368,11 +374,11 @@ while not rospy.is_shutdown():
                 #rospy.sleep(4)
                 k = 1
                 distance_x_ref = p_ref_x[0]
-                if step_phase >= 3:
-                  step_phase = 1 # Double-Support left leg in front
+                if rs.step_phase >= 3:
+                  rs.step_phase = 1 # Double-Support left leg in front
                 else:
-                  step_phase = 3 # Double-Support right leg in front
-                rospy.loginfo("step phase = %d" % (step_phase))
+                  rs.step_phase = 3 # Double-Support right leg in front
+                rospy.loginfo("step phase = %d" % (rs.step_phase))
 
                 if ns.walk:
                   # make a full step:
@@ -380,7 +386,7 @@ while not rospy.is_shutdown():
                   # TODO: update ZMP_profiles with new parameters: step time,length...
                   # Load new step to preview buffer:
                   Preview_Sagital_x.load_NewStep( p_ref_x_forward_step + distance_x_ref, p_ref_x_forward_step )
-                  if step_phase == 1:
+                  if rs.step_phase == 1:
                     Preview_Lateral_y.load_NewStep( p_ref_y_step_left, r_[ p_ref_y_step_right,p_ref_y_step_left ] )
                   else:
                     Preview_Lateral_y.load_NewStep( p_ref_y_step_right, r_[ p_ref_y_step_left, p_ref_y_step_right ] )
@@ -398,7 +404,7 @@ while not rospy.is_shutdown():
                 rospy.loginfo("stoped walking")
 
           else:
-             rospy.loginfo("Error: Problem step state not found. step phase = %d" % (step_phase))
+             rospy.loginfo("Error: Problem step state not found. step phase = %d" % (rs.step_phase))
 
       #rospy.loginfo(k)
       step_done = 0

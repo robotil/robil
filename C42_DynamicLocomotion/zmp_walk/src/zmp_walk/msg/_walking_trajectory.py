@@ -7,7 +7,7 @@ import struct
 import zmp_walk.msg
 
 class walking_trajectory(genpy.Message):
-  _md5sum = "ed8b7c956dcefaa6c2410483e27f484c"
+  _md5sum = "c05fd0fe7a35e7271566eb62bc35f1ce"
   _type = "zmp_walk/walking_trajectory"
   _has_header = False #flag to mark the presence of a Header object
   _full_text = """# This message contains information of desired limb positions and orientation
@@ -40,6 +40,10 @@ Position      com_m         # measured COM position (x,y,z)
 int32        step_phase     # 1 = Double-Support left leg in front, 2 = lift right swing leg
                             # 3 = Double-Support right leg in front, 4 = lift left swing leg 
 
+# for debug use:
+Position      stance_hip_m  # measured stance hip position (x,y,z)
+Position      swing_hip_m   # measured swing hip position (x,y,z)
+Pos_and_Ori   swing_foot_m  # measured swing foot position and orientation (x,y,z,r,p,w)
 
 ================================================================================
 MSG: zmp_walk/Position
@@ -63,8 +67,8 @@ float64 p
 float64 w
 
 """
-  __slots__ = ['stance_hip','pelvis_d','swing_foot','swing_hip','pelvis_m','zmp_ref','zmp_pc','com_ref','com_dot_ref','com_m','step_phase']
-  _slot_types = ['zmp_walk/Position','zmp_walk/Orientation','zmp_walk/Pos_and_Ori','zmp_walk/Position','zmp_walk/Orientation','zmp_walk/Position','zmp_walk/Position','zmp_walk/Position','zmp_walk/Position','zmp_walk/Position','int32']
+  __slots__ = ['stance_hip','pelvis_d','swing_foot','swing_hip','pelvis_m','zmp_ref','zmp_pc','com_ref','com_dot_ref','com_m','step_phase','stance_hip_m','swing_hip_m','swing_foot_m']
+  _slot_types = ['zmp_walk/Position','zmp_walk/Orientation','zmp_walk/Pos_and_Ori','zmp_walk/Position','zmp_walk/Orientation','zmp_walk/Position','zmp_walk/Position','zmp_walk/Position','zmp_walk/Position','zmp_walk/Position','int32','zmp_walk/Position','zmp_walk/Position','zmp_walk/Pos_and_Ori']
 
   def __init__(self, *args, **kwds):
     """
@@ -74,7 +78,7 @@ float64 w
     changes.  You cannot mix in-order arguments and keyword arguments.
 
     The available fields are:
-       stance_hip,pelvis_d,swing_foot,swing_hip,pelvis_m,zmp_ref,zmp_pc,com_ref,com_dot_ref,com_m,step_phase
+       stance_hip,pelvis_d,swing_foot,swing_hip,pelvis_m,zmp_ref,zmp_pc,com_ref,com_dot_ref,com_m,step_phase,stance_hip_m,swing_hip_m,swing_foot_m
 
     :param args: complete set of field values, in .msg order
     :param kwds: use keyword arguments corresponding to message field names
@@ -105,6 +109,12 @@ float64 w
         self.com_m = zmp_walk.msg.Position()
       if self.step_phase is None:
         self.step_phase = 0
+      if self.stance_hip_m is None:
+        self.stance_hip_m = zmp_walk.msg.Position()
+      if self.swing_hip_m is None:
+        self.swing_hip_m = zmp_walk.msg.Position()
+      if self.swing_foot_m is None:
+        self.swing_foot_m = zmp_walk.msg.Pos_and_Ori()
     else:
       self.stance_hip = zmp_walk.msg.Position()
       self.pelvis_d = zmp_walk.msg.Orientation()
@@ -117,6 +127,9 @@ float64 w
       self.com_dot_ref = zmp_walk.msg.Position()
       self.com_m = zmp_walk.msg.Position()
       self.step_phase = 0
+      self.stance_hip_m = zmp_walk.msg.Position()
+      self.swing_hip_m = zmp_walk.msg.Position()
+      self.swing_foot_m = zmp_walk.msg.Pos_and_Ori()
 
   def _get_types(self):
     """
@@ -131,7 +144,7 @@ float64 w
     """
     try:
       _x = self
-      buff.write(_struct_33di.pack(_x.stance_hip.x, _x.stance_hip.y, _x.stance_hip.z, _x.pelvis_d.r, _x.pelvis_d.p, _x.pelvis_d.w, _x.swing_foot.x, _x.swing_foot.y, _x.swing_foot.z, _x.swing_foot.r, _x.swing_foot.p, _x.swing_foot.w, _x.swing_hip.x, _x.swing_hip.y, _x.swing_hip.z, _x.pelvis_m.r, _x.pelvis_m.p, _x.pelvis_m.w, _x.zmp_ref.x, _x.zmp_ref.y, _x.zmp_ref.z, _x.zmp_pc.x, _x.zmp_pc.y, _x.zmp_pc.z, _x.com_ref.x, _x.com_ref.y, _x.com_ref.z, _x.com_dot_ref.x, _x.com_dot_ref.y, _x.com_dot_ref.z, _x.com_m.x, _x.com_m.y, _x.com_m.z, _x.step_phase))
+      buff.write(_struct_33di12d.pack(_x.stance_hip.x, _x.stance_hip.y, _x.stance_hip.z, _x.pelvis_d.r, _x.pelvis_d.p, _x.pelvis_d.w, _x.swing_foot.x, _x.swing_foot.y, _x.swing_foot.z, _x.swing_foot.r, _x.swing_foot.p, _x.swing_foot.w, _x.swing_hip.x, _x.swing_hip.y, _x.swing_hip.z, _x.pelvis_m.r, _x.pelvis_m.p, _x.pelvis_m.w, _x.zmp_ref.x, _x.zmp_ref.y, _x.zmp_ref.z, _x.zmp_pc.x, _x.zmp_pc.y, _x.zmp_pc.z, _x.com_ref.x, _x.com_ref.y, _x.com_ref.z, _x.com_dot_ref.x, _x.com_dot_ref.y, _x.com_dot_ref.z, _x.com_m.x, _x.com_m.y, _x.com_m.z, _x.step_phase, _x.stance_hip_m.x, _x.stance_hip_m.y, _x.stance_hip_m.z, _x.swing_hip_m.x, _x.swing_hip_m.y, _x.swing_hip_m.z, _x.swing_foot_m.x, _x.swing_foot_m.y, _x.swing_foot_m.z, _x.swing_foot_m.r, _x.swing_foot_m.p, _x.swing_foot_m.w))
     except struct.error as se: self._check_types(se)
     except TypeError as te: self._check_types(te)
 
@@ -161,11 +174,17 @@ float64 w
         self.com_dot_ref = zmp_walk.msg.Position()
       if self.com_m is None:
         self.com_m = zmp_walk.msg.Position()
+      if self.stance_hip_m is None:
+        self.stance_hip_m = zmp_walk.msg.Position()
+      if self.swing_hip_m is None:
+        self.swing_hip_m = zmp_walk.msg.Position()
+      if self.swing_foot_m is None:
+        self.swing_foot_m = zmp_walk.msg.Pos_and_Ori()
       end = 0
       _x = self
       start = end
-      end += 268
-      (_x.stance_hip.x, _x.stance_hip.y, _x.stance_hip.z, _x.pelvis_d.r, _x.pelvis_d.p, _x.pelvis_d.w, _x.swing_foot.x, _x.swing_foot.y, _x.swing_foot.z, _x.swing_foot.r, _x.swing_foot.p, _x.swing_foot.w, _x.swing_hip.x, _x.swing_hip.y, _x.swing_hip.z, _x.pelvis_m.r, _x.pelvis_m.p, _x.pelvis_m.w, _x.zmp_ref.x, _x.zmp_ref.y, _x.zmp_ref.z, _x.zmp_pc.x, _x.zmp_pc.y, _x.zmp_pc.z, _x.com_ref.x, _x.com_ref.y, _x.com_ref.z, _x.com_dot_ref.x, _x.com_dot_ref.y, _x.com_dot_ref.z, _x.com_m.x, _x.com_m.y, _x.com_m.z, _x.step_phase,) = _struct_33di.unpack(str[start:end])
+      end += 364
+      (_x.stance_hip.x, _x.stance_hip.y, _x.stance_hip.z, _x.pelvis_d.r, _x.pelvis_d.p, _x.pelvis_d.w, _x.swing_foot.x, _x.swing_foot.y, _x.swing_foot.z, _x.swing_foot.r, _x.swing_foot.p, _x.swing_foot.w, _x.swing_hip.x, _x.swing_hip.y, _x.swing_hip.z, _x.pelvis_m.r, _x.pelvis_m.p, _x.pelvis_m.w, _x.zmp_ref.x, _x.zmp_ref.y, _x.zmp_ref.z, _x.zmp_pc.x, _x.zmp_pc.y, _x.zmp_pc.z, _x.com_ref.x, _x.com_ref.y, _x.com_ref.z, _x.com_dot_ref.x, _x.com_dot_ref.y, _x.com_dot_ref.z, _x.com_m.x, _x.com_m.y, _x.com_m.z, _x.step_phase, _x.stance_hip_m.x, _x.stance_hip_m.y, _x.stance_hip_m.z, _x.swing_hip_m.x, _x.swing_hip_m.y, _x.swing_hip_m.z, _x.swing_foot_m.x, _x.swing_foot_m.y, _x.swing_foot_m.z, _x.swing_foot_m.r, _x.swing_foot_m.p, _x.swing_foot_m.w,) = _struct_33di12d.unpack(str[start:end])
       return self
     except struct.error as e:
       raise genpy.DeserializationError(e) #most likely buffer underfill
@@ -179,7 +198,7 @@ float64 w
     """
     try:
       _x = self
-      buff.write(_struct_33di.pack(_x.stance_hip.x, _x.stance_hip.y, _x.stance_hip.z, _x.pelvis_d.r, _x.pelvis_d.p, _x.pelvis_d.w, _x.swing_foot.x, _x.swing_foot.y, _x.swing_foot.z, _x.swing_foot.r, _x.swing_foot.p, _x.swing_foot.w, _x.swing_hip.x, _x.swing_hip.y, _x.swing_hip.z, _x.pelvis_m.r, _x.pelvis_m.p, _x.pelvis_m.w, _x.zmp_ref.x, _x.zmp_ref.y, _x.zmp_ref.z, _x.zmp_pc.x, _x.zmp_pc.y, _x.zmp_pc.z, _x.com_ref.x, _x.com_ref.y, _x.com_ref.z, _x.com_dot_ref.x, _x.com_dot_ref.y, _x.com_dot_ref.z, _x.com_m.x, _x.com_m.y, _x.com_m.z, _x.step_phase))
+      buff.write(_struct_33di12d.pack(_x.stance_hip.x, _x.stance_hip.y, _x.stance_hip.z, _x.pelvis_d.r, _x.pelvis_d.p, _x.pelvis_d.w, _x.swing_foot.x, _x.swing_foot.y, _x.swing_foot.z, _x.swing_foot.r, _x.swing_foot.p, _x.swing_foot.w, _x.swing_hip.x, _x.swing_hip.y, _x.swing_hip.z, _x.pelvis_m.r, _x.pelvis_m.p, _x.pelvis_m.w, _x.zmp_ref.x, _x.zmp_ref.y, _x.zmp_ref.z, _x.zmp_pc.x, _x.zmp_pc.y, _x.zmp_pc.z, _x.com_ref.x, _x.com_ref.y, _x.com_ref.z, _x.com_dot_ref.x, _x.com_dot_ref.y, _x.com_dot_ref.z, _x.com_m.x, _x.com_m.y, _x.com_m.z, _x.step_phase, _x.stance_hip_m.x, _x.stance_hip_m.y, _x.stance_hip_m.z, _x.swing_hip_m.x, _x.swing_hip_m.y, _x.swing_hip_m.z, _x.swing_foot_m.x, _x.swing_foot_m.y, _x.swing_foot_m.z, _x.swing_foot_m.r, _x.swing_foot_m.p, _x.swing_foot_m.w))
     except struct.error as se: self._check_types(se)
     except TypeError as te: self._check_types(te)
 
@@ -210,14 +229,20 @@ float64 w
         self.com_dot_ref = zmp_walk.msg.Position()
       if self.com_m is None:
         self.com_m = zmp_walk.msg.Position()
+      if self.stance_hip_m is None:
+        self.stance_hip_m = zmp_walk.msg.Position()
+      if self.swing_hip_m is None:
+        self.swing_hip_m = zmp_walk.msg.Position()
+      if self.swing_foot_m is None:
+        self.swing_foot_m = zmp_walk.msg.Pos_and_Ori()
       end = 0
       _x = self
       start = end
-      end += 268
-      (_x.stance_hip.x, _x.stance_hip.y, _x.stance_hip.z, _x.pelvis_d.r, _x.pelvis_d.p, _x.pelvis_d.w, _x.swing_foot.x, _x.swing_foot.y, _x.swing_foot.z, _x.swing_foot.r, _x.swing_foot.p, _x.swing_foot.w, _x.swing_hip.x, _x.swing_hip.y, _x.swing_hip.z, _x.pelvis_m.r, _x.pelvis_m.p, _x.pelvis_m.w, _x.zmp_ref.x, _x.zmp_ref.y, _x.zmp_ref.z, _x.zmp_pc.x, _x.zmp_pc.y, _x.zmp_pc.z, _x.com_ref.x, _x.com_ref.y, _x.com_ref.z, _x.com_dot_ref.x, _x.com_dot_ref.y, _x.com_dot_ref.z, _x.com_m.x, _x.com_m.y, _x.com_m.z, _x.step_phase,) = _struct_33di.unpack(str[start:end])
+      end += 364
+      (_x.stance_hip.x, _x.stance_hip.y, _x.stance_hip.z, _x.pelvis_d.r, _x.pelvis_d.p, _x.pelvis_d.w, _x.swing_foot.x, _x.swing_foot.y, _x.swing_foot.z, _x.swing_foot.r, _x.swing_foot.p, _x.swing_foot.w, _x.swing_hip.x, _x.swing_hip.y, _x.swing_hip.z, _x.pelvis_m.r, _x.pelvis_m.p, _x.pelvis_m.w, _x.zmp_ref.x, _x.zmp_ref.y, _x.zmp_ref.z, _x.zmp_pc.x, _x.zmp_pc.y, _x.zmp_pc.z, _x.com_ref.x, _x.com_ref.y, _x.com_ref.z, _x.com_dot_ref.x, _x.com_dot_ref.y, _x.com_dot_ref.z, _x.com_m.x, _x.com_m.y, _x.com_m.z, _x.step_phase, _x.stance_hip_m.x, _x.stance_hip_m.y, _x.stance_hip_m.z, _x.swing_hip_m.x, _x.swing_hip_m.y, _x.swing_hip_m.z, _x.swing_foot_m.x, _x.swing_foot_m.y, _x.swing_foot_m.z, _x.swing_foot_m.r, _x.swing_foot_m.p, _x.swing_foot_m.w,) = _struct_33di12d.unpack(str[start:end])
       return self
     except struct.error as e:
       raise genpy.DeserializationError(e) #most likely buffer underfill
 
 _struct_I = genpy.struct_I
-_struct_33di = struct.Struct("<33di")
+_struct_33di12d = struct.Struct("<33di12d")

@@ -28,3 +28,7 @@ Position      com_m         # measured COM position (x,y,z)
 int32        step_phase     # 1 = Double-Support left leg in front, 2 = lift right swing leg
                             # 3 = Double-Support right leg in front, 4 = lift left swing leg 
 
+# for debug use:
+Position      stance_hip_m  # measured stance hip position (x,y,z)
+Position      swing_hip_m   # measured swing hip position (x,y,z)
+Pos_and_Ori   swing_foot_m  # measured swing foot position and orientation (x,y,z,r,p,w)

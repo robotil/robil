@@ -77,7 +77,7 @@ class ZMP_Preview_Buffer:
         #rospy.loginfo("ZMP_Preview_Buffer %s: end_of_step_preview = %f, buffer_size = %f, preview_size = %f, precede_time_samples = %f " % (self.name, self.end_of_step_preview, self.buffer_size, self.preview_size, self.precede_time_samples) )
 
         self.clearBuffer() # clear buffer
-        rospy.loginfo("ZMP_Preview_Buffer %s: data_end = %f, step_length = %f" % (self.name, self.data_end, step_length) )
+        #rospy.loginfo("ZMP_Preview_Buffer %s: data_end = %f, step_length = %f" % (self.name, self.data_end, step_length) )
 
         self.pushData(new_step[self.precede_time_samples :]) # Insert into buffer new step with (lead) time shift  
         # Insert into buffer cycles of step sequence (need to fill buffer with at least step_length+preview_size samples)
