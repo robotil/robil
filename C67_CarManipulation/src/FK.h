@@ -5,24 +5,39 @@
 #define dx 0][3
 #define dy 1][3
 #define dz 2][3
-#define x1 -0.0125
+#define x1 (-0.0125)
 #define z2 0.09
 #define z3 0.05
-#define ry 0.5
-#define rz -0.866
-#define x4 0.024
-#define y4 -0.221
-#define z4 0.289
-#define y5 (-0.075)
-#define z5 0.036
-#define y6 (-0.185)
-#define y7 (-0.121)
-#define z7 0.013
-#define y8 (-0.188)
-#define z8 (-0.013)
-#define y9 (-0.058)
-#define y67 (y6 + y7)
-#define y89 (y8 + y9)
+#define ryr 0.5
+#define rzr (-0.866025)
+#define x4r 0.024
+#define y4r (-0.221)
+#define z4r 0.289
+#define y5r (-0.075)
+#define z5r 0.036
+#define y6r (-0.185)
+#define y7r (-0.121)
+#define z7r 0.013
+#define y8r (-0.188)
+#define z8r (-0.013)
+#define y9r (-0.058)
+#define y67r (y6r + y7r)
+#define y89r (y8r + y9r)
+#define ryl 0.5
+#define rzl 0.866025
+#define x4l 0.024
+#define y4l 0.221
+#define z4l 0.289
+#define y5l 0.075
+#define z5l 0.036
+#define y6l 0.185
+#define y7l 0.121
+#define z7l 0.013
+#define y8l 0.188
+#define z8l (-0.013)
+#define y9l 0.058
+#define y67l (y6l + y7l)
+#define y89l (y8l + y9l)
 
 enum {
 	back_lbz,
@@ -58,12 +73,18 @@ enum {
 	q1 = back_lbz,
 	q2 = back_mby,
 	q3 = back_ubx,
-	q4 = r_arm_usy,
-	q5 = r_arm_shx,
-	q6 = r_arm_ely,
-	q7 = r_arm_elx,
-	q8 = r_arm_uwy,
-	q9 = r_arm_mwx
+	q4l = l_arm_usy,
+	q5l = l_arm_shx,
+	q6l = l_arm_ely,
+	q7l = l_arm_elx,
+	q8l = l_arm_uwy,
+	q9l = l_arm_mwx,
+	q4r = r_arm_usy,
+	q5r = r_arm_shx,
+	q6r = r_arm_ely,
+	q7r = r_arm_elx,
+	q8r = r_arm_uwy,
+	q9r = r_arm_mwx
 	
 };
 
@@ -71,16 +92,20 @@ enum {
 class Matrix{
 	//double q[10];	
 	
-	void Update(double A[4][4], int Type, double val);
+	void rUpdate(double A[4][4], int Type, double val);
+	void lUpdate(double A[4][4], int Type, double val);
 	void RotateX(double A[4][4], double val);
 	void RotateY(double A[4][4], double val);
 	void RotateZ(double A[4][4], double val);
-	void RotateYZ(double A[4][4], double val);
+	void rRotateYZ(double A[4][4], double val);
+	void lRotateYZ(double A[4][4], double val);
 public:
 	double T[4][4];	
 	Matrix(){}
-	void Get(int Type, double val);
-	void Multiply(int Type, double val);
+	void rGet(int Type, double val);
+	void lGet(int Type, double val);
+	void rMultiply(int Type, double val);
+	void lMultiply(int Type, double val);
 	void Multiply(Matrix A);
 	void Inverse();
 	void Print(); 
@@ -97,7 +122,7 @@ public:
 	void Print();
 };
 
-Matrix DestinationRhand(double mq1,double mq2,double mq3,double mq4, RPY Target);
-
+Matrix rDest(double mq1,double mq2,double mq3,double mq4, RPY Target);
+Matrix lDest(double mq1,double mq2,double mq3,double mq4, RPY Target);
 
 #endif
