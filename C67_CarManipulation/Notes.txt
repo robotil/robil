@@ -9,13 +9,23 @@ to test one of the 6 action servers, use 6 client nodes.
 
 for example:
 to test SteeringWheel_Server:
-rosrun C67_CarManipulation SteeringWheel_Client 
+
+run server:
+rosrun C67_CarManipulation SteeringWheel_server
+
+run client:
+rosrun C67_CarManipulation SteeringWheel_client 
 -------------------------------------------------------------------------------
 
-to test the rPoint node, run it with *RPY parameters.
+to test the rPoint,lPoint nodes, run it with *RPY parameters.
 
 for example:
+
+right hand:
 rosrun C67_CarManipulation rPoint .257 -.648 .420 .1 -.1 1.336
+
+left hand:
+rosrun C67_CarManipulation lPoint .261 .632 .465 .007 -.026 -1.498
 
 if solution exists the movement command will be transfered to the DRC module.
 if no solution was found, no command will be sent to the module.
@@ -29,7 +39,7 @@ if solution exists the node prints:
 -the last 5 arm's angles before command
 -the last 5 arm's new angles in the command.
 
-example print:
+example print: 
 RPY(0.257, -0.648, 0.42, 0.1, -0.1, 1.336)
 [ INFO] [1361356348.839777701, 12350.913000000]: 
 error: 0.00545672
