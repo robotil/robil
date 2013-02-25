@@ -32,8 +32,21 @@ rosbuild_gensrv()
 #target_link_libraries(example ${PROJECT_NAME})
 
 
+
+find_package( PCL 1.5 REQUIRED )
+
+include_directories(${PCL_INCLUDE_DIRS})
+link_directories(${PCL_LIBRARY_DIRS})
+add_definitions(${PCL_DEFINITIONS})
 rosbuild_add_boost_directories()
+
+find_package(OpenCV REQUIRED)
+
 rosbuild_add_executable(C25 src/C25_Node.cpp)
 rosbuild_link_boost(C25 thread signals)
+target_link_libraries(C25 ${PCL_LIBRARIES})
 rosbuild_add_executable(C25_test src/C25_test.cpp)
 rosbuild_link_boost(C25_test thread signals)
+rosbuild_add_executable(C25_test2 src/C25_objectTest.cpp)
+target_link_libraries(C25_test2 ${OpenCV_LIBS})
+rosbuild_link_boost(C25_test2 thread signals)

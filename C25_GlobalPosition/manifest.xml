@@ -15,6 +15,14 @@
   <depend package="message_filters"/>
   <depend package="rospy"/>
   <depend package="C0_RobilTask"/>
+  <depend package="pcl"/>
+  <depend package="pcl_ros"/>
+  <depend package="tf"/>
+  <depend package="opencv2"/>
+  <depend package="geometry_msgs"/>
+  <depend package="opencv2"/>
+  <depend package="C21_VisionAndLidar"/>
+  <depend package="C23_ObjectRecognition"/>
 </package>
 
 
