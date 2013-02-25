@@ -16,7 +16,7 @@
   <depend package="pr2_mechanism_msgs"/>
   <depend package="C31_PathPlanner"/>
   <depend package="DRCSim2_tools"/>
-
+  <depend package="zmp_walk"/>
 </package>
 
 
