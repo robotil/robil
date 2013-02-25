@@ -206,10 +206,10 @@ go = 0
 
 while not rospy.is_shutdown():
   
-  pub_zmp.publish(out) 
   interval.sleep()
 
   if ns.walk == 1:
+      pub_zmp.publish(out) 
       
       rospy.loginfo("started walking")
       rospy.loginfo("time:")
