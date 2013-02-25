@@ -18,10 +18,13 @@ enum status{AVAILABLE,BLOCKED,UNCHARTED};		//AVAILABLE = 0,BLOCKED = 1,UNCHARTED
 class MapSquare {
 public:
 	int rating;
+	bool ratable;
 	status square_status;
 	std::vector<MPlane*> *square_Planes;
 	MapSquare();
 	virtual ~MapSquare();
+	void addRating();
+	void setRatable();
 	void clearSq();
 	bool hasPlane(MPlane* other);
 	MPlane* getPlane(MPlane* other);

@@ -22,6 +22,7 @@
 #include <pcl/point_types.h>
 #include <pcl/filters/extract_indices.h>
 #include <pcl/filters/voxel_grid.h>
+#include <pcl/filters/statistical_outlier_removal.h>
 #include <pcl/segmentation/sac_segmentation.h>
 #include <iostream>
 #include <pcl/io/pcd_io.h>
@@ -58,8 +59,8 @@ C22_Node::C22_Node():
 	//test2=nh_.subscribe("/ground_truth_odom",1,&C22_Node::callback3,this);
 	service = nh_.advertiseService("C22", &C22_Node::proccess, this); //Specifying what to do when a reconstructed 3d scene is requested
 	service2 = nh_.advertiseService("C22/C24", &C22_Node::proccess2, this); //Specifying what to do when a reconstructed 3d scene is requested
-	pcl::PointCloud<pcl::PointXYZ>::Ptr basic_cloud_ptr (new pcl::PointCloud<pcl::PointXYZ>);
-	/*std::cout << "Genarating example point clouds.\n\n";
+	/*pcl::PointCloud<pcl::PointXYZ>::Ptr basic_cloud_ptr (new pcl::PointCloud<pcl::PointXYZ>);
+	std::cout << "Genarating example point clouds.\n\n";
 	// We're going to make an ellipse extruded along the z-axis. The color for
 	for (float z(-1.0); z <= 1.0; z += 0.05)
 	{
@@ -80,8 +81,7 @@ C22_Node::C22_Node():
 	viewer->setBackgroundColor (0, 0, 0);
 	viewer->addPointCloud<pcl::PointXYZ> (basic_cloud_ptr, "reconstruction");
 	viewer->addCoordinateSystem ( 1.0 );
-	viewer->initCameraParameters ();
-*/
+	viewer->initCameraParameters ();*/
 }
 
 /**
@@ -153,22 +153,31 @@ void C22_Node::callback(const C21_VisionAndLidar::C21_C22::ConstPtr& pclMsg,cons
 	 // Create the filtering object: downsample the dataset using a leaf size of 5cm
 	 pcl::VoxelGrid<pcl::PointXYZ> vg;
 	 pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_filtered(new pcl::PointCloud<pcl::PointXYZ>);
-	 vg.setInputCloud (cloud_backup);
-	 vg.setLeafSize (0.05f, 0.05f, 0.05f);
-	 vg.filter (*cloud_filtered);
+	 // create the radius outlier removal filter
+	  vg.setInputCloud (cloud_backup);
+	  vg.setLeafSize (0.01f, 0.01f, 0.01f);
+	  vg.filter (*cloud_filtered);
+	 pcl::StatisticalOutlierRemoval<pcl::PointXYZ> sor;
+	  sor.setInputCloud (cloud_filtered);
+	  sor.setMeanK (100);
+	  sor.setStddevMulThresh (1.0);
+	  sor.filter (*cloud_filtered);
+
+
 	 tf::Transform trans;
-	 trans.setOrigin(tf::Vector3(pclMsg->pose.position.x,pclMsg->pose.position.z,pclMsg->pose.position.y));
-	 trans.setRotation(tf::Quaternion(pclMsg->pose.orientation.x,pclMsg->pose.orientation.z,pclMsg->pose.orientation.y,pclMsg->pose.orientation.w));
+	 trans.setOrigin(tf::Vector3(pclMsg->pose.position.x,pclMsg->pose.position.y,pclMsg->pose.position.z));
+	 trans.setRotation(tf::Quaternion(pclMsg->pose.orientation.x,pclMsg->pose.orientation.y,pclMsg->pose.orientation.z,pclMsg->pose.orientation.w));
 	 tf::Transform trans2;
-	 	 trans2.setOrigin(tf::Vector3(pos_msg->pose.pose.position.x,pos_msg->pose.pose.position.z,pos_msg->pose.pose.position.y));
-	 	 trans2.setRotation(tf::Quaternion(pos_msg->pose.pose.orientation.x,pos_msg->pose.pose.orientation.z,pos_msg->pose.pose.orientation.y,pos_msg->pose.pose.orientation.w));
+	 	 trans2.setOrigin(tf::Vector3(pos_msg->pose.pose.position.x,pos_msg->pose.pose.position.y,pos_msg->pose.pose.position.z));
+	 	 trans2.setRotation(tf::Quaternion(pos_msg->pose.pose.orientation.x,pos_msg->pose.pose.orientation.y,pos_msg->pose.pose.orientation.z,pos_msg->pose.pose.orientation.w));
 	 tf::Transform trans3;
 	 	 trans3.setOrigin(tf::Vector3(0.0,-0.002, 0.035 ));
-	 	 trans3.setRotation(tf::Quaternion(0,0,0,1));
+	 	 trans3.setRotation(tf::Quaternion(-1.57,3.14,1.57));
 	 Eigen::Matrix4f sensorToHead,headTopelvis,pelvisToWorld;
 	 pcl_ros::transformAsMatrix(trans3, sensorToHead);
-	 pcl_ros::transformAsMatrix(trans, headTopelvis);
+     pcl_ros::transformAsMatrix(trans, headTopelvis);
 	 pcl_ros::transformAsMatrix(trans2, pelvisToWorld);
+
 	 robotPos.x=pos_msg->pose.pose.position.x;
 	 robotPos.y=pos_msg->pose.pose.position.y;
 	 robotPos.z=pos_msg->pose.pose.position.z;
@@ -182,7 +191,6 @@ void C22_Node::callback(const C21_VisionAndLidar::C21_C22::ConstPtr& pclMsg,cons
 	 _myMatrix->updateMapRelationToWorld(pos_msg->pose.pose.position.x,pos_msg->pose.pose.position.y);
 	 //_myMatrix->clearMatrix();
 	 pcl::PointCloud<pcl::PointXYZ>::Ptr cloudf_backup(cloud_filtered->makeShared());
-
 	  /*
 	   * while there are indices there are planes we haven't checked
 	   */
@@ -228,6 +236,7 @@ void C22_Node::callback(const C21_VisionAndLidar::C21_C22::ConstPtr& pclMsg,cons
 
 	  }
 	  _myMatrix->computeMMatrix(_myPlanes,cloudf_backup);//cloud_filtered);
+
 	  while(_myPlanes->size()!=0){
 		  pclPlane* temp=_myPlanes->back();
 		  _myPlanes->pop_back();
