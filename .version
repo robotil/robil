@@ -1,4 +1,4 @@
-V0.0.0.88
+V0.0.0.89
 =======================================================
 C0_RobilTask     			0.5
 C0_Scripts     			        0.13
@@ -11,7 +11,7 @@ C23_ObjectRecognition     		0.10
 C24_ObstacleDetection     		0.5
 C25_GlobalPosition     			0.5
 C31_PathPlanner     			0.6
-C34_BTExecuter     			0.7
+C34_BTExecuter     			0.8
 C34_Designer     			0.18
 C34_Executer     			0.7
 C35_Monitoring     			0.4
