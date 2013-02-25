@@ -17,12 +17,7 @@ def zmp_client():
     client.wait_for_server()
 
     # Creates a goal to send to the action server.
-
     goal = C42_ZmpWlkGoal()
-    #rospy.wait_for_service("C31_GetPath_srv")
-    #goal.goal_pos.theta = 0
-    #goal.tol = 0.1
-    # Sends the goal to the action server.
     client.send_goal(goal)
     # Waits for the server to finish performing the action.
     client.wait_for_result()

@@ -63,6 +63,7 @@ class ZmpWlkServer(object):
   def task(self, goal):
     #init_zmp.init_pose_with_trajectory_controllers()
     init_pose()
+    rospy.sleep(2)
     rospy.loginfo("pos init")
 
     pth = self._get_path()
