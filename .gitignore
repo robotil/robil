@@ -18,6 +18,7 @@
 *~
 #"Compiled" python files
 *.pyc
+__init__.py
 #QT Creator files
 qtcreator-build/
 #ROS auto-make files
@@ -27,4 +28,6 @@ msg_gen/
 srv_gen/
 #java bin files
 *.class
+#Designer logging and debuging
+BTDesigner_stdout.log
 

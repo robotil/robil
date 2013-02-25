@@ -46,7 +46,7 @@ public class Task extends GElement implements View.ChangesListener {
 	private Tooltip _debugInfo;
 	private Tooltip _runtimeInfo;
 	private Document _document;
-	private ArrayList<TaskResult> _resultsHistory = new ArrayList<TaskResult>();
+	private TaskResultCollection _resultsHistory = new TaskResultCollection();
 	private Date _runStart;
 	private Date _runFinish;
 	private boolean _runFailed;
@@ -73,6 +73,7 @@ public class Task extends GElement implements View.ChangesListener {
 	@Override
 	public GElement clone() {
 		Task n = new Task();
+		n.setDocument(this._document);
 		cloneInit(n);
 		
 		if (this.text != null)
@@ -83,8 +84,16 @@ public class Task extends GElement implements View.ChangesListener {
 		
 		n.seqNumber = this.seqNumber;
 		
-		n._debugInfo = (Tooltip)this._debugInfo.clone();
-		n._runtimeInfo = (Tooltip)this._runtimeInfo.clone();
+		n._debugInfo = (Tooltip)this._debugInfo.clone(n);
+		n._runtimeInfo = (Tooltip)this._runtimeInfo.clone(n);
+		n._resultsHistory = this._resultsHistory;
+		n._debugInfo = this._debugInfo;
+		n._runtimeInfo = this._runtimeInfo;
+		n._runFailed = this._runFailed;
+		n._runFinish = this._runFinish;
+		n._runStart = this._runStart;
+		n._isRunning = this._isRunning;
+		
 		
 		return n;
 	}
@@ -154,14 +163,18 @@ public class Task extends GElement implements View.ChangesListener {
 		// *******************************************************************************
 		// Draw tooltips *****************************************************************
 		// *******************************************************************************
-		if (this.type.equalsIgnoreCase(TYPE_task) && this.property.leftClicked && this.taskDescriptionProvider != null) 			
+		if (this.type.equalsIgnoreCase(TYPE_task) && this.property.leftClicked && this.taskDescriptionProvider != null) {
+			this._tooltip.setView(this.getView());
 			this._tooltip.paint(g);
+		}
 		else if (this.type.equalsIgnoreCase(TYPE_task) && isDebugViewEnabled()) {
 			// Draw debug info tooltip
+			this._debugInfo.setView(this.getView());
 			this._debugInfo.setMessage(String.format("Duration: %d\n%sDebug: %b", this.property.test_time, !this.property.test_result ? "$RED$" : "",this.property.test_result));
 			this._debugInfo.paint(g);
 		} else if (this.type.equalsIgnoreCase(TYPE_task) && isRuntimeViewEnabled()) {
 			// this._runtimeInfo.setMessage(getRunResultsString());
+			this._runtimeInfo.setView(this.getView());
 			this._runtimeInfo.paint(g);
 		}
 		
@@ -294,7 +307,7 @@ public class Task extends GElement implements View.ChangesListener {
 		this.taskDescriptionProvider = provider;
 
 		String cleanName = getNameWithoutParameters();
-		TaskDescription.Task taskDesc = this.taskDescriptionProvider.get(cleanName);
+		TaskDescription.TaskInfo taskDesc = this.taskDescriptionProvider.get(cleanName);
 		if (taskDesc != null)
 			this._tooltip.setMessage("Description", taskDesc.algorithm);
 	}
@@ -303,7 +316,7 @@ public class Task extends GElement implements View.ChangesListener {
 		return this.taskDescriptionProvider;
 	}
 	
-	public ArrayList<TaskResult> getRunResults() {
+	public TaskResultCollection getRunResults() {
 		return _resultsHistory;
 	}
 	

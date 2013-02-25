@@ -60,7 +60,7 @@ public class RosPipe {
 			result = result + string + " ! ";
 		}
 
-		Log.e(result);
+		Log.i("ROSPIPE", result);
 	}
 
 	private void receive(RosTargets target, String streamid, LineProcessor processor )
@@ -150,7 +150,7 @@ public class RosPipe {
 			return;
 		}
 		if(Parameters.log_ros_progress_print_level > 1)
-			Log.d("   send message to ros.");
+			Log.i("ROSPIPE", "   send message to ros.");
 		send(target, sid.toString(), args);
 
 		if (this.thread.isInterrupted()) {
@@ -158,7 +158,7 @@ public class RosPipe {
 		}
 
 		if(Parameters.log_ros_progress_print_level > 1)
-			Log.d("   listen output stream from ros.");
+			Log.i("ROSPIPE", "   listen output stream from ros.");
 		receive(target, sid.toString(), processor);
 
 	}

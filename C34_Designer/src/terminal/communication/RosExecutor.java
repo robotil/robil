@@ -29,26 +29,25 @@ public class RosExecutor {
 		this.workerThreads.add(new Thread(new RosStopStreamListener(designer),
 				"RosStopListener"));
 
-		for (Thread t : this.workerThreads) {
+		for (Thread t : this.workerThreads)
 			t.start();
-		}
 	}
 
 	public void pauseBehaviorTree(String btName) {
 		ServiceCaller caller = new ServiceCaller();
-		Log.d("Pause " + btName);
+		Log.i("ROSEXECUTOR", "Pause " + btName);
 		caller.callService(PAUSE, btName);
 	}
 
 	public void resumeBehaviorTree(String btName) {
-		Log.d("Resume " + btName);
+		Log.i("ROSEXECUTOR", "Resume " + btName);
 		ServiceCaller caller = new ServiceCaller();
 		caller.callService(RESUME, btName);
 	}
 
 	public void runBehaviorTree(String btName, String plan) {
 		ServiceCaller caller = new ServiceCaller();
-		Log.d("Run " + btName);
+		Log.i("ROSEXECUTOR", "Run " + btName);
 		caller.callService(RUN, btName, plan);
 	}
 
@@ -60,13 +59,13 @@ public class RosExecutor {
 
 	public void stepBehaviorTree(String btName) {
 		ServiceCaller caller = new ServiceCaller();
-		Log.d("Step " + btName);
+		Log.i("ROSEXECUTOR", "Step " + btName);
 		caller.callService(STEP, btName);
 	}
 
 	public void stopBehaviorTree(String btName) {
 		ServiceCaller caller = new ServiceCaller();
-		Log.d("Stop " + btName);
+		Log.i("ROSEXECUTOR", "Stop " + btName);
 		caller.callService(STOP, btName);
 	}
 

@@ -47,7 +47,7 @@ public class RunAction extends AbstractDesignerAction implements ActionListener 
 
 	private void resumePlan() {
 		String id = getActiveTab().getID();
-		Log.d("GET ACTIVE TAB ID = " + id);
+		Log.i("ROSACTION", "GET ACTIVE TAB ID = " + id);
 		this.designer.rosExecutor.resumeBehaviorTree(id);
 	}
 
@@ -66,7 +66,7 @@ public class RunAction extends AbstractDesignerAction implements ActionListener 
 					+ doc.getShortFilePath();
 		}
 
-		Log.d("RUN PLAN FILE : " + fileName);
+		Log.i("ROSACTION", "RUN PLAN FILE : " + fileName);
 
 		if (fileName == null) {
 			JOptionPane
@@ -81,18 +81,19 @@ public class RunAction extends AbstractDesignerAction implements ActionListener 
 		// fileName);
 
 		String id = Utils.randomString(10); // "Matan";
-		Log.d("SET ACTIVE TAB ID = " + id);
+		Log.i("ROSACTION", "Set active tab id to " + id);
 		getActiveTab().setID(id);
 		this.designer.rosExecutor.runBehaviorTree(id, fileName);
+		this.designer.getMenubar().setRunView();
 	}
 
 	@SuppressWarnings("unused")
 	private void runPlanXML(String id, String xml) {
-		Log.d("RUN PLAN XML : " + xml);
+		Log.i("ROSACTION", "Run plan xml: " + xml);
 
 		if (id == null)
 			id = Utils.randomString(10); // "Matan";
-		Log.d("SET ACTIVE TAB ID = " + id);
+		Log.i("ROSACTION", "Set active tab id to " + id);
 		getActiveTab().setID(id);
 
 		this.designer.rosExecutor.runBehaviorTree(id, xml);

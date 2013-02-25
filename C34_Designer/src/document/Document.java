@@ -501,7 +501,7 @@ public class Document extends JPanel {
 				return false;
 			}
 			for (GElement ea : this.arrays) {
-				if (((Task) ((Arrow) ea).getSource()).type == Task.TYPE_task) {
+				if (((Task) ((Arrow) ea).getSource()).type.equalsIgnoreCase(Task.TYPE_task)) {
 					this.tip.setText("ERROR: Task in BT is a TERMINAL node");
 					return false;
 				}
@@ -555,23 +555,6 @@ public class Document extends JPanel {
 	public void copyTree(GElement el) {
 		onBeforeTreeChange(TreeChangeType.TreeCopy, el);
 
-//		el.setView(this.view);
-//		
-//		ArrayList<GElement> targets = searchAllSubelements(el);
-//		targets.add(el);
-//		
-//		HashMap<GElement, GElement> link = new HashMap<GElement, GElement>();
-//		for (GElement t : targets) {
-//			GElement n = t.clone();
-//			link.put(t, n);
-//			add(n);
-//			n.getProperty().loc = n.getProperty().loc.add(new Vec(10, 10));
-//			n.getProperty().leftClicked = false;
-//		}
-//		
-//		for (GElement t : targets) 
-//			link.get(t).cloneReconnect(link);
-		
 		ArrayList<GElement> sourceElements = new ArrayList<GElement>();
 		ArrayList<GElement> sourceArrows  = arrays;
 		ArrayList<GElement> outElements = new ArrayList<GElement>();
@@ -604,21 +587,6 @@ public class Document extends JPanel {
 	public void copyTree(GElement el, Document sourceDocument) {
 		onBeforeTreeChange(TreeChangeType.TreeCopy, el);
 
-//		ArrayList<GElement> targets = sourceDocument.searchAllSubelements(el);
-//		targets.add(el);
-//		
-//		HashMap<GElement, GElement> link = new HashMap<GElement, GElement>();
-//		for (GElement t : targets) {
-//			GElement n = t.clone();
-//			link.put(t, n);
-//			add(n);
-//			n.getProperty().loc = n.getProperty().loc.add(new Vec(10, 10));
-//			n.getProperty().leftClicked = false;
-//		}
-//		
-//		for (GElement t : targets) 
-//			link.get(t).cloneReconnect(link);
-		
 		ArrayList<GElement> sourceElements = new ArrayList<GElement>();
 		ArrayList<GElement> sourceArrows  = sourceDocument.arrays;
 		ArrayList<GElement> outElements = new ArrayList<GElement>();
@@ -724,7 +692,7 @@ public class Document extends JPanel {
 	}
 
 	public String createXml(Task root, String tab, boolean justNames) {
-		if (root.type == Task.TYPE_task)
+		if (root.type.equalsIgnoreCase(Task.TYPE_task))
 			return tab + "<" + xmlNameOfTask(root.type) + " name=\""
 					+ root.text + "\""
 					+ (justNames ? "" : " " + strTaskProperties(root)) + " />";
@@ -777,7 +745,7 @@ public class Document extends JPanel {
 		int i = 1;
 		for (GElement ea : this.elements)
 			if (ea instanceof Task && ((Task) ea).type.equals(Task.TYPE_task)) {
-				TaskDescription.Task taskDesc = this.task_description
+				TaskDescription.TaskInfo taskDesc = this.task_description
 						.get(((Task) ea).getNameWithoutParameters());
 				if (taskDesc != null)
 					taskDescString = taskDesc.algorithm;
@@ -1480,15 +1448,15 @@ public class Document extends JPanel {
 		for (GElement el : elements) {
 			if (el instanceof Task) {
 				Task t = ((Task) el);
-				if (t.type == Task.TYPE_sequenser
-						|| t.type == Task.TYPE_selector) {
+				if (t.type.equalsIgnoreCase(Task.TYPE_sequenser)
+						|| t.type.equalsIgnoreCase(Task.TYPE_selector)) {
 					int i = 1;
 					for (GElement e : getSubElements(t)) {
 						if (e instanceof Task) {
 							((Task) e).seqNumber = i++;
 						}
 					}
-				} else if (t.type == Task.TYPE_switch) {
+				} else if (t.type.equalsIgnoreCase(Task.TYPE_switch)) {
 					int i = 0;
 					for (GElement e : getSubElements(t)) {
 						if (e instanceof Task) {
@@ -1639,6 +1607,7 @@ public class Document extends JPanel {
 			@Override
 			public void run() {
 				ArrayList<String> cmd = new ArrayList<String>();
+				mainWindow.getMenubar().setDebugView();
 				if (OSValidator.isUnix()) {
 					String[] f1 = new String[] { "./BTExecuter-lin.exe",
 							"./BTExecuter-lin.bin", "./BTExecuter-lin.a",
@@ -1730,17 +1699,17 @@ public class Document extends JPanel {
 	}
 
 	public String xmlNameOfTask(String tname) {
-		if (tname == Task.TYPE_selector)
+		if (tname.equalsIgnoreCase(Task.TYPE_selector))
 			return "sel";
-		if (tname == Task.TYPE_sequenser)
+		if (tname.equalsIgnoreCase(Task.TYPE_sequenser))
 			return "seq";
-		if (tname == Task.TYPE_task)
+		if (tname.equalsIgnoreCase(Task.TYPE_task))
 			return "tsk";
-		if (tname == Task.TYPE_parallel)
+		if (tname.equalsIgnoreCase(Task.TYPE_parallel))
 			return "par";
-		if (tname == Task.TYPE_switch)
+		if (tname.equalsIgnoreCase(Task.TYPE_switch))
 			return "swi";
-		return "";
+		return "UNKNOWN_TASK_TYPE";
 	}
 
 	public boolean close() {

@@ -1,64 +1,102 @@
 <plan descriptions="./plans/TaskDescriptions.xml">
-   <seq name="event1"> 
-         <tsk name="Initiate Mounted Mobility Mission" />
-         <par name="Perception and Execution"> 
-               <par name="DB Information"> 
-                     <tsk name="Receive own localization" />
-                     <tsk name="Receive vehicle possible localization" />
-                     <tsk name="Receive world model" />
-                     <tsk name="Receive Vehicle parameterics " />
-               </par>
-               <seq name="Execution"> 
-                     <seq name="Target Identification"> 
-                           <tsk name="Stand Up" />
-                           <tsk name="Turn to face presumed target" />
-                           <tsk name="Perform an all-around scan" />
-                           <tsk name="Identify possible target locations" />
-                           <tsk name="Select target" />
-                           <tsk name="Send 360? panoramic image to Operator" />
-                           <tsk name="Send target parametrics to Operator" />
-                           <tsk name="OCU shows targets overlay on panoramic image with critical parametrics (driver door) " />
-                           <tsk name="Receive Operator OK/override to target parametrics" />
-                     </seq>
-                     <seq name="Entry position"> 
-                           <tsk name="Walk to target (Refer to Event 2)" />
-                           <tsk name="Stand at entry position" />
-                           <tsk name="Direct sensors at doorway and cabin" />
-                           <tsk name="Identify cabin parametrics" />
-                           <tsk name="Send cabin image to Operator" />
-                           <tsk name="Send parametrics to Operator" />
-                           <tsk name="OCU shows parametrics overlay on cabin image " />
-                           <tsk name="Receive Operator OK/override to cabin parametrics" />
+   < name="event1"> 
+         < name="Initiate Mounted Mobility Mission"> 
+         </>
+         < name="Perception and Execution"> 
+               < name="DB Information"> 
+                     < name="Receive own localization"> 
+                     </>
+                     < name="Receive vehicle possible localization"> 
+                     </>
+                     < name="Receive world model"> 
+                     </>
+                     < name="Receive Vehicle parameterics "> 
+                     </>
+               </>
+               < name="Execution"> 
+                     < name="Target Identification"> 
+                           < name="Stand Up"> 
+                           </>
+                           < name="Turn to face presumed target"> 
+                           </>
+                           < name="Perform an all-around scan"> 
+                           </>
+                           < name="Identify possible target locations"> 
+                           </>
+                           < name="Select target"> 
+                           </>
+                           < name="Send 360? panoramic image to Operator"> 
+                           </>
+                           < name="Send target parametrics to Operator"> 
+                           </>
+                           < name="OCU shows targets overlay on panoramic image with critical parametrics (driver door) "> 
+                           </>
+                           < name="Receive Operator OK/override to target parametrics"> 
+                           </>
+                     </>
+                     < name="Entry position"> 
+                           < name="Walk to target (Refer to Event 2)"> 
+                           </>
+                           < name="Stand at entry position"> 
+                           </>
+                           < name="Direct sensors at doorway and cabin"> 
+                           </>
+                           < name="Identify cabin parametrics"> 
+                           </>
+                           < name="Send cabin image to Operator"> 
+                           </>
+                           < name="Send parametrics to Operator"> 
+                           </>
+                           < name="OCU shows parametrics overlay on cabin image "> 
+                           </>
+                           < name="Receive Operator OK/override to cabin parametrics"> 
+                           </>
                         <dec name="!L!"> 
-                              <sel name="Entry routine"> 
-                                    <seq name="Enter to Car"> 
-                                          <tsk name="Adjust standing position in relation to cabin" />
-                                          <tsk name="Adjust entry posture" />
-                                          <tsk name="Perform entry routine" />
-                                    </seq>
+                              < name="Entry routine"> 
+                                    < name="Enter to Car"> 
+                                          < name="Adjust standing position in relation to cabin"> 
+                                          </>
+                                          < name="Adjust entry posture"> 
+                                          </>
+                                          < name="Perform entry routine"> 
+                                          </>
+                                    </>
                                  <dec name="!"> 
-                                       <tsk name="Reverse entry routine" />
+                                       < name="Reverse entry routine"> 
+                                       </>
                                  </dec>
-                              </sel>
+                              </>
                         </dec>
-                     </seq>
+                     </>
                   <dec name="!L!"> 
-                        <seq name="Driving"> 
-                              <tsk name="Identify control parametrics" />
-                              <tsk name="Send parametrics to Operator" />
-                              <tsk name="OCU shows parametrics overlay on controls image " />
-                              <tsk name="Send image to Operator" />
-                              <tsk name="Receive Operator overrides to parametrics" />
-                              <tsk name="Adjust posture" />
-                              <tsk name="Grip steering wheel" />
-                              <tsk name="Turn slightly left and right" />
-                              <tsk name="Grip starter switch" />
-                              <tsk name="Turn slightly left and right" />
-                              <tsk name="Place feet on pedals" />
-                              <tsk name="Press and release slightly" />
-                        </seq>
+                        < name="Driving"> 
+                              < name="Identify control parametrics"> 
+                              </>
+                              < name="Send parametrics to Operator"> 
+                              </>
+                              < name="OCU shows parametrics overlay on controls image "> 
+                              </>
+                              < name="Send image to Operator"> 
+                              </>
+                              < name="Receive Operator overrides to parametrics"> 
+                              </>
+                              < name="Adjust posture"> 
+                              </>
+                              < name="Grip steering wheel"> 
+                              </>
+                              < name="Turn slightly left and right"> 
+                              </>
+                              < name="Grip starter switch"> 
+                              </>
+                              < name="Turn slightly left and right"> 
+                              </>
+                              < name="Place feet on pedals"> 
+                              </>
+                              < name="Press and release slightly"> 
+                              </>
+                        </>
                   </dec>
-               </seq>
-         </par>
-   </seq>
+               </>
+         </>
+   </>
 </plan>

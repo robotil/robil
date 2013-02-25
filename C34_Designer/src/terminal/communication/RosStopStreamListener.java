@@ -26,7 +26,7 @@ public class RosStopStreamListener implements Runnable {
 				processor, "echo", RosExecutor.STOP_STREAM);
 
 		try {
-			Log.d("Try to connect to ROS topic: " + RosExecutor.STOP_STREAM);
+			Log.i("STOPSTREAM", "Try to connect to ROS topic: " + RosExecutor.STOP_STREAM);
 			pipe.sendAndReceive();
 		} catch (IOException ex) {
 			Log.e("ROS COMMUNICATION CRITICAL ERROR: on listening to " + RosExecutor.STOP_STREAM);

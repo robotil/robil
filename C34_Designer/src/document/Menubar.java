@@ -409,17 +409,6 @@ public class Menubar extends JMenuBar {
 
 		ImageIcon icon;
 
-		// new
-//		icon = new ImageIcon(getClass().getClassLoader().getResource(
-//				"icons/new_tab.png"));
-//		JMenuItem menuItemNew = new JMenuItem("New", KeyEvent.VK_N);
-//		menuItemNew.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_1,
-//				ActionEvent.ALT_MASK));
-//		menuItemNew.setToolTipText("creates new instance of BTDesigner");
-//		menuItemNew.addActionListener(new NewWindowAction(designer));
-//		menuItemNew.setIcon(icon);
-//		menu.add(menuItemNew);
-
 		// open terminal
 		icon = new ImageIcon(getClass().getClassLoader().getResource(
 				"icons/terminal.png"));
@@ -480,6 +469,16 @@ public class Menubar extends JMenuBar {
 	
 	public JCheckBoxMenuItem getRuntimeViewMenuItem() {
 		return _runtimeViewMenuItem;
+	}
+
+	public void setRunView() {
+		_runtimeViewMenuItem.setSelected(true);
+		_debugViewMenuItem.setSelected(false);
+	}
+	
+	public void setDebugView() {
+		_runtimeViewMenuItem.setSelected(false);
+		_debugViewMenuItem.setSelected(true);
 	}
 
 }

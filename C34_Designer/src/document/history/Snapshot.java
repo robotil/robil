@@ -48,11 +48,12 @@ class Snapshot {
 		ArrayList<GElement> arrows   = new ArrayList<GElement>();
 		
 		// Set elements & arrows to allow cloning
-		_document.elements = _elements;
-		_document.arrays  	= _arrows;
+		// _document.elements = _elements;
+		// _document.arrays  	= _arrows;
 		
 		// Clone elements & arrows
-		_document.cloneElements(elements, arrows);
+		// _document.cloneElements(elements, arrows);
+		_document.cloneElements(_elements, _arrows, elements, arrows);
 		
 		// Replace elements & arrows by clones
 		_document.elements = elements;
