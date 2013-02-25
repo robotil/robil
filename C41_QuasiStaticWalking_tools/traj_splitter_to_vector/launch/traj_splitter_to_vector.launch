@@ -1,0 +1,3 @@
+<launch>
+	<node name="$(anon traj_vector_server)" pkg="traj_splitter_to_vector" type="traj_vector_server" cwd="node" output="screen" />
+</launch>
