@@ -1,6 +1,7 @@
 #! /usr/bin/env python
 
 import roslib; roslib.load_manifest('C42_DynamicLocomotion')
+from zmp_init import init_pose()
 import numpy as np
 import rospy
 import actionlib
@@ -10,7 +11,6 @@ from C31_PathPlanner.srv import *
 from C31_PathPlanner.msg import C31_Location
 from std_msgs.msg import Float64, Int32
 import geometry_msgs.msg as gm
-import init_zmp
 
 
 class ZmpWlkServer(object):
@@ -63,13 +63,13 @@ class ZmpWlkServer(object):
   #def task(self, goal):
   def task(self, goal):
     #init_zmp.init_pose_with_trajectory_controllers()
-    #init_zmp.main()
+    init_pose()
     rospy.loginfo("pos init")
+
     pth = self._get_path()
     self._nxt_wp.x = pth.path.points[1].x#2
     self._nxt_wp.y = pth.path.points[1].y#0
     # start executing the action
-    init_zmp.main()
     self.walk_pub.publish(Int32(1))
     
     #### LOG TASK PARAMETERS ####
