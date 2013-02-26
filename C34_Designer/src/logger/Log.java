@@ -3,6 +3,8 @@ package logger;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.concurrent.locks.ReentrantLock;
+
 
 /**
  * Provides a comfortable way to log debug & trace information 
@@ -12,7 +14,7 @@ import java.util.Date;
 public class Log {
 	
 	private static ArrayList<String> _disabledTags = new ArrayList<String>();
-	
+	private static ReentrantLock _printLock = new ReentrantLock();
 	/**
 	 * Prints single line, used by logMessage
 	 * @param errorStream Is error stream
@@ -80,6 +82,8 @@ public class Log {
 		if (_disabledTags.contains(tag))
 			return;
 		
+		_printLock.lock();
+		
 		String[] lines = message.split("\n");
 		boolean multiLine = false;
 		
@@ -94,6 +98,8 @@ public class Log {
 		
 		if (multiLine)
 			logMessageHelper(errorStream, tag, "", false);
+		
+		_printLock.unlock();
 	}
 
 	/**

@@ -82,18 +82,17 @@ public class Task extends GElement implements View.ChangesListener {
 		if (this.type != null)
 			n.type = new String(this.type);
 		
+		n.view = this.getView();
 		n.seqNumber = this.seqNumber;
 		
 		n._debugInfo = (Tooltip)this._debugInfo.clone(n);
 		n._runtimeInfo = (Tooltip)this._runtimeInfo.clone(n);
+		
 		n._resultsHistory = this._resultsHistory;
-		n._debugInfo = this._debugInfo;
-		n._runtimeInfo = this._runtimeInfo;
 		n._runFailed = this._runFailed;
 		n._runFinish = this._runFinish;
 		n._runStart = this._runStart;
 		n._isRunning = this._isRunning;
-		
 		
 		return n;
 	}
@@ -334,6 +333,13 @@ public class Task extends GElement implements View.ChangesListener {
 		return "" + this.type + "{" + this.text + "}";
 	}
 
+	public void clearRunning() {
+		getProperty().running = false;
+		_isRunning = false;
+		_runFailed = false;
+		_runtimeInfo.setMessage("");
+	}
+	
 	// *******************************************************************************
 	// Events ************************************************************************
 	// *******************************************************************************
@@ -348,6 +354,10 @@ public class Task extends GElement implements View.ChangesListener {
 		else
 			onStop(taskResult, message);
 		
+	}
+	
+	public void onPlanRun() {
+		clearRunning();
 	}
 	
 	public void onStart() {

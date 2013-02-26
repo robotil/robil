@@ -378,10 +378,10 @@ public class Document extends JPanel {
 		GElement el = new TaskCreator().newInstance();
 		el.setView(Document.this.view);
 		
-		if (el.isTask()) {
-			el.getAsTask().setDocument(this);
-			el.getAsTask().setTaskDescriptionProvider(task_description);
-		}
+		// if (el.isTask()) {
+		el.getAsTask().setDocument(this);
+		el.getAsTask().setTaskDescriptionProvider(task_description);
+		// }
 		
 		if (el instanceof View.ChangesListener)
 			((View.ChangesListener) el).onViewChange();
@@ -655,7 +655,7 @@ public class Document extends JPanel {
 		
 		// Copy elements
 		for (GElement element : sourceElements) {
-			clonedElement = element.clone();
+			clonedElement = element.getAsTask().clone();
 			clonedElements.put(element, clonedElement);
 			
 			if (clonedElement.isTaskType())
@@ -868,11 +868,15 @@ public class Document extends JPanel {
 		}
 
 		String[] splitted = this.absoluteFilePath.split("/");
-		if (splitted.length == 0) {
+		
+		if (splitted.length == 0)
 			return null;
-		}
-
+		
 		return (_documentChanged ? "*" : "") + new String(splitted[splitted.length - 1]);
+	}
+	
+	public String getFileNameOnly() {
+		return getShortFilePath().replace("*", "");
 	}
 
 	public ArrayList<GElement> getSubElements(GElement el) {
@@ -1308,11 +1312,19 @@ public class Document extends JPanel {
 	}
 	
 	public void onRun() {
+		for (GElement element : elements)
+			if (element.isTaskType())
+				element.getAsTask().onPlanRun();
 		
+		repaint();
 	}
 	
 	public void onPause() {
 		
+	}
+	
+	public void onStop() {
+		Log.i("Stop button pressed");
 	}
 	
 	public void onStop(StopStreamMessage message) {

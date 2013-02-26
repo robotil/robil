@@ -167,6 +167,13 @@ public class Toolbar extends JPanel {
 		btn.addActionListener(new RunAction(designer));
 		buttons.add(btn);
 		
+		btn = new JButton();
+		btn.setToolTipText("Stop");
+		btn.setIcon(new ImageIcon(getClass().getClassLoader().getResource("icons/stop.png")));
+		btn.setActionCommand("run_stop_plan");
+		btn.addActionListener(new RunAction(designer));
+		buttons.add(btn);
+		
 		pnl = new JPanel();
 		pnl.setPreferredSize(new Dimension(10, 0));
 		buttons.add(pnl);
