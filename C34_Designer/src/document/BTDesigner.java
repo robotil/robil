@@ -62,7 +62,7 @@ public class BTDesigner extends JFrame {
 				try {
 					javax.swing.UIManager.setLookAndFeel(info.getClassName());
 				} catch (Exception e) {
-					e.printStackTrace();
+					Log.e(e);
 				}
 				break;
 			}
@@ -71,7 +71,7 @@ public class BTDesigner extends JFrame {
 		try {
 			PropertiesXmlHandler.loadAndSetProperties();
 		} catch (Exception e) {
-			e.printStackTrace();
+			Log.e(e);
 		}
 
 		final BTDesigner btd = new BTDesigner();
@@ -85,7 +85,7 @@ public class BTDesigner extends JFrame {
 						System.exit(0);
 					}
 				} catch (Exception e) {
-					e.printStackTrace();
+					Log.e(e);
 				}
 			}
 			@Override

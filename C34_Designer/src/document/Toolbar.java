@@ -322,7 +322,7 @@ public class Toolbar extends JPanel {
 	// getSaveSnapShot( document,fileDialog.getFile());
 	// } catch (Exception e) {
 	// // TODO Auto-generated catch block
-	// e.printStackTrace();
+	// Log.e(e);
 	// }
 	//
 	// }

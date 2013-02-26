@@ -20,6 +20,8 @@ import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 
+import logger.Log;
+
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -300,11 +302,11 @@ public class TaskDescription {
 			transformer.transform(new DOMSource(doc), result);
 
 		} catch (TransformerConfigurationException e) {
-			e.printStackTrace();
+			Log.e(e);
 		} catch (TransformerException e) {
-			e.printStackTrace();
+			Log.e(e);
 		} catch (IOException e) {
-			e.printStackTrace();
+			Log.e(e);
 		}
 	}
 

@@ -24,6 +24,8 @@ import javax.swing.JTextField;
 import javax.swing.ScrollPaneConstants;
 import javax.swing.UIManager;
 
+import logger.Log;
+
 import document.description.TaskDescription;
 import elements.JAutoSuggestComboBox;
 
@@ -128,7 +130,7 @@ class ModifyDialog extends JDialog {
 								_task.getNameWithoutParameters(), updateTask);
 					}
 				} catch (Exception e) {
-					e.printStackTrace();
+					Log.e(e);
 				}
 				dispose();
 			}

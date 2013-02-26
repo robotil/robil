@@ -119,6 +119,17 @@ public class Log {
 	}
 	
 	/**
+	 * Logs exception
+	 * @param exception
+	 */
+	public static void e(Exception exception) {
+		if (LogManager.isRedirected()) 
+			exception.printStackTrace(LogManager.getStdErrorStream());
+		
+		exception.printStackTrace(LogManager.getCurrentErrorStream());
+	}
+	
+	/**
 	 * Logs informational message
 	 * @param message Message to print
 	 */

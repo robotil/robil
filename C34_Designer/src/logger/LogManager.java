@@ -27,7 +27,7 @@ public final class LogManager {
 			return new PrintStream(new BufferedOutputStream(
 					new FileOutputStream(fileName)));
 		} catch (FileNotFoundException e) {
-			e.printStackTrace();
+			Log.e(e);
 			return null;
 		}
 	}
@@ -65,7 +65,7 @@ public final class LogManager {
 			return stringBuilder.toString();
 
 		} catch (Exception e) {
-			e.printStackTrace();
+			Log.e(e);
 			return "Output file not found";
 		} finally {
 			scanner.close();

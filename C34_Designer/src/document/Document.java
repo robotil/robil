@@ -318,13 +318,13 @@ public class Document extends JPanel {
 			this.task_description = new TaskDescription(this._taskDescriptionFilename);
 			Log.d("Task descriptions file loaded from " + this._taskDescriptionFilename + ", descriptions count = " + this.task_description.getNames().size());
 		} catch (Exception ex) {
-			ex.printStackTrace();
+			Log.e(ex);
 		}
 		
 		try {
 			this._historyManager.init(this);
 		} catch (HistoryManagerNotReadyException e) {
-			e.printStackTrace();
+			Log.e(e);
 		}
 		
 		_shouldBeSavedAs = true;
@@ -339,7 +339,7 @@ public class Document extends JPanel {
 		try {
 			this.absoluteFilePath = new File(fileName).getCanonicalFile().getAbsolutePath();
 		} catch (IOException e) {
-			e.printStackTrace();
+			Log.e(e);
 		}
 		this.mainWindow = mw;
 		this.view.loc = new Vec(0, 0);
@@ -355,7 +355,7 @@ public class Document extends JPanel {
 		try {
 			_historyManager.init(this);
 		} catch (HistoryManagerNotReadyException e) {
-			e.printStackTrace();
+			Log.e(e);
 		}
 		
 		_shouldBeSavedAs = false;
@@ -769,7 +769,7 @@ public class Document extends JPanel {
 			fw.close();
 			this.tip.setText("Tasks exported to " + fileName);
 		} catch (IOException e) {
-			e.printStackTrace();
+			Log.e(e);
 			this.tip.setText("Failed to export tasks, see log for more information");
 		}
 
@@ -1159,11 +1159,11 @@ public class Document extends JPanel {
 			doc = DocumentBuilderFactory.newInstance().newDocumentBuilder()
 					.parse(file);
 		} catch (javax.xml.parsers.ParserConfigurationException ex) {
-			ex.printStackTrace();
+			Log.e(ex);
 		} catch (SAXException ex) {
-			ex.printStackTrace();
+			Log.e(ex);
 		} catch (IOException ex) {
-			ex.printStackTrace();
+			Log.e(ex);
 		}	
 
 		toolSelectionClean();
@@ -1237,7 +1237,7 @@ public class Document extends JPanel {
 			} catch (Exception e) {
 				Log.d("WARNING: Can'tpaint find or open task description file. It's not a critical error.");
 				Log.e("NOT CRITICAL : Print stack and exception name (for debug purposes only): ");
-				e.printStackTrace();
+				Log.e(e);
 				this.task_description = new TaskDescription();
 				Log.d("Default task descriptions file not found, empty created.");
 			}
@@ -1749,7 +1749,7 @@ public class Document extends JPanel {
 						Log.d("BTExecuter STDERR: " + line);
 					}
 				} catch (IOException e) {
-					e.printStackTrace();
+					Log.e(e);
 					Document.this.tip.setText("ERROR: Can not run BTExecuter");
 				}
 				Document.this.BTExecuter = null;
