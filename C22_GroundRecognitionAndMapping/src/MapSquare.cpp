@@ -13,6 +13,7 @@
 MapSquare::MapSquare(){
 	  square_status=UNCHARTED;
 	  rating=0;
+	  ratable=true;
 	  square_Planes=new std::vector<MPlane*>();
 }
 
@@ -47,6 +48,35 @@ MPlane* MapSquare::getPlane(MPlane* other){
 			  return square_Planes->at(i);
 	  }
 	  return 0;
+}
+
+void MapSquare::addRating(){
+	if(ratable){
+		rating++;
+		ratable=false;
+	}
+}
+
+void MapSquare::setRatable(){
+	if(!ratable){
+		std::vector<int> *toremove=new std::vector<int>;
+		for(int i=0;i<square_Planes->size();i++){
+			square_Planes->at(i)->
+					setRatable();
+			if(square_Planes->at(i)->rating/rating<=0.2){
+				toremove->push_back(i);
+			}
+		}
+		for(int i=0;i<toremove->size();i++){
+			MPlane* temp=square_Planes->at(toremove->at(i)-i);
+			square_Planes->erase(square_Planes->begin() + toremove->at(i)-i);
+			delete temp;
+		}
+
+		toremove->clear();
+		delete toremove;
+	}
+	ratable=true;
 }
 
 std::string MapSquare::toString(){
