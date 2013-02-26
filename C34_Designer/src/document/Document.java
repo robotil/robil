@@ -862,7 +862,6 @@ public class Document extends JPanel {
 				if (getArrow(null, e).size() == 0)
 					root.add(e);
 			}
-		// for(GElement r: root) System.out.print(""+r.toString()+" ");
 		
 		return root;
 	}
@@ -1642,7 +1641,7 @@ public class Document extends JPanel {
 		for (GElement e : this.elements){
 			
 			if(Parameters.log_print_running_tasks_id)
-				System.out.print("  select as running : "+ids+". ");
+				Log.d("  select as running : "+ids+". ");
 			
 			if (ids.contains(e.id.toString())) {
 				if(Parameters.log_print_running_tasks_id)
