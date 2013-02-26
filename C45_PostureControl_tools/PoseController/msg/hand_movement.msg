@@ -1,0 +1,12 @@
+float64 l_arm_usy
+float64 l_arm_shx
+float64 l_arm_ely
+float64 l_arm_elx
+float64 l_arm_uwy
+float64 l_arm_mwx
+float64 r_arm_usy
+float64 r_arm_shx
+float64 r_arm_ely
+float64 r_arm_elx
+float64 r_arm_uwy
+float64 r_arm_mwx
