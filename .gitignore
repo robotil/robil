@@ -28,4 +28,6 @@ msg_gen/
 srv_gen/
 #java bin files
 *.class
+#Designer logging and debuging
+BTDesigner_stdout.log
 
