@@ -14,12 +14,14 @@ dir="$ROS_WD/C34_BTExecuter"
 if test -d "$dir"; then
         echo ">> $dir" 
         cd $dir/bin_so
-        make all 2>&1 2>&1 2>&1 >/dev/null
+        make all &>/dev/null
         STATUS=$?
         if [ $STATUS -ne 0 ]; then
-                                echo "[Error] $dir" >> $LOG
+                echo "[Error] $dir" >> $LOG
         else
                 echo "[PASS] $dir" >> $LOG
+                cd ../bin_exe
+                make all &>/dev/null && cp BTExecuter ../../C34_Designer/BTExecuter-lin.bin
         fi
         echo "<< $dir"
         cd $ROS_WD
@@ -32,7 +34,7 @@ for dir in "$ROS_WD"/*; do
 		rosmake;
 		STATUS=$?
 		if [ $STATUS -ne 0 ]; then
-       			 echo "[Error] $dir" >> $LOG
+       		echo "[Error] $dir" >> $LOG
    		else
 			echo "[PASS] $dir" >> $LOG
 		fi 

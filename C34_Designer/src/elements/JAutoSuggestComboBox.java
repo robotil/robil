@@ -12,10 +12,12 @@ import javax.swing.JComboBox;
 import javax.swing.JTextField;
 
 //VERSION_PROBLME public class JAutoSuggestComboBox extends JComboBox<String> {
+@SuppressWarnings({ "unchecked", "rawtypes" })
 public class JAutoSuggestComboBox extends JComboBox {
 	private static final long serialVersionUID = 3397382953165041968L;
 
 	//VERSION_PROBLME private static DefaultComboBoxModel<String> getSuggestedModel(
+	
 	private static DefaultComboBoxModel getSuggestedModel(
 			List<String> list, String text) {
 		//VERSION_PROBLME final DefaultComboBoxModel<String> model = new DefaultComboBoxModel<String>();

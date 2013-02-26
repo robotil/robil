@@ -33,7 +33,7 @@ import elements.Arrow;
 import elements.Decorator;
 import elements.GElement;
 import elements.Joint;
-import elements.Task;
+import elements.tasks.TaskCreator;
 
 public class Toolbar extends JPanel {
 	
@@ -90,7 +90,7 @@ public class Toolbar extends JPanel {
 
 		setLayout(new BorderLayout());
 
-		this.creators.add(new Task.Creator());
+		this.creators.add(new TaskCreator());
 		this.creators.add(new Arrow.Creator());
 		this.creators.add(new Decorator.Creator());
 		this.creators.add(new Joint.Creator());
@@ -302,7 +302,7 @@ public class Toolbar extends JPanel {
 	// });
 	// fileDialog.setFile("plan.png");
 	// fileDialog.setVisible(true);
-	// System.out.println("File: " + fileDialog.getFile());
+
 	// try {
 	//
 	// getSaveSnapShot( document,fileDialog.getFile());
@@ -324,5 +324,6 @@ public class Toolbar extends JPanel {
 		if (this._statusBarLabel != null)
 			this._statusBarLabel.setText(msg);
 	}
+
 
 }

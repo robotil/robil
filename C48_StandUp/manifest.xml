@@ -1,7 +1,7 @@
 <package>
   <description brief="C48_StandUp">
 
-     C47_DismountVehicle
+     C48_StandUp
 
   </description>
   <author>biu</author>
@@ -13,6 +13,7 @@
   <depend package="roscpp"/>
   <depend package="tf"/>
   <depend package="C0_RobilTask"/>
+  <depend package="atlas_utils"/>
 </package>
 
 

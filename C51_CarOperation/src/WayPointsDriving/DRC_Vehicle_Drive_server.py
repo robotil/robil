@@ -3,6 +3,7 @@ import roslib; roslib.load_manifest('C51_CarOperation')
 import rospy
 import actionlib
 import C51_CarOperation.msg
+from C51_CarOperation.msg import Monitoring
 from geometry_msgs.msg import Twist
 import geometry_msgs.msg
 from nav_msgs.msg import Odometry
@@ -28,6 +29,7 @@ class Drive(object):
         self._action_name = name
         self.path=pathVec
         self._as = actionlib.SimpleActionServer(self._action_name, C51_CarOperation.msg.DriveAction, execute_cb=self.DriveCallback, auto_start=False)
+        self.feedback_publisher = rospy.Publisher("C51/m_feedback", Monitoring)
         self._as.start()
         
 
@@ -69,9 +71,9 @@ class Drive(object):
         brakeP=Brake() #gas pedal online
         Steer=SW()      #steering wheel online        
         # helper variables
-        success = False
+        success = True
         #Perform job
-        if goal.PerformJob:
+        if success:
             
             '''Library ----------------------------------
             for driving write the desired speed.. max:0.09
@@ -80,7 +82,7 @@ class Drive(object):
             for turning max: 6*pi
             ---------------------->self.Steer.turn(desired turn)
             ''' 
-            self._result.Success = 0
+            self._result.success = 1
             success = True
             self.sub = rospy.Subscriber('/ground_truth_odom', Odometry,self.callback ) #get atlas location
             while not rospy.is_shutdown():
@@ -92,6 +94,8 @@ class Drive(object):
                         success = False
                         rospy.loginfo('%s: Preempted' % self._action_name)
                         self._as.set_preempted()
+                        gasP.gas(0)
+                        return
                     #self._feedback.WayPointsGiven.append(object)
                     DATA.WayPoint(object)
                     flag=b=m=0
@@ -121,17 +125,24 @@ class Drive(object):
                                 success = False
                                 rospy.loginfo('%s: Preempted' % self._action_name)
                                 self._as.set_preempted()
+                                gasP.gas(0)
+                                return
                             DATA.MyPath(self.world.pose.pose.position.x, self.world.pose.pose.position.y)
                             [speed, Cspeed]=P2P(self.DistanceToWP(object), self.OrientationErrorToWP(object)) 
                             gasP.gas(speed)
                             Steer.turn(Cspeed)
                         DATA.DistanceError([self.world.pose.pose.position.x-object[0], self.world.pose.pose.position.y-object[1]])
                         DATA.PassedWayPoint(object)
-                        self._feedback.LastWPpassed = object
+                        newMsg=Monitoring()
+                        newMsg.LastWPpassed = object
+                        newMsg.MyLoc4LastWP= [self.world.pose.pose.position.x , self.world.pose.pose.position.y]
+                        self.feedback_publisher.publish(newMsg)
+                        print newMsg,  "shmulik"
                         #self._feedback.LastWPpassed_Y = object[1]
-                        self._feedback.MyLoc4LastWP= [self.world.pose.pose.position.x , self.world.pose.pose.position.y]
+                        #self._feedback.MyLoc4LastWP= [self.world.pose.pose.position.x , self.world.pose.pose.position.y]
                         #self._feedback.MyLoc4LastWP_Y=  self.world.pose.pose.position.y
-                        print self._feedback
+                        #print self._feedback
+                        self._feedback.complete = 32.22
                         self._as.publish_feedback(self._feedback)
                         print "arrived at Way point"
                     i+=1
@@ -142,7 +153,9 @@ class Drive(object):
                     gasP.gas(0)
                     brakeP.brake(0)
                     Steer.turn(0)
-                    self._result.Success = 1
+                    self._result.success = 0
+                    self._result.description = "finished driving car"
+                    self._result.plan = "finished driving car"
                     break   
             
         #plotGraph(DATA)    
@@ -232,7 +245,7 @@ class SW:
 
 if __name__ == '__main__':
     try:
-        rospy.init_node('Drive_server')
+        rospy.init_node('WayPointsDriving')
         Drive(rospy.get_name(), [])   
         rospy.spin()
     except rospy.ROSInterruptException: 

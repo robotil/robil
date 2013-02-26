@@ -3,6 +3,8 @@ package terminal.commands;
 import java.io.IOException;
 import java.util.ArrayList;
 
+import logger.Log;
+
 import terminal.Terminal;
 import terminal.communication.RosPipe.RosTargets;
 import terminal.lineprocessors.BatchLineProcessor;
@@ -50,7 +52,7 @@ public class ServiceCaller extends RosCommand {
 				this.thread = null;
 
 				for (String s : ret)
-					System.out.println(s);
+					Log.d(s);
 
 			} catch (IOException ex) {
 				this.sys.println("ERROR: " + ex.getMessage());
@@ -124,7 +126,7 @@ public class ServiceCaller extends RosCommand {
 			this.pipe.sendAndReceive();
 			ret.addAll(processor.getLines());
 		} catch (IOException ex) {
-			System.err.println(ex.getMessage());
+			Log.e(ex.getMessage());
 		} finally {
 			this.thread = null;
 		}
@@ -186,10 +188,10 @@ public class ServiceCaller extends RosCommand {
 		initPipe(RosTargets.Service, processor, "type", service);
 		this.pipe.sendAndReceive();
 
-		System.out.println("DEBUG: services received: ");
+		Log.d("DEBUG: services received: ");
 		// translate type of service
 		for (String type : processor.getLines()) {
-			System.out.println("DEBUG: " + type);
+			Log.d("DEBUG: " + type);
 			ref_type[0] = type;
 			BatchLineProcessor p = new BatchLineProcessor();
 			initPipe(RosTargets.Rossrv, p, "show", type);

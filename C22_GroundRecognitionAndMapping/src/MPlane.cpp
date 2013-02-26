@@ -16,6 +16,7 @@ MPlane::MPlane():representing_point(0,0,0){
 	coefficient_z=0;
 	coefficient_d=0;
 	rating=0;
+	  ratable=true;
 }
 
 MPlane::MPlane(pcl::PointXYZ point, pcl::ModelCoefficients::Ptr c_):representing_point(point){
@@ -27,6 +28,21 @@ MPlane::MPlane(pcl::PointXYZ point, pcl::ModelCoefficients::Ptr c_):representing
 
 MPlane::~MPlane(){
 
+}
+
+void MPlane::addRating(){
+	if(ratable){
+		rating++;
+		if(rating==100)
+			rating=100;
+		ratable=false;
+	}
+}
+void MPlane::setRatable(){
+	if(ratable){
+		rating--;
+	}
+	ratable=true;
 }
 
 bool MPlane::isEqualTo(MPlane * other){

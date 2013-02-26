@@ -73,7 +73,7 @@ public:
 			GPSPath gpspath;
 			for(size_t i=0;i<session.results.path.size();i++){
 				const Vec2d& wp = session.results.path[i];
-				gpspath.push_back(_planner.cast(wp));
+				gpspath.push_back(planner.cast(wp));
 			}
 			//TODO: fill message by planner results
 		}
@@ -92,6 +92,8 @@ public:
 
     TaskResult task(const string& name, const string& uid, Arguments& args){
     	//ros::this_node::getName()
+    	
+    	// TASK INPUT CHANNELS
     	ros::ServiceServer c31_PlanPath =
     			_node.advertiseService<C31_PathPlanner::C31_PlanPathRequest, C31_PathPlanner::C31_PlanPathResponse>(
     					STR(ros::this_node::getName()<<"/planPath"),boost::bind(&PathPlanningServer::srv_PlanPath,this,_1,_2)
@@ -101,9 +103,11 @@ public:
     					STR(ros::this_node::getName()<<"/getPath"),boost::bind(&PathPlanningServer::srv_GetPath,this,_1,_2)
     			);
 
+		//TASK OUTPUT CHANNELS
     	ros::ServiceClient c22Client = _node.serviceClient<C22_GroundRecognitionAndMapping::C22>("C22");
+		ros::Subscriber c23Client = _node.subscribe("C23/object_deminsions", 1000, &PathPlanningServer::callbackNewTargetLocation, this );
+		
 
-    	/* NUMBER OF ITERATIONS IN TASK LOOP */
         while(true){
             if (isPreempt()){
 
@@ -144,10 +148,8 @@ public:
 
             }
 
-
-
             /* SLEEP BETWEEN LOOP ITERATIONS */
-            sleep(1000);
+            sleep(1000); //millisec
         }
 
         return TaskResult::FAULT();
@@ -178,27 +180,24 @@ public:
 
 		C22_GroundRecognitionAndMapping::C22 c22;
 		/*
-			C0C22_AZI azimuth_msg
-				float32 azimuth
-			C0C22_CAM camera_sample_rate_msg
-				int32 frameRatePerSec
-			C0C22_LAZ laser_sample_rate_msg
-				int32 sampleRatePerSec
-			C0C22_SAF safety_requirements
-				int32 safety_req
-			---
-			C22C0_PATH drivingPath
-				C22_ROW_TYPE[] row
-					C22_MAP_SQUARE[] column
-						int32 status
-						int32 AVAILABLE=0
-						int32 BLOCKED=1
-						int32 UNCHARTED=2
-						C22_PLANE_TYPE[] planes
-							float32 x
-							float32 y
-							float32 z
-							float32 d
+			C22_GroundRecognitionAndMapping/C22C0_PATH drivingPath
+			C22_GroundRecognitionAndMapping/C22_ROW_TYPE[] row
+				C22_GroundRecognitionAndMapping/C22_MAP_SQUARE[] column
+				int32 AVAILABLE=0
+				int32 BLOCKED=1
+				int32 UNCHARTED=2
+				int32 status
+				C22_GroundRecognitionAndMapping/C22_PLANE_TYPE[] planes
+					float32 x
+					float32 y
+					float32 z
+					float32 d
+			int32 xOffset
+			int32 yOffset
+			geometry_msgs/Point robotPos
+				float64 x
+				float64 y
+				float64 z
 		*/
 		SYNCH(SET_CURRENT_TIME(statistic.time_map_lastRequest));
 		if (c22Client.call(c22)){
@@ -225,7 +224,8 @@ public:
     	return false;
     }
     void requestNewLocation(){ //REQ. HAS BE NOT external synchronizationed on _mtx
-		//TODO: write real algorithm for requestNewLocation
+		//TODO: [CURRENTLLY NOT ACTUAL] write real algorithm for requestNewLocation
+		//......we get location from map message
     	SYNCH(SET_CURRENT_TIME(statistic.time_location_lastRequest));
 		//onNewLocation(NEW_ROBOT_LOCATION_GPS)
     }
@@ -236,10 +236,14 @@ public:
     	return false;
     }
     void requestNewTargetLocation(){ //REQ. HAS BE NOT external synchronizationed on _mtx
-		//TODO: write real algorithm for requestNewTargetLocation
+		//TODO: [CURRENTLLY NOT ACTUAL] write real algorithm for requestNewTargetLocation
+		//......we get location by callback from Topic listener
     	SYNCH(SET_CURRENT_TIME(statistic.time_targetLocation_lastRequest));
     	//onNewTargetLocation(NEW_TARGET_LOCATION_GPS)
     }
+    void callbackNewTargetLocation(const C23_ObjectRecognition::C23C0_ODIM::ConstPtr & msg){
+		onNewTargetLocation( extractObjectLocation( *msg ) );
+	}
 
     //=================== NEW DATA INPUT ==================================================
     void dataChanged(){
@@ -322,23 +326,6 @@ public:
 
 			return TaskResult(FAULT, desc);
 		}
-//        /* NUMBER OF ITERATIONS IN TASK LOOP */
-//        while(true){
-//            if (isPreempt()){
-//
-//                /* HERE PROCESS PREEMPTION OR INTERAPT */
-//
-//
-//                return TaskResult::Preempted();
-//            }
-//
-//            /* HERE PROCESS TASK */
-//
-//
-//
-//            /* SLEEP BETWEEN LOOP ITERATIONS */
-//            sleep(100);
-//        }
 
         return TaskResult::FAULT();
     }

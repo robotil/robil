@@ -12,6 +12,21 @@ public class Utils {
 
 	private static Random rnd = new Random(System.currentTimeMillis());
 
+	public static ArrayList<String> extractIds(String txt) {
+		ArrayList<String> ids = new ArrayList<String>();
+		int p = txt.indexOf("[id=");
+		while(p>=0){
+			int s = p+4;
+			p =  txt.indexOf("]", p);
+			if(p<0) break;
+			int e = p;
+			String id = txt.substring(s, e);
+			ids.add(id);
+			p = txt.indexOf("[id=", p);
+		}
+		return ids;
+	}
+	
 	public static ArrayList<String> getMatchedInstances(String txt, String regex) {
 		return getMatchedInstances(txt, regex, 4, 1);
 	}

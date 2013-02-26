@@ -66,7 +66,7 @@ void MapMatrix::printMatrix(){
 }
 
 double MapMatrix::calcSlopeZ(float a,float b,float c){
-	double ang = 180-std::acos((c)/std::sqrt(a*a+b*b+c*c))*180/M_PI;
+	double ang = std::acos((c)/std::sqrt(a*a+b*b+c*c))*180/M_PI;
 	return ang;
 }
 
@@ -80,7 +80,7 @@ void MapMatrix::clearMatrix(){
 
 bool MapMatrix::inMatrixRange(pcl::PointXYZ p){
 	if (p.x<0+xOffset || (p.x >= NUMOFSQUARES*SIZEOFSQUARE+xOffset)
-			||(p.z<0+yOffset) || (p.z>=NUMOFSQUARES*SIZEOFSQUARE+yOffset))
+			||(p.y<0+yOffset) || (p.y>=NUMOFSQUARES*SIZEOFSQUARE+yOffset))
 		return false;
 	return true;
 }
@@ -168,25 +168,27 @@ void MapMatrix::computeMMatrix(std::vector<pclPlane*>* mapPlanes,pcl::PointCloud
 		pcl::PointIndices::Ptr inliers = mapPlanes->at(i)->inliers;
 		pcl::ModelCoefficients::Ptr coff= mapPlanes->at(i)->coefficients;
 		MPlane* tempPlane=new MPlane(pcl::PointXYZ(0,0,0),coff);
-		double angle=calcSlopeZ(tempPlane->coefficient_x,tempPlane->coefficient_z,tempPlane->coefficient_y);
+		double angle=calcSlopeZ(tempPlane->coefficient_x,tempPlane->coefficient_y,tempPlane->coefficient_z);
 		for (unsigned int j=0; j< inliers->indices.size();j++){ //goes through all indices in the plane i
 			pcl::PointXYZ p = map_cloud->points[inliers->indices[j]];
-			//p.x+= (SIZEOFMAP/2);	//adapt x axis to matrix
-			//p.z+= BEHIND;	//adapt y axis to matrix
+
 			if (inMatrixRange(p)){
 				int xIndex,yIndex;
 				xIndex = (p.x -xOffset)*(1/SIZEOFSQUARE);	//added for now instead of previous three lines
-				yIndex = (p.z-yOffset) *(1/SIZEOFSQUARE);	//same as above
+				yIndex = (p.y-yOffset) *(1/SIZEOFSQUARE);	//same as above
 				//std::cout<<"xOffset:"<<xOffset<<" yOffset:"<<yOffset<<"\n";
 				//std::cout<<"indexX:"<<xIndex<<" indexY"<<yIndex<<"\n";
 
 				MapSquare* ms=data->at(xIndex)->at(yIndex);
-				ms->rating++;
+				ms->addRating();
 				if(!ms->hasPlane(tempPlane)){
 					MPlane* newPlane=new MPlane(pcl::PointXYZ(p.x,p.y,p.z),coff);
+					newPlane->addRating();
+					newPlane->rating=20;
 					ms->square_Planes->push_back(newPlane);
-					if (angle>30){
-						//ms->square_status = BLOCKED;
+					if (std::abs(angle)>25 && p.z>0.20){
+						std::cout<<"angle:"<<angle<<std::endl;
+						ms->square_status = BLOCKED;
 					}
 					else{
 						if(ms->square_status!=BLOCKED){
@@ -195,9 +197,14 @@ void MapMatrix::computeMMatrix(std::vector<pclPlane*>* mapPlanes,pcl::PointCloud
 					}
 				}else{
 					MPlane* temp=ms->getPlane(tempPlane);
-					temp->rating++;
+					 temp->addRating();
 				}
 			}
+		}
+	}
+	for(unsigned int i=0; i< data->size();i++){
+		for(unsigned int j=0; j< data->at(i)->size();j++){
+			 data->at(i)->at(j)->setRatable();
 		}
 	}
 }

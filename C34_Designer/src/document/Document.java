@@ -29,11 +29,17 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.xml.parsers.DocumentBuilderFactory;
 
+import logger.Log;
+
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
+import terminal.communication.StackStreamMessage;
+import terminal.communication.StopStreamMessage;
+
+import document.actions.Dialogs;
 import document.description.TaskDescription;
 import document.history.HistoryManager;
 import document.history.HistoryManagerNotReadyException;
@@ -42,9 +48,10 @@ import elements.Decorator;
 import elements.GElement;
 import elements.Joint;
 import elements.Modifier;
-import elements.Task;
 import elements.Vec;
 import elements.View;
+import elements.tasks.Task;
+import elements.tasks.TaskCreator;
 
 public class Document extends JPanel {
 
@@ -268,12 +275,14 @@ public class Document extends JPanel {
 	public View view = new View();
 	public TaskDescription task_description = null;
 	private boolean _documentChanged = false;
+	private boolean _shouldBeSavedAs = false;
 	private double lastX = 0;
 	private double lastY = 0;
 	private String _taskDescriptionFilename;
 	private String _taskDescriptionFilenameOriginal;
 	private Boolean _taskDescriptionExists = false;
 	private Boolean _buildTime = false;
+	private Boolean _debugView = false;
 	private String absoluteFilePath = "plan.xml";
 	private Vec _mousePosition = new Vec(0, 0);
 	private HistoryManager _historyManager = new HistoryManager();
@@ -283,6 +292,10 @@ public class Document extends JPanel {
 
 	private Map<String, GElement> loadedElements = new HashMap<String, GElement>();
 
+	/**
+	 * Creates new empty, unsaved document
+	 * @param mw Parent BTDesginer window
+	 */
 	public Document(BTDesigner mw) {
 
 		this.absoluteFilePath = new File(Parameters.path_to_plans, getTempFileName()).getAbsolutePath();
@@ -295,13 +308,28 @@ public class Document extends JPanel {
 		addMouseMotionListener(mh);
 		addMouseWheelListener(mh);
 		
+		this._taskDescriptionFilename = parsePlanPath(Parameters.path_to_description);
+		try {
+			this.task_description = new TaskDescription(this._taskDescriptionFilename);
+			Log.d("Task descriptions file loaded from " + this._taskDescriptionFilename + ", descriptions count = " + this.task_description.getNames().size());
+		} catch (Exception ex) {
+			ex.printStackTrace();
+		}
+		
 		try {
 			this._historyManager.init(this);
 		} catch (HistoryManagerNotReadyException e) {
 			e.printStackTrace();
 		}
+		
+		_shouldBeSavedAs = true;
 	}
 	
+	/**
+	 * Load specified document
+	 * @param mw Parent BTDesginer window
+	 * @param fileName Plan to load
+	 */
 	public Document(BTDesigner mw, String fileName) {
 		try {
 			this.absoluteFilePath = new File(fileName).getCanonicalFile().getAbsolutePath();
@@ -325,6 +353,7 @@ public class Document extends JPanel {
 			e.printStackTrace();
 		}
 		
+		_shouldBeSavedAs = false;
 	}
 
 	
@@ -346,12 +375,20 @@ public class Document extends JPanel {
 	}
 	
 	public void createTask() {
-		GElement el = new Task.Creator().newInstance();
+		GElement el = new TaskCreator().newInstance();
 		el.setView(Document.this.view);
+		
+		if (el.isTask()) {
+			el.getAsTask().setDocument(this);
+			el.getAsTask().setTaskDescriptionProvider(task_description);
+		}
+		
 		if (el instanceof View.ChangesListener)
 			((View.ChangesListener) el).onViewChange();
+		
 		el.getProperty().setCenter(getMousePos());
 		el.modify();
+		
 		add(el);
 		repaint();
 	}
@@ -429,6 +466,24 @@ public class Document extends JPanel {
 	public void compile() {
 		compile(getCurrentWorkingFile(), true, true);
 	}
+	
+	public void save() {
+		String fileName = getCurrentWorkingFile();
+		
+		if (_shouldBeSavedAs) {
+			fileName = Dialogs.saveFile("Save XML", "xml", getShortFilePath().replace("*", ""), Parameters.path_to_plans);
+			if (!fileName.equals("")) {
+				fileName = getCurrentWorkingFile();
+				_shouldBeSavedAs = false;
+			}
+		}
+		
+		compile(fileName, true, true);
+	}
+	
+	public void save(String fileName) {
+		compile(fileName, true, true);
+	}
 
 	public boolean compile(String destination, boolean updateCurrentWorkingFile, boolean createJustNamesXml) {
 		// if (updateCurrentWorkingFile)
@@ -446,15 +501,14 @@ public class Document extends JPanel {
 				return false;
 			}
 			for (GElement ea : this.arrays) {
-				if (((Task) ((Arrow) ea).getSource()).type == Task.TYPE_task) {
+				if (((Task) ((Arrow) ea).getSource()).type.equalsIgnoreCase(Task.TYPE_task)) {
 					this.tip.setText("ERROR: Task in BT is a TERMINAL node");
 					return false;
 				}
 			}
 			for (GElement ea : this.elements)
-				if (ea instanceof Task) {
-					if (((Task) ea).type != Task.TYPE_task
-							&& getArrow(ea, null).size() == 0) {
+				if (ea.isTask()) {
+					if (!ea.isTaskType() && getArrow(ea, null).size() == 0) {
 						this.tip.setText("ERROR: Sequenser, Parallel or Selector in BT are a NON TERMINAL nodes");
 						return false;
 					}
@@ -465,7 +519,7 @@ public class Document extends JPanel {
 			try {
 	
 				xml = createXml(rootTask, tabulation);
-				// System.out.println("XML : \n"+"<plan>\n"+xml+"\n</plan>");
+				// Log.d("XML : \n"+"<plan>\n"+xml+"\n</plan>");
 				this.tip.setText("Compilation is OK");
 	
 			} catch (StackOverflowError e) {
@@ -476,10 +530,10 @@ public class Document extends JPanel {
 			// Write task descriptions file
 			try {
 				this.task_description.save(destination);
-				System.out.println("Task descriptions file successfully saved to "
+				Log.d("Task descriptions file successfully saved to "
 						+ destination);
 			} catch (Exception e) {
-				System.err.println("Task descriptions save failed. Filename = "
+				Log.e("Task descriptions save failed. Filename = "
 						+ destination);
 			}
 	
@@ -501,22 +555,31 @@ public class Document extends JPanel {
 	public void copyTree(GElement el) {
 		onBeforeTreeChange(TreeChangeType.TreeCopy, el);
 
-		el.setView(this.view);
+		ArrayList<GElement> sourceElements = new ArrayList<GElement>();
+		ArrayList<GElement> sourceArrows  = arrays;
+		ArrayList<GElement> outElements = new ArrayList<GElement>();
+		ArrayList<GElement> outArrows = new ArrayList<GElement>();
 		
-		ArrayList<GElement> targets = searchAllSubelements(el);
-		targets.add(el);
+		// Take only tasks
+		for (GElement element : searchAllSubelements(el))
+			if (element.isTask())
+				sourceElements.add(element);
 		
-		HashMap<GElement, GElement> link = new HashMap<GElement, GElement>();
-		for (GElement t : targets) {
-			GElement n = t.clone();
-			link.put(t, n);
-			add(n);
-			n.getProperty().loc = n.getProperty().loc.add(new Vec(10, 10));
-			n.getProperty().leftClicked = false;
+		sourceElements.add(el);
+		
+		cloneElements(sourceElements, sourceArrows, outElements, outArrows);
+		
+		for (GElement arrow : outArrows) {
+			// add(arrow);
+			add(arrow);
+			arrow.setView(this.view);
 		}
 		
-		for (GElement t : targets) 
-			link.get(t).cloneReconnect(link);
+		for (GElement element : outElements) {
+			// add(element);
+			add(element);
+			element.setView(this.view);
+		}
 		
 		onTreeChange(TreeChangeType.TreeCopy, el);
 	}
@@ -524,21 +587,32 @@ public class Document extends JPanel {
 	public void copyTree(GElement el, Document sourceDocument) {
 		onBeforeTreeChange(TreeChangeType.TreeCopy, el);
 
-		ArrayList<GElement> targets = sourceDocument.searchAllSubelements(el);
-		targets.add(el);
+		ArrayList<GElement> sourceElements = new ArrayList<GElement>();
+		ArrayList<GElement> sourceArrows  = sourceDocument.arrays;
+		ArrayList<GElement> outElements = new ArrayList<GElement>();
+		ArrayList<GElement> outArrows = new ArrayList<GElement>();
 		
-		HashMap<GElement, GElement> link = new HashMap<GElement, GElement>();
-		for (GElement t : targets) {
-			GElement n = t.clone();
-			link.put(t, n);
-			add(n);
-			n.getProperty().loc = n.getProperty().loc.add(new Vec(10, 10));
-			n.getProperty().leftClicked = false;
+		// Take only tasks
+		for (GElement element : sourceDocument.searchAllSubelements(el))
+			if (element.isTask())
+				sourceElements.add(element);
+		
+		sourceElements.add(el);
+		
+		cloneElements(sourceElements, sourceArrows, outElements, outArrows);
+		
+		for (GElement arrow : outArrows) {
+			// add(arrow);
+			add(arrow);
+			arrow.setView(this.view);
 		}
 		
-		for (GElement t : targets) 
-			link.get(t).cloneReconnect(link);
-		
+		for (GElement element : outElements) {
+			// add(element);
+			add(element);
+			element.setView(this.view);
+		}
+
 		onTreeChange(TreeChangeType.TreeCopy, el);
 	}
 	
@@ -572,6 +646,44 @@ public class Document extends JPanel {
 			outArrows.add(clonedArrow);
 		}
 	}
+	
+	public void cloneElements(ArrayList<GElement> sourceElements, ArrayList<GElement> sourceArrows, ArrayList<GElement> outElements, ArrayList<GElement> outArrows) {
+		
+		HashMap<GElement, GElement> clonedElements = new HashMap<GElement, GElement>();
+	
+		GElement clonedElement;
+		
+		// Copy elements
+		for (GElement element : sourceElements) {
+			clonedElement = element.clone();
+			clonedElements.put(element, clonedElement);
+			
+			if (clonedElement.isTaskType())
+				clonedElement.getAsTask().setTaskDescriptionProvider(task_description);
+			
+			outElements.add(clonedElement);
+		}
+		
+		for (GElement arrow : sourceArrows) {
+			ArrayList<GElement> clonedTargets = new ArrayList<GElement>();
+			
+			if (!clonedElements.containsKey(arrow.getAsArrow().source))
+				continue;
+			
+			for (GElement target : arrow.getAsArrow().targets)
+				if (clonedElements.containsKey(target))
+					clonedTargets.add(clonedElements.get(target));
+				else
+					continue;
+			
+			Arrow clonedArrow = arrow.getAsArrow().clone(
+				clonedElements.get(arrow.getAsArrow().source), 
+				clonedTargets);
+			
+			outArrows.add(clonedArrow);
+		}
+	}
+
 
 	public String createXml(Task root, String tab) {
 		String res = createXml(root, tab, false);
@@ -580,7 +692,7 @@ public class Document extends JPanel {
 	}
 
 	public String createXml(Task root, String tab, boolean justNames) {
-		if (root.type == Task.TYPE_task)
+		if (root.type.equalsIgnoreCase(Task.TYPE_task))
 			return tab + "<" + xmlNameOfTask(root.type) + " name=\""
 					+ root.text + "\""
 					+ (justNames ? "" : " " + strTaskProperties(root)) + " />";
@@ -633,7 +745,7 @@ public class Document extends JPanel {
 		int i = 1;
 		for (GElement ea : this.elements)
 			if (ea instanceof Task && ((Task) ea).type.equals(Task.TYPE_task)) {
-				TaskDescription.Task taskDesc = this.task_description
+				TaskDescription.TaskInfo taskDesc = this.task_description
 						.get(((Task) ea).getNameWithoutParameters());
 				if (taskDesc != null)
 					taskDescString = taskDesc.algorithm;
@@ -746,7 +858,7 @@ public class Document extends JPanel {
 					root.add(e);
 			}
 		// for(GElement r: root) System.out.print(""+r.toString()+" ");
-		System.out.println();
+		
 		return root;
 	}
 
@@ -789,6 +901,14 @@ public class Document extends JPanel {
 			}
 		}
 		return uniq(subels);
+	}
+	
+	public boolean isDebugViewEnabled() {
+		return this.mainWindow.getMenubar().getDebugViewMenuItem().isSelected();
+	}
+	
+	public boolean isRuntimeViewEnabled() {
+		return this.mainWindow.getMenubar().getRuntimeViewMenuItem().isSelected();
 	}
 
 	public ArrayList<GElement> getSuperElements(GElement el) {
@@ -907,6 +1027,10 @@ public class Document extends JPanel {
 							nge.id = UUID.fromString(e.getAttribute("id"));
 							this.loadedElements.put(nge.id.toString(), nge);
 						}
+						
+						if (nge.isTask())
+							nge.getAsTask().setDocument(this);
+						
 						add(nge);
 						loadPlan(e, nge);
 					} else if (ge instanceof Arrow) {
@@ -964,6 +1088,10 @@ public class Document extends JPanel {
 							a.add(nge);
 							se = nge;
 						}
+						
+						if (nge.isTask())
+							nge.getAsTask().setDocument(this);
+						
 						add(nge);
 						if (e.hasAttribute("x") && e.hasAttribute("y")) {
 							this.lastX = nge.getProperty().loc.x = Double
@@ -1060,7 +1188,7 @@ public class Document extends JPanel {
 						.getAttribute("descriptions");
 				this._taskDescriptionFilenameOriginal = this._taskDescriptionFilename;
 
-				System.out.println("Plan has a descriptions attribute = "
+				Log.d("Plan has a descriptions attribute = "
 						+ this._taskDescriptionFilenameOriginal);
 
 				// Relative path, need to combine with current path
@@ -1072,7 +1200,7 @@ public class Document extends JPanel {
 
 				this.task_description = new TaskDescription(
 						this._taskDescriptionFilename);
-				System.out.println("Task descriptions loaded from "
+				Log.d("Task descriptions loaded from "
 						+ this._taskDescriptionFilename);
 			} catch (Exception e) {
 				System.out
@@ -1085,7 +1213,7 @@ public class Document extends JPanel {
 		} else {
 
 			try {
-				System.out.println("Plan has no descriptions attribute");
+				Log.d("Plan has no descriptions attribute");
 
 				this._taskDescriptionFilename = parsePlanPath(Parameters.path_to_description);
 
@@ -1097,17 +1225,14 @@ public class Document extends JPanel {
 
 				this.task_description = new TaskDescription(
 						this._taskDescriptionFilename);
-				System.out.println("Descriptions loaded from "
+				Log.d("Descriptions loaded from "
 						+ this._taskDescriptionFilename);
 			} catch (Exception e) {
-				System.out
-						.println("WARNING: Can't find or open task description file. It's not a critical error.");
-				System.err
-						.println("NOT CRITICAL : Print stack and exception name (for debug purposes only): ");
+				Log.d("WARNING: Can't find or open task description file. It's not a critical error.");
+				Log.e("NOT CRITICAL : Print stack and exception name (for debug purposes only): ");
 				e.printStackTrace();
 				this.task_description = new TaskDescription();
-				System.out
-						.println("Default task descriptions file not found, empty created.");
+				Log.d("Default task descriptions file not found, empty created.");
 			}
 		}
 		loadPlan(doc.getDocumentElement(), null);
@@ -1147,10 +1272,10 @@ public class Document extends JPanel {
 				_historyManager.createSnapshot();
 			} catch (HistoryManagerNotReadyException e) {
 				this.tip.setText("History manager create snapshot exception");
-				System.err.println("Snapshot create failed");
+				Log.e("Snapshot create failed");
 			}
 		
-		// System.out.println("Undo count = " + _historyManager.getUndoCount());
+		// Log.d("Undo count = " + _historyManager.getUndoCount());
 		
 		if (!_buildTime) {
 			_documentChanged = true;
@@ -1172,13 +1297,43 @@ public class Document extends JPanel {
 		updateTabTitle();
 	}
 	
+	public void onMessageReceive(StackStreamMessage message) {
+		Task task = findTaskById(message.getTaskId());
+		
+		if (task == null)
+			return;
+		
+		task.onMessageReceive(message);
+		repaint();
+	}
+	
+	public void onRun() {
+		
+	}
+	
+	public void onPause() {
+		
+	}
+	
+	public void onStop(StopStreamMessage message) {
+		Log.i("STOPSTREAM", message.toString());
+	}
+	
+	public Task findTaskById(String taskId) {
+		for (GElement e : elements)
+			if (e.isTask())
+				if (e.id.toString().equalsIgnoreCase(taskId))
+					return e.getAsTask();
+		
+		return null;
+	}
+	
 	public void undo() {
 		try {
 			if (_historyManager.hasUndo())
 				_historyManager.undo();
 		} catch (Exception e) { return; }
 		
-		_historyManager.printStacks();
 		_documentChanged = true;
 		
 		updateUndoRedoButtonsState();
@@ -1191,7 +1346,6 @@ public class Document extends JPanel {
 				_historyManager.redo();
 			} catch (Exception e) { return; }
 		
-		_historyManager.printStacks();
 		_documentChanged = true;
 		
 		updateUndoRedoButtonsState();
@@ -1205,7 +1359,6 @@ public class Document extends JPanel {
 	
 	private void updateTabTitle() {
 		this.mainWindow.setTabName(this, getShortFilePath());
-		System.out.println("Tab name updated to: " + getShortFilePath());
 	}
 	
 	@Override
@@ -1219,6 +1372,7 @@ public class Document extends JPanel {
 			this.view.graphics = g2d;
 			riceOnViewChange();
 		}
+		
 		renumberElements(this.elements);
 		hideCollapsed();
 		paintElement(g2d, this.arrays);
@@ -1235,7 +1389,7 @@ public class Document extends JPanel {
 
 	private String parsePlanPath(String pattern) {
 
-		String planFileName = new File(getCurrentWorkingFile()).getName();
+		String planFileName = new File(getAbsoluteFilePath()).getName();
 		planFileName = planFileName.replaceAll("\\.[^\\.]+$", "");
 		return pattern.replace("{PLANFILENAME}", planFileName);
 	}
@@ -1294,15 +1448,15 @@ public class Document extends JPanel {
 		for (GElement el : elements) {
 			if (el instanceof Task) {
 				Task t = ((Task) el);
-				if (t.type == Task.TYPE_sequenser
-						|| t.type == Task.TYPE_selector) {
+				if (t.type.equalsIgnoreCase(Task.TYPE_sequenser)
+						|| t.type.equalsIgnoreCase(Task.TYPE_selector)) {
 					int i = 1;
 					for (GElement e : getSubElements(t)) {
 						if (e instanceof Task) {
 							((Task) e).seqNumber = i++;
 						}
 					}
-				} else if (t.type == Task.TYPE_switch) {
+				} else if (t.type.equalsIgnoreCase(Task.TYPE_switch)) {
 					int i = 0;
 					for (GElement e : getSubElements(t)) {
 						if (e instanceof Task) {
@@ -1338,7 +1492,7 @@ public class Document extends JPanel {
 			descriptionFileAttribute = "descriptions=\""
 					+ parsePlanPath(Parameters.path_to_description) + "\"";
 
-		System.out.println("description attribute added to plan = "
+		Log.d("description attribute added to plan = "
 				+ descriptionFileAttribute);
 
 		xml = "<plan"
@@ -1398,17 +1552,21 @@ public class Document extends JPanel {
 
 	public void setRunning(ArrayList<String> ids) {
 		if(Parameters.log_print_running_tasks_id)
-			System.out.println("Select running tasks:");
+			Log.d("Select running tasks:");
+		
 		for (GElement e : this.elements){
+			
 			if(Parameters.log_print_running_tasks_id)
 				System.out.print("  select as running : "+ids+". ");
+			
 			if (ids.contains(e.id.toString())) {
 				if(Parameters.log_print_running_tasks_id)
-					System.out.println("id="+e.id+" found.");
+					Log.d("id="+e.id+" found.");
+				
 				e.getProperty().running = true;
 			}else{
 				if(Parameters.log_print_running_tasks_id)
-					System.out.println("not found.");
+					Log.d("not found.");
 			}
 		}
 		repaint();
@@ -1449,6 +1607,7 @@ public class Document extends JPanel {
 			@Override
 			public void run() {
 				ArrayList<String> cmd = new ArrayList<String>();
+				mainWindow.getMenubar().setDebugView();
 				if (OSValidator.isUnix()) {
 					String[] f1 = new String[] { "./BTExecuter-lin.exe",
 							"./BTExecuter-lin.bin", "./BTExecuter-lin.a",
@@ -1484,7 +1643,7 @@ public class Document extends JPanel {
 					Document.this.tip
 							.setText("Execution running... (press \"Run\" again for stop running)");
 					while ((line = stdout.readLine()) != null) {
-						System.out.println("BTExecuter STDOUT: " + line);
+						Log.d("BTExecuter STDOUT: " + line);
 						if (line.contains("plan{")) {
 							plan += line;
 							c++;
@@ -1502,7 +1661,7 @@ public class Document extends JPanel {
 						}
 					}
 					while ((line = stderr.readLine()) != null) {
-						System.out.println("BTExecuter STDERR: " + line);
+						Log.d("BTExecuter STDERR: " + line);
 					}
 				} catch (IOException e) {
 					e.printStackTrace();
@@ -1510,7 +1669,7 @@ public class Document extends JPanel {
 				}
 				Document.this.BTExecuter = null;
 				cleanRunning();
-				System.out.println("BTExecuter DONE");
+				Log.d("BTExecuter DONE");
 				Document.this.tip.setText("Execution done.");
 			}
 		}).start();
@@ -1540,17 +1699,17 @@ public class Document extends JPanel {
 	}
 
 	public String xmlNameOfTask(String tname) {
-		if (tname == Task.TYPE_selector)
+		if (tname.equalsIgnoreCase(Task.TYPE_selector))
 			return "sel";
-		if (tname == Task.TYPE_sequenser)
+		if (tname.equalsIgnoreCase(Task.TYPE_sequenser))
 			return "seq";
-		if (tname == Task.TYPE_task)
+		if (tname.equalsIgnoreCase(Task.TYPE_task))
 			return "tsk";
-		if (tname == Task.TYPE_parallel)
+		if (tname.equalsIgnoreCase(Task.TYPE_parallel))
 			return "par";
-		if (tname == Task.TYPE_switch)
+		if (tname.equalsIgnoreCase(Task.TYPE_switch))
 			return "swi";
-		return "";
+		return "UNKNOWN_TASK_TYPE";
 	}
 
 	public boolean close() {
@@ -1559,7 +1718,7 @@ public class Document extends JPanel {
 					this.mainWindow, "Document '" + getShortFilePath().replace("*", "") + 
 					"' has unsaved changes, save document before close?",
 					"Document has unsaved changes",
-					JOptionPane.YES_NO_CANCEL_OPTION);
+					JOptionPane.YES_NO_CANCEL_OPTION, JOptionPane.QUESTION_MESSAGE);
 
 			switch (dialogResult) {
 			case JOptionPane.YES_OPTION:

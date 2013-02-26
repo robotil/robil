@@ -1,0 +1,22 @@
+C48_StandUp
+# Description: robot stands up after falling.
+
+Known bugs:
+* for now, the robot doesnt stand up due to stability problems,
+the movements are the first it should do to stand.
+
+Conditions:
+* works with version 1.3 of drcsim!
+* the function, for now, is for the robot lying on its stomach,
+this will be changed to fit every falling position. 
+
+*Not final steps, may change*
+Follow the steps:
+1. roslaunch atlas_utils atlas.launch
+2. run designer and executer.
+3. rosrun C48_StandUp C48_Node.py
+4. in designer load tree located in TestTree folder.
+5. run the tree.
+
+Contains:
+TestTree folder: tree wich executes the standing code.

@@ -1,51 +1,66 @@
 package document;
 
 import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 
 import javax.swing.ImageIcon;
+import javax.swing.JCheckBoxMenuItem;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 import javax.swing.KeyStroke;
 
-import document.actions.ArrowReconnectAction;
-import document.actions.CloseTabAction;
-import document.actions.CompileAction;
-import document.actions.CopyTreeAction;
-import document.actions.LoadAndOpenAction;
-import document.actions.LogConsoleAction;
-import document.actions.ModifyAction;
-import document.actions.NewWindowAction;
-import document.actions.NextTabAction;
-import document.actions.OpenFileAction;
-import document.actions.OpenTerminalAction;
-import document.actions.PointAction;
-import document.actions.PreviousTabAction;
-import document.actions.PropertiesAction;
-import document.actions.RedoAction;
-import document.actions.RemoveAction;
-import document.actions.RemoveSubtreeAction;
-import document.actions.RunAction;
-import document.actions.SaveImageAction;
-import document.actions.SaveXMLAction;
-import document.actions.TestAction;
-import document.actions.ToolAction;
-import document.actions.UndoAction;
+import document.actions.*;
 
 public class Menubar extends JMenuBar {
 
 	private JMenuItem _undoMenuItem;
 	private JMenuItem _redoMenuItem;
+	private JCheckBoxMenuItem _debugViewMenuItem;
+	private JCheckBoxMenuItem _runtimeViewMenuItem;
+	
 	private static final long serialVersionUID = 8066873848483126226L;
 
 	public Menubar(BTDesigner designer) {
 		add(buildFileMenu(designer));
 		add(buildEditMenu(designer));
+		add(buildViewMenu(designer));
 		add(buildRunMenu(designer));
 		add(buildWindowMenu(designer));
 	}
 
+	private JMenu buildViewMenu(final BTDesigner designer) {
+		JMenu menu = new JMenu("View");
+		_debugViewMenuItem = new JCheckBoxMenuItem("Enable debug view");
+		_debugViewMenuItem.setSelected(false);
+		_debugViewMenuItem.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent arg) {
+				designer.getActiveTab().doc.repaint();
+				
+				if (_debugViewMenuItem.isSelected())
+					_runtimeViewMenuItem.setSelected(false);
+			}
+		});
+		menu.add(_debugViewMenuItem);
+		
+		_runtimeViewMenuItem = new JCheckBoxMenuItem("Enable runtime view");
+		_runtimeViewMenuItem.setSelected(false);
+		_runtimeViewMenuItem.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent arg) {
+				designer.getActiveTab().doc.repaint();
+				
+				if (_runtimeViewMenuItem.isSelected())
+					_debugViewMenuItem.setSelected(false);
+			}
+		});
+		menu.add(_runtimeViewMenuItem);
+		
+		return menu;
+	}
+	
 	private JMenu buildEditMenu(BTDesigner designer) {
 		JMenu menu = new JMenu("Edit");
 
@@ -59,7 +74,6 @@ public class Menubar extends JMenuBar {
 		redo.setIcon(new ImageIcon(getClass().getClassLoader().getResource("icons/redo.png")));
 		redo.addActionListener(new RedoAction(designer));
 		
-		
 		menu.add(undo);
 		menu.add(redo);
 		
@@ -70,11 +84,9 @@ public class Menubar extends JMenuBar {
 		menu.add(buildToolsMenu(designer));
 		menu.add(buildElementsCreatorMenu(designer));
 
-		ImageIcon icon = new ImageIcon(getClass().getClassLoader().getResource(
-				"icons/copy.png"));
+		ImageIcon icon = new ImageIcon(getClass().getClassLoader().getResource("icons/copy.png"));
 		JMenuItem menuItemCopy = new JMenuItem("Copy", KeyEvent.VK_C);
-		menuItemCopy.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_1,
-				ActionEvent.ALT_MASK));
+		menuItemCopy.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_1, ActionEvent.ALT_MASK));
 		menuItemCopy.setToolTipText("Copy selected sub-tree");
 		menuItemCopy.setIcon(icon);
 		menuItemCopy.addActionListener(new CopyTreeAction(designer));
@@ -397,17 +409,6 @@ public class Menubar extends JMenuBar {
 
 		ImageIcon icon;
 
-		// new
-//		icon = new ImageIcon(getClass().getClassLoader().getResource(
-//				"icons/new_tab.png"));
-//		JMenuItem menuItemNew = new JMenuItem("New", KeyEvent.VK_N);
-//		menuItemNew.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_1,
-//				ActionEvent.ALT_MASK));
-//		menuItemNew.setToolTipText("creates new instance of BTDesigner");
-//		menuItemNew.addActionListener(new NewWindowAction(designer));
-//		menuItemNew.setIcon(icon);
-//		menu.add(menuItemNew);
-
 		// open terminal
 		icon = new ImageIcon(getClass().getClassLoader().getResource(
 				"icons/terminal.png"));
@@ -460,6 +461,24 @@ public class Menubar extends JMenuBar {
 	
 	public JMenuItem getRedoButton() {
 		return _redoMenuItem;
+	}
+	
+	public JCheckBoxMenuItem getDebugViewMenuItem() {
+		return _debugViewMenuItem;
+	}
+	
+	public JCheckBoxMenuItem getRuntimeViewMenuItem() {
+		return _runtimeViewMenuItem;
+	}
+
+	public void setRunView() {
+		_runtimeViewMenuItem.setSelected(true);
+		_debugViewMenuItem.setSelected(false);
+	}
+	
+	public void setDebugView() {
+		_runtimeViewMenuItem.setSelected(false);
+		_debugViewMenuItem.setSelected(true);
 	}
 
 }

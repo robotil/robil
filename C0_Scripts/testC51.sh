@@ -1,30 +1,25 @@
 #!/bin/sh
-#This script should run the modules needed for testing C31
+#This script should run the modules needed for testing tasks needing path
 
 CURR_WD=$PWD
 PKILL=$CURR_WD'/.killC51test.txt'
 rm $PKILL
-#roslaunch atlas_utils atlas_golf_cart_fire_hose.launch
-#rostopic pub /drc_world/robot_enter_car geometry_msgs/Pose "position (press TAB)
-echo "Starting executer"
-rosrun C34_Executer executer &
-C34_PID=$!
-echo $C34_PID
-echo "Done "
-sleep 1
-rosrun C22_GroundRecognitionAndMapping C22 &
-C22_PID=$!
-echo $C22_PID
+echo "This is a self test for the driving tasks"
+#roslaunch C51_CarOperation C51_completeLuanch.launch &
+#C51_PID=$!
+#echo $C51_PID
+#echo "sleeping 60"
+#sleep 60
+echo "Setting the robot in the driver seat"
+rostopic pub --once /drc_world/robot_enter_car geometry_msgs/Pose '{}'
+echo "Done"
+echo "Initializing the car"
+rosrun C51_CarOperation DRC_Vehicle_Init_client.py 
 sleep 3
-echo "Starting C31"
-rosrun C31_PathPlanner gpp&
-C31_PID=$!
-echo $C31_PID
+echo "Driving the car"
+rosrun C51_CarOperation DRC_Vehicle_Drive_client.py 
 echo "Done "
-echo $C22_PID $C31_PID $C34_PID >> $PKILL
+echo "Finishing driving"
+rosrun C51_CarOperation DRC_Vehicle_Finish_client.py 
+#echo $C51_PID $INIT $DRIVE $FIN >> $PKILL
 
-roscd C34_Executer
-rosservice call executer/run T $PWD/tmp/pln
-rosservice call executer/resume T
-rosservice call executer/run T1 $PWD/tmp/pln1
-rosservice call executer/resume T1

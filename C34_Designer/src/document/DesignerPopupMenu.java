@@ -28,6 +28,56 @@ public class DesignerPopupMenu extends JPopupMenu {
 	private Document _document; 
 	private GElement _element;
 	
+	/**
+	 * Creates a popup menu for selected element
+	 * @param designer BTDesigner object
+	 * @param document Target document
+	 * @param element Selected element
+	 */
+	public DesignerPopupMenu(BTDesigner designer, Document document, GElement element) {
+		_designer = designer;
+		_document = document;
+		_element = element;
+
+		if (element.isArrow())
+			createArrowMenu();
+		
+		if (element.isTask()) 
+			createTaskMenu();
+		
+		if (element.isDecorator())
+			createDecoratorMenu();
+		
+		initPopupMenu();
+	}
+	
+	/**
+	 * Creates popup menu when the document is clicked, but none elements selected
+	 * @param designer BTDesigner object
+	 * @param document Target document
+	 */
+	public DesignerPopupMenu(BTDesigner designer, Document document) {
+		_designer = designer;
+		_document = document;
+		
+		add(createTaskCreateMenuItem());
+		
+		initPopupMenu();
+	}
+	
+	private void initPopupMenu() {
+		this.addPopupMenuListener(new PopupMenuListener() {
+			@Override
+			public void popupMenuWillBecomeVisible(PopupMenuEvent arg0) {}
+			@Override
+			public void popupMenuCanceled(PopupMenuEvent arg0) {}
+			@Override
+			public void popupMenuWillBecomeInvisible(PopupMenuEvent arg0) {
+				_document.repaint();
+			}
+		});
+	}
+	
 	private JMenu createCopyToPopup() {
 		JMenu menu = new JMenu("Copy to...");
 		
@@ -94,6 +144,18 @@ public class DesignerPopupMenu extends JPopupMenu {
 		return menu;
 	}
 	
+	private JMenuItem createRunHistoryMenuItem() {
+		JMenuItem menu = new JMenuItem("Run history");
+		menu.setIcon(new ImageIcon(getClass().getClassLoader().getResource("icons/history.png")));
+		menu.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent arg) {
+				_element.getAsTask().showHistory(_designer);
+			}
+		});
+		return menu;
+	}
+	
 	private JMenuItem createCopyMenuItem() {
 		JMenuItem menu = new JMenuItem("Copy");
 		menu.setIcon(new ImageIcon(getClass().getClassLoader().getResource("icons/copy.png")));
@@ -151,7 +213,7 @@ public class DesignerPopupMenu extends JPopupMenu {
 		return menu;
 	}
 	
-	public void createArrowMenu() {
+	private void createArrowMenu() {
 		add(createJointMenuItem());
 		add(createDecoratorMenuItem());
 		add(createReconnectMenuItem());
@@ -159,15 +221,20 @@ public class DesignerPopupMenu extends JPopupMenu {
 		add(createRemoveMenuItem());
 	}
 	
-	public void createDecoratorMenu() {
+	private void createDecoratorMenu() {
 		add(createModifyMenuItem());
 		add(createRemoveMenuItem());
 	}
 	
-	public void createTaskMenu() {
+	private void createTaskMenu() {
 		add(createModifyMenuItem());
+		
+		if (this._element.isTaskType())
+			add(createRunHistoryMenuItem());
+		
 		add(createCopyMenuItem());
 		add(createCopyToPopup());
+		
 		if (!this._element.isTaskType())
 			add(createCollapseCheckBox());
 		
@@ -177,56 +244,6 @@ public class DesignerPopupMenu extends JPopupMenu {
 		add(createRemoveMenuItem());
 		if (!this._element.isTaskType())
 			add(createRemoveSubtreeMenuItem());
-	}
-	
-	/**
-	 * Creates a popup menu for selected element
-	 * @param designer BTDesigner object
-	 * @param document Target document
-	 * @param element Selected element
-	 */
-	public DesignerPopupMenu(BTDesigner designer, Document document, GElement element) {
-		_designer = designer;
-		_document = document;
-		_element = element;
-
-		if (element.isArrow())
-			createArrowMenu();
-		
-		if (element.isTask()) 
-			createTaskMenu();
-		
-		if (element.isDecorator())
-			createDecoratorMenu();
-		
-		initPopupMenu();
-	}
-	
-	/**
-	 * Creates popup menu when the document is clicked, but none elements selected
-	 * @param designer BTDesigner object
-	 * @param document Target document
-	 */
-	public DesignerPopupMenu(BTDesigner designer, Document document) {
-		_designer = designer;
-		_document = document;
-		
-		add(createTaskCreateMenuItem());
-		
-		initPopupMenu();
-	}
-	
-	private void initPopupMenu() {
-		this.addPopupMenuListener(new PopupMenuListener() {
-			@Override
-			public void popupMenuWillBecomeVisible(PopupMenuEvent arg0) {}
-			@Override
-			public void popupMenuCanceled(PopupMenuEvent arg0) {}
-			@Override
-			public void popupMenuWillBecomeInvisible(PopupMenuEvent arg0) {
-				_document.repaint();
-			}
-		});
 	}
 	
 }

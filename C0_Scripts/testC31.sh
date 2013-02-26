@@ -14,7 +14,7 @@ C22_PID=$!
 echo $C22_PID
 sleep 3
 echo "Playing bag file"
-rosbag play /userhome/mhallak/Downloads/record_points4_2013-01-14-14-22-01.bag 
+rosbag play record_points4_2013-01-14-14-22-01.bag 
 echo "Starting executer"
 rosrun C34_Executer executer &
 C34_PID=$!

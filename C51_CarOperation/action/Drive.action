@@ -1,14 +1,13 @@
 #goal definition
-int32 PerformJob
+string name
+string uid
+string parameters
 ---
 #result definition
-int32 Success
+int32 success
+string description
+string plan
 ---
 #feedback
-
-#float32[] WayPointsGiven
-float32[] LastWPpassed
-#float32 LastWPpassed_Y
-float32[] MyLoc4LastWP
-#float32 MyLoc4LastWP_Y
+float32 complete
 

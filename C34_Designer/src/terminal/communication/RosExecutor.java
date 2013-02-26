@@ -2,6 +2,8 @@ package terminal.communication;
 
 import java.util.ArrayList;
 
+import logger.Log;
+
 import terminal.commands.ServiceCaller;
 import document.BTDesigner;
 
@@ -24,29 +26,28 @@ public class RosExecutor {
 		this.workerThreads = new ArrayList<Thread>();
 		this.workerThreads.add(new Thread(new RosStackStreamListener(designer),
 				"RosStackListener"));
-		this.workerThreads.add(new Thread(new RosStopStreamListener(),
+		this.workerThreads.add(new Thread(new RosStopStreamListener(designer),
 				"RosStopListener"));
 
-		for (Thread t : this.workerThreads) {
+		for (Thread t : this.workerThreads)
 			t.start();
-		}
 	}
 
 	public void pauseBehaviorTree(String btName) {
 		ServiceCaller caller = new ServiceCaller();
-		System.out.println("Pause " + btName);
+		Log.i("ROSEXECUTOR", "Pause " + btName);
 		caller.callService(PAUSE, btName);
 	}
 
 	public void resumeBehaviorTree(String btName) {
-		System.out.println("Resume " + btName);
+		Log.i("ROSEXECUTOR", "Resume " + btName);
 		ServiceCaller caller = new ServiceCaller();
 		caller.callService(RESUME, btName);
 	}
 
 	public void runBehaviorTree(String btName, String plan) {
 		ServiceCaller caller = new ServiceCaller();
-		System.out.println("Run " + btName);
+		Log.i("ROSEXECUTOR", "Run " + btName);
 		caller.callService(RUN, btName, plan);
 	}
 
@@ -58,13 +59,13 @@ public class RosExecutor {
 
 	public void stepBehaviorTree(String btName) {
 		ServiceCaller caller = new ServiceCaller();
-		System.out.println("Step " + btName);
+		Log.i("ROSEXECUTOR", "Step " + btName);
 		caller.callService(STEP, btName);
 	}
 
 	public void stopBehaviorTree(String btName) {
 		ServiceCaller caller = new ServiceCaller();
-		System.out.println("Stop " + btName);
+		Log.i("ROSEXECUTOR", "Stop " + btName);
 		caller.callService(STOP, btName);
 	}
 

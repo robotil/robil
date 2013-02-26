@@ -6,6 +6,8 @@ import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
 
+import logger.Log;
+
 import document.Parameters;
 
 import terminal.lineprocessors.LineProcessor;
@@ -58,7 +60,7 @@ public class RosPipe {
 			result = result + string + " ! ";
 		}
 
-		System.err.println(result);
+		Log.i("ROSPIPE", result);
 	}
 
 	private void receive(RosTargets target, String streamid, LineProcessor processor )
@@ -83,7 +85,7 @@ public class RosPipe {
 					return;
 				}
 				if(Parameters.log_print_ros_output)
-					System.out.println("new line from ros stream ("+streamid+") "+convertRosEnumToString(target)+": "+line);
+					Log.d("new line from ros stream ("+streamid+") "+convertRosEnumToString(target)+": "+line);
 				processor.onNewLine(line);
 			}
 		} catch (IOException e) {
@@ -148,7 +150,7 @@ public class RosPipe {
 			return;
 		}
 		if(Parameters.log_ros_progress_print_level > 1)
-			System.out.println("   send message to ros.");
+			Log.i("ROSPIPE", "   send message to ros.");
 		send(target, sid.toString(), args);
 
 		if (this.thread.isInterrupted()) {
@@ -156,7 +158,7 @@ public class RosPipe {
 		}
 
 		if(Parameters.log_ros_progress_print_level > 1)
-			System.out.println("   listen output stream from ros.");
+			Log.i("ROSPIPE", "   listen output stream from ros.");
 		receive(target, sid.toString(), processor);
 
 	}

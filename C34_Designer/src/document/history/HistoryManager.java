@@ -2,6 +2,8 @@ package document.history;
 
 import java.util.Stack;
 
+import logger.Log;
+
 import document.Document;
 
 /**
@@ -52,8 +54,6 @@ public class HistoryManager {
 		_redoStack.clear();
 		_undoStack.push(_currentSnapshot);
 		updateCurrentSnapshot();
-		System.out.println("Snapshot saved");
-	
 	}
 	
 	/**
@@ -129,18 +129,19 @@ public class HistoryManager {
 	 * Prints information about current state, undo & redo stacks to standard output
 	 */
 	public void printStacks() {
+		StringBuilder output = new StringBuilder();
 		
 		for (Snapshot snapShot : this._undoStack)
 			if (snapShot != null)
-				System.out.print(snapShot.toString() + " ");
+				output.append(snapShot.toString() + " ");
 		
-		System.out.print("[" + this._currentSnapshot + "]");
+		output.append("[" + this._currentSnapshot + "]");
 		
 		for (Snapshot snapShot : this._redoStack)
 			if (snapShot != null)
-				System.out.print(snapShot.toString() + " ");
+				output.append(snapShot.toString() + " ");
 		
-		System.out.println();
+		Log.e(output.toString());
 	}
 
 }

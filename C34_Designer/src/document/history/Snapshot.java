@@ -19,6 +19,13 @@ class Snapshot {
 	private ArrayList<GElement> _elements;
 	private ArrayList<GElement> _arrows;
 	
+	/**
+	 * Private constructor, instance of Snapshot must be create via static method create
+	 * @param document Document
+	 * @param elements Elements list
+	 * @param arrows Arrows list
+	 * @param sequenceNumber Sequence number
+	 */
 	private Snapshot(Document document, ArrayList<GElement> elements, ArrayList<GElement> arrows, int sequenceNumber) {
 		this._date 		= new Date();
 		this._document 	= document;
@@ -41,11 +48,12 @@ class Snapshot {
 		ArrayList<GElement> arrows   = new ArrayList<GElement>();
 		
 		// Set elements & arrows to allow cloning
-		_document.elements = _elements;
-		_document.arrays  	= _arrows;
+		// _document.elements = _elements;
+		// _document.arrays  	= _arrows;
 		
 		// Clone elements & arrows
-		_document.cloneElements(elements, arrows);
+		// _document.cloneElements(elements, arrows);
+		_document.cloneElements(_elements, _arrows, elements, arrows);
 		
 		// Replace elements & arrows by clones
 		_document.elements = elements;
