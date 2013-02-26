@@ -1,0 +1,26 @@
+<launch>
+<!-- Launch the atlas & vehicle & fire hose world-->
+<!--include file="$(find atlas_utils)/launch/atlas_drc_vehicle_fire_hose.launch" /-->
+
+<!-- Start Steering Wheel server -->
+<node name="SteeringWheel_server" pkg="C67_CarManipulation" type="SteeringWheel_server" />
+
+<!-- Start Ignition server -->
+<node name="Ignition_server" pkg="C67_CarManipulation" type="Ignition_server" />
+
+<!-- Start Hand Brake server -->
+<node name="HandBrake_server" pkg="C67_CarManipulation" type="HandBrake_server" />
+
+<!-- Start Gear Handle server -->
+<node name="GearHandle_server" pkg="C67_CarManipulation" type="GearHandle_server" />
+
+<!-- Start Gas Pedal server -->
+<node name="GasPedal_server" pkg="C67_CarManipulation" type="GasPedal_server" />
+
+<!-- Start Brake Pedal server -->
+<node name="BrakePedal_server" pkg="C67_CarManipulation" type="BrakePedal_server" />
+
+
+</launch>
+  
+

@@ -61,23 +61,23 @@ void SetJointStates(const sensor_msgs::JointState::ConstPtr &_js)
 		Target = RPY(0.6, -0.5, 0.3, 0.142, -0.061, 1.28);
 	
 	
-	IkSolution Ik = rSearchSolution(_js->position[q1], _js->position[q2], 
+	IkSolution Ik = lSearchSolution(_js->position[q1], _js->position[q2], 
 		_js->position[q3], Target);
 	
 	if (Ik.valid)
 	{
 		std::cout.precision(6);
 		std::cout.setf (std::ios::fixed , std::ios::floatfield ); 
-		std::cout << "q5-q9 old:"<< _js->position[q5r]<< ", "<< _js->position[q6r]<< ", "<< _js->position[q7r]
-			<< ", "<< _js->position[q8r]<< ", "<< _js->position[q9r]<< std::endl;
+		std::cout << "q5-q9 old:"<< _js->position[q5l]<< ", "<< _js->position[q6l]<< ", "<< _js->position[q7l]
+			<< ", "<< _js->position[q8l]<< ", "<< _js->position[q9l]<< std::endl;
 		Ik.Print();
 	
-		jointcommands.position[q4r] = Ik._q4;
-		jointcommands.position[q5r] = Ik._q5;
-		jointcommands.position[q6r] = Ik._q6;
-		jointcommands.position[q7r] = Ik._q7;
-		jointcommands.position[q8r] = Ik._q8;
-		jointcommands.position[q9r] = Ik._q9;
+		jointcommands.position[q4l] = Ik._q4;
+		jointcommands.position[q5l] = Ik._q5;
+		jointcommands.position[q6l] = Ik._q6;
+		jointcommands.position[q7l] = Ik._q7;
+		jointcommands.position[q8l] = Ik._q8;
+		jointcommands.position[q9l] = Ik._q9;
 		pub_joint_commands_.publish(jointcommands);
 	}
 	else
@@ -103,7 +103,7 @@ int main(int argc, char** argv)
   	use_arg = true;
   }
    
-  ros::init(argc, argv, "pub_joint_command_rhand");
+  ros::init(argc, argv, "pub_joint_command_lhand");
 
   ros::NodeHandle* rosnode = new ros::NodeHandle();
 
