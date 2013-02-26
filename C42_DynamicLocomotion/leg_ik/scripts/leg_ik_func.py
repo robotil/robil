@@ -28,7 +28,7 @@ from IKException import IKReachException
 # swing_hip  = measured swing hip position (x,y,z)   
 # pelvis_m   = measured pelvis orientation(r,p,w)
   
-def swing_leg_ik(swing_foot,swing_hip,pelvis_m):
+def swing_leg_ik(swing_foot,swing_hip,pelvis_m): # pelvis_d
 
     l1=round(0.37700,6) #u_leg
     l2=round(0.42200,6) #l_leg
@@ -52,7 +52,7 @@ def swing_leg_ik(swing_foot,swing_hip,pelvis_m):
                         
                         [-sin(swing_foot.p), cos(swing_foot.p)*sin(swing_foot.r),cos(swing_foot.p)*cos(swing_foot.r)]])
 
-    #des_pos = dot(linalg.inv(Rrpw_pelvis_m),(xankle-xhip))
+    #des_pos = dot(linalg.inv(Rrpw_pelvis_m),(xankle-xhip)) # use pelvis_d
     des_pos = (xankle-xhip)
     
     

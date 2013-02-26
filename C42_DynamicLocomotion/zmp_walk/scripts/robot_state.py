@@ -112,11 +112,11 @@ class Robot_State:
         return()
 
     # External auxiliary method:
-    def Get_l_stance_hip_0(self):
+    def Get_l_foot_coord_params(self):
         return(self.array2Pos( self.l_stance_hip_0 ))
 
     # External auxiliary method:
-    def Get_r_stance_hip_0(self):
+    def Get_r_foot_coord_params(self):
         return(self.array2Pos( self.r_stance_hip_0 ))
 
     # Class internal auxiliary method:
@@ -265,19 +265,44 @@ class Robot_State:
             while listener.waitForTransform (base_frame, get_frames[i], rospy.Time(0), time_out, polling_sleep_duration) and not rospy.is_shutdown():
                 rospy.loginfo("Not ready for Forward Kinematics transform")
 
-        self.getRobot_State( listener = listener, step_phase = 3)
+        # Wait 1 second used for printing
+        rospy.sleep(1)
+
+        for i in range(0,Robot_State.sample_buffer_size):
+            self.getRobot_State( listener = listener, step_phase = 3)
+            rospy.loginfo("Robot State static_init-getRS R sample num.%i: stance_hip_filtered - x = %f, y = %f, z = %f;  stance_hip_last - x = %f, y = %f, z = %f" \
+               % ( self.num_of_samples_in_buffer, self.stance_hip.x, self.stance_hip.y, self.stance_hip.z, float(self.stance_hip_arr[-1,0]), float(self.stance_hip_arr[-1,1]), float(self.stance_hip_arr[-1,2])) )
+            # Wait 0.02 second
+            rospy.sleep(0.03)
 
         com_0_from_r_foot = self.com_m_filtered.copy() #copy.deepcopy( self.com_m_arr )
         self.r_stance_hip_0 = self.stance_hip_filtered.copy() #copy.deepcopy( self.stance_hip_arr ) 
+        delta_between_hips = self.stance_hip_filtered - self.swing_hip_filtered
+        self.rf_swing_hip_dy = pl.sqrt( pl.dot( delta_between_hips,delta_between_hips ) ) # distance between hips in right leg frame
 
-        self.getRobot_State( listener = listener, step_phase = 1)
+        # Wait 1 second used for printing
+        rospy.sleep(1)
 
+        self.init_Change_step_phase() # reset robot state buffers 
+
+        for i in range(0,Robot_State.sample_buffer_size):
+            self.getRobot_State( listener = listener, step_phase = 1)
+            rospy.loginfo("Robot State static_init-getRS L sample num.%i: stance_hip_filtered - x = %f, y = %f, z = %f;  stance_hip_last - x = %f, y = %f, z = %f" \
+               % ( self.num_of_samples_in_buffer, self.stance_hip.x, self.stance_hip.y, self.stance_hip.z, float(self.stance_hip_arr[-1,0]), float(self.stance_hip_arr[-1,1]), float(self.stance_hip_arr[-1,2])) )
+            # Wait 0.02 second
+            rospy.sleep(0.03)
+        
+        # Wait 1 second used for printing
+        rospy.sleep(1)
         
         self.l_stance_hip_0 = self.stance_hip_filtered.copy() #copy.deepcopy( self.stance_hip_arr )
         # com_0_from_l_foot = self.com_m_arr.copy() #copy.deepcopy( self.com_m_arr )
         # rs_from_l_foot_swing_foot = self.swing_foot_arr.copy() #copy.deepcopy( self.swing_foot_arr )
         # rs_from_l_foot_swing_hip = self.swing_hip_arr.copy() #copy.deepcopy( self.swing_hip_arr )
         # rs_from_l_foot_pelvis_m = self.pelvis_m_arr.copy() #copy.deepcopy( self.pelvis_m_arr )
+
+        delta_between_hips = self.stance_hip_filtered - self.swing_hip_filtered
+        self.lf_swing_hip_dy = pl.sqrt( pl.dot( delta_between_hips,delta_between_hips ) )  # distance between hips in left leg frame
 
         # TODO: in order to get better readings one should repeat the lines above a few times while init position function and average the readings  
 
@@ -297,8 +322,8 @@ class Robot_State:
         # use with measured com  e.g: com_m_arr - com2_stance_hip + com_ref = stance hip in the foot coordinate system to be used by IK
         # use with out e.g: stance_hip_0 + com_ref = stance hip in the foot coordinate system to be used by IK
 
-        rospy.loginfo("Robot State static_init: l_stance_hip_0 - x = %f, y = %f, z = %f;  r_stance_hip_0 - x = %f, y = %f, z = %f" \
-               % (float(self.l_stance_hip_0[0]), float(self.l_stance_hip_0[1]), float(self.l_stance_hip_0[2]), float(self.r_stance_hip_0[0]), float(self.r_stance_hip_0[1]), float(self.r_stance_hip_0[2])) )
+        rospy.loginfo("Robot State static_init: lf_swing_hip_dy = %f l_stance_hip_0 - x = %f, y = %f, z = %f; rf_swing_hip_dy = %f r_stance_hip_0 - x = %f, y = %f, z = %f" \
+               % (self.lf_swing_hip_dy, float(self.l_stance_hip_0[0]), float(self.l_stance_hip_0[1]), float(self.l_stance_hip_0[2]), self.rf_swing_hip_dy, float(self.r_stance_hip_0[0]), float(self.r_stance_hip_0[1]), float(self.r_stance_hip_0[2])) )
 
 
         # self.swing_foot_arr = rs_from_l_foot_swing_foot
