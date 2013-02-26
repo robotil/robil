@@ -156,6 +156,18 @@ public class DesignerPopupMenu extends JPopupMenu {
 		return menu;
 	}
 	
+	private JMenuItem createPlanExecutionHistoryMenuItem() {
+		JMenuItem menu = new JMenuItem("Execution history");
+		menu.setIcon(new ImageIcon(getClass().getClassLoader().getResource("icons/history.png")));
+		menu.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent arg) {
+				_document.showHistory(_designer);
+			}
+		});
+		return menu;
+	}
+	
 	private JMenuItem createCopyMenuItem() {
 		JMenuItem menu = new JMenuItem("Copy");
 		menu.setIcon(new ImageIcon(getClass().getClassLoader().getResource("icons/copy.png")));
@@ -231,6 +243,9 @@ public class DesignerPopupMenu extends JPopupMenu {
 		
 		if (this._element.isTaskType())
 			add(createRunHistoryMenuItem());
+		
+		if (this._element.getProperty().isRoot)
+			add(createPlanExecutionHistoryMenuItem());
 		
 		add(createCopyMenuItem());
 		add(createCopyToPopup());

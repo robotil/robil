@@ -1,4 +1,4 @@
-package elements.tasks;
+package document;
 
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
@@ -13,19 +13,16 @@ import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.UIManager;
 
-import document.PlanExecution;
+import document.PlanExecutionCollection.EventListenerArgs;
 
-import elements.tasks.TaskResultCollection.EventListenerArgs;
-
-public class TaskRunHistoryDialog extends JDialog {
+public class PlanExecutionHistoryDialog extends JDialog {
 	private static final long serialVersionUID = -4309214496648164067L;
 	
-	private final Task _task;
+	private final Document _document;
 	private JTextArea _txtOutput;
-	private PlanExecution _lastPlan;
 	
-	public TaskRunHistoryDialog(JFrame parent, Task task) {
-		this._task = task;
+	public PlanExecutionHistoryDialog(JFrame parent, Document document) {
+		this._document = document;
 		
 		build();
 		// setModalityType(ModalityType.APPLICATION_MODAL);
@@ -37,22 +34,17 @@ public class TaskRunHistoryDialog extends JDialog {
 		
 		setEventListener();
 		
-		setTitle("Task run history");
+		setTitle("Plan execution history");
 		setDefaultCloseOperation(DISPOSE_ON_CLOSE);
 		setSize(600, 400);
 		setVisible(true);
 	}
 
 	private void setEventListener() {
-		_task.getRunResults().addEventListener(new TaskResultCollection.EventListener() {
+		_document.getPlanExecutionResults().addEventListener(new PlanExecutionCollection.EventListener() {
 			@Override
 			public void onAdd(EventListenerArgs e) {
-				if (e.taskResult.getPlanExecution() != _lastPlan) {
-					_txtOutput.append("------------\n");
-					_lastPlan = e.taskResult.getPlanExecution();
-				}
-				
-				_txtOutput.append(e.taskResult.toString() + "\n");
+				_txtOutput.append(e.planResult.toStringDetailed() + "\n");
 				_txtOutput.setCaretPosition(_txtOutput.getDocument().getLength());
 			}
 		});
@@ -69,14 +61,14 @@ public class TaskRunHistoryDialog extends JDialog {
 		c.gridx = 0;
 		c.gridy = 0;
 		c.weightx = 1;
-		panel.add(new JLabel("Task id:"), c);
+		panel.add(new JLabel("Plan filename:"), c);
 		
 		c.insets = new Insets(0, 10, 10, 10);
 		c.fill = GridBagConstraints.HORIZONTAL;
 		c.gridx = 0;
 		c.gridy++;
 		c.weightx = 1;
-		JTextField txtTaskId = new JTextField(_task.id.toString());
+		JTextField txtTaskId = new JTextField(_document.getShortFilePath().toString());
 		txtTaskId.setMargin(new Insets(5, 5, 5, 5));
 		txtTaskId.setEditable(false);
 		panel.add(txtTaskId, c);
@@ -99,17 +91,8 @@ public class TaskRunHistoryDialog extends JDialog {
 		_txtOutput = new JTextArea();
 		
 		_txtOutput.setEditable(false);
-		
-		PlanExecution prevPlan = null;
-		for (TaskResult result : _task.getRunResults()) {
-			if (prevPlan != result.getPlanExecution()) {
-				_txtOutput.append("------------\n");
-				prevPlan = result.getPlanExecution();
-			}
-				
-			_txtOutput.append(result + "\n");
-			_lastPlan = result.getPlanExecution();
-		}
+		for (PlanExecution result : _document.getPlanExecutionResults())
+			_txtOutput.append(result.toStringDetailed() + "\n");
 		
 		_txtOutput.setCaretPosition(_txtOutput.getDocument().getLength());
 
