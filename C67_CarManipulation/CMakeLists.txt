@@ -48,6 +48,9 @@ rosbuild_add_boost_directories()
 rosbuild_add_executable(rPoint src/rPoint.cpp)
 target_link_libraries(rPoint Kinematics)
 
+rosbuild_add_executable(lPoint src/lPoint.cpp)
+target_link_libraries(lPoint Kinematics)
+
 rosbuild_add_executable(Ignition_server src/Ignition_server.cpp)
 rosbuild_link_boost(Ignition_server thread)
 

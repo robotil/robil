@@ -16,8 +16,10 @@
 #define	px A.T[0][3]
 #define	py A.T[1][3]
 #define	pz A.T[2][3]
-#define py5 (py - y5)
-#define pz5 (pz - z5)
+#define py5r (py - y5r)
+#define pz5r (pz - z5r)
+#define py5l (py - y5l)
+#define pz5l (pz - z5l)
 #define _q4	m_q[0]
 #define _q5	m_q[1]
 #define _q6	m_q[2]
@@ -42,13 +44,16 @@ public:
 	double error;
 	bool valid;
 	IkSolution(){}
-	RPY Fk5Dof();
+	RPY rFk5Dof();
+	RPY lFk5Dof();
 	void Print();
 };
 
-IkSolution Ik5Dof(RPY target); 
+IkSolution rIk5Dof(RPY target); 
+IkSolution lIk5Dof(RPY target); 
 double RpyError(RPY R1, RPY R2);
-IkSolution SearchSolution(double mq1, double mq2, double mq3, RPY target);
+IkSolution rSearchSolution(double mq1, double mq2, double mq3, RPY target);
+IkSolution lSearchSolution(double mq1, double mq2, double mq3, RPY target);
 
 
 

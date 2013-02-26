@@ -18,8 +18,11 @@ public:
 	  pcl::PointXYZ representing_point;
 	  MPlane();
 	  int rating;
+	  bool ratable;
 	  MPlane(pcl::PointXYZ point, pcl::ModelCoefficients::Ptr c_);
 	  virtual ~MPlane();
+	  void addRating();
+	  void setRatable();
 	  bool isEqualTo(MPlane * other);
 	  std::string toString();
 };
