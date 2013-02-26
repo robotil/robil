@@ -30,7 +30,7 @@ public class StopStreamMessage {
 	}
 	
 	private PlanFinishReason _finishReason = PlanFinishReason.Success;
-	private ArrayList<String> _failedTasks = new ArrayList<String>();
+	private ArrayList<String> _tasksTree = new ArrayList<String>();
 	private String _targetTaskId = "";
 
 	public PlanFinishReason getFinishReason() {
@@ -54,18 +54,18 @@ public class StopStreamMessage {
 			this._targetTaskId = targetTaskId;
 	}
 
-	public ArrayList<String> getFailedTasks() {
-		return _failedTasks;
+	public ArrayList<String> getTasksTree() {
+		return _tasksTree;
 	}
 
 	public void setFailedTasks(ArrayList<String> failedTasks) {
-		this._failedTasks = failedTasks;
+		this._tasksTree = failedTasks;
 	}
 	
 	@Override
 	public String toString() {
 		return String.format(
-				"Finish reason: %s\nFailed task: %s",
+				"Finish reason: %s\nLast task: %s",
 				getFinishReason().toString(),
 				getTargetTaskId()
 				);

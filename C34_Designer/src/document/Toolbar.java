@@ -19,6 +19,7 @@ import document.actions.CompileAction;
 import document.actions.ExportTasksAction;
 import document.actions.ModifyAction;
 import document.actions.NewWindowAction;
+import document.actions.OpenEditorAction;
 import document.actions.OpenFileAction;
 import document.actions.OpenTaskDescriptionEditorAction;
 import document.actions.PointAction;
@@ -147,6 +148,12 @@ public class Toolbar extends JPanel {
 		pnl = new JPanel();
 		pnl.setPreferredSize(new Dimension(10, 0));
 		buttons.add(pnl);
+		
+		btn = new JButton();
+		btn.setToolTipText("Edit xml");
+		btn.setIcon(new ImageIcon(getClass().getClassLoader().getResource("icons/editor.png")));
+		btn.addActionListener(new OpenEditorAction(designer));
+		buttons.add(btn);
 		
 		btn = new JButton();
 		btn.setToolTipText("Save image");

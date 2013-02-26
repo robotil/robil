@@ -197,6 +197,10 @@ public class TaskDescription {
 
 	public TaskDescription(String fname) throws ParserConfigurationException,
 			SAXException, IOException {
+		
+		if (!(new File(fname).exists()))
+			save(fname);
+		
 		DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
 		DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
 		Document doc = dBuilder.parse(new File(fname));
