@@ -69,13 +69,10 @@ public class Document extends JPanel {
 			if (Document.this.selectedElement == null) {
 				// Vec d = new Vec(e.getPoint()).sub(new
 				// Vec(mousePressed)).scale(1/view.zoom);
-				Document.this.view.loc.setOffset(new Vec(e.getPoint())
-						.sub(new Vec(Document.this.mousePressed)));
+				Document.this.view.loc.setOffset(new Vec(e.getPoint()).sub(new Vec(Document.this.mousePressed)));
 				Document.this.mousePressed = e.getPoint();
 			} else {
-				Vec d = new Vec(e.getPoint()).sub(
-						new Vec(Document.this.mousePressed)).scale(
-						1 / Document.this.view.zoom);
+				Vec d = new Vec(e.getPoint()).sub(new Vec(Document.this.mousePressed)).scale(1 / Document.this.view.zoom);
 				Document.this.selectedElement.getProperty().location.setOffset(d);
 				for (GElement el : searchAllSubelements(Document.this.selectedElement)) {
 					el.getProperty().location.setOffset(d);
@@ -906,6 +903,16 @@ public class Document extends JPanel {
 			if (arr.getSource() == el) {
 				subels.add(arr);
 				subels.addAll(arr.targets);
+			}else{
+				boolean found = false;
+				for( int i=0; i<arr.targets.size(); i++ ){
+					if(arr.targets.get(i) == el){
+						found = true;
+					}
+					if( found ){
+						subels.add(arr.targets.get(i));
+					}
+				}
 			}
 		}
 		return uniq(subels);
@@ -1604,14 +1611,12 @@ public class Document extends JPanel {
 	}
 
 	public ArrayList<GElement> searchAllSubelements(GElement el) {
-		ArrayList<GElement> ret = uniq(searchAllSubelements(el,
-				new ArrayList<GElement>()));
+		ArrayList<GElement> ret = uniq(searchAllSubelements(el,	new ArrayList<GElement>()));
 		ret.remove(el);
 		return ret;
 	}
 
-	public ArrayList<GElement> searchAllSubelements(GElement el,
-			ArrayList<GElement> subels) {
+	public ArrayList<GElement> searchAllSubelements(GElement el,ArrayList<GElement> subels) {
 		ArrayList<GElement> subels_onelevel = getSubElementsOfOneLevel(el);
 		for (GElement e : subels_onelevel)
 			if (subels.contains(e) == false) {
@@ -1621,10 +1626,8 @@ public class Document extends JPanel {
 		return subels;
 	}
 
-	public ArrayList<GElement> searchAllSubelements(GElement el,
-			boolean removeTopElement) {
-		ArrayList<GElement> ret = uniq(searchAllSubelements(el,
-				new ArrayList<GElement>()));
+	public ArrayList<GElement> searchAllSubelements(GElement el,boolean removeTopElement) {
+		ArrayList<GElement> ret = uniq(searchAllSubelements(el,new ArrayList<GElement>()));
 		if (removeTopElement)
 			ret.remove(el);
 		return ret;
