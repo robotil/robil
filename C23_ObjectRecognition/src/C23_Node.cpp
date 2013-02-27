@@ -7,6 +7,8 @@
  * 
  **************************************************************************************/
 #include "C23_Node.hpp"
+#include <ros/package.h>
+
 
 
 
@@ -103,10 +105,10 @@ void C23_Node::callback(const sensor_msgs::ImageConstPtr& left_msg,const sensor_
     if(tldh_ == NULL) {
         ROS_INFO("Now reading model..");
         char buf[10000];
-        sprintf(buf,"models/%s%c",models[currentModel_],'\0');
+        sprintf(buf,"%s/models/%s%c",ros::package::getPath("C23_ObjectRecognition").c_str(),models[currentModel_],'\0');
         ROS_INFO("Done reading");
         ROS_INFO("Now building... %s\n",buf);
-        tldh_ = new C23_Node_TLD_Handler(TRACKING, "models/car_polaris_passenger_side.mdl");
+        tldh_ = new C23_Node_TLD_Handler(TRACKING, buf);
         ROS_INFO("Now init..\n");
         tldh_->init(destination);
     } else {
