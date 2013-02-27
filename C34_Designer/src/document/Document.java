@@ -581,6 +581,8 @@ public class Document extends JPanel {
 			// add(element);
 			add(element);
 			element.setView(this.view);
+			element.getProperty().location.x+=10;
+			element.getProperty().location.y+=10;
 		}
 		
 		onTreeChange(TreeChangeType.TreeCopy, el);
