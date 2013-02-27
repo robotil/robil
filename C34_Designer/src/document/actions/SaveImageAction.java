@@ -3,6 +3,8 @@ package document.actions;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
+import logger.Log;
+
 import document.BTDesigner;
 import document.Document;
 import document.Parameters;
@@ -29,7 +31,7 @@ public class SaveImageAction extends AbstractDesignerAction implements
 			Toolbar.getSaveSnapShot(document, fileName);
 		} catch (Exception ex) {
 			// TODO Auto-generated catch block
-			ex.printStackTrace();
+			Log.e(ex);
 		}
 	}
 }

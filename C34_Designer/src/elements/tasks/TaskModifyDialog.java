@@ -24,6 +24,8 @@ import javax.swing.JTextField;
 import javax.swing.ScrollPaneConstants;
 import javax.swing.UIManager;
 
+import logger.Log;
+
 import document.description.TaskDescription;
 import elements.JAutoSuggestComboBox;
 
@@ -82,9 +84,9 @@ class ModifyDialog extends JDialog {
 
 		this.cType = new JComboBox(new String[] { Task.TYPE_sequenser,Task.TYPE_selector, Task.TYPE_task, Task.TYPE_parallel, Task.TYPE_switch });
 		this.cType.setSelectedItem(_task.type);
-		this.txtDbgTime = new JTextField("" + _task.getProperty().test_time);
+		this.txtDbgTime = new JTextField("" + _task.getProperty().testTime);
 		this.txtDbgResult = new JComboBox(new String[] { "true","false" });
-		this.txtDbgResult.setSelectedItem("" + _task.getProperty().test_result);
+		this.txtDbgResult.setSelectedItem("" + _task.getProperty().testResult);
 
 		this.txtTaskDescAlgoritm = new JTextArea();
 		// txtTaskDescAlgoritm.setAutoscrolls(true);
@@ -110,10 +112,10 @@ class ModifyDialog extends JDialog {
 				_task.type = (String) ModifyDialog.this.cType
 						.getSelectedItem();
 				try {
-					_task.getProperty().test_time = Integer
+					_task.getProperty().testTime = Integer
 							.parseInt(ModifyDialog.this.txtDbgTime
 									.getText());
-					_task.getProperty().test_result = Boolean
+					_task.getProperty().testResult = Boolean
 							.parseBoolean((String) ModifyDialog.this.txtDbgResult
 									.getSelectedItem());
 					_task.getProperty().collapsed = ModifyDialog.this.chkCollapse
@@ -128,7 +130,7 @@ class ModifyDialog extends JDialog {
 								_task.getNameWithoutParameters(), updateTask);
 					}
 				} catch (Exception e) {
-					e.printStackTrace();
+					Log.e(e);
 				}
 				dispose();
 			}

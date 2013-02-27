@@ -62,18 +62,6 @@ public class TaskDescriptionEditor extends JFrame {
 	private TaskDescription _tasks;
 
 	public TaskDescriptionEditor(TaskDescription tasks) {
-//
-//		for (javax.swing.UIManager.LookAndFeelInfo info : javax.swing.UIManager
-//				.getInstalledLookAndFeels()) {
-//			if ("GTK+".equals(info.getName())) {
-//				try {
-//					javax.swing.UIManager.setLookAndFeel(info.getClassName());
-//				} catch (Exception e) {
-//					e.printStackTrace();
-//				}
-//				break;
-//			}
-//		}
 
 		UIManager.put("TextArea.margin", new Insets(10, 10, 10, 10));
 
