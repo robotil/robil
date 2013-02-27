@@ -3,6 +3,8 @@ package elements.tasks;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
+import document.PlanExecution;
+
 /**
  * Holds run result
  * @author blackpc
@@ -13,16 +15,18 @@ public class TaskResult {
 	private Date _startTime;
 	private Date _finishTime;
 	private boolean _failed;
+	private PlanExecution _planExecution;
 	
-	public TaskResult() { this(0, ""); }
+	public TaskResult(PlanExecution planExecution) { this(0, "", planExecution); }
 	
-	public TaskResult(int code) { this(code, ""); }
+	public TaskResult(int code, PlanExecution planExecution) { this(code, "", planExecution); }
 	
-	public TaskResult(int code, String description) {
+	public TaskResult(int code, String description, PlanExecution planExecution) {
 		_code = code;
 		_description = description;
 		_finishTime = new Date();
 		_failed = _code > 0;
+		_planExecution = planExecution;
 	}
 	
 	public int getCode() {
@@ -51,6 +55,10 @@ public class TaskResult {
 		
 	public Date getStartTime() {
 		return this._startTime;
+	}
+	
+	public PlanExecution getPlanExecution() {
+		return _planExecution;
 	}
 
 	public boolean isFailure() {

@@ -1,5 +1,6 @@
 package document;
 
+import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
@@ -24,6 +25,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
+import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
@@ -38,6 +40,7 @@ import org.xml.sax.SAXException;
 
 import terminal.communication.StackStreamMessage;
 import terminal.communication.StopStreamMessage;
+import terminal.communication.StopStreamMessage.PlanFinishReason;
 
 import document.actions.Dialogs;
 import document.description.TaskDescription;
@@ -73,9 +76,9 @@ public class Document extends JPanel {
 				Vec d = new Vec(e.getPoint()).sub(
 						new Vec(Document.this.mousePressed)).scale(
 						1 / Document.this.view.zoom);
-				Document.this.selectedElement.getProperty().loc.setOffset(d);
+				Document.this.selectedElement.getProperty().location.setOffset(d);
 				for (GElement el : searchAllSubelements(Document.this.selectedElement)) {
-					el.getProperty().loc.setOffset(d);
+					el.getProperty().location.setOffset(d);
 				}
 				Document.this.mousePressed = e.getPoint();
 			}
@@ -282,12 +285,14 @@ public class Document extends JPanel {
 	private String _taskDescriptionFilenameOriginal;
 	private Boolean _taskDescriptionExists = false;
 	private Boolean _buildTime = false;
-	private Boolean _debugView = false;
+	private Date _executionStart = new Date();
+	private boolean _isRunning = false;
 	private String absoluteFilePath = "plan.xml";
 	private Vec _mousePosition = new Vec(0, 0);
 	private HistoryManager _historyManager = new HistoryManager();
 	private Set<String> savedIds = new HashSet<String>();
-
+	private PlanExecutionCollection _executionResults = new PlanExecutionCollection();
+	
 	public BTDesigner mainWindow = null;
 
 	private Map<String, GElement> loadedElements = new HashMap<String, GElement>();
@@ -313,13 +318,13 @@ public class Document extends JPanel {
 			this.task_description = new TaskDescription(this._taskDescriptionFilename);
 			Log.d("Task descriptions file loaded from " + this._taskDescriptionFilename + ", descriptions count = " + this.task_description.getNames().size());
 		} catch (Exception ex) {
-			ex.printStackTrace();
+			Log.e(ex);
 		}
 		
 		try {
 			this._historyManager.init(this);
 		} catch (HistoryManagerNotReadyException e) {
-			e.printStackTrace();
+			Log.e(e);
 		}
 		
 		_shouldBeSavedAs = true;
@@ -334,7 +339,7 @@ public class Document extends JPanel {
 		try {
 			this.absoluteFilePath = new File(fileName).getCanonicalFile().getAbsolutePath();
 		} catch (IOException e) {
-			e.printStackTrace();
+			Log.e(e);
 		}
 		this.mainWindow = mw;
 		this.view.loc = new Vec(0, 0);
@@ -350,7 +355,7 @@ public class Document extends JPanel {
 		try {
 			_historyManager.init(this);
 		} catch (HistoryManagerNotReadyException e) {
-			e.printStackTrace();
+			Log.e(e);
 		}
 		
 		_shouldBeSavedAs = false;
@@ -378,10 +383,10 @@ public class Document extends JPanel {
 		GElement el = new TaskCreator().newInstance();
 		el.setView(Document.this.view);
 		
-		if (el.isTask()) {
-			el.getAsTask().setDocument(this);
-			el.getAsTask().setTaskDescriptionProvider(task_description);
-		}
+		// if (el.isTask()) {
+		el.getAsTask().setDocument(this);
+		el.getAsTask().setTaskDescriptionProvider(task_description);
+		// }
 		
 		if (el instanceof View.ChangesListener)
 			((View.ChangesListener) el).onViewChange();
@@ -529,12 +534,12 @@ public class Document extends JPanel {
 	
 			// Write task descriptions file
 			try {
-				this.task_description.save(destination);
+				this.task_description.save(_taskDescriptionFilename);
 				Log.d("Task descriptions file successfully saved to "
-						+ destination);
+						+ _taskDescriptionFilename);
 			} catch (Exception e) {
 				Log.e("Task descriptions save failed. Filename = "
-						+ destination);
+						+ _taskDescriptionFilename);
 			}
 	
 			saved = saveXmlToFile(xml, getCurrentWorkingFile(), true);
@@ -655,7 +660,7 @@ public class Document extends JPanel {
 		
 		// Copy elements
 		for (GElement element : sourceElements) {
-			clonedElement = element.clone();
+			clonedElement = element.getAsTask().clone();
 			clonedElements.put(element, clonedElement);
 			
 			if (clonedElement.isTaskType())
@@ -764,7 +769,7 @@ public class Document extends JPanel {
 			fw.close();
 			this.tip.setText("Tasks exported to " + fileName);
 		} catch (IOException e) {
-			e.printStackTrace();
+			Log.e(e);
 			this.tip.setText("Failed to export tasks, see log for more information");
 		}
 
@@ -857,7 +862,6 @@ public class Document extends JPanel {
 				if (getArrow(null, e).size() == 0)
 					root.add(e);
 			}
-		// for(GElement r: root) System.out.print(""+r.toString()+" ");
 		
 		return root;
 	}
@@ -868,11 +872,15 @@ public class Document extends JPanel {
 		}
 
 		String[] splitted = this.absoluteFilePath.split("/");
-		if (splitted.length == 0) {
+		
+		if (splitted.length == 0)
 			return null;
-		}
-
+		
 		return (_documentChanged ? "*" : "") + new String(splitted[splitted.length - 1]);
+	}
+	
+	public String getFileNameOnly() {
+		return getShortFilePath().replace("*", "");
 	}
 
 	public ArrayList<GElement> getSubElements(GElement el) {
@@ -885,7 +893,7 @@ public class Document extends JPanel {
 		Collections.sort(subels, new Comparator<GElement>() {
 			@Override
 			public int compare(GElement a, GElement b) {
-				return (int) (a.getProperty().loc.x - b.getProperty().loc.x);
+				return (int) (a.getProperty().location.x - b.getProperty().location.x);
 			}
 		});
 		return uniq(subels);
@@ -921,7 +929,7 @@ public class Document extends JPanel {
 		Collections.sort(uniq(subels), new Comparator<GElement>() {
 			@Override
 			public int compare(GElement a, GElement b) {
-				return (int) (a.getProperty().loc.x - b.getProperty().loc.x);
+				return (int) (a.getProperty().location.x - b.getProperty().location.x);
 			}
 		});
 		return subels;
@@ -1001,13 +1009,13 @@ public class Document extends JPanel {
 							((Task) nge).text = e.getAttribute("name");
 						}
 						if (e.hasAttribute("x") && e.hasAttribute("y")) {
-							this.lastX = nge.getProperty().loc.x = Double
+							this.lastX = nge.getProperty().location.x = Double
 									.parseDouble(e.getAttribute("x"));
-							this.lastY = nge.getProperty().loc.y = Double
+							this.lastY = nge.getProperty().location.y = Double
 									.parseDouble(e.getAttribute("y"));
 						} else {
-							this.lastX = nge.getProperty().loc.x = this.lastX + 20;
-							this.lastY = nge.getProperty().loc.y = this.lastY;
+							this.lastX = nge.getProperty().location.x = this.lastX + 20;
+							this.lastY = nge.getProperty().location.y = this.lastY;
 						}
 						if (e.hasAttribute("collapsed")) {
 							nge.getProperty().collapsed = Boolean
@@ -1016,11 +1024,11 @@ public class Document extends JPanel {
 							nge.getProperty().collapsed = false;
 						}
 						if (e.hasAttribute("test_time")) {
-							nge.getProperty().test_time = Integer.parseInt(e
+							nge.getProperty().testTime = Integer.parseInt(e
 									.getAttribute("test_time"));
 						}
 						if (e.hasAttribute("test_result")) {
-							nge.getProperty().test_result = Boolean
+							nge.getProperty().testResult = Boolean
 									.parseBoolean(e.getAttribute("test_result"));
 						}
 						if (e.hasAttribute("id")) {
@@ -1090,17 +1098,17 @@ public class Document extends JPanel {
 						}
 						
 						if (nge.isTask())
-							nge.getAsTask().setDocument(this);
+								nge.getAsTask().setDocument(this);
 						
 						add(nge);
 						if (e.hasAttribute("x") && e.hasAttribute("y")) {
-							this.lastX = nge.getProperty().loc.x = Double
+							this.lastX = nge.getProperty().location.x = Double
 									.parseDouble(e.getAttribute("x"));
-							this.lastY = nge.getProperty().loc.y = Double
+							this.lastY = nge.getProperty().location.y = Double
 									.parseDouble(e.getAttribute("y"));
 						} else {
-							this.lastX = nge.getProperty().loc.x = this.lastX + 20;
-							this.lastY = nge.getProperty().loc.y = this.lastY;
+							this.lastX = nge.getProperty().location.x = this.lastX + 20;
+							this.lastY = nge.getProperty().location.y = this.lastY;
 						}
 						if (e.hasAttribute("collapsed")) {
 							nge.getProperty().collapsed = Boolean
@@ -1109,11 +1117,11 @@ public class Document extends JPanel {
 							nge.getProperty().collapsed = false;
 						}
 						if (e.hasAttribute("test_time")) {
-							nge.getProperty().test_time = Integer.parseInt(e
+							nge.getProperty().testTime = Integer.parseInt(e
 									.getAttribute("test_time"));
 						}
 						if (e.hasAttribute("test_result")) {
-							nge.getProperty().test_result = Boolean
+							nge.getProperty().testResult = Boolean
 									.parseBoolean(e.getAttribute("test_result"));
 						}
 						if (e.hasAttribute("id")) {
@@ -1150,12 +1158,13 @@ public class Document extends JPanel {
 			doc = DocumentBuilderFactory.newInstance().newDocumentBuilder()
 					.parse(file);
 		} catch (javax.xml.parsers.ParserConfigurationException ex) {
-			ex.printStackTrace();
+			Log.e(ex);
 		} catch (SAXException ex) {
-			ex.printStackTrace();
+			Log.e(ex);
 		} catch (IOException ex) {
-			ex.printStackTrace();
-		}
+			Log.e(ex);
+		}	
+
 		toolSelectionClean();
 		if (doc == null) {
 			this.tip.setText("ERROR: Can't load plan file : "
@@ -1198,16 +1207,13 @@ public class Document extends JPanel {
 							new File(fileName).getParent(),
 							this._taskDescriptionFilename).getPath();
 
-				this.task_description = new TaskDescription(
-						this._taskDescriptionFilename);
+				this.task_description = new TaskDescription(this._taskDescriptionFilename);
+				
 				Log.d("Task descriptions loaded from "
 						+ this._taskDescriptionFilename);
 			} catch (Exception e) {
-				System.out
-						.println("WARNING: Can't find or open task description file. It's not a critical error.");
-				System.err
-						.println("NOT CRITICAL : Print stack and exception name (for debug purposes only): ");
-				e.printStackTrace();
+				Log.d("WARNING: Can't find or open task description file. It's not a critical error.");
+				Log.e("NOT CRITICAL : Print stack and exception name (for debug purposes only): ");
 				this.task_description = new TaskDescription();
 			}
 		} else {
@@ -1228,9 +1234,9 @@ public class Document extends JPanel {
 				Log.d("Descriptions loaded from "
 						+ this._taskDescriptionFilename);
 			} catch (Exception e) {
-				Log.d("WARNING: Can't find or open task description file. It's not a critical error.");
+				Log.d("WARNING: Can'tpaint find or open task description file. It's not a critical error.");
 				Log.e("NOT CRITICAL : Print stack and exception name (for debug purposes only): ");
-				e.printStackTrace();
+				Log.e(e);
 				this.task_description = new TaskDescription();
 				Log.d("Default task descriptions file not found, empty created.");
 			}
@@ -1263,7 +1269,8 @@ public class Document extends JPanel {
 	
 	private void onTreeChange(TreeChangeType changeType, GElement element) {
 		_treeChangeNestingCounter--;
-		if (_treeChangeNestingCounter == 0)
+		if (_treeChangeNestingCounter == 0)	
+
 			_treeChangeEvent = false;
 		
 		if (_historyManager.isReady() && !_buildTime && !_treeChangeEvent)
@@ -1275,11 +1282,10 @@ public class Document extends JPanel {
 				Log.e("Snapshot create failed");
 			}
 		
-		// Log.d("Undo count = " + _historyManager.getUndoCount());
-		
 		if (!_buildTime) {
 			_documentChanged = true;
 			updateTabTitle();
+			updateRootElement();
 		}
 		
 		updateUndoRedoButtonsState();
@@ -1288,6 +1294,8 @@ public class Document extends JPanel {
 	private void onDocumentLoad(String fileName) {
 		_documentChanged = false;
 		updateTabTitle();
+		updateRootElement();
+		repaint();
 	}
 	
 	private void onDocumentSave(boolean successfuly) {
@@ -1307,16 +1315,75 @@ public class Document extends JPanel {
 		repaint();
 	}
 	
+	PlanExecution _currentPlanExecution;
 	public void onRun() {
+		for (GElement element : elements)
+			if (element.isTaskType())
+				element.getAsTask().onPlanRun();
 		
+		_isRunning = true;
+		_executionStart = new Date();
+		_planExecutionMessage = String.format("[%s] Running", new SimpleDateFormat("HH:mm:ss").format(new Date()) );
+		_currentPlanExecution = new PlanExecution();
+		
+		repaint();
 	}
 	
 	public void onPause() {
 		
 	}
 	
+	public void onStop() {
+		Log.i("Plan execution aborted");
+		_currentPlanExecution.stop(null, null, false, true);
+		_executionResults.add(_currentPlanExecution);
+		_isRunning = false;
+	}
+	
 	public void onStop(StopStreamMessage message) {
-		Log.i("STOPSTREAM", message.toString());
+		Log.i("STOPSTREAM", "Plan execution finished [" + message.getFinishReason() + "]");
+		_isRunning = false;
+		
+		_currentPlanExecution.stop(
+				findTaskById(message.getTargetTaskId()),
+				findTasksById(message.getTasksTree()),
+				message.getFinishReason() == PlanFinishReason.Failure,  
+				false);
+		
+		_executionResults.add(_currentPlanExecution);
+
+		_planExecutionMessage = _currentPlanExecution.toString();
+		
+		if (_currentPlanExecution.isFailure())
+			_planExecutionMessage = "$RED$" + _planExecutionMessage;
+		
+		repaint();
+	}
+	
+	// ******************************paint****************************************************
+	// Misc
+	// **********************************************************************************
+	
+	private String _planExecutionMessage = "Idle";
+	public String getPlanExecutionMessage() {
+		return _planExecutionMessage;
+	}
+	
+
+	public PlanExecutionCollection getPlanExecutionResults() {
+		return _executionResults;
+	}
+	
+	public PlanExecution getCurrentPlanExecution() {
+		return _currentPlanExecution;
+	}
+	
+	public void updateRootElement() {
+		for (GElement element : elements)
+			element.getProperty().isRoot = false;
+		
+		for (GElement element : getRoot())
+			element.getProperty().isRoot = true;
 	}
 	
 	public Task findTaskById(String taskId) {
@@ -1326,6 +1393,19 @@ public class Document extends JPanel {
 					return e.getAsTask();
 		
 		return null;
+	}
+	
+	public ArrayList<Task> findTasksById(ArrayList<String> ids) {
+		ArrayList<Task> tasks = new ArrayList<Task>();
+		
+		for (String id : ids) {
+			Task task = findTaskById(id);
+			
+			if (task != null)
+				tasks.add(task);
+		}
+		
+		return tasks;
 	}
 	
 	public void undo() {
@@ -1359,6 +1439,10 @@ public class Document extends JPanel {
 	
 	private void updateTabTitle() {
 		this.mainWindow.setTabName(this, getShortFilePath());
+	}
+	
+	public void showHistory(JFrame designer) {
+		new PlanExecutionHistoryDialog(designer, this);
 	}
 	
 	@Override
@@ -1557,7 +1641,7 @@ public class Document extends JPanel {
 		for (GElement e : this.elements){
 			
 			if(Parameters.log_print_running_tasks_id)
-				System.out.print("  select as running : "+ids+". ");
+				Log.d("  select as running : "+ids+". ");
 			
 			if (ids.contains(e.id.toString())) {
 				if(Parameters.log_print_running_tasks_id)
@@ -1664,7 +1748,7 @@ public class Document extends JPanel {
 						Log.d("BTExecuter STDERR: " + line);
 					}
 				} catch (IOException e) {
-					e.printStackTrace();
+					Log.e(e);
 					Document.this.tip.setText("ERROR: Can not run BTExecuter");
 				}
 				Document.this.BTExecuter = null;
@@ -1732,6 +1816,10 @@ public class Document extends JPanel {
 		}
 		
 		return true;
+	}
+
+	public void showEditor() {
+		new PlanEditor(this.mainWindow, this);
 	}
 
 }

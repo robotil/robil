@@ -101,7 +101,7 @@ public class Decorator extends GElement implements ArrayElement,
 
 	public Decorator(double x, double y) {
 		this.property.size.set(new Vec(10, 10));
-		this.property.loc.set(new Vec(x, y).sub(this.property.size.scale(0.5)));
+		this.property.location.set(new Vec(x, y).sub(this.property.size.scale(0.5)));
 	}
 
 	@Override

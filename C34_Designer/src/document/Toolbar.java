@@ -19,6 +19,7 @@ import document.actions.CompileAction;
 import document.actions.ExportTasksAction;
 import document.actions.ModifyAction;
 import document.actions.NewWindowAction;
+import document.actions.OpenEditorAction;
 import document.actions.OpenFileAction;
 import document.actions.OpenTaskDescriptionEditorAction;
 import document.actions.PointAction;
@@ -149,6 +150,12 @@ public class Toolbar extends JPanel {
 		buttons.add(pnl);
 		
 		btn = new JButton();
+		btn.setToolTipText("Edit xml");
+		btn.setIcon(new ImageIcon(getClass().getClassLoader().getResource("icons/editor.png")));
+		btn.addActionListener(new OpenEditorAction(designer));
+		buttons.add(btn);
+		
+		btn = new JButton();
 		btn.setToolTipText("Save image");
 		btn.setIcon(new ImageIcon(getClass().getClassLoader().getResource("icons/save_image.png")));
 		btn.addActionListener(new SaveImageAction(designer));
@@ -164,6 +171,13 @@ public class Toolbar extends JPanel {
 		btn.setToolTipText("Play");
 		btn.setIcon(new ImageIcon(getClass().getClassLoader().getResource("icons/play.png")));
 		btn.setActionCommand("run_runresume_plan");
+		btn.addActionListener(new RunAction(designer));
+		buttons.add(btn);
+		
+		btn = new JButton();
+		btn.setToolTipText("Stop");
+		btn.setIcon(new ImageIcon(getClass().getClassLoader().getResource("icons/stop.png")));
+		btn.setActionCommand("run_stop_plan");
 		btn.addActionListener(new RunAction(designer));
 		buttons.add(btn);
 		
@@ -308,7 +322,7 @@ public class Toolbar extends JPanel {
 	// getSaveSnapShot( document,fileDialog.getFile());
 	// } catch (Exception e) {
 	// // TODO Auto-generated catch block
-	// e.printStackTrace();
+	// Log.e(e);
 	// }
 	//
 	// }
