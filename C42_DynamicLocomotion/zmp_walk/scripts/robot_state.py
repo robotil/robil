@@ -112,12 +112,20 @@ class Robot_State:
         return()
 
     # External auxiliary method:
-    def Get_l_foot_coord_params(self):
-        return(self.array2Pos( self.l_stance_hip_0 ))
-
-    # External auxiliary method:
-    def Get_r_foot_coord_params(self):
-        return(self.array2Pos( self.r_stance_hip_0 ))
+    def Get_foot_coord_params(self):
+    # Retrieves parameters that are depended on the coordinate system that we are using (right or left foot).
+    # Which coordinate system we are using is determined by the current step phase:
+        if ( self.__step_phase == 1 ) or ( self.__step_phase == 2 ):
+            # stance = left, swing = right
+            res_stance_hip_0 = self.l_stance_hip_0.copy() # left stance hip initial position (before starting to walk) in left foot coord. system
+            res_swing_y_sign = -1.0 # relative direction of swing leg from current coord system 
+        elif ( self.__step_phase == 3 ) or ( self.__step_phase == 4 ): 
+            # stance = right, swing = left
+            res_stance_hip_0 = self.r_stance_hip_0.copy() # right stance hip initial position (before starting to walk) in right foot coord. system
+            res_swing_y_sign = 1.0 # relative direction of swing leg from current coord system
+        
+        res_swing_hip_dy = self.swing_hip_dy*res_swing_y_sign # swing hip relative position to stance hip
+        return(self.array2Pos( res_stance_hip_0 ), res_swing_y_sign, res_swing_hip_dy )
 
     # Class internal auxiliary method:
     def init_Change_step_phase(self): 
@@ -302,7 +310,7 @@ class Robot_State:
         # rs_from_l_foot_pelvis_m = self.pelvis_m_arr.copy() #copy.deepcopy( self.pelvis_m_arr )
 
         delta_between_hips = self.stance_hip_filtered - self.swing_hip_filtered
-        self.lf_swing_hip_dy = pl.sqrt( pl.dot( delta_between_hips,delta_between_hips ) )  # distance between hips in left leg frame
+        self.lf_swing_hip_dy = pl.sqrt( pl.dot( delta_between_hips,delta_between_hips ) )  # distance between hips in left leg coord. frame
 
         # TODO: in order to get better readings one should repeat the lines above a few times while init position function and average the readings  
 
@@ -311,6 +319,8 @@ class Robot_State:
         hip_sagital = -0.02 # (self.l_stance_hip_0.x + self.r_stance_hip_0.x)/2 # x position relative to foot
         self.l_stance_hip_0[2] = hip_height; self.r_stance_hip_0[2] = hip_height; # update z coord.
         self.l_stance_hip_0[0] = hip_sagital; self.r_stance_hip_0[0] = hip_sagital; # update x coord.
+
+        self.swing_hip_dy = (self.lf_swing_hip_dy + self.rf_swing_hip_dy)/2
 
         # self.com2l_stance_hip = Position(); self.com2r_stance_hip = Position(); 
         # self.com2l_stance_hip.x = com_0_from_l_foot.x - self.l_stance_hip_0.x # to be used when using measured com. we get the relative postion of the left stance hip

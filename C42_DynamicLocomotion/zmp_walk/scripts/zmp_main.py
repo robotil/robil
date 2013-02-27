@@ -90,10 +90,12 @@ p_ref_x = zeros(NL)
 p_ref_y = zeros(NL)
 
 # init output message (before starting to walk)
-out.stance_hip = copy.deepcopy( rs.Get_l_stance_hip_0() )
+[stance_hip_0, swing_y_sign, swing_hip_dy]=rs.Get_foot_coord_params() # assumes start walking in step phase 1 (set in rs init)
+
+out.stance_hip = copy.copy( stance_hip_0 )
 out.pelvis_d = pelvis_des
 out.swing_foot = rs.swing_foot
-out.swing_hip = rs.place_in_Pos( out.stance_hip.x, rs.swing_hip.y, out.stance_hip.z) # constraint: hips at same hight and advance together
+out.swing_hip = rs.place_in_Pos( out.stance_hip.x, (out.stance_hip.y + swing_hip_dy) , out.stance_hip.z) # constraint: hips at same hight and advance together
 out.pelvis_m = rs.pelvis_m
 
 out.zmp_ref = rs.place_in_Pos(0,0,0)
@@ -267,18 +269,21 @@ while not rospy.is_shutdown():
       # Update Robot State: getting joints locations using tf to process and store them in Robot State object 
       rs.getRobot_State( listener = ns.listener )
 
-      stance_hip_0 = rs.place_in_Pos(0,0,0)
-      if ( rs.Get_step_phase() == 1 ) or ( rs.Get_step_phase() == 2 ): 
-          # stance = left, swing = right
-          stance_hip_0 = copy.deepcopy( rs.Get_l_stance_hip_0() )
-          swing_y_0 = -step_width 
-      elif ( rs.Get_step_phase() == 3 ) or ( rs.Get_step_phase() == 4 ): 
-          # stance = right, swing = left
-          stance_hip_0 = copy.deepcopy( rs.Get_r_stance_hip_0() )
-          swing_y_0 = step_width
+      # stance_hip_0 = rs.place_in_Pos(0,0,0)
+      # if ( rs.Get_step_phase() == 1 ) or ( rs.Get_step_phase() == 2 ): 
+      #     # stance = left, swing = right
+      #     stance_hip_0 = copy.deepcopy( rs.Get_l_stance_hip_0() )
+      #     swing_foot_y_0 = -step_width 
+      # elif ( rs.Get_step_phase() == 3 ) or ( rs.Get_step_phase() == 4 ): 
+      #     # stance = right, swing = left
+      #     stance_hip_0 = copy.deepcopy( rs.Get_r_stance_hip_0() )
+      #     swing_foot_y_0 = step_width
+
+      [ stance_hip_0, swing_y_sign, swing_hip_dy ] = rs.Get_foot_coord_params()
+      swing_foot_y_0 = step_width*swing_y_sign
 
       if ( rs.Get_step_phase() == 2 ) or ( rs.Get_step_phase() == 4 ): # if swing foot is in the air
-          out.swing_foot = rs.place_in_Pos_Ori( swing_x_k, swing_y_0, swing_z_k, 0, 0, 0 )
+          out.swing_foot = rs.place_in_Pos_Ori( swing_x_k, swing_foot_y_0, swing_z_k, 0, 0, 0 )
       elif ( rs.Get_step_phase() == 1 ) or ( rs.Get_step_phase() == 3 ): # if swing foot is on the ground
           out.swing_foot = rs.swing_foot  
 
@@ -288,7 +293,7 @@ while not rospy.is_shutdown():
 
       out.pelvis_d = pelvis_des #place_in_Orientation( 0, 0, 0 )
       
-      out.swing_hip = rs.place_in_Pos( out.stance_hip.x, rs.swing_hip.y, out.stance_hip.z) # constraint: hips at same hight and advance together
+      out.swing_hip = rs.place_in_Pos( out.stance_hip.x, (out.stance_hip.y + swing_hip_dy), out.stance_hip.z) # constraint: hips at same hight and advance together
       out.pelvis_m = rs.pelvis_m
 
       out.zmp_ref = rs.place_in_Pos( p_ref_x[0], p_ref_y[0], 0)
