@@ -8,7 +8,7 @@ import rospy
  
 def pathis(req):
      wp = C31_GetPathResponse()
-     wp.path.points = [C31_Location(k,k) for k in xrange(5)] 
+     wp.path.points = [C31_Location(0,0) ,C31_Location(0,1),C31_Location(1,1),C31_Location(1,0),C31_Location(0,0)] 
      #print "Path_x is [%s] Path_y is [%s]"%(wp.path.points.x[0], points.y[0])
      return wp
  

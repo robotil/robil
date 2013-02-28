@@ -1,7 +1,6 @@
 #! /usr/bin/env python
 
 import roslib; roslib.load_manifest('C42_DynamicLocomotion')
-from zmp_init import init_pose
 import numpy as np
 import rospy
 import actionlib
@@ -62,35 +61,40 @@ class ZmpWlkServer(object):
   #def task(self, goal):
   def task(self, goal):
     #init_zmp.init_pose_with_trajectory_controllers()
-    init_pose()
+    rospy.loginfo("started ZMPwalk")
+    task_success = True
     rospy.sleep(2)
-    rospy.loginfo("pos init")
+    Vel = gm.Twist()
     pth = self._get_path()
-    self._nxt_wp.x = pth.path.points[1].x#2
-    self._nxt_wp.y = pth.path.points[1].y#0
     # start executing the action
     #### LOG TASK PARAMETERS ####
-    rospy.loginfo("started ZMPwalk")
-    rospy.loginfo("Target position: x:%s y:%s", self._nxt_wp.x, self._nxt_wp.y)
-    task_success = True
-
-    self._dis_from_goal = self._tol + 1
-    #### TASK ####
-    while self._dis_from_goal > self._tol:
-      #calculate distance from goal
+    for point in pth.path.points:
+      self._nxt_wp.x = point.x#2
+      self._nxt_wp.y = point.y#0
+      rospy.loginfo("next way point: x:%s y:%s", point.x, point.y)
       pos = np.array([self._pos.x,self._pos.y])
-      gl = np.array([self._nxt_wp.x, self._nxt_wp.y])
+      gl = np.array([point.x, point.y])
       self._dis_from_goal = np.linalg.norm(gl-pos)
-      self._feedback.dis_to_goal = self._dis_from_goal
-      self._as.publish_feedback(self._feedback)
-      rospy.sleep(0.5)
-      if self._as.is_preempt_requested() or rospy.is_shutdown():
-        #### HERE PROICESS PREEMTION OR INTERUPT #####
-        rospy.loginfo('%s: Preempted' % self._action_name)
-        self._as.set_preempted()
-        task_success = False
-        break
-    self.walk_pub.publish(Int32(0))
+      V = (gl-pos)/np.linalg.norm(gl-pos)
+      Vel.linear.x = V[0]
+      Vel.linear.y = V[1]
+      self.walk_pub.publish(Vel)
+      print Vel
+
+      while self._dis_from_goal > self._tol:
+        #calculate distance from goal
+        pos = np.array([self._pos.x,self._pos.y])
+        gl = np.array([point.x, point.y])
+        self._dis_from_goal = np.linalg.norm(gl-pos)
+        rospy.sleep(0.1)
+        if self._as.is_preempt_requested() or rospy.is_shutdown():
+          #### HERE PROICESS PREEMTION OR INTERUPT #####
+          rospy.loginfo('%s: Preempted' % self._action_name)
+          self._as.set_preempted()
+          task_success = False
+          break
+    Vel = gm.Twist()
+    self.walk_pub.publish(Vel)
     if task_success:
       self._result.res_pos.x = self._pos.x
       self._result.res_pos.y = self._pos.y
