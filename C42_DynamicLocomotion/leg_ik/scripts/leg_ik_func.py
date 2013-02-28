@@ -52,7 +52,8 @@ def swing_leg_ik(swing_foot,swing_hip,pelvis_m): # pelvis_d
                         
                         [-sin(swing_foot.p), cos(swing_foot.p)*sin(swing_foot.r),cos(swing_foot.p)*cos(swing_foot.r)]])
 
-    #des_pos = dot(linalg.inv(Rrpw_pelvis_m),(xankle-xhip)) # use pelvis_d
+    #des_pos = dot(linalg.inv(Rrpw_pelvis_m),(xankle-xhip)) # or use pelvis_d ??? when in the air better to use measured in order to 
+            # reduce placement error of swing foot. need to check if the sign (direction) of correction isn't for each leg left/right
     des_pos = (xankle-xhip)
     
     

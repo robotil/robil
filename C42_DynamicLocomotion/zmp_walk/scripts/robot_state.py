@@ -105,10 +105,19 @@ class Robot_State:
         return(step_phase)
 
     # External auxiliary method:
-    def Set_step_phase(self,value):
-        self.previous_step_phase = copy.deepcopy(self.__step_phase)
-        self.step_phase_changed = True
-        self.__step_phase = copy.deepcopy(value)
+    def Set_step_phase(self, value = None, foot_lift = False):
+        if value is None:
+            # value = self.__step_phase
+            if foot_lift and ( (self.__step_phase == 1) or (self.__step_phase == 3) ): 
+            # on the start of foot lift we move the step phase one step forward
+                self.previous_step_phase = copy.copy(self.__step_phase)
+                self.step_phase_changed = True
+                self.__step_phase = self.__step_phase + 1 
+
+        else: # set step phase to given value
+            self.previous_step_phase = copy.copy(self.__step_phase)
+            self.step_phase_changed = True
+            self.__step_phase = copy.copy(value)
         return()
 
     # External auxiliary method:

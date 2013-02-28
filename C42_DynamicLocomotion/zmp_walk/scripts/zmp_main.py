@@ -60,7 +60,8 @@ out = walking_trajectory () #traj() # output message of topic 'zmp_out'
 
 # Walking Parameters 
 step_length = 0.03 #0.01  # [m]
-step_width  = 0.165  # 0.178  # [m]
+step_width  = 0.188  # 0.178  # [m]
+zmp_width   = 0.178
 step_time   = 1 #1   # [sec]
 bend_knees  = 0.04  # [m]    
 step_height = 0.05 #0.03 #0.05  # [m] 
@@ -70,7 +71,7 @@ trans_slope_steepens_factor = 8/step_time #2 # 1 transition Sigmoid slope (a)
 rs = Robot_State('Robot State')
 pelvis_des = rs.place_in_Ori( 0, 0, 0 ) # pelvis desired rotation (0,0,0)<=>stand up straight
 
-max_step_time = 10.0 #[sec] the longest period of step that we plan to do
+max_step_time = 10.0 #[sec] the longest periodstep_length, of step that we plan to do
 
 # TODO: make sure robot is static (in start position) and tf is running
 # init Robot State using tf data getting hip to com relative position:
@@ -86,9 +87,12 @@ NL = Lateral_y_Preview_Controller.getBufferSize()
 Preview_Sagital_x = ZMP_Preview_Buffer('Sagital X', NL, 4*max_step_time/dt, 0 ) #name, preview_sample_size, max_step_samples, precede_time_samples
 Preview_Lateral_y = ZMP_Preview_Buffer('Lateral Y', NL, 4*max_step_time/dt, 0 ) #name, preview_sample_size, max_step_samples, precede_time_samples
 
-# init preview:
+# init preview:step_length,
 p_ref_x = zeros(NL)
 p_ref_y = zeros(NL)
+
+# initialize swing trajectory object
+swing_traj = Swing_Trajectory('swing_foot_trajectory')
 
 # init output message (before starting to walk)
 [stance_hip_0, swing_y_sign, swing_hip_dy]=rs.Get_foot_coord_params() # assumes start walking in step phase 1 (set in rs init)
@@ -148,7 +152,8 @@ while not rospy.is_shutdown():
       step_done = 0
       swing_x_v = []
       swing_z_v = []
-      rs.Set_step_phase(1)                                                              # added by Israel to initiate step phase 24.2
+      lifting_swing_foot = False
+      rs.Set_step_phase(value = 1)                                                              # added by Israel to initiate step phase 24.2
       swing_z_t_more_double_support = 0
       swing_x_t_more_double_support = 0
 
@@ -158,11 +163,11 @@ while not rospy.is_shutdown():
       # create ZMP_ref profiles: 
       # 1) to start walking (pre_step + first_step)
       p_ref_x_start = Start_sagital_x(0, step_length, trans_ratio_of_step, trans_slope_steepens_factor, step_time, dt)
-      p_ref_y_start = Start_lateral_y_weight_to_left_foot(0, step_width, trans_ratio_of_step, trans_slope_steepens_factor, step_time, dt)
+      p_ref_y_start = Start_lateral_y_weight_to_left_foot(0, zmp_width, trans_ratio_of_step, trans_slope_steepens_factor, step_time, dt)
       # 2) preceeding steps (full_step)
       p_ref_x_forward_step = Step_forward_x(0, step_length, trans_ratio_of_step, trans_slope_steepens_factor, step_time, dt)
-      p_ref_y_step_right = Step_onto_right_foot(0, step_width, trans_ratio_of_step, trans_slope_steepens_factor, step_time, dt)
-      p_ref_y_step_left = Step_onto_left_foot(0, step_width, trans_ratio_of_step, trans_slope_steepens_factor, step_time, dt)
+      p_ref_y_step_right = Step_onto_right_foot(0, zmp_width, trans_ratio_of_step, trans_slope_steepens_factor, step_time, dt)
+      p_ref_y_step_left = Step_onto_left_foot(0, zmp_width, trans_ratio_of_step, trans_slope_steepens_factor, step_time, dt)
 
       # Load the starting step to the preview buffer:
       Preview_Sagital_x.load_NewStep( p_ref_x_start, p_ref_x_forward_step )
@@ -191,93 +196,111 @@ while not rospy.is_shutdown():
 
   #######################################################
   #                                                     #
-  # foot trajectory                                     #
+  #   Update Robot State and produce foot trajectory    #
   #                                                     #
   #######################################################
       # Update Robot State: getting joints locations using tf to process and store them in Robot State object 
       rs.getRobot_State( listener = ns.listener )                                                                         # moved to here by Israel 24.2 - to be used by previous lines
 
- #change of foot trajectory section - by Israel 24.2
-      k_total = step_time*(1/dt)
-      k_start_swing =  floor(k_total/3)
-      k_stop_swing =   floor(2*k_total/3)
+      [ stance_hip_0, swing_y_sign, swing_hip_dy ] = rs.Get_foot_coord_params()
+      swing_foot_y = step_width*swing_y_sign # final position of swing_foot y coordinate
+
+      #step_phase = rs.Get_step_phase()
+      robot_foot_state = copy.copy(rs.swing_foot)
+
+      [swing_k, lifting_swing_foot] = swing_traj.Get_swing_foot_traj(k, step_time, robot_foot_state, step_length,swing_foot_y, step_height,dt,pre_step,first_step,full_step,last_step)
       
-      step_phase = rs.Get_step_phase()
+      rs.Set_step_phase( foot_lift = lifting_swing_foot )
+      # if (step_phase == 1) and lifting_swing_foot:
+      #     rs.Set_step_phase(2)
+      # elif (step_phase == 3) and lifting_swing_foot:
+      #     rs.Set_step_phase(4)
 
-      robot_foot_state = copy.copy(rs.swing_foot)            ########### need to change this !!!!!!!!!!!!!!!!!!!!!!
-      rospy.loginfo( step_phase )
-      if step_phase == 1 or step_phase == 2: # makes sure to correct step width for right and left leg
-         step_width = -1*abs(step_width)
-      elif step_phase == 3 or step_phase == 4:
-         step_width = abs(step_width)
+ #change of foot trajectory section - by Israel 24.2
+      # k_total = step_time*(1/dt)
+      # k_start_swing =  floor(k_total/3)
+      # k_stop_swing =   floor(2*k_total/3)
+      
+      # 
 
-      if pre_step:
+      # robot_foot_state = copy.copy(rs.swing_foot)            ########### need to change this !!!!!!!!!!!!!!!!!!!!!!
+      # rospy.loginfo( step_phase )
+      # if step_phase == 1 or step_phase == 2: # makes sure to correct step width for right and left leg
+      #    step_width = -1*abs(step_width)
+      # elif step_phase == 3 or step_phase == 4:
+      #    step_width = abs(step_width)
 
-         swing_k = copy.copy(robot_foot_state)
+      # if pre_step:
+
+      #    swing_k = copy.copy(robot_foot_state)
 
 
-      if first_step or full_step:
+      # if first_step or full_step:
          
-         if k<k_start_swing:
+      #    if k<k_start_swing:
               
-              swing_k = copy.copy(robot_foot_state)
+      #         swing_k = copy.copy(robot_foot_state)
 
-        ### the following can be eareased -  though it is used now due to strong vibrations in the curennt state:######
-        #      if first_step:
-        #          swing_k.x = 0
-       #       elif full_step:
-        #          swing_k.x = -step_length
+      #   ### the following can be eareased -  though it is used now due to strong vibrations in the curennt state:######
+      #   #      if first_step:
+      #   #          swing_k.x = 0
+      #  #       elif full_step:
+      #   #          swing_k.x = -step_length
      
-         #     swing_k.y = step_width
-         #     swing_k.z = 0
-       ######################################### 
-         elif(k>=k_start_swing  and k<k_stop_swing ):
+      #    #     swing_k.y = step_width
+      #    #     swing_k.z = 0
+      #  ######################################### 
+      #    elif(k>=k_start_swing  and k<k_stop_swing ):
 
-              if k==k_start_swing:
-                 step_start_state = copy.copy(robot_foot_state)
-              if step_phase == 1:  
-                  step_phase = 2
-              elif step_phase == 3:
-                  step_phase = 4
+      #         if k==k_start_swing:
+      #            step_start_state = copy.copy(robot_foot_state)
+      #         if step_phase == 1:  
+      #             rs.Set_step_phase(2)
+      #         elif step_phase == 3:
+      #             rs.Set_step_phase(4)
 
-              swing_k = full_step_traj(step_phase,step_start_state,step_length,step_width, step_height,k_start_swing, k_stop_swing,k_total,k,dt)
+      #         swing_k = full_step_traj(step_phase,step_start_state,step_length,step_width, step_height,k_start_swing, k_stop_swing,k_total,k,dt)
 
 
              
-         else:
+      #    else:
             
-              swing_k = copy.copy(robot_foot_state)
-              swing_k.x = step_length
-              swing_k.y = step_width
-              swing_k.z = 0
+      #         swing_k = copy.copy(robot_foot_state)
+      #         swing_k.x = step_length
+      #         swing_k.y = step_width
+      #         swing_k.z = 0
 
-      if last_step: 
+      # if last_step: 
 
-         if k<k_start_swing:
+      #    if k<k_start_swing:
                 
-            swing_k = copy.copy(robot_foot_state)
+      #       swing_k = copy.copy(robot_foot_state)
  
           
-         if(k>k_start_swing  and k<k_stop_swing ):
-              if k==k_start_swing:
-                 step_start_state = copy.copy(robot_foot_state)
-              if step_phase == 1:  
-                  rs.Set_step_phase(2)
-              elif step_phase == 3:
-                  rs.Set_step_phase(4)
+      #    if(k>k_start_swing  and k<k_stop_swing ):
+      #         if k==k_start_swing:
+      #            step_start_state = copy.copy(robot_foot_state)
+      #            swing_k.r = 0
+    #swing_k.p = 0
+   # swing_k.w = 0 if step_phase == 1:  
+      #             rs.Set_step_phase(2)
+      #         elif step_phase == 3:
+      #             rs.Set_step_phase(4)
 
-              swing_k = last_step_traj(step_phase,step_start_state,step_length,step_width, step_height,k_start_swing, k_stop_swing,k_total,k,dt)
+      #           swing_k.r = 0
+ #   swing_k.p = 0
+ #   swing_k.w = 0  swing_k = last_step_traj(step_phase,step_start_state,step_length,step_width, step_height,k_start_swing, k_stop_swing,k_total,k,dt)
 
-         else:
+      #    else:
            
-              swing_k = copy.copy(robot_foot_state)
-              swing_k.x = step_length
-              swing_k.y = step_width
-              swing_k.z = 0
+      #         swing_k = copy.copy(robot_foot_state)
+      #         swing_k.x = step_length
+      #         swing_k.y = step_width
+      #         swing_k.z = 0
 
   #######################################################
   #                                                     #
-  # Update Robot State and publish zmp                  #
+  #                publish zmp                          #
   #                                                     #
   #######################################################
       
@@ -293,10 +316,10 @@ while not rospy.is_shutdown():
       #     stance_hip_0 = copy.deepcopy( rs.Get_r_stance_hip_0() )
       #     swing_foot_y_0 = step_width
 
-      [ stance_hip_0, swing_y_sign, swing_hip_dy ] = rs.Get_foot_coord_params()
+      
      # swing_foot_y_0 = step_width*swing_y_sign
 
-    #  if ( rs.Get_step_phase() == 2 ) or ( rs.Get_step_phase() == 4 ): # if swing foot is in the air                 #comented by Israel 24.2
+     # if ( rs.Get_step_phase() == 2 ) or ( rs.Get_step_phase() == 4 ): # if swing foot is in the air                 #comented by Israel 24.2
      #     out.swing_foot = rs.place_in_Pos_Ori( swing_x_k, swing_foot_y_0, swing_z_k, 0, 0, 0 )
      # elif ( rs.Get_step_phase() == 1 ) or ( rs.Get_step_phase() == 3 ): # if swing foot is on the ground
      #     out.swing_foot = rs.swing_foot  
@@ -327,6 +350,7 @@ while not rospy.is_shutdown():
 
       # rospy.loginfo("zmp_main go=1, stance foot: COMy = %f, out.hip_y = %f, stance_hip_0.y = %f, l_stance_hip_0 = %f " \
       #          % (COMy, out.stance_hip.y, stance_hip_0.y, rs.Get_l_stance_hip_0() ) )
+      #rospy.loginfo(out.step_phase)
 
       pub_zmp.publish(out)
 
@@ -348,7 +372,7 @@ while not rospy.is_shutdown():
             # start first step:
             pre_step = 0
             first_step = 1
-            rs.Set_step_phase(1) # Double-Support left leg in front
+            rs.Set_step_phase(value = 1) # Double-Support left leg in front
             k = 1
             
       elif first_step:
@@ -364,7 +388,7 @@ while not rospy.is_shutdown():
               first_step = 0
               k = 1
               distance_x_ref = p_ref_x[0]
-              rs.Set_step_phase(3) # Double-Support right leg in front
+              rs.Set_step_phase(value = 3) # Double-Support right leg in front
               #rospy.sleep(4)
               #exit()######################################################
               if ns.walk:
@@ -397,9 +421,9 @@ while not rospy.is_shutdown():
                 k = 1
                 distance_x_ref = p_ref_x[0]
                 if rs.Get_step_phase() >= 3:
-                  rs.Set_step_phase(1) # Double-Support left leg in front
+                  rs.Set_step_phase(value = 1) # Double-Support left leg in front
                 else:
-                  rs.Set_step_phase(3) # Double-Support right leg in front
+                  rs.Set_step_phase(value = 3) # Double-Support right leg in front
                 rospy.loginfo( "step phase = %d" % ( rs.Get_step_phase() ) )
 
                 if ns.walk:
