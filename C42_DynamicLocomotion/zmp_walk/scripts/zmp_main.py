@@ -24,6 +24,7 @@ from pylab import *
 from zmp_walk.msg import walking_trajectory, Position, Orientation, Pos_and_Ori  #traj
 from std_msgs.msg import Int32
 from preview_controller import ZMP_Preview_Controller
+from swing_trajectory import *
 from zmp_profiles import *
 from preview_buffer import ZMP_Preview_Buffer
 import tf
@@ -147,7 +148,7 @@ while not rospy.is_shutdown():
       step_done = 0
       swing_x_v = []
       swing_z_v = []
-
+      rs.Set_step_phase(1)                                                              # added by Israel to initiate step phase 24.2
       swing_z_t_more_double_support = 0
       swing_x_t_more_double_support = 0
 
@@ -193,72 +194,86 @@ while not rospy.is_shutdown():
   # foot trajectory                                     #
   #                                                     #
   #######################################################
+      # Update Robot State: getting joints locations using tf to process and store them in Robot State object 
+      rs.getRobot_State( listener = ns.listener )                                                                         # moved to here by Israel 24.2 - to be used by previous lines
 
-      k_total = step_time*100
-      k_start_swing =  round(k_total/3)
-      k_stop_swing =   round(2*k_total/3)
+ #change of foot trajectory section - by Israel 24.2
+      k_total = step_time*(1/dt)
+      k_start_swing =  floor(k_total/3)
+      k_stop_swing =   floor(2*k_total/3)
+      
+      step_phase = rs.Get_step_phase()
+
+      robot_foot_state = copy.copy(rs.swing_foot)            ########### need to change this !!!!!!!!!!!!!!!!!!!!!!
+      rospy.loginfo( step_phase )
+      if step_phase == 1 or step_phase == 2: # makes sure to correct step width for right and left leg
+         step_width = -1*abs(step_width)
+      elif step_phase == 3 or step_phase == 4:
+         step_width = abs(step_width)
 
       if pre_step:
-         swing_pre_step = abs(sin(pi/(step_time_z)*(k-1)*(dt)))
-         swing_x_t = 0 
-         swing_y = 0
-         swing_z_t = 0 
 
-      if full_step:  
-         #swing_x_t = -step_length_z + 2*(k-1)*dt*step_length_z/step_time_z
-         swing_y = 0
-         swing_z_t = 0.05*abs(sin(pi/step_time_z*(k-1)*dt))
+         swing_k = copy.copy(robot_foot_state)
 
 
-         if(k>k_start_swing  and k<k_stop_swing ):
-              if rs.Get_step_phase() == 1:    # comment  to stay in step phase 1
-                  rs.Set_step_phase(2)
-              elif rs.Get_step_phase() == 3:
-                  rs.Set_step_phase(4)
-              swing_x_t_more_double_support = -step_length_z +2*(k-k_start_swing)*step_length/(k_stop_swing - k_start_swing)
-              swing_z_t_more_double_support = step_height*abs( (sin(pi/(k_stop_swing -k_start_swing)*(k - k_start_swing)))**2 ) #step_height*abs(sin(pi/(k_stop_swing -k_start_swing)*(k - k_start_swing)))  
-         elif k<k_start_swing:
-              swing_z_t_more_double_support = 0
-              swing_x_t_more_double_support = -step_length
-         elif k>k_stop_swing:
-              swing_z_t_more_double_support = 0
-              swing_x_t_more_double_support = step_length
+      if first_step or full_step:
+         
+         if k<k_start_swing:
+              
+              swing_k = copy.copy(robot_foot_state)
+
+        ### the following can be eareased -  though it is used now due to strong vibrations in the curennt state:######
+        #      if first_step:
+        #          swing_k.x = 0
+       #       elif full_step:
+        #          swing_k.x = -step_length
+     
+         #     swing_k.y = step_width
+         #     swing_k.z = 0
+       ######################################### 
+         elif(k>=k_start_swing  and k<k_stop_swing ):
+
+              if k==k_start_swing:
+                 step_start_state = copy.copy(robot_foot_state)
+              if step_phase == 1:  
+                  step_phase = 2
+              elif step_phase == 3:
+                  step_phase = 4
+
+              swing_k = full_step_traj(step_phase,step_start_state,step_length,step_width, step_height,k_start_swing, k_stop_swing,k_total,k,dt)
 
 
+             
+         else:
+            
+              swing_k = copy.copy(robot_foot_state)
+              swing_k.x = step_length
+              swing_k.y = step_width
+              swing_k.z = 0
 
-      if first_step:  
+      if last_step: 
 
-         #swing_x_t = (k-1)*dt*step_length/step_time
-         #rospy.loginfo(swing_x_t)
-         swing_y = 0#-0.02*(k-1)*dt/step_time 
-         swing_z_t = 0.06*abs(sin(pi/step_time*(k-1)*dt))
+         if k<k_start_swing:
+                
+            swing_k = copy.copy(robot_foot_state)
  
+          
          if(k>k_start_swing  and k<k_stop_swing ):
-              if rs.Get_step_phase() == 1:  # comment  to stay in step phase 1
+              if k==k_start_swing:
+                 step_start_state = copy.copy(robot_foot_state)
+              if step_phase == 1:  
                   rs.Set_step_phase(2)
-              elif rs.Get_step_phase() == 3:
+              elif step_phase == 3:
                   rs.Set_step_phase(4)
-              swing_x_t_more_double_support = (k-k_start_swing)*step_length/(k_stop_swing - k_start_swing)
-              swing_z_t_more_double_support = step_height*abs( (sin(pi/(k_stop_swing -k_start_swing)*(k - k_start_swing)))**2 )  
- 
-         elif k<k_start_swing:
-              swing_z_t_more_double_support = 0
-              swing_x_t_more_double_support = 0 #-step_length
-         elif k>k_stop_swing:
-              swing_z_t_more_double_support = 0
-              swing_x_t_more_double_support = step_length
-      if last_step:  
-         swing_x_t = -step_length_z + (k-1)*dt*step_length_z/step_time_z
-         swing_y = 0
-         swing_z_t = 0.05*abs(sin(pi/step_time_z*(k-1)*dt))
 
-      
-      swing_x_v = r_[ swing_x_v , swing_x_t_more_double_support ]
-      swing_z_v = r_[ swing_z_v , swing_z_t_more_double_support ]
+              swing_k = last_step_traj(step_phase,step_start_state,step_length,step_width, step_height,k_start_swing, k_stop_swing,k_total,k,dt)
 
-
-      swing_x_k = swing_x_t_more_double_support # for use of IK 
-      swing_z_k = swing_z_t_more_double_support # for use of IK
+         else:
+           
+              swing_k = copy.copy(robot_foot_state)
+              swing_k.x = step_length
+              swing_k.y = step_width
+              swing_k.z = 0
 
   #######################################################
   #                                                     #
@@ -266,8 +281,7 @@ while not rospy.is_shutdown():
   #                                                     #
   #######################################################
       
-      # Update Robot State: getting joints locations using tf to process and store them in Robot State object 
-      rs.getRobot_State( listener = ns.listener )
+
 
       # stance_hip_0 = rs.place_in_Pos(0,0,0)
       # if ( rs.Get_step_phase() == 1 ) or ( rs.Get_step_phase() == 2 ): 
@@ -280,12 +294,15 @@ while not rospy.is_shutdown():
       #     swing_foot_y_0 = step_width
 
       [ stance_hip_0, swing_y_sign, swing_hip_dy ] = rs.Get_foot_coord_params()
-      swing_foot_y_0 = step_width*swing_y_sign
+     # swing_foot_y_0 = step_width*swing_y_sign
 
-      if ( rs.Get_step_phase() == 2 ) or ( rs.Get_step_phase() == 4 ): # if swing foot is in the air
-          out.swing_foot = rs.place_in_Pos_Ori( swing_x_k, swing_foot_y_0, swing_z_k, 0, 0, 0 )
-      elif ( rs.Get_step_phase() == 1 ) or ( rs.Get_step_phase() == 3 ): # if swing foot is on the ground
-          out.swing_foot = rs.swing_foot  
+    #  if ( rs.Get_step_phase() == 2 ) or ( rs.Get_step_phase() == 4 ): # if swing foot is in the air                 #comented by Israel 24.2
+     #     out.swing_foot = rs.place_in_Pos_Ori( swing_x_k, swing_foot_y_0, swing_z_k, 0, 0, 0 )
+     # elif ( rs.Get_step_phase() == 1 ) or ( rs.Get_step_phase() == 3 ): # if swing foot is on the ground
+     #     out.swing_foot = rs.swing_foot  
+     
+      out.swing_foot = copy.copy(swing_k)                                                                                    #added by Israel 24.2
+
 
       out.stance_hip.x = COMx + stance_hip_0.x-D 
       out.stance_hip.y = COMy + stance_hip_0.y

@@ -30,7 +30,44 @@ import roslib; roslib.load_manifest('zmp_walk')
 import rospy, sys, os.path
 from pylab import *
 
+# min jerk functions - added by Israel 24.2
+def  transition_Min_jerk(x0,xf, number_of_samples, sample_time):
+    
+    samples_array = linspace(0,number_of_samples-1, number_of_samples) #- floor(float(number_of_samples)/2)
+    s = samples_array * sample_time
+    s1 = s/max(s)
+    min_jerk_profile = x0 + (x0 -xf)*( 15*(s1)**4 - 6*(s1)**5 -10*(s1)**3 )
 
+    return (min_jerk_profile)
+
+def transition_Min_jerk_via_point(x0,xm,xf, number_of_samples, sample_time):
+
+    N = number_of_samples
+    dt = sample_time
+    tf = (N-1)*dt
+    tau1 = 0.5
+
+    T = linspace(0,N-1, N)*dt/tf
+    
+    T1 = T[0:floor(N/2)]
+    T2 = T[floor(N/2):N]
+
+    A1 = 1.0/(tf**5 * tau1**2 * (1.0 - tau1)**5 )
+    A2 = 1.0/(tf**5 * tau1**5 * (1.0 - tau1)**5 )
+
+    C1 = A1*( (xf-x0)*(300.0*tau1**5 - 1200.0*tau1**4 + 1600.0*tau1**3) + tau1**2*(-720.0*xf + 120.0*xm + 600.0*x0) + (x0-xm)*(300.0*tau1-200.0) )
+    pi1 = A2*( (xf-x0)*(120.0*tau1**5 - 300.0*tau1**4 + 200.0*tau1**3)  -20.0*(xm-x0) )
+
+    x1 = (tf**5)/720.0*(pi1*(tau1**4*(15.0*T1**4-30.0*T1**3)+tau1**3*(80.0*T1**3-30.0*T1**4)-60.0*T1**3*tau1**2+30.0*T1**4*tau1-6*T1**5)+C1*(15.0*T1**4-10.0*T1**3-6.0*T1**5)) + x0
+
+
+    x2 = (tf**5)/720.0*(pi1*(tau1**4*(15.0*T2**4-30.0*T2**3+30.0*T2-15.0)+tau1**3*(-30.0*T2**4+ 80.0*T2**3-60.0*T2**2+10.0))+C1*(-6.0*T2**5+15.0*T2**4-10.0*T2**3 + 1.0)) + xf
+
+
+    min_jerk_profile = r_[ x1,x2 ]
+
+
+    return (min_jerk_profile)
 # Sigmoid Function: an auxiliary function to smoothen step trasitions
 
 def  transitionSigmoid(step_size, trans_slope_steepens_factor, number_of_samples, sample_time):
