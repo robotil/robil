@@ -80,7 +80,12 @@ int main (int argc, char **argv)
 		goal.name = tname;
 		stringstream suid; suid<<"task_id_tested_"<<::time(NULL);
 		goal.uid = suid.str();
-		goal.parameters = find(params,"arg=").size()==0 ? string(""): value(params, "arg=");
+		goal.parameters="";
+		if(find(params,"arg=").size()!=0)
+			goal.parameters = value(params, "arg=");
+		else if(find(params,"args=").size()!=0)
+			goal.parameters = value(params, "args=");
+			
 	ROS_INFO("Sending goal.");
 	ROS_INFO("   name=%s", goal.name.c_str());
 	ROS_INFO("   uid=%s", goal.uid.c_str());
