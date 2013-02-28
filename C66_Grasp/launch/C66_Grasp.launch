@@ -1,0 +1,5 @@
+<launch>
+	<include file="$(find move_hand)/launch/move_hand.launch" />
+	
+	<node name="PickUp" pkg="C66_Grasp" type="PickUp" cwd="node" output="screen" />
+</launch>

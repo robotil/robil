@@ -3,8 +3,8 @@ FILE(REMOVE_RECURSE
   "srv_gen"
   "msg_gen"
   "srv_gen"
-  "src/c21_Vision_and_Lidar/msg"
-  "src/c21_Vision_and_Lidar/srv"
+  "src/C21_VisionAndLidar/msg"
+  "src/C21_VisionAndLidar/srv"
   "CMakeFiles/rosbuild_premsgsrvgen"
 )
 

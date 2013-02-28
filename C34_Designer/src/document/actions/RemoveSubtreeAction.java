@@ -7,17 +7,19 @@ import document.BTDesigner;
 import document.Document;
 import document.Toolbar;
 
-public class RemoveSubtreeAction extends AbstractDesignerAction implements ActionListener {
-	
+public class RemoveSubtreeAction extends AbstractDesignerAction implements
+		ActionListener {
+
 	public RemoveSubtreeAction(BTDesigner designer) {
 		super(designer);
 	}
-	
+
+	@Override
 	public void actionPerformed(ActionEvent a) {
 		Document document = getActiveTab().doc;
 		document.toolSelectionClean();
 		document.removeSubElements = true;
-		designer.toolbar.setTipText(Toolbar.TIP_removeSubtree);
-	}	
+		this.designer.toolbar.setTipText(Toolbar.TIP_removeSubtree);
+	}
 
 }

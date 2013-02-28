@@ -17,6 +17,9 @@ public slots:
 	void SltOnOpenUImgClick();
 	void SltImageAreaOpened(int);
 	void SltOnNewImg(QImage img);
+	void SltOnPlayPauseClick(bool);
+	void SltOnCreateClick(bool);
+	void SltOnPathClick(bool);
 
 signals:
 	void SigOnNewImg(QImage img);
@@ -29,6 +32,8 @@ public:
 
 	//C11_Node_Subscriber implementation
 	virtual void OnImgReceived(QImage image);
+	virtual void OnImgReceived(std::string fileName);
+	virtual void OnOccupancyGridReceived(int grid[48][48]);
 
 protected:
 	void CloseOpenedImages();

@@ -7,17 +7,19 @@ import document.BTDesigner;
 import document.Document;
 import document.Toolbar;
 
-public class ArrowReconnectAction extends AbstractDesignerAction implements ActionListener {
-	
+public class ArrowReconnectAction extends AbstractDesignerAction implements
+		ActionListener {
+
 	public ArrowReconnectAction(BTDesigner designer) {
 		super(designer);
 	}
-	
+
+	@Override
 	public void actionPerformed(ActionEvent a) {
 		Document document = getActiveTab().doc;
 		document.toolSelectionClean();
 		document.reconectArrow = true;
-		designer.toolbar.setTipText(Toolbar.TIP_reconnect);
-	}	
+		this.designer.toolbar.setTipText(Toolbar.TIP_reconnect);
+	}
 
 }

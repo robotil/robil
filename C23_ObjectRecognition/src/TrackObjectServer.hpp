@@ -1,76 +1,96 @@
+#ifndef __TRACK_OBJECT__HPP
+#define __TRACK_OBJECT__HPP
 
 #include <actionlib/server/simple_action_server.h>
-#include <RobilTask/RobilTask.h>
-#include <RobilTask/RobilTaskAction.h>
-
+#include <C0_RobilTask/RobilTask.h>
+#include <C0_RobilTask/RobilTaskAction.h>
+#include "C23_Node.hpp"
+#include <C23_ObjectRecognition/C23C0_OD.h>
+#include <C23_ObjectRecognition/C23C0_ODIM.h>
 using namespace std;
-using namespace RobilTask;
+using namespace C0_RobilTask;
 
-class TrackObjectServer{
+class TrackObjectServer: public RobilTask {
 
-    typedef RobilTask::RobilTaskGoalConstPtr GOAL;
-    typedef RobilTask::RobilTaskFeedback FEEDBACK;
-    typedef RobilTask::RobilTaskResult RESULT;
-    typedef actionlib::SimpleActionServer<RobilTask::RobilTaskAction> Server;
-    
 protected:
-    ros::NodeHandle _node;
-    Server _server;
+    //ros::NodeHandle _node;
+    //Server _server;
     string _name;
-    FEEDBACK _feedback;
-    RESULT _result;
+    C23_Node *_detector;
+    ros::Publisher objectDetectedPublisher;
+    ros::Publisher objectDeminsionsPublisher;
+    ros::NodeHandle nh_;
+   // FEEDBACK _feedback;
+   // RESULT _result;
 
 public:
-    TrackObjectServer():
-        _server(_node, name, boost::bind(&SimpleTaskServer::task, this, _1), false),
+    TrackObjectServer(C23_Node &detector):
+        RobilTask("/TrackObject"),
+        _detector(&detector),
         _name("/TrackObject")
+        //, boost::bind(&TrackObjectServer::dataChanged, this, _1)
     {
-        _server.start();
         ROS_INFO("instance of TrackObjectServer started.");
+        objectDetectedPublisher = nh_.advertise<C23_ObjectRecognition::C23C0_OD>("C23/object_detected", 1);
+        objectDeminsionsPublisher = nh_.advertise<C23_ObjectRecognition::C23C0_ODIM>("C23/object_deminsions", 1);
     }
-
-    void task(const GOAL &goal){
-        int32_t success = PLAN;
-        string plan ="";
+    void dataChangeD() {
+    
+    }
+    TaskResult task(const string& name, const string& uid, Arguments& args) {
+        ROS_INFO("I was called\n");
         
-        /* GET TASK PARAMETERS */
-        ROS_INFO("%s: Start: task name = %s", _name.c_str(), goal->name.c_str());
-        ROS_INFO("%s: Start: task id = %s", _name.c_str(), goal->uid.c_str());
-        ROS_INFO("%s: Start: task params = %s", _name.c_str(), goal->parameters.c_str());
+        if (isPreempt()){
+            _detector->stopDetection();
+            return TaskResult::Preempted();
+        }
+        if(args.find("object") != args.end() ) {
+            std::stringstream numbers; numbers<<args["object"];
+            int x;
+            numbers>>x;
+            switch (x) {
+                case 0:
+                    _detector->detectAndTrack(CAR_DRIVER);
+                    break;
+                case 1:
+                _detector->detectAndTrack(CAR_PASSENGER);
+                    break;
+                case 2:
+                    _detector->detectAndTrack(CAR_FRONT);
+                    break;
+                case 3:
+                    _detector->detectAndTrack(CAR_BEHIND);
+                    break;
+                default:
+                    break;
+            }
+            _detector->startDetection();
+            C23_ObjectRecognition::C23C0_OD msg;
+            C23_ObjectRecognition::C23C0_ODIM msg2;
+            while(!isPreempt()) {
+                if(_detector->x != -1) {
+                    msg.ObjectDetected = 1;
+                    msg2.x = _detector->x;
+                    msg2.y = _detector->y;
+                    msg2.width = _detector->width;
+                    msg2.height = _detector->height;
+                    objectDeminsionsPublisher.publish(msg2);
+               } else {
+                    msg.ObjectDetected = 0;
+                }
+                objectDetectedPublisher.publish(msg);
+               
+            }
+            _detector->stopDetection();
+            return TaskResult::Preempted();
+        } else {
+            char* str = "TrackObject was called without an object";
+            ROS_INFO("%s.\n", str);
+            return TaskResult(FAULT, str);
+        }
         
-        /* HERE PROCESS TASK PARAMETERS */
-
-        /* NUMBER OF ITERATIONS IN TASK LOOP */
-        for(int times =0; times < 100; times++){
-            if (_server.isPreemptRequested() || !ros::ok()){
-            
-                /* HERE PROCESS PREEMPTION OR INTERAPT */
-            
-                ROS_INFO("%s: Preempted", _name.c_str());
-                _server.setPreempted();
-                success = FAULT;
-                break;
-            }
-            
-            /* HERE PROCESS TASK */
-
-            /* SLEEP BETWEEN LOOP ITERATIONS */
-            boost::this_thread::sleep(boost::posix_time::millisec(100));
-        }
-
-        if(success)
-        {
-            _result.success = success;
-            ROS_INFO("%s: Succeeded", _name.c_str());
-            if(success == PLAN){
-                ROS_INFO("%s: New plan", _name.c_str());
-                _result.plan = plan;
-            }
-            _server.setSucceeded(_result);
-        }else{
-            ROS_INFO("%s: Aborted", _name.c_str());
-            _server.setAborted(_result);
-        }
+        return TaskResult(SUCCESS, "OK");
     }
 
 };
+#endif

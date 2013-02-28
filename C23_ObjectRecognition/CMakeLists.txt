@@ -8,7 +8,9 @@ include($ENV{ROS_ROOT}/core/rosbuild/rosbuild.cmake)
 #  RelWithDebInfo : w/ debug symbols, w/ optimization
 #  MinSizeRel     : w/o debug symbols, w/ optimization, stripped binaries
 #set(ROS_BUILD_TYPE RelWithDebInfo)
-
+rosbuild_find_ros_package(actionlib_msgs)
+include(${actionlib_msgs_PACKAGE_PATH}/cmake/actionbuild.cmake)
+genaction()
 rosbuild_init()
 
 #set the default path for built executables to the "bin" directory
@@ -19,7 +21,7 @@ set(LIBRARY_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/lib)
 #uncomment if you have defined messages
 rosbuild_genmsg()
 #uncomment if you have defined services
-#rosbuild_gensrv()
+rosbuild_gensrv()
 
 #common commands for building c++ executables and libraries
 #rosbuild_add_library(${PROJECT_NAME} src/example.cpp)
@@ -59,7 +61,7 @@ endif(NOT USE_SYSTEM_LIBS)
 add_subdirectory(src/libopentld)
 
 target_link_libraries(c23 ${PCL_LIBRARIES} libopentld cvblobs ${OpenCV_LIBS} )
-rosbuild_add_executable(c23 src/C23_Node.cpp src/C23_Node_TLD_Handler.cpp)
+rosbuild_add_executable(c23 src/c23.cpp src/C23_Node.cpp src/C23_Node_TLD_Handler.cpp)
 #rosbuild_add_executable(test1 src/C21testNode.cpp)
 #rosbuild_link_boost(test1 thread signals)
 #target_link_libraries(test1 ${OpenCV_LIBS} ${PCL_LIBRARIES})

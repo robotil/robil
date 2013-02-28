@@ -7,6 +7,7 @@
 #include "C21_VisionAndLidar/C21.h"
 #include "C21_VisionAndLidar/C21_Pan.h"
 #include "C21_VisionAndLidar/C21_Pic.h"
+#include "C21_VisionAndLidar/C21_C22.h"
 #include <image_transport/image_transport.h>
 #include <message_filters/synchronizer.h>
 #include <message_filters/subscriber.h>
@@ -28,6 +29,9 @@
 #include <pcl_ros/point_cloud.h>
 #include "opencv2/stitching/stitcher.hpp"
 #include "std_msgs/Empty.h"
+#include <tf/tf.h>
+#include <tf/transform_listener.h>
+
 namespace enc=sensor_msgs::image_encodings;
 
 /**
@@ -49,13 +53,13 @@ public:
 		//more on filters and how to use them can be found on http://www.ros.org/wiki/message_filters
 		left_image_sub_( it_, left_camera, 1 ),
 		right_image_sub_( it_, right_camera, 1 ),
-		pointcloud(nh_,"/multisense_sl/points2",1),
+		pointcloud(nh_,"/multisense_sl/camera/points2",1),
 		sync( MySyncPolicy( 10 ), left_image_sub_, right_image_sub_ ,pointcloud)
 	  {
 		leftpub = it_.advertise("C21/left_camera/image", 1);
 		rightpub = it_.advertise("C21/right_camera/image", 1);
+		c22pub= nh_.advertise<C21_VisionAndLidar::C21_C22>("C21/C22", 1000);
 		//set compression data to png
-		ROS_INFO("finished subscribing\n");
 		sync.registerCallback( boost::bind( &C21_Node::callback, this, _1, _2,_3 ) );  //Specifying what to do with the data
 		_panMutex=new boost::mutex();
 		_cloudMutex=new boost::mutex();
@@ -63,7 +67,7 @@ public:
 		pano_service = nh_.advertiseService("C21/Panorama", &C21_Node::pano_proccess, this);
 		pic_service= nh_.advertiseService("C21/Pic", &C21_Node::pic_proccess, this);
 		pan_imgs=new std::vector<cv::Mat>();
-		ROS_INFO("service on\n");
+		ROS_INFO("C21 Online\n");
 		//boost::thread panorama(&C21_Node::publishPanorama,this);
 	  }
 
@@ -77,7 +81,7 @@ public:
 	  bool proccess(C21_VisionAndLidar::C21::Request  &req,
 			C21_VisionAndLidar::C21::Response &res )
 	  {
-		  ROS_INFO("recived request, tying to fetch data\n");
+		  //ROS_INFO("recived request, tying to fetch data\n");
 		  _cloudMutex->lock();
 		  pcl::toROSMsg(my_answer,res.scene_full_resolution_msg.cloud);
 		  _cloudMutex->unlock();
@@ -144,6 +148,28 @@ public:
 	   * @param right_msg ROS mesage with image data from the right camera topic
 	   */
 	  void callback(const sensor_msgs::ImageConstPtr& left_msg,const sensor_msgs::ImageConstPtr& right_msg,const sensor_msgs::PointCloud2::ConstPtr &cloud){
+		tf::StampedTransform transform;
+		try{
+		  listener.lookupTransform("/pelvis","/head",
+								   ros::Time(0), transform);
+		}
+		catch (tf::TransformException ex){
+		   return;
+		}
+		C21_VisionAndLidar::C21_C22 msg;
+		msg.header=cloud->header;
+		msg.image=*left_msg;
+		msg.cloud=*cloud;
+		tf::Vector3 orig=transform.getOrigin();
+		tf::Quaternion rot=transform.getRotation();
+		msg.pose.position.x=orig.getX();
+		msg.pose.position.y=orig.getY();
+		msg.pose.position.z=orig.getZ();
+		msg.pose.orientation.x=rot.getX();
+		msg.pose.orientation.y=rot.getY();
+		msg.pose.orientation.z=rot.getZ();
+		msg.pose.orientation.w=rot.getW();
+		c22pub.publish(msg);
 		 cv_bridge::CvImagePtr left;
 		 cv_bridge::CvImagePtr right;
 		try
@@ -156,6 +182,7 @@ public:
 		  ROS_ERROR("cv_bridge exception: %s", e.what());
 		  return;
 		}
+
 		//left_msg->header.stamp=ros::Time::now();
 		//right_msg->header.stamp=ros::Time::now();
 		leftpub.publish(left_msg);
@@ -173,7 +200,7 @@ public:
 		my_answer.swap(out);
 		//pcl::io::savePCDFile("cloud.pcd",out,true);
 		_cloudMutex->unlock();
-
+		//std::cout<<" position x:"<<msg.pose.position.x<<" y:"<<msg.pose.position.y<<" z:"<<msg.pose.position.z<<"\n";
 	  }
 
 private:
@@ -192,9 +219,10 @@ private:
   ImageSubscriber right_image_sub_;
   image_transport::Publisher leftpub;
   image_transport::Publisher rightpub;
+  ros::Publisher c22pub;
   image_transport::Publisher smallPanoramicPublisher;
   message_filters::Subscriber<sensor_msgs::PointCloud2> pointcloud;
-
+  tf::TransformListener listener;
   ros::ServiceServer pcl_service;
 
   std::vector<cv::Mat> *pan_imgs;
@@ -210,7 +238,7 @@ private:
 int main(int argc, char **argv)
 {
   ros::init(argc, argv, "C21_VisionAndLidar");
-  C21_Node my_node("/multisense_sl/left/image_raw","/multisense_sl/right/image_raw");
+  C21_Node my_node("/multisense_sl/camera/left/image_raw","/multisense_sl/camera/right/image_raw");
   while(ros::ok()){
 	  ros::spin();
   }

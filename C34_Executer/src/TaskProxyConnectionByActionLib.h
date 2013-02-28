@@ -47,6 +47,15 @@ public:
 		if(TNAME=="TEST"||TNAME=="test") return BTTask::Ref().get();
 		return new RobilTaskProxy(TNAME);
 	}
+	virtual bool canCreate(std::string TNAME){
+		PRINT("[RobilTask]: is can create "<<TNAME<<" task?");
+		if(TNAME=="TEST"||TNAME=="test"){
+			PRINT("[RobilTask]: ... not, I can't");
+			return false;
+		}
+		PRINT("[RobilTask]: ... yes, I can.");
+		return true;
+	}
 };
 
 }using namespace TaskProxyConnectionByActionLib;

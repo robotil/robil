@@ -1,64 +1,102 @@
 <plan descriptions="./plans/TaskDescriptions.xml">
-   <seq name="event1" x="157.27818165723596" y="-277.36753235745584" collapsed="false" id="eb5fdfc7-37cf-4cbe-a6f2-319cd0b9cc2d"> 
-         <tsk name="Initiate Mounted Mobility Mission" x="-14.721818342764038" y="-171.36753235745581" test_time="1000" test_result="true" id="481fcf22-cc6a-4c8d-8a39-7b00fe595e20" />
-         <par name="Perception and Execution" x="197.4715438506002" y="-169.1550503949724" collapsed="false" id="a319121b-7fdc-4a75-9f48-a404d9ec0e42"> 
-               <par name="DB Information" x="-57.22181834276404" y="-53.86753235745584" collapsed="false" id="6fb2aba8-0b9a-451f-b6a1-67a04d69ba07"> 
-                     <tsk name="Receive own localization" x="-203.72181834276404" y="158.63246764254433" test_time="10000" test_result="false" id="944fb538-81fb-4978-9a98-8542b974c557" />
-                     <tsk name="Receive vehicle possible localization" x="-129.7218183427641" y="83.63246764254416" test_time="1000000" test_result="true" id="d43cbd0a-e3ad-40d3-8f0f-de4d3dd7fece" />
-                     <tsk name="Receive world model" x="-40.72181834276404" y="122.63246764254416" test_time="1000000" test_result="true" id="1f3e429a-6fc3-48ad-a74e-4de5f65f827b" />
-                     <tsk name="Receive Vehicle parameterics " x="-8.721818342764038" y="160.63246764254433" test_time="1000000" test_result="true" id="16d21210-790b-498a-8e84-d8a787637ec1" />
-               </par>
-               <seq name="Execution" x="733.4715438506003" y="-41.15505039497242" collapsed="false" id="85e65469-45be-4acc-a5e9-42903098defe"> 
-                     <seq name="Target Identification" x="270.01194789100225" y="194.6844156944927" collapsed="false" id="e00305f6-a82e-4bba-8df4-4cd0e47fb9fe"> 
-                           <tsk name="Stand Up" x="148.18727256632707" y="297.54155855163526" test_time="1000" test_result="true" id="bb531b91-9c03-4e07-adae-5abe54f7352e" />
-                           <tsk name="Turn to face presumed target" x="162.18727256632695" y="326.54155855163526" test_time="1000" test_result="true" id="9bfb6b20-f5a1-4acc-b102-712786a54365" />
-                           <tsk name="Perform an all-around scan" x="173.18727256632695" y="364.5415585516356" test_time="1000" test_result="true" id="d6412ef2-a2a6-43c1-896e-8f3dc1953c29" />
-                           <tsk name="Identify possible target locations" x="189.18727256632684" y="400.5415585516356" test_time="1000" test_result="true" id="b7a1c713-3049-4f7e-bf39-ecc12e752f50" />
-                           <tsk name="Select target" x="255.18727256632621" y="441.5415585516356" test_time="10000" test_result="true" id="375ee390-0e36-4967-b4ef-6c58f6dd3ce2" />
-                           <tsk name="Send 360? panoramic image to Operator" x="282.1872725663262" y="289.54155855163526" test_time="1000" test_result="true" id="fccc1d2f-d05c-4a55-99c4-c275031c32ae" />
-                           <tsk name="Send target parametrics to Operator" x="356.1872725663262" y="326.54155855163526" test_time="1000" test_result="true" id="b3989e3c-5112-435d-af43-fdce284c3989" />
-                           <tsk name="OCU shows targets overlay on panoramic image with critical parametrics (driver door) " x="373.1872725663262" y="362.5415585516356" test_time="1000" test_result="true" id="35f129af-6779-41e0-8c3e-7f598c265a6f" />
-                           <tsk name="Receive Operator OK/override to target parametrics" x="397.27818165723534" y="403.5415585516356" test_time="1000" test_result="true" id="a973e06f-4417-4670-a2aa-9482153ad180" />
-                     </seq>
-                     <seq name="Entry position" x="730.921038800094" y="194.1364358965127" collapsed="false" id="768692c2-bf47-477b-a6e9-01ff0017d799"> 
-                           <tsk name="Walk to target (Refer to Event 2)" x="562.8236362026893" y="330.3597403698176" test_time="10000" test_result="true" id="1c5da2af-5711-4e5d-bfbc-71014d0aae6c" />
-                           <tsk name="Stand at entry position" x="596.4599998390539" y="368.54155855163685" test_time="10000" test_result="true" id="93e4e8c1-eee1-4917-847f-c865ae16f791" />
-                           <tsk name="Direct sensors at doorway and cabin" x="629.1872725663271" y="407.632467642546" test_time="10000" test_result="true" id="b067ade1-c31d-4f8c-a31b-5566bf714eea" />
-                           <tsk name="Identify cabin parametrics" x="652.82363620269" y="448.5415585516365" test_time="10000" test_result="true" id="37460b4c-bd2c-4a8b-a35e-fa80013ba35a" />
-                           <tsk name="Send cabin image to Operator" x="736.4599998390545" y="330.3597403698179" test_time="10000" test_result="true" id="10940d11-1b2d-43a1-b919-06c8ad774a9f" />
-                           <tsk name="Send parametrics to Operator" x="761.9145452935991" y="368.5415585516366" test_time="10000" test_result="true" id="c7a00658-780e-4432-b321-4d6b39a1e0b9" />
-                           <tsk name="OCU shows parametrics overlay on cabin image " x="795.5509089299633" y="406.72337673345453" test_time="10000" test_result="true" id="47cb511d-a01d-43d0-a2db-bc0d1cfe1736" />
-                           <tsk name="Receive Operator OK/override to cabin parametrics" x="831.0054543845094" y="448.54155855163674" test_time="10000" test_result="true" id="3502e0b0-cf84-49bb-9263-183d87ae0bcc" />
-                        <dec name="!L!" x="1042.6483115273656" y="385.04552680560494"> 
-                              <sel name="Entry routine" x="1013.8236362026907" y="439.2688312789079" collapsed="false" id="b53a46a1-f07d-4868-afea-822352709f6c"> 
-                                    <seq name="Enter to Car" x="930.187272566327" y="510.17792218799786" collapsed="false" id="1e5728d8-5095-41be-bcb9-5af697f6e770"> 
-                                          <tsk name="Adjust standing position in relation to cabin" x="773.8236362026907" y="551.9961040061792" test_time="10000" test_result="true" id="2659ada8-1deb-418c-87aa-d331729b2af3" />
-                                          <tsk name="Adjust entry posture" x="862.9145452935986" y="578.3597403698161" test_time="10000" test_result="true" id="60e4a3d0-913c-430b-b01d-d82f248c8c3b" />
-                                          <tsk name="Perform entry routine" x="949.278181657236" y="606.5415585516362" test_time="10000" test_result="true" id="6220e2a3-e8e4-4547-971f-89c72cbb5013" />
-                                    </seq>
-                                 <dec name="!" x="1105.8236362026864" y="490.2688312789069"> 
-                                       <tsk name="Reverse entry routine" x="1048.7327271117788" y="545.6324676425431" test_time="10000" test_result="true" id="dfdcb093-5ac9-4059-aa48-18a3cf040251" />
+   < name="event1" x="734.9646895937437" y="89.78326129333766" collapsed="false" id="eb5fdfc7-37cf-4cbe-a6f2-319cd0b9cc2d"> 
+         < name="Initiate Mounted Mobility Mission" x="562.9646895937437" y="195.7832612933377" test_time="1000" test_result="true" id="481fcf22-cc6a-4c8d-8a39-7b00fe595e20"> 
+         </>
+         < name="Perception and Execution" x="775.158051787108" y="197.9957432558211" collapsed="false" id="a319121b-7fdc-4a75-9f48-a404d9ec0e42"> 
+               < name="DB Information" x="520.4646895937437" y="313.28326129333766" collapsed="false" id="6fb2aba8-0b9a-451f-b6a1-67a04d69ba07"> 
+                     < name="Receive own localization" x="373.9646895937437" y="525.7832612933378" test_time="10000" test_result="false" id="944fb538-81fb-4978-9a98-8542b974c557"> 
+                     </>
+                     < name="Receive vehicle possible localization" x="447.9646895937436" y="450.78326129333766" test_time="1000000" test_result="true" id="d43cbd0a-e3ad-40d3-8f0f-de4d3dd7fece"> 
+                     </>
+                     < name="Receive world model" x="536.9646895937437" y="489.78326129333766" test_time="1000000" test_result="true" id="1f3e429a-6fc3-48ad-a74e-4de5f65f827b"> 
+                     </>
+                     < name="Receive Vehicle parameterics " x="568.9646895937437" y="527.7832612933378" test_time="1000000" test_result="true" id="16d21210-790b-498a-8e84-d8a787637ec1"> 
+                     </>
+               </>
+               < name="Execution" x="1311.158051787108" y="325.9957432558211" collapsed="false" id="85e65469-45be-4acc-a5e9-42903098defe"> 
+                     < name="Target Identification" x="847.69845582751" y="561.8352093452862" collapsed="false" id="e00305f6-a82e-4bba-8df4-4cd0e47fb9fe"> 
+                           < name="Stand Up" x="725.8737805028347" y="664.6923522024288" test_time="1000" test_result="true" id="bb531b91-9c03-4e07-adae-5abe54f7352e"> 
+                           </>
+                           < name="Turn to face presumed target" x="739.8737805028347" y="693.6923522024288" test_time="1000" test_result="true" id="9bfb6b20-f5a1-4acc-b102-712786a54365"> 
+                           </>
+                           < name="Perform an all-around scan" x="750.8737805028347" y="731.6923522024291" test_time="1000" test_result="true" id="d6412ef2-a2a6-43c1-896e-8f3dc1953c29"> 
+                           </>
+                           < name="Identify possible target locations" x="766.8737805028345" y="767.6923522024291" test_time="1000" test_result="true" id="b7a1c713-3049-4f7e-bf39-ecc12e752f50"> 
+                           </>
+                           < name="Select target" x="832.8737805028339" y="808.6923522024291" test_time="10000" test_result="true" id="375ee390-0e36-4967-b4ef-6c58f6dd3ce2"> 
+                           </>
+                           < name="Send 360? panoramic image to Operator" x="859.8737805028339" y="656.6923522024288" test_time="1000" test_result="true" id="fccc1d2f-d05c-4a55-99c4-c275031c32ae"> 
+                           </>
+                           < name="Send target parametrics to Operator" x="933.8737805028339" y="693.6923522024288" test_time="1000" test_result="true" id="b3989e3c-5112-435d-af43-fdce284c3989"> 
+                           </>
+                           < name="OCU shows targets overlay on panoramic image with critical parametrics (driver door) " x="950.8737805028339" y="729.6923522024291" test_time="1000" test_result="true" id="35f129af-6779-41e0-8c3e-7f598c265a6f"> 
+                           </>
+                           < name="Receive Operator OK/override to target parametrics" x="974.9646895937431" y="770.6923522024291" test_time="1000" test_result="true" id="a973e06f-4417-4670-a2aa-9482153ad180"> 
+                           </>
+                     </>
+                     < name="Entry position" x="1308.6075467366018" y="561.2872295473062" collapsed="false" id="768692c2-bf47-477b-a6e9-01ff0017d799"> 
+                           < name="Walk to target (Refer to Event 2)" x="1140.510144139197" y="697.5105340206111" test_time="10000" test_result="true" id="1c5da2af-5711-4e5d-bfbc-71014d0aae6c"> 
+                           </>
+                           < name="Stand at entry position" x="1174.1465077755615" y="735.6923522024304" test_time="10000" test_result="true" id="93e4e8c1-eee1-4917-847f-c865ae16f791"> 
+                           </>
+                           < name="Direct sensors at doorway and cabin" x="1206.873780502835" y="774.7832612933395" test_time="10000" test_result="true" id="b067ade1-c31d-4f8c-a31b-5566bf714eea"> 
+                           </>
+                           < name="Identify cabin parametrics" x="1230.5101441391976" y="815.69235220243" test_time="10000" test_result="true" id="37460b4c-bd2c-4a8b-a35e-fa80013ba35a"> 
+                           </>
+                           < name="Send cabin image to Operator" x="1314.1465077755622" y="697.5105340206114" test_time="10000" test_result="true" id="10940d11-1b2d-43a1-b919-06c8ad774a9f"> 
+                           </>
+                           < name="Send parametrics to Operator" x="1339.6010532301068" y="735.6923522024301" test_time="10000" test_result="true" id="c7a00658-780e-4432-b321-4d6b39a1e0b9"> 
+                           </>
+                           < name="OCU shows parametrics overlay on cabin image " x="1373.237416866471" y="773.874170384248" test_time="10000" test_result="true" id="47cb511d-a01d-43d0-a2db-bc0d1cfe1736"> 
+                           </>
+                           < name="Receive Operator OK/override to cabin parametrics" x="1408.6919623210172" y="815.6923522024302" test_time="10000" test_result="true" id="3502e0b0-cf84-49bb-9263-183d87ae0bcc"> 
+                           </>
+                        <dec name="!L!" x="1620.3348194638734" y="752.1963204563984"> 
+                              < name="Entry routine" x="1591.5101441391985" y="806.4196249297014" collapsed="false" id="b53a46a1-f07d-4868-afea-822352709f6c"> 
+                                    < name="Enter to Car" x="1507.8737805028347" y="877.3287158387914" collapsed="false" id="1e5728d8-5095-41be-bcb9-5af697f6e770"> 
+                                          < name="Adjust standing position in relation to cabin" x="1351.5101441391985" y="919.1468976569727" test_time="10000" test_result="true" id="2659ada8-1deb-418c-87aa-d331729b2af3"> 
+                                          </>
+                                          < name="Adjust entry posture" x="1440.6010532301063" y="945.5105340206096" test_time="10000" test_result="true" id="60e4a3d0-913c-430b-b01d-d82f248c8c3b"> 
+                                          </>
+                                          < name="Perform entry routine" x="1526.9646895937437" y="973.6923522024297" test_time="10000" test_result="true" id="6220e2a3-e8e4-4547-971f-89c72cbb5013"> 
+                                          </>
+                                    </>
+                                 <dec name="!" x="1683.5101441391942" y="857.4196249297004"> 
+                                       < name="Reverse entry routine" x="1626.4192350482865" y="912.7832612933366" test_time="10000" test_result="true" id="dfdcb093-5ac9-4059-aa48-18a3cf040251"> 
+                                       </>
                                  </dec>
-                              </sel>
+                              </>
                         </dec>
-                     </seq>
-                  <dec name="!L!" x="1268.4715438506005" y="153.8449496050277"> 
-                        <seq name="Driving" x="1256.9437660728213" y="219.48383849391598" collapsed="false" id="3536be82-0aaa-4c84-af46-048399ba5235"> 
-                              <tsk name="Identify control parametrics" x="1036.8236362026907" y="271.7006494607267" test_time="10000" test_result="true" id="01b60e56-6b22-45f4-b841-4caf4ad460a1" />
-                              <tsk name="Send parametrics to Operator" x="1062.0509089299608" y="308.5870130970909" test_time="10000" test_result="true" id="1c01fc34-58a5-4306-8b71-ca711df7d7e9" />
-                              <tsk name="OCU shows parametrics overlay on controls image " x="1089.596363475416" y="345.95064946072694" test_time="10000" test_result="true" id="34f6cbc1-ae54-4b1c-a458-cfe5722c7410" />
-                              <tsk name="Send image to Operator" x="1213.073636202689" y="275.06428582436047" test_time="10000" test_result="true" id="bf583a47-89aa-41ae-9835-9911d3ba3191" />
-                              <tsk name="Receive Operator overrides to parametrics" x="1237.5054543845079" y="307.9506494607251" test_time="10000" test_result="true" id="ff5510d9-c33e-4fcf-8a54-f393e790cbb9" />
-                              <tsk name="Adjust posture" x="1273.5054543845063" y="341.3142858243598" test_time="10000" test_result="true" id="ada84aad-b7e1-444c-ab82-c9679a509c26" />
-                              <tsk name="Grip steering wheel" x="1350.1418180208716" y="380.0415585516339" test_time="10000" test_result="true" id="a0947038-5047-4659-b88c-2610ac81b925" />
-                              <tsk name="Turn slightly left and right" x="1382.6872725663275" y="410.67792218799786" test_time="10000" test_result="true" id="510ec6fa-8416-4c15-8355-702eeff3540b" />
-                              <tsk name="Grip starter switch" x="1536.2327271117836" y="379.40519491527175" test_time="10000" test_result="true" id="451fa591-5cd2-48f9-8934-60a954b49c79" />
-                              <tsk name="Turn slightly left and right" x="1570.7781816572367" y="408.04155855163526" test_time="10000" test_result="true" id="755f2b4a-c8f5-4ed8-9b06-61248bf74e2a" />
-                              <tsk name="Place feet on pedals" x="1727.5963634754212" y="378.3142858243606" test_time="10000" test_result="true" id="8b240b3c-3a53-4758-a4fd-acd8570eae67" />
-                              <tsk name="Press and release slightly" x="1762.1418180208702" y="408.04155855163344" test_time="10000" test_result="true" id="c9a50933-5b3a-4336-8e06-535ee8711089" />
-                        </seq>
+                     </>
+                  <dec name="!L!" x="1846.1580517871082" y="520.9957432558213"> 
+                        < name="Driving" x="1834.630274009329" y="586.6346321447095" collapsed="false" id="3536be82-0aaa-4c84-af46-048399ba5235"> 
+                              < name="Identify control parametrics" x="1614.5101441391985" y="638.8514431115202" test_time="10000" test_result="true" id="01b60e56-6b22-45f4-b841-4caf4ad460a1"> 
+                              </>
+                              < name="Send parametrics to Operator" x="1639.7374168664685" y="675.7378067478844" test_time="10000" test_result="true" id="1c01fc34-58a5-4306-8b71-ca711df7d7e9"> 
+                              </>
+                              < name="OCU shows parametrics overlay on controls image " x="1667.2828714119237" y="713.1014431115204" test_time="10000" test_result="true" id="34f6cbc1-ae54-4b1c-a458-cfe5722c7410"> 
+                              </>
+                              < name="Send image to Operator" x="1790.7601441391967" y="642.215079475154" test_time="10000" test_result="true" id="bf583a47-89aa-41ae-9835-9911d3ba3191"> 
+                              </>
+                              < name="Receive Operator overrides to parametrics" x="1815.1919623210156" y="675.1014431115186" test_time="10000" test_result="true" id="ff5510d9-c33e-4fcf-8a54-f393e790cbb9"> 
+                              </>
+                              < name="Adjust posture" x="1851.191962321014" y="708.4650794751533" test_time="10000" test_result="true" id="ada84aad-b7e1-444c-ab82-c9679a509c26"> 
+                              </>
+                              < name="Grip steering wheel" x="1927.8283259573793" y="747.1923522024274" test_time="10000" test_result="true" id="a0947038-5047-4659-b88c-2610ac81b925"> 
+                              </>
+                              < name="Turn slightly left and right" x="1960.3737805028352" y="777.8287158387914" test_time="10000" test_result="true" id="510ec6fa-8416-4c15-8355-702eeff3540b"> 
+                              </>
+                              < name="Grip starter switch" x="2113.9192350482913" y="746.5559885660653" test_time="10000" test_result="true" id="451fa591-5cd2-48f9-8934-60a954b49c79"> 
+                              </>
+                              < name="Turn slightly left and right" x="2148.4646895937444" y="775.1923522024288" test_time="10000" test_result="true" id="755f2b4a-c8f5-4ed8-9b06-61248bf74e2a"> 
+                              </>
+                              < name="Place feet on pedals" x="2305.2828714119287" y="745.4650794751541" test_time="10000" test_result="true" id="8b240b3c-3a53-4758-a4fd-acd8570eae67"> 
+                              </>
+                              < name="Press and release slightly" x="2339.828325957378" y="775.192352202427" test_time="10000" test_result="true" id="c9a50933-5b3a-4336-8e06-535ee8711089"> 
+                              </>
+                        </>
                   </dec>
-               </seq>
-         </par>
-   </seq>
+               </>
+         </>
+   </>
 </plan>

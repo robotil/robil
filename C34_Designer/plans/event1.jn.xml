@@ -1,0 +1,102 @@
+<plan descriptions="./plans/TaskDescriptions.xml">
+   < name="event1"> 
+         < name="Initiate Mounted Mobility Mission"> 
+         </>
+         < name="Perception and Execution"> 
+               < name="DB Information"> 
+                     < name="Receive own localization"> 
+                     </>
+                     < name="Receive vehicle possible localization"> 
+                     </>
+                     < name="Receive world model"> 
+                     </>
+                     < name="Receive Vehicle parameterics "> 
+                     </>
+               </>
+               < name="Execution"> 
+                     < name="Target Identification"> 
+                           < name="Stand Up"> 
+                           </>
+                           < name="Turn to face presumed target"> 
+                           </>
+                           < name="Perform an all-around scan"> 
+                           </>
+                           < name="Identify possible target locations"> 
+                           </>
+                           < name="Select target"> 
+                           </>
+                           < name="Send 360? panoramic image to Operator"> 
+                           </>
+                           < name="Send target parametrics to Operator"> 
+                           </>
+                           < name="OCU shows targets overlay on panoramic image with critical parametrics (driver door) "> 
+                           </>
+                           < name="Receive Operator OK/override to target parametrics"> 
+                           </>
+                     </>
+                     < name="Entry position"> 
+                           < name="Walk to target (Refer to Event 2)"> 
+                           </>
+                           < name="Stand at entry position"> 
+                           </>
+                           < name="Direct sensors at doorway and cabin"> 
+                           </>
+                           < name="Identify cabin parametrics"> 
+                           </>
+                           < name="Send cabin image to Operator"> 
+                           </>
+                           < name="Send parametrics to Operator"> 
+                           </>
+                           < name="OCU shows parametrics overlay on cabin image "> 
+                           </>
+                           < name="Receive Operator OK/override to cabin parametrics"> 
+                           </>
+                        <dec name="!L!"> 
+                              < name="Entry routine"> 
+                                    < name="Enter to Car"> 
+                                          < name="Adjust standing position in relation to cabin"> 
+                                          </>
+                                          < name="Adjust entry posture"> 
+                                          </>
+                                          < name="Perform entry routine"> 
+                                          </>
+                                    </>
+                                 <dec name="!"> 
+                                       < name="Reverse entry routine"> 
+                                       </>
+                                 </dec>
+                              </>
+                        </dec>
+                     </>
+                  <dec name="!L!"> 
+                        < name="Driving"> 
+                              < name="Identify control parametrics"> 
+                              </>
+                              < name="Send parametrics to Operator"> 
+                              </>
+                              < name="OCU shows parametrics overlay on controls image "> 
+                              </>
+                              < name="Send image to Operator"> 
+                              </>
+                              < name="Receive Operator overrides to parametrics"> 
+                              </>
+                              < name="Adjust posture"> 
+                              </>
+                              < name="Grip steering wheel"> 
+                              </>
+                              < name="Turn slightly left and right"> 
+                              </>
+                              < name="Grip starter switch"> 
+                              </>
+                              < name="Turn slightly left and right"> 
+                              </>
+                              < name="Place feet on pedals"> 
+                              </>
+                              < name="Press and release slightly"> 
+                              </>
+                        </>
+                  </dec>
+               </>
+         </>
+   </>
+</plan>

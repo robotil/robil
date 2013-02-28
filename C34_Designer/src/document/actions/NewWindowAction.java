@@ -7,11 +7,12 @@ import document.BTDesigner;
 
 /**
  * Creates a new designer tab
+ * 
  * @author matan
- *
+ * 
  */
-public class NewWindowAction extends AbstractDesignerAction implements ActionListener {
-
+public class NewWindowAction extends AbstractDesignerAction implements
+		ActionListener {
 
 	public NewWindowAction(BTDesigner designer) {
 		super(designer);
@@ -19,7 +20,7 @@ public class NewWindowAction extends AbstractDesignerAction implements ActionLis
 
 	@Override
 	public void actionPerformed(ActionEvent arg0) {
-		designer.addNewDocumentTab();
+		this.designer.addNewDocumentTab();
 	}
 
 }

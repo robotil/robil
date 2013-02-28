@@ -7,17 +7,19 @@ import document.BTDesigner;
 import document.Document;
 import document.Toolbar;
 
-public class RemoveAction extends AbstractDesignerAction implements ActionListener {
-	
+public class RemoveAction extends AbstractDesignerAction implements
+		ActionListener {
+
 	public RemoveAction(BTDesigner designer) {
 		super(designer);
 	}
-	
+
+	@Override
 	public void actionPerformed(ActionEvent a) {
 		Document document = getActiveTab().doc;
 		document.toolSelectionClean();
 		document.removeElement = true;
-		designer.toolbar.setTipText(Toolbar.TIP_remove);
-	}	
+		this.designer.toolbar.setTipText(Toolbar.TIP_remove);
+	}
 
 }

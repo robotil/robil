@@ -1,0 +1,3 @@
+Redirecting all output to /home/blackpc/workspace/robil_updated/C34_Designer/test_stdoutput.txt
+[14:51:55][terminal.communication.StackStreamMessageParser.main:76][DEBUG] Test message
+[14:51:55][terminal.communication.StackStreamMessageParser.main:78][INFO] Test message

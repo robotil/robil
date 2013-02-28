@@ -1,0 +1,20 @@
+<package>
+  <description brief="C10_Common">
+
+     C10_Common
+
+  </description>
+  <author>Dimitri Bachirev</author>
+  <license>BSD</license>
+  <review status="unreviewed" notes=""/>
+  <url>http://ros.org/wiki/C10_Common</url>
+  <depend package="std_msgs"/>
+  <depend package="rospy"/>
+  <depend package="roscpp"/>
+  <depend package="roslib"/>
+  <depend package="C21_VisionAndLidar"/>
+  <depend package="C22_GroundRecognitionAndMapping"/>
+
+</package>
+
+

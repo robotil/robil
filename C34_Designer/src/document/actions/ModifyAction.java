@@ -7,20 +7,21 @@ import document.BTDesigner;
 import document.Document;
 import document.Toolbar;
 
-public class ModifyAction extends AbstractDesignerAction implements ActionListener {
-	
+public class ModifyAction extends AbstractDesignerAction implements
+		ActionListener {
+
 	public ModifyAction(BTDesigner designer) {
 		super(designer);
 	}
 
 	@Override
 	public void actionPerformed(ActionEvent a) {
-		
+
 		Document document = getActiveTab().doc;
-		
+
 		document.toolSelectionClean();
-		document.modifier= new elements.Modifier();
-				
-		designer.toolbar.setTipText(Toolbar.TIP_modify);
+		document.modifier = new elements.Modifier();
+
+		this.designer.toolbar.setTipText(Toolbar.TIP_modify);
 	}
 }

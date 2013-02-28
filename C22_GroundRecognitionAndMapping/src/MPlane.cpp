@@ -8,12 +8,15 @@
 #include "MPlane.h"
 #include <pcl/ModelCoefficients.h>
 #include <pcl/point_types.h>
+double EQUALITY_THRESH=0.01;
 
 MPlane::MPlane():representing_point(0,0,0){
 	coefficient_x=0;
 	coefficient_y=0;
 	coefficient_z=0;
 	coefficient_d=0;
+	rating=0;
+	  ratable=true;
 }
 
 MPlane::MPlane(pcl::PointXYZ point, pcl::ModelCoefficients::Ptr c_):representing_point(point){
@@ -27,11 +30,26 @@ MPlane::~MPlane(){
 
 }
 
+void MPlane::addRating(){
+	if(ratable){
+		rating++;
+		if(rating==100)
+			rating=100;
+		ratable=false;
+	}
+}
+void MPlane::setRatable(){
+	if(ratable){
+		rating--;
+	}
+	ratable=true;
+}
+
 bool MPlane::isEqualTo(MPlane * other){
-  if (other->coefficient_x==coefficient_x)
-	  if (other->coefficient_y==coefficient_y)
-		  if (other->coefficient_z==coefficient_z)
-			  if (other->coefficient_d==coefficient_d)
+  if (std::max(other->coefficient_x,coefficient_x)-std::min(other->coefficient_x,coefficient_x)<=EQUALITY_THRESH)
+	  if (std::max(other->coefficient_y,coefficient_y)-std::min(other->coefficient_y,coefficient_y)<=EQUALITY_THRESH)
+		  if (std::max(other->coefficient_z,coefficient_z)-std::min(other->coefficient_z,coefficient_z)<=EQUALITY_THRESH)
+			  if (std::max(other->coefficient_d,coefficient_d)-std::min(other->coefficient_d,coefficient_d)<=EQUALITY_THRESH)
 				  return true;
   return false;
 }

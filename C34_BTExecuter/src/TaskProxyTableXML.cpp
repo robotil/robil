@@ -26,6 +26,7 @@ TaskProxyTableXML::TaskProxyTableXML(std::string pathToTaskList, BTTaskProxyCrea
 	PRINT("... "<<mr.getMap().size()<<" elements have been read.")
 	typedef MapReader::MAP Map;
 	for(Map::const_iterator i = mr.getMap().begin(); i!=mr.getMap().end(); i++){
+		//if(creator->canCreate(i->second)==false || creator->isDynamic(i->second)) continue;
 		add(i->first, BTTask::Ref(creator->create(i->second)));
 		PRINT("ADDRESS("<<i->first<<" , "<<i->second<<")")
 		PRINT_COUT("ADDRESS("<<i->first<<" , "<<i->second<<")")
@@ -41,6 +42,7 @@ TaskProxyTableXML::TaskProxyTableXML(std::istream& pathToTaskList, BTTaskProxyCr
 			"tasks","task","name","address");
 	typedef MapReader::MAP Map;
 	for(Map::const_iterator i = mr.getMap().begin(); i!=mr.getMap().end(); i++){
+		//if(creator->canCreate(i->second)==false || creator->isDynamic(i->second)) continue;
 		add(i->first, BTTask::Ref(creator->create(i->second)));
 		PRINT("ADDRESS("<<i->first<<" , "<<i->second<<")")
 		PRINT_COUT("ADDRESS("<<i->first<<" , "<<i->second<<")")
@@ -57,7 +59,7 @@ TaskProxyTableXML::~TaskProxyTableXML() {
 //}
  bool TaskProxyTableXML::contains(std::string tn){
 	bool res = TaskProxyTable::contains(tn);
-	if(res) return true;
+	if(res) return tbl[tn].get()!=NULL;
 	res = creator->canCreate(tn);
 	return res;
 }

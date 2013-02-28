@@ -7,19 +7,19 @@
     <x>0</x>
     <y>0</y>
     <width>1920</width>
-    <height>1200</height>
+    <height>1000</height>
    </rect>
   </property>
   <property name="minimumSize">
    <size>
     <width>1920</width>
-    <height>1200</height>
+    <height>1000</height>
    </size>
   </property>
   <property name="maximumSize">
    <size>
     <width>1920</width>
-    <height>1200</height>
+    <height>1000</height>
    </size>
   </property>
   <property name="contextMenuPolicy">
@@ -330,7 +330,23 @@
               </widget>
              </item>
              <item>
-              <widget class="QComboBox" name="cmbMissions"/>
+              <widget class="QComboBox" name="cmbMissions">
+               <item>
+                <property name="text">
+                 <string>Task1</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>Task2</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>Task3</string>
+                </property>
+               </item>
+              </widget>
              </item>
             </layout>
            </widget>
@@ -968,38 +984,79 @@
      <widget class="QWidget" name="widMain" native="true">
       <layout class="QHBoxLayout" name="horizontalLayout_2">
        <item>
-        <widget class="QWidget" name="widImages" native="true">
+        <widget class="QScrollArea" name="widImages">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
          <property name="minimumSize">
           <size>
-           <width>762</width>
+           <width>556</width>
            <height>0</height>
           </size>
          </property>
          <property name="maximumSize">
           <size>
-           <width>762</width>
+           <width>556</width>
            <height>16777215</height>
           </size>
          </property>
-         <layout class="QVBoxLayout" name="verticalLayout_5">
-          <item>
-           <layout class="QVBoxLayout" name="layImages"/>
-          </item>
-          <item>
-           <spacer name="verticalSpacer_2">
-            <property name="orientation">
-             <enum>Qt::Vertical</enum>
-            </property>
-            <property name="sizeHint" stdset="0">
-             <size>
-              <width>20</width>
-              <height>40</height>
-             </size>
-            </property>
-           </spacer>
-          </item>
-         </layout>
+         <property name="verticalScrollBarPolicy">
+          <enum>Qt::ScrollBarAlwaysOn</enum>
+         </property>
+         <property name="horizontalScrollBarPolicy">
+          <enum>Qt::ScrollBarAlwaysOff</enum>
+         </property>
+         <property name="widgetResizable">
+          <bool>true</bool>
+         </property>
+         <widget class="QWidget" name="scrollAreaWidgetContents">
+          <property name="geometry">
+           <rect>
+            <x>0</x>
+            <y>0</y>
+            <width>541</width>
+            <height>902</height>
+           </rect>
+          </property>
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <layout class="QVBoxLayout" name="verticalLayout_6">
+           <item>
+            <layout class="QVBoxLayout" name="layImages">
+             <property name="sizeConstraint">
+              <enum>QLayout::SetDefaultConstraint</enum>
+             </property>
+            </layout>
+           </item>
+           <item>
+            <spacer name="verticalSpacer_2">
+             <property name="orientation">
+              <enum>Qt::Vertical</enum>
+             </property>
+             <property name="sizeType">
+              <enum>QSizePolicy::Expanding</enum>
+             </property>
+             <property name="sizeHint" stdset="0">
+              <size>
+               <width>20</width>
+               <height>1073</height>
+              </size>
+             </property>
+            </spacer>
+           </item>
+          </layout>
+         </widget>
         </widget>
+       </item>
+       <item>
+        <widget class="CMapMain" name="mapWidget" native="true"/>
        </item>
        <item>
         <spacer name="horizontalSpacer_6">
@@ -1020,6 +1077,9 @@
    </layout>
   </widget>
   <widget class="QMenuBar" name="menuBar">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
    <property name="geometry">
     <rect>
      <x>0</x>
@@ -1033,6 +1093,9 @@
    </property>
   </widget>
   <widget class="QToolBar" name="mainToolBar">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
    <attribute name="toolBarArea">
     <enum>TopToolBarArea</enum>
    </attribute>
@@ -1040,9 +1103,21 @@
     <bool>false</bool>
    </attribute>
   </widget>
-  <widget class="QStatusBar" name="statusBar"/>
+  <widget class="QStatusBar" name="statusBar">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
+  </widget>
  </widget>
  <layoutdefault spacing="6" margin="11"/>
+ <customwidgets>
+  <customwidget>
+   <class>CMapMain</class>
+   <extends>QWidget</extends>
+   <header>mapmain.h</header>
+   <container>1</container>
+  </customwidget>
+ </customwidgets>
  <resources>
   <include location="imagedraw.qrc"/>
  </resources>

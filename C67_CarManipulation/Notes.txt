@@ -1,0 +1,54 @@
+Car Manipulation functions
+
+How to Check:
+============
+run the node with the DRC simulation
+------------------------------------------------------------------------------
+
+to test one of the 6 action servers, use 6 client nodes.
+
+for example:
+to test SteeringWheel_Server:
+
+run server:
+rosrun C67_CarManipulation SteeringWheel_server
+
+run client:
+rosrun C67_CarManipulation SteeringWheel_client 
+-------------------------------------------------------------------------------
+
+to test the rPoint,lPoint nodes, run it with *RPY parameters.
+
+for example:
+
+right hand:
+rosrun C67_CarManipulation rPoint .257 -.648 .420 .1 -.1 1.336
+
+left hand:
+rosrun C67_CarManipulation lPoint .261 .632 .465 .007 -.026 -1.498
+
+if solution exists the movement command will be transfered to the DRC module.
+if no solution was found, no command will be sent to the module.
+
+Prints
+======
+if solution exists the node prints:
+-the RPY command
+-time stamp 
+-summed error, target vs. solution
+-the last 5 arm's angles before command
+-the last 5 arm's new angles in the command.
+
+example print: 
+RPY(0.257, -0.648, 0.42, 0.1, -0.1, 1.336)
+[ INFO] [1361356348.839777701, 12350.913000000]: 
+error: 0.00545672
+q5-q9 old:0.427901, 1.304104, -1.360446, -1.186743, 0.403391
+q5-q9:0.418074, 1.226236, -1.389139, -1.167793, 0.413008
+
+if no solution was found, the node prints:
+No solution found.
+
+*RPY parameters are x,y,z,R,P,Y: x,y,z - position, R,P,Y - orientation.
+-------------------------------------------------------------------------------
+

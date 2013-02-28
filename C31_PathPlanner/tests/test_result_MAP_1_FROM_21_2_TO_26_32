@@ -51,7 +51,7 @@ map source
  1 -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  - 
  0 -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  - 
 
-Plan path : from 21,2 to 26,32 
+Plan path : from %,% to %,% 
 
 PRINT MAP - STR
 21	3
@@ -2711,11 +2711,5 @@ map with smoothed path
 PRINT PATH AFTER PFIELD - STR
 PRINT PATH AFTER PFIELD - END
 
-TIMES:
-   total : 10000 clocks
-   inflation : 0 clocks
-   quad tree : 0 clocks
-   A* : 0 clocks
-   smoothing : 0 clocks
 
 END

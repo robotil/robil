@@ -9,32 +9,32 @@ public class BatchLineProcessor implements LineProcessor {
 	public BatchLineProcessor() {
 	}
 
-	@Override
-	public void onStart() {
+	public void clear() {
+		this.lines.clear();
 	}
 
-	@Override
-	public void onNewLine(String line) {
-		lines.add(new String(line));
+	public ArrayList<String> getLines() {
+		return new ArrayList<String>(this.lines);
+	}
+
+	public ArrayList<String> getLines(String filter, String pref, String suf) {
+		ArrayList<String> r = new ArrayList<String>();
+		for (String w : this.lines)
+			if ((pref + w + suf).startsWith(filter))
+				r.add(pref + w + suf);
+		return r;
 	}
 
 	@Override
 	public void onEnd() {
 	}
 
-	public ArrayList<String> getLines() {
-		return new ArrayList<String>(lines);
-	}
-	
-	public ArrayList<String> getLines(String filter, String pref, String suf) {
-		ArrayList<String> r = new ArrayList<String>();
-		for (String w : lines)
-			if ((pref + w + suf).startsWith(filter))
-				r.add(pref + w + suf);
-		return r;
+	@Override
+	public void onNewLine(String line) {
+		this.lines.add(new String(line));
 	}
 
-	public void clear() {
-		lines.clear();
+	@Override
+	public void onStart() {
 	}
 }

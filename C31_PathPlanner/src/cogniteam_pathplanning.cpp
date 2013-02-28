@@ -354,19 +354,34 @@ AStar::Path AStar::reconstruct_path(map<AStar::QT,AStar::QT>& came_from, AStar::
 
 // -------------------------------- Inflator -------------------------------------
 
-
+namespace __Inaflator_utils{
+	using namespace std;
+	bool contains( const vector<int>& tx, const vector<int>& ty, int x, int y ){
+		for(size_t i=0;i<tx.size();i++){
+			if(tx[i]==x && ty[i]==y) return true;
+		}
+		return false;
+	}
+	void addTemplatePoint( vector<int>& tx, vector<int>& ty, int x, int y ){
+		if(!contains(tx, ty, x, y)){
+			tx.push_back(x); ty.push_back(y);
+		}
+	}
+}
 Inflator::Inflator(size_t radius, char sbv)
 : radius(radius), cellBlockValue(sbv)
 {
+	using namespace __Inaflator_utils;
+	
 	//TODO: MUST UNIQUE ON (tx,ty) => INCREACE SPEED OF INFLATION
 	//cout<<"Inflator("<<radius<<","<<(int)sbv<<")"<<endl;
 	int rr = radius*radius;
 	for(int x = -(int)radius; x<=(int)radius; x++){
 		int y = (int)round(sqrt( rr - x*x ));
-		tx.push_back(x); ty.push_back(y);
-		tx.push_back(x); ty.push_back(-y);
-		tx.push_back(y); ty.push_back(x);
-		tx.push_back(-y); ty.push_back(x);
+		addTemplatePoint(tx,ty,  x, y);
+		addTemplatePoint(tx,ty,  x,-y);
+		addTemplatePoint(tx,ty,  y, x);
+		addTemplatePoint(tx,ty, -y, x);
 	}
 	//for( size_t i=0;i<tx.size();i++){cout<<"x,y="<<tx[i]<<","<<ty[i]<<endl;}
 	//cout<<"Inflator: end"<<endl;
@@ -427,27 +442,27 @@ void MapEditor::coloring(const Map& source, size_t x, size_t y, const char c, co
 int cogniteam_pathplanning_test_map_inflation(int argc, char** argv) {
 	cout << "START" << endl; // prints PP
 
-	char cmap[]={
-			0,0,0,0,0, 0,0,0,0,0, 0,0,0,0,0, 0,0,0,0,0, 0,
-			0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-			0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-			0,0,0,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-			0,0,0,0,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-
-			0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-			0,0,0,0,0,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-			0,0,0,0,0,0,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,
-			0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-			0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-
-			0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,1,1,
-			0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,0,1,1,1,1,1,
-			0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,
-			0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,0,0,0,
-			0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-
-			0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
-	};
+// 	char cmap[]={
+// 			0,0,0,0,0, 0,0,0,0,0, 0,0,0,0,0, 0,0,0,0,0, 0,
+// 			0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+// 			0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+// 			0,0,0,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+// 			0,0,0,0,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+// 
+// 			0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+// 			0,0,0,0,0,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+// 			0,0,0,0,0,0,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,
+// 			0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+// 			0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+// 
+// 			0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,1,1,
+// 			0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,0,1,1,1,1,1,
+// 			0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,
+// 			0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,0,0,0,
+// 			0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+// 
+// 			0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+// 	};
 	char cmap1[]={
 			0,0,0,0,0, 0,0,0,0,0, 0,0,0,0,0, 0,0,0,0,0, 0,
 			0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
@@ -553,7 +568,7 @@ int cogniteam_pathplanning_test(int argc, char** argv) {
 	
 	#define POINTS START_P, END_P
 	
-	printf("Plan path : from %i,%i to %i,%i \n", POINTS);
+	printf("Plan path : from %l,%l to %l,%l \n", POINTS);
 	
 	if(map.inRange(END_P)==false){
 		map.approximate(START_P, END_P);
@@ -709,12 +724,12 @@ int cogniteam_pathplanning_test(int argc, char** argv) {
 #endif
 //#define STR_TIME(x) ((double)x)/(double)CLOCKS_PER_SEC/1000.0<<" msec"
 #define STR_TIME(x) x<<" clocks"
-	cout<<"TIMES:"<<endl;
-	cout<<"   total : "<<STR_TIME(start_time)<<endl;
-	cout<<"   inflation : "<<STR_TIME(time_inflator)<<endl;
-	cout<<"   quad tree : "<<STR_TIME(time_qt)<<endl;
-	cout<<"   A* : "<<STR_TIME(time_astar)<<endl;
-	cout<<"   smoothing : "<<STR_TIME(time_smoothing)<<endl;
+// 	cout<<"TIMES:"<<endl;
+// 	cout<<"   total : "<<STR_TIME(start_time)<<endl;
+// 	cout<<"   inflation : "<<STR_TIME(time_inflator)<<endl;
+// 	cout<<"   quad tree : "<<STR_TIME(time_qt)<<endl;
+// 	cout<<"   A* : "<<STR_TIME(time_astar)<<endl;
+// 	cout<<"   smoothing : "<<STR_TIME(time_smoothing)<<endl;
 	
 	cout << endl << "END" << endl; // prints PP
 	return 0;
