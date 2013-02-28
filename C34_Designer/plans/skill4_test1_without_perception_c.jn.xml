@@ -1,0 +1,25 @@
+<plan descriptions="./plans/TaskDescriptions.xml">
+   <par name="skill4"> 
+         <seq name="Mission"> 
+               <seq name="DriveMission"> 
+                     <seq name="InCar"> 
+                           <par name="Driving"> 
+                              <dec name="!L!"> 
+                                    <seq name="Driving"> 
+                                          <seq name="@4"> 
+                                                <tsk name="InitDrive" />
+                                                <sel name="@5"> 
+                                                      <tsk name="WayPointsDriving" />
+                                                      <tsk name="FinishDrive" />
+                                                </sel>
+                                                <tsk name="FinishDrive" />
+                                          </seq>
+                                          <tsk name="PathPlanningFocus(target=FORWARD)" />
+                                    </seq>
+                              </dec>
+                           </par>
+                     </seq>
+               </seq>
+         </seq>
+   </par>
+</plan>
