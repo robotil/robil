@@ -148,7 +148,7 @@ def LEG_IK():
     rospy.loginfo( "LEG_IK node is ready" )
     rospy.loginfo( "waiting 1 seconds for robot to initiate" )
     yaml_pth = os.path.join(roslib.packages.get_pkg_dir('DRCSim2_tools'),'calibrated_controller_drc2.yaml')
-    ns.JC.set_default_gains_from_yaml(yaml_pth)
+    #ns.JC.set_default_gains_from_yaml(yaml_pth)
     ns.JC.reset_gains()
     sub1=rospy.Subscriber("zmp_out", walking_trajectory, get_from_zmp) # traj, get_from_zmp)
 
