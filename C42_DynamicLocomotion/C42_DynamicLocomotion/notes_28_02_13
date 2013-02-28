@@ -3,6 +3,6 @@ Robot waits for start,then goes to path planner and asks for the path, takes poi
 
 you can check it out by:
 1. building the pkg
-2. launch launch  zmp_walk_stub.launch
-3. and then running test_zmp_client.py
-
+2. launch launch  zmp_walk_stub.launch 
+3. running a node C31_GetPath_clone.py 
+4. and then running test_zmp_client.py
