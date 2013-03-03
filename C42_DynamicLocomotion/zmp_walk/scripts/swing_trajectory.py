@@ -42,7 +42,7 @@ class Swing_Trajectory:
         k_stop_swing =   floor(2*k_total/3)
         
         res_swing_k = vector()
-          
+
         # step_phase = rs.Get_step_phase()
     
         # robot_foot_state = copy.copy(rs.swing_foot)            ########### need to change this !!!!!!!!!!!!!!!!!!!!!!
@@ -137,9 +137,9 @@ class Swing_Trajectory:
         number_of_samples = k_stop_swing - k_start_swing
         sample_time = dt
     
-        a = transition_Min_jerk(start_state.x,step_length, number_of_samples, sample_time)
+        a = transition_Min_jerk(start_state.x,step_length, number_of_samples) #, sample_time)
         res_swing_k.x = a[k-k_start_swing]
-        b = transition_Min_jerk(start_state.y,step_width, number_of_samples, sample_time)
+        b = transition_Min_jerk(start_state.y,step_width, number_of_samples) #,, sample_time)
         res_swing_k.y = b[k-k_start_swing]
         c = transition_Min_jerk_via_point(start_state.z,start_state.z+step_height, 0,number_of_samples, sample_time)
         res_swing_k.z = c[k-k_start_swing]
@@ -159,9 +159,9 @@ class Swing_Trajectory:
         number_of_samples = k_stop_swing - k_start_swing
         sample_time = dt
     
-        a = transition_Min_jerk(start_state.x,0, number_of_samples, sample_time)
+        a = transition_Min_jerk(start_state.x,0, number_of_samples) #,, sample_time)
         res_swing_k.x = a[k-k_start_swing]
-        b = transition_Min_jerk(start_state.y,step_width, number_of_samples, sample_time)
+        b = transition_Min_jerk(start_state.y,step_width, number_of_samples) #,, sample_time)
         res_swing_k.y = b[k-k_start_swing]
         c = transition_Min_jerk_via_point(start_state.z,start_state.z+step_height, 0,number_of_samples, sample_time)
         res_swing_k.z = c[k-k_start_swing]

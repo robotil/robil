@@ -46,7 +46,7 @@ def init_pose_with_trajectory_controllers():
                                  FollowJointTrajectoryAction)
     traj_client.wait_for_server()
     goal = FollowJointTrajectoryGoal()
-    traj_len = 1
+    traj_len = 1 #2 #1
     goal.trajectory.joint_names = ['l_leg_uhz', 'l_leg_mhx', 'l_leg_lhy', 
                                    'l_leg_kny', 'l_leg_uay', 'l_leg_lax', 
                                    'r_leg_uhz', 'r_leg_mhx', 'r_leg_lhy', 
@@ -59,6 +59,17 @@ def init_pose_with_trajectory_controllers():
     goal.trajectory.points = [ trajectory_msgs.msg.JointTrajectoryPoint() \
                              for x in xrange(0, traj_len) ]
     t = 0.0
+    traj_positions = [ [0] * 28 ]
+    # init_pose = rospy.get_param("/zmp_walking/zmp_init_pose")
+    # traj_positions.append( [ init_pose['l_leg_uhz'], init_pose['l_leg_mhx'], init_pose['l_leg_lhy'], 
+    #                                init_pose['l_leg_kny'], init_pose['l_leg_uay'], init_pose['l_leg_lax'], 
+    #                                init_pose['r_leg_uhz'], init_pose['r_leg_mhx'], init_pose['r_leg_lhy'], 
+    #                                init_pose['r_leg_kny'], init_pose['r_leg_uay'], init_pose['r_leg_lax'], 
+    #                                init_pose['l_arm_usy'], init_pose['l_arm_shx'], init_pose['l_arm_ely'], 
+    #                                init_pose['l_arm_elx'], init_pose['l_arm_uwy'], init_pose['l_arm_mwx'], 
+    #                                init_pose['r_arm_usy'], init_pose['r_arm_shx'], init_pose['r_arm_ely'], 
+    #                                init_pose['r_arm_elx'], init_pose['r_arm_uwy'], init_pose['r_arm_mwx'], 
+    #                                init_pose['neck_ay'], init_pose['back_lbz'], init_pose['back_mby'], init_pose['back_ubx'] ] )
     for i in xrange(0, traj_len):
         goal_pt = goal.trajectory.points[i]
         t += 5
@@ -66,16 +77,7 @@ def init_pose_with_trajectory_controllers():
         goal_pt.velocities = [0] * 28
         #y = "0 0 -0.2372 0.4491 -0.2119 0   0 0 -0.2372 0.4491 -0.2119 0   0 -1.3 0 0 0 0   0 1.3 0 0 0 0    0 0 0 0"
         #goal_pt.positions = [ float(x) for x in y.split() ]
-        init_pose = rospy.get_param("/zmp_walking/zmp_init_pose")
-        goal_pt.positions = [ init_pose['l_leg_uhz'], init_pose['l_leg_mhx'], init_pose['l_leg_lhy'], 
-                                   init_pose['l_leg_kny'], init_pose['l_leg_uay'], init_pose['l_leg_lax'], 
-                                   init_pose['r_leg_uhz'], init_pose['r_leg_mhx'], init_pose['r_leg_lhy'], 
-                                   init_pose['r_leg_kny'], init_pose['r_leg_uay'], init_pose['r_leg_lax'], 
-                                   init_pose['l_arm_usy'], init_pose['l_arm_shx'], init_pose['l_arm_ely'], 
-                                   init_pose['l_arm_elx'], init_pose['l_arm_uwy'], init_pose['l_arm_mwx'], 
-                                   init_pose['r_arm_usy'], init_pose['r_arm_shx'], init_pose['r_arm_ely'], 
-                                   init_pose['r_arm_elx'], init_pose['r_arm_uwy'], init_pose['r_arm_mwx'], 
-                                   init_pose['neck_ay'], init_pose['back_lbz'], init_pose['back_mby'], init_pose['back_ubx'] ]
+        goal_pt.positions = traj_positions[i]
     
     traj_client.send_goal(goal)
     traj_client.wait_for_result(rospy.Duration.from_sec(t + 3))
@@ -193,6 +195,24 @@ def jointStateCommand():
     back_mby = rospy.Publisher('/back_mby_position_controller/command', Float64)
     back_ubx = rospy.Publisher('/back_ubx_position_controller/command', Float64)
 
+    l_arm_elx = rospy.Publisher('/l_arm_elx_position_controller/command', Float64)
+    r_arm_elx = rospy.Publisher('/r_arm_elx_position_controller/command', Float64)
+
+    l_arm_ely = rospy.Publisher('/l_arm_ely_position_controller/command', Float64)
+    r_arm_ely = rospy.Publisher('/r_arm_ely_position_controller/command', Float64)
+
+    l_arm_mwx = rospy.Publisher('/l_arm_mwx_position_controller/command', Float64)
+    r_arm_mwx = rospy.Publisher('/r_arm_mwx_position_controller/command', Float64)
+    
+    l_arm_shx = rospy.Publisher('/l_arm_shx_position_controller/command', Float64)
+    r_arm_shx = rospy.Publisher('/r_arm_shx_position_controller/command', Float64)
+
+    l_arm_usy = rospy.Publisher('/l_arm_usy_position_controller/command', Float64)
+    r_arm_usy = rospy.Publisher('/r_arm_usy_position_controller/command', Float64)
+
+    l_arm_uwy = rospy.Publisher('/l_arm_uwy_position_controller/command', Float64)
+    r_arm_uwy = rospy.Publisher('/r_arm_uwy_position_controller/command', Float64)
+   
     rospy.loginfo(": Setup Joint Control Publishers")
     # Initialize the node
     #rospy.init_node('joint_control_init')
@@ -211,33 +231,51 @@ def jointStateCommand():
   #   bend_ankle_angle = 0#-0.2119
 
 
-    init_pose_l_leg_kny = init_pose['l_leg_kny'] #bend_knee_angle
-    init_pose_r_leg_kny = init_pose['r_leg_kny'] #init_pose_l_leg_kny
+    init_pose_l_leg_kny = 0.0 #bend_knee_angle
+    init_pose_r_leg_kny = 0.0 #init_pose_l_leg_kny
     
-    init_pose_l_leg_lax = init_pose['l_leg_lax'] #0.0
-    init_pose_r_leg_lax = init_pose['r_leg_lax'] #init_pose_l_leg_lax
+    init_pose_l_leg_lax = 0.0 #0.0
+    init_pose_r_leg_lax = 0.0 #init_pose_l_leg_lax
 
-    init_pose_l_leg_lhy = init_pose['l_leg_lhy'] #bend_hip_angle 
-    init_pose_r_leg_lhy = init_pose['r_leg_lhy'] #init_pose_l_leg_lhy
+    init_pose_l_leg_lhy = 0.0 #bend_hip_angle 
+    init_pose_r_leg_lhy = 0.0 #init_pose_l_leg_lhy
 
-    init_pose_l_leg_mhx = init_pose['l_leg_mhx'] #0.0
-    init_pose_r_leg_mhx = init_pose['r_leg_mhx'] #init_pose_l_leg_mhx
+    init_pose_l_leg_mhx = 0.0 #0.0
+    init_pose_r_leg_mhx = 0.0 #init_pose_l_leg_mhx
     
-    init_pose_l_leg_uay = init_pose['l_leg_uay'] #bend_ankle_angle
-    init_pose_r_leg_uay = init_pose['r_leg_uay'] #init_pose_l_leg_uay
+    init_pose_l_leg_uay = 0.0 #bend_ankle_angle
+    init_pose_r_leg_uay = 0.0 #init_pose_l_leg_uay
 
-    init_pose_l_leg_uhz = init_pose['l_leg_uhz'] #0.0
-    init_pose_r_leg_uhz = init_pose['r_leg_uhz'] #init_pose_l_leg_uhz
+    init_pose_l_leg_uhz = 0.0 #0.0
+    init_pose_r_leg_uhz = 0.0 #init_pose_l_leg_uhz
 
-    init_pose_neck_ay =  init_pose['neck_ay'] #0.0
-    init_pose_back_lbz = init_pose['back_lbz'] #0.0
-    init_pose_back_mby = init_pose['back_mby'] #0.0
-    init_pose_back_ubx = init_pose['back_ubx'] #0.0 
+    init_pose_neck_ay =  0.0 #0.0
+    init_pose_back_lbz = 0.0 #0.0
+    init_pose_back_mby = 0.0 #0.0
+    init_pose_back_ubx = 0.0 #0.0 
 
-    # insert step command on init:
-    enable_step_flag = 0
-    step_pose_l_leg_lhy = -0.1
-    step_pose_r_leg_lhy = step_pose_l_leg_lhy
+    init_pose_l_arm_elx = 0.0 
+    init_pose_r_arm_elx = 0.0
+    
+    init_pose_l_arm_ely = 0.0 
+    init_pose_r_arm_ely = 0.0 
+
+    init_pose_l_arm_mwx = 0.0 
+    init_pose_r_arm_mwx = 0.0 
+
+    init_pose_l_arm_shx = 0.0 
+    init_pose_r_arm_shx = 0.0 
+    
+    init_pose_l_arm_usy = 0.0 
+    init_pose_r_arm_usy = 0.0 
+
+    init_pose_l_arm_uwy = 0.0 
+    init_pose_r_arm_uwy = 0.0 
+
+    # # insert step command on init:
+    # enable_step_flag = 0
+    # step_pose_l_leg_lhy = -0.1
+    # step_pose_r_leg_lhy = step_pose_l_leg_lhy
 
     # intitialsation publish:
     l_leg_kny.publish(init_pose_l_leg_kny)
@@ -263,11 +301,56 @@ def jointStateCommand():
     back_mby.publish(init_pose_back_mby)
     back_ubx.publish(init_pose_back_ubx)
 
+    l_arm_elx.publish(init_pose_l_arm_elx)
+    r_arm_elx.publish(init_pose_r_arm_elx)
+
+    l_arm_ely.publish(init_pose_l_arm_ely)
+    r_arm_ely.publish(init_pose_r_arm_ely)
+    
+    l_arm_mwx.publish(init_pose_l_arm_mwx)
+    r_arm_mwx.publish(init_pose_r_arm_mwx)
+
+    l_arm_shx.publish(init_pose_l_arm_shx)
+    r_arm_shx.publish(init_pose_r_arm_shx)
+
+    l_arm_usy.publish(init_pose_l_arm_usy)
+    r_arm_usy.publish(init_pose_r_arm_usy)
+
+    l_arm_uwy.publish(init_pose_l_arm_uwy)
+    r_arm_uwy.publish(init_pose_r_arm_uwy)
+
+
+
+    # Final Position:
+    final_pose_l_leg_kny = init_pose['l_leg_kny'] #bend_knee_angle
+    final_pose_r_leg_kny = init_pose['r_leg_kny'] #init_pose_l_leg_kny
+    
+    final_pose_l_leg_lax = init_pose['l_leg_lax'] #0.0
+    final_pose_r_leg_lax = init_pose['r_leg_lax'] #init_pose_l_leg_lax
+
+    final_pose_l_leg_lhy = init_pose['l_leg_lhy'] #bend_hip_angle 
+    final_pose_r_leg_lhy = init_pose['r_leg_lhy'] #init_pose_l_leg_lhy
+
+    final_pose_l_leg_mhx = init_pose['l_leg_mhx'] #0.0
+    final_pose_r_leg_mhx = init_pose['r_leg_mhx'] #init_pose_l_leg_mhx
+    
+    final_pose_l_leg_uay = init_pose['l_leg_uay'] #bend_ankle_angle
+    final_pose_r_leg_uay = init_pose['r_leg_uay'] #init_pose_l_leg_uay
+
+    final_pose_l_leg_uhz = init_pose['l_leg_uhz'] #0.0
+    final_pose_r_leg_uhz = init_pose['r_leg_uhz'] #init_pose_l_leg_uhz
+
+    final_pose_neck_ay =  init_pose['neck_ay'] #0.0
+    final_pose_back_lbz = init_pose['back_lbz'] #0.0
+    final_pose_back_mby = init_pose['back_mby'] #0.0
+    final_pose_back_ubx = init_pose['back_ubx'] #0.0 
+
     #t_start = rospy.get_time() # current time to start Init
     #init_duration = 30 # units [sec]; time to enable Init
     #t = t_start
     times_to_pub = 1000 # number of times to publish
-    times_to_step = 500
+    final_pose_pub = 500.0 # number of times to publish until reaching final position
+    #times_to_step = 500
     pub_num = 1;
 
     #Sleep for 1 second to wait for the home position
@@ -276,42 +359,47 @@ def jointStateCommand():
     pose_input = init_pose_l_leg_lhy
     #This while loop will continue until ROS tells it to shutdown init time passes
     while ( not rospy.is_shutdown() ) and (pub_num < times_to_pub): #( t <= (t_start + 10) ):
+        if pub_num < final_pose_pub:
+            final_ratio = pub_num/final_pose_pub
+        else:
+            final_ratio = 1.0
         pub_num += 1
+        
         #t = rospy.get_time() #6 * rospy.get_time()
         #elbow_x = -1.57 + 0.4 * math.cos(t)
         #elbow_y = 0.4 + 0.4 * math.sin(t)
         #r_arm_elx.publish(elbow_x)
         #r_arm_ely.publish(elbow_y)
         
-        #rospy.loginfo(": Pub num %d" %(pub_num))
+        rospy.loginfo(": Pub num %d; final_ratio = %f" %(pub_num, final_ratio))
 
-        # Insertr Step command:
-        if (pub_num == times_to_step) and enable_step_flag:
-            pose_input = step_pose_l_leg_lhy
-            rospy.loginfo(": Starting step with size %f in publication number %d" %(pose_input,pub_num))
+        # # Insertr Step command:
+        # if (pub_num == times_to_step) and enable_step_flag:
+        #     pose_input = step_pose_l_leg_lhy
+        #     rospy.loginfo(": Starting step with size %f in publication number %d" %(pose_input,pub_num))
 
-        l_leg_kny.publish(init_pose_l_leg_kny)
-        r_leg_kny.publish(init_pose_r_leg_kny)
+        l_leg_kny.publish( final_pose_l_leg_kny*final_ratio + init_pose_l_leg_kny*(1-final_ratio) )
+        r_leg_kny.publish( final_pose_r_leg_kny*final_ratio + init_pose_r_leg_kny*(1-final_ratio) )
 
-        l_leg_lax.publish(init_pose_l_leg_lax)
-        r_leg_lax.publish(init_pose_r_leg_lax)
+        l_leg_lax.publish( final_pose_l_leg_lax*final_ratio + init_pose_l_leg_lax*(1-final_ratio) )
+        r_leg_lax.publish( final_pose_r_leg_lax*final_ratio + init_pose_r_leg_lax*(1-final_ratio) )
     
-        l_leg_lhy.publish(pose_input) # init_pose_l_leg_lhy
-        r_leg_lhy.publish(pose_input) # init_pose_r_leg_lhy
+        l_leg_lhy.publish( final_pose_l_leg_lhy*final_ratio + init_pose_l_leg_lhy*(1-final_ratio) ) # init_pose_l_leg_lhy #pose_input
+        r_leg_lhy.publish( final_pose_r_leg_lhy*final_ratio + init_pose_r_leg_lhy*(1-final_ratio) ) # init_pose_r_leg_lhy #pose_input
 
-        l_leg_mhx.publish(init_pose_l_leg_mhx)
-        r_leg_mhx.publish(init_pose_r_leg_mhx)
+        l_leg_mhx.publish( final_pose_l_leg_mhx*final_ratio + init_pose_l_leg_mhx*(1-final_ratio) )
+        r_leg_mhx.publish( final_pose_r_leg_mhx*final_ratio + init_pose_r_leg_mhx*(1-final_ratio) )
 
-        l_leg_uay.publish(init_pose_l_leg_uay)
-        r_leg_uay.publish(init_pose_r_leg_uay)
+        l_leg_uay.publish( final_pose_l_leg_uay*final_ratio + init_pose_l_leg_uay*(1-final_ratio) )
+        r_leg_uay.publish( final_pose_r_leg_uay*final_ratio + init_pose_r_leg_uay*(1-final_ratio) )
 
-        l_leg_uhz.publish(init_pose_l_leg_uhz)
-        r_leg_uhz.publish(init_pose_r_leg_uhz)
+        l_leg_uhz.publish( final_pose_l_leg_uhz*final_ratio + init_pose_l_leg_uhz*(1-final_ratio) )
+        r_leg_uhz.publish( final_pose_r_leg_uhz*final_ratio + init_pose_r_leg_uhz*(1-final_ratio) )
 
-        neck_ay.publish(init_pose_neck_ay)
-        back_lbz.publish(init_pose_back_lbz)
-        back_mby.publish(init_pose_back_mby)
-        back_ubx.publish(init_pose_back_ubx)
+        neck_ay.publish( final_pose_neck_ay*final_ratio + init_pose_neck_ay*(1-final_ratio) )
+        back_lbz.publish( final_pose_back_lbz*final_ratio + init_pose_back_lbz*(1-final_ratio) )
+        back_mby.publish( final_pose_back_mby*final_ratio + init_pose_back_mby*(1-final_ratio) )
+        back_ubx.publish( final_pose_back_ubx*final_ratio + init_pose_back_ubx*(1-final_ratio) )
 
 
         # Wait 0.01 second
@@ -323,10 +411,21 @@ if __name__ == '__main__':
     rospy.loginfo("started init_zmp node")
 
     # Set parameters for ZMP_walking init position
-    rospy.set_param("/zmp_walking/zmp_init_pose", {'l_leg_uhz':0, 'l_leg_mhx':0, 'l_leg_lhy':-0.2372, 
-                                   'l_leg_kny':0.4491, 'l_leg_uay':-0.2119, 'l_leg_lax':0, 
-                                   'r_leg_uhz':0, 'r_leg_mhx':0, 'r_leg_lhy':-0.2372, 
-                                   'r_leg_kny':0.4491, 'r_leg_uay':-0.2119, 'r_leg_lax':0, 
+    # # old params - bend_knees=0.04
+    # rospy.set_param("/zmp_walking/zmp_init_pose", {'l_leg_uhz':0, 'l_leg_mhx':0, 'l_leg_lhy':-0.2372, 
+    #                                'l_leg_kny':0.4491, 'l_leg_uay':-0.2119, 'l_leg_lax':0, 
+    #                                'r_leg_uhz':0, 'r_leg_mhx':0, 'r_leg_lhy':-0.2372, 
+    #                                'r_leg_kny':0.4491, 'r_leg_uay':-0.2119, 'r_leg_lax':0, 
+    #                                'l_arm_usy':0, 'l_arm_shx':-1.3, 'l_arm_ely':0, 
+    #                                'l_arm_elx':0, 'l_arm_uwy':0, 'l_arm_mwx':0, 
+    #                                'r_arm_usy':0, 'r_arm_shx':1.3, 'r_arm_ely':0, 
+    #                                'r_arm_elx':0, 'r_arm_uwy':0, 'r_arm_mwx':0, 
+    #                                'neck_ay':0, 'back_lbz':0, 'back_mby':0, 'back_ubx':0})
+    ## new params - bend_knees=0.18
+    rospy.set_param("/zmp_walking/zmp_init_pose", {'l_leg_uhz':0, 'l_leg_mhx':0, 'l_leg_lhy':-0.7297, 
+                                   'l_leg_kny':1.3677, 'l_leg_uay':-0.6380, 'l_leg_lax':0, 
+                                   'r_leg_uhz':0, 'r_leg_mhx':0, 'r_leg_lhy':-0.7297, 
+                                   'r_leg_kny':1.3677, 'r_leg_uay':-0.6380, 'r_leg_lax':0, 
                                    'l_arm_usy':0, 'l_arm_shx':-1.3, 'l_arm_ely':0, 
                                    'l_arm_elx':0, 'l_arm_uwy':0, 'l_arm_mwx':0, 
                                    'r_arm_usy':0, 'r_arm_shx':1.3, 'r_arm_ely':0, 
