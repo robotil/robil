@@ -20,6 +20,35 @@
 #define pz5r (pz - z5r)
 #define py5l (py - y5l)
 #define pz5l (pz - z5l)
+#define cc_q7r 2*(y67r*y89r + z7r*z8r)
+#define cs_q7r 2*(y89r*z7r - y67r*z8r)
+#define c1_q7r (y89r*y89r + z8r*z8r + y67r*y67r + z7r*z7r)
+#define cc_q7l 2*(y67l*y89l + z7l*z8l)
+#define cs_q7l 2*(y89l*z7l - y67l*z8l)
+#define c1_q7l (y89l*y89l + z8l*z8l + y67l*y67l + z7l*z7l)
+
+#define q5rMin -1.74533
+#define q5rMax 1.39626
+#define q6rMin 0
+#define q6rMax 3.14159
+#define q7rMin -2.35619
+#define q7rMax 0	
+#define q8rMin -1.571
+#define q8rMax 1.571
+#define q9rMin -1.571
+#define q9rMax 0.436
+
+#define q5lMin -1.39626
+#define q5lMax 1.74533
+#define q6lMin 0
+#define q6lMax 3.14159
+#define q7lMin 0
+#define q7lMax 2.35619	
+#define q8lMin -1.571
+#define q8lMax 1.571
+#define q9lMin -0.436
+#define q9lMax 1.571
+
 #define _q4	m_q[0]
 #define _q5	m_q[1]
 #define _q6	m_q[2]
@@ -44,6 +73,8 @@ public:
 	double error;
 	bool valid;
 	IkSolution(){}
+	IkSolution(double mq1,double mq2,double mq3,double mq4,double mq5,double mq6):
+		m_q{mq1,mq2,mq3,mq4,mq5,mq6}{}
 	RPY rFk5Dof();
 	RPY lFk5Dof();
 	void Print();
@@ -54,8 +85,9 @@ IkSolution lIk5Dof(RPY target);
 double RpyError(RPY R1, RPY R2);
 IkSolution rSearchSolution(double mq1, double mq2, double mq3, RPY target);
 IkSolution lSearchSolution(double mq1, double mq2, double mq3, RPY target);
-
-
-
+Matrix rDest(double mq1,double mq2,double mq3,double mq4, RPY Target);
+Matrix lDest(double mq1,double mq2,double mq3,double mq4, RPY Target);
+RPY rPose(double mq1,double mq2,double mq3, IkSolution ik);
+RPY lPose(double mq1,double mq2,double mq3, IkSolution ik);
 
 #endif
