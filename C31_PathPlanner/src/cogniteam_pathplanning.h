@@ -46,7 +46,7 @@ inline std::ostream& operator<<(std::ostream& o, const SmoothedPath& w){
 struct RobotDimentions{
 	size_t radius;
 	double gps_radius;
-	RobotDimentions(double gps_rad=0.12):radius(1),gps_radius(gps_rad){}
+	RobotDimentions(double gps_rad=0.40):radius(1),gps_radius(gps_rad){}
 };
 
 struct Constraints{
