@@ -78,13 +78,22 @@ public class DesignerPopupMenu extends JPopupMenu {
 		});
 	}
 	
+	
+	private ImageIcon loadIcon(String iname){
+		try{
+			return new ImageIcon(getClass().getClassLoader().getResource("icons/"+iname));
+		}catch(Exception e){
+			return null;
+		}
+	}
+	
 	private JMenu createCopyToPopup() {
 		JMenu menu = new JMenu("Copy to...");
 		
 		for (DesignerTab tab : _designer.tabs) {
 			JMenuItem item = new JMenuItem(tab.doc.getShortFilePath());
 			item.setEnabled(!tab.doc.getShortFilePath().equals(_document.getShortFilePath()));
-			item.setIcon(new ImageIcon(getClass().getClassLoader().getResource("icons/open.png")));
+			item.setIcon(loadIcon("open.png"));
 			
 			item.addActionListener(new CopyToAction(_designer, this._element, tab.doc));
 			
@@ -97,7 +106,7 @@ public class DesignerPopupMenu extends JPopupMenu {
 	private JCheckBoxMenuItem createCollapseCheckBox() {
 		final JCheckBoxMenuItem menu = new JCheckBoxMenuItem("Collapsed");
 		menu.setState(_element.getProperty().collapsed);
-		// menu.setIcon(new ImageIcon(getClass().getClassLoader().getResource("icons/remove.png")));
+		// menu.setIcon(loadIcon("remove.png"));
 		menu.addChangeListener(new ChangeListener() {
 			@Override
 			public void stateChanged(ChangeEvent arg) {
@@ -110,7 +119,7 @@ public class DesignerPopupMenu extends JPopupMenu {
 	
 	private JMenuItem createRemoveMenuItem() {
 		JMenuItem menu = new JMenuItem("Remove");
-		menu.setIcon(new ImageIcon(getClass().getClassLoader().getResource("icons/remove.png")));
+		menu.setIcon(loadIcon("remove.png"));
 		menu.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent arg0) {
@@ -122,7 +131,7 @@ public class DesignerPopupMenu extends JPopupMenu {
 	
 	private JMenuItem createRemoveSubtreeMenuItem() {
 		JMenuItem menu = new JMenuItem("Remove subtree");
-		menu.setIcon(new ImageIcon(getClass().getClassLoader().getResource("icons/remove.png")));
+		menu.setIcon(loadIcon("remove.png"));
 		menu.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent arg0) {
@@ -134,7 +143,7 @@ public class DesignerPopupMenu extends JPopupMenu {
 	
 	private JMenuItem createModifyMenuItem() {
 		JMenuItem menu = new JMenuItem("Modify");
-		menu.setIcon(new ImageIcon(getClass().getClassLoader().getResource("icons/modify.png")));
+		menu.setIcon(loadIcon("modify.png"));
 		menu.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent arg0) {
@@ -143,10 +152,11 @@ public class DesignerPopupMenu extends JPopupMenu {
 		});
 		return menu;
 	}
+
 	
 	private JMenuItem createRunHistoryMenuItem() {
 		JMenuItem menu = new JMenuItem("Run history");
-		menu.setIcon(new ImageIcon(getClass().getClassLoader().getResource("icons/history.png")));
+		menu.setIcon(loadIcon("history.png"));
 		menu.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent arg) {
@@ -158,7 +168,7 @@ public class DesignerPopupMenu extends JPopupMenu {
 	
 	private JMenuItem createPlanExecutionHistoryMenuItem() {
 		JMenuItem menu = new JMenuItem("Execution history");
-		menu.setIcon(new ImageIcon(getClass().getClassLoader().getResource("icons/history.png")));
+		menu.setIcon(loadIcon("history.png"));
 		menu.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent arg) {
@@ -170,7 +180,7 @@ public class DesignerPopupMenu extends JPopupMenu {
 	
 	private JMenuItem createCopyMenuItem() {
 		JMenuItem menu = new JMenuItem("Copy");
-		menu.setIcon(new ImageIcon(getClass().getClassLoader().getResource("icons/copy.png")));
+		menu.setIcon(loadIcon("copy.png"));
 		menu.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent arg0) {
@@ -182,7 +192,7 @@ public class DesignerPopupMenu extends JPopupMenu {
 	
 	private JMenuItem createTaskCreateMenuItem() {
 		JMenuItem menu = new JMenuItem("Create task...");
-		menu.setIcon(new ImageIcon(getClass().getClassLoader().getResource("icons/add_icon.png")));
+		menu.setIcon(loadIcon("add_icon.png"));
 		menu.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent arg) {
