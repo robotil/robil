@@ -7,7 +7,7 @@
 #include "Gps.h"
 
 
-static Map extractMap(C22_GroundRecognitionAndMapping::C22::Response &res){
+static Map extractMap(C22_GroundRecognitionAndMapping::C22::Response &res, const MapProperties& prop){
 	Map::MapCreator m;
 	size_t h = res.drivingPath.row.size();
 	bool size_ok = false;
@@ -35,7 +35,7 @@ static Map extractMap(C22_GroundRecognitionAndMapping::C22::Response &res){
 };
 
 
-static Gps2Grid extractLocation(C22_GroundRecognitionAndMapping::C22::Response &res){
+static Gps2Grid extractLocation(C22_GroundRecognitionAndMapping::C22::Response &res, const MapProperties& prop){
 	GPSPoint gps(0,0);
 	Waypoint wp(0,0);
 
@@ -46,8 +46,8 @@ static Gps2Grid extractLocation(C22_GroundRecognitionAndMapping::C22::Response &
 				 res.drivingPath.robotPos.x, res.drivingPath.robotPos.y, res.drivingPath.xOffset, res.drivingPath.yOffset);
 		//size_t w = res.drivingPath.row.at(0).column.size();
 		
-		wp.x=( res.drivingPath.robotPos.x - res.drivingPath.xOffset )*4;
-		wp.y=( res.drivingPath.robotPos.y - res.drivingPath.yOffset )*4;
+		wp.x=( res.drivingPath.robotPos.x - res.drivingPath.xOffset )/ prop.resolution;
+		wp.y=( res.drivingPath.robotPos.y - res.drivingPath.yOffset )/ prop.resolution;
 		
 		gps.x = res.drivingPath.robotPos.x;
 		gps.y = res.drivingPath.robotPos.y;
@@ -60,6 +60,7 @@ static Gps2Grid extractLocation(C22_GroundRecognitionAndMapping::C22::Response &
 static MapProperties extractMapProperties(C22_GroundRecognitionAndMapping::C22::Response &res){
 	GPSPoint gps(0,0);
 	Waypoint wp(0,0);
+	double cell_resolution_in_meters = 0;
 
 	size_t h = res.drivingPath.row.size();
 	if(h){
@@ -73,9 +74,11 @@ static MapProperties extractMapProperties(C22_GroundRecognitionAndMapping::C22::
 		gps.x = res.drivingPath.xOffset;
 		gps.y = res.drivingPath.yOffset;
 		
+		cell_resolution_in_meters = 0.25;
+		
 		ROS_INFO("... new data converted : new robot pos in gps = %f,%f",  gps.x, gps.y);
 	}
-	return MapProperties(0.12, gps, wp);
+	return MapProperties(cell_resolution_in_meters, gps, wp);
 };
 
 
