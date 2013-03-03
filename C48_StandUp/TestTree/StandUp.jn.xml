@@ -1,5 +1,5 @@
 <plan descriptions="./plans/TaskDescriptions.xml">
    <seq name="mission"> 
-         <tsk name="StandUp(param=Mount)" />
+         <tsk name="StandUp" />
    </seq>
 </plan>
