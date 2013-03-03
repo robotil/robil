@@ -1,0 +1,5 @@
+<plan descriptions="./plans/TaskDescriptions.xml">
+   <seq name="mission"> 
+         <tsk name="MountVehicle" />
+   </seq>
+</plan>
