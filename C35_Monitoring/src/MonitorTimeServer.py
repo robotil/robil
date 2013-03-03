@@ -53,17 +53,16 @@ class MonitorTimeServer(object):
 			#updating debug information in BTree
 			finished_node = MonitorTimeServer._offline_computed_BT.getWrappedNode(node_id)
 			finished_node.setDebug(str(node_success) + " " + str(current_time - start_time))
-#			print "Added debug info: %s" % finished_node.getDebug()
-			#TODO - Run Monte-Carlo sampling in debug mode to update tree
-			#TODO - currently, adding the debug information and re-running MC doesn't change the average succ time although it should.
-			#TODO - consult Adi about this, probably has to do with her methods.
-#			node.debugMode = True
-#			root = MonitorTimeServer._offline_computed_BT.getRoot()
-#   			for i in range(100):
-#        			root.runPlan(0)
-#			if self._monitored_node_id:
-#				self._threshold_time = MonitorTimeServer._offline_computed_BT.getWrappedNode(self._monitored_node_id).getAverageSuccTime(0) * 1.3
-#				print "Updated threshold time of monitored node to:%f" % self._threshold_time
+			#TODO - remove all computed information from all parents of finished_node (preparing the tree for debug runs
+			print "Added debug info: %s" % finished_node.getDebug()
+			node.debugMode = True
+			root = MonitorTimeServer._offline_computed_BT.getRoot()
+   			for i in range(100):
+        			root.runPlan(0)
+        		root.treeToXml(sys.argv[0][0:-11]+"small_monitoring_example_output_after_update.xml")
+			if self._monitored_node_id:
+				self._threshold_time = MonitorTimeServer._offline_computed_BT.getWrappedNode(self._monitored_node_id).getAverageSuccTime(0) * 1.3
+				print "Updated threshold time of monitored node to:%f" % self._threshold_time
 
 #			print "Node with id=%s has ended after %f seconds" % (node_id, MonitorTimeServer._node_execution_times_by_id[node_id])
 			if self._monitored_node_id == node_id:    
@@ -72,6 +71,7 @@ class MonitorTimeServer(object):
 		else:			#This means a task has started
 #			print "Node with id=%s has begun." % node_id
 			MonitorTimeServer._node_start_times_by_id[node_id] = time.time()
+			print "started some node"
 			if self._monitored_node_id == node_id: 
 				rospy.loginfo("The node we are monitoring has started! Time:%f, Node_id:%s",MonitorTimeServer._node_start_times_by_id.get(node_id),self._monitored_node_id)
 #		print MonitorTimeServer._node_start_times_by_id
@@ -95,7 +95,7 @@ class MonitorTimeServer(object):
 		node.debugMode = False		#TODO - refactor this into the global variables of MonitorTimeServer
     		for i in range(1000):
         		root.runPlan(0)
-  
+		root.treeToXml(sys.argv[0][0:-11]+"small_monitoring_example_output.xml")
           	# I added this function- makes a map key- id/name, value- pointer to the wrapped node.
           	# example- revice name as unique id- we can also write  MonitorTimeServer._offline_computed_BT.createWrapperTreeMap("id")-Adi.
         	MonitorTimeServer._offline_computed_BT.createWrapperTreeMap("id") 
