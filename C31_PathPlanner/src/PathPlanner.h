@@ -162,7 +162,7 @@ public:
 		targetPosition(0,0), 
 		targetGoal(""),
 		selfLocation(0,0), 
-		mapProperties(0.12, GPSPoint(0,0), Waypoint(0,0)),
+		mapProperties(0.25, GPSPoint(0,0), Waypoint(0,0)),
 		//input data 
 		data(),
 		//output data
