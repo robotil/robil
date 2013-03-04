@@ -27,7 +27,7 @@ set(LIBRARY_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/lib)
 rosbuild_genmsg()
 #uncomment if you have defined services
 rosbuild_gensrv()
-set(qt_hdrs src/graphicsview.h src/imagedraw.h src/C11_Node.h src/mapmain.h src/mapwidget.h src/pixitem.h src/routeitem.h src/lineItemlist.h src/lineitem.h src/pointitem.h)
+set(qt_hdrs src/graphicsview.h src/imagedraw.h src/C11_Node.h src/mapmain.h src/mapwidget.h src/pixitem.h src/routeitem.h src/lineItemlist.h src/lineitem.h src/pointitem.h src/structs.h)
 set(qt_srcs src/graphicsview.cpp src/imagedraw.cpp src/main.cpp src/C11_Node.cpp src/mapmain.cpp src/mapwidget.cpp src/pixitem.cpp src/routeitem.cpp src/lineitemlist.cpp src/lineitem.cpp src/pointitem.cpp)
 
 qt4_automoc(${qt_srcs})
