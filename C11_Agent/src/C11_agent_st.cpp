@@ -2,14 +2,14 @@
 #include "ros/package.h"
 #include "std_msgs/String.h"
 #include "C11_Agent/C11.h"
-#include "C11_Agent/obstacle_map.h"
-#include "C11_Agent/object_map.h"
-#include "C11_Agent/override_object_properties.h"
-#include "C11_Agent/override_obstacle_properties.h"
+//#include "C11_Agent/obstacle_map.h"
+//#include "C11_Agent/object_map.h"
+//#include "C11_Agent/override_object_properties.h"
+//#include "C11_Agent/override_obstacle_properties.h"
 #include "C10_Common/mission_selection.h"
-#include "C11_Agent/ask_for_image.h"
-#include "C11_Agent/set_forbidden_are.h"
-#include "C11_Agent/override_local_path.h"
+//#include "C11_Agent/ask_for_image.h"
+//#include "C11_Agent/set_forbidden_are.h"
+//#include "C11_Agent/override_local_path.h"
 #include "C11_PushServer.hpp"
 //#include "TaskProxyConnectionByActionLib.h"
 #include "C34_Executer/run.h"
@@ -24,14 +24,14 @@ std::string tree_id_str;
 ros::ServiceClient c34StopClient;
 
 
-bool PathPlan(C11_Agent::C11::Request& req,
-	                C11_Agent::C11::Response& res)
-{
-	                ROS_INFO("START CALCULATION OF LOCAL PATH PLANNER");
-
-return true;
-
-}
+//bool PathPlan(C11_Agent::C11::Request& req,
+//	                C11_Agent::C11::Response& res)
+//{
+//	                ROS_INFO("START CALCULATION OF LOCAL PATH PLANNER");
+//
+//return true;
+//
+//}
 
 void StopExecuteMessageCallback(const std_msgs::StringConstPtr& msg)
 {
@@ -107,14 +107,14 @@ bool MissionSelection(C10_Common::mission_selection::Request& req,
 }
 
 
-bool AskForImage(C11_Agent::ask_for_image::Request& req,
-		C11_Agent::ask_for_image::Response& res)
-{
-
-		ROS_INFO("START CALCULATION OF AskForImage");
-		return true;
-
-}
+//bool AskForImage(C11_Agent::ask_for_image::Request& req,
+//		C11_Agent::ask_for_image::Response& res)
+//{
+//
+//		ROS_INFO("START CALCULATION OF AskForImage");
+//		return true;
+//
+//}
 
 
 
@@ -130,11 +130,11 @@ int main(int argc, char **argv)
   pn = &n;
 
    
-   ros::Publisher stt_pub = n.advertise<C11_Agent::C34C11_STT>("c11_stt", 1000);
+//   ros::Publisher stt_pub = n.advertise<C11_Agent::C34C11_STT>("c11_stt", 1000);
 
-   ros::ServiceServer service = n.advertiseService("PathPlan", PathPlan);
+//   ros::ServiceServer service = n.advertiseService("PathPlan", PathPlan);
    ros::ServiceServer service_MissionSelection = n.advertiseService("MissionSelection", MissionSelection);
-   ros::ServiceServer service_AskForImage = n.advertiseService("AskForImage", AskForImage);
+//   ros::ServiceServer service_AskForImage = n.advertiseService("AskForImage", AskForImage);
 
    ros::Rate loop_rate(10);
 
@@ -147,12 +147,12 @@ int main(int argc, char **argv)
   {
 
 
-  C11_Agent::C34C11_STT  stt1;
+  //C11_Agent::C34C11_STT  stt1;
 
 // ROS_INFO("The status is  = %d",  1);
  
 
-    stt_pub.publish(stt1);
+   // stt_pub.publish(stt1);
 
     ros::spinOnce();
 

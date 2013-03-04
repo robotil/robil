@@ -184,7 +184,7 @@ CLineItemList* CRouteItem::GoToLastLine()
 }
 void CRouteItem::updatePoints()
 {
-	int i=0;
+//	int i=0;
 	CLineItemList *curLineItem = pFirstLineItemList;
 
 	//while(curLineItem->getNextLineItem()!=NULL)

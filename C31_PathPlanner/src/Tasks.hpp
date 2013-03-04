@@ -205,8 +205,8 @@ public:
 			SYNCH(SET_CURRENT_TIME(statistic.time_map_lastReceive));
 			
 			MapProperties mprop = extractMapProperties(c22.response);
-			Map map = extractMap(c22.response);
-			Gps2Grid gps_grid = extractLocation(c22.response);
+			Map map = extractMap(c22.response, mprop);
+			Gps2Grid gps_grid = extractLocation(c22.response, mprop);
 			
 			if(map.w()>0 && map.h()>0){
 			

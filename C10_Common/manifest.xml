@@ -14,6 +14,7 @@
   <depend package="roslib"/>
   <depend package="C21_VisionAndLidar"/>
   <depend package="C22_GroundRecognitionAndMapping"/>
+  <depend package="C31_PathPlanner"/>
 
 </package>
 
