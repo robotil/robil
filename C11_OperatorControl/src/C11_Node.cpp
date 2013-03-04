@@ -1,6 +1,7 @@
 #include <QImage>
 #include <cv_bridge/cv_bridge.h>
 #include <opencv/highgui.h>
+#include "structs.h"
 #include "C11_Node.h"
 
 //void C11_Node::viewImage(const sensor_msgs::ImageConstPtr& msg);
@@ -57,6 +58,7 @@ bool C11_Node::init() {
 
 		c11_push_img =	nh_->advertiseService("C11/push_img", &C11_Node::push_img_proccess, this);
 		c11_push_occupancy_grid = nh_->advertiseService("C11/push_occupancy_grid", &C11_Node::push_occupancy_grid_proccess, this);
+		c11_push_path = nh_->advertiseService("C11/push_path", &C11_Node::push_path_proccess, this);
 		LoadMissionClient = nh_->serviceClient<C10_Common::mission_selection>("MissionSelection");
 
 
@@ -144,15 +146,40 @@ bool C11_Node::push_img_proccess(C10_Common::push_img::Request  &req,
 bool C11_Node::push_occupancy_grid_proccess(C10_Common::push_occupancy_grid::Request  &req,
                   		  C10_Common::push_occupancy_grid::Response &res )
 {
-	int grid[48][48];
-	for(int i=0; i<48; i++)
+	ROS_INFO("C11_OperatorControl: occupancy grid received!\n");
+	std::cout<<"Robot pos: "<<req.OGD.robotPos<<"\n";
+	std::cout<<"xOffset: "<<req.OGD.xOffset<<"\n";
+	std::cout<<"yOffset: "<<req.OGD.yOffset<<"\n";
+//	std::cout<<"Grid: "<<req.OGD<<"\n";
+	int grid[100][100];
+	for(int i=0; i<100; i++)
 	{
-		for(int j=0; j<48;j++)
+		for(int j=0; j<100;j++)
 		{
-			grid[i][j] = req.OGD.row[47-i].column[j].status;
+			grid[i][j] = req.OGD.row[i].column[99-j].status;
 		}
 	}
-	pIC11_Node_Subscriber->OnOccupancyGridReceived(grid);
+	StructPoint robotPos;
+	robotPos.x = req.OGD.robotPos.x;
+	robotPos.y = req.OGD.robotPos.y;
+	pIC11_Node_Subscriber->OnOccupancyGridReceived(grid,robotPos,req.OGD.xOffset,req.OGD.yOffset);
+	res.ACK.mes = 1;
+	return true;
+}
+
+bool C11_Node::push_path_proccess(C10_Common::push_path::Request  &req, C10_Common::push_path::Response &res )
+{
+	ROS_INFO("C11_OperatorControl: path received!\n");
+	std::cout<<req.PTH<<"\n";
+	std::vector<StructPoint> points;
+	for(int i=0; i<req.PTH.points.size(); i++)
+	{
+		StructPoint point;
+		point.x = req.PTH.points[i].x;
+		point.y = req.PTH.points[i].y;
+		points.push_back(point);
+	}
+	pIC11_Node_Subscriber->OnPathReceived(points);
 	res.ACK.mes = 1;
 	return true;
 }
