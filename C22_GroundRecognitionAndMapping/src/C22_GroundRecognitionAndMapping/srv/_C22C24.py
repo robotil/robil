@@ -4,36 +4,15 @@ python3 = True if sys.hexversion > 0x03000000 else False
 import genpy
 import struct
 
-import C22_GroundRecognitionAndMapping.msg
 
 class C22C24Request(genpy.Message):
-  _md5sum = "70e3cb910a6be1e3b12f117d0d8e5984"
+  _md5sum = "d41d8cd98f00b204e9800998ecf8427e"
   _type = "C22_GroundRecognitionAndMapping/C22C24Request"
   _has_header = False #flag to mark the presence of a Header object
-  _full_text = """C22_GroundRecognitionAndMapping/C0C22_AZI azimuth_msg
-C22_GroundRecognitionAndMapping/C0C22_CAM camera_sample_rate_msg
-C22_GroundRecognitionAndMapping/C0C22_LAZ laser_sample_rate_msg
-C22_GroundRecognitionAndMapping/C0C22_SAF safety_requirements
-
-================================================================================
-MSG: C22_GroundRecognitionAndMapping/C0C22_AZI
-float32 azimuth
-
-================================================================================
-MSG: C22_GroundRecognitionAndMapping/C0C22_CAM
-int32 frameRatePerSec
-
-================================================================================
-MSG: C22_GroundRecognitionAndMapping/C0C22_LAZ
-int32 sampleRatePerSec
-
-================================================================================
-MSG: C22_GroundRecognitionAndMapping/C0C22_SAF
-int32 safety_req
-
+  _full_text = """
 """
-  __slots__ = ['azimuth_msg','camera_sample_rate_msg','laser_sample_rate_msg','safety_requirements']
-  _slot_types = ['C22_GroundRecognitionAndMapping/C0C22_AZI','C22_GroundRecognitionAndMapping/C0C22_CAM','C22_GroundRecognitionAndMapping/C0C22_LAZ','C22_GroundRecognitionAndMapping/C0C22_SAF']
+  __slots__ = []
+  _slot_types = []
 
   def __init__(self, *args, **kwds):
     """
@@ -43,7 +22,7 @@ int32 safety_req
     changes.  You cannot mix in-order arguments and keyword arguments.
 
     The available fields are:
-       azimuth_msg,camera_sample_rate_msg,laser_sample_rate_msg,safety_requirements
+       
 
     :param args: complete set of field values, in .msg order
     :param kwds: use keyword arguments corresponding to message field names
@@ -51,20 +30,6 @@ int32 safety_req
     """
     if args or kwds:
       super(C22C24Request, self).__init__(*args, **kwds)
-      #message fields cannot be None, assign default values for those that are
-      if self.azimuth_msg is None:
-        self.azimuth_msg = C22_GroundRecognitionAndMapping.msg.C0C22_AZI()
-      if self.camera_sample_rate_msg is None:
-        self.camera_sample_rate_msg = C22_GroundRecognitionAndMapping.msg.C0C22_CAM()
-      if self.laser_sample_rate_msg is None:
-        self.laser_sample_rate_msg = C22_GroundRecognitionAndMapping.msg.C0C22_LAZ()
-      if self.safety_requirements is None:
-        self.safety_requirements = C22_GroundRecognitionAndMapping.msg.C0C22_SAF()
-    else:
-      self.azimuth_msg = C22_GroundRecognitionAndMapping.msg.C0C22_AZI()
-      self.camera_sample_rate_msg = C22_GroundRecognitionAndMapping.msg.C0C22_CAM()
-      self.laser_sample_rate_msg = C22_GroundRecognitionAndMapping.msg.C0C22_LAZ()
-      self.safety_requirements = C22_GroundRecognitionAndMapping.msg.C0C22_SAF()
 
   def _get_types(self):
     """
@@ -78,8 +43,7 @@ int32 safety_req
     :param buff: buffer, ``StringIO``
     """
     try:
-      _x = self
-      buff.write(_struct_f3i.pack(_x.azimuth_msg.azimuth, _x.camera_sample_rate_msg.frameRatePerSec, _x.laser_sample_rate_msg.sampleRatePerSec, _x.safety_requirements.safety_req))
+      pass
     except struct.error as se: self._check_types(se)
     except TypeError as te: self._check_types(te)
 
@@ -89,19 +53,7 @@ int32 safety_req
     :param str: byte array of serialized message, ``str``
     """
     try:
-      if self.azimuth_msg is None:
-        self.azimuth_msg = C22_GroundRecognitionAndMapping.msg.C0C22_AZI()
-      if self.camera_sample_rate_msg is None:
-        self.camera_sample_rate_msg = C22_GroundRecognitionAndMapping.msg.C0C22_CAM()
-      if self.laser_sample_rate_msg is None:
-        self.laser_sample_rate_msg = C22_GroundRecognitionAndMapping.msg.C0C22_LAZ()
-      if self.safety_requirements is None:
-        self.safety_requirements = C22_GroundRecognitionAndMapping.msg.C0C22_SAF()
       end = 0
-      _x = self
-      start = end
-      end += 16
-      (_x.azimuth_msg.azimuth, _x.camera_sample_rate_msg.frameRatePerSec, _x.laser_sample_rate_msg.sampleRatePerSec, _x.safety_requirements.safety_req,) = _struct_f3i.unpack(str[start:end])
       return self
     except struct.error as e:
       raise genpy.DeserializationError(e) #most likely buffer underfill
@@ -114,8 +66,7 @@ int32 safety_req
     :param numpy: numpy python module
     """
     try:
-      _x = self
-      buff.write(_struct_f3i.pack(_x.azimuth_msg.azimuth, _x.camera_sample_rate_msg.frameRatePerSec, _x.laser_sample_rate_msg.sampleRatePerSec, _x.safety_requirements.safety_req))
+      pass
     except struct.error as se: self._check_types(se)
     except TypeError as te: self._check_types(te)
 
@@ -126,25 +77,12 @@ int32 safety_req
     :param numpy: numpy python module
     """
     try:
-      if self.azimuth_msg is None:
-        self.azimuth_msg = C22_GroundRecognitionAndMapping.msg.C0C22_AZI()
-      if self.camera_sample_rate_msg is None:
-        self.camera_sample_rate_msg = C22_GroundRecognitionAndMapping.msg.C0C22_CAM()
-      if self.laser_sample_rate_msg is None:
-        self.laser_sample_rate_msg = C22_GroundRecognitionAndMapping.msg.C0C22_LAZ()
-      if self.safety_requirements is None:
-        self.safety_requirements = C22_GroundRecognitionAndMapping.msg.C0C22_SAF()
       end = 0
-      _x = self
-      start = end
-      end += 16
-      (_x.azimuth_msg.azimuth, _x.camera_sample_rate_msg.frameRatePerSec, _x.laser_sample_rate_msg.sampleRatePerSec, _x.safety_requirements.safety_req,) = _struct_f3i.unpack(str[start:end])
       return self
     except struct.error as e:
       raise genpy.DeserializationError(e) #most likely buffer underfill
 
 _struct_I = genpy.struct_I
-_struct_f3i = struct.Struct("<f3i")
 """autogenerated by genpy from C22_GroundRecognitionAndMapping/C22C24Response.msg. Do not edit."""
 import sys
 python3 = True if sys.hexversion > 0x03000000 else False
@@ -308,6 +246,6 @@ _struct_I = genpy.struct_I
 _struct_if = struct.Struct("<if")
 class C22C24(object):
   _type          = 'C22_GroundRecognitionAndMapping/C22C24'
-  _md5sum = '6cc5f391b717dc1a37aaadba95085358'
+  _md5sum = 'e0bf5feccc6e231a6c595ca0e934f5e5'
   _request_class  = C22C24Request
   _response_class = C22C24Response

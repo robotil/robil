@@ -4,13 +4,17 @@ python3 = True if sys.hexversion > 0x03000000 else False
 import genpy
 import struct
 
+import geometry_msgs.msg
 import C22_GroundRecognitionAndMapping.msg
 
 class C22C0_PATH(genpy.Message):
-  _md5sum = "46374fa12d677eab09b2c41c8d3efc1b"
+  _md5sum = "4930f713ba6faaaa8fd5950ec83939d3"
   _type = "C22_GroundRecognitionAndMapping/C22C0_PATH"
   _has_header = False #flag to mark the presence of a Header object
   _full_text = """C22_ROW_TYPE[] row
+int32 xOffset
+int32 yOffset
+geometry_msgs/Point robotPos
 ================================================================================
 MSG: C22_GroundRecognitionAndMapping/C22_ROW_TYPE
 C22_MAP_SQUARE[] column
@@ -27,9 +31,16 @@ float32 x
 float32 y
 float32 z
 float32 d
+================================================================================
+MSG: geometry_msgs/Point
+# This contains the position of a point in free space
+float64 x
+float64 y
+float64 z
+
 """
-  __slots__ = ['row']
-  _slot_types = ['C22_GroundRecognitionAndMapping/C22_ROW_TYPE[]']
+  __slots__ = ['row','xOffset','yOffset','robotPos']
+  _slot_types = ['C22_GroundRecognitionAndMapping/C22_ROW_TYPE[]','int32','int32','geometry_msgs/Point']
 
   def __init__(self, *args, **kwds):
     """
@@ -39,7 +50,7 @@ float32 d
     changes.  You cannot mix in-order arguments and keyword arguments.
 
     The available fields are:
-       row
+       row,xOffset,yOffset,robotPos
 
     :param args: complete set of field values, in .msg order
     :param kwds: use keyword arguments corresponding to message field names
@@ -50,8 +61,17 @@ float32 d
       #message fields cannot be None, assign default values for those that are
       if self.row is None:
         self.row = []
+      if self.xOffset is None:
+        self.xOffset = 0
+      if self.yOffset is None:
+        self.yOffset = 0
+      if self.robotPos is None:
+        self.robotPos = geometry_msgs.msg.Point()
     else:
       self.row = []
+      self.xOffset = 0
+      self.yOffset = 0
+      self.robotPos = geometry_msgs.msg.Point()
 
   def _get_types(self):
     """
@@ -77,6 +97,8 @@ float32 d
           for val3 in val2.planes:
             _x = val3
             buff.write(_struct_4f.pack(_x.x, _x.y, _x.z, _x.d))
+      _x = self
+      buff.write(_struct_2i3d.pack(_x.xOffset, _x.yOffset, _x.robotPos.x, _x.robotPos.y, _x.robotPos.z))
     except struct.error as se: self._check_types(se)
     except TypeError as te: self._check_types(te)
 
@@ -88,6 +110,8 @@ float32 d
     try:
       if self.row is None:
         self.row = None
+      if self.robotPos is None:
+        self.robotPos = geometry_msgs.msg.Point()
       end = 0
       start = end
       end += 4
@@ -117,6 +141,10 @@ float32 d
             val2.planes.append(val3)
           val1.column.append(val2)
         self.row.append(val1)
+      _x = self
+      start = end
+      end += 32
+      (_x.xOffset, _x.yOffset, _x.robotPos.x, _x.robotPos.y, _x.robotPos.z,) = _struct_2i3d.unpack(str[start:end])
       return self
     except struct.error as e:
       raise genpy.DeserializationError(e) #most likely buffer underfill
@@ -141,6 +169,8 @@ float32 d
           for val3 in val2.planes:
             _x = val3
             buff.write(_struct_4f.pack(_x.x, _x.y, _x.z, _x.d))
+      _x = self
+      buff.write(_struct_2i3d.pack(_x.xOffset, _x.yOffset, _x.robotPos.x, _x.robotPos.y, _x.robotPos.z))
     except struct.error as se: self._check_types(se)
     except TypeError as te: self._check_types(te)
 
@@ -153,6 +183,8 @@ float32 d
     try:
       if self.row is None:
         self.row = None
+      if self.robotPos is None:
+        self.robotPos = geometry_msgs.msg.Point()
       end = 0
       start = end
       end += 4
@@ -182,6 +214,10 @@ float32 d
             val2.planes.append(val3)
           val1.column.append(val2)
         self.row.append(val1)
+      _x = self
+      start = end
+      end += 32
+      (_x.xOffset, _x.yOffset, _x.robotPos.x, _x.robotPos.y, _x.robotPos.z,) = _struct_2i3d.unpack(str[start:end])
       return self
     except struct.error as e:
       raise genpy.DeserializationError(e) #most likely buffer underfill
@@ -189,3 +225,4 @@ float32 d
 _struct_I = genpy.struct_I
 _struct_i = struct.Struct("<i")
 _struct_4f = struct.Struct("<4f")
+_struct_2i3d = struct.Struct("<2i3d")
