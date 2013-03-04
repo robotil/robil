@@ -63,7 +63,7 @@ step_length = 0.03 #0.01  # [m]
 step_width  = 0.178  # 0.178  # [m]
 zmp_width   = 0.168
 step_time   = 1 #1   # [sec]
-bend_knees  = 0.18 #0.04  # [m]    
+bend_knees  = 0.001 #0.18 #0.04  # [m]    
 step_height = 0.05 #0.03 #0.05  # [m] 
 trans_ratio_of_step = 1.0 #0.8 # units fraction: 0-1.0 ; fraction of step time to be used for transition. 1.0 = all of step time is transition 
 trans_slope_steepens_factor = 8/step_time #2 # 1 transition Sigmoid slope (a)
@@ -76,6 +76,7 @@ max_step_time = 10.0 #[sec] the longest periodstep_length, of step that we plan 
 # TODO: make sure robot is static (in start position) and tf is running
 # init Robot State using tf data getting hip to com relative position:
 rs.static_init_with_tf_data(ns.listener,bend_knees)
+swing_foot_at_init = copy.copy(rs.swing_foot)
 
 # Preview Controllers:
 Sagital_x_Preview_Controller = ZMP_Preview_Controller('X_sagital','sagital_x',0.0) # name, parameters_folder_name, initial position of COM 
@@ -94,38 +95,40 @@ p_ref_y = zeros(NL)
 # initialize swing trajectory object
 swing_traj = Swing_Trajectory('swing_foot_trajectory')
 
-# init output message (before starting to walk)
-[stance_hip_0, swing_y_sign, swing_hip_dy]=rs.Get_foot_coord_params() # assumes start walking in step phase 1 (set in rs init)
-
-out.stance_hip = copy.copy( stance_hip_0 )
-out.pelvis_d = pelvis_des
-out.swing_foot = rs.swing_foot
-out.swing_hip = rs.place_in_Pos( out.stance_hip.x, (out.stance_hip.y + swing_hip_dy) , out.stance_hip.z) # constraint: hips at same hight and advance together
-out.pelvis_m = rs.pelvis_m
-
-out.zmp_ref = rs.place_in_Pos(0,0,0)
-out.zmp_pc = rs.place_in_Pos(0,0,0)
-out.com_ref = rs.place_in_Pos(0,0,0)
-out.com_dot_ref = rs.place_in_Pos(0,0,0)
-out.com_m = rs.com_m
-
-out.step_phase = rs.Get_step_phase()
-# for debug use
-out.stance_hip_m = rs.stance_hip
-out.swing_hip_m = rs.swing_hip
-out.swing_foot_m = rs.swing_foot
-
-# rospy.loginfo("zmp_main, stance foot: hip_x = %f, hip_y = %f, hip_z = %f, swing l-foot: foot_x = %f, foot_y = %f, foot_z = %f" \
-#                % (l_stance_hip_0.x, l_stance_hip_0.y, l_stance_hip_0.z, rs_from_r_foot.swing_foot.x, rs_from_r_foot.swing_foot.y, rs_from_r_foot.swing_foot.z) )
-# Wait 1 second
-# rospy.sleep(1)
-
-
 # Main Loop
 
 go = 0
 
 while not rospy.is_shutdown():
+
+  # Update Robot State: getting joints locations using tf to process and store them in Robot State object 
+  rs.getRobot_State( listener = ns.listener )
+
+  # init output message (before starting to walk)
+  [stance_hip_0, swing_y_sign, swing_hip_dy]=rs.Get_foot_coord_params() # assumes start walking in step phase 1 (set in rs init)
+
+  out.stance_hip = copy.copy( stance_hip_0 )
+  out.pelvis_d = pelvis_des
+  out.swing_foot = swing_foot_at_init
+  out.swing_hip = rs.place_in_Pos( out.stance_hip.x, (out.stance_hip.y + swing_hip_dy) , out.stance_hip.z) # constraint: hips at same hight and advance together
+  out.pelvis_m = rs.pelvis_m
+
+  out.zmp_ref = rs.place_in_Pos(0,0,0)
+  out.zmp_pc = rs.place_in_Pos(0,0,0)
+  out.com_ref = rs.place_in_Pos(0,0,0)
+  out.com_dot_ref = rs.place_in_Pos(0,0,0)
+  out.com_m = rs.com_m
+
+  out.step_phase = rs.Get_step_phase()
+  # for debug use
+  out.stance_hip_m = rs.stance_hip
+  out.swing_hip_m = rs.swing_hip
+  out.swing_foot_m = rs.swing_foot
+
+  # rospy.loginfo("zmp_main, stance foot: hip_x = %f, hip_y = %f, hip_z = %f, swing l-foot: foot_x = %f, foot_y = %f, foot_z = %f" \
+  #                % (l_stance_hip_0.x, l_stance_hip_0.y, l_stance_hip_0.z, rs_from_r_foot.swing_foot.x, rs_from_r_foot.swing_foot.y, rs_from_r_foot.swing_foot.z) )
+  # Wait 1 second
+  # rospy.sleep(1)
   
   pub_zmp.publish(out) 
   interval.sleep()

@@ -20,6 +20,7 @@ import roslib; roslib.load_manifest('zmp_walk')
 import rospy
 from zmp_walk.msg import Position, Orientation, Pos_and_Ori
 import pylab as pl
+import math as ma
 import copy
 
 
@@ -234,14 +235,14 @@ class Robot_State:
         # tf frames:
         if ( step_phase == 1 ) or ( step_phase == 2 ): 
             # stance = left, swing/support = right
-            base_frame = 'l_foot'
+            base_frame = 'l_talus' #'l_foot'
             # frames to transform: stance hip, com_m_arr, pelvis_m_arr, swing_hip_arr, swing_foot_arr
-            get_frames = [ 'l_uleg', 'com', 'pelvis', 'r_uleg', 'r_foot' ] # DRC (from tf) names 
+            get_frames = [ 'l_uleg', 'com', 'pelvis', 'r_uleg', 'r_foot', 'l_lleg' ] # DRC (from tf) names # 'l_knee' add for debug links length
         elif ( step_phase == 3 ) or ( step_phase == 4 ): 
             # stance = right, swing/support = left
             base_frame = 'r_foot'
             # frames to transform: stance hip, com_m_arr, pelvis_m_arr, swing_hip_arr, swing_foot_arr
-            get_frames = [ 'r_uleg', 'com', 'pelvis', 'l_uleg', 'l_foot' ] # DRC (from tf) names    
+            get_frames = [ 'r_uleg', 'com', 'pelvis', 'l_uleg', 'l_foot', 'r_lleg' ] # DRC (from tf) names    
         # get transforms:
         tran = self.last_tran
         rot = self.last_rot
@@ -260,6 +261,20 @@ class Robot_State:
                 tran[i] = translation
                 rot[i] = rotation
 
+        ## debug calc. link length:
+        #try:
+        (translation,rotation) = listener.lookupTransform(base_frame, get_frames[5], rospy.Time(0))  #  rospy.Time(0) to use latest availble transform 
+        # except (tf.LookupException, tf.ConnectivityException, tf.ExtrapolationException) as ex:
+        #     # print ex
+        #     rospy.loginfo("tf exception: %s" % (ex.args))
+        #     # Wait 1 second
+        #     # rospy.sleep(1)
+        #     # continue
+        lower_leg_length = ma.sqrt(translation[0]**2 + translation[1]**2 + translation[2]**2)
+        upper_leg_length = ma.sqrt((tran[0][0]-translation[0])**2 + (tran[0][1]-translation[1])**2 + (tran[0][2]-translation[2])**2)
+        rospy.loginfo("Knee position: - x=%f, y=%f , z=%f, Hip position: - x=%f, y=%f , z=%f; Lower leg length = %f, Upper leg length = %f" \
+            % (translation[0], translation[1], translation[2], tran[0][0], tran[0][1], tran[0][2], lower_leg_length, upper_leg_length) )
+
         self.Update_State(tran, rot)
 
         self.last_tran = tran
@@ -277,8 +292,8 @@ class Robot_State:
         # stance = left, swing = right
         base_frame = 'l_foot'
         # frames to transform: stance hip, com_m_arr, pelvis_m_arr, swing_hip_arr, swing_foot_arr
-        get_frames = [ 'l_uleg', 'com', 'pelvis', 'r_uleg', 'r_foot' ] # DRC (from tf) names 
-        for i in range(0,5):
+        get_frames = [ 'l_uleg', 'com', 'pelvis', 'r_uleg', 'r_foot', 'r_lleg' ] # DRC (from tf) names 
+        for i in range(0,6):
             while listener.waitForTransform (base_frame, get_frames[i], rospy.Time(0), time_out, polling_sleep_duration) and not rospy.is_shutdown():
                 rospy.loginfo("Not ready for Forward Kinematics transform")
 
@@ -325,7 +340,7 @@ class Robot_State:
 
         # constraint: we want hips height (z) and advance (x) to be the same
         hip_height = 0.7999 - bend_knees #(self.l_stance_hip_0.z + self.r_stance_hip_0.z)/2
-        hip_sagital = -0.02 # (self.l_stance_hip_0.x + self.r_stance_hip_0.x)/2 # x position relative to foot
+        hip_sagital = 0.0 #-0.02 # (self.l_stance_hip_0.x + self.r_stance_hip_0.x)/2 # x position relative to foot
         self.l_stance_hip_0[2] = hip_height; self.r_stance_hip_0[2] = hip_height; # update z coord.
         self.l_stance_hip_0[0] = hip_sagital; self.r_stance_hip_0[0] = hip_sagital; # update x coord.
 
