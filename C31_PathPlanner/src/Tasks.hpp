@@ -164,7 +164,7 @@ public:
     		const Vec2d& wp = session.results.path[i];
 			GPSPoint gpsp = _planner.cast(wp);
     		gpspath.push_back(gpsp);
-			//ROS_INFO("PATH: cast %i,%i  ->  %f,%f", wp.x, wp.y,  gpsp.x, gpsp.y);
+			ROS_INFO("PATH: cell:%i,%i  ->  gps:%f,%f", wp.x, wp.y,  gpsp.x, gpsp.y);
     	}
     	return gpspath;
     }

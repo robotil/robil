@@ -76,7 +76,7 @@ static MapProperties extractMapProperties(C22_GroundRecognitionAndMapping::C22::
 		
 		cell_resolution_in_meters = 0.25;
 		
-		ROS_INFO("... new data converted : new robot pos in gps = %f,%f",  gps.x, gps.y);
+		ROS_INFO("... new data converted : new map anchor is ( cell = 0,0 gps = %f,%f )",  gps.x, gps.y);
 	}
 	return MapProperties(cell_resolution_in_meters, gps, wp);
 };

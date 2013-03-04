@@ -18,6 +18,21 @@
 
 #define PRINT_AS_VECTORS 1
 
+// #define SET_PARAMETERS(pf_params)\
+// 	pf_params.viewRadiusForward = 5;\
+// 	pf_params.viewRadiusSide = 2;\
+// 	pf_params.stepRate=0.6;\
+// 	pf_params.inertia=pow(1/pf_params.viewRadiusForward*0.5,2);\
+// 	pf_params.distanceBetweenPoints = 2;\
+// 	pf_params.maxAngleWhileReducing = Vec2d::d2r(10);
+#define SET_PARAMETERS(pf_params)\
+	pf_params.viewRadiusForward = 15;\
+	pf_params.viewRadiusSide = 4;\
+	pf_params.stepRate=0.3;\
+	pf_params.inertia=pow(1/pf_params.viewRadiusForward*0.5,2);\
+	pf_params.distanceBetweenPoints = 2;\
+	pf_params.maxAngleWhileReducing = Vec2d::d2r(10);
+
 using namespace std;
 
 // -------------------------- MAP ---------------------------------------------
@@ -498,6 +513,7 @@ int cogniteam_pathplanning_test_map_inflation(int argc, char** argv) {
 
 #include <cstdlib>
 #include <cstdio>
+#include "MapFileReader.hpp"
 int cogniteam_pathplanning_test(int argc, char** argv) {
 	cout << "START" << endl; // prints PP
 
@@ -551,24 +567,36 @@ int cogniteam_pathplanning_test(int argc, char** argv) {
 		0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
 		0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
 	};
-	
+
+
 	clock_t start_time = clock();
 	
 	char* cmap = cmap_1;
 	size_t w=48,h=48;
+	
+	
+	vector<char> map_from_file;
+	if(argc>5){
+		cout<<"map from file: "<<argv[5]<<endl;
+		map_from_file = map_file_reader::readMap(argv[5], w, h);
+		cmap = map_from_file.data();
+	}
+	
 	
 	Map map(w, h, cmap);
 	cout<<"map source"<<endl<<map<<endl;
 	
 	long _sx=atoi(argv[1]), _sy=atoi(argv[2]);
 	long _ex=atoi(argv[3]), _ey=atoi(argv[4]);
+	long _rr=atoi(argv[6]);
 	
 	#define START_P _sx,_sy 
 	#define END_P   _ex,_ey
 	
 	#define POINTS START_P, END_P
 	
-	printf("Plan path : from %l,%l to %l,%l \n", POINTS);
+	printf("Robot radius : %i celles \n", _rr);
+	printf("Plan path : from %i,%i to %i,%i \n", POINTS);
 	
 	if(map.inRange(END_P)==false){
 		map.approximate(START_P, END_P);
@@ -588,7 +616,7 @@ int cogniteam_pathplanning_test(int argc, char** argv) {
 	
 	clock_t time_inflator = clock();
 	
-	Inflator i( 1 , Map::ST_BLOCKED);
+	Inflator i( _rr , Map::ST_BLOCKED);
 	MapEditor e;
 	
 	map = 
@@ -689,13 +717,8 @@ int cogniteam_pathplanning_test(int argc, char** argv) {
 	
 	PField pf(input_map, res_path);
 	PField::SmoothingParameters pf_params;
-	pf_params.viewRadiusForward = 5;
-	pf_params.viewRadiusSide = 2;
-	pf_params.stepRate=0.6;
-	pf_params.inertia=pow(1/pf_params.viewRadiusForward*0.5,2);
-	pf_params.distanceBetweenPoints = 2;
-	pf_params.maxAngleWhileReducing = Vec2d::d2r(10);
-
+	SET_PARAMETERS(pf_params)
+	
 	clock_t time_smoothing = clock();
 	
 	PField::Points smoothed_points= pf.smooth(pf_params);
@@ -758,7 +781,10 @@ PField::Points searchPath(const Map& source_map, const Waypoint& start, const Wa
 		return PField::Points();
 	}
 	
-	Inflator i( constraints.dimentions.radius , Map::ST_BLOCKED);
+	size_t rr = constraints.dimentions.radius;
+	if( rr<constraints.dimentions.radius) rr++;
+	
+	Inflator i( rr , Map::ST_BLOCKED);
 	MapEditor e;
 	
 // 	Map map =  i.inflate(source_map);
@@ -826,12 +852,7 @@ PField::Points searchPath(const Map& source_map, const Waypoint& start, const Wa
 	}
 
 	PField::SmoothingParameters pf_params;
-	pf_params.viewRadiusForward = 5;
-	pf_params.viewRadiusSide = 2;
-	pf_params.stepRate=0.6;
-	pf_params.inertia=pow(1/pf_params.viewRadiusForward*0.5,2);
-	pf_params.distanceBetweenPoints = 2;
-	pf_params.maxAngleWhileReducing = Vec2d::d2r(10); // unused
+	SET_PARAMETERS(pf_params)
 
 	PField pf(map, path);
 	PField::Points smoothed_path = pf.smooth(pf_params);
