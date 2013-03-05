@@ -17,7 +17,9 @@ sleep 30
 
 #start executor
 rosrun C34_Executer executer &
+sleep 5
 $C34_Executer_PID=$!
+sleep 2
 echo $C34_Executer_PID
 sleep 10
 
