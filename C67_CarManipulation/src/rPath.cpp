@@ -77,17 +77,20 @@ void SetJointStates(const sensor_msgs::JointState::ConstPtr &_js)
 
 int main(int argc, char** argv)
 {
-	
-  if (argc == 7)
-  {
-  	double dubGet[6];
-  	for (int i=0; i<6; i++)
-  	{
-  		dubGet[i] = boost::lexical_cast<double>(argv[i+1]);
-  	}
-  	argTarget = RPY(dubGet[0],dubGet[1], dubGet[2], dubGet[3], dubGet[4], dubGet[5]);
-  	use_arg = true;
-  }
+	int pointsNum;
+	double seconds; 
+	if (argc == 9)
+	{
+		double dubGet[6];
+		for (int i=0; i<6; i++)
+		{
+			dubGet[i] = boost::lexical_cast<double>(argv[i+1]);
+		}
+		argTarget = RPY(dubGet[0],dubGet[1], dubGet[2], dubGet[3], dubGet[4], dubGet[5]);
+		seconds =  boost::lexical_cast<double>(argv[7]);
+		pointsNum = boost::lexical_cast<int>(argv[8]);
+		use_arg = true;
+	}
    
   ros::init(argc, argv, "pub_joint_command_rhand");
 
@@ -226,7 +229,7 @@ int main(int argc, char** argv)
 				break;
 			}
 			
-			sPathPoints points = sPathPoints(IkCurrent, IkNext);
+			pPathPoints points = pPathPoints(IkCurrent, IkNext, pointsNum);
 			
 //			for (unsigned int j=0; j<jointcommands.name.size(); j++)
 //				{
@@ -244,12 +247,12 @@ int main(int argc, char** argv)
 					//std::cout << state[j] << " ";
 				}
 				
-				jointcommands.position[q4r] = points.Array[i]._q4;
-				jointcommands.position[q5r] = points.Array[i]._q5;
-				jointcommands.position[q6r] = points.Array[i]._q6;
-				jointcommands.position[q7r] = points.Array[i]._q7;
-				jointcommands.position[q8r] = points.Array[i]._q8;
-				jointcommands.position[q9r] = points.Array[i]._q9;
+				jointcommands.position[q4r] = points.pArray[i]._q4;
+				jointcommands.position[q5r] = points.pArray[i]._q5;
+				jointcommands.position[q6r] = points.pArray[i]._q6;
+				jointcommands.position[q7r] = points.pArray[i]._q7;
+				jointcommands.position[q8r] = points.pArray[i]._q8;
+				jointcommands.position[q9r] = points.pArray[i]._q9;
 				
 				//ROS_INFO("");
 				//std::cout << i <<": ";				
@@ -257,7 +260,7 @@ int main(int argc, char** argv)
 				
 				pub_joint_commands_.publish(jointcommands);					
 					
-				ros::Duration(2.0/N).sleep();
+				ros::Duration(seconds/pointsNum).sleep();
 			}
 			break;
 		}

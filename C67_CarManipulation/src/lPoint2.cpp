@@ -59,15 +59,18 @@ void SetJointStates(const sensor_msgs::JointState::ConstPtr &_js)
 
 		// print current state
 		std::cout << "Current Position:\n";
-		IkSolution IkCurrent = IkSolution(_js->position[q4r],_js->position[q5r],
-			_js->position[q6r],	_js->position[q7r], _js->position[q8r], _js->position[q9r]);
+		IkSolution IkCurrent = IkSolution(_js->position[q4l],_js->position[q5l],
+			_js->position[q6l],	_js->position[q7l], _js->position[q8l], _js->position[q9l]);
 		IkCurrent.Print();	
-		RPY rCurrent = rPose(_js->position[q1], _js->position[q2],_js->position[q3],IkCurrent);
-		rCurrent.Print();
+		RPY lCurrent = lPose(_js->position[q1], _js->position[q2],_js->position[q3],IkCurrent);
+		lCurrent.Print();
+
+		// shutdown if no arguments
+		//if (!use_arg)	ros::shutdown();	
 
 		// print target
-		if (use_arg)
-		{
+		if (use_arg)	
+		{		
 			std::cout << "Target:\n";
 			argTarget.Print();
 		}		
@@ -89,7 +92,7 @@ int main(int argc, char** argv)
   	use_arg = true;
   }
    
-  ros::init(argc, argv, "pub_joint_command_rhand");
+  ros::init(argc, argv, "pub_joint_command_lhand");
 
   ros::NodeHandle* rosnode = new ros::NodeHandle();
 
@@ -206,9 +209,9 @@ int main(int argc, char** argv)
 			// check if no arguments			
 			if (!use_arg) break;			
 						
-			IkSolution IkCurrent = IkSolution(state[q4r], state[q5r], state[q6r], state[q7r],
-				state[q8r], state[q9r]);
-			IkSolution IkNext = rSearchSolution(state[q1], state[q2], state[q3], argTarget);
+			IkSolution IkCurrent = IkSolution(state[q4l], state[q5l], state[q6l], state[q7l],
+				state[q8l], state[q9l]);
+			IkSolution IkNext = lSearchSolution(state[q1], state[q2], state[q3], argTarget);
 			
 			// check if solution valid
 			if (IkNext.valid)
@@ -216,8 +219,8 @@ int main(int argc, char** argv)
 				// print solution		
 				std::cout << "Solution/Command:\n";			
 				IkNext.Print();		
-				RPY r = rPose(state[q1], state[q2], state[q3], IkNext);
-				r.Print();	
+				RPY l = lPose(state[q1], state[q2], state[q3], IkNext);
+				l.Print();	
 				std::cout << "error: " << IkNext.error << std::endl;
 			}
 			else
@@ -244,12 +247,12 @@ int main(int argc, char** argv)
 					//std::cout << state[j] << " ";
 				}
 				
-				jointcommands.position[q4r] = points.Array[i]._q4;
-				jointcommands.position[q5r] = points.Array[i]._q5;
-				jointcommands.position[q6r] = points.Array[i]._q6;
-				jointcommands.position[q7r] = points.Array[i]._q7;
-				jointcommands.position[q8r] = points.Array[i]._q8;
-				jointcommands.position[q9r] = points.Array[i]._q9;
+				jointcommands.position[q4l] = points.Array[i]._q4;
+				jointcommands.position[q5l] = points.Array[i]._q5;
+				jointcommands.position[q6l] = points.Array[i]._q6;
+				jointcommands.position[q7l] = points.Array[i]._q7;
+				jointcommands.position[q8l] = points.Array[i]._q8;
+				jointcommands.position[q9l] = points.Array[i]._q9;
 				
 				//ROS_INFO("");
 				//std::cout << i <<": ";				
