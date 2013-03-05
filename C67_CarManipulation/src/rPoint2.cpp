@@ -28,96 +28,57 @@
 #include <boost/lexical_cast.hpp>
 #include "FK.h"
 #include "IK.h"
+#include "Path.h"
 
 ros::Publisher pub_joint_commands_;
+double state[28] = {0};
 osrf_msgs::JointCommands jointcommands;
-int	 callback_called = 0, call_next = 1;
-RPY rTarget, lTarget;
-IkSolution rIkCurrent, rIkDelta,lIkCurrent, lIkDelta;
-bool use_arg = false, publish;
+int	 callback_called = 0;
+RPY argTarget;
+bool use_arg = false;
+bool callBackRun = false;
 
 void SetJointStates(const sensor_msgs::JointState::ConstPtr &_js)
 {
 	static ros::Time startTime = ros::Time::now();
-  	static int count = 0;
 	// for testing round trip time
 	jointcommands.header.stamp = _js->header.stamp;
 
 	// assign sinusoidal joint angle targets
 	for (unsigned int i = 0; i < jointcommands.name.size(); i++)
-		jointcommands.position[i] = _js->position[i];
+		//jointcommands.position[i] = _js->position[i];
+		state[i] = _js->position[i];
+		
 	
-	std_msgs::String msg;	
-	std::stringstream ss;
-	//ss << "hello world " << count++;
-	//msg.data = ss.str();
-	//ROS_INFO("%s", msg.data.c_str());
-	if (call_next == callback_called) return;
-	callback_called += 1;
-	if (callback_called > 6) callback_called = 1;
-	call_next = callback_called;
-	// target from pelvis
-	//RPY rTarget,lTarget;
-	//if (use_arg)
-	//	Target = argTarget;
-	//else
-	//	rTarget = RPY(0.6, -0.5, 0.3, 0.142, -0.061, 1.28);
+	if (callBackRun == false)
+	{
+		callBackRun = true;
+		// set cout presentation	
+		std::cout.precision(6);
+		std::cout.setf (std::ios::fixed , std::ios::floatfield ); 
 
-	// set cout presentation	
-	std::cout.precision(6);
-	std::cout.setf (std::ios::fixed , std::ios::floatfield ); 
+		// print current state
+		std::cout << "Current Position:\n";
+		IkSolution IkCurrent = IkSolution(_js->position[q4r],_js->position[q5r],
+			_js->position[q6r],	_js->position[q7r], _js->position[q8r], _js->position[q9r]);
+		IkCurrent.Print();	
+		RPY rCurrent = rPose(_js->position[q1], _js->position[q2],_js->position[q3],IkCurrent);
+		rCurrent.Print();
+
+		// print target
+		if (use_arg)
+		{
+			std::cout << "Target:\n";
+			argTarget.Print();
+		}		
+	}	
 	
-	// print current state
-	//std::cout << "Current Position:\n";
-	/*IkSolution IkCurrent = IkSolution(_js->position[q4r],_js->position[q5r],_js->position[q6r],
-		_js->position[q7r], _js->position[q8r], _js->position[q9r]);
-	IkCurrent.Print();	
-	RPY rCurrent = rPose(_js->position[q1], _js->position[q2],_js->position[q3],IkCurrent);
-	rCurrent.Print();
-	*/	
-	
-	// print target	
-	//std::cout << "Target:\n";
-	//Target.Print();	
-	rIkCurrent = IkSolution(_js->position[q4r],_js->position[q5r],_js->position[q6r],
-		_js->position[q7r], _js->position[q8r], _js->position[q9r]);
-	lIkCurrent = IkSolution(_js->position[q4l],_js->position[q5l],_js->position[q6l],
-		_js->position[q7l], _js->position[q8l], _js->position[q9l]);
-	IkSolution rIk = rSearchSolution(_js->position[q1], _js->position[q2], 
-		_js->position[q3], rTarget);
-	IkSolution lIk = lSearchSolution(_js->position[q1], _js->position[q2], 
-		_js->position[q3], lTarget);
-	
-	if ((rIk.valid)&&(lIk.valid))
-	{
-	
-		rIkDelta._q4 = rIk._q4 - rIkCurrent._q4;
-		rIkDelta._q5 = rIk._q5 - rIkCurrent._q5;
-		rIkDelta._q6 = rIk._q6 - rIkCurrent._q6;
-		rIkDelta._q7 = rIk._q7 - rIkCurrent._q7;
-		rIkDelta._q8 = rIk._q8 - rIkCurrent._q8;
-		rIkDelta._q9 = rIk._q9 - rIkCurrent._q9;
-		lIkDelta._q4 = lIk._q4 - lIkCurrent._q4;
-		lIkDelta._q5 = lIk._q5 - lIkCurrent._q5;
-		lIkDelta._q6 = lIk._q6 - lIkCurrent._q6;
-		lIkDelta._q7 = lIk._q7 - lIkCurrent._q7;
-		lIkDelta._q8 = lIk._q8 - lIkCurrent._q8;
-		lIkDelta._q9 = lIk._q9 - lIkCurrent._q9;
-		publish  = true;
-	}
-	else
-	{
-		std::cout << "No solution found.\n";
-		publish = false;
-	}
-	
-  
 }
 
 int main(int argc, char** argv)
 {
 	
-  /*if (argc == 7)
+  if (argc == 7)
   {
   	double dubGet[6];
   	for (int i=0; i<6; i++)
@@ -126,7 +87,7 @@ int main(int argc, char** argv)
   	}
   	argTarget = RPY(dubGet[0],dubGet[1], dubGet[2], dubGet[3], dubGet[4], dubGet[5]);
   	use_arg = true;
-  }*/
+  }
    
   ros::init(argc, argv, "pub_joint_command_rhand");
 
@@ -230,19 +191,9 @@ int main(int argc, char** argv)
     rosnode->advertise<osrf_msgs::JointCommands>(
     "/atlas/joint_commands", 1, true);
 	
-	RPY Array[][2] = {{{0.260, -0.63, 0.46, 0, 0, 1.5},{0.260, 0.63, 0.46, 0, 0, -1.5}},
-					{{0.45, -0.3, 0.32, 0, 0, 1.5},{0.48,0.25, 0.25, 0, 0, -1.5}},
-					{{0.48, -0.25, 0.45, 0, 0, 1.5},{0.48,0.25, 0.25, 0, 0, -1.5}},
-					{{0.48, -0.15, 0.55, 0, 0, 1.5},{0.48,0.2, 0.3, 0, 0, -1.5}},
-					{{0.48, -0.1, 0.55, 0, 0, 1.5},{0.48,0.25, 0.25, 0, 0, -1.5}},
-					{{0.48, -0.15, 0.55, 0, 0, 1.5},{0.48,0.2, 0.3, 0, 0, -1.5}},
-					{{0.48, -0.25, 0.45, 0, 0, 1.5},{0.48,0.25, 0.25, 0, 0, -1.5}},
-					{{0.45, -0.3, 0.32, 0, 0, 1.5},{0.48,0.25, 0.25, 0, 0, -1.5}}};
-	double Delay[] = {2,1,1,1,1,1,1}; 
+	
 	while (ros::ok())
 	{
-		rTarget = Array[callback_called][0];
-		lTarget = Array[callback_called][1];
 		ros::spinOnce();
 		/*if (callback_called == 1)
 		{
@@ -250,28 +201,67 @@ int main(int argc, char** argv)
 			callback_called++;
 			break;
 		}*/
-		if ((callback_called == call_next)&&(publish))		
-			for (int i=0; i<2; i++)
+		if (callBackRun)
+		{
+			// check if no arguments			
+			if (!use_arg) break;			
+						
+			IkSolution IkCurrent = IkSolution(state[q4r], state[q5r], state[q6r], state[q7r],
+				state[q8r], state[q9r]);
+			IkSolution IkNext = rSearchSolution(state[q1], state[q2], state[q3], argTarget);
+			
+			// check if solution valid
+			if (IkNext.valid)
 			{
-				jointcommands.position[q4r] = rIkCurrent._q4 + i*rIkDelta._q4/2;
-				jointcommands.position[q5r] = rIkCurrent._q5 + i*rIkDelta._q5/2;
-				jointcommands.position[q6r] = rIkCurrent._q6 + i*rIkDelta._q6/2;
-				jointcommands.position[q7r] = rIkCurrent._q7 + i*rIkDelta._q7/2;
-				jointcommands.position[q8r] = rIkCurrent._q8 + i*rIkDelta._q8/2;
-				jointcommands.position[q9r] = rIkCurrent._q9 + i*rIkDelta._q9/2;
-				jointcommands.position[q4l] = lIkCurrent._q4 + i*lIkDelta._q4/2;
-				jointcommands.position[q5l] = lIkCurrent._q5 + i*lIkDelta._q5/2;
-				jointcommands.position[q6l] = lIkCurrent._q6 + i*lIkDelta._q6/2;
-				jointcommands.position[q7l] = lIkCurrent._q7 + i*lIkDelta._q7/2;
-				jointcommands.position[q8l] = lIkCurrent._q8 + i*lIkDelta._q8/2;
-				jointcommands.position[q9l] = lIkCurrent._q9 + i*lIkDelta._q9/2;
-				pub_joint_commands_.publish(jointcommands);
-				sleep(Delay[callback_called]/N);
-				//std::cout << i << std::endl;
- 				
+				// print solution		
+				std::cout << "Solution/Command:\n";			
+				IkNext.Print();		
+				RPY r = rPose(state[q1], state[q2], state[q3], IkNext);
+				r.Print();	
+				std::cout << "error: " << IkNext.error << std::endl;
 			}
-		else sleep(1);
-		call_next++;
+			else
+			{
+				std::cout << "No Solution.\n";
+				break;
+			}
+			
+			sPathPoints points = sPathPoints(IkCurrent, IkNext);
+			
+//			for (unsigned int j=0; j<jointcommands.name.size(); j++)
+//				{
+//					//jointcommands.position[j] = state[j];
+//					std::cout << state[j] << " ";
+//				}			
+			
+			for (int i=0; i<N; i++)
+			{
+				// ros::spinOnce();
+				// assign current joint angles 
+				for (unsigned int j=0; j<jointcommands.name.size(); j++)
+				{
+					jointcommands.position[j] = state[j];
+					//std::cout << state[j] << " ";
+				}
+				
+				jointcommands.position[q4r] = points.Array[i]._q4;
+				jointcommands.position[q5r] = points.Array[i]._q5;
+				jointcommands.position[q6r] = points.Array[i]._q6;
+				jointcommands.position[q7r] = points.Array[i]._q7;
+				jointcommands.position[q8r] = points.Array[i]._q8;
+				jointcommands.position[q9r] = points.Array[i]._q9;
+				
+				//ROS_INFO("");
+				//std::cout << i <<": ";				
+				//points.Array[i].Print();
+				
+				pub_joint_commands_.publish(jointcommands);					
+					
+				ros::Duration(2.0/N).sleep();
+			}
+			break;
+		}
+		ros::Duration(0.1).sleep();
 	}
 
   return 0;

@@ -17,37 +17,44 @@ run client:
 rosrun C67_CarManipulation SteeringWheel_client 
 -------------------------------------------------------------------------------
 
-to test the rPoint,lPoint nodes, run it with *RPY parameters.
+to test the rPoint,lPoint nodes, run it with *RPY parameters time and NO. of points.
 
 for example:
 
-right hand:
-rosrun C67_CarManipulation rPoint .257 -.648 .420 .1 -.1 1.336
-
+right hand(x y z R P Y sec points_Number):
+rosrun C67_CarManipulation rPath .26 -.63 .46 0 0 1.5 2 100
+rosrun C67_CarManipulation rPath .45 -.4 .4 0 0 1.5 2 100
 left hand:
-rosrun C67_CarManipulation lPoint .261 .632 .465 .007 -.026 -1.498
+rosrun C67_CarManipulation lPath .26 .63 .46 0 0 -1.5 2 100
+rosrun C67_CarManipulation lPath .45 .4 .4 0 0 -1.5 2 100
 
 if solution exists the movement command will be transfered to the DRC module.
 if no solution was found, no command will be sent to the module.
 
+to see only arms position run nodes w/o parameters.
+
 Prints
 ======
+-Current Position and arm 6 angles
+if parameters where given
+-the RPY Target
 if solution exists the node prints:
--the RPY command
--time stamp 
--summed error, target vs. solution
--the last 5 arm's angles before command
--the last 5 arm's new angles in the command.
+-solution for arm's 6 angles
+-RPY of solution
+-total error of solution compared to target
 
 example print: 
-RPY(0.257, -0.648, 0.42, 0.1, -0.1, 1.336)
-[ INFO] [1361356348.839777701, 12350.913000000]: 
-error: 0.00545672
-q5-q9 old:0.427901, 1.304104, -1.360446, -1.186743, 0.403391
-q5-q9:0.418074, 1.226236, -1.389139, -1.167793, 0.413008
+Current Position:
+q4-q9:0.024647, 0.302808, 1.721455, -1.419178, -1.381719, 0.290994
+RPY(0.221138, -0.636597, 0.333620, 0.424570, -0.104114, 1.411099)
+Target:
+RPY(0.260000, -0.630000, 0.460000, 0.000000, 0.000000, 1.500000)
+Solution/Command:
+q4-q9:-0.100000, 0.003002, 1.707083, -1.447886, -1.571000, -0.007935
+RPY(0.260000, -0.630000, 0.460000, 0.009789, 0.001782, 1.510138)
+error: 0.020772
 
-if no solution was found, the node prints:
-No solution found.
+
 
 *RPY parameters are x,y,z,R,P,Y: x,y,z - position, R,P,Y - orientation.
 -------------------------------------------------------------------------------
