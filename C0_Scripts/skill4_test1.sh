@@ -4,10 +4,11 @@ echo Start the skill4 test
 
 CURR_WD=$PWD
 PKILLS=$CURR_WD'/.skill4_test1.txt'
-rm $PKILLS
+#rm $PKILLS
 
 #roslaunch atlas_utils atlas_drc_vehicle_fire_hose.launch &
-
+source /usr/share/drcsim/setup.sh
+export ROS_PACKAGE_PATH=$ROS_PACKAGE_PATH:/home/${USER}/
 roslaunch C51_CarOperation C51_completeLuanch.launch &
 C51_PID=$!
 echo $C51_PID
