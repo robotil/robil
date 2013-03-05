@@ -1,26 +1,22 @@
 C47_DismountVehicle
-# Description: robot gets out from the vehicle from a sitting position
-facing forward.
-Robot gets out with final position standing outside the vehicle in any position.
 
-Known bugs:
-* The robot falls out of the car and is not standing stable. 
-Thus it can finalize in any posture. But it is out of the vehicle.  
+Description: 
+  * A stub module for exiting the vehicle
 
 Conditions:
-* works with version 1.2 of drcsim!
-* start testing world using launch forlder: drc_robot_profile_lower.launch
-it is in the launch directory. It also calles a world in the world directory.
+  * DRC version 2.0
 
-*Not final steps, may change*
-Follow the steps:
-1. roslaunch drc_robot_profile_lower.launch
-2. run designer and executer
-3. rosrun C47_DismountVehicle C47_DismountV2.py
-4. in designer load tree located in TestTree folder.
-5. run the tree
+To test the module follow these steps:
+  1. roslaunch atlas_utils atlas_drc_vehicle_fire_hose.launch
+  2. rosrun C47_DismountVehicle C47_DismountVehicle.py
+  3. Now choose one of these 2 options:
+     a. rosrun C47_DismountVehicle TestDismountVehicle.py
+     b. 1. Copy the file DismountVehicle.xml from /C47_DismountVehicle/TestTree/ to /C34_Designer/plans/
+        2. Run the executer
+        3. Run the designer
+        4. Load the file DismountVehicle.xml
+        5. Run the tree
 
 Contains:
-launch folder: launch files, last working is drc_robot_profile_lower.launch.
-world folder: test world, last working world: drc_robot_profile_lower.world.
-TestTree folder: tree wich executes the dismounting code.
+  * A stub module for exiting the car
+  * A test tree to test the module

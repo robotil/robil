@@ -47,6 +47,7 @@ private:
   std::vector<pclPlane*>* _myPlanes;
   boost::shared_ptr<pcl::visualization::PCLVisualizer> viewer;
   geometry_msgs::Point robotPos;
+  geometry_msgs::Point robotOri;
 public:
 
 	/**

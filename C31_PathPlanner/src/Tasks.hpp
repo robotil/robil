@@ -164,7 +164,7 @@ public:
     		const Vec2d& wp = session.results.path[i];
 			GPSPoint gpsp = _planner.cast(wp);
     		gpspath.push_back(gpsp);
-			//ROS_INFO("PATH: cast %i,%i  ->  %f,%f", wp.x, wp.y,  gpsp.x, gpsp.y);
+			ROS_INFO("PATH: cell:%i,%i  ->  gps:%f,%f", wp.x, wp.y,  gpsp.x, gpsp.y);
     	}
     	return gpspath;
     }
@@ -205,8 +205,8 @@ public:
 			SYNCH(SET_CURRENT_TIME(statistic.time_map_lastReceive));
 			
 			MapProperties mprop = extractMapProperties(c22.response);
-			Map map = extractMap(c22.response);
-			Gps2Grid gps_grid = extractLocation(c22.response);
+			Map map = extractMap(c22.response, mprop);
+			Gps2Grid gps_grid = extractLocation(c22.response, mprop);
 			
 			if(map.w()>0 && map.h()>0){
 			
@@ -266,21 +266,41 @@ public:
     	session.arguments.start = _planner.cast(session.arguments.selfLocation);
     	session.arguments.finish = _planner.cast(session.arguments.targetPosition);
     	session.constraints.dimentions.radius = _planner.castLength(session.constraints.dimentions.gps_radius);
+		ROS_INFO("GPS_GRID_CASTING: start=*(%f,%f)->(%i,%i), finis=*(%f,%f)->(%i,%i), robot.rad=*%f->%i",
+			session.arguments.selfLocation.x, session.arguments.selfLocation.y, session.arguments.start.x, session.arguments.start.y,
+			session.arguments.targetPosition.x, session.arguments.targetPosition.y, session.arguments.finish.x, session.arguments.finish.y,
+			session.constraints.dimentions.gps_radius, session.constraints.dimentions.radius
+		);
     }
     void onNewLocation(const GPSPoint& pos, const Waypoint& wp){
     	PathPlanning::EditSession session = _planner.startEdit();
     	session.arguments.start = wp;
     	session.arguments.selfLocation = pos;
+		ROS_INFO("GPS_GRID_CASTING: start=*(%f,%f)->*(%i,%i), finis=(%f,%f)->(%i,%i), robot.rad=%f->%i",
+			session.arguments.selfLocation.x, session.arguments.selfLocation.y, session.arguments.start.x, session.arguments.start.y,
+			session.arguments.targetPosition.x, session.arguments.targetPosition.y, session.arguments.finish.x, session.arguments.finish.y,
+			session.constraints.dimentions.gps_radius, session.constraints.dimentions.radius
+		);
     }
     void onNewTargetLocation(const GPSPoint& pos){
     	PathPlanning::EditSession session = _planner.startEdit();
     	session.arguments.targetPosition = pos;
     	session.arguments.finish = _planner.cast(session.arguments.targetPosition);
+		ROS_INFO("GPS_GRID_CASTING: start=(%f,%f)->(%i,%i), finis=*(%f,%f)->(%i,%i), robot.rad=%f->%i",
+			session.arguments.selfLocation.x, session.arguments.selfLocation.y, session.arguments.start.x, session.arguments.start.y,
+			session.arguments.targetPosition.x, session.arguments.targetPosition.y, session.arguments.finish.x, session.arguments.finish.y,
+			session.constraints.dimentions.gps_radius, session.constraints.dimentions.radius
+		);
     }
     void onNewLocation(const GPSPoint& pos){
     	PathPlanning::EditSession session = _planner.startEdit();
     	session.arguments.start = _planner.cast(pos);
     	session.arguments.selfLocation = pos;
+		ROS_INFO("GPS_GRID_CASTING: start=*(%f,%f)->(%i,%i), finis=(%f,%f)->(%i,%i), robot.rad=%f->%i",
+			session.arguments.selfLocation.x, session.arguments.selfLocation.y, session.arguments.start.x, session.arguments.start.y,
+			session.arguments.targetPosition.x, session.arguments.targetPosition.y, session.arguments.finish.x, session.arguments.finish.y,
+			session.constraints.dimentions.gps_radius, session.constraints.dimentions.radius
+		);
     }
     void onNewConstraints(const Constraints& constr){
     	PathPlanning::EditSession session = _planner.startEdit();

@@ -309,36 +309,5 @@ void RPY::Print()
 	std::cout << "RPY(" << x << ", "<< y << ", " << z << ", " << R << ", " << P << ", " << Y << ")\n";
 }
 
-Matrix rDest(double mq1,double mq2,double mq3,double mq4, RPY Target)
-{
-	Matrix T = Matrix();
-	T.rGet(q1,mq1);
-	T.rMultiply(q2,mq2);
-	T.rMultiply(q3,mq3);
-	T.rMultiply(q4r,mq4);
-	T.Inverse();
-	
-	Matrix A = Matrix();
-	A = Target.FromRPY();
-	T.Multiply(A);
-
-	return T;
-}
-
-Matrix lDest(double mq1,double mq2,double mq3,double mq4, RPY Target)
-{
-	Matrix T = Matrix();
-	T.lGet(q1,mq1);
-	T.lMultiply(q2,mq2);
-	T.lMultiply(q3,mq3);
-	T.lMultiply(q4l,mq4);
-	T.Inverse();
-	
-	Matrix A = Matrix();
-	A = Target.FromRPY();
-	T.Multiply(A);
-
-	return T;
-}
 
 

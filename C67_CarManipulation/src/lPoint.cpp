@@ -60,17 +60,34 @@ void SetJointStates(const sensor_msgs::JointState::ConstPtr &_js)
 	else
 		Target = RPY(0.6, -0.5, 0.3, 0.142, -0.061, 1.28);
 	
+	// set cout presentation	
+	std::cout.precision(6);
+	std::cout.setf (std::ios::fixed , std::ios::floatfield ); 
+	
+	// print current state
+	std::cout << "Current Position:\n";
+	IkSolution IkCurrent = IkSolution(_js->position[q4l],_js->position[q5l],_js->position[q6l],
+		_js->position[q7l], _js->position[q8l], _js->position[q9l]);
+	IkCurrent.Print();
+	RPY rCurrent = lPose(_js->position[q1], _js->position[q2],_js->position[q3],IkCurrent);
+	rCurrent.Print();
+		
+	
+	// print target	
+	std::cout << "Target:\n";
+	Target.Print();	
 	
 	IkSolution Ik = lSearchSolution(_js->position[q1], _js->position[q2], 
 		_js->position[q3], Target);
 	
 	if (Ik.valid)
 	{
-		std::cout.precision(6);
-		std::cout.setf (std::ios::fixed , std::ios::floatfield ); 
-		std::cout << "q5-q9 old:"<< _js->position[q5l]<< ", "<< _js->position[q6l]<< ", "<< _js->position[q7l]
-			<< ", "<< _js->position[q8l]<< ", "<< _js->position[q9l]<< std::endl;
+		// print solution		
+		std::cout << "Solution/Command:\n";
 		Ik.Print();
+		RPY r = lPose(_js->position[q1], _js->position[q2],_js->position[q3],Ik);		
+		r.Print();				
+		std::cout << "error: " << Ik.error << std::endl;
 	
 		jointcommands.position[q4l] = Ik._q4;
 		jointcommands.position[q5l] = Ik._q5;
@@ -84,6 +101,9 @@ void SetJointStates(const sensor_msgs::JointState::ConstPtr &_js)
 	{
 		std::cout << "No solution found.\n";
 	}
+
+	
+	
 	
   
 }
@@ -99,7 +119,6 @@ int main(int argc, char** argv)
   		dubGet[i] = boost::lexical_cast<double>(argv[i+1]);
   	}
   	argTarget = RPY(dubGet[0],dubGet[1], dubGet[2], dubGet[3], dubGet[4], dubGet[5]);
-  	argTarget.Print();
   	use_arg = true;
   }
    

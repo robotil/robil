@@ -4,6 +4,7 @@
 #include "routeitem.h"
 #include <QGraphicsSceneMouseEvent>
 #include <QGraphicsPathItem>
+#include <iostream>
 
 bool Drawing;
 bool Moving;
@@ -27,16 +28,15 @@ CMapMain::CMapMain(QWidget *parent, Qt::WFlags flags)
 	LineMoving = false;
 	PixPressed.i = 0;
 	PixPressed.j = 0;
-	for(int i=0; i<48; i++)
+	for(int i=0; i<100; i++)
 	{
-		for(int j=0; j<48; j++)
+		for(int j=0; j<100; j++)
 		{
 			PixColor[i][j] = 0;
 		}
 	}
 	startX = 175;
 	startY = 400;
-	pos[2];
 	p_i=startX;
 	p_j=startY;
 	pos[0] = p_i;
@@ -52,9 +52,15 @@ CMapMain::CMapMain(QWidget *parent, Qt::WFlags flags)
 	routePath = NULL;
 	routeSteps = NULL;
 	routePolygon = NULL;
+
+	RobotPos.x = 0;
+	RobotPos.y = 0;
+	GridXOffset = 12;
+	GridYOffset = 2;
+	CalculateCornerPos();
 }
 
-CMapMain::CMapMain(int arr[48][48],QWidget *parent, Qt::WFlags flags)
+CMapMain::CMapMain(int arr[100][100],QWidget *parent, Qt::WFlags flags)
 	: QWidget(parent, flags)
 {
 	ui.setupUi(this);
@@ -72,16 +78,15 @@ CMapMain::CMapMain(int arr[48][48],QWidget *parent, Qt::WFlags flags)
 		LineMoving = false;
 		PixPressed.i = 0;
 		PixPressed.j = 0;
-		for(int i=0; i<48; i++)
+		for(int i=0; i<100; i++)
 		{
-			for(int j=0; j<48; j++)
+			for(int j=0; j<100; j++)
 			{
 				PixColor[i][j] = 0;
 			}
 		}
 		startX = 175;
 		startY = 400;
-		pos[2];
 		p_i=startX;
 		p_j=startY;
 		pos[0] = p_i;
@@ -163,40 +168,43 @@ void CMapMain::setMode(ModeDraw m)
 	}
 }
 
-void CMapMain::UpdateGrid(int grid[48][48])
+void CMapMain::UpdateGrid(int grid[100][100], StructPoint robotPos, int xOffset, int yOffset)
 {
-	for(int i=0; i<48; i++)
+	for(int i=0; i<100; i++)
 	{
-		for(int j=0; j<48; j++)
+		for(int j=0; j<100; j++)
 		{
 			PixColor[i][j] = grid[i][j];
 			pPixItem[i][j]->SetColor(grid[i][j]);
 		}
 	}
+	RobotPos = robotPos;
+	GridXOffset = xOffset;
+	GridYOffset = yOffset;
+	CalculateCornerPos();
 	update();
 }
 
 void CMapMain::AddPix()
 {
-	startX = 175;
-	startY = 400;
-	pos[2];//line=[0],column= [1]
+	startX = 50;//175;
+	startY = 130;//400;
 	p_i=startX;//line
 	p_j=startY;//column
 	
-	for(int i=0;i<48;i++)
+	for(int i=0;i<100;i++)
 	{
 		pos[0] = p_i;
-		for(int j=0;j<48;j++)
+		for(int j=0;j<100;j++)
 		{
 			pos[1] = p_j;
 			pPixItem[i][j] = new CPixItem(PixColor[i][j],ui.graphicsView->scene(),pos[0],pos[1]);
 			pPixItem[i][j]->setPos(pos[0],pos[1]);
 			ui.graphicsView->scene()->addItem(pPixItem[i][j]);
-			p_j=p_j+12.0;
+			p_j=p_j+8.0;
 		}
 		p_j = startY;
-		p_i=p_i+12.0;
+		p_i=p_i+8.0;
 	}
 }
 
@@ -206,8 +214,9 @@ bool CMapMain::eventFilter(QObject *o, QEvent* e)
 	{
 		case QEvent::GraphicsSceneMouseDoubleClick:
 		{
-			QGraphicsSceneMouseEvent* event = static_cast<QGraphicsSceneMouseEvent*>(e);
+//			QGraphicsSceneMouseEvent* event = static_cast<QGraphicsSceneMouseEvent*>(e);
 			stopDrawing();
+			return true;
 			break;
 		}
 		case QEvent::GraphicsSceneMousePress:
@@ -219,13 +228,15 @@ bool CMapMain::eventFilter(QObject *o, QEvent* e)
 			{
 				drawing();
 			}
+			return true;
 
 			break;
 		}
 		case QEvent::GraphicsSceneMouseRelease:
 		{
-			QGraphicsSceneMouseEvent* event = static_cast<QGraphicsSceneMouseEvent*>(e);
+//			QGraphicsSceneMouseEvent* event = static_cast<QGraphicsSceneMouseEvent*>(e);
 			releasePoint();
+			return true;
 			break;
 		}
 		case QEvent::GraphicsSceneMouseMove:
@@ -242,8 +253,11 @@ bool CMapMain::eventFilter(QObject *o, QEvent* e)
 					MoveLine(event->scenePos());
 				}
 			}
+			return true;
 			break;
 		}
+		default:
+			return QWidget::eventFilter(o, e);
 	}
 return false;
 }
@@ -293,6 +307,8 @@ void CMapMain::drawing()
 			drawLines(routePolygon,true);
 			break;
 		}
+	default:
+		break;
 	}
 }
 void CMapMain::stopDrawing()
@@ -306,34 +322,36 @@ void CMapMain::stopDrawing()
 	case E_PATH_MODE:
 		{
 			routePath->endPath(PressPoint);
-			setMode(E_POLYGON_MODE);
+//			setMode(E_POLYGON_MODE);
 			break;
 		}
 	case E_STEPS_MODE:
 		{
 			routeSteps->endPath(PressPoint);
-			setMode(E_NULL_MODE);
+//			setMode(E_NULL_MODE);
 			break;
 		}
 	case E_POLYGON_MODE:
 		{
 			routePolygon->ConnectLastPoint(PressPoint);
-			setMode(E_STEPS_MODE);
+//			setMode(E_STEPS_MODE);
 			break;
 		}
+	default:
+		break;
 	}
-	//setMode(E_NULL_MODE);
+	setMode(E_NULL_MODE);
 }
 void CMapMain::setReadyPath()
 {
 	//////////////Ready Path/////////////////////////
 	//setMode(E_READY_PATH_MODE);
-	routePathReady->addPointToLine(QPointF(175,400),true);
-	routePathReady->addPointToLine(QPointF(200,450),true);
-	routePathReady->addPointToLine(QPointF(300,550),true);
-	routePathReady->addPointToLine(QPointF(175,600),true);
-	routePathReady->addPointToLine(QPointF(300,700),true);
-	routePathReady->endPath(QPointF(300,700));
+//	routePathReady->addPointToLine(QPointF(175,400),true);
+//	routePathReady->addPointToLine(QPointF(200,450),true);
+//	routePathReady->addPointToLine(QPointF(300,550),true);
+//	routePathReady->addPointToLine(QPointF(175,600),true);
+//	routePathReady->addPointToLine(QPointF(300,700),true);
+//	routePathReady->endPath(QPointF(300,700));
 	setMode(E_NULL_MODE);
 	/////////////////////////////////////////////////
 }
@@ -420,6 +438,43 @@ void CMapMain::releasePoint()
 				routeSelected->ReleasePoint();
 				break;
 			}
+		default:
+			break;
 		}
 	}
+}
+
+void CMapMain::AddPath(std::vector<StructPoint> points)
+{
+	setMode(E_READY_PATH_MODE);
+	std::cout<<"Path size: "<<points.size()<<"\n";
+	for(int i=0; i<points.size(); i++)
+	{
+//		QPointF point = PointToPix(points[i]);
+		if(i<points.size()-1)
+		{
+			routePathReady->addPointToLine(PointToPix(points[i]),true);
+		}
+		else
+		{
+			routePathReady->addPointToLine(PointToPix(points[i]),true);
+			routePathReady->endPath(QPointF(0,0));
+		}
+	}
+	setMode(E_NULL_MODE);
+}
+
+QPointF CMapMain::PointToPix(StructPoint point)
+{
+	QPointF GPoint;
+	GPoint.setX(50+((point.x - CornerPos.x)*32));
+	GPoint.setY(930-((point.y - CornerPos.y)*32));
+	std::cout<<"PointX: "<<GPoint.x()<<" PointY: "<<GPoint.y()<<"\n";
+	return GPoint;
+}
+
+void CMapMain::CalculateCornerPos()
+{
+	CornerPos.x = RobotPos.x+GridXOffset;
+	CornerPos.y = RobotPos.y+GridYOffset;
 }
