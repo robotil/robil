@@ -1,3 +1,8 @@
+
+==============================
+monitor time
+==============================
+
 C35_Monitoring
 # Description: The monitor performs the following:
 1. On initialization, computes statistics for the given behavior tree which include success probabilities and time distributions given success/failure.
@@ -6,6 +11,7 @@ C35_Monitoring
 
 
 How to Check (outdated):
+
 ============
 Requires python ver 2.7.3. In order to test the code run the following:
 1. roslaunch C46_MountVehicle atlas_profile_lower.launch
@@ -34,3 +40,42 @@ Known Limitations:
 TODO - the module still doesn't update its statistics, given runtime information. This means that the threshold for monitored nodes doesn't change during runtime.
 xml file is hardcoded, instead of being given as cmd line argument.
 Not sure yet how multiple monitoring nodes within the same subtree are handled. Should be checked.
+
+
+
+=======================
+Monitor specific tasks
+=======================
+
+MONITOR WAYPOINT OF DRIVING MODULE
+
+# Description: This monitor works in parallel to "WayPointsDriving" in C51_CarOperation.
+Performs the following:
+1. Saves the way points sent by the path planner and the current location passed by the vehicle.
+2. Compares the vehicle's real location to the accurate way point and calculates the gap.
+3. Check whether the current driving module run has passed the threshold, if so, produces an alert.
+
+How to Check:
+============
+Requires python ver 2.7.3. , drc-2.0 and gazebo-1.4.0 and up.
+In order to test the code run the following:
+1.C0_Scripts/clear_all.sh
+2.C0_Scripts/make_all.sh
+3. follow the instructions in: http://www.robil.org/trac_robil/wiki/WalkingdexterityPage to upload the C51_CarOperation module.
+  3.1. in C51_CarOperation: rosrun C51_CarOperation DRC_Vehicle_Init_client.py
+  3.2. continue to run C51_CarOperation in stage 9
+4. rosrun C34_Designer run.sh
+5. rosrun C35_Monitoring C35_Node.py
+6. rosrun C34_Executer executer
+7. in designer, open tree located in C35_monitoring/src/tests/plan26-02-13-131747286.xml  (IF THE DESIGNER REFUSES, MOVE FILE TO C34_Designer/plans/ )
+8. run the tree, resume.
+9. in C51_CarOperation: rosrun C51_CarOperation DRC_Vehicle_Drive_client.py
+
+Known Bugs:
+==========
+
+
+Known Limitations:
+=================
+TODO - Need to get threshold function from Oded.
+TODO - Need to formalize the alerts raised by the monitor
