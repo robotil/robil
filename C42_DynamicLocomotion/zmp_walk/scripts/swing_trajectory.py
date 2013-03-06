@@ -54,7 +54,7 @@ class Swing_Trajectory:
     
         if pre_step:
     
-           res_swing_k = robot_foot_state
+           res_swing_k = copy.copy( robot_foot_state )
            lifting_swing_foot = False
     
     
@@ -62,7 +62,7 @@ class Swing_Trajectory:
              
             if k<k_start_swing:
          
-                res_swing_k = robot_foot_state
+                res_swing_k =  copy.copy( robot_foot_state )
                 lifting_swing_foot = False
     
             ### the following can be eareased -  though it is used now due to strong vibrations in the curennt state:######
@@ -80,7 +80,7 @@ class Swing_Trajectory:
             elif(k>=k_start_swing  and k<k_stop_swing ):
     
                 if k==k_start_swing:
-                   self.step_start_state = robot_foot_state
+                   self.step_start_state = copy.copy( robot_foot_state )
                 # if step_phase == 1:  
                 #     step_phase = 2
                 # elif step_phase == 3:
@@ -104,13 +104,13 @@ class Swing_Trajectory:
     
             if k<k_start_swing:
                     
-               res_swing_k = robot_foot_state
+               res_swing_k = copy.copy( robot_foot_state )
                lifting_swing_foot = False
      
                 
             if(k>k_start_swing  and k<k_stop_swing ):
                 if k==k_start_swing:
-                   self.step_start_state = robot_foot_state
+                   self.step_start_state = copy.copy( robot_foot_state )
                 # if step_phase == 1:  
                 #     rs.Set_step_phase(2)
                 # elif step_phase == 3:

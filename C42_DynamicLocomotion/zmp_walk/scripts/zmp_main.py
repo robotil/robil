@@ -62,10 +62,10 @@ out = walking_trajectory () #traj() # output message of topic 'zmp_out'
 step_length = 0.03 #0.01  # [m]
 step_width  = 0.178  # 0.178  # [m]
 zmp_width   = 0.168
-step_time   = 1 #1   # [sec]
-bend_knees  = 0.001 #0.18 #0.04  # [m]    
+step_time   = 4 #1   # [sec]
+bend_knees  = 0.18 #0.04  # [m]    
 step_height = 0.05 #0.03 #0.05  # [m] 
-trans_ratio_of_step = 1.0 #0.8 # units fraction: 0-1.0 ; fraction of step time to be used for transition. 1.0 = all of step time is transition 
+trans_ratio_of_step = 0.8 #1.0 #0.8 # units fraction: 0-1.0 ; fraction of step time to be used for transition. 1.0 = all of step time is transition 
 trans_slope_steepens_factor = 8/step_time #2 # 1 transition Sigmoid slope (a)
 # Robot State object:
 rs = Robot_State('Robot State')
@@ -208,7 +208,7 @@ while not rospy.is_shutdown():
       [ stance_hip_0, swing_y_sign, swing_hip_dy ] = rs.Get_foot_coord_params()
       swing_foot_y = step_width*swing_y_sign # final position of swing_foot y coordinate
 
-      robot_foot_state = copy.copy(rs.swing_foot)
+      robot_foot_state = copy.copy(rs.swing_foot_at_start_of_step_phase)  #copy.copy(rs.swing_foot)
 
       [swing_k, lifting_swing_foot] = swing_traj.Get_swing_foot_traj(k, step_time, robot_foot_state, step_length,swing_foot_y, step_height,dt,pre_step,first_step,full_step,last_step)
       
@@ -221,8 +221,8 @@ while not rospy.is_shutdown():
   #                                                     #
   #######################################################
      
-      out.swing_foot = copy.copy(swing_k)                                                                                    #added by Israel 24.2
-
+      out.swing_foot = copy.copy(swing_k)                              #added by Israel 24.2
+      out.swing_foot.y = copy.copy(swing_foot_y)                                         
 
       out.stance_hip.x = COMx + stance_hip_0.x-D 
       out.stance_hip.y = COMy + stance_hip_0.y
@@ -237,13 +237,13 @@ while not rospy.is_shutdown():
       out.zmp_pc = rs.place_in_Pos( p_pre_con_x, p_pre_con_y, 0)
       out.com_ref = rs.place_in_Pos( COMx, COMy, 0)
       out.com_dot_ref = rs.place_in_Pos( COMx_dot, COMy_dot, 0)
-      out.com_m = rs.com_m
+      out.com_m = rs.com_m # last sampled value
 
       out.step_phase = rs.Get_step_phase()
       # for debug use
-      out.stance_hip_m = rs.stance_hip
-      out.swing_hip_m = rs.swing_hip
-      out.swing_foot_m = rs.swing_foot
+      out.stance_hip_m = rs.stance_hip # last sampled value
+      out.swing_hip_m = rs.swing_hip # last sampled value
+      out.swing_foot_m = rs.swing_foot # filtered value
 
       # rospy.loginfo("zmp_main go=1, stance foot: COMy = %f, out.hip_y = %f, stance_hip_0.y = %f, l_stance_hip_0 = %f " \
       #          % (COMy, out.stance_hip.y, stance_hip_0.y, rs.Get_l_stance_hip_0() ) )
@@ -257,6 +257,10 @@ while not rospy.is_shutdown():
   #                                                     #
   ####################################################### 
       
+      # ## Debug -Stop Walk
+      # if rs.Get_step_phase() == 2:
+      #     go = 0
+
       # pre_step:  
           
       if pre_step:

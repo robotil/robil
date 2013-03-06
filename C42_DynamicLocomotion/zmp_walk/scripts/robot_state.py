@@ -28,6 +28,7 @@ class Robot_State:
     'Keeps track of robots lower limbs positions using tf - foward kinematics, filters sampled data '
     # Class parameters:
     sample_buffer_size = 10 # number of samples to keep in history of robot state (tf location readings) 
+    samples_in_start_of_step_phase_avg = 10 # number of samples to average pose at begining of step phase
 
     def __init__(self, name):
         self.name = name
@@ -39,6 +40,7 @@ class Robot_State:
         self.swing_hip = Position()
         self.pelvis_m = Orientation()
         self.com_m = Position()
+        self.swing_foot_at_start_of_step_phase = Pos_and_Ori()
 
         # # init buffer of robot state
         # self.stance_hip_arr = zeros((Robot_State.sample_buffer_size,3)) #Position()
@@ -106,7 +108,7 @@ class Robot_State:
         return(step_phase)
 
     # External auxiliary method:
-    def Set_step_phase(self, value = None, foot_lift = False):
+    def Set_step_phase(self, value = None, foot_lift = False):       
         if value is None:
             # value = self.__step_phase
             if foot_lift and ( (self.__step_phase == 1) or (self.__step_phase == 3) ): 
@@ -158,8 +160,15 @@ class Robot_State:
             #self.buffer_full = False
         
         ## Reset step phase average parameters
-        self.num_of_avg_samples = 0
-        self.reset_avg_flag = True
+        self.count_avg_samples = 0
+        #self.reset_avg_flag = True
+        self.stance_hip_sum = pl.zeros((3)) #Position()
+        self.swing_foot_sum = pl.zeros((6)) #Pos_and_Ori()
+        self.swing_hip_sum = pl.zeros((3)) #Position()
+        self.pelvis_m_sum = pl.zeros((3)) #Orientation()
+        self.com_m_sum = pl.zeros((3)) #Position()
+
+        self.count_start_samples = 0
 
         self.step_phase_changed = False
         return()
@@ -175,11 +184,11 @@ class Robot_State:
 
     # Class internal auxiliary method:
     def Update_State(self, tran, rot):
-        stance_hip_new = pl.array([[ tran[0][0], tran[0][1], tran[0][2] ]])
-        swing_foot_new = pl.array([[ tran[4][0], tran[4][1], tran[4][2], rot[4][0], rot[4][1], rot[4][2] ]])
-        swing_hip_new = pl.array([[ tran[3][0], tran[3][1], tran[3][2] ]])
-        pelvis_m_new = pl.array([[ rot[2][0], rot[2][1], rot[2][2] ]])
-        com_m_new = pl.array([[ tran[1][0], tran[1][1], tran[1][2] ]])
+        stance_hip_new = pl.array([ tran[0][0], tran[0][1], tran[0][2] ])
+        swing_foot_new = pl.array([ tran[4][0], tran[4][1], tran[4][2], rot[4][0], rot[4][1], rot[4][2] ])
+        swing_hip_new = pl.array([ tran[3][0], tran[3][1], tran[3][2] ])
+        pelvis_m_new = pl.array([ rot[2][0], rot[2][1], rot[2][2] ])
+        com_m_new = pl.array([ tran[1][0], tran[1][1], tran[1][2] ])
         
         ## Check if step phase changed and update robot state accordingly:
         if self.step_phase_changed:
@@ -209,22 +218,46 @@ class Robot_State:
         self.Moving_Avg_Filter()
 
         ## Calc. step phase average
-        self.num_of_avg_samples += 1
-        # self.last_Fint = force
-        # self.Fint_sum += force
+        self.count_avg_samples += 1
+
+        self.stance_hip_sum = self.stance_hip_sum + stance_hip_new
+        self.swing_foot_sum = self.swing_foot_sum + swing_foot_new
+        self.swing_hip_sum = self.swing_hip_sum + swing_hip_new
+        self.pelvis_m_sum = self.pelvis_m_sum + pelvis_m_new
+        self.com_m_sum = self.com_m_sum + com_m_new
+
+        self.stance_hip_avg = self.stance_hip_sum/self.count_avg_samples
+        self.swing_foot_avg = self.swing_foot_sum/self.count_avg_samples
+        self.swing_hip_avg = self.swing_hip_sum/self.count_avg_samples
+        self.pelvis_m_avg = self.pelvis_m_sum/self.count_avg_samples
+        self.com_m_avg = self.com_m_sum/self.count_avg_samples
 
         # #self.last_update_stamp = time_stamp
         # if self.reset_avg_flag:
         #     self.avg_start_time = rospy.get_rostime() #time_stamp
         #     self.reset_avg_flag = False
 
-        ## Selecet desired State value:
-        self.stance_hip = self.array2Pos( self.stance_hip_filtered )
-        self.swing_foot = self.array2Pos_Ori( self.swing_foot_filtered )
-        self.swing_hip = self.array2Pos( self.swing_hip_filtered ) #_arr[-1,:] )
-        self.pelvis_m = self.array2Ori( self.pelvis_m_filtered )
-        self.com_m = self.array2Pos( self.com_m_filtered )  
+        ## Pose at begining of step phase:
+        if self.count_start_samples < Robot_State.samples_in_start_of_step_phase_avg:
+            self.count_start_samples += 1
+            self.stance_hip_start = self.stance_hip_avg.copy()
+            self.swing_foot_start = self.swing_foot_avg.copy()
+            self.swing_hip_start = self.swing_hip_avg.copy()
+            self.pelvis_m_start = self.pelvis_m_avg.copy()
+            self.com_m_start = self.com_m_avg.copy()
 
+        # rospy.loginfo("Robot State Update_State: count_start_samples = %f, swing_foot_start x=%f, y=%f,  z=%f, p=%f, r=%f, w=%f" \
+        #        % ( self.count_start_samples, self.swing_foot_start[0], self.swing_foot_start[1], self.swing_foot_start[2], self.swing_foot_start[3], self.swing_foot_start[4], self.swing_foot_start[5]) ) #,self.swing_foot_start.shape[1] ) )
+        # # Wait 1 second
+        # rospy.sleep(1)
+
+        ## Selecet desired State value to output:
+        self.stance_hip = self.array2Pos( self.stance_hip_arr[-1,:] ) # last sampled value
+        self.swing_foot = self.array2Pos_Ori( self.swing_foot_filtered )
+        self.swing_hip = self.array2Pos( self.swing_hip_arr[-1,:] ) #_arr[-1,:] ) # last sampled value
+        self.pelvis_m = self.array2Ori( self.pelvis_m_filtered )
+        self.com_m = self.array2Pos( self.com_m_arr[-1,:] ) # last sampled value  
+        self.swing_foot_at_start_of_step_phase = self.array2Pos_Ori( self.swing_foot_start )
 
         return()
 
@@ -235,14 +268,14 @@ class Robot_State:
         # tf frames:
         if ( step_phase == 1 ) or ( step_phase == 2 ): 
             # stance = left, swing/support = right
-            base_frame = 'l_talus' #'l_foot'
+            base_frame =  'l_foot' #'l_talus'
             # frames to transform: stance hip, com_m_arr, pelvis_m_arr, swing_hip_arr, swing_foot_arr
-            get_frames = [ 'l_uleg', 'com', 'pelvis', 'r_uleg', 'r_foot', 'l_lleg' ] # DRC (from tf) names # 'l_knee' add for debug links length
+            get_frames = [ 'l_uleg', 'com', 'pelvis', 'r_uleg', 'r_foot', 'l_lleg' ] # DRC (from tf) names # 'l_lleg' add for debug links length
         elif ( step_phase == 3 ) or ( step_phase == 4 ): 
             # stance = right, swing/support = left
             base_frame = 'r_foot'
             # frames to transform: stance hip, com_m_arr, pelvis_m_arr, swing_hip_arr, swing_foot_arr
-            get_frames = [ 'r_uleg', 'com', 'pelvis', 'l_uleg', 'l_foot', 'r_lleg' ] # DRC (from tf) names    
+            get_frames = [ 'r_uleg', 'com', 'pelvis', 'l_uleg', 'l_foot', 'r_lleg' ] # DRC (from tf) names # 'r_lleg' add for debug links length   
         # get transforms:
         tran = self.last_tran
         rot = self.last_rot
@@ -250,10 +283,10 @@ class Robot_State:
             successful_tf = True
             try:
               (translation,rotation) = listener.lookupTransform(base_frame, get_frames[i], rospy.Time(0))  #  rospy.Time(0) to use latest availble transform 
-            except (tf.LookupException, tf.ConnectivityException, tf.ExtrapolationException) as ex:
+            except: # (tf.LookupException, tf.ConnectivityException, tf.ExtrapolationException) as ex:
               successful_tf = False
               # print ex
-              rospy.loginfo("tf exception: %s" % (ex.args))
+              rospy.loginfo("tf exception: ")  # %s" % (ex.args))
               # Wait 1 second
               # rospy.sleep(1)
               continue
@@ -261,19 +294,12 @@ class Robot_State:
                 tran[i] = translation
                 rot[i] = rotation
 
-        ## debug calc. link length:
-        #try:
-        (translation,rotation) = listener.lookupTransform(base_frame, get_frames[5], rospy.Time(0))  #  rospy.Time(0) to use latest availble transform 
-        # except (tf.LookupException, tf.ConnectivityException, tf.ExtrapolationException) as ex:
-        #     # print ex
-        #     rospy.loginfo("tf exception: %s" % (ex.args))
-        #     # Wait 1 second
-        #     # rospy.sleep(1)
-        #     # continue
-        lower_leg_length = ma.sqrt(translation[0]**2 + translation[1]**2 + translation[2]**2)
-        upper_leg_length = ma.sqrt((tran[0][0]-translation[0])**2 + (tran[0][1]-translation[1])**2 + (tran[0][2]-translation[2])**2)
-        rospy.loginfo("Knee position: - x=%f, y=%f , z=%f, Hip position: - x=%f, y=%f , z=%f; Lower leg length = %f, Upper leg length = %f" \
-            % (translation[0], translation[1], translation[2], tran[0][0], tran[0][1], tran[0][2], lower_leg_length, upper_leg_length) )
+        # ## debug calc. links length:
+        # (translation,rotation) = listener.lookupTransform(base_frame, get_frames[5], rospy.Time(0))  #  rospy.Time(0) to use latest availble transform 
+        # lower_leg_length = ma.sqrt(translation[0]**2 + translation[1]**2 + translation[2]**2)
+        # upper_leg_length = ma.sqrt((tran[0][0]-translation[0])**2 + (tran[0][1]-translation[1])**2 + (tran[0][2]-translation[2])**2)
+        # rospy.loginfo("Knee position: x=%f, y=%f , z=%f, Hip position: x=%f, y=%f , z=%f; Lower leg length = %f, Upper leg length = %f" \
+        #     % (translation[0], translation[1], translation[2], tran[0][0], tran[0][1], tran[0][2], lower_leg_length, upper_leg_length) )
 
         self.Update_State(tran, rot)
 

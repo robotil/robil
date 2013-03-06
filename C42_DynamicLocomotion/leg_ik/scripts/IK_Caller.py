@@ -77,7 +77,7 @@ def get_from_zmp(msg):
             # swing_fixed.z = PSC_right_swing_leg.getCMD(msg.swing_foot.z, desired_normal_force)  
             
             # right_leg_angles = swing_leg_ik(swing_fixed,msg.swing_hip,msg.pelvis_m)
-            right_leg_angles = swing_leg_ik(msg.swing_foot,msg.swing_hip,msg.pelvis_m)
+            right_leg_angles = swing_leg_ik(msg.swing_foot,msg.swing_hip,msg.pelvis_d) # msg.pelvis_m)
             left_leg_angles = stance_leg_ik(msg.stance_hip,msg.pelvis_d)
         elif ( msg.step_phase == 3 ) or ( msg.step_phase == 4 ): # right leg is stance
             # [mhx,lhy,uhz,kny,lax,uay]
@@ -87,7 +87,7 @@ def get_from_zmp(msg):
             # swing_fixed.z = PSC_left_swing_leg.getCMD(msg.swing_foot.z, desired_normal_force) 
 
             # left_leg_angles = swing_leg_ik(swing_fixed,msg.swing_hip,msg.pelvis_m)
-            left_leg_angles = swing_leg_ik(msg.swing_foot,msg.swing_hip,msg.pelvis_m)
+            left_leg_angles = swing_leg_ik(msg.swing_foot,msg.swing_hip,msg.pelvis_d) # msg.pelvis_m)
             right_leg_angles = stance_leg_ik(msg.stance_hip,msg.pelvis_d)
 
     except IKReachException as exc:
@@ -99,16 +99,16 @@ def get_from_zmp(msg):
         
     ns.l_leg_lax.publish( left_leg_angles[4] ) #JSC_l_leg_lax.getCMD(ns.LegAng.ang.lax) )
     ns.l_leg_uay.publish( left_leg_angles[5] )
-    ns.l_leg_kny.publish( left_leg_angles[3] )
+    ns.l_leg_kny.publish( left_leg_angles[3] + ns.joints_offset['l_leg_kny'] )
     ns.l_leg_uhz.publish( left_leg_angles[2] )
-    ns.l_leg_lhy.publish( left_leg_angles[1] )
+    ns.l_leg_lhy.publish( left_leg_angles[1] + ns.joints_offset['l_leg_lhy'] )
     ns.l_leg_mhx.publish( left_leg_angles[0] ) #JSC_l_leg_mhx.getCMD(ns.LegAng.ang.mhx) )
 
     ns.r_leg_lax.publish( right_leg_angles[4] ) #JSC_r_leg_lax.getCMD(ns.LegAng.ang.lax + lax_stance) )
     ns.r_leg_uay.publish( right_leg_angles[5] )
-    ns.r_leg_kny.publish( right_leg_angles[3] )
+    ns.r_leg_kny.publish( right_leg_angles[3] + ns.joints_offset['r_leg_kny'] )
     ns.r_leg_uhz.publish( right_leg_angles[2] )
-    ns.r_leg_lhy.publish( right_leg_angles[1] )
+    ns.r_leg_lhy.publish( right_leg_angles[1] + ns.joints_offset['r_leg_lhy'])
     ns.r_leg_mhx.publish( right_leg_angles[0] ) #JJSC_r_leg_mhx.getCMD(ns.LegAng.ang.mhx + mhx_stance) )
         
     ns.back_mby.publish( 0.0 )
@@ -150,7 +150,11 @@ def LEG_IK():
     rospy.init_node('LEG_IK')
     # rospy.wait_for_service('swing_leg_ik')
     # rospy.wait_for_service('stance_leg_ik')
-    
+
+    ns.joints_offset = rospy.get_param("/zmp_walking/IK_zero_pose")
+    rospy.loginfo("LEG_IK joints_offset: l_leg_kny = %f, r_leg_kny = %f, l_leg_lhy = %f, r_leg_lhy = %f" \
+            % ( ns.joints_offset['l_leg_kny'], ns.joints_offset['r_leg_kny'], ns.joints_offset['l_leg_lhy'], ns.joints_offset['r_leg_lhy']) )
+
 
     ns.r_leg_lax = rospy.Publisher('/r_leg_lax_position_controller/command', Float64)
     ns.r_leg_uay = rospy.Publisher('/r_leg_uay_position_controller/command', Float64)

@@ -10,11 +10,13 @@ import yaml
 from pr2_mechanism_msgs.srv import *
 from std_msgs.msg import *
 from control_msgs.msg import *
+from std_srvs.srv import Empty
 
 load_controller = rospy.ServiceProxy('pr2_controller_manager/load_controller', LoadController)
 unload_controller = rospy.ServiceProxy('pr2_controller_manager/unload_controller', UnloadController)
 switch_controller = rospy.ServiceProxy('pr2_controller_manager/switch_controller', SwitchController)
 list_loaded_controllers = rospy.ServiceProxy('pr2_controller_manager/list_controllers', ListControllers)
+#reset_gazebo_model = 
 
 loaded = []
 
@@ -72,7 +74,7 @@ def init_pose_with_trajectory_controllers():
     #                                init_pose['neck_ay'], init_pose['back_lbz'], init_pose['back_mby'], init_pose['back_ubx'] ] )
     for i in xrange(0, traj_len):
         goal_pt = goal.trajectory.points[i]
-        t += 5
+        t += 1 #5
         goal_pt.time_from_start = rospy.Duration.from_sec(t)
         goal_pt.velocities = [0] * 28
         #y = "0 0 -0.2372 0.4491 -0.2119 0   0 0 -0.2372 0.4491 -0.2119 0   0 -1.3 0 0 0 0   0 1.3 0 0 0 0    0 0 0 0"
@@ -80,7 +82,7 @@ def init_pose_with_trajectory_controllers():
         goal_pt.positions = traj_positions[i]
     
     traj_client.send_goal(goal)
-    traj_client.wait_for_result(rospy.Duration.from_sec(t + 3))
+    traj_client.wait_for_result(rospy.Duration.from_sec(t + 1)) #3
     succeeded_to_init_pose = 1
     return succeeded_to_init_pose
 
@@ -113,7 +115,7 @@ def ResetControllerParams(running_controller_names, new_controller_names, New_pa
         if resp.ok != 0:
             rospy.loginfo("Running controller: %s" % ', '.join(running_controller_names ))
             rospy.loginfo("Stoped controllers: %s" % ', '.join(new_controller_names))
-            time.sleep(1)
+            time.sleep(0.01)
             move_2_init_pose = init_pose_with_trajectory_controllers()
             if move_2_init_pose == 1:
                 rospy.loginfo("Successful init pose with trajectory controllers:")
@@ -150,7 +152,7 @@ def ResetControllerParams(running_controller_names, new_controller_names, New_pa
         if resp.ok != 0:
             loaded.append(name)
         else:
-            time.sleep(1) # give error message a chance to get out
+            time.sleep(0.1) # give error message a chance to get out
             rospy.logerr("Failed to load %s" % name)
 
     rospy.loginfo("Loaded controllers: %s" % ', '.join(loaded))
@@ -230,93 +232,101 @@ def jointStateCommand():
   #   bend_ankle_angle = 0#-0.2119
 
 
-    init_pose_l_leg_kny = 0.0 #bend_knee_angle
-    init_pose_r_leg_kny = 0.0 #init_pose_l_leg_kny
+    zero_pose_l_leg_kny = 0.0 #bend_knee_angle
+    zero_pose_r_leg_kny = 0.0 #zero_pose_l_leg_kny
     
-    init_pose_l_leg_lax = 0.0 #0.0
-    init_pose_r_leg_lax = 0.0 #init_pose_l_leg_lax
+    zero_pose_l_leg_lax = 0.0 #0.0
+    zero_pose_r_leg_lax = 0.0 #zero_pose_l_leg_lax
 
-    init_pose_l_leg_lhy = 0.0 #bend_hip_angle 
-    init_pose_r_leg_lhy = 0.0 #init_pose_l_leg_lhy
+    zero_pose_l_leg_lhy = 0.0 #bend_hip_angle 
+    zero_pose_r_leg_lhy = 0.0 #zero_pose_l_leg_lhy
 
-    init_pose_l_leg_mhx = 0.0 #0.0
-    init_pose_r_leg_mhx = 0.0 #init_pose_l_leg_mhx
+    zero_pose_l_leg_mhx = 0.0 #0.0
+    zero_pose_r_leg_mhx = 0.0 #zero_pose_l_leg_mhx
     
-    init_pose_l_leg_uay = 0.0 #bend_ankle_angle
-    init_pose_r_leg_uay = 0.0 #init_pose_l_leg_uay
+    zero_pose_l_leg_uay = 0.0 #bend_ankle_angle
+    zero_pose_r_leg_uay = 0.0 #zero_pose_l_leg_uay
 
-    init_pose_l_leg_uhz = 0.0 #0.0
-    init_pose_r_leg_uhz = 0.0 #init_pose_l_leg_uhz
+    zero_pose_l_leg_uhz = 0.0 #0.0
+    zero_pose_r_leg_uhz = 0.0 #zero_pose_l_leg_uhz
 
-    init_pose_neck_ay =  0.0 #0.0
-    init_pose_back_lbz = 0.0 #0.0
-    init_pose_back_mby = 0.0 #0.0
-    init_pose_back_ubx = 0.0 #0.0 
+    zero_pose_neck_ay =  0.0 #0.0
+    zero_pose_back_lbz = 0.0 #0.0
+    zero_pose_back_mby = 0.0 #0.0
+    zero_pose_back_ubx = 0.0 #0.0 
 
-    init_pose_l_arm_elx = 0.0 
-    init_pose_r_arm_elx = 0.0
+    zero_pose_l_arm_elx = 0.0 
+    zero_pose_r_arm_elx = 0.0
     
-    init_pose_l_arm_ely = 0.0 
-    init_pose_r_arm_ely = 0.0 
+    zero_pose_l_arm_ely = 0.0 
+    zero_pose_r_arm_ely = 0.0 
 
-    init_pose_l_arm_mwx = 0.0 
-    init_pose_r_arm_mwx = 0.0 
+    zero_pose_l_arm_mwx = 0.0 
+    zero_pose_r_arm_mwx = 0.0 
 
-    init_pose_l_arm_shx = 0.0 
-    init_pose_r_arm_shx = 0.0 
+    zero_pose_l_arm_shx = 0.0 
+    zero_pose_r_arm_shx = 0.0 
     
-    init_pose_l_arm_usy = 0.0 
-    init_pose_r_arm_usy = 0.0 
+    zero_pose_l_arm_usy = 0.0 
+    zero_pose_r_arm_usy = 0.0 
 
-    init_pose_l_arm_uwy = 0.0 
-    init_pose_r_arm_uwy = 0.0 
+    zero_pose_l_arm_uwy = 0.0 
+    zero_pose_r_arm_uwy = 0.0 
 
     # # insert step command on init:
     # enable_step_flag = 0
     # step_pose_l_leg_lhy = -0.1
     # step_pose_r_leg_lhy = step_pose_l_leg_lhy
 
+    times_to_pub_zero_pose = 100 #1000 # number of times to publish zero_pose
+    pub_num = 1;
+
+    while ( not rospy.is_shutdown() ) and (pub_num < times_to_pub_zero_pose):
     # intitialsation publish:
-    l_leg_kny.publish(init_pose_l_leg_kny)
-    r_leg_kny.publish(init_pose_r_leg_kny)
-
-    l_leg_lax.publish(init_pose_l_leg_lax)
-    r_leg_lax.publish(init_pose_r_leg_lax)
+        l_leg_kny.publish(zero_pose_l_leg_kny)
+        r_leg_kny.publish(zero_pose_r_leg_kny)
     
-    l_leg_lhy.publish(init_pose_l_leg_lhy)
-    r_leg_lhy.publish(init_pose_r_leg_lhy)
-
-    l_leg_mhx.publish(init_pose_l_leg_mhx)
-    r_leg_mhx.publish(init_pose_r_leg_mhx)
-
-    l_leg_uay.publish(init_pose_l_leg_uay)
-    r_leg_uay.publish(init_pose_r_leg_uay)
-
-    l_leg_uhz.publish(init_pose_l_leg_uhz)
-    r_leg_uhz.publish(init_pose_r_leg_uhz)
-
-    neck_ay.publish(init_pose_neck_ay)
-    back_lbz.publish(init_pose_back_lbz)
-    back_mby.publish(init_pose_back_mby)
-    back_ubx.publish(init_pose_back_ubx)
-
-    l_arm_elx.publish(init_pose_l_arm_elx)
-    r_arm_elx.publish(init_pose_r_arm_elx)
-
-    l_arm_ely.publish(init_pose_l_arm_ely)
-    r_arm_ely.publish(init_pose_r_arm_ely)
+        l_leg_lax.publish(zero_pose_l_leg_lax)
+        r_leg_lax.publish(zero_pose_r_leg_lax)
+        
+        l_leg_lhy.publish(zero_pose_l_leg_lhy)
+        r_leg_lhy.publish(zero_pose_r_leg_lhy)
     
-    l_arm_mwx.publish(init_pose_l_arm_mwx)
-    r_arm_mwx.publish(init_pose_r_arm_mwx)
+        l_leg_mhx.publish(zero_pose_l_leg_mhx)
+        r_leg_mhx.publish(zero_pose_r_leg_mhx)
+    
+        l_leg_uay.publish(zero_pose_l_leg_uay)
+        r_leg_uay.publish(zero_pose_r_leg_uay)
+    
+        l_leg_uhz.publish(zero_pose_l_leg_uhz)
+        r_leg_uhz.publish(zero_pose_r_leg_uhz)
+    
+        neck_ay.publish(zero_pose_neck_ay)
+        back_lbz.publish(zero_pose_back_lbz)
+        back_mby.publish(zero_pose_back_mby)
+        back_ubx.publish(zero_pose_back_ubx)
+    
+        l_arm_elx.publish(zero_pose_l_arm_elx)
+        r_arm_elx.publish(zero_pose_r_arm_elx)
+    
+        l_arm_ely.publish(zero_pose_l_arm_ely)
+        r_arm_ely.publish(zero_pose_r_arm_ely)
+        
+        l_arm_mwx.publish(zero_pose_l_arm_mwx)
+        r_arm_mwx.publish(zero_pose_r_arm_mwx)
+    
+        l_arm_shx.publish(zero_pose_l_arm_shx)
+        r_arm_shx.publish(zero_pose_r_arm_shx)
+    
+        l_arm_usy.publish(zero_pose_l_arm_usy)
+        r_arm_usy.publish(zero_pose_r_arm_usy)
+    
+        l_arm_uwy.publish(zero_pose_l_arm_uwy)
+        r_arm_uwy.publish(zero_pose_r_arm_uwy)
 
-    l_arm_shx.publish(init_pose_l_arm_shx)
-    r_arm_shx.publish(init_pose_r_arm_shx)
-
-    l_arm_usy.publish(init_pose_l_arm_usy)
-    r_arm_usy.publish(init_pose_r_arm_usy)
-
-    l_arm_uwy.publish(init_pose_l_arm_uwy)
-    r_arm_uwy.publish(init_pose_r_arm_uwy)
+        pub_num += 1
+        # Wait 0.01 second
+        rospy.sleep(0.01)
 
 
 
@@ -324,22 +334,22 @@ def jointStateCommand():
     init_pose = rospy.get_param("/zmp_walking/zmp_init_pose")
 
     final_pose_l_leg_kny = init_pose['l_leg_kny'] #bend_knee_angle
-    final_pose_r_leg_kny = init_pose['r_leg_kny'] #init_pose_l_leg_kny
+    final_pose_r_leg_kny = init_pose['r_leg_kny'] #zero_pose_l_leg_kny
     
     final_pose_l_leg_lax = init_pose['l_leg_lax'] #0.0
-    final_pose_r_leg_lax = init_pose['r_leg_lax'] #init_pose_l_leg_lax
+    final_pose_r_leg_lax = init_pose['r_leg_lax'] #zero_pose_l_leg_lax
 
     final_pose_l_leg_lhy = init_pose['l_leg_lhy'] #bend_hip_angle 
-    final_pose_r_leg_lhy = init_pose['r_leg_lhy'] #init_pose_l_leg_lhy
+    final_pose_r_leg_lhy = init_pose['r_leg_lhy'] #zero_pose_l_leg_lhy
 
     final_pose_l_leg_mhx = init_pose['l_leg_mhx'] #0.0
-    final_pose_r_leg_mhx = init_pose['r_leg_mhx'] #init_pose_l_leg_mhx
+    final_pose_r_leg_mhx = init_pose['r_leg_mhx'] #zero_pose_l_leg_mhx
     
     final_pose_l_leg_uay = init_pose['l_leg_uay'] #bend_ankle_angle
-    final_pose_r_leg_uay = init_pose['r_leg_uay'] #init_pose_l_leg_uay
+    final_pose_r_leg_uay = init_pose['r_leg_uay'] #zero_pose_l_leg_uay
 
     final_pose_l_leg_uhz = init_pose['l_leg_uhz'] #0.0
-    final_pose_r_leg_uhz = init_pose['r_leg_uhz'] #init_pose_l_leg_uhz
+    final_pose_r_leg_uhz = init_pose['r_leg_uhz'] #zero_pose_l_leg_uhz
 
     final_pose_neck_ay =  init_pose['neck_ay'] #0.0
     final_pose_back_lbz = init_pose['back_lbz'] #0.0
@@ -367,15 +377,19 @@ def jointStateCommand():
     #t_start = rospy.get_time() # current time to start Init
     #init_duration = 30 # units [sec]; time to enable Init
     #t = t_start
-    times_to_pub = 1000 # number of times to publish
+    times_to_pub = 600 #1000 # number of times to publish
     final_pose_pub = 500.0 # number of times to publish until reaching final position
     #times_to_step = 500
     pub_num = 1;
 
-    #Sleep for 1 second to wait for the home position
-    rospy.sleep(1)
+    #Sleep for 0.1 second to wait for the home position
+    rospy.sleep(0.1)
 
-    pose_input = init_pose_l_leg_lhy
+    rospy.wait_for_service('gazebo/reset_models')
+    reset_gazebo_model = rospy.ServiceProxy('gazebo/reset_models', Empty)
+    reset_gazebo_model()
+
+    pose_input = zero_pose_l_leg_lhy
     #This while loop will continue until ROS tells it to shutdown init time passes
     while ( not rospy.is_shutdown() ) and (pub_num < times_to_pub): #( t <= (t_start + 10) ):
         if pub_num < final_pose_pub:
@@ -397,46 +411,46 @@ def jointStateCommand():
         #     pose_input = step_pose_l_leg_lhy
         #     rospy.loginfo(": Starting step with size %f in publication number %d" %(pose_input,pub_num))
 
-        l_leg_kny.publish( final_pose_l_leg_kny*final_ratio + init_pose_l_leg_kny*(1-final_ratio) )
-        r_leg_kny.publish( final_pose_r_leg_kny*final_ratio + init_pose_r_leg_kny*(1-final_ratio) )
+        l_leg_kny.publish( final_pose_l_leg_kny*final_ratio + zero_pose_l_leg_kny*(1-final_ratio) )
+        r_leg_kny.publish( final_pose_r_leg_kny*final_ratio + zero_pose_r_leg_kny*(1-final_ratio) )
 
-        l_leg_lax.publish( final_pose_l_leg_lax*final_ratio + init_pose_l_leg_lax*(1-final_ratio) )
-        r_leg_lax.publish( final_pose_r_leg_lax*final_ratio + init_pose_r_leg_lax*(1-final_ratio) )
+        l_leg_lax.publish( final_pose_l_leg_lax*final_ratio + zero_pose_l_leg_lax*(1-final_ratio) )
+        r_leg_lax.publish( final_pose_r_leg_lax*final_ratio + zero_pose_r_leg_lax*(1-final_ratio) )
     
-        l_leg_lhy.publish( final_pose_l_leg_lhy*final_ratio + init_pose_l_leg_lhy*(1-final_ratio) ) # init_pose_l_leg_lhy #pose_input
-        r_leg_lhy.publish( final_pose_r_leg_lhy*final_ratio + init_pose_r_leg_lhy*(1-final_ratio) ) # init_pose_r_leg_lhy #pose_input
+        l_leg_lhy.publish( final_pose_l_leg_lhy*final_ratio + zero_pose_l_leg_lhy*(1-final_ratio) ) # zero_pose_l_leg_lhy #pose_input
+        r_leg_lhy.publish( final_pose_r_leg_lhy*final_ratio + zero_pose_r_leg_lhy*(1-final_ratio) ) # zero_pose_r_leg_lhy #pose_input
 
-        l_leg_mhx.publish( final_pose_l_leg_mhx*final_ratio + init_pose_l_leg_mhx*(1-final_ratio) )
-        r_leg_mhx.publish( final_pose_r_leg_mhx*final_ratio + init_pose_r_leg_mhx*(1-final_ratio) )
+        l_leg_mhx.publish( final_pose_l_leg_mhx*final_ratio + zero_pose_l_leg_mhx*(1-final_ratio) )
+        r_leg_mhx.publish( final_pose_r_leg_mhx*final_ratio + zero_pose_r_leg_mhx*(1-final_ratio) )
 
-        l_leg_uay.publish( final_pose_l_leg_uay*final_ratio + init_pose_l_leg_uay*(1-final_ratio) )
-        r_leg_uay.publish( final_pose_r_leg_uay*final_ratio + init_pose_r_leg_uay*(1-final_ratio) )
+        l_leg_uay.publish( final_pose_l_leg_uay*final_ratio + zero_pose_l_leg_uay*(1-final_ratio) )
+        r_leg_uay.publish( final_pose_r_leg_uay*final_ratio + zero_pose_r_leg_uay*(1-final_ratio) )
 
-        l_leg_uhz.publish( final_pose_l_leg_uhz*final_ratio + init_pose_l_leg_uhz*(1-final_ratio) )
-        r_leg_uhz.publish( final_pose_r_leg_uhz*final_ratio + init_pose_r_leg_uhz*(1-final_ratio) )
+        l_leg_uhz.publish( final_pose_l_leg_uhz*final_ratio + zero_pose_l_leg_uhz*(1-final_ratio) )
+        r_leg_uhz.publish( final_pose_r_leg_uhz*final_ratio + zero_pose_r_leg_uhz*(1-final_ratio) )
 
-        neck_ay.publish( final_pose_neck_ay*final_ratio + init_pose_neck_ay*(1-final_ratio) )
-        back_lbz.publish( final_pose_back_lbz*final_ratio + init_pose_back_lbz*(1-final_ratio) )
-        back_mby.publish( final_pose_back_mby*final_ratio + init_pose_back_mby*(1-final_ratio) )
-        back_ubx.publish( final_pose_back_ubx*final_ratio + init_pose_back_ubx*(1-final_ratio) )
+        neck_ay.publish( final_pose_neck_ay*final_ratio + zero_pose_neck_ay*(1-final_ratio) )
+        back_lbz.publish( final_pose_back_lbz*final_ratio + zero_pose_back_lbz*(1-final_ratio) )
+        back_mby.publish( final_pose_back_mby*final_ratio + zero_pose_back_mby*(1-final_ratio) )
+        back_ubx.publish( final_pose_back_ubx*final_ratio + zero_pose_back_ubx*(1-final_ratio) )
 
-        l_arm_elx.publish( final_pose_l_arm_elx*final_ratio + init_pose_l_arm_elx*(1-final_ratio) )
-        r_arm_elx.publish( final_pose_r_arm_elx*final_ratio + init_pose_r_arm_elx*(1-final_ratio) )
+        l_arm_elx.publish( final_pose_l_arm_elx*final_ratio + zero_pose_l_arm_elx*(1-final_ratio) )
+        r_arm_elx.publish( final_pose_r_arm_elx*final_ratio + zero_pose_r_arm_elx*(1-final_ratio) )
 
-        l_arm_ely.publish( final_pose_l_arm_ely*final_ratio + init_pose_l_arm_ely*(1-final_ratio) )
-        r_arm_ely.publish( final_pose_r_arm_ely*final_ratio + init_pose_r_arm_ely*(1-final_ratio) )
+        l_arm_ely.publish( final_pose_l_arm_ely*final_ratio + zero_pose_l_arm_ely*(1-final_ratio) )
+        r_arm_ely.publish( final_pose_r_arm_ely*final_ratio + zero_pose_r_arm_ely*(1-final_ratio) )
     
-        l_arm_mwx.publish( final_pose_l_arm_mwx*final_ratio + init_pose_l_arm_mwx*(1-final_ratio) ) # init_pose_l_leg_lhy #pose_input
-        r_arm_mwx.publish( final_pose_r_arm_mwx*final_ratio + init_pose_r_arm_mwx*(1-final_ratio) ) # init_pose_r_leg_lhy #pose_input
+        l_arm_mwx.publish( final_pose_l_arm_mwx*final_ratio + zero_pose_l_arm_mwx*(1-final_ratio) ) # zero_pose_l_leg_lhy #pose_input
+        r_arm_mwx.publish( final_pose_r_arm_mwx*final_ratio + zero_pose_r_arm_mwx*(1-final_ratio) ) # zero_pose_r_leg_lhy #pose_input
 
-        l_arm_shx.publish( final_pose_l_arm_shx*final_ratio + init_pose_l_arm_shx*(1-final_ratio) )
-        r_arm_shx.publish( final_pose_r_arm_shx*final_ratio + init_pose_r_arm_shx*(1-final_ratio) )
+        l_arm_shx.publish( final_pose_l_arm_shx*final_ratio + zero_pose_l_arm_shx*(1-final_ratio) )
+        r_arm_shx.publish( final_pose_r_arm_shx*final_ratio + zero_pose_r_arm_shx*(1-final_ratio) )
 
-        l_arm_usy.publish( final_pose_l_arm_usy*final_ratio + init_pose_l_arm_usy*(1-final_ratio) )
-        r_arm_usy.publish( final_pose_r_arm_usy*final_ratio + init_pose_r_arm_usy*(1-final_ratio) )
+        l_arm_usy.publish( final_pose_l_arm_usy*final_ratio + zero_pose_l_arm_usy*(1-final_ratio) )
+        r_arm_usy.publish( final_pose_r_arm_usy*final_ratio + zero_pose_r_arm_usy*(1-final_ratio) )
 
-        l_arm_uwy.publish( final_pose_l_arm_uwy*final_ratio + init_pose_l_arm_uwy*(1-final_ratio) )
-        r_arm_uwy.publish( final_pose_r_arm_uwy*final_ratio + init_pose_r_arm_uwy*(1-final_ratio) )
+        l_arm_uwy.publish( final_pose_l_arm_uwy*final_ratio + zero_pose_l_arm_uwy*(1-final_ratio) )
+        r_arm_uwy.publish( final_pose_r_arm_uwy*final_ratio + zero_pose_r_arm_uwy*(1-final_ratio) )
 
 
         # Wait 0.01 second
@@ -459,17 +473,17 @@ if __name__ == '__main__':
     #                                'r_arm_elx':0, 'r_arm_uwy':0, 'r_arm_mwx':0, 
     #                                'neck_ay':0, 'back_lbz':0, 'back_mby':0, 'back_ubx':0})
     ## new params - bend_knees=0.18
-    # rospy.set_param("/zmp_walking/zmp_init_pose", {'l_leg_uhz':0, 'l_leg_mhx':0, 'l_leg_lhy':-0.7297, 
-    #                                'l_leg_kny':1.3677, 'l_leg_uay':-0.6380, 'l_leg_lax':0, 
-    #                                'r_leg_uhz':0, 'r_leg_mhx':0, 'r_leg_lhy':-0.7297, 
-    #                                'r_leg_kny':1.3677, 'r_leg_uay':-0.6380, 'r_leg_lax':0, 
-    #                                'l_arm_usy':0, 'l_arm_shx':-1.3, 'l_arm_ely':0, 
-    #                                'l_arm_elx':0, 'l_arm_uwy':0, 'l_arm_mwx':0, 
-    #                                'r_arm_usy':0, 'r_arm_shx':1.3, 'r_arm_ely':0, 
-    #                                'r_arm_elx':0, 'r_arm_uwy':0, 'r_arm_mwx':0, 
-    #                                'neck_ay':0, 'back_lbz':0, 'back_mby':0, 'back_ubx':0})
+    rospy.set_param("/zmp_walking/zmp_init_pose", {'l_leg_uhz':0, 'l_leg_mhx':0, 'l_leg_lhy':-0.7297, 
+                                   'l_leg_kny':1.3677, 'l_leg_uay':-0.6380, 'l_leg_lax':0, 
+                                   'r_leg_uhz':0, 'r_leg_mhx':0, 'r_leg_lhy':-0.7297, 
+                                   'r_leg_kny':1.3677, 'r_leg_uay':-0.6380, 'r_leg_lax':0, 
+                                   'l_arm_usy':0, 'l_arm_shx':-1.3, 'l_arm_ely':0, 
+                                   'l_arm_elx':0, 'l_arm_uwy':0, 'l_arm_mwx':0, 
+                                   'r_arm_usy':0, 'r_arm_shx':1.3, 'r_arm_ely':0, 
+                                   'r_arm_elx':0, 'r_arm_uwy':0, 'r_arm_mwx':0, 
+                                   'neck_ay':0, 'back_lbz':0, 'back_mby':0, 'back_ubx':0})
     #for debug: off-set values for IK
-    rospy.set_param("/zmp_walking/zmp_init_pose", {'l_leg_uhz':0, 'l_leg_mhx':0, 'l_leg_lhy':-0.13, 
+    rospy.set_param("/zmp_walking/IK_zero_pose", {'l_leg_uhz':0, 'l_leg_mhx':0, 'l_leg_lhy':-0.13, 
                                    'l_leg_kny':0.13, 'l_leg_uay':0.0, 'l_leg_lax':0, 
                                    'r_leg_uhz':0, 'r_leg_mhx':0, 'r_leg_lhy':-0.13, 
                                    'r_leg_kny':0.13, 'r_leg_uay':0.0, 'r_leg_lax':0, 

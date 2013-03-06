@@ -35,7 +35,7 @@ def swing_leg_ik(swing_foot,swing_hip,pelvis_m): # pelvis_d
 
     xankle = array([swing_foot.x,swing_foot.y,swing_foot.z])
     xhip =   array([swing_hip.x,swing_hip.y,swing_hip.z])
-
+    
     Rrpw_pelvis_m = array([[cos(pelvis_m.w)*cos(pelvis_m.p),cos(pelvis_m.w)*sin(pelvis_m.p)*sin(pelvis_m.r)-sin(pelvis_m.w)*cos(pelvis_m.r),
                                                             cos(pelvis_m.w)*sin(pelvis_m.p)*cos(pelvis_m.r)+sin(pelvis_m.w)*sin(pelvis_m.r)],
 
@@ -52,8 +52,7 @@ def swing_leg_ik(swing_foot,swing_hip,pelvis_m): # pelvis_d
                         
                         [-sin(swing_foot.p), cos(swing_foot.p)*sin(swing_foot.r),cos(swing_foot.p)*cos(swing_foot.r)]])
 
-    #des_pos = dot(linalg.inv(Rrpw_pelvis_m),(xankle-xhip)) # or use pelvis_d ??? when in the air better to use measured in order to 
-            # reduce placement error of swing foot. need to check if the sign (direction) of correction isn't for each leg left/right
+    #des_pos = dot(linalg.inv(Rrpw_pelvis_m),(xankle-xhip)) # or use pelvis_d ??? 
     des_pos = (xankle-xhip)
     
     
