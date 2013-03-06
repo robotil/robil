@@ -44,7 +44,10 @@ void SetJointStates(const sensor_msgs::JointState::ConstPtr &_js)
 
 	// assign sinusoidal joint angle targets
 	for (unsigned int i = 0; i < jointcommands.name.size(); i++)
+	{
 		jointcommands.position[i] = _js->position[i];
+		//std::cout << jointcommands.position[i] << " ";
+	}
 	
 	std_msgs::String msg;	
 	std::stringstream ss;
