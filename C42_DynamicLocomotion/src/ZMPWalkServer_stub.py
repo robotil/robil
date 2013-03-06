@@ -10,7 +10,6 @@ from C31_PathPlanner.srv import *
 from C31_PathPlanner.msg import C31_Location
 from std_msgs.msg import Float64, Int32
 import geometry_msgs.msg as gm
-import init_zmp
 
 
 class ZmpWlkServer(object):
@@ -20,7 +19,7 @@ class ZmpWlkServer(object):
     
   def __init__(self):
     rospy.loginfo('zmp initialized')
-    self.walk_pub = rospy.Publisher('zmp_walk_command',Int32)
+    self.walk_pub = rospy.Publisher('/atlas/cmd_vel',gm.Twist)
     self._action_name = "/ZmpWalk"
     self._as = actionlib.SimpleActionServer(self._action_name, C42_DynamicLocomotion.msg.C42_ZmpWlkAction, execute_cb=self.task)
     self._as.start()
@@ -32,7 +31,6 @@ class ZmpWlkServer(object):
     self._tol = 0.1
     self._nxt_wp = C31_Location()
     #ensure we enter the main loop at least once
-    self._dis_from_goal = self._tol + 1
 
   def get_pos(self,odom):
     #get robot position, currently from /ground_truth_odom, later from navigation node
@@ -63,36 +61,40 @@ class ZmpWlkServer(object):
   #def task(self, goal):
   def task(self, goal):
     #init_zmp.init_pose_with_trajectory_controllers()
-    #init_zmp.main()
-    rospy.loginfo("pos init")
-    pth = self._get_path()
-    self._nxt_wp.x = pth.path.points[1].x#2
-    self._nxt_wp.y = pth.path.points[1].y#0
-    # start executing the action
-    init_zmp.main()
-    self.walk_pub.publish(Int32(1))
-    
-    #### LOG TASK PARAMETERS ####
     rospy.loginfo("started ZMPwalk")
-    rospy.loginfo("Target position: x:%s y:%s", self._nxt_wp.x, self._nxt_wp.y)
     task_success = True
-
-    #### TASK ####
-    while self._dis_from_goal > self._tol:
-      #calculate distance from goal
+    rospy.sleep(2)
+    Vel = gm.Twist()
+    pth = self._get_path()
+    # start executing the action
+    #### LOG TASK PARAMETERS ####
+    for point in pth.path.points:
+      self._nxt_wp.x = point.x#2
+      self._nxt_wp.y = point.y#0
+      rospy.loginfo("next way point: x:%s y:%s", point.x, point.y)
       pos = np.array([self._pos.x,self._pos.y])
-      gl = np.array([self._nxt_wp.x, self._nxt_wp.y])
+      gl = np.array([point.x, point.y])
       self._dis_from_goal = np.linalg.norm(gl-pos)
-      self._feedback.dis_to_goal = self._dis_from_goal
-      self._as.publish_feedback(self._feedback)
-      rospy.sleep(1)
-      if self._as.is_preempt_requested() or rospy.is_shutdown():
-        #### HERE PROICESS PREEMTION OR INTERUPT #####
-        rospy.loginfo('%s: Preempted' % self._action_name)
-        self._as.set_preempted()
-        task_success = False
-        break
-    self.walk_pub.publish(Int32(0))
+      V = (gl-pos)/np.linalg.norm(gl-pos)
+      Vel.linear.x = V[0]
+      Vel.linear.y = V[1]
+      self.walk_pub.publish(Vel)
+      print Vel
+
+      while self._dis_from_goal > self._tol:
+        #calculate distance from goal
+        pos = np.array([self._pos.x,self._pos.y])
+        gl = np.array([point.x, point.y])
+        self._dis_from_goal = np.linalg.norm(gl-pos)
+        rospy.sleep(0.1)
+        if self._as.is_preempt_requested() or rospy.is_shutdown():
+          #### HERE PROICESS PREEMTION OR INTERUPT #####
+          rospy.loginfo('%s: Preempted' % self._action_name)
+          self._as.set_preempted()
+          task_success = False
+          break
+    Vel = gm.Twist()
+    self.walk_pub.publish(Vel)
     if task_success:
       self._result.res_pos.x = self._pos.x
       self._result.res_pos.y = self._pos.y
