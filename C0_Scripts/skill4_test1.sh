@@ -23,7 +23,7 @@ sleep 10
 
 #start Designer
 #roslaunch C34_Designer start.launch &
-#$C34_Designer_PID=$!
+C34_Designer_PID=$!
 #echo $C34_Designer_PID
 #sleep 10
 
@@ -50,9 +50,7 @@ $C31_PID=$!
 echo $C31_PID
 #sleep 5
 
-echo $C51_PID >> $PKILLS
-#echo $C51_PID $C34_Executer_PID  $C31_PID >> $PKILLS
-echo $C51_PID $C31_PID >> $PKILLS
+echo $C51_PID $C34_Executer_PID  $C31_PID >> $PKILLS
 
 #rosservice call executer/run T4 /home/userws1/git/robil/C34_Designer/plans/skill4_test1_without_pathplanning.xml 
 rosservice call executer/run T4 /home/userws1/git/robil/C34_Designer/plans/skill4_driving.xml 
