@@ -1,0 +1,27 @@
+# The SupportLegs_Status service allows you to update and get the status
+# of the robots support legs that indicates which feet are in contact 
+# with the ground. 
+
+# To update Support Legs Status, specify 
+#  * FootSupport_CMD (SUPPORT_DOUBLE or SUPPORT_SINGLE_RIGHT ro SUPPORT_SINGLE_LEFT: 
+#    * SUPPORT_DOUBLE sets Foot Support to robot standing on two legs.
+#    * SUPPORT_SINGLE_RIGHT sets Foot Support to robot standing only on right leg.
+#    * SUPPORT_SINGLE_LEFT sets Foot Support to robot standing only on left leg.
+# To get Support Legs Status, specify
+#  * FootSupport_CMD (GET_SUPPORT_STATUS) returns Foot Support state.
+
+# The return value "FootSupport_Status" indicates the state of foot support after
+# processing "FootSupport_CMD" (SUPPORT_DOUBLE=0; SUPPORT_SINGLE_RIGHT=1; 
+# SUPPORT_SINGLE_LEFT=2)
+# Note: "FootSupport_Status" gives indication of status for operational purpose
+#       it does not necessary mean the robot has reached the state.  
+
+
+int8 FootSupport_CMD
+int8 SUPPORT_DOUBLE=0
+int8 SUPPORT_SINGLE_RIGHT=1
+int8 SUPPORT_SINGLE_LEFT=2
+int8 GET_SUPPORT_STATUS=3
+---
+int32 FootSupport_Status
+

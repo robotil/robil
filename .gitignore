@@ -2,32 +2,31 @@
 .cproject
 .project
 .pydevproject
-/.metadata/
 
 # Compiled Object files
 *.slo
 *.lo
 *.o
+
 # Compiled Dynamic libraries
 *.so
 !libBTExecuter.so
+
 # Compiled Static libraries
 *.lai
 *.la
 *.a
+
 *~
+
 #"Compiled" python files
 *.pyc
-__init__.py
+
 #QT Creator files
 qtcreator-build/
+
 #ROS auto-make files
 build/
 bin/
 msg_gen/
 srv_gen/
-#java bin files
-*.class
-#Designer logging and debuging
-BTDesigner_stdout.log
-
