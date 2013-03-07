@@ -17,7 +17,7 @@ public class RemoveAction extends AbstractDesignerAction implements
 
 	@Override
 	public void actionPerformed(ActionEvent a) {
-		Document document = getActiveTab().doc;
+		Document document = getActiveTab().document;
 		document.toolSelectionClean();
 		document.removeElement = true;
 		this.designer.toolbar.setTipText(Toolbar.TIP_remove);

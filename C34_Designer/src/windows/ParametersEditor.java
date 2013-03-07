@@ -27,10 +27,10 @@ import javax.swing.table.AbstractTableModel;
 
 import logger.Log;
 
-import document.PropertiesXmlHandler;
+import document.ParametersXmlHandler;
 import document.actions.PropertiesEditorAction;
 
-public class PropertiesEditor extends JPanel implements ActionListener {
+public class ParametersEditor extends JPanel implements ActionListener {
 	private class ColumnListener implements ListSelectionListener {
 		@Override
 		public void valueChanged(ListSelectionEvent event) {
@@ -55,7 +55,7 @@ public class PropertiesEditor extends JPanel implements ActionListener {
 
 			// load
 			try {
-				PropertiesXmlHandler.loadAndSetProperties(path);
+				ParametersXmlHandler.loadAndSetProperties(path);
 				buildTableFromProperties();
 			} catch (Exception ex) {
 				Log.e("Error: " + ex.getMessage());
@@ -63,7 +63,7 @@ public class PropertiesEditor extends JPanel implements ActionListener {
 		}
 
 		private void buildTableFromProperties() {
-			Map<String, String> map = PropertiesXmlHandler.getParameters();
+			Map<String, String> map = ParametersXmlHandler.getParameters();
 
 			// build properties data matrix
 			this.data = new Object[map.keySet().size()][2];
@@ -72,9 +72,9 @@ public class PropertiesEditor extends JPanel implements ActionListener {
 			keyset.addAll(map.keySet());
 			Collections.sort(keyset);
 			for (Object key : keyset) {
-				this.data[index][PropertiesEditor.this.KEY_INDEX] = new String(
+				this.data[index][ParametersEditor.this.KEY_INDEX] = new String(
 						key.toString());
-				this.data[index++][PropertiesEditor.this.VALUE_INDEX] = new String(
+				this.data[index++][ParametersEditor.this.VALUE_INDEX] = new String(
 						map.get(key.toString()));
 			}
 
@@ -165,7 +165,7 @@ public class PropertiesEditor extends JPanel implements ActionListener {
 		frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 
 		// Create and set up the content pane.
-		PropertiesEditor newContentPane = new PropertiesEditor(
+		ParametersEditor newContentPane = new ParametersEditor(
 				"BTDesigner.xml", frame);
 		newContentPane.setOpaque(true); // content panes must be opaque
 		frame.setContentPane(newContentPane);
@@ -191,7 +191,7 @@ public class PropertiesEditor extends JPanel implements ActionListener {
 		frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 
 		// Create and set up the content pane.
-		PropertiesEditor newContentPane = new PropertiesEditor(path, frame);
+		ParametersEditor newContentPane = new ParametersEditor(path, frame);
 		newContentPane.setOpaque(true); // content panes must be opaque
 		frame.setContentPane(newContentPane);
 
@@ -221,7 +221,7 @@ public class PropertiesEditor extends JPanel implements ActionListener {
 
 	private final int VALUE_INDEX = 1;
 
-	public PropertiesEditor(String path, JFrame frame) {
+	public ParametersEditor(String path, JFrame frame) {
 		super();
 		setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
 

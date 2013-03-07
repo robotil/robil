@@ -17,7 +17,7 @@ public class RemoveSubtreeAction extends AbstractDesignerAction implements
 
 	@Override
 	public void actionPerformed(ActionEvent a) {
-		Document document = getActiveTab().doc;
+		Document document = getActiveTab().document;
 		document.toolSelectionClean();
 		document.removeSubElements = true;
 		this.designer.toolbar.setTipText(Toolbar.TIP_removeSubtree);

@@ -2,17 +2,17 @@ package document;
 
 import org.w3c.dom.Element;
 
-public class LookupTableRow {
+public class LookupTableRecord {
 	private String _taskName;
 	private String _type;
 	private String _planner;
 	private String _fileName;
 	
-	public LookupTableRow() {
+	public LookupTableRecord() {
 		this("", "", "", "");
 	}
 	
-	public LookupTableRow(String taskName, String type, String planner, String fileName) {
+	public LookupTableRecord(String taskName, String type, String planner, String fileName) {
 		setTaskName(taskName);
 		setType(type);
 		setPlanner(planner);
@@ -20,7 +20,7 @@ public class LookupTableRow {
 	}
 	
 	public static String[] getTypeValues() {
-		return new String[] { "local", "remote" };
+		return new String[] { "local" };
 	}
 	
 	public static String[] getPlannerValues() {

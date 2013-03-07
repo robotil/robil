@@ -15,6 +15,6 @@ public class TestAction extends AbstractDesignerAction implements
 
 	@Override
 	public void actionPerformed(ActionEvent a) {
-		getActiveTab().doc.test();
+		getActiveTab().document.test();
 	}
 }

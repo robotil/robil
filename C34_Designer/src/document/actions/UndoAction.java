@@ -15,6 +15,6 @@ public class UndoAction extends AbstractDesignerAction implements
 
 	@Override
 	public void actionPerformed(ActionEvent e) {
-		designer.getActiveTab().doc.undo();
+		designer.getActiveTab().document.undo();
 	}
 }

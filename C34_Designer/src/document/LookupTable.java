@@ -3,6 +3,7 @@ package document;
 import java.io.File;
 import java.io.FileWriter;
 import java.util.ArrayList;
+import java.util.HashMap;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -19,7 +20,8 @@ import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 
 public class LookupTable {
-	ArrayList<LookupTableRow> _rows = new ArrayList<LookupTableRow>();
+	HashMap<String, LookupTableRecord> _rowsHashMap = new HashMap<String, LookupTableRecord>();
+	ArrayList<LookupTableRecord> _rows = new ArrayList<LookupTableRecord>();
 	String _filename;
 	
 	public LookupTable(String fileName) {
@@ -27,7 +29,7 @@ public class LookupTable {
 		load();
 	}
 	
-	public LookupTableRow getRow(int index) {
+	public LookupTableRecord getRow(int index) {
 		return _rows.get(index);
 	}
 	
@@ -47,20 +49,39 @@ public class LookupTable {
 		return this._filename;
 	}
 	
-	public void add(String taskName, String type, String planner, String fileName) {
-		add(new LookupTableRow(taskName, type, planner, fileName));
+	public boolean containsTask(String taskName) {
+		return getByTaskName(taskName) != null;
 	}
 	
-	public void add(LookupTableRow row) {
+	public LookupTableRecord getByTaskName(String taskName) {
+		if (!_rowsHashMap.containsKey(taskName))
+			return null;
+		
+		return _rowsHashMap.get(taskName);
+	}
+	
+	public void add(String taskName, String type, String planner, String fileName) {
+		add(new LookupTableRecord(taskName, type, planner, fileName));
+	}
+	
+	public void add(LookupTableRecord row) {
 		_rows.add(row);
+		_rowsHashMap.put(row.getTaskName(), row);
 	}
 
 	public void remove(int row) {
 		if (row >= 0 && row < getRowCount())
-		_rows.remove(row);
+			_rows.remove(row);
 	}
-	
+
+	public void load(String filename) {
+		this._filename = filename;
+		load();
+	}
+
 	public void load() {
+		_rows.clear();
+		_rowsHashMap.clear();
 		try {
 			DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
 			DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
@@ -87,7 +108,7 @@ public class LookupTable {
 					continue;
 				
 				Element taskElement = (Element)tasks.item(i);
-				LookupTableRow newRow = new LookupTableRow(
+				LookupTableRecord newRow = new LookupTableRecord(
 						taskElement.getAttribute("name"),
 						taskElement.getAttribute("type"),
 						taskElement.getAttribute("planner"),
@@ -104,7 +125,7 @@ public class LookupTable {
 			Document document = DocumentBuilderFactory.newInstance().newDocumentBuilder().newDocument();
 			Element root = document.createElement("lookup");
 			
-			for (LookupTableRow row : _rows)
+			for (LookupTableRecord row : _rows)
 				root.appendChild(row.getXmlElement(document));
 	
 			document.appendChild(root);
@@ -124,5 +145,4 @@ public class LookupTable {
 			Log.e(e);
 		}
 	}
-
 }

@@ -26,7 +26,7 @@ public class SaveImageAction extends AbstractDesignerAction implements
 			return;
 		}
 
-		Document document = getActiveTab().doc;
+		Document document = getActiveTab().document;
 
 		try {
 			Toolbar.getSaveSnapShot(document, fileName);

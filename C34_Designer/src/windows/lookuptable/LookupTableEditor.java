@@ -4,6 +4,7 @@ import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.EventQueue;
 import java.awt.FileDialog;
+import java.awt.Font;
 import java.awt.Frame;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
@@ -29,13 +30,16 @@ import javax.swing.border.TitledBorder;
 import javax.swing.table.TableCellRenderer;
 
 import document.LookupTable;
-import document.LookupTableRow;
+import document.LookupTableRecord;
+import document.Parameters;
+import document.ParametersXmlHandler;
 
 public class LookupTableEditor extends JFrame {
 
 	private static final long serialVersionUID = 507538166623467081L;
 	private LookupTable _lookupTable;
 	private JTable _jTable;
+	private JLabel _fileNameLabel;
 
 	public LookupTableEditor(Frame parent, String fileName) {
 		_lookupTable = new LookupTable(fileName);
@@ -57,8 +61,8 @@ public class LookupTableEditor extends JFrame {
 		panel.setBorder(new TitledBorder("Add new record"));
 		
 		final JTextField taskName = new JTextField();
-		final JComboBox type = new JComboBox(LookupTableRow.getTypeValues());
-		final JComboBox planner = new JComboBox(LookupTableRow.getPlannerValues());
+		final JComboBox type = new JComboBox(LookupTableRecord.getTypeValues());
+		final JComboBox planner = new JComboBox(LookupTableRecord.getPlannerValues());
 		final JTextField fileName = new JTextField();
 		
 		c = new GridBagConstraints();
@@ -148,8 +152,18 @@ public class LookupTableEditor extends JFrame {
 						dialog.setDirectory("~");
 						dialog.setVisible(true);
 						
-						if (dialog.getFile() != null)
+						if (dialog.getFile() != null) {
 							fileName.setText(dialog.getDirectory() + dialog.getFile());
+
+							EventQueue.invokeLater(new Runnable() {
+								@Override
+								public void run() {
+									_jTable.updateUI();
+									_jTable.repaint();
+								}
+							});
+							
+						}
 					}
 				});
 			}
@@ -167,7 +181,6 @@ public class LookupTableEditor extends JFrame {
 					@Override
 					public void actionPerformed(ActionEvent arg) {
 						_lookupTable.add(taskName.getText(), type.getSelectedItem().toString(), planner.getSelectedItem().toString(), fileName.getText());
-						
 						EventQueue.invokeLater(new Runnable() {
 							@Override
 							public void run() {
@@ -183,10 +196,58 @@ public class LookupTableEditor extends JFrame {
 		return panel;
 	}
 	
+	@SuppressWarnings("serial")
+	private JPanel createFilenamePanel() {
+		JPanel panel = new JPanel();
+		GridBagConstraints c = new GridBagConstraints();
+		
+		panel.setLayout(new GridBagLayout());
+		
+		c.fill = GridBagConstraints.NONE; c.gridy = 0; c.gridx = 0; c.weightx = 0.0;		
+		panel.add(new JLabel("Filename: "), c);
+		
+		c.fill = GridBagConstraints.HORIZONTAL; c.gridy = 0; c.gridx = 1; c.weightx = 1.0;		
+		_fileNameLabel = new JLabel(this._lookupTable.getFilename());
+		_fileNameLabel.setFont(new Font(_fileNameLabel.getFont().getName(), Font.BOLD, _fileNameLabel.getFont().getSize()));
+		panel.add(_fileNameLabel, c);
+		
+		c = new GridBagConstraints(); 
+		c.fill = GridBagConstraints.NONE; c.gridy = 0; c.gridx = 2;
+		panel.add(new JButton("Browse...") {
+			{
+				addActionListener(new ActionListener() {
+					@Override
+					public void actionPerformed(ActionEvent arg0) {
+						FileDialog dialog = new FileDialog(LookupTableEditor.this, "Browse file", FileDialog.SAVE);
+						dialog.setDirectory("~");
+						dialog.setVisible(true);
+						
+						if (dialog.getFile() != null) {
+							String filename = dialog.getDirectory() + dialog.getFile();
+							_fileNameLabel.setText(filename);
+							_lookupTable.load(filename);
+							
+							EventQueue.invokeLater(new Runnable() {
+								@Override
+								public void run() {
+									_jTable.updateUI();
+									_jTable.repaint();
+								}
+							});
+						}
+					}
+				});
+			}
+		}, c);
+		
+		return panel;
+	}
+
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	private void buildWindow() {
 		UIManager.put("TextArea.margin", new Insets(10, 10, 10, 10));
 		setLayout(new GridBagLayout());
+		setTitle("Lookup table editor");
 		GridBagConstraints c = new GridBagConstraints();
 		
 		c.insets = new Insets(10, 10, 10, 10);
@@ -195,7 +256,7 @@ public class LookupTableEditor extends JFrame {
 		c.gridy = 0;
 		c.weightx = 1.0;
 		c.weighty = 0.0;
-		add(new JLabel("Filename: " + this._lookupTable.getFilename()), c);
+		add(createFilenamePanel(), c);
 		
 		c = new GridBagConstraints();
 		c.insets = new Insets(0, 10, 10, 10);
@@ -225,8 +286,8 @@ public class LookupTableEditor extends JFrame {
 				return comp;
 			}
 		};
-		_jTable.getColumnModel().getColumn(1).setCellEditor(new DefaultCellEditor(new JComboBox(LookupTableRow.getTypeValues())));
-		_jTable.getColumnModel().getColumn(2).setCellEditor(new DefaultCellEditor(new JComboBox(LookupTableRow.getPlannerValues())));
+		_jTable.getColumnModel().getColumn(1).setCellEditor(new DefaultCellEditor(new JComboBox(LookupTableRecord.getTypeValues())));
+		_jTable.getColumnModel().getColumn(2).setCellEditor(new DefaultCellEditor(new JComboBox(LookupTableRecord.getPlannerValues())));
 		_jTable.setRowHeight(28);
 		
 		
@@ -256,6 +317,8 @@ public class LookupTableEditor extends JFrame {
 				addActionListener(new ActionListener() {
 					@Override
 					public void actionPerformed(ActionEvent arg0) {
+						Parameters.path_to_lookup = _fileNameLabel.getText();
+						ParametersXmlHandler.saveToFile();
 						_lookupTable.save();
 						dispose();						
 					}

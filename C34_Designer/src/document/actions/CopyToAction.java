@@ -27,7 +27,7 @@ public class CopyToAction extends AbstractDesignerAction implements
 //		document.toolSelectionClean();
 //		document.copyElement = true;
 //		
-		this._targetDocument.copyTree(this._element, getActiveTab().doc);
+		this._targetDocument.copyTree(this._element, getActiveTab().document);
 		this.designer.setActiveTab(this._targetDocument);
 		this.designer.toolbar.setTipText(Toolbar.TIP_copy);
 	}

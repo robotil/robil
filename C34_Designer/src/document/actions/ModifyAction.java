@@ -18,7 +18,7 @@ public class ModifyAction extends AbstractDesignerAction implements
 	@Override
 	public void actionPerformed(ActionEvent a) {
 
-		Document document = getActiveTab().doc;
+		Document document = getActiveTab().document;
 
 		document.toolSelectionClean();
 		document.modifier = new elements.Modifier();

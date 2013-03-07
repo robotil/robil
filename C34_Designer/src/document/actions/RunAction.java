@@ -52,7 +52,7 @@ public class RunAction extends AbstractDesignerAction implements ActionListener 
 	}
 
 	private void runPlan() {
-		Document doc = getActiveTab().doc;
+		Document doc = getActiveTab().document;
 		doc.onRun();
 		String fileName = doc.getFileNameOnly();
 		if (Parameters.path_to_plans_on_executer.equals("{LOCALPATH}")) {
@@ -108,6 +108,6 @@ public class RunAction extends AbstractDesignerAction implements ActionListener 
 	private void stopPlan() {
 		String id = getActiveTab().getID();
 		this.designer.rosExecutor.stopBehaviorTree(id);
-		getActiveTab().doc.onStop();
+		getActiveTab().document.onStop();
 	}
 }

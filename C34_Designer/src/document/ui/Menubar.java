@@ -39,7 +39,7 @@ public class Menubar extends JMenuBar {
 		_debugViewMenuItem.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent arg) {
-				designer.getActiveTab().doc.repaint();
+				designer.getActiveTab().document.repaint();
 				
 				if (_debugViewMenuItem.isSelected())
 					_runtimeViewMenuItem.setSelected(false);
@@ -52,7 +52,7 @@ public class Menubar extends JMenuBar {
 		_runtimeViewMenuItem.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent arg) {
-				designer.getActiveTab().doc.repaint();
+				designer.getActiveTab().document.repaint();
 				
 				if (_runtimeViewMenuItem.isSelected())
 					_debugViewMenuItem.setSelected(false);
