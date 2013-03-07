@@ -1,4 +1,4 @@
-package document;
+package windows.designer;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
@@ -8,24 +8,43 @@ import java.awt.GridBagLayout;
 import java.awt.Insets;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
+import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 
 import javax.swing.BorderFactory;
 import javax.swing.ImageIcon;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
-import javax.swing.JMenu;
 import javax.swing.JPanel;
 import javax.swing.JTabbedPane;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
+import document.Document;
+import document.Parameters;
+import document.PropertiesXmlHandler;
+import document.ui.Menubar;
+import document.ui.Toolbar;
+
+
 import logger.Log;
 import logger.LogManager;
 import terminal.communication.RosExecutor;
+import windows.lookuptable.LookupTableEditor;
 
 public class BTDesigner extends JFrame {
 
+	public ArrayList<DesignerTab> tabs = new ArrayList<DesignerTab>();
+	Menubar _menu;
+	public DesignerTab activeTab;
+
+	public RosExecutor rosExecutor = new RosExecutor(this);
+
+	public Toolbar toolbar;
+
+	public JTabbedPane tabbedPane = new JTabbedPane();
+	
 	public class DesignerTab {
 		public Document doc;
 		public String executionID;
@@ -50,7 +69,7 @@ public class BTDesigner extends JFrame {
 
 	private static final long serialVersionUID = 5495864869110385684L;
 
-	public final static String VERSION = "0.2.6.02";
+	public final static String VERSION = "0.2.6.1";
 
 	public static void main(String[] args) throws Exception {
 
@@ -77,7 +96,7 @@ public class BTDesigner extends JFrame {
 		final BTDesigner btd = new BTDesigner();
 		btd.addWindowListener(new WindowListener() {
 			@Override
-			public void windowClosing(WindowEvent arg0) {
+			public void windowClosing(WindowEvent arg) {
 				try {
 					if (btd.close()) {
 						btd.setVisible(false);
@@ -89,9 +108,9 @@ public class BTDesigner extends JFrame {
 				}
 			}
 			@Override
-			public void windowClosed(WindowEvent arg0) {}
+			public void windowClosed(WindowEvent arg) {}
 			@Override
-			public void windowActivated(WindowEvent arg0) {}
+			public void windowActivated(WindowEvent arg) {}
 			@Override
 			public void windowDeactivated(WindowEvent e) {}
 			@Override
@@ -107,16 +126,6 @@ public class BTDesigner extends JFrame {
 		
 		Log.d("BTDesigner loaded");
 	}
-
-	ArrayList<DesignerTab> tabs = new ArrayList<DesignerTab>();
-	Menubar _menu;
-	DesignerTab activeTab;
-
-	public RosExecutor rosExecutor = new RosExecutor(this);
-
-	public Toolbar toolbar;
-
-	public JTabbedPane tabbedPane = new JTabbedPane();
 
 	public BTDesigner() {
 
@@ -347,5 +356,14 @@ public class BTDesigner extends JFrame {
 			this.tabs.remove(selectedIndex);
 		}
 		
+	}
+
+	public void showLookupTableEditor() {
+		try {
+			new LookupTableEditor(this, new File(Parameters.path_to_lookup).getCanonicalPath());
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			Log.e(e);
+		}
 	}
 }

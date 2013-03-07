@@ -3,13 +3,14 @@ package document.actions;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
-import document.BTDesigner;
+import windows.designer.BTDesigner;
 
-public class OpenEditorAction implements ActionListener {
+
+public class OpenXmlEditorAction implements ActionListener {
 
 	private BTDesigner _designer; 
 	
-	public OpenEditorAction(BTDesigner designer) {
+	public OpenXmlEditorAction(BTDesigner designer) {
 		this._designer = designer;
 	}
 	

@@ -1,4 +1,4 @@
-package document;
+package windows;
 
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
@@ -13,6 +13,9 @@ import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.UIManager;
 
+import document.Document;
+import document.PlanExecution;
+import document.PlanExecutionCollection;
 import document.PlanExecutionCollection.EventListenerArgs;
 
 public class PlanExecutionHistoryDialog extends JDialog {

@@ -3,7 +3,7 @@ package terminal.lineprocessors;
 import logger.Log;
 import terminal.communication.StackStreamMessage;
 import terminal.communication.StackStreamMessageParser;
-import document.BTDesigner;
+import windows.designer.BTDesigner;
 import document.Document;
 
 public class StackStreamProcessor implements LineProcessor {

@@ -1,4 +1,4 @@
-package document;
+package windows;
 
 //ColorPane.java
 //A simple extension of JTextPane that allows the user to easily append
@@ -22,6 +22,8 @@ import javax.swing.text.AttributeSet;
 import javax.swing.text.SimpleAttributeSet;
 import javax.swing.text.StyleConstants;
 import javax.swing.text.StyleContext;
+
+import document.Parameters;
 
 import logger.Log;
 import logger.LogManager;

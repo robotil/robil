@@ -8,7 +8,8 @@ import javax.swing.JOptionPane;
 import javax.swing.JTable;
 import javax.swing.table.AbstractTableModel;
 
-import document.PropertiesEditor;
+import windows.PropertiesEditor;
+
 import document.PropertiesXmlHandler;
 
 public class PropertiesEditorAction implements ActionListener {

@@ -1,4 +1,4 @@
-package document;
+package windows;
 
 import java.awt.Dimension;
 import java.awt.Font;
@@ -21,9 +21,7 @@ import javax.swing.JTabbedPane;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.ListSelectionModel;
-import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
-import javax.swing.UnsupportedLookAndFeelException;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 
@@ -33,22 +31,6 @@ import document.description.TaskDescription;
 public class TaskDescriptionEditor extends JFrame {
 
 	private static final long serialVersionUID = 844706702028498340L;
-
-	public static void main(String[] args) throws ClassNotFoundException,
-			InstantiationException, IllegalAccessException,
-			UnsupportedLookAndFeelException {
-
-		SwingUtilities.invokeLater(new Runnable() {
-
-			@Override
-			public void run() {
-				TaskDescription tasks = new TaskDescription();
-
-				TaskDescriptionEditor editor = new TaskDescriptionEditor(tasks);
-				editor.setVisible(true);
-			}
-		});
-	}
 
 	private JTextField _txtEditTaskName = new JTextField();
 
@@ -95,13 +77,12 @@ public class TaskDescriptionEditor extends JFrame {
 		c.weighty = 0.0;
 
 		add(new JButton("   Close   ") {
+			private static final long serialVersionUID = -5658657254282091109L;
 			{
 				this.setPreferredSize(new Dimension(150, 42));
 				Font font = new Font(getFont().getName(), Font.BOLD, 16);
 				this.setFont(font);
-			}
-			private static final long serialVersionUID = -5658657254282091109L;
-			{
+				
 				addActionListener(new ActionListener() {
 					@Override
 					public void actionPerformed(ActionEvent e) {

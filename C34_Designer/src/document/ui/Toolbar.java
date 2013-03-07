@@ -1,4 +1,4 @@
-package document;
+package document.ui;
 
 import java.awt.BorderLayout;
 import java.awt.Component;
@@ -15,11 +15,14 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.border.TitledBorder;
 
+import windows.designer.BTDesigner;
+
+import document.Document;
 import document.actions.CompileAction;
 import document.actions.ExportTasksAction;
 import document.actions.ModifyAction;
 import document.actions.NewWindowAction;
-import document.actions.OpenEditorAction;
+import document.actions.OpenXmlEditorAction;
 import document.actions.OpenFileAction;
 import document.actions.OpenTaskDescriptionEditorAction;
 import document.actions.PointAction;
@@ -150,9 +153,9 @@ public class Toolbar extends JPanel {
 		buttons.add(pnl);
 		
 		btn = new JButton();
-		btn.setToolTipText("Edit xml");
-		btn.setIcon(new ImageIcon(getClass().getClassLoader().getResource("icons/editor.png")));
-		btn.addActionListener(new OpenEditorAction(designer));
+		btn.setToolTipText("View source xml");
+		btn.setIcon(new ImageIcon(getClass().getClassLoader().getResource("icons/source.png")));
+		btn.addActionListener(new OpenXmlEditorAction(designer));
 		buttons.add(btn);
 		
 		btn = new JButton();

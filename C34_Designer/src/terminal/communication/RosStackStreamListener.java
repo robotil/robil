@@ -6,7 +6,7 @@ import logger.Log;
 
 import terminal.communication.RosPipe.RosTargets;
 import terminal.lineprocessors.StackStreamProcessor;
-import document.BTDesigner;
+import windows.designer.BTDesigner;
 
 public class RosStackStreamListener implements Runnable {
 

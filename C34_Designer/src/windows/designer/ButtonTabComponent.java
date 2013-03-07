@@ -1,4 +1,4 @@
-package document;
+package windows.designer;
 
 /*
  * Copyright (c) 1995, 2008, Oracle and/or its affiliates. All rights reserved.
@@ -51,6 +51,7 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTabbedPane;
 import javax.swing.plaf.basic.BasicButtonUI;
+
 
 /**
  * Component to be used as tabComponent; Contains a JLabel to show the text and

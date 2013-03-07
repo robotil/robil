@@ -9,7 +9,7 @@ import javax.swing.JOptionPane;
 import logger.Log;
 
 import terminal.communication.Utils;
-import document.BTDesigner;
+import windows.designer.BTDesigner;
 import document.Document;
 import document.Parameters;
 

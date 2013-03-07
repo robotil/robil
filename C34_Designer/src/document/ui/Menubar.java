@@ -1,4 +1,4 @@
-package document;
+package document.ui;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -10,6 +10,8 @@ import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 import javax.swing.KeyStroke;
+
+import windows.designer.BTDesigner;
 
 import document.actions.*;
 
@@ -230,6 +232,14 @@ public class Menubar extends JMenuBar {
 		// menuItemCompileAndUpload.addActionListener(listener);
 		menuFile.add(menuItemCompileAndUpload);
 
+		// Lookup table editor
+		icon = new ImageIcon(getClass().getClassLoader().getResource(
+				"icons/lookup.png"));
+		JMenuItem menuLookup = new JMenuItem("Lookup table editor");
+		menuLookup.addActionListener(new OpenLookupTableEditorAction(designer));
+		menuLookup.setIcon(icon);
+		menuFile.add(menuLookup);
+		
 		// // run
 		// icon = new ImageIcon(getClass().getClassLoader().getResource(
 		// "icons/play.png"));

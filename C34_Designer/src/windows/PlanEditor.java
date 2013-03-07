@@ -1,4 +1,4 @@
-package document;
+package windows;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -21,6 +21,8 @@ import javax.swing.JScrollPane;
 import javax.swing.JTextField;
 import javax.swing.JTextPane;
 import javax.swing.UIManager;
+
+import document.Document;
 
 import logger.Log;
 

@@ -1,9 +1,8 @@
-package document;
+package document.ui;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
-import javax.swing.ImageIcon;
 import javax.swing.JCheckBoxMenuItem;
 import javax.swing.JMenu;
 import javax.swing.JMenuItem;
@@ -14,8 +13,12 @@ import javax.swing.event.ChangeListener;
 import javax.swing.event.PopupMenuEvent;
 import javax.swing.event.PopupMenuListener;
 
-import document.BTDesigner.DesignerTab;
+import windows.designer.BTDesigner;
+import windows.designer.BTDesigner.DesignerTab;
+
+import document.Document;
 import document.actions.CopyToAction;
+import document.actions.OpenXmlEditorAction;
 
 import elements.Arrow;
 import elements.GElement;
@@ -61,6 +64,7 @@ public class DesignerPopupMenu extends JPopupMenu {
 		_document = document;
 		
 		add(createTaskCreateMenuItem());
+		add(createViewSourceMenuItem());
 		
 		initPopupMenu();
 	}
@@ -68,23 +72,14 @@ public class DesignerPopupMenu extends JPopupMenu {
 	private void initPopupMenu() {
 		this.addPopupMenuListener(new PopupMenuListener() {
 			@Override
-			public void popupMenuWillBecomeVisible(PopupMenuEvent arg0) {}
+			public void popupMenuWillBecomeVisible(PopupMenuEvent arg) {}
 			@Override
-			public void popupMenuCanceled(PopupMenuEvent arg0) {}
+			public void popupMenuCanceled(PopupMenuEvent arg) {}
 			@Override
-			public void popupMenuWillBecomeInvisible(PopupMenuEvent arg0) {
+			public void popupMenuWillBecomeInvisible(PopupMenuEvent arg) {
 				_document.repaint();
 			}
 		});
-	}
-	
-	
-	private ImageIcon loadIcon(String iname){
-		try{
-			return new ImageIcon(getClass().getClassLoader().getResource("icons/"+iname));
-		}catch(Exception e){
-			return null;
-		}
 	}
 	
 	private JMenu createCopyToPopup() {
@@ -93,7 +88,7 @@ public class DesignerPopupMenu extends JPopupMenu {
 		for (DesignerTab tab : _designer.tabs) {
 			JMenuItem item = new JMenuItem(tab.doc.getShortFilePath());
 			item.setEnabled(!tab.doc.getShortFilePath().equals(_document.getShortFilePath()));
-			item.setIcon(loadIcon("open.png"));
+			item.setIcon(Utilities.loadIcon("open.png"));
 			
 			item.addActionListener(new CopyToAction(_designer, this._element, tab.doc));
 			
@@ -119,7 +114,7 @@ public class DesignerPopupMenu extends JPopupMenu {
 	
 	private JMenuItem createRemoveMenuItem() {
 		JMenuItem menu = new JMenuItem("Remove");
-		menu.setIcon(loadIcon("remove.png"));
+		menu.setIcon(Utilities.loadIcon("remove.png"));
 		menu.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent arg0) {
@@ -131,7 +126,7 @@ public class DesignerPopupMenu extends JPopupMenu {
 	
 	private JMenuItem createRemoveSubtreeMenuItem() {
 		JMenuItem menu = new JMenuItem("Remove subtree");
-		menu.setIcon(loadIcon("remove.png"));
+		menu.setIcon(Utilities.loadIcon("remove.png"));
 		menu.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent arg0) {
@@ -143,7 +138,7 @@ public class DesignerPopupMenu extends JPopupMenu {
 	
 	private JMenuItem createModifyMenuItem() {
 		JMenuItem menu = new JMenuItem("Modify");
-		menu.setIcon(loadIcon("modify.png"));
+		menu.setIcon(Utilities.loadIcon("modify.png"));
 		menu.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent arg0) {
@@ -156,7 +151,7 @@ public class DesignerPopupMenu extends JPopupMenu {
 	
 	private JMenuItem createRunHistoryMenuItem() {
 		JMenuItem menu = new JMenuItem("Run history");
-		menu.setIcon(loadIcon("history.png"));
+		menu.setIcon(Utilities.loadIcon("history.png"));
 		menu.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent arg) {
@@ -168,7 +163,7 @@ public class DesignerPopupMenu extends JPopupMenu {
 	
 	private JMenuItem createPlanExecutionHistoryMenuItem() {
 		JMenuItem menu = new JMenuItem("Execution history");
-		menu.setIcon(loadIcon("history.png"));
+		menu.setIcon(Utilities.loadIcon("history.png"));
 		menu.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent arg) {
@@ -180,7 +175,7 @@ public class DesignerPopupMenu extends JPopupMenu {
 	
 	private JMenuItem createCopyMenuItem() {
 		JMenuItem menu = new JMenuItem("Copy");
-		menu.setIcon(loadIcon("copy.png"));
+		menu.setIcon(Utilities.loadIcon("copy.png"));
 		menu.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent arg0) {
@@ -192,7 +187,7 @@ public class DesignerPopupMenu extends JPopupMenu {
 	
 	private JMenuItem createTaskCreateMenuItem() {
 		JMenuItem menu = new JMenuItem("Create task...");
-		menu.setIcon(loadIcon("add_icon.png"));
+		menu.setIcon(Utilities.loadIcon("add_icon.png"));
 		menu.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent arg) {
@@ -232,6 +227,13 @@ public class DesignerPopupMenu extends JPopupMenu {
 				DesignerPopupMenu.this._document.creator = new Arrow.Reconector((Arrow) DesignerPopupMenu.this._element);
 			}
 		});
+		return menu;
+	}
+	
+	private JMenuItem createViewSourceMenuItem() {
+		JMenuItem menu = new JMenuItem("View source");
+		menu.setIcon(Utilities.loadIcon("source.png"));
+		menu.addActionListener(new OpenXmlEditorAction(_designer));
 		return menu;
 	}
 	
