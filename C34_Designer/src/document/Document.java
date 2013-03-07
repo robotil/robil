@@ -1,14 +1,10 @@
 package document;
 
-import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Point;
 import java.awt.RenderingHints;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
-import java.awt.event.MouseWheelEvent;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileWriter;
@@ -41,11 +37,15 @@ import org.xml.sax.SAXException;
 import terminal.communication.StackStreamMessage;
 import terminal.communication.StopStreamMessage;
 import terminal.communication.StopStreamMessage.PlanFinishReason;
+import windows.PlanEditor;
+import windows.PlanExecutionHistoryDialog;
+import windows.designer.BTDesigner;
 
 import document.actions.Dialogs;
 import document.description.TaskDescription;
 import document.history.HistoryManager;
 import document.history.HistoryManagerNotReadyException;
+import document.ui.Toolbar;
 import elements.Arrow;
 import elements.Decorator;
 import elements.GElement;
@@ -60,200 +60,7 @@ public class Document extends JPanel {
 
 	private static final long serialVersionUID = 2195280758622734696L;
 
-	public class MouseHandler extends MouseAdapter {
-
-		@Override
-		public void mouseDragged(MouseEvent e) {
-			if (Document.this.mousePressed == null)
-				return;
-			if (Document.this.selectedElement == null) {
-				// Vec d = new Vec(e.getPoint()).sub(new
-				// Vec(mousePressed)).scale(1/view.zoom);
-				Document.this.view.loc.setOffset(new Vec(e.getPoint()).sub(new Vec(Document.this.mousePressed)));
-				Document.this.mousePressed = e.getPoint();
-			} else {
-				Vec d = new Vec(e.getPoint()).sub(new Vec(Document.this.mousePressed)).scale(1 / Document.this.view.zoom);
-				Document.this.selectedElement.getProperty().location.setOffset(d);
-				for (GElement el : searchAllSubelements(Document.this.selectedElement)) {
-					el.getProperty().location.setOffset(d);
-				}
-				Document.this.mousePressed = e.getPoint();
-			}
-			repaint();
-			super.mouseDragged(e);
-		}
-
-		@Override
-		public void mousePressed(MouseEvent ev) {
-			
-			_mousePosition = new Vec(ev.getPoint()).sub(Document.this.view.loc).scale(1 / Document.this.view.zoom);
-			
-			Document.this.mousePressed = ev.getPoint();
-			for (GElement el : getReversed(Document.this.elements)) {
-				GElement e = el.underMouse(ev.getPoint());
-				if (e != null && e.isVisiable) {
-					Document.this.selectedElement = e;
-					
-					if (ev.getButton() == MouseEvent.BUTTON1)
-						Document.this.selectedElement.getProperty().leftClicked = true;
-					else if (ev.getButton() == MouseEvent.BUTTON3)
-						Document.this.selectedElement.getProperty().rightClicked = true;
-					
-					repaint();
-					break;
-				}
-			}
-			if (Document.this.selectedElement == null)
-				for (GElement el : Document.this.arrays) {
-					GElement e = el.underMouse(ev.getPoint());
-					if (e != null && e.isVisiable) {
-						Document.this.selectedElement = e;
-						
-						if (ev.getButton() == MouseEvent.BUTTON1)
-							Document.this.selectedElement.getProperty().leftClicked = true;
-						else if (ev.getButton() == MouseEvent.BUTTON3)
-							Document.this.selectedElement.getProperty().rightClicked = true;
-						
-						repaint();
-						break;
-					}
-				}
-			
-			super.mousePressed(ev);
-		}
-		
-		@Override
-		public void mouseReleased(MouseEvent e) {
-			Document.this.mousePressed = null;
-			
-			if (e.getButton() == MouseEvent.BUTTON1) {
-			
-				if (Document.this.creator != null) {
-					if (Document.this.selectedElement != null)
-						Document.this.creator.add(Document.this.selectedElement);
-					boolean checkCreator = Document.this.creator != null
-							&& Document.this.creator.ready()
-							&& ((Document.this.selectedElement == null && Document.this.creator
-									.createOnEmptyPlace()) || (Document.this.selectedElement != null && !Document.this.creator
-									.createOnEmptyPlace()));
-					if (checkCreator) {
-						Vec p = new Vec(e.getPoint()).sub(Document.this.view.loc)
-								.scale(1 / Document.this.view.zoom);
-						GElement el = Document.this.creator.newInstance();
-						if (el instanceof Arrow) {
-							Arrow a = (Arrow) el;
-							onBeforeTreeChange(TreeChangeType.ArrowModify, el);
-							if (getArrow(a.getSource(), a.getTarget()).size() > 0
-									|| getArrow(a.getTarget(), a.getSource())
-											.size() > 0)
-								el = null;
-							onTreeChange(TreeChangeType.ArrowModify, el);
-						}
-						if (el != null) {
-							onBeforeTreeChange(TreeChangeType.ArrowModify, el);
-							el.setView(Document.this.view);
-							if (el instanceof View.ChangesListener)
-								((View.ChangesListener) el).onViewChange();
-							el.getProperty().setCenter(p);
-							add(el);
-							el.modify();
-							repaint();
-							onTreeChange(TreeChangeType.ArrowModify, el);
-						}
-						if (Document.this.cleanToolSelectionAfterUse)
-							toolSelectionClean();
-						else if (Document.this.creator instanceof Arrow.Reconector) {
-							((Arrow.Reconector) Document.this.creator)
-									.getInstance().getProperty().leftClicked = false;
-							toolSelectionClean();
-						}
-					}
-				}
-				if (Document.this.removeElement
-						&& Document.this.selectedElement != null) {
-					remove(Document.this.selectedElement);
-					if (Document.this.cleanToolSelectionAfterUse)
-						toolSelectionClean();
-				}
-				if (Document.this.removeSubElements
-						&& Document.this.selectedElement != null) {
-					removeSubTree(Document.this.selectedElement);
-					// if(cleanToolSelectionAfterUse)
-					toolSelectionClean();
-				}
-				if (Document.this.copyElement
-						&& Document.this.selectedElement != null) {
-					copyTree(Document.this.selectedElement);
-					// if(cleanToolSelectionAfterUse)
-					toolSelectionClean();
-				}
-				if (Document.this.reconectArrow
-						&& Document.this.selectedElement != null
-						&& Document.this.selectedElement instanceof Arrow) {
-					Document.this.creator = new Arrow.Reconector(
-							(Arrow) Document.this.selectedElement);
-					Document.this.mainWindow.toolbar
-							.setTipText(Document.this.creator.toolTip());
-				}
-				if (Document.this.modifier != null
-						&& Document.this.selectedElement != null) {
-					Document.this.modifier.set(Document.this.selectedElement);
-					if (Document.this.cleanToolSelectionAfterUse)
-						toolSelectionClean();
-				}
-				if (Document.this.selectedElement == null)
-					return;
-	
-				Document.this.selectedElement.getProperty().leftClicked = false;
-				Document.this.selectedElement = null;
-	
-				if (Document.this.creator != null
-						&& Document.this.creator instanceof Arrow.Reconector) {
-					((Arrow.Reconector) Document.this.creator).getInstance()
-							.getProperty().leftClicked = true;
-				}
-	
-				repaint();
-				super.mouseReleased(e);
-				
-			} else if (e.getButton() == MouseEvent.BUTTON3) {
-				// Right click
-				toolSelectionClean();
-				if (Document.this.selectedElement != null) {
-					DesignerPopupMenu popup = new DesignerPopupMenu(Document.this.mainWindow, Document.this, Document.this.selectedElement);
-					popup.show(e.getComponent(), e.getX(), e.getY());
-					Document.this.selectedElement.getProperty().rightClicked = false;
-					Document.this.selectedElement = null;
-				} else {
-					DesignerPopupMenu popup = new DesignerPopupMenu(Document.this.mainWindow, Document.this);
-					popup.show(e.getComponent(), e.getX(), e.getY());
-				}
-				
-			}
-			
-			
-		}
-
-		@Override
-		public void mouseWheelMoved(MouseWheelEvent e) {
-			int notches = e.getWheelRotation();
-			if (notches < 0 && Document.this.view.zoom < 0.3)
-				return;
-			if (notches > 0 && Document.this.view.zoom > 5)
-				return;
-			double old_zoom = Document.this.view.zoom;
-			double new_zoom = Document.this.view.zoom = Document.this.view.zoom + (notches * 0.1);
-			Vec m = new Vec(e.getPoint());
-			Vec d = Document.this.view.loc.sub(m).scale(1.0 / old_zoom)
-					.scale(new_zoom);
-			Document.this.view.loc = d.add(m);
-			repaint();
-			super.mouseWheelMoved(e);
-		}
-
-	}
-
-	private enum TreeChangeType {
+	enum TreeChangeType {
 		Add, AddArrow, Remove, RemoveArrow, SubTreeRemove, TreeCopy, ArrowModify
 	}
 
@@ -282,8 +89,8 @@ public class Document extends JPanel {
 	private String _taskDescriptionFilenameOriginal;
 	private Boolean _taskDescriptionExists = false;
 	private Boolean _buildTime = false;
-	private Date _executionStart = new Date();
-	private boolean _isRunning = false;
+	// private Date _executionStart = new Date();
+	// private boolean _isRunning = false;
 	private String absoluteFilePath = "plan.xml";
 	private Vec _mousePosition = new Vec(0, 0);
 	private HistoryManager _historyManager = new HistoryManager();
@@ -298,17 +105,15 @@ public class Document extends JPanel {
 	 * Creates new empty, unsaved document
 	 * @param mw Parent BTDesginer window
 	 */
-	public Document(BTDesigner mw) {
+	public Document(BTDesigner mainWindow) {
 
-		this.absoluteFilePath = new File(Parameters.path_to_plans, getTempFileName()).getAbsolutePath();
-		this.mainWindow = mw;
-		this.view.loc = new Vec(0, 0);
-		this.view.zoom = 1;
-
-		MouseHandler mh = new MouseHandler();
-		addMouseListener(mh);
-		addMouseMotionListener(mh);
-		addMouseWheelListener(mh);
+		try {
+			this.absoluteFilePath = new File(Parameters.path_to_plans, getTempFileName()).getCanonicalFile().getAbsolutePath();
+		} catch (IOException e) {
+			Log.e(e);
+		}
+		
+		initializeDocument(mainWindow);
 		
 		this._taskDescriptionFilename = parsePlanPath(Parameters.path_to_description);
 		try {
@@ -332,20 +137,14 @@ public class Document extends JPanel {
 	 * @param mw Parent BTDesginer window
 	 * @param fileName Plan to load
 	 */
-	public Document(BTDesigner mw, String fileName) {
+	public Document(BTDesigner mainWindow, String fileName) {
 		try {
 			this.absoluteFilePath = new File(fileName).getCanonicalFile().getAbsolutePath();
 		} catch (IOException e) {
 			Log.e(e);
 		}
-		this.mainWindow = mw;
-		this.view.loc = new Vec(0, 0);
-		this.view.zoom = 1;
-
-		MouseHandler mh = new MouseHandler();
-		addMouseListener(mh);
-		addMouseMotionListener(mh);
-		addMouseWheelListener(mh);
+		
+		initializeDocument(mainWindow);
 		
 		loadPlan(fileName);
 		
@@ -358,6 +157,16 @@ public class Document extends JPanel {
 		_shouldBeSavedAs = false;
 	}
 
+	private void initializeDocument(BTDesigner mainWindow) {
+		this.mainWindow = mainWindow;
+		this.view.loc = new Vec(0, 0);
+		this.view.zoom = 1;
+
+		DocumentMouseHandler mouseHander = new DocumentMouseHandler(this);
+		addMouseListener(mouseHander);
+		addMouseMotionListener(mouseHander);
+		addMouseWheelListener(mouseHander);
+	}
 	
 	private String getTempFileName() {
 		SimpleDateFormat dateFormat = new SimpleDateFormat("dd-MM-yy-HHmmssSS");
@@ -374,6 +183,10 @@ public class Document extends JPanel {
 	
 	public Vec getMousePos() {
 		return this._mousePosition;
+	}
+	
+	public void setMousePosition(Vec vec) {
+		this._mousePosition = vec;
 	}
 	
 	public void createTask() {
@@ -1266,7 +1079,7 @@ public class Document extends JPanel {
 
 	}
 
-	private void onBeforeTreeChange(TreeChangeType changeType, GElement element) {
+	void onBeforeTreeChange(TreeChangeType changeType, GElement element) {
 		// Disable nested calls
 		_treeChangeNestingCounter++;
 		
@@ -1276,7 +1089,7 @@ public class Document extends JPanel {
 
 	}
 	
-	private void onTreeChange(TreeChangeType changeType, GElement element) {
+	void onTreeChange(TreeChangeType changeType, GElement element) {
 		_treeChangeNestingCounter--;
 		if (_treeChangeNestingCounter == 0)	
 
@@ -1330,8 +1143,8 @@ public class Document extends JPanel {
 			if (element.isTaskType())
 				element.getAsTask().onPlanRun();
 		
-		_isRunning = true;
-		_executionStart = new Date();
+		// _isRunning = true;
+		// _executionStart = new Date();
 		_planExecutionMessage = String.format("[%s] Running", new SimpleDateFormat("HH:mm:ss").format(new Date()) );
 		_currentPlanExecution = new PlanExecution();
 		
@@ -1346,12 +1159,12 @@ public class Document extends JPanel {
 		Log.i("Plan execution aborted");
 		_currentPlanExecution.stop(null, null, false, true);
 		_executionResults.add(_currentPlanExecution);
-		_isRunning = false;
+		// _isRunning = false;
 	}
 	
 	public void onStop(StopStreamMessage message) {
 		Log.i("STOPSTREAM", "Plan execution finished [" + message.getFinishReason() + "]");
-		_isRunning = false;
+		// _isRunning = false;
 		
 		_currentPlanExecution.stop(
 				findTaskById(message.getTargetTaskId()),

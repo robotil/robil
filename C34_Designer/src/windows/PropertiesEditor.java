@@ -1,4 +1,4 @@
-package document;
+package windows;
 
 import java.awt.BorderLayout;
 import java.awt.Dimension;
@@ -27,6 +27,7 @@ import javax.swing.table.AbstractTableModel;
 
 import logger.Log;
 
+import document.PropertiesXmlHandler;
 import document.actions.PropertiesEditorAction;
 
 public class PropertiesEditor extends JPanel implements ActionListener {

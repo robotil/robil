@@ -3,12 +3,13 @@ package document.actions;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
+import windows.designer.BTDesigner;
+
 import logger.Log;
 
-import document.BTDesigner;
 import document.Document;
 import document.Parameters;
-import document.Toolbar;
+import document.ui.Toolbar;
 
 public class SaveImageAction extends AbstractDesignerAction implements
 		ActionListener {

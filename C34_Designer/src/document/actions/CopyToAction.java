@@ -3,9 +3,10 @@ package document.actions;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
-import document.BTDesigner;
+import windows.designer.BTDesigner;
+
 import document.Document;
-import document.Toolbar;
+import document.ui.Toolbar;
 import elements.GElement;
 
 public class CopyToAction extends AbstractDesignerAction implements

@@ -19,8 +19,8 @@ import logger.Log;
 import terminal.communication.StackStreamMessage;
 import terminal.communication.StackStreamMessage.ChangeType;
 import terminal.communication.StackStreamMessage.TaskFinishReason;
+import windows.designer.BTDesigner;
 
-import document.BTDesigner;
 import document.Document;
 import document.description.TaskDescription;
 import elements.GElement;

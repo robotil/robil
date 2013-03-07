@@ -5,9 +5,9 @@ import java.util.regex.Pattern;
 
 import terminal.communication.StopStreamMessage;
 import terminal.communication.StopStreamMessageParser;
+import windows.designer.BTDesigner;
 
 import logger.Log;
-import document.BTDesigner;
 import document.Document;
 
 public class StopStreamProcessor implements LineProcessor {

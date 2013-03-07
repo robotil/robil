@@ -1,4 +1,4 @@
-package document;
+package windows;
 
 import java.awt.BorderLayout;
 import java.awt.Component;
