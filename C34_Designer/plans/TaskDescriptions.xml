@@ -12,11 +12,11 @@
         <effects/>
         <algorithm>C46 - mounts the robot onto the car from a given posture (yet to be defined)</algorithm>
     </task>
-    <task name="GripSteeringWheel">
+    <task name="AlignObjects">
         <conditions/>
         <constraints/>
         <effects/>
-        <algorithm>C52 - Robot is sitting in vehicle, grip wheel</algorithm>
+        <algorithm>C66 Align objects A and B</algorithm>
     </task>
     <task name="ObjectAttachment">
         <conditions/>
@@ -24,11 +24,11 @@
         <effects/>
         <algorithm>C66 Attach object A to B</algorithm>
     </task>
-    <task name="AlignObjects">
+    <task name="GripSteeringWheel">
         <conditions/>
         <constraints/>
         <effects/>
-        <algorithm>C66 Align objects A and B</algorithm>
+        <algorithm>C52 - Robot is sitting in vehicle, grip wheel</algorithm>
     </task>
     <task name="DismountVechicle">
         <conditions/>
@@ -66,17 +66,17 @@
         <effects/>
         <algorithm>C45 - need to sync with C46 requirements for mounting on the vehicle</algorithm>
     </task>
-    <task name="WayPointsDriving">
-        <conditions/>
-        <constraints/>
-        <effects/>
-        <algorithm>C51 - way point driver, asks path from C31 and drives according to it</algorithm>
-    </task>
     <task name="PathPlanning">
         <conditions/>
         <constraints/>
         <effects/>
         <algorithm>C31 calculates paths on occupancy grids, fails when it's no longer possible to do so</algorithm>
+    </task>
+    <task name="WayPointsDriving">
+        <conditions/>
+        <constraints/>
+        <effects/>
+        <algorithm>C51 - way point driver, asks path from C31 and drives according to it</algorithm>
     </task>
     <task name="PlaceFeetOnPedals">
         <conditions/>
@@ -165,17 +165,11 @@ selfPosition=internal,external</algorithm>
         <effects/>
         <algorithm/>
     </task>
-    <task name="TestPedals">
+    <task name="whileObjectInHands">
         <conditions/>
         <constraints/>
         <effects/>
-        <algorithm>C51 - move foot to pedals</algorithm>
-    </task>
-    <task name="TrackObject">
-        <conditions/>
-        <constraints/>
-        <effects/>
-        <algorithm>C23 Tracks object A position withing the image, fails if there is no longer a method to predict it</algorithm>
+        <algorithm>C66 returns if there is no more an object in one of the hands</algorithm>
     </task>
     <task name="PickUp">
         <conditions/>
@@ -183,11 +177,17 @@ selfPosition=internal,external</algorithm>
         <effects/>
         <algorithm>C66 pick up an object (without walking)</algorithm>
     </task>
-    <task name="whileObjectInHands">
+    <task name="TrackObject">
         <conditions/>
         <constraints/>
         <effects/>
-        <algorithm>C66 returns if there is no more an object in one of the hands</algorithm>
+        <algorithm>C23 Tracks object A position withing the image, fails if there is no longer a method to predict it</algorithm>
+    </task>
+    <task name="TestPedals">
+        <conditions/>
+        <constraints/>
+        <effects/>
+        <algorithm>C51 - move foot to pedals</algorithm>
     </task>
     <task name="ObstacleDetection">
         <conditions/>
@@ -215,17 +215,17 @@ selfPosition=internal,external</algorithm>
 data=panoramic_image - C11 it retrieves the panoramic image and sends it back to the operator
 data=path - C11 it retrieves the path and sends it back to the operator</algorithm>
     </task>
-    <task name="SearchObject">
-        <conditions/>
-        <constraints/>
-        <effects/>
-        <algorithm>C24 Actually moves the robot until the object is visible</algorithm>
-    </task>
     <task name="ReturnToExitPosture">
         <conditions/>
         <constraints/>
         <effects/>
         <algorithm>C51 - return the robot to initial position so it can exit</algorithm>
+    </task>
+    <task name="SearchObject">
+        <conditions/>
+        <constraints/>
+        <effects/>
+        <algorithm>C24 Actually moves the robot until the object is visible</algorithm>
     </task>
     <task name="HMIResponse">
         <conditions/>

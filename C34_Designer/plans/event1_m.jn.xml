@@ -204,7 +204,9 @@
                                                 <tsk name="InitDrive" />
                                                 <sel name="@5"> 
                                                       <tsk name="WayPointsDriving" />
-                                                      <tsk name="FinishDrive" />
+                                                   <dec name="F:1"> 
+                                                         <tsk name="FinishDrive" />
+                                                   </dec>
                                                 </sel>
                                                 <tsk name="FinishDrive" />
                                           </seq>
