@@ -8,7 +8,8 @@
  **************************************************************************************/
 #include "C23_Node.hpp"
 #include <ros/package.h>
-
+#include <C23_ObjectRecognition/C23C0_OD.h>
+#include <C23_ObjectRecognition/C23C0_ODIM.h>
 
 
 
@@ -29,12 +30,14 @@ C23_Node::C23_Node(std::string left_camera,std::string right_camera) :
 		left_image_sub_( it_, left_camera, 1 ),
 		right_image_sub_( it_, right_camera, 1 ),
 		sync( MySyncPolicy( 10 ), left_image_sub_, right_image_sub_ ),
-		ready(false)
+		detect(false),done_processing(true)
 	  {
 	    //ready=false;
 		sync.registerCallback( boost::bind( &C23_Node::callback, this, _1, _2 ) );  //Specifying what to do with the data
 		//service = nh_.advertiseService("C23", &C23_Node::proccess, this); //Specifying what to do when a reconstructed 3d scene is requested
 		ROS_INFO("service on\n");
+		objectDetectedPublisher = nh_.advertise<C23_ObjectRecognition::C23C0_OD>("C23/object_detected", 1);
+        objectDeminsionsPublisher = nh_.advertise<C23_ObjectRecognition::C23C0_ODIM>("C23/object_deminsions", 1);
 		
 	  }
 /**
@@ -67,10 +70,12 @@ bool C23_Node::detectAndTrack(MODELS model) {
         currentModel_ = NONE;
     }
     currentModel_ = model;
-    ROS_INFO("Now detecting and tracking model 2: ");
+    ROS_INFO("C23_Node:: Now detecting and tracking model 2: ");
     ROS_INFO(models[model]);
     ROS_INFO("\n");
-    ready=true;
+    x = -1;
+    detect=true;
+    done_processing = true;
     return true;
 
 }
@@ -79,10 +84,11 @@ bool C23_Node::detectAndTrack(MODELS model) {
 void C23_Node::callback(const sensor_msgs::ImageConstPtr& left_msg,const sensor_msgs::ImageConstPtr& right_msg){
  
  cv_bridge::CvImagePtr cv_ptr;
-    ROS_INFO("C23_Node::callBack\n");
- if(ready) {
-    ready = false;
-    ROS_INFO("I'm ready\n");
+    
+ if(detect && done_processing) {
+ //   ROS_INFO("C23_Node::detect + done_processing\n");
+    done_processing = false;
+   // ROS_INFO("I'm ready\n");
     try {
         cv_ptr = cv_bridge::toCvCopy(left_msg,enc::BGR8);
     }
@@ -96,35 +102,44 @@ void C23_Node::callback(const sensor_msgs::ImageConstPtr& left_msg,const sensor_
     IplImage tosave=cv_ptr->image;
     int percent = 30;
     IplImage *destination = cvCreateImage
-    ( cvSize((int)((tosave.width*percent)/100) , (int)((tosave.height*percent)/100) ),
+    ( cvSize((int)((tosave.width*percent)/50) , (int)((tosave.height*percent)/50) ),
                              tosave.depth, tosave.nChannels );
     
     //use cvResize to resize source to a destination image
     cvResize(&tosave, destination);
-    ROS_INFO("Received image");
+   // ROS_INFO("Received image");
     if(tldh_ == NULL) {
-        ROS_INFO("Now reading model..");
+       // ROS_INFO("Now reading model..");
         char buf[10000];
-        sprintf(buf,"%s/models/%s%c",ros::package::getPath("C23_ObjectRecognition").c_str(),models[currentModel_],'\0');
-        ROS_INFO("Done reading");
-        ROS_INFO("Now building... %s\n",buf);
+       sprintf(buf,"%s/models/%s%c",ros::package::getPath("C23_ObjectRecognition").c_str(),models[currentModel_],'\0');
+      //  ROS_INFO("Done reading");
+      //  ROS_INFO("Now building... %s\n",buf);
         tldh_ = new C23_Node_TLD_Handler(TRACKING, buf);
-        ROS_INFO("Now init..\n");
+       // ROS_INFO("Now init..\n");
         tldh_->init(destination);
     } else {
-        ROS_INFO("Now processing..\n");
+     //   ROS_INFO("Now processing..\n");
         
         tldh_->processFrame(destination, &x, &y, &width, &height, &confident);
-        char buff[100];
-        sprintf(buff,"BB: %d %d %d %d, Confident: %lf \n",x,y,width,height,confident);
-        ROS_INFO(buff);
+      //  char buff[100];
+      //  sprintf(buff,"BB: %d %d %d %d, Confident: %lf \n",x,y,width,height,confident);
+      //  ROS_INFO(buff);
+        C23_ObjectRecognition::C23C0_OD msg;
+        C23_ObjectRecognition::C23C0_ODIM msg2;
+        msg.ObjectDetected = (x != -1 ? 1 : 0);
+        msg2.x = x;
+        msg2.y = y;
+        msg2.width = width;
+        msg2.height = height;
+        objectDeminsionsPublisher.publish(msg2);
+        objectDetectedPublisher.publish(msg);
     }
-    ready = true;
+    done_processing = true;
    }
 }
 void C23_Node::startDetection() {
     ROS_INFO("C23_Node::startDetection\n");
-  //  ready=false;
+    detect=true;
 }
 void C23_Node::stopDetection() {
     ROS_INFO("C23_Node::stopDetection\n");
@@ -132,7 +147,7 @@ void C23_Node::stopDetection() {
         free(tldh_);
         tldh_ = NULL;
     }
-    ready=false;
+    detect=false;
 }
 	  
 

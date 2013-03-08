@@ -41,7 +41,10 @@ private:
   TLD tld;
   C23_Node_TLD_Handler *tldh_;
   MODELS currentModel_;
-  bool ready;
+  bool detect;
+  bool done_processing;
+  ros::Publisher objectDetectedPublisher;
+  ros::Publisher objectDeminsionsPublisher;
   
 public:
     int x,y,width,height;
