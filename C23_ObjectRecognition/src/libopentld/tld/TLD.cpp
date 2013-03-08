@@ -84,6 +84,7 @@ void TLD::storeCurrentData()
 void TLD::selectObject(const Mat &img, Rect *bb)
 {
     //Delete old object
+
     detectorCascade->release();
 
     detectorCascade->objWidth = bb->width;

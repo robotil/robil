@@ -2,6 +2,7 @@
 
 #include "LearnObjectServer.hpp"
 #include "SearchObjectServer.hpp"
+#include "TrackObjectServer.hpp"
 #include "ros/ros.h"
 
 int main(int argc, char **argv)
@@ -14,7 +15,7 @@ int main(int argc, char **argv)
   
   C23_Node my_node(argv[1],argv[2]);
 
- // TrackObjectServer trackObject(my_node);
+  TrackObjectServer trackObject(my_node);
   SearchObjectServer searchObject(my_node);
   LearnObjectServer learnObject(my_node);
  
