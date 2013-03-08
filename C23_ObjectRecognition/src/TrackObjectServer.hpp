@@ -32,33 +32,31 @@ public:
     
     }
     TaskResult task(const string& name, const string& uid, Arguments& args) {
-         ROS_INFO("trackObject::I was called\n");
-        
+        ROS_INFO("trackObject::I was called\n");
         if (isPreempt()){
             ROS_INFO("trackObject::was preepmpted\n");
             _detector->stopDetection();
             return TaskResult::Preempted();
         }
         if(args.find("target") != args.end() ) {
-            std::stringstream target; target<<args["target"];
-            string target_str = target.str();
+            std::stringstream msg; 
+           
+            msg << args["target"];
+           
+            string target_str = msg.str();
+            const char* target = target_str.c_str();
             
+            char buffer[1000];
+            sprintf(buffer,"%s/models/%s.mdl%c",ros::package::getPath("C23_ObjectRecognition").c_str(),target,'\0');
+            /* Check if the target model exists under /models */
+            if( access( buffer, F_OK ) == -1 ) {
+                char* str = "trackObject was called with unknown target";
+                return TaskResult(FAULT, str);
+            }
             
-             if(!strcmp(target_str.c_str(),"CAR_PASSENGER")) {
-                 _detector->detectAndTrack(CAR_PASSENGER);
-             }
-             if(!strcmp(target_str.c_str(),"CAR_DRIVER")) {
-                 _detector->detectAndTrack(CAR_DRIVER);
-             }
-             if(!strcmp(target_str.c_str(),"CAR_FRONT")) {
-                 _detector->detectAndTrack(CAR_FRONT);
-             }
-             if(!strcmp(target_str.c_str(),"CAR_REAR")) {
-                 _detector->detectAndTrack(CAR_DRIVER);
-             }
-            _detector->startDetection();
-            C23_ObjectRecognition::C23C0_OD msg;
-            C23_ObjectRecognition::C23C0_ODIM msg2;
+
+            _detector->detectAndTrack(target);
+            
             int count = 0;
             while(!isPreempt()) {
                 count++;
@@ -70,10 +68,10 @@ public:
                     
                     
                } else {
-                  
+                   
                     char* str = "trackObject didnt' detect any object";
                     if (count > 1000000) {
-                        ROS_INFO("trackObject::object not detect - %d\n ", count);
+                        ROS_INFO("trackObject object not detect - %d\n ", count);
                         _detector->stopDetection();
                         return TaskResult(FAULT, str);
                     }

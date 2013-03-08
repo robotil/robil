@@ -5,7 +5,7 @@
 #include <C0_RobilTask/RobilTask.h>
 #include <C0_RobilTask/RobilTaskAction.h>
 #include "C23_Node.hpp"
-
+#include <ros/package.h>
 using namespace std;
 using namespace C0_RobilTask;
 
@@ -15,8 +15,6 @@ protected:
 
     string _name;
     C23_Node *_detector;
-    ros::Publisher objectDetectedPublisher;
-    ros::Publisher objectDeminsionsPublisher;
     ros::NodeHandle nh_;
 
 
@@ -39,23 +37,23 @@ public:
             return TaskResult::Preempted();
         }
         if(args.find("target") != args.end() ) {
-            std::stringstream target; target<<args["target"];
-            string target_str = target.str();
+            std::stringstream msg; 
+           
+            msg << args["target"];
+           
+            string target_str = msg.str();
+            const char* target = target_str.c_str();
             
-            ROS_INFO("searchObject called with: %s",target_str.c_str());
-             if(!strcmp(target_str.c_str(),"CAR_PASSENGER")) {
-                 _detector->detectAndTrack(CAR_PASSENGER);
-             }
-             if(!strcmp(target_str.c_str(),"CAR_DRIVER")) {
-                 _detector->detectAndTrack(CAR_DRIVER);
-             }
-             if(!strcmp(target_str.c_str(),"CAR_FRONT")) {
-                 _detector->detectAndTrack(CAR_FRONT);
-             }
-             if(!strcmp(target_str.c_str(),"CAR_REAR")) {
-                 _detector->detectAndTrack(CAR_DRIVER);
-             }
-            _detector->startDetection();
+            char buffer[1000];
+            sprintf(buffer,"%s/models/%s.mdl%c",ros::package::getPath("C23_ObjectRecognition").c_str(),target,'\0');
+            /* Check if the target model exists under /models */
+            if( access( buffer, F_OK ) == -1 ) {
+                char* str = "searchObject was called with unknown target";
+                return TaskResult(FAULT, str);
+            }
+            
+
+            _detector->detectAndTrack(target);
             
             int count = 0;
             while(!isPreempt()) {

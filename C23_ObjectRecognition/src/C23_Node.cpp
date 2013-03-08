@@ -17,12 +17,6 @@
 static const char WINDOW[] = "Image window";
 
 
-static const char *models[] = {
-"car_polaris_driver_side.mdl",
-"car_polaris_passenger_side.mdl",
-"car_polaris_front.mdl",
-"car_polaris_behind.mdl"};
-
 C23_Node::C23_Node(std::string left_camera,std::string right_camera) :
 		it_(nh_),
 		tldh_(NULL),
@@ -62,23 +56,37 @@ bool proccess(C23_ObjectRecognition::C23::Request  &req,
 * @param right_msg ROS mesage with image data from the right camera topic
 */
 	   
-bool C23_Node::detectAndTrack(MODELS model) {
+bool C23_Node::detectAndTrack(const char* target) {
+
     ROS_INFO("C23_Node::detectAndTrack\n");
     if(tldh_ != NULL) {
         free(tldh_);
         tldh_ = NULL;
-        currentModel_ = NONE;
     }
-    currentModel_ = model;
-    ROS_INFO("C23_Node:: Now detecting and tracking model 2: ");
-    ROS_INFO(models[model]);
-    ROS_INFO("\n");
+    sprintf(_path,"%s/models/%s.mdl%c",ros::package::getPath("C23_ObjectRecognition").c_str(),target,'\0');
     x = -1;
-    detect=true;
+    
+    _mode = TRACKING;
     done_processing = true;
+    detect=true;
     return true;
 
 }
+
+bool C23_Node::learnObject(const char* target) {
+    ROS_INFO("C23_Node:: learning new object: %s.",target);
+    if(tldh_ != NULL) {
+        free(tldh_);
+        tldh_ = NULL;
+    }
+    sprintf(_path,"%s/models/%s.mdl%c",ros::package::getPath("C23_ObjectRecognition").c_str(),target,'\0');
+    _mode = LEARNING;
+    
+    done_processing = true;
+    detect = true;
+    return true;
+}
+
 
 	
 void C23_Node::callback(const sensor_msgs::ImageConstPtr& left_msg,const sensor_msgs::ImageConstPtr& right_msg){
@@ -86,9 +94,8 @@ void C23_Node::callback(const sensor_msgs::ImageConstPtr& left_msg,const sensor_
  cv_bridge::CvImagePtr cv_ptr;
     
  if(detect && done_processing) {
- //   ROS_INFO("C23_Node::detect + done_processing\n");
     done_processing = false;
-   // ROS_INFO("I'm ready\n");
+
     try {
         cv_ptr = cv_bridge::toCvCopy(left_msg,enc::BGR8);
     }
@@ -102,28 +109,24 @@ void C23_Node::callback(const sensor_msgs::ImageConstPtr& left_msg,const sensor_
     IplImage tosave=cv_ptr->image;
     int percent = 30;
     IplImage *destination = cvCreateImage
-    ( cvSize((int)((tosave.width*percent)/50) , (int)((tosave.height*percent)/50) ),
+    ( cvSize((int)((tosave.width*percent)/20) , (int)((tosave.height*percent)/20) ),
                              tosave.depth, tosave.nChannels );
     
-    //use cvResize to resize source to a destination image
+
     cvResize(&tosave, destination);
-   // ROS_INFO("Received image");
+
     if(tldh_ == NULL) {
-       // ROS_INFO("Now reading model..");
+
         char buf[10000];
-       sprintf(buf,"%s/models/%s%c",ros::package::getPath("C23_ObjectRecognition").c_str(),models[currentModel_],'\0');
-      //  ROS_INFO("Done reading");
-      //  ROS_INFO("Now building... %s\n",buf);
-        tldh_ = new C23_Node_TLD_Handler(TRACKING, buf);
-       // ROS_INFO("Now init..\n");
+      
+      
+        tldh_ = new C23_Node_TLD_Handler(_mode, _path);
+
         tldh_->init(destination);
     } else {
-     //   ROS_INFO("Now processing..\n");
+
         
         tldh_->processFrame(destination, &x, &y, &width, &height, &confident);
-      //  char buff[100];
-      //  sprintf(buff,"BB: %d %d %d %d, Confident: %lf \n",x,y,width,height,confident);
-      //  ROS_INFO(buff);
         C23_ObjectRecognition::C23C0_OD msg;
         C23_ObjectRecognition::C23C0_ODIM msg2;
         msg.ObjectDetected = (x != -1 ? 1 : 0);
