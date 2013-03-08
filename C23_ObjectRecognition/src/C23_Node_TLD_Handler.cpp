@@ -24,16 +24,6 @@ C23_Node_TLD_Handler::C23_Node_TLD_Handler(TldMode mode, const char* modelPath) 
     _initialBB = NULL;
     _mode = mode;
     _window = "Image window";
-    //showOutput = 1;
-    //showNotConfident = true;
-
-   // reinit = 0;
-
-    //loadModel = false;
-
-   // exportModelAfterRun = false;
-   // modelExportFile = "model";
-    //seed = 0;
     
 }
 TldRetval C23_Node_TLD_Handler::init(IplImage* img) {
@@ -66,29 +56,27 @@ TldRetval C23_Node_TLD_Handler::init(IplImage* img) {
     
     }
    
-    //FILE *resultsFile = NULL;
-
-    //if(printResults != NULL)
-   // {
-   //     resultsFile = fopen(printResults, "w");
-   // }
+    
     ROS_INFO("Init func: 5\n");
     bool reuseFrameOnce = false;
     bool skipProcessingOnce = false;
     
     if(_mode ==TRACKING && _modelPath != NULL)
     {
-        ROS_INFO("Loading model..\n");
+        ROS_INFO("Loading model.. 5.1\n");
         tld->readFromFile(_modelPath);
         reuseFrameOnce = true;
     }
     else if(_initialBB != NULL)
     {
+        ROS_INFO("Init func: 5.2");
         Rect bb = tldArrayToRect(_initialBB);
 
         printf("Starting at %d %d %d %d\n", bb.x, bb.y, bb.width, bb.height);
-
+        ROS_INFO("Init func: 6");
+        ROS_INFO("%d %d %d %d",bb.x, bb.y, bb.width, bb.height);
         tld->selectObject(grey, &bb);
+        ROS_INFO("Init func: 7");
         skipProcessingOnce = true;
         reuseFrameOnce = true;
     }
@@ -258,7 +246,7 @@ int C23_Node_TLD_Handler::getBBFromUser(IplImage *img, CvRect &rect)
         rect.height = abs(rect.height);
     }
 
-    cvSetMouseCallback(_window, NULL, NULL);
+    cvSetMouseCallback("Image window", NULL, NULL);
     
     cvReleaseImage(&img0);
     cvReleaseImage(&img1);
