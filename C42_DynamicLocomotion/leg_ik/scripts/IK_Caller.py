@@ -99,14 +99,14 @@ def get_from_zmp(msg):
         
     ns.l_leg_lax.publish( left_leg_angles[4] ) #JSC_l_leg_lax.getCMD(ns.LegAng.ang.lax) )
     ns.l_leg_uay.publish( left_leg_angles[5] )
-    ns.l_leg_kny.publish( 1.498 ) #left_leg_angles[3] + ns.joints_offset['l_leg_kny'] )
+    ns.l_leg_kny.publish( left_leg_angles[3] + ns.joints_offset['l_leg_kny'] ) # 1.498 ) #
     ns.l_leg_uhz.publish( left_leg_angles[2] )
     ns.l_leg_lhy.publish( left_leg_angles[1] + ns.joints_offset['l_leg_lhy'] )
     ns.l_leg_mhx.publish( left_leg_angles[0] ) #JSC_l_leg_mhx.getCMD(ns.LegAng.ang.mhx) )
 
     ns.r_leg_lax.publish( right_leg_angles[4] ) #JSC_r_leg_lax.getCMD(ns.LegAng.ang.lax + lax_stance) )
     ns.r_leg_uay.publish( right_leg_angles[5] )
-    ns.r_leg_kny.publish( 1.498 ) # right_leg_angles[3] + ns.joints_offset['r_leg_kny'] )
+    ns.r_leg_kny.publish( right_leg_angles[3] + ns.joints_offset['r_leg_kny'] ) # 1.498 ) #
     ns.r_leg_uhz.publish( right_leg_angles[2] )
     ns.r_leg_lhy.publish( right_leg_angles[1] + ns.joints_offset['r_leg_lhy'])
     ns.r_leg_mhx.publish( right_leg_angles[0] ) #JJSC_r_leg_mhx.getCMD(ns.LegAng.ang.mhx + mhx_stance) )

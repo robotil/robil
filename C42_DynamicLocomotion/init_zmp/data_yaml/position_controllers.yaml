@@ -101,9 +101,9 @@ l_leg_lax_position_controller:
   type: robot_mechanism_controllers/JointPositionController
   joint: l_leg_lax
   pid: &l_leg_lax_gains
-    p: 5000.0 #5000.0 #10000.0
-    d: 1.5   #15.0 # 30.0 #0.75 max value 30
-    i: 150.0  #150.0  #5.0 
+    p: 2500.0 #5000.0 #5000.0 #10000.0                 last try: 2500.0
+    d: 1.5    #1.5   #15.0 # 30.0 #0.75 max value 30   last try: 1.5
+    i: 0.0    #150.0  #5.0                             last try: 0.0
     i_clamp: 50.0
 
 r_leg_lax_position_controller:
@@ -133,9 +133,9 @@ l_leg_mhx_position_controller:
   type: robot_mechanism_controllers/JointPositionController
   joint: l_leg_mhx
   pid: &l_leg_mhx_gains
-    p: 5000.0 #50000.0
-    d: 0.0    # # 10.0
-    i: 50.0   # 5.0
+    p: 5000.0 #5000.0 #50000.0     last try: 5000.0
+    d: 0.0    #0.0 # 10.0
+    i: 0.0    #50.0   # 5.0        last try: 50.0
     i_clamp: 50.0
 
 r_leg_mhx_position_controller:
