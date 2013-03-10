@@ -544,6 +544,7 @@ class node:
         if (node.debugMode):
             tmpIndex  = index
             a = self.DEBUG
+            
             if (a!=None):
                 if not(self.boolWhoAmI("tsk")): 
                     if (self.monitor):
@@ -561,7 +562,20 @@ class node:
         self.DEBUG[1] = float(self.DEBUG[1])
         #self.setAttrib("DEBUG", self.DEBUG )
         self._updateDebugAttribToXmlFile()
+        self.upadtewholetree(self.myTree.rootNode)
         
+    
+#        self._setBubbleDebugChild()
+    
+    def upadtewholetree(self,recnode):
+        for child in recnode.childList :
+            child._updateChildDebug()
+            self.upadtewholetree(child)
+        
+#    def _setBubbleDebugChild(self):
+#        if self.parent :
+#            self.parent.setDebug(self.DEBUG[0]+" "+self.DEBUG[1])
+            
     #run as base case func
     def runAsBaseCase (self, index):
         debug = node.run(self, index)

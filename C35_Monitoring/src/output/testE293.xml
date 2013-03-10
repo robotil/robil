@@ -1,0 +1,25 @@
+<plan>
+   <par name="event3" x="440.5" y="74.5" id="83828891-c7d7-48da-867f-72f3f15cb960" Successdistribution="C[[2.0,57][3.0,39][4.0,4]] C[[2.0,32][3.0,44][4.0,16][5.0,2]]" probability="1.0 0.94 " Failuredistribution="C[] C[[6.0,2][7.0,4]]">
+         <par name="perception" x="259.5" y="168.5" id="ac1a5217-449b-412b-ba1e-587b424aad5d" Successdistribution="C[[2.0,57][3.0,39][4.0,4]] C[[2.0,32][3.0,44][4.0,16][5.0,2]]" probability="1.0 0.94 " Failuredistribution="C[] C[[6.0,2][7.0,4]]">
+               <tsk name="LocalizationTrack" Successdistribution="U[2.0,5.0] U[2.0,5.0]" Failuredistribution="U[6.0,10.0] U[6.0,9.0]" DEBUG="True 1.0" probability="0.9 0.5 "/>
+               <tsk name="TrackObject(target=A)" Successdistribution="U[2.0,5.0] U[2.0,5.0]" Failuredistribution="U[6.0,10.0] U[6.0,9.0]" DEBUG="True 1.0" probability="0.9 0.5 "/>
+               <tsk name="TrackObject(target=B)" Successdistribution="U[2.0,5.0] U[2.0,5.0]" Failuredistribution="U[6.0,10.0] U[6.0,9.0]" DEBUG="True 1.0" probability="0.9 0.5 "/>
+               <tsk name="ObstacleDetection" Successdistribution="U[2.0,5.0] U[2.0,5.0]" Failuredistribution="U[6.0,10.0] U[6.0,9.0]" DEBUG="True 1.0" probability="0.9 0.5 "/>
+               <tsk name="PathPlanning" Successdistribution="U[2.0,5.0] U[2.0,5.0]" Failuredistribution="U[6.0,10.0] U[6.0,9.0]" DEBUG="True 1.0" probability="0.9 0.5 "/>
+         </par>
+         <seq name="mission" x="528.5" y="165.5" id="8002a72b-760f-49b1-b91b-f7a67c6c3bec" Successdistribution="C[[21.0,1][22.0,1][23.0,1][24.0,2][25.0,5][26.0,2][27.0,5][28.0,5][29.0,4][30.0,7][31.0,2][33.0,3]] C[]" probability="0.38 0.0 " Failuredistribution="C[[6.0,2][7.0,2][8.0,4][9.0,7][10.0,3][12.0,2][13.0,2][14.0,1][15.0,2][16.0,3][17.0,3][18.0,5][20.0,3][21.0,1][23.0,2][24.0,1][26.0,3][27.0,2][28.0,4][29.0,1][30.0,2][31.0,2][32.0,2][34.0,3]] C[[6.0,10][7.0,14][8.0,18][9.0,10][10.0,8][11.0,5][12.0,7][13.0,2][14.0,5][16.0,5][17.0,2][18.0,2][19.0,2][20.0,1][21.0,1][22.0,4][23.0,2][25.0,1][26.0,1]]">
+               <tsk name="RobotBody(pose=standUp)" Successdistribution="U[2.0,5.0] U[2.0,5.0]" Failuredistribution="U[6.0,10.0] U[6.0,9.0]" DEBUG="True 1.0" probability="0.9 0.5 "/>
+               <seq name="objectAFlow" x="585.5" y="236.5" id="c19bda81-5d25-4c63-acff-0c11d4030344" Successdistribution="C[[18.0,1][19.0,1][20.0,1][21.0,2][22.0,2][23.0,9][24.0,4][25.0,6][26.0,2][27.0,7][28.0,1][29.0,2]] C[]" probability="0.447058823529 0.0 " Failuredistribution="C[[6.0,1][7.0,2][8.0,2][9.0,1][10.0,1][11.0,1][12.0,4][13.0,1][14.0,8][17.0,2][18.0,2][19.0,3][21.0,2][22.0,1][23.0,2][24.0,3][25.0,2][26.0,1][27.0,3][28.0,1][29.0,1][30.0,3]] C[[6.0,2][7.0,12][8.0,5][9.0,5][10.0,2][11.0,5][12.0,3][13.0,2][14.0,1][15.0,2][17.0,3][18.0,2][19.0,2][20.0,2][21.0,2]]">
+                     <tsk name="TurnTo(target=A)" Successdistribution="U[2.0,5.0] U[2.0,5.0]" Failuredistribution="U[6.0,10.0] U[6.0,9.0]" DEBUG="True 1.0" probability="0.9 0.5 "/>
+                     <seq name="OperatorRequest" x="633.5" y="309.5" id="3fa4b07c-910e-4ee4-8922-0005ad9f0d44" Successdistribution="C[[10.0,1][11.0,3][12.0,11][13.0,10][14.0,11][15.0,5][16.0,8][18.0,1]] C[]" probability="0.632911392405 0.0 " Failuredistribution="C[[7.0,2][8.0,2][9.0,5][10.0,4][11.0,1][12.0,2][13.0,1][15.0,1][16.0,3][17.0,1][18.0,1][19.0,2][21.0,2][22.0,1][23.0,1]] C[[6.0,3][7.0,6][8.0,4][9.0,3][10.0,1][11.0,1][12.0,3][13.0,1][14.0,2][15.0,2][16.0,3][18.0,1]]">
+                           <tsk name="PushHMI(data=panoramic_image)" Successdistribution="U[2.0,5.0] U[2.0,5.0]" Failuredistribution="U[6.0,10.0] U[6.0,9.0]" DEBUG="True 1.0" probability="0.9 0.5 "/>
+                           <tsk name="PushHMI(data=occupancy_grid)" Successdistribution="U[2.0,5.0] U[2.0,5.0]" Failuredistribution="U[6.0,10.0] U[6.0,9.0]" DEBUG="True 1.0" probability="0.9 0.5 "/>
+                           <tsk name="PushHMI(data=path)" Successdistribution="U[2.0,5.0] U[2.0,5.0]" Failuredistribution="U[6.0,10.0] U[6.0,9.0]" DEBUG="True 1.0" probability="0.9 0.5 "/>
+                           <tsk name="HMIResponse" Successdistribution="U[2.0,5.0] U[2.0,5.0]" Failuredistribution="U[6.0,10.0] U[6.0,9.0]" DEBUG="True 1.0" probability="0.9 0.5 "/>
+                     </seq>
+                     <tsk name="FollowPath" Successdistribution="U[2.0,5.0] U[2.0,5.0]" Failuredistribution="U[6.0,10.0] U[6.0,9.0]" DEBUG="True 1.0" probability="0.9 0.5 "/>
+                     <tsk name="PickUp(target=A)" Successdistribution="U[2.0,5.0] U[2.0,5.0]" Failuredistribution="U[6.0,10.0] U[6.0,9.0]" DEBUG="True 1.0" probability="0.9 0.5 "/>
+               </seq>
+         </seq>
+   </par>
+</plan>
