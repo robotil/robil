@@ -112,9 +112,9 @@ void ImageDraw::OnImgReceived(std::string fileName)
 	emit SigOnNewImg(myImage);
 }
 
-void ImageDraw::OnOccupancyGridReceived(int grid[100][100], StructPoint robotPos, int xOffset, int yOffset)
+void ImageDraw::OnOccupancyGridReceived(int grid[100][100], StructPoint robotPos, int xOffset, int yOffset, double orient)
 {
-	ui.mapWidget->UpdateGrid(grid,robotPos,xOffset,yOffset);
+	ui.mapWidget->UpdateGrid(grid,robotPos,xOffset,yOffset,orient);
 }
 
 void ImageDraw::OnPathReceived(std::vector<StructPoint> points)
