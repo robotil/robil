@@ -55,6 +55,8 @@ class Robot_State:
         self.pelvis_m_filtered = pl.zeros((3)) #Orientation()
         self.com_m_filtered = pl.zeros((3)) #Position()
 
+        self.com_0_from_l_foot = pl.zeros((3)) #Position()
+
         self.__step_phase = 1 # Double-Support left leg in front
         self.init_Change_step_phase()
 
@@ -158,7 +160,13 @@ class Robot_State:
 
             self.num_of_samples_in_buffer = 0
             #self.buffer_full = False
-        
+            self.change_in_foot_coordinates = self.previous_swing_foot_filtered[0:3].copy()
+
+        if self.__step_phase == 1:
+            self.com_0_from_foot = self.com_0_from_l_foot
+        if self.__step_phase == 3:
+            self.com_0_from_foot = self.com_0_from_r_foot
+
         ## Reset step phase average parameters
         self.count_avg_samples = 0
         #self.reset_avg_flag = True
@@ -256,7 +264,8 @@ class Robot_State:
         self.swing_foot = self.array2Pos_Ori( self.swing_foot_filtered )
         self.swing_hip = self.array2Pos( self.swing_hip_arr[-1,:] ) #_arr[-1,:] ) # last sampled value
         self.pelvis_m = self.array2Ori( self.pelvis_m_filtered )
-        self.com_m = self.array2Pos( self.com_m_arr[-1,:] ) # last sampled value  
+        self.com_m = self.array2Pos( self.com_m_arr[-1,:] ) # last sampled value 
+        self.com_m.y =  self.com_m_arr[-1,1] - self.com_0_from_foot[1] #+ self.change_in_foot_coordinates[1]
         self.swing_foot_at_start_of_step_phase = self.array2Pos_Ori( self.swing_foot_start )
 
         return()
@@ -333,7 +342,7 @@ class Robot_State:
             # Wait 0.02 second
             rospy.sleep(0.03)
 
-        com_0_from_r_foot = self.com_m_filtered.copy() #copy.deepcopy( self.com_m_arr )
+        self.com_0_from_r_foot = self.com_m_filtered.copy() #copy.deepcopy( self.com_m_arr )
         self.r_stance_hip_0 = self.stance_hip_filtered.copy() #copy.deepcopy( self.stance_hip_arr ) 
         delta_between_hips = self.stance_hip_filtered - self.swing_hip_filtered
         self.rf_swing_hip_dy = pl.sqrt( pl.dot( delta_between_hips,delta_between_hips ) ) # distance between hips in right leg frame
@@ -354,6 +363,7 @@ class Robot_State:
         rospy.sleep(1)
         
         self.l_stance_hip_0 = self.stance_hip_filtered.copy() #copy.deepcopy( self.stance_hip_arr )
+        self.com_0_from_l_foot = self.com_m_filtered.copy()
         # com_0_from_l_foot = self.com_m_arr.copy() #copy.deepcopy( self.com_m_arr )
         # rs_from_l_foot_swing_foot = self.swing_foot_arr.copy() #copy.deepcopy( self.swing_foot_arr )
         # rs_from_l_foot_swing_hip = self.swing_hip_arr.copy() #copy.deepcopy( self.swing_hip_arr )
@@ -366,7 +376,7 @@ class Robot_State:
 
         # constraint: we want hips height (z) and advance (x) to be the same
         hip_height = 0.7999 - bend_knees #(self.l_stance_hip_0.z + self.r_stance_hip_0.z)/2
-        hip_sagital = 0.0 #-0.02 # (self.l_stance_hip_0.x + self.r_stance_hip_0.x)/2 # x position relative to foot
+        hip_sagital = 0.01 #-0.02 # (self.l_stance_hip_0.x + self.r_stance_hip_0.x)/2 # x position relative to foot
         self.l_stance_hip_0[2] = hip_height; self.r_stance_hip_0[2] = hip_height; # update z coord.
         self.l_stance_hip_0[0] = hip_sagital; self.r_stance_hip_0[0] = hip_sagital; # update x coord.
 

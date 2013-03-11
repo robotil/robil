@@ -59,13 +59,13 @@ out = walking_trajectory () #traj() # output message of topic 'zmp_out'
 #zc = 0#0.8455 # [m] COM height
 
 # Walking Parameters 
-step_length = 0.0001 # 0.03 #0.01  # [m]
+step_length = 0.00001 # 0.03 #0.01  # [m]
 step_width  = 0.178  # 0.178  # [m]
-zmp_width   = 0.100 #0.02 # #0.168
+zmp_width   = 0.130  #0.02 # #0.168 #when lift foot 0.130, feet on ground 0.110
 step_time   = 1 #1   # [sec]
 bend_knees  = 0.18 #0.04  # [m]    
-step_height = 0.0001 #0.05 #0.03 #0.05  # [m] 
-trans_ratio_of_step = 1.0 #0.8 # units fraction: 0-1.0 ; fraction of step time to be used for transition. 1.0 = all of step time is transition 
+step_height = 0.00001 #0.05 #0.03 #0.05  # [m] 
+trans_ratio_of_step = 0.9 #1.0 #0.8 # units fraction: 0-1.0 ; fraction of step time to be used for transition. 1.0 = all of step time is transition 
 trans_slope_steepens_factor = 8/step_time #2 # 1 transition Sigmoid slope (a)
 # Robot State object:
 rs = Robot_State('Robot State')
