@@ -34,7 +34,7 @@ public:
 	//C11_Node_Subscriber implementation
 	virtual void OnImgReceived(QImage image);
 	virtual void OnImgReceived(std::string fileName);
-	virtual void OnOccupancyGridReceived(int grid[100][100], StructPoint robotPos, int xOffset, int yOffset);
+	virtual void OnOccupancyGridReceived(int grid[100][100], StructPoint robotPos, int xOffset, int yOffset, double orient);
 	virtual void OnPathReceived(std::vector<StructPoint> points);
 
 protected:

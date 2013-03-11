@@ -5,6 +5,7 @@
 #include <QGraphicsSceneMouseEvent>
 #include <QGraphicsPathItem>
 #include <iostream>
+#include "math.h"
 
 bool Drawing;
 bool Moving;
@@ -36,7 +37,7 @@ CMapMain::CMapMain(QWidget *parent, Qt::WFlags flags)
 		}
 	}
 	startX = 175;
-	startY = 400;
+	startY = 930;
 	p_i=startX;
 	p_j=startY;
 	pos[0] = p_i;
@@ -82,11 +83,11 @@ CMapMain::CMapMain(int arr[100][100],QWidget *parent, Qt::WFlags flags)
 		{
 			for(int j=0; j<100; j++)
 			{
-				PixColor[i][j] = 0;
+				PixColor[i][j] = 2;
 			}
 		}
 		startX = 175;
-		startY = 400;
+		startY = 930;
 		p_i=startX;
 		p_j=startY;
 		pos[0] = p_i;
@@ -168,43 +169,71 @@ void CMapMain::setMode(ModeDraw m)
 	}
 }
 
-void CMapMain::UpdateGrid(int grid[100][100], StructPoint robotPos, int xOffset, int yOffset)
+void CMapMain::UpdateGrid(int grid[100][100], StructPoint robotPos, int xOffset, int yOffset, double orient)
 {
-	for(int i=0; i<100; i++)
+        RobotPos.x = robotPos.x;
+        RobotPos.y = robotPos.y;
+        RobotOrientation = orient;
+        GridXOffset = xOffset;
+        GridYOffset = yOffset;
+        CalculateCornerPos();
+        StructIntPoint oldPoint;
+        StructIntPoint newPoint;
+        int i,j;
+        WorldToRobotOrientation = (90.0f/RAD2DEG + orient);
+//        WorldToRobotOrientation = 90.0f/RAD2DEG;
+	for(i=0; i<100; i++)
 	{
-		for(int j=0; j<100; j++)
+		for(j=0; j<100; j++)
 		{
-			PixColor[i][j] = grid[i][j];
-			pPixItem[i][j]->SetColor(grid[i][j]);
+//			PixColor[i][j] = grid[i][j];
+//			pPixItem[i][j]->SetColor(grid[i][j]);
+		    PixColor[i][j] = 2;
+		    pPixItem[i][j]->SetColor(2);
 		}
 	}
-	RobotPos = robotPos;
-	GridXOffset = xOffset;
-	GridYOffset = yOffset;
-	CalculateCornerPos();
+	for(i=0; i<100; i++)
+        {
+                for(j=0; j<100; j++)
+                {
+//                      PixColor[i][j] = grid[i][j];
+//                      pPixItem[i][j]->SetColor(grid[i][j]);
+                    oldPoint.x = i;
+                    oldPoint.y = j;
+                    newPoint = CalculateGridPoint(oldPoint);
+//                    std::cout<<"newPoint.x="<<newPoint.x<<" newPoint.y="<<newPoint.y<<"\n";
+                    if(newPoint.x>=0 && newPoint.x<=99 && newPoint.y>=0 && newPoint.y<=99)
+                    {
+                        PixColor[newPoint.x][99-newPoint.y] = grid[i][j];
+                        pPixItem[newPoint.x][99-newPoint.y]->SetColor(grid[i][j]);
+                        //std::cout<<"Bingo!\n";
+                    }
+                }
+        }
+//	std::cout<<"RobotGridPos.x="<<RobotGridPos.x<<"RobotGridPos.y="<<RobotGridPos.y<<"!\n";
 	update();
 }
 
 void CMapMain::AddPix()
 {
 	startX = 50;//175;
-	startY = 130;//400;
+	startY = 930;//400;
 	p_i=startX;//line
 	p_j=startY;//column
 	
 	for(int i=0;i<100;i++)
 	{
-		pos[0] = p_i;
+		pos[1] = p_j;
 		for(int j=0;j<100;j++)
 		{
-			pos[1] = p_j;
+			pos[0] = p_i;
 			pPixItem[i][j] = new CPixItem(PixColor[i][j],ui.graphicsView->scene(),pos[0],pos[1]);
 			pPixItem[i][j]->setPos(pos[0],pos[1]);
 			ui.graphicsView->scene()->addItem(pPixItem[i][j]);
-			p_j=p_j+8.0;
+			p_i=p_i+8.0;
 		}
-		p_j = startY;
-		p_i=p_i+8.0;
+		p_i = startX;
+		p_j=p_j-8.0;
 	}
 }
 
@@ -467,14 +496,28 @@ void CMapMain::AddPath(std::vector<StructPoint> points)
 QPointF CMapMain::PointToPix(StructPoint point)
 {
 	QPointF GPoint;
-	GPoint.setX(50+((point.x - CornerPos.x)*32));
-	GPoint.setY(930-((point.y - CornerPos.y)*32));
+//	GPoint.setX(50+((point.x - CornerPos.y)*32) - CornerPos.y*32 + 12.5*32);
+	GPoint.setX(50+((point.y - RobotPos.y)*(-32)) + 400);
+	GPoint.setY(930-((point.x - RobotPos.x)*32) - 200);
 	std::cout<<"PointX: "<<GPoint.x()<<" PointY: "<<GPoint.y()<<"\n";
 	return GPoint;
 }
 
 void CMapMain::CalculateCornerPos()
 {
-	CornerPos.x = RobotPos.x+GridXOffset;
-	CornerPos.y = RobotPos.y+GridYOffset;
+	CornerPos.x = GridXOffset;
+	CornerPos.y = GridYOffset;
+	RobotGridPos.x = (RobotPos.x-GridXOffset)*4;
+	RobotGridPos.y = (RobotPos.y-GridYOffset)*4;
+	std::cout<<"CornerPos.x: "<<CornerPos.x<<" CornerPos.y: "<<CornerPos.y<<"\n";
+	std::cout<<"RobotGridPos.x: "<<RobotGridPos.x<<" RobotGridPos.y: "<<RobotGridPos.y<<"\n";
+}
+
+StructIntPoint CMapMain::CalculateGridPoint(StructIntPoint pointFromRos)
+{
+  StructIntPoint gridPoint;
+  gridPoint.x = (pointFromRos.x-RobotGridPos.x)*sin(WorldToRobotOrientation) - (pointFromRos.y-RobotGridPos.y)*cos(WorldToRobotOrientation) + 20;
+  gridPoint.y = (pointFromRos.y-RobotGridPos.y)*sin(WorldToRobotOrientation) + (pointFromRos.x-RobotGridPos.x)*cos(WorldToRobotOrientation) + 50;
+//  std::cout<<"PointX="<<pointFromRos.x<<" PointY="<<pointFromRos.y<<" gridPoint.x = "<<gridPoint.x<<" gridPoint.y = "<<gridPoint.y<<" Orientation = "<<WorldToRobotOrientation<<"\n";
+  return gridPoint;
 }
