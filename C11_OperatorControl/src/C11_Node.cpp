@@ -158,7 +158,7 @@ bool C11_Node::push_occupancy_grid_proccess(C10_Common::push_occupancy_grid::Req
 	{
 		for(int j=0; j<100;j++)
 		{
-			grid[i][j] = req.OGD.row[j].column[i].status;
+			grid[i][j] = req.OGD.row[i].column[j].status;
 		}
 	}
 	StructPoint robotPos;
