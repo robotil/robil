@@ -35,7 +35,7 @@ public:
 	CMapMain(QWidget *parent = 0, Qt::WFlags flags = 0);
 	CMapMain(int arr[100][100],QWidget *parent = 0, Qt::WFlags flags = 0);
 	~CMapMain();
-	void UpdateGrid(int grid[100][100], StructPoint robotPos, int xOffset, int yOffset);
+	void UpdateGrid(int grid[100][100], StructPoint robotPos, int xOffset, int yOffset, double orient);
 	void setReadyPath();
 	void setReadyPolygon();
 	void setMode(ModeDraw m);
@@ -66,6 +66,9 @@ private:
 	CRouteItem *routePolygon;
 
 	StructPoint RobotPos;
+	StructIntPoint RobotGridPos;
+	double RobotOrientation;
+	double WorldToRobotOrientation;
 	int GridXOffset;
 	int GridYOffset;
 	StructPoint CornerPos;
@@ -83,6 +86,7 @@ private:
 	QPointF PointToPix(StructPoint point);
 	void CalculateCornerPos();
 
+	StructIntPoint CalculateGridPoint(StructIntPoint pointFromRos);
 
 protected:
 	bool eventFilter(QObject *o, QEvent* e);

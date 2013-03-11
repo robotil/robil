@@ -148,22 +148,24 @@ bool C11_Node::push_occupancy_grid_proccess(C10_Common::push_occupancy_grid::Req
 {
 	ROS_INFO("C11_OperatorControl: occupancy grid received!\n");
 	std::cout<<"Robot pos: "<<req.OGD.robotPos<<"\n";
+	std::cout<<"Robot orientation: "<<req.OGD.robotOri<<"\n";
 	std::cout<<"xOffset: "<<req.OGD.xOffset<<"\n";
 	std::cout<<"yOffset: "<<req.OGD.yOffset<<"\n";
 //	std::cout<<"Grid: "<<req.OGD<<"\n";
+	res.ACK.mes = 1;
 	int grid[100][100];
 	for(int i=0; i<100; i++)
 	{
 		for(int j=0; j<100;j++)
 		{
-			grid[i][j] = req.OGD.row[i].column[99-j].status;
+			grid[i][j] = req.OGD.row[j].column[i].status;
 		}
 	}
 	StructPoint robotPos;
 	robotPos.x = req.OGD.robotPos.x;
 	robotPos.y = req.OGD.robotPos.y;
-	pIC11_Node_Subscriber->OnOccupancyGridReceived(grid,robotPos,req.OGD.xOffset,req.OGD.yOffset);
-	res.ACK.mes = 1;
+	pIC11_Node_Subscriber->OnOccupancyGridReceived(grid,robotPos,req.OGD.xOffset,req.OGD.yOffset,req.OGD.robotOri.z);
+
 	return true;
 }
 
