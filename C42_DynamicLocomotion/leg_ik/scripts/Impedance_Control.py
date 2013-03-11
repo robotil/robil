@@ -8,7 +8,7 @@
 ####    1) class "Joint_Stiffness_Controller":                               ##
 ####       The purpose of this controller is to limit the effort of the      ## 
 ####       join. Because of uncertainty of the structure* the desired angle  ##
-####       might not fit the structure which can cause a build up of moment. ##   
+####       might not fit the structure which can cause a build up of torque. ##   
 ####       This controller regulates the input of a joint position           ##
 ####       controller by aspiring to minimize its error while compromising   ##
 ####       the error from the desired angle so that we will get a better fit ##
@@ -140,7 +140,89 @@ class Joint_Stiffness_Controller:
 
         return command 
 
+#################################################################################
+#     Joint_Stiffness_Controller 2 - using ground reaction feedback             #
+#################################################################################
 
+
+class Joint_Stiffness_Controller_2:
+    'This controller regulates the input of a joint position controller to limit effort output so that foot stays on ground'
+    # Class parameters:
+    limit_command_diff = 0.02 # units [rad]
+    command_resolution = 0.002 #0.0001 # Command will change with steps greater than command_resolution
+                                       # Should be greater than steady state noise (PID error) 
+
+    def __init__(self, name, stiffness, activation_ZMP_point, update_period):
+        self.name = name
+        self.K = stiffness # parameter to tune
+        self.activation_ZMP_point = activation_ZMP_point # when the torque/force is greater than this value we start to reduce the effort of the joint
+        
+        self.last_set_point = 0.0 # set point
+        self.last_command = 0.0
+
+        # FeedBack data:
+        self.FB_force_avg = 0.0
+        self.FB_torque_avg = 0.0
+
+        self.FB_force_sum = 0.0
+        self.FB_torque_sum = 0.0
+
+        self.num_of_FB_samples = 0
+
+    def UpdateFeedBack(self, force, torque):
+        self.num_of_FB_samples += 1
+        self.FB_force_sum += force
+        self.FB_torque_sum += torque
+
+        self.FB_force_avg = self.FB_force_sum/self.num_of_FB_samples
+        self.FB_torque_avg = self.FB_torque_sum/self.num_of_FB_samples
+
+    def ResetFB_Sum(self):
+        self.FB_force_sum = 0.0
+        self.FB_torque_sum = 0.0
+        self.num_of_FB_samples = 0
+
+    def getCMD(self, set_point): # set_point = original input to joint position controller 
+
+        if self.FB_force_sum == 0:
+            force_sum = 1.0
+        else:
+            force_sum = self.FB_force_sum
+
+        if abs(self.FB_torque_avg/force_sum) > self.activation_ZMP_point: # if torque is greater than activation ZMP point we start to reduce joint effort
+
+            # command = self.last_command
+
+            # if (time_from_avg_start >= self.update_period):
+
+            #     position_avg = self.getAvgPosition()
+
+                # rospy.loginfo("SC_'%s' method getCMD: update time = %f, position_sum = %f, effort_sum = %f" %  \
+                #              (self.name,time_from_avg_start,self.position_sum,self.effort_sum))
+
+                J =  self.getAvgEffort() # units [Nm] J~=err*PID can try to use err = ??? 
+                
+                correction_factor = J/self.K
+                if correction_factor > self.limit_command_diff:
+                    correction_factor = self.limit_command_diff
+                # elif -1*correction_factor > self.limit_command_diff: # added without checking need to check that it works
+                #     correction_factor = -1*self.limit_command_diff
+      
+                command = self.last_set_point - correction_factor  # last_set_point ~= set_point, we use it so that set point will not include noise 
+
+                self.ResetStateSum()
+                self.avg_start_time = self.last_update_stamp # it's not enough to ResetStateSum() because getCMD might be called again before UpdateState
+
+        else:
+            command = set_point
+        
+        self.ResetFB_Sum()
+        #rospy.loginfo("JSC_'%s' method getCMD: set_point = %f, last_set_point = %f, CHANGED" %(self.name,set_point,self.last_set_point))
+
+        self.last_set_point = set_point
+        self.last_command = command
+
+        return command 
 
 
 #################################################################################
