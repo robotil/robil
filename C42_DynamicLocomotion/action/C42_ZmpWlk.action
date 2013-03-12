@@ -1,6 +1,3 @@
-#goal position and orientation
-geometry_msgs/Pose2D goal_pos
-float64 tol
 ---
 #current position and orientation
 geometry_msgs/Pose2D res_pos
