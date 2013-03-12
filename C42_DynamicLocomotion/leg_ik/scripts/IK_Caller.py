@@ -34,13 +34,17 @@ import copy
 from Impedance_Control import Position_Stiffness_Controller, Joint_Stiffness_Controller_2
 class Nasmpace: pass
 ns = Nasmpace()
+
 #ns.LegAng = LegIkResponse()
 
 PSC_right_swing_leg = Position_Stiffness_Controller('R_Swing Leg', 50000, True, False) # name, stiffness, triggered_controller, bypass_input2output [True/False]
 PSC_left_swing_leg = Position_Stiffness_Controller('L_Swing Leg', 30000, True, False) # name, stiffness, triggered_controller, bypass_input2output [True/False]
 
-JSC_l_leg_lax = Joint_Stiffness_Controller_2('l_leg_lax', 1000, 0.04) # joint name, stiffness, activation_ZMP_point [m]
-JSC_r_leg_lax = Joint_Stiffness_Controller_2('r_leg_lax', 1000, 0.04) # joint name, stiffness, activation_ZMP_point [m]
+JSC_l_leg_lax = Joint_Stiffness_Controller_2('l_leg_lax', 650, 1000, 0.04) # joint name, stance_stiffness, swing_stiffness, activation_ZMP_point [m]
+JSC_r_leg_lax = Joint_Stiffness_Controller_2('r_leg_lax', 650, 1000, 0.04) # joint name, stance_stiffness, swing_stiffness, activation_ZMP_point [m]
+JSC_l_leg_lax.ChangeStiffness(Joint_Stiffness_Controller_2.stance)
+JSC_r_leg_lax.ChangeStiffness(Joint_Stiffness_Controller_2.swing)
+
 
 # swing_leg_ik = rospy.ServiceProxy('swing_leg_ik', LegIk)
 # stance_leg_ik = rospy.ServiceProxy('stance_leg_ik', LegIk)
@@ -75,6 +79,8 @@ def get_from_zmp(msg):
         desired_normal_force = half_robot_weight - abs(msg.com_ref.y/com_y_max) * (half_robot_weight - min_support_force)
 
         if ( msg.step_phase == 1 ) or ( msg.step_phase == 2 ): # left leg is stance
+            JSC_l_leg_lax.ChangeStiffness(Joint_Stiffness_Controller_2.stance)
+            JSC_r_leg_lax.ChangeStiffness(Joint_Stiffness_Controller_2.swing)
             # [mhx,lhy,uhz,kny,lax,uay]
             # PSC_left_swing_leg.ByPassON()# bypass controller
             # PSC_right_swing_leg.ByPassOFF()
@@ -85,6 +91,8 @@ def get_from_zmp(msg):
             right_leg_angles = swing_leg_ik(msg.swing_foot,msg.swing_hip,msg.pelvis_d) # msg.pelvis_m)
             left_leg_angles = stance_leg_ik(msg.stance_hip,msg.pelvis_d)
         elif ( msg.step_phase == 3 ) or ( msg.step_phase == 4 ): # right leg is stance
+            JSC_l_leg_lax.ChangeStiffness(Joint_Stiffness_Controller_2.swing)
+            JSC_r_leg_lax.ChangeStiffness(Joint_Stiffness_Controller_2.stance)
             # [mhx,lhy,uhz,kny,lax,uay]
             # PSC_right_swing_leg.ByPassON()  # bypass controller
             # PSC_left_swing_leg.ByPassOFF()
