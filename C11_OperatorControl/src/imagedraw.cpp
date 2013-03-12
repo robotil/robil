@@ -11,6 +11,11 @@ ImageDraw::ImageDraw(int argc, char** argv, QWidget *parent, Qt::WFlags flags)
         , C11node(argc,argv,this)
 {
 	ui.setupUi(this);
+
+	ui.mainToolBar->hide();
+	ui.menuBar->hide();
+	ui.statusBar->hide();
+
 	ImageAreaCount = 0;
 	IsUpdateCurrentImg = false;
 
@@ -107,9 +112,14 @@ void ImageDraw::OnImgReceived(std::string fileName)
 	emit SigOnNewImg(myImage);
 }
 
-void ImageDraw::OnOccupancyGridReceived(int grid[48][48])
+void ImageDraw::OnOccupancyGridReceived(int grid[100][100], StructPoint robotPos, int xOffset, int yOffset, double orient)
 {
-	ui.mapWidget->UpdateGrid(grid);
+	ui.mapWidget->UpdateGrid(grid,robotPos,xOffset,yOffset,orient);
+}
+
+void ImageDraw::OnPathReceived(std::vector<StructPoint> points)
+{
+	ui.mapWidget->AddPath(points);
 }
 
 void ImageDraw::SltOnNewImg(QImage image)

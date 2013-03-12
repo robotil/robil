@@ -122,7 +122,5 @@ public:
 	void Print();
 };
 
-Matrix rDest(double mq1,double mq2,double mq3,double mq4, RPY Target);
-Matrix lDest(double mq1,double mq2,double mq3,double mq4, RPY Target);
 
 #endif
