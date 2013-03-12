@@ -31,13 +31,16 @@ from leg_ik_func import swing_leg_ik,stance_leg_ik
 from IKException import IKReachException
 from geometry_msgs.msg import *
 import copy
-from Impedance_Control import Position_Stiffness_Controller
+from Impedance_Control import Position_Stiffness_Controller, Joint_Stiffness_Controller_2
 class Nasmpace: pass
 ns = Nasmpace()
 #ns.LegAng = LegIkResponse()
 
 PSC_right_swing_leg = Position_Stiffness_Controller('R_Swing Leg', 50000, True, False) # name, stiffness, triggered_controller, bypass_input2output [True/False]
 PSC_left_swing_leg = Position_Stiffness_Controller('L_Swing Leg', 30000, True, False) # name, stiffness, triggered_controller, bypass_input2output [True/False]
+
+JSC_l_leg_lax = Joint_Stiffness_Controller_2('l_leg_lax', 1000, 0.04) # joint name, stiffness, activation_ZMP_point [m]
+JSC_r_leg_lax = Joint_Stiffness_Controller_2('r_leg_lax', 1000, 0.04) # joint name, stiffness, activation_ZMP_point [m]
 
 # swing_leg_ik = rospy.ServiceProxy('swing_leg_ik', LegIk)
 # stance_leg_ik = rospy.ServiceProxy('stance_leg_ik', LegIk)
@@ -50,12 +53,14 @@ PSC_left_swing_leg = Position_Stiffness_Controller('L_Swing Leg', 30000, True, F
 def get_r_foot_contact(msg):
     
     PSC_right_swing_leg.UpdateForce(msg.force.z)
+    JSC_r_leg_lax.UpdateFeedBack(msg.force.z, msg.torque.x)
     
     #rospy.loginfo("Stiffness Controllers joint state updated ")  
 
 def get_l_foot_contact(msg):
     
-    PSC_left_swing_leg.UpdateForce(msg.force.z) 
+    PSC_left_swing_leg.UpdateForce(msg.force.z)
+    JSC_l_leg_lax.UpdateFeedBack(msg.force.z, msg.torque.x) 
 
 #################################################################################
 #                     request from IK and publish angles                        #
@@ -97,18 +102,18 @@ def get_from_zmp(msg):
 
 
         
-    ns.l_leg_lax.publish( left_leg_angles[4] ) #JSC_l_leg_lax.getCMD(ns.LegAng.ang.lax) )
+    ns.l_leg_lax.publish( JSC_l_leg_lax.getCMD(left_leg_angles[4]) ) #JSC_l_leg_lax.getCMD(ns.LegAng.ang.lax) )
     ns.l_leg_uay.publish( left_leg_angles[5] )
     ns.l_leg_kny.publish( left_leg_angles[3] + ns.joints_offset['l_leg_kny'] ) # 1.498 ) #
     ns.l_leg_uhz.publish( left_leg_angles[2] )
     ns.l_leg_lhy.publish( left_leg_angles[1] + ns.joints_offset['l_leg_lhy'] )
     ns.l_leg_mhx.publish( left_leg_angles[0] ) #JSC_l_leg_mhx.getCMD(ns.LegAng.ang.mhx) )
 
-    ns.r_leg_lax.publish( right_leg_angles[4] ) #JSC_r_leg_lax.getCMD(ns.LegAng.ang.lax + lax_stance) )
+    ns.r_leg_lax.publish( JSC_r_leg_lax.getCMD(right_leg_angles[4]) ) #JSC_r_leg_lax.getCMD(ns.LegAng.ang.lax + lax_stance) )
     ns.r_leg_uay.publish( right_leg_angles[5] )
     ns.r_leg_kny.publish( right_leg_angles[3] + ns.joints_offset['r_leg_kny'] ) # 1.498 ) #
     ns.r_leg_uhz.publish( right_leg_angles[2] )
-    ns.r_leg_lhy.publish( right_leg_angles[1] + ns.joints_offset['r_leg_lhy'])
+    ns.r_leg_lhy.publish( right_leg_angles[1] + ns.joints_offset['r_leg_lhy'] )
     ns.r_leg_mhx.publish( right_leg_angles[0] ) #JJSC_r_leg_mhx.getCMD(ns.LegAng.ang.mhx + mhx_stance) )
         
     ns.back_mby.publish( 0.0 )
