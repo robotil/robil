@@ -7,6 +7,7 @@
 #include "structs.h"
 //#include <QMainWindow>
 #include <QMouseEvent>
+#include "traingleitem.h"
 
 typedef struct
 {
@@ -36,15 +37,22 @@ public:
 	CMapMain(int arr[100][100],QWidget *parent = 0, Qt::WFlags flags = 0);
 	~CMapMain();
 	void UpdateGrid(int grid[100][100], StructPoint robotPos, int xOffset, int yOffset, double orient);
-	void setReadyPath();
-	void setReadyPolygon();
+	void setReadyPath(QVector<QPointF> vecPoints);
+	void setReadyPolygon(QVector<QPointF> vecPoints);
+	void setReadySteps(QVector<QPointF> vecPoints);
 	void setMode(ModeDraw m);
+	void setMode(ModeDraw m,QVector<QPointF> vec_p);
 	ModeDraw getMode();
 	void AddPath(std::vector<StructPoint> points);
+	bool checkSelectedArc();
+	void deleteReadyPath();
+	void deletePath();
+	void deleteRoute(ModeDraw m);
 
 private:
 	Ui::CMapMainClass ui;
 	CPixItem *pPixItem[100][100];
+	CtraingleItem *traingle;
 	ModeDraw mode;
 	int PixColor[100][100];
 	int pos[2];
