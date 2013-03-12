@@ -54,6 +54,11 @@
 #define q9lMin -0.436
 #define q9lMax 1.571
 
+#define rHandToPalm 0,-0.1,0,-1.57079,0,-1.57079
+#define rPalmToF1	0.115,0.03122,0,0,0,0.3
+#define lHandToPalm 0,0.1,0,1.57079,0,1.57079
+#define lPalmToF1	0.115,-0.03122,0,0,0,-0.3
+
 #define _q4	m_q[0]
 #define _q5	m_q[1]
 #define _q6	m_q[2]

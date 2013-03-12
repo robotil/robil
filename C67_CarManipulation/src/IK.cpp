@@ -469,6 +469,16 @@ Matrix rDest(double mq1,double mq2,double mq3,double mq4, RPY Target)
 	A = Target.FromRPY();
 	T.Multiply(A);
 
+	// Transition To Sandia Palm
+	RPY SPr = RPY(rHandToPalm);
+	Matrix S = SPr.FromRPY();
+	// Transition to Sandia f1 base - middle finger base
+	RPY f1r = RPY(rPalmToF1);
+	Matrix f1m = f1r.FromRPY();
+	S.Multiply(f1m);
+	S.Inverse();
+	T.Multiply(S);
+
 	return T;
 }
 
@@ -485,6 +495,16 @@ Matrix lDest(double mq1,double mq2,double mq3,double mq4, RPY Target)
 	A = Target.FromRPY();
 	T.Multiply(A);
 
+	// Transition To Sandia Palm
+	RPY SPr = RPY(lHandToPalm);
+	Matrix S = SPr.FromRPY();
+	// Transition to Sandia f1 base - middle finger base
+	RPY f1r = RPY(lPalmToF1);
+	Matrix f1m = f1r.FromRPY();
+	S.Multiply(f1m);
+	S.Inverse();
+	T.Multiply(S);
+
 	return T;
 }
 
@@ -500,6 +520,16 @@ RPY rPose(double mq1,double mq2,double mq3, IkSolution ik)
 	T.rMultiply(q7r,ik._q7);
 	T.rMultiply(q8r,ik._q8);
 	T.rMultiply(q9r,ik._q9);
+
+	// Transition to Sandia Palm
+	RPY SPr = RPY(rHandToPalm);
+	Matrix SPm = SPr.FromRPY();
+	T.Multiply(SPm);
+	// Transition to Sandia f1 base - middle finger base
+	RPY f1r = RPY(rPalmToF1);
+	Matrix f1m = f1r.FromRPY();
+	T.Multiply(f1m);
+
 	RPY r;
 	r.ToRPY(T);
 	return r;
@@ -517,6 +547,16 @@ RPY lPose(double mq1,double mq2,double mq3, IkSolution ik)
 	T.lMultiply(q7l,ik._q7);
 	T.lMultiply(q8l,ik._q8);
 	T.lMultiply(q9l,ik._q9);
+
+	// Transition to Sandia Palm
+	RPY SPr = RPY(lHandToPalm);
+	Matrix SPm = SPr.FromRPY();
+	T.Multiply(SPm);
+	// Transition to Sandia f1 base - middle finger base
+	RPY f1r = RPY(lPalmToF1);
+	Matrix f1m = f1r.FromRPY();
+	T.Multiply(f1m);
+
 	RPY r;
 	r.ToRPY(T);
 	return r;
