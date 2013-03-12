@@ -27,6 +27,9 @@
 #define cs_q7l 2*(y89l*z7l - y67l*z8l)
 #define c1_q7l (y89l*y89l + z8l*z8l + y67l*y67l + z7l*z7l)
 
+
+#define q4rMin -1.9
+#define q4rMax 1.9
 #define q5rMin -1.74533
 #define q5rMax 1.39626
 #define q6rMin 0
@@ -38,6 +41,8 @@
 #define q9rMin -1.571
 #define q9rMax 0.436
 
+#define q4lMin -1.9
+#define q4lMax 1.9
 #define q5lMin -1.39626
 #define q5lMax 1.74533
 #define q6lMin 0
@@ -48,6 +53,11 @@
 #define q8lMax 1.571
 #define q9lMin -0.436
 #define q9lMax 1.571
+
+#define rHandToPalm 0,-0.1,0,-1.57079,0,-1.57079
+#define rPalmToF1	0.115,0.03122,0,0,0,0.3
+#define lHandToPalm 0,0.1,0,1.57079,0,1.57079
+#define lPalmToF1	0.115,-0.03122,0,0,0,-0.3
 
 #define _q4	m_q[0]
 #define _q5	m_q[1]
@@ -89,5 +99,7 @@ Matrix rDest(double mq1,double mq2,double mq3,double mq4, RPY Target);
 Matrix lDest(double mq1,double mq2,double mq3,double mq4, RPY Target);
 RPY rPose(double mq1,double mq2,double mq3, IkSolution ik);
 RPY lPose(double mq1,double mq2,double mq3, IkSolution ik);
+void rFindAltSolution(double &mpx, double &mpy, double &mpz);
+void lFindAltSolution(double &mpx, double &mpy, double &mpz);
 
 #endif
