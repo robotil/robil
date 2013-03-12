@@ -72,7 +72,7 @@ void IkSolution::Print()
 IkSolution rIk5Dof(RPY target)
 {
 	Matrix A = target.FromRPY();
-	double cc,cs,c1, solution[2];
+	double cc, cs, c1, solution[2];
 	bool solutionExist;
 	
 	
@@ -84,6 +84,12 @@ IkSolution rIk5Dof(RPY target)
 	c1 = c1_q7r - py5r*py5r - pz5r*pz5r - px*px;
 	
 	solutionExist = IkSqrSolve(cc,cs,c1,solution);
+	if (!solutionExist)
+	{
+		rFindAltSolution(px,py,pz);
+		c1 = c1_q7r - py5r*py5r - pz5r*pz5r - px*px;
+		solutionExist = IkSqrSolve(cc,cs,c1,solution);
+	}
 	
 	for(int k=0; k<2; k++) // k=0,1
 		//if (solutionExist && (solution[k] >= -2.35619) && (solution[k] <= 0))
@@ -99,6 +105,7 @@ IkSolution rIk5Dof(RPY target)
 			Ik[s111+k*4].valid = Ik[s112+k*4].valid = Ik[s121+k*4].valid = Ik[s122+k*4].valid = false;
 		}
 	
+	//if (!solutionExist) std::cout << "No solution q7\n";
 	//solve q5
 	cc = py5r;
 	cs = pz5r;
@@ -122,9 +129,10 @@ IkSolution rIk5Dof(RPY target)
 				}
 		
 		}
-	
+		//if ((!Ik[s111].valid)&&(!Ik[s121].valid)&&(!Ik[s211].valid)&&(!Ik[s221].valid))
+			//std::cout << "No solution q5\n";
 	// solve q6
-	int sgn;
+	int sgn = 1;
 	for(int j = 0; j<5; j+=4) //j = 0,4
 	{
 		//choose sign
@@ -231,7 +239,12 @@ IkSolution lIk5Dof(RPY target)
 	c1 = c1_q7l - py5l*py5l - pz5l*pz5l - px*px;
 	
 	solutionExist = IkSqrSolve(cc,cs,c1,solution);
-	
+	if (!solutionExist)
+	{
+		lFindAltSolution(px,py,pz);
+		c1 = c1_q7l - py5l*py5l - pz5l*pz5l - px*px;
+		solutionExist = IkSqrSolve(cc,cs,c1,solution);
+	}
 	for(int k=0; k<2; k++) // k=0,1
 		//if (solutionExist && (solution[k] >= 0) && (solution[k] <= 2.35619))
 		if (solutionExist)
@@ -456,6 +469,16 @@ Matrix rDest(double mq1,double mq2,double mq3,double mq4, RPY Target)
 	A = Target.FromRPY();
 	T.Multiply(A);
 
+	// Transition To Sandia Palm
+	RPY SPr = RPY(rHandToPalm);
+	Matrix S = SPr.FromRPY();
+	// Transition to Sandia f1 base - middle finger base
+	RPY f1r = RPY(rPalmToF1);
+	Matrix f1m = f1r.FromRPY();
+	S.Multiply(f1m);
+	S.Inverse();
+	T.Multiply(S);
+
 	return T;
 }
 
@@ -472,6 +495,16 @@ Matrix lDest(double mq1,double mq2,double mq3,double mq4, RPY Target)
 	A = Target.FromRPY();
 	T.Multiply(A);
 
+	// Transition To Sandia Palm
+	RPY SPr = RPY(lHandToPalm);
+	Matrix S = SPr.FromRPY();
+	// Transition to Sandia f1 base - middle finger base
+	RPY f1r = RPY(lPalmToF1);
+	Matrix f1m = f1r.FromRPY();
+	S.Multiply(f1m);
+	S.Inverse();
+	T.Multiply(S);
+
 	return T;
 }
 
@@ -487,6 +520,16 @@ RPY rPose(double mq1,double mq2,double mq3, IkSolution ik)
 	T.rMultiply(q7r,ik._q7);
 	T.rMultiply(q8r,ik._q8);
 	T.rMultiply(q9r,ik._q9);
+
+	// Transition to Sandia Palm
+	RPY SPr = RPY(rHandToPalm);
+	Matrix SPm = SPr.FromRPY();
+	T.Multiply(SPm);
+	// Transition to Sandia f1 base - middle finger base
+	RPY f1r = RPY(rPalmToF1);
+	Matrix f1m = f1r.FromRPY();
+	T.Multiply(f1m);
+
 	RPY r;
 	r.ToRPY(T);
 	return r;
@@ -504,13 +547,59 @@ RPY lPose(double mq1,double mq2,double mq3, IkSolution ik)
 	T.lMultiply(q7l,ik._q7);
 	T.lMultiply(q8l,ik._q8);
 	T.lMultiply(q9l,ik._q9);
+
+	// Transition to Sandia Palm
+	RPY SPr = RPY(lHandToPalm);
+	Matrix SPm = SPr.FromRPY();
+	T.Multiply(SPm);
+	// Transition to Sandia f1 base - middle finger base
+	RPY f1r = RPY(lPalmToF1);
+	Matrix f1m = f1r.FromRPY();
+	T.Multiply(f1m);
+
 	RPY r;
 	r.ToRPY(T);
 	return r;
 }
 
+void rFindAltSolution(double &mpx, double &mpy, double &mpz )
+{
+	double cc7, cs7, c17, mpy5, mpz5, l, m, n, d, R;
+	mpy5 = mpy - y5r;
+	mpz5 = mpz - z5r;
+	cc7 = cc_q7r;
+	cs7 = cs_q7r;
+	c17 = c1_q7r - mpy5*mpy5 - mpz5*mpz5 - mpx*mpx;
+	d = sqrt(mpy5*mpy5 + mpz5*mpz5 + mpx*mpx);
+	l = mpx/d; m = mpy5/d, n = mpz5/d;
 
+	if (c17 >= 0)
+		R = sqrt(c1_q7r - sqrt(cc7*cc7 + cs7*cs7)) + 0.0001;
+	else
+		R = sqrt(c1_q7r + sqrt(cc7*cc7 + cs7*cs7)) - 0.0001;
 
+	mpx = l*R; mpy = m*R + y5r; mpz = n*R + z5r;
+
+}
+void lFindAltSolution(double &mpx, double &mpy, double &mpz )
+{
+	double cc7, cs7, c17, mpy5, mpz5, l, m, n, d, R;
+	mpy5 = mpy - y5l;
+	mpz5 = mpz - z5l;
+	cc7 = cc_q7l;
+	cs7 = cs_q7l;
+	c17 = c1_q7l - mpy5*mpy5 - mpz5*mpz5 - mpx*mpx;
+	d = sqrt(mpy5*mpy5 + mpz5*mpz5 + mpx*mpx);
+	l = mpx/d; m = mpy5/d, n = mpz5/d;
+
+	if (c17 >= 0)
+		R = sqrt(c1_q7l - sqrt(cc7*cc7 + cs7*cs7)) + 0.0001;
+	else
+		R = sqrt(c1_q7l + sqrt(cc7*cc7 + cs7*cs7)) - 0.0001;
+
+	mpx = l*R; mpy = m*R + y5l; mpz = n*R + z5l;
+
+}
 
 
 
