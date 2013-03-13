@@ -12,7 +12,7 @@ echo "Done "
 echo $C23_PID  >> $PKILL
 #echo $C22_PID $C31_PID $C34_PID >> $PKILL
 
-rosservice call executer/run O /home/userws4/git/robil/C34_Designer/plans/trackObject.xml
+rosservice call executer/run O /home/michele/git/robil/C34_Designer/plans/trackObject.xml
 rosservice call executer/resume O
-rosservice call executer/run S /home/userws4/git/robil/C34_Designer/plans/searchObject.xml
+rosservice call executer/run S /home/michele/git/robil/C34_Designer/plans/searchObject.xml
 rosservice call executer/resume S

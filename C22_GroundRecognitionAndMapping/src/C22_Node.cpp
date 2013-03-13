@@ -41,7 +41,8 @@
 //c24 added includes
 #include <nav_msgs/Odometry.h>
 #include <sensor_msgs/Imu.h>
-
+#include <tf/transform_datatypes.h>
+#include <tf/LinearMath/Matrix3x3.h>
 /**
  * this class represent the C22_Node,
  * it subscribe to the drc multisense topic and provide the Eagle eye mapping
@@ -97,6 +98,9 @@ bool C22_Node::proccess(C22_GroundRecognitionAndMapping::C22::Request  &req,
 	res.drivingPath.robotPos.x=robotPos.x;
 	res.drivingPath.robotPos.y=robotPos.y;
 	res.drivingPath.robotPos.z=robotPos.z;
+	res.drivingPath.robotOri.x=robotOri.x;
+	res.drivingPath.robotOri.y=robotOri.y;
+	res.drivingPath.robotOri.z=robotOri.z;
 	res.drivingPath.xOffset=_myMatrix->xOffset;
 	res.drivingPath.yOffset=_myMatrix->yOffset;
 	for(int i=0;i<_myMatrix->data->size();i++){
@@ -178,9 +182,17 @@ void C22_Node::callback(const C21_VisionAndLidar::C21_C22::ConstPtr& pclMsg,cons
      pcl_ros::transformAsMatrix(trans, headTopelvis);
 	 pcl_ros::transformAsMatrix(trans2, pelvisToWorld);
 
+	 tf::Quaternion q;
+	 double roll, pitch, yaw;
+	 tf::quaternionMsgToTF(pos_msg->pose.pose.orientation, q);
+	 tf::Matrix3x3(q).getRPY(roll, pitch, yaw);
+	 tf::Quaternion myEuler(pos_msg->pose.pose.orientation.x,pos_msg->pose.pose.orientation.y,pos_msg->pose.pose.orientation.z,pos_msg->pose.pose.orientation.w);
 	 robotPos.x=pos_msg->pose.pose.position.x;
 	 robotPos.y=pos_msg->pose.pose.position.y;
 	 robotPos.z=pos_msg->pose.pose.position.z;
+	 robotOri.x=roll;
+	 robotOri.y=pitch;
+	 robotOri.z=yaw;
 	 // transform pointcloud from sensor frame to fixed robot frame
 	 pcl::transformPointCloud(*cloud_filtered, *cloud_filtered, sensorToHead);
 	 pcl::transformPointCloud(*cloud_filtered, *cloud_filtered, headTopelvis);

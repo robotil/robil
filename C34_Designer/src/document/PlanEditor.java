@@ -70,10 +70,34 @@ public class PlanEditor extends JDialog {
 		
 	}
 	
+	private String removeLineNumber(String sline){
+		int i=0;
+		for(;i<sline.length();i++){
+			if(sline.charAt(i)==' ' || sline.charAt(i)=='\t' || (sline.charAt(i)>='0' && sline.charAt(i)<='9'))
+				continue;
+			break;
+		}
+		return sline.substring(i);
+	}
+	private String removeLineNumbers(String source){
+		String line = "";
+		String res = "";
+		for(int i=0;i<source.length();i++){
+			line+=source.charAt(i);
+			if(source.charAt(i)=='\n'){
+				res+=removeLineNumber(line);
+				line="";
+			}
+		}
+		res+=removeLineNumber(line);
+		return res;
+	}
+	
 	public void writeXml(String path, String xml) {
 		try {
 	        BufferedWriter out = new BufferedWriter(new FileWriter(path));
-	        out.write(xml);
+	        String line = removeLineNumbers(xml);
+	        out.write(line);
 	        out.close();
 	    } catch (IOException e) {
 	    	Log.e("Couldn't write to xml file " + path);

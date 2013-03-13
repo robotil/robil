@@ -1,0 +1,12 @@
+Robot waits for start,then goes to path planner and asks for the path, takes points from path and makes teleportation between points. 
+
+Prerequisites:
+
+1) Depends on HRL_Kinematics package. Installation instructions: http://www.robil.org/trac_robil/wiki/InstallUbuntuLog#insthrl
+
+To test:
+
+1. building the pkg
+2. roslaunch zmp_walk_stub.launch 
+3. running a node C31_GetPath_clone.py 
+4. and then running test_zmp_client.py

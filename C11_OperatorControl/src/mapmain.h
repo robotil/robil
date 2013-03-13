@@ -4,8 +4,10 @@
 #include <QtGui/QWidget>
 #include "ui_mapmain.h"
 #include "pixitem.h"
+#include "structs.h"
 //#include <QMainWindow>
 #include <QMouseEvent>
+#include "traingleitem.h"
 
 typedef struct
 {
@@ -32,19 +34,28 @@ class CMapMain : public QWidget
 
 public:
 	CMapMain(QWidget *parent = 0, Qt::WFlags flags = 0);
-	CMapMain(int arr[48][48],QWidget *parent = 0, Qt::WFlags flags = 0);
+	CMapMain(int arr[100][100],QWidget *parent = 0, Qt::WFlags flags = 0);
 	~CMapMain();
-	void UpdateGrid(int grid[48][48]);
-	void setReadyPath();
-	void setReadyPolygon();
+	void UpdateGrid(int grid[100][100], StructPoint robotPos, int xOffset, int yOffset, double orient);
+	void setReadyPath(QVector<QPointF> vecPoints);
+	void setReadyPolygon(QVector<QPointF> vecPoints);
+	void setReadySteps(QVector<QPointF> vecPoints);
 	void setMode(ModeDraw m);
+	void setMode(ModeDraw m,QVector<QPointF> vec_p);
 	ModeDraw getMode();
+	void AddPath(std::vector<StructPoint> points);
+	bool checkSelectedArc();
+	void deleteReadyPath();
+	void deletePath();
+	void deleteRoute(ModeDraw m);
 
 private:
 	Ui::CMapMainClass ui;
-	CPixItem *pPixItem[48][48];
+	CPixItem *pPixItem[100][100];
+	CtraingleItem *traingle;
 	ModeDraw mode;
-	int PixColor[48][48];int pos[2];
+	int PixColor[100][100];
+	int pos[2];
 	int startX,startY;
 	float p_i;
 	float p_j;
@@ -62,6 +73,14 @@ private:
 	CRouteItem *routeSteps;
 	CRouteItem *routePolygon;
 
+	StructPoint RobotPos;
+	StructIntPoint RobotGridPos;
+	double RobotOrientation;
+	double WorldToRobotOrientation;
+	int GridXOffset;
+	int GridYOffset;
+	StructPoint CornerPos;
+
 	void drawLines(CRouteItem *route,bool ShowLines);
 	void AddPix();
 	void drawing();
@@ -72,6 +91,10 @@ private:
 	void MoveLine(QPointF p);
 	bool checkSelectedPoint(CRouteItem *Route);
 	bool checkSelectedEdge(CRouteItem *Route);
+	QPointF PointToPix(StructPoint point);
+	void CalculateCornerPos();
+
+	StructIntPoint CalculateGridPoint(StructIntPoint pointFromRos);
 
 protected:
 	bool eventFilter(QObject *o, QEvent* e);

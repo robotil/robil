@@ -8,7 +8,7 @@
 class CLineItemList : public QGraphicsItem
 {
 public:
-	CLineItemList(QPointF p,bool ShowLines,QGraphicsScene* scene);
+	CLineItemList(QPointF p,bool ShowLines,QGraphicsScene* scene,QColor c = Qt::darkBlue);
 	~CLineItemList();
 	void addPointItem1(QPointF p);
 	QRectF boundingRect() const;
@@ -29,6 +29,7 @@ private:
 	CLineItemList *pNextLineItemList;
 	CLineItem *pPointPressedInLine;
 	bool b_ShowLines;
+	QColor penColor;
 };
 
 #endif // LINELIST_H
