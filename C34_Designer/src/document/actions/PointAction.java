@@ -17,7 +17,7 @@ public class PointAction extends AbstractDesignerAction implements
 
 	@Override
 	public void actionPerformed(ActionEvent a) {
-		Document doc = getActiveTab().doc;
+		Document doc = getActiveTab().document;
 		doc.toolSelectionClean();
 		this.designer.toolbar.setTipText(Toolbar.TIP_move);
 	}

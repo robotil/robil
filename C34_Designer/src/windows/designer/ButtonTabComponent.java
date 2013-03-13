@@ -86,7 +86,7 @@ public class ButtonTabComponent extends JPanel {
 			int i = ButtonTabComponent.this.pane
 					.indexOfTabComponent(ButtonTabComponent.this);
 			if (i != -1) {
-				if (designer.tabs.get(i).doc.close())
+				if (designer.tabs.get(i).document.close())
 					ButtonTabComponent.this.pane.remove(i);
 				else
 					return;
@@ -101,7 +101,7 @@ public class ButtonTabComponent extends JPanel {
 						.get(i);
 				ButtonTabComponent.this.designer.toolbar
 						.setActiveDocument(ButtonTabComponent.this.designer
-								.getActiveTab().doc);
+								.getActiveTab().document);
 			} else {
 				// no tabs are available
 				ButtonTabComponent.this.designer.activeTab = null;

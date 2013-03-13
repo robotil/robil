@@ -15,6 +15,6 @@ public class CompileAction extends AbstractDesignerAction implements
 
 	@Override
 	public void actionPerformed(ActionEvent a) {
-		getActiveTab().doc.compile();
+		getActiveTab().document.compile();
 	}
 }

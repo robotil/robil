@@ -29,7 +29,7 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
-public class PropertiesXmlHandler {
+public class ParametersXmlHandler {
 
 	final public static String lastPath = "BTDesigner.xml";
 
@@ -128,6 +128,14 @@ public class PropertiesXmlHandler {
 			transformer.transform(xmlSource, result);
 		} catch (Exception ex) {
 			Log.e(ex.getMessage());
+		}
+	}
+	
+	public static void saveToFile() {
+		try {
+			saveToFile(lastPath);
+		} catch (Exception e) {
+			Log.e(e);
 		}
 	}
 

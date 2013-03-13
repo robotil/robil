@@ -86,11 +86,11 @@ public class DesignerPopupMenu extends JPopupMenu {
 		JMenu menu = new JMenu("Copy to...");
 		
 		for (DesignerTab tab : _designer.tabs) {
-			JMenuItem item = new JMenuItem(tab.doc.getShortFilePath());
-			item.setEnabled(!tab.doc.getShortFilePath().equals(_document.getShortFilePath()));
+			JMenuItem item = new JMenuItem(tab.document.getShortFilePath());
+			item.setEnabled(!tab.document.getShortFilePath().equals(_document.getShortFilePath()));
 			item.setIcon(Utilities.loadIcon("open.png"));
 			
-			item.addActionListener(new CopyToAction(_designer, this._element, tab.doc));
+			item.addActionListener(new CopyToAction(_designer, this._element, tab.document));
 			
 			menu.add(item);
 		}
@@ -230,6 +230,18 @@ public class DesignerPopupMenu extends JPopupMenu {
 		return menu;
 	}
 	
+	private JMenuItem createTaskLookupLinkMenuItem() {
+		JMenuItem menu = new JMenuItem("Open plan");
+		menu.setIcon(Utilities.loadIcon("link_icon.png"));
+		menu.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent arg) {
+				_designer.addnewDocumentTab(_element.getAsTask().getOverridePlanFilename());
+			}
+		});
+		return menu;
+	}
+	
 	private JMenuItem createViewSourceMenuItem() {
 		JMenuItem menu = new JMenuItem("View source");
 		menu.setIcon(Utilities.loadIcon("source.png"));
@@ -258,6 +270,9 @@ public class DesignerPopupMenu extends JPopupMenu {
 		
 		if (this._element.getProperty().isRoot)
 			add(createPlanExecutionHistoryMenuItem());
+		
+		if (this._element.isTaskType() && this._element.getAsTask().isOverrided())
+			add(createTaskLookupLinkMenuItem());
 		
 		add(createCopyMenuItem());
 		add(createCopyToPopup());

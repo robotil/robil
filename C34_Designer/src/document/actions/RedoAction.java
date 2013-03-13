@@ -15,6 +15,6 @@ public class RedoAction extends AbstractDesignerAction implements
 
 	@Override
 	public void actionPerformed(ActionEvent e) {
-		designer.getActiveTab().doc.redo();
+		designer.getActiveTab().document.redo();
 	}
 }

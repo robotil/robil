@@ -8,8 +8,6 @@ import java.awt.GridBagLayout;
 import java.awt.Insets;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
-import java.io.File;
-import java.io.IOException;
 import java.util.ArrayList;
 
 import javax.swing.BorderFactory;
@@ -23,7 +21,7 @@ import javax.swing.event.ChangeListener;
 
 import document.Document;
 import document.Parameters;
-import document.PropertiesXmlHandler;
+import document.ParametersXmlHandler;
 import document.ui.Menubar;
 import document.ui.Toolbar;
 
@@ -36,21 +34,18 @@ import windows.lookuptable.LookupTableEditor;
 public class BTDesigner extends JFrame {
 
 	public ArrayList<DesignerTab> tabs = new ArrayList<DesignerTab>();
-	Menubar _menu;
+	private Menubar _menu;
 	public DesignerTab activeTab;
-
 	public RosExecutor rosExecutor = new RosExecutor(this);
-
 	public Toolbar toolbar;
-
 	public JTabbedPane tabbedPane = new JTabbedPane();
 	
 	public class DesignerTab {
-		public Document doc;
+		public Document document;
 		public String executionID;
 
 		public DesignerTab(Document doc, String executionID) {
-			this.doc = doc;
+			this.document = doc;
 			this.executionID = executionID;
 		}
 
@@ -69,14 +64,13 @@ public class BTDesigner extends JFrame {
 
 	private static final long serialVersionUID = 5495864869110385684L;
 
-	public final static String VERSION = "0.2.6.1";
+	public final static String VERSION = "0.2.6.3";
 
 	public static void main(String[] args) throws Exception {
 
 		LogManager.redirectStandardAndErrorOutput("BTDesigner_stdout.log");
 		
-		for (javax.swing.UIManager.LookAndFeelInfo info : javax.swing.UIManager
-				.getInstalledLookAndFeels()) {
+		for (javax.swing.UIManager.LookAndFeelInfo info : javax.swing.UIManager.getInstalledLookAndFeels()) {
 			if ("GTK+".equals(info.getName())) {
 				try {
 					javax.swing.UIManager.setLookAndFeel(info.getClassName());
@@ -88,7 +82,7 @@ public class BTDesigner extends JFrame {
 		}
 
 		try {
-			PropertiesXmlHandler.loadAndSetProperties();
+			ParametersXmlHandler.loadAndSetProperties();
 		} catch (Exception e) {
 			Log.e(e);
 		}
@@ -139,8 +133,7 @@ public class BTDesigner extends JFrame {
 		JLabel lblStatusBar = new JLabel(Toolbar.TIP_move);
 		this.toolbar.setTipLabel(lblStatusBar);
 
-		ImageIcon icon = new ImageIcon(getClass().getClassLoader().getResource(
-				"icons/CogniTeam.gif"));
+		ImageIcon icon = new ImageIcon(getClass().getClassLoader().getResource("icons/CogniTeam.gif"));
 		this.setIconImage(icon.getImage());
 
 		// setLayout(new BorderLayout());
@@ -190,7 +183,7 @@ public class BTDesigner extends JFrame {
 			@Override
 			public void stateChanged(ChangeEvent arg0) {
 				if (tabbedPane.getSelectedIndex() >= 0)
-					tabs.get((tabbedPane.getSelectedIndex())).doc.activate();
+					tabs.get((tabbedPane.getSelectedIndex())).document.activate();
 			}
 		});
 		
@@ -209,15 +202,15 @@ public class BTDesigner extends JFrame {
 		this.activeTab = new DesignerTab(new Document(this), null);
 		this.tabs.add(this.activeTab);
 
-		panelDoc.add(this.activeTab.doc, BorderLayout.CENTER);
-		this.tabbedPane.addTab(this.activeTab.doc.getShortFilePath(), panelDoc);
+		panelDoc.add(this.activeTab.document, BorderLayout.CENTER);
+		this.tabbedPane.addTab(this.activeTab.document.getShortFilePath(), panelDoc);
 		this.tabbedPane.setTabComponentAt(numOfTabs, new ButtonTabComponent(
 				this.tabbedPane, this));
 		
 		this.tabbedPane.setSelectedIndex(this.tabbedPane.getTabCount() - 1);
 	}
 	
-	public void addNewDocumentTab(String fileName) {
+	private void addNewDocumentTabInternal(String fileName) {
 		int numOfTabs = this.tabbedPane.getTabCount();
 		JPanel panelDoc = new JPanel(new BorderLayout());
 
@@ -225,8 +218,8 @@ public class BTDesigner extends JFrame {
 		this.activeTab = new DesignerTab(new Document(this, fileName), null);
 		this.tabs.add(this.activeTab);
 
-		panelDoc.add(this.activeTab.doc, BorderLayout.CENTER);
-		this.tabbedPane.addTab(this.activeTab.doc.getShortFilePath(), panelDoc);
+		panelDoc.add(this.activeTab.document, BorderLayout.CENTER);
+		this.tabbedPane.addTab(this.activeTab.document.getShortFilePath(), panelDoc);
 		this.tabbedPane.setTabComponentAt(numOfTabs, new ButtonTabComponent(
 				this.tabbedPane, this));
 		
@@ -236,18 +229,18 @@ public class BTDesigner extends JFrame {
 	public void addnewDocumentTab(String planFilename) {
 		
 		for (int i = 0; i < tabs.size(); i++) {
-			if (tabs.get(i).doc.getAbsoluteFilePath().equals(planFilename)) {
+			if (tabs.get(i).document.getAbsoluteFilePath().equals(planFilename)) {
 				tabbedPane.setSelectedIndex(i);
 				return;
 			}
 		}
 				
-		addNewDocumentTab(planFilename);
+		addNewDocumentTabInternal(planFilename);
 		
 		tabbedPane.setSelectedIndex(tabbedPane.getSelectedIndex());
 		
 		// getActiveTab().doc.loadPlan(planFilename);
-		setTabName(tabbedPane.getSelectedIndex(), getActiveTab().doc.getShortFilePath());
+		setTabName(tabbedPane.getSelectedIndex(), getActiveTab().document.getShortFilePath());
 		// tabs.get(tabbedPane.getSelectedIndex()).doc.loadPlan(planFilename);
 		
 		
@@ -262,7 +255,7 @@ public class BTDesigner extends JFrame {
 
 	public void setActiveTab(Document document) {
 		for (int i = 0; i < tabs.size(); i++) {
-			if (tabs.get(i).doc == document)
+			if (tabs.get(i).document == document)
 				tabbedPane.setSelectedIndex(i);
 		}
 	}
@@ -281,14 +274,14 @@ public class BTDesigner extends JFrame {
 		int index = this.tabbedPane.getSelectedIndex();
 
 		this.activeTab = this.tabs.get(index);
-		this.toolbar.setActiveDocument(this.activeTab.doc);
+		this.toolbar.setActiveDocument(this.activeTab.document);
 		return this.activeTab;
 	}
 
 	public Document getDocumentOfRunningPlan(String id) {
 		for (DesignerTab tab : this.tabs)
 			if (tab.getID() != null && tab.getID().equals(id))
-				return tab.doc;
+				return tab.document;
 
 		return null;
 	}
@@ -313,7 +306,7 @@ public class BTDesigner extends JFrame {
 	
 	public void setTabName(Document document, String name) {
 		for (int i = 0; i < this.tabs.size(); i++)
-			if (this.tabs.get(i).doc.equals(document)) {
+			if (this.tabs.get(i).document.equals(document)) {
 				setTabName(i, name);
 				return;
 			}
@@ -325,7 +318,7 @@ public class BTDesigner extends JFrame {
 
 	public boolean close() throws Exception {
 		for (DesignerTab tab : this.tabs) {
-			if (!tab.doc.close())
+			if (!tab.document.close())
 				return false;
 		}
 		return true;
@@ -351,7 +344,7 @@ public class BTDesigner extends JFrame {
 		
 		int selectedIndex = selectedDocumentIndex();
 		
-		if (this.tabs.get(selectedIndex).doc.close()) {
+		if (this.tabs.get(selectedIndex).document.close()) {
 			this.tabbedPane.remove(selectedIndex);
 			this.tabs.remove(selectedIndex);
 		}
@@ -359,11 +352,6 @@ public class BTDesigner extends JFrame {
 	}
 
 	public void showLookupTableEditor() {
-		try {
-			new LookupTableEditor(this, new File(Parameters.path_to_lookup).getCanonicalPath());
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			Log.e(e);
-		}
+		new LookupTableEditor(this, Parameters.path_to_lookup);
 	}
 }

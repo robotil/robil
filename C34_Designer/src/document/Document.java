@@ -80,7 +80,8 @@ public class Document extends JPanel {
 	public ArrayList<GElement> arrays = new ArrayList<GElement>();
 	public ArrayList<GElement> elements = new ArrayList<GElement>();
 	public View view = new View();
-	public TaskDescription task_description = null;
+	private TaskDescription _taskDescription = null;
+	private LookupTable _lookupTable;
 	private boolean _documentChanged = false;
 	private boolean _shouldBeSavedAs = false;
 	private double lastX = 0;
@@ -89,8 +90,6 @@ public class Document extends JPanel {
 	private String _taskDescriptionFilenameOriginal;
 	private Boolean _taskDescriptionExists = false;
 	private Boolean _buildTime = false;
-	// private Date _executionStart = new Date();
-	// private boolean _isRunning = false;
 	private String absoluteFilePath = "plan.xml";
 	private Vec _mousePosition = new Vec(0, 0);
 	private HistoryManager _historyManager = new HistoryManager();
@@ -117,8 +116,8 @@ public class Document extends JPanel {
 		
 		this._taskDescriptionFilename = parsePlanPath(Parameters.path_to_description);
 		try {
-			this.task_description = new TaskDescription(this._taskDescriptionFilename);
-			Log.d("Task descriptions file loaded from " + this._taskDescriptionFilename + ", descriptions count = " + this.task_description.getNames().size());
+			this._taskDescription = new TaskDescription(this._taskDescriptionFilename);
+			Log.d("Task descriptions file loaded from " + this._taskDescriptionFilename + ", descriptions count = " + this._taskDescription.getNames().size());
 		} catch (Exception ex) {
 			Log.e(ex);
 		}
@@ -162,6 +161,8 @@ public class Document extends JPanel {
 		this.view.loc = new Vec(0, 0);
 		this.view.zoom = 1;
 
+		this._lookupTable = new LookupTable(Parameters.path_to_lookup);
+		
 		DocumentMouseHandler mouseHander = new DocumentMouseHandler(this);
 		addMouseListener(mouseHander);
 		addMouseMotionListener(mouseHander);
@@ -195,7 +196,7 @@ public class Document extends JPanel {
 		
 		// if (el.isTask()) {
 		el.getAsTask().setDocument(this);
-		el.getAsTask().setTaskDescriptionProvider(task_description);
+		el.getAsTask().setTaskDescriptionProvider(_taskDescription);
 		// }
 		
 		if (el instanceof View.ChangesListener)
@@ -251,7 +252,7 @@ public class Document extends JPanel {
 			this.elements.add(el);
 
 			if (el instanceof Task && ((Task) el).type.equals("task"))
-				((Task) el).setTaskDescriptionProvider(this.task_description);
+				((Task) el).setTaskDescriptionProvider(this._taskDescription);
 			
 			onTreeChange(TreeChangeType.Add, el);
 		}
@@ -344,7 +345,7 @@ public class Document extends JPanel {
 	
 			// Write task descriptions file
 			try {
-				this.task_description.save(_taskDescriptionFilename);
+				this._taskDescription.save(_taskDescriptionFilename);
 				Log.d("Task descriptions file successfully saved to "
 						+ _taskDescriptionFilename);
 			} catch (Exception e) {
@@ -445,7 +446,7 @@ public class Document extends JPanel {
 			clonedElements.put(element, clonedElement);
 			
 			if (clonedElement.isTaskType())
-				clonedElement.getAsTask().setTaskDescriptionProvider(task_description);
+				clonedElement.getAsTask().setTaskDescriptionProvider(_taskDescription);
 			
 			outElements.add(clonedElement);
 		}
@@ -472,11 +473,16 @@ public class Document extends JPanel {
 		
 		// Copy elements
 		for (GElement element : sourceElements) {
-			clonedElement = element.getAsTask().clone();
+			
+			if (element.isTaskType())
+				clonedElement = element.getAsTask().clone();
+			else
+				clonedElement = element.clone();
+			
 			clonedElements.put(element, clonedElement);
 			
 			if (clonedElement.isTaskType())
-				clonedElement.getAsTask().setTaskDescriptionProvider(task_description);
+				clonedElement.getAsTask().setTaskDescriptionProvider(_taskDescription);
 			
 			outElements.add(clonedElement);
 		}
@@ -562,7 +568,7 @@ public class Document extends JPanel {
 		int i = 1;
 		for (GElement ea : this.elements)
 			if (ea instanceof Task && ((Task) ea).type.equals(Task.TYPE_task)) {
-				TaskDescription.TaskInfo taskDesc = this.task_description
+				TaskDescription.TaskInfo taskDesc = this._taskDescription
 						.get(((Task) ea).getNameWithoutParameters());
 				if (taskDesc != null)
 					taskDescString = taskDesc.algorithm;
@@ -1029,14 +1035,14 @@ public class Document extends JPanel {
 							new File(fileName).getParent(),
 							this._taskDescriptionFilename).getPath();
 
-				this.task_description = new TaskDescription(this._taskDescriptionFilename);
+				this._taskDescription = new TaskDescription(this._taskDescriptionFilename);
 				
 				Log.d("Task descriptions loaded from "
 						+ this._taskDescriptionFilename);
 			} catch (Exception e) {
 				Log.d("WARNING: Can't find or open task description file. It's not a critical error.");
 				Log.e("NOT CRITICAL : Print stack and exception name (for debug purposes only): ");
-				this.task_description = new TaskDescription();
+				this._taskDescription = new TaskDescription();
 			}
 		} else {
 
@@ -1051,7 +1057,7 @@ public class Document extends JPanel {
 							new File(fileName).getParent(),
 							this._taskDescriptionFilename).getPath();
 
-				this.task_description = new TaskDescription(
+				this._taskDescription = new TaskDescription(
 						this._taskDescriptionFilename);
 				Log.d("Descriptions loaded from "
 						+ this._taskDescriptionFilename);
@@ -1059,7 +1065,7 @@ public class Document extends JPanel {
 				Log.d("WARNING: Can'tpaint find or open task description file. It's not a critical error.");
 				Log.e("NOT CRITICAL : Print stack and exception name (for debug purposes only): ");
 				Log.e(e);
-				this.task_description = new TaskDescription();
+				this._taskDescription = new TaskDescription();
 				Log.d("Default task descriptions file not found, empty created.");
 			}
 		}
@@ -1110,6 +1116,14 @@ public class Document extends JPanel {
 			updateRootElement();
 		}
 		
+		/**
+		 * Update lookup table overrides
+		 */
+		if (changeType == TreeChangeType.Add && element.isTaskType()) {
+			if (_lookupTable.containsTask(element.getAsTask().getNameWithoutParameters()))
+				element.getAsTask().overrideTask(_lookupTable.getByTaskName(element.getAsTask().getNameWithoutParameters()));
+		}
+		
 		updateUndoRedoButtonsState();
 	}
 
@@ -1117,6 +1131,7 @@ public class Document extends JPanel {
 		_documentChanged = false;
 		updateTabTitle();
 		updateRootElement();
+		updateOverrides();
 		repaint();
 	}
 	
@@ -1137,14 +1152,18 @@ public class Document extends JPanel {
 		repaint();
 	}
 	
+	private void updateOverrides() {
+		for (GElement element : elements)
+			if (element.isTaskType() && _lookupTable.containsTask(element.getAsTask().getNameWithoutParameters()))
+				element.getAsTask().overrideTask(_lookupTable.getByTaskName(element.getAsTask().getNameWithoutParameters()));
+	}
+	
 	PlanExecution _currentPlanExecution;
 	public void onRun() {
 		for (GElement element : elements)
 			if (element.isTaskType())
 				element.getAsTask().onPlanRun();
-		
-		// _isRunning = true;
-		// _executionStart = new Date();
+
 		_planExecutionMessage = String.format("[%s] Running", new SimpleDateFormat("HH:mm:ss").format(new Date()) );
 		_currentPlanExecution = new PlanExecution();
 		
@@ -1200,6 +1219,10 @@ public class Document extends JPanel {
 		return _currentPlanExecution;
 	}
 	
+	public TaskDescription getTaskDescriptionProvider() {
+		return _taskDescription;
+	}
+	
 	public void updateRootElement() {
 		for (GElement element : elements)
 			element.getProperty().isRoot = false;
@@ -1234,7 +1257,10 @@ public class Document extends JPanel {
 		try {
 			if (_historyManager.hasUndo())
 				_historyManager.undo();
-		} catch (Exception e) { return; }
+		} catch (Exception e) {
+			Log.e(e);
+			return; 
+		}
 		
 		_documentChanged = true;
 		
@@ -1246,7 +1272,10 @@ public class Document extends JPanel {
 		if (_historyManager.hasRedo())
 			try {
 				_historyManager.redo();
-			} catch (Exception e) { return; }
+			} catch (Exception e) {
+				Log.e(e);
+				return; 
+			}
 		
 		_documentChanged = true;
 		

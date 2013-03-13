@@ -20,7 +20,7 @@ public class ToolAction extends AbstractDesignerAction implements
 
 	@Override
 	public void actionPerformed(ActionEvent a) {
-		Document document = getActiveTab().doc;
+		Document document = getActiveTab().document;
 		document.toolSelectionClean();
 		document.creator = this.c;
 		this.designer.toolbar.setTipText(this.c.toolTip());

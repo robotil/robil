@@ -16,7 +16,7 @@ public class OpenXmlEditorAction implements ActionListener {
 	
 	@Override
 	public void actionPerformed(ActionEvent arg) {
-		this._designer.getActiveTab().doc.showEditor();
+		this._designer.getActiveTab().document.showEditor();
 	}
 
 }
