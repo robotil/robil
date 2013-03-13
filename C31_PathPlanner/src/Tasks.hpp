@@ -327,16 +327,21 @@ public:
 
 			PathPlanning::EditSession session = _planner.startEdit();
 
-			if(_planner.isMapReady()==false){ session.aborted(); return TaskResult(FAULT, "Map is not ready"); }
+			if(_planner.isMapReady()==false){
+				session.aborted();
+				return TaskResult(FAULT, "Map is not ready");
+			}
 
 			session.arguments.targetGoal="";
 			session.arguments.targetPosition.x=x;
 			session.arguments.targetPosition.y=y;
 			session.arguments.finish = _planner.cast(session.arguments.targetPosition);
-			stringstream info; info<<"CONVERT "
-			<<session.arguments.targetPosition.x<<","<<session.arguments.targetPosition.y
-			<<" -> "
-			<<session.arguments.finish.x<<","<<session.arguments.finish.y<<endl;
+
+			stringstream info;
+			info<<"CONVERT "
+					<<session.arguments.targetPosition.x<<","<<session.arguments.targetPosition.y
+					<<" -> "
+					<<session.arguments.finish.x<<","<<session.arguments.finish.y<<endl;
 			ROS_INFO(info.str().c_str());
 
 			return TaskResult(SUCCESS, "OK");
