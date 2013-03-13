@@ -64,7 +64,7 @@ echo $C31_PID
 echo $C51_INIT_PID $C51_DRIVE_PID $C51_FINISH_PID $C34_Executer_PID  $C31_PID >> $PKILLS
 
 #rosservice call executer/run T4 /home/userws1/git/robil/C34_Designer/plans/skill4_test1_without_pathplanning.xml 
-rosservice call executer/run T4 ${WORKSPACE}/C34_Designer/plans/skill4.xml 
+rosservice call executer/run T4 ${WORKSPACE}/C34_Designer/plans/skill4_driving.xml 
 rosservice call executer/resume T4
 
 
