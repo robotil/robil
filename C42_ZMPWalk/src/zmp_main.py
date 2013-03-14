@@ -163,7 +163,7 @@ r_stance_hip_0 = copy.deepcopy( rs_from_r_foot.stance_hip )
 
 # constraint: we want hips height (z) and advance (x) to be the same
 hip_height = 0.7999 - bend_knees #(l_stance_hip_0.z + r_stance_hip_0.z)/2
-hip_sagital = -0.02 # (l_stance_hip_0.x + r_stance_hip_0.x)/2 # x position relative to foot
+hip_sagital = 0.01#-0.02 # (l_stance_hip_0.x + r_stance_hip_0.x)/2 # x position relative to foot
 l_stance_hip_0.z = hip_height; r_stance_hip_0.z = hip_height;
 l_stance_hip_0.x = hip_sagital; r_stance_hip_0.x = hip_sagital;
 
@@ -206,10 +206,10 @@ go = 0
 
 while not rospy.is_shutdown():
   
-  pub_zmp.publish(out) 
   interval.sleep()
 
   if ns.walk == 1:
+      pub_zmp.publish(out) 
       
       rospy.loginfo("started walking")
       rospy.loginfo("time:")

@@ -1,6 +1,7 @@
 #! /usr/bin/env python
 
 import roslib; roslib.load_manifest('C42_DynamicLocomotion')
+from zmp_init import init_pose
 import numpy as np
 import rospy
 import actionlib
@@ -10,7 +11,6 @@ from C31_PathPlanner.srv import *
 from C31_PathPlanner.msg import C31_Location
 from std_msgs.msg import Float64, Int32
 import geometry_msgs.msg as gm
-import init_zmp
 
 
 class ZmpWlkServer(object):
@@ -32,7 +32,6 @@ class ZmpWlkServer(object):
     self._tol = 0.1
     self._nxt_wp = C31_Location()
     #ensure we enter the main loop at least once
-    self._dis_from_goal = self._tol + 1
 
   def get_pos(self,odom):
     #get robot position, currently from /ground_truth_odom, later from navigation node
@@ -63,13 +62,14 @@ class ZmpWlkServer(object):
   #def task(self, goal):
   def task(self, goal):
     #init_zmp.init_pose_with_trajectory_controllers()
-    #init_zmp.main()
+    init_pose()
+    rospy.sleep(2)
     rospy.loginfo("pos init")
+
     pth = self._get_path()
     self._nxt_wp.x = pth.path.points[1].x#2
     self._nxt_wp.y = pth.path.points[1].y#0
     # start executing the action
-    init_zmp.main()
     self.walk_pub.publish(Int32(1))
     
     #### LOG TASK PARAMETERS ####
@@ -77,6 +77,7 @@ class ZmpWlkServer(object):
     rospy.loginfo("Target position: x:%s y:%s", self._nxt_wp.x, self._nxt_wp.y)
     task_success = True
 
+    self._dis_from_goal = self._tol + 1
     #### TASK ####
     while self._dis_from_goal > self._tol:
       #calculate distance from goal
@@ -85,7 +86,7 @@ class ZmpWlkServer(object):
       self._dis_from_goal = np.linalg.norm(gl-pos)
       self._feedback.dis_to_goal = self._dis_from_goal
       self._as.publish_feedback(self._feedback)
-      rospy.sleep(1)
+      rospy.sleep(0.5)
       if self._as.is_preempt_requested() or rospy.is_shutdown():
         #### HERE PROICESS PREEMTION OR INTERUPT #####
         rospy.loginfo('%s: Preempted' % self._action_name)

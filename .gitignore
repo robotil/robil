@@ -7,7 +7,9 @@
 *.slo
 *.lo
 *.o
-
+*.pyc
+*.user
+atlas_urdf_test.xml
 # Compiled Dynamic libraries
 *.so
 !libBTExecuter.so
@@ -30,3 +32,9 @@ build/
 bin/
 msg_gen/
 srv_gen/
+*__.py
+*Action.py
+*Goal.py
+*Feedback.py
+*Result.py
+
