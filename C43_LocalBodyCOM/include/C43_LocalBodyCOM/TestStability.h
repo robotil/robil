@@ -36,17 +36,17 @@
 #ifndef HRL_KINEMATICS_TESTSTABILITY_H_
 #define HRL_KINEMATICS_TESTSTABILITY_H_
 
-#include <hrl_kinematics/Kinematics.h>
+#include <C43_LocalBodyCOM/Kinematics.h>
 
 #include <geometric_shapes/shape_operations.h>
 #include <geometry_msgs/PolygonStamped.h>
-#include <hrl_kinematics/SupportLegs_Status.h> // Yuval added
-#include <hrl_kinematics/CoM_Array_msg.h> // Yuval added
-#include <hrl_kinematics/pCoM_err_msg.h> // Yuval added
+#include <C43_LocalBodyCOM/SupportLegs_Status.h> // Yuval added
+#include <C43_LocalBodyCOM/CoM_Array_msg.h> // Yuval added
+#include <C43_LocalBodyCOM/pCoM_err_msg.h> // Yuval added
 
 #include <vector>
 
-namespace hrl_kinematics {
+namespace C43_LocalBodyCOM {
 
   /**
    * Class to test whether the kinematic state of a (humanoid) robot

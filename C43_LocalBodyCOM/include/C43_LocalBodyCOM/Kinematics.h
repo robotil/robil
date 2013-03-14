@@ -56,7 +56,7 @@
 #include <visualization_msgs/MarkerArray.h>
 
 
-namespace hrl_kinematics {
+namespace C43_LocalBodyCOM {
 typedef std::map<std::string, double> JointMap;
 
 /**

@@ -32,11 +32,11 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <hrl_kinematics/Kinematics.h>
+#include <C43_LocalBodyCOM/Kinematics.h>
 
 using robot_state_publisher::SegmentPair;
 
-namespace hrl_kinematics {
+namespace C43_LocalBodyCOM {
 
 Kinematics::Kinematics()
 : nh_(), nh_private_ ("~"),

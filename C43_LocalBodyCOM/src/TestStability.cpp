@@ -32,14 +32,14 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "hrl_kinematics/TestStability.h"
+#include "C43_LocalBodyCOM/TestStability.h"
 #include <pcl/surface/convex_hull.h>
 #include <pcl/point_types.h>
 
 using robot_state_publisher::SegmentPair;
 using boost::shared_ptr;
 
-namespace hrl_kinematics {
+namespace C43_LocalBodyCOM {
 
 TestStability::TestStability()
 : Kinematics(), rfoot_mesh_link_name("r_foot")//"r_talus" Yuval changed from:rfoot_mesh_link_name("RAnkleRoll_link")

@@ -32,11 +32,11 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <hrl_kinematics/TestStability.h>
+#include <C43_LocalBodyCOM/TestStability.h>
 #include <ros/ros.h>
 
 
-namespace hrl_kinematics {
+namespace C43_LocalBodyCOM {
   
 /**
  * Simple node to use the Kinematics and TestStability classes.
@@ -48,8 +48,8 @@ public:
   TestStabilityNode(Kinematics::FootSupport support = Kinematics::SUPPORT_DOUBLE);
   virtual ~TestStabilityNode();
   void jointStateCb(const sensor_msgs::JointStateConstPtr& state);
-  bool FootSupport_func(hrl_kinematics::SupportLegs_Status::Request  &req,
-                        hrl_kinematics::SupportLegs_Status::Response &res);
+  bool FootSupport_func(C43_LocalBodyCOM::SupportLegs_Status::Request  &req,
+                        C43_LocalBodyCOM::SupportLegs_Status::Response &res);
 
 protected:
   ros::NodeHandle nh_,nh2_; //Yuval added: nh2_
@@ -154,8 +154,8 @@ void TestStabilityNode::jointStateCb(const sensor_msgs::JointStateConstPtr& stat
 }
 
 //Yuval added: to use service for Support Legs
-bool TestStabilityNode::FootSupport_func(hrl_kinematics::SupportLegs_Status::Request  &req,
-                                         hrl_kinematics::SupportLegs_Status::Response &res){
+bool TestStabilityNode::FootSupport_func(C43_LocalBodyCOM::SupportLegs_Status::Request  &req,
+                                         C43_LocalBodyCOM::SupportLegs_Status::Response &res){
     switch ( req.FootSupport_CMD )
     {
     case 0:  //req.SUPPORT_DOUBLE:
@@ -187,7 +187,7 @@ bool TestStabilityNode::FootSupport_func(hrl_kinematics::SupportLegs_Status::Req
 
 }
 
-using namespace hrl_kinematics;
+using namespace C43_LocalBodyCOM;
 
 int main(int argc, char** argv)
 {
@@ -205,11 +205,11 @@ int main(int argc, char** argv)
   try
   {
     ros::spinOnce();
-    hrl_kinematics::TestStabilityNode StabilityNode(support);
+    C43_LocalBodyCOM::TestStabilityNode StabilityNode(support);
 
     ros::spin();
   }
-  catch(hrl_kinematics::Kinematics::InitFailed &e)
+  catch(C43_LocalBodyCOM::Kinematics::InitFailed &e)
   {
     std::cerr << "Could not initialize kinematics node: " << e.what() << std::endl;
     // TODO: does not work?
