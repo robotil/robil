@@ -77,7 +77,7 @@ class ZMP_Preview_Buffer:
         #rospy.loginfo("ZMP_Preview_Buffer %s: end_of_step_preview = %f, buffer_size = %f, preview_size = %f, precede_time_samples = %f " % (self.name, self.end_of_step_preview, self.buffer_size, self.preview_size, self.precede_time_samples) )
 
         self.clearBuffer() # clear buffer
-        rospy.loginfo("ZMP_Preview_Buffer %s: data_end = %f, step_length = %f" % (self.name, self.data_end, step_length) )
+        #rospy.loginfo("ZMP_Preview_Buffer %s: data_end = %f, step_length = %f" % (self.name, self.data_end, step_length) )
 
         self.pushData(new_step[self.precede_time_samples :]) # Insert into buffer new step with (lead) time shift  
         # Insert into buffer cycles of step sequence (need to fill buffer with at least step_length+preview_size samples)
@@ -90,12 +90,12 @@ class ZMP_Preview_Buffer:
     def update_Preview(self): 
         # return current step sequence preview and increment preview (one time cycle)
         end_index = self.start_index + self.preview_size
-        if end_index > self.end_of_step_preview: # make sure not exceed steps preview
+        if end_index > self.end_of_step_preview: # make sure not to exceed steps preview
             # may want to do some thing alse in this case like: preview = zeros(self.preview_size) ???
-            end_index = self.end_of_step_preview
+            end_index = self.end_of_step_preview # freeze preview (preview is not updated, stays on end_of_step_preview values)
             self.start_index = self.end_of_step_preview - self.preview_size
         if end_index > self.buffer_size: # make sure not exceed buffer size
-            end_index = self.buffer_size
+            end_index = self.buffer_size # freeze preview (preview is not updated, stays on end of buffer values)
             self.start_index = self.buffer_size - self.preview_size
 
         preview = self.buffer[self.start_index : end_index]
