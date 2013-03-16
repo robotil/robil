@@ -57,21 +57,22 @@ public:
 
             _detector->detectAndTrack(target);
             
-            int count = 0;
+            time_t now;
+            now = time(0);
             while(!isPreempt()) {
-                count++;
+
                 if(_detector->x != -1) {
                     ROS_INFO("trackObject:: object detected!");
                    
-                    count = 0;
+
                     return TaskResult(SUCCESS, "OK");
                     
                     
                } else {
                    
                     char* str = "trackObject didnt' detect any object";
-                    if (count > 1000000) {
-                        ROS_INFO("trackObject object not detect - %d\n ", count);
+                     if (time(0) > now+30) {
+                        ROS_INFO("trackObject object not detect ");
                         _detector->stopDetection();
                         return TaskResult(FAULT, str);
                     }
