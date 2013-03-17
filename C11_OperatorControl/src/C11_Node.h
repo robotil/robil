@@ -13,6 +13,9 @@
 #include "C11_OperatorControl/C11.h"
 //#include "C11_Agent/C34C11_STT.h"
 #include "C10_Common/mission_selection.h"
+#include "C10_Common/pause_mission.h"
+#include "C10_Common/resume_mission.h"
+#include "C10_Common/execution_status_change.h"
 #include "C10_Common/push_img.h"
 #include "C10_Common/push_occupancy_grid.h"
 #include "C10_Common/push_path.h"
@@ -58,6 +61,8 @@ public:
           void run();
 
           void LoadMission(int index);
+          void Resume();
+          void Pause();
 
           static void viewImage(const sensor_msgs::ImageConstPtr& msg);
 //          static void StatusMessageCallback(const C11_Agent::C34C11_STTConstPtr);
@@ -67,6 +72,7 @@ public:
           bool push_occupancy_grid_proccess(C10_Common::push_occupancy_grid::Request  &req,
                   		  C10_Common::push_occupancy_grid::Response &res );
           bool push_path_proccess(C10_Common::push_path::Request  &req, C10_Common::push_path::Response &res );
+          bool execution_status_change(C10_Common::execution_status_change::Request  &req, C10_Common::execution_status_change::Response &res );
 
 Q_SIGNALS:
         void loggingUpdated();
@@ -78,7 +84,10 @@ private:
   ros::ServiceServer c11_push_img;
   ros::ServiceServer c11_push_occupancy_grid;
   ros::ServiceServer c11_push_path;
+  ros::ServiceServer c11_execution_status_change;
   ros::ServiceClient LoadMissionClient;// = _node.serviceClient<C11_Agent::mission_selection>("C11/mission_selection");
+  ros::ServiceClient ResumeMissionClient;
+  ros::ServiceClient PauseMissionClient;
   image_transport::ImageTransport* it_;
   image_transport::Subscriber panoramic_image;
   ros::Subscriber status_subscriber;

@@ -672,8 +672,8 @@ QPointF CMapMain::PointToPix(StructPoint point)
 {
 	QPointF GPoint;
 //	GPoint.setX(50+((point.x - CornerPos.y)*32) - CornerPos.y*32 + 12.5*32);
-	GPoint.setX(50+((point.y - RobotPos.y)*(-32)) + 400);
-	GPoint.setY(930-((point.x - RobotPos.x)*32) - 160);
+	GPoint.setX(50+((RobotPos.x - point.x)*(-32)) + 400);
+	GPoint.setY(930-((point.y - RobotPos.y)*32) - 160);
 	std::cout<<"PointX: "<<GPoint.x()<<" PointY: "<<GPoint.y()<<"\n";
 	return GPoint;
 }
