@@ -1,10 +1,10 @@
-V0.0.0.114
+V0.0.0.115
 ===========================================================
 C0_RobilTask     0.5
 C0_Scripts     0.16
-C10_Common     0.3
-C11_Agent    				 0.8
-C11_OperatorControl     		 0.12
+C10_Common     0.4
+C11_Agent    				 0.9
+C11_OperatorControl     		 0.14
 C21_VisionAndLidar     		 	 0.10
 C22_GroundRecognitionAndMapping     	0.8
 C23_ObjectRecognition     		0.13
