@@ -15,9 +15,11 @@ ImageDraw::ImageDraw(int argc, char** argv, QWidget *parent, Qt::WFlags flags)
 	ui.mainToolBar->hide();
 	ui.menuBar->hide();
 	ui.statusBar->hide();
+	ui.btnCreate->setEnabled(false);
 
 	ImageAreaCount = 0;
 	IsUpdateCurrentImg = false;
+	ERunStatus = STOPPED_ENUM;
 
 	connect(this,SIGNAL(SigOnNewImg(QImage)),this,SLOT(SltOnNewImg(QImage)),Qt::QueuedConnection);
 	connect(ui.btnPlayPause,SIGNAL(clicked(bool)),this,SLOT(SltOnPlayPauseClick(bool)));
@@ -122,6 +124,30 @@ void ImageDraw::OnPathReceived(std::vector<StructPoint> points)
 	ui.mapWidget->AddPath(points);
 }
 
+void ImageDraw::OnExecutionStatusUpdate(int status)
+{
+        if(0 == status)
+          {
+            ui.btnPlayPause->setChecked(true);
+            ERunStatus = RUNNING_ENUM;
+            ui.btnCreate->setEnabled(false);
+            SltOnCreateClick(false);
+          }
+        else if (1 == status)
+          {
+            ui.btnPlayPause->setChecked(false);
+            ERunStatus = PAUSED_ENUM;
+            ui.btnCreate->setEnabled(true);
+          }
+        else if( 2 == status)
+          {
+            ui.btnPlayPause->setChecked(false);
+            ERunStatus = STOPPED_ENUM;
+            ui.btnCreate->setEnabled(false);
+            SltOnCreateClick(false);
+          }
+}
+
 void ImageDraw::SltOnNewImg(QImage image)
 {
 //	QLabel* lbl = new QLabel(this);
@@ -211,25 +237,45 @@ void ImageDraw::SltOnPlayPauseClick(bool checked)
 {
 	if(checked)
 	{
-		QString curMission = ui.cmbMissions->currentText();
-		if(!curMission.isEmpty())
-		{
-			int index=0;
-			if(curMission == "Task1")
-			{
-				index = 0;
-			}
-			else if(curMission == "Task2")
-			{
-				index = 1;
-			}
-			else if(curMission == "Task3")
-			{
-				index = 2;
-			}
-			C11node.LoadMission(index);
-		}
+	        if(ERunStatus==STOPPED_ENUM)
+                {
+	            QString curMission = ui.cmbMissions->currentText();
+
+                  if(!curMission.isEmpty())
+                  {
+                          int index=0;
+                          if(curMission == "Task1")
+                          {
+                                  index = 0;
+                          }
+                          else if(curMission == "Task2")
+                          {
+                                  index = 1;
+                          }
+                          else if(curMission == "Task3")
+                          {
+                                  index = 2;
+                          }
+                          C11node.LoadMission(index);
+                          ERunStatus = RUNNING_ENUM;
+                          ui.btnCreate->setEnabled(false);
+                          SltOnCreateClick(false);
+                  }
+                }
+	        else
+                {
+	            C11node.Resume();
+	            ERunStatus = RUNNING_ENUM;
+	            ui.btnCreate->setEnabled(false);
+	            SltOnCreateClick(false);
+                }
 	}
+	else
+        {
+	    C11node.Pause();
+	    ERunStatus = PAUSED_ENUM;
+	    ui.btnCreate->setEnabled(true);
+        }
 }
 
 void ImageDraw::SltOnCreateClick(bool checked)
@@ -243,10 +289,10 @@ void ImageDraw::SltOnCreateClick(bool checked)
 	}
 	else
 	{
-		ui.btnPath->setEnabled(true);
-		ui.btnNoGo->setEnabled(true);
-		ui.btnDoor->setEnabled(true);
-		ui.btnCarInt->setEnabled(true);
+		ui.btnPath->setEnabled(false);
+		ui.btnNoGo->setEnabled(false);
+		ui.btnDoor->setEnabled(false);
+		ui.btnCarInt->setEnabled(false);
 	}
 }
 
