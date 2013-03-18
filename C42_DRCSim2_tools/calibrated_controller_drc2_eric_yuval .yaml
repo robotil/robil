@@ -31,18 +31,18 @@ atlas_controller:
     - back_mby
     - back_ubx
   gains:
-    l_leg_uhz: {p:  5000.0,   d:   0.0,  i:   0.0,      i_clamp:    0.0 }
-    l_leg_mhx: {p:  5000.0,   d:   0.0,  i:   0.0,     i_clamp:    50.0}
-    l_leg_lhy: {p:  5000.0,   d:   0.0,  i:  50.0,     i_clamp:    50.0}
-    l_leg_kny: {p:  9000.0,   d: 250.0,  i: 250.0,    i_clamp:    150 }
-    l_leg_uay: {p:  5000.0,   d:   1.5,  i: 150.0,    i_clamp:    150 }
-    l_leg_lax: {p:  2500.0,   d:   0.0,  i:   0.0,    i_clamp:    150 }
-    r_leg_uhz: {p:  5000.0,   d:   0.0,  i:   0.0,      i_clamp:    0.0 }
-    r_leg_mhx: {p:  5000.0,   d:   0.0,  i:   0.0,     i_clamp:    50.0}
-    r_leg_lhy: {p:  5000.0,   d:   0.0,  i:  50.0,     i_clamp:    50.0}
-    r_leg_kny: {p:  9000.0,   d: 250.0,  i: 250.0,    i_clamp:    150 }
-    r_leg_uay: {p:  5000.0,   d:   1.5,  i: 150.0,    i_clamp:    150 }
-    r_leg_lax: {p:  2500.0,   d:   0.0,  i:   0.0,    i_clamp:    150 }
+    l_leg_uhz: {p:  1000.0,  d:   0.0,  i: 0.0,      i_clamp:    0.0 }
+    l_leg_mhx: {p:  1000.0,   d:   0.0,  i: 0.0,     i_clamp:    50.0}
+    l_leg_lhy: {p:  1000.0,   d:   0.0,  i: 0.0,     i_clamp:    50.0}
+    l_leg_kny: {p:  6000.0,   d:   0.0,  i: 0.0,    i_clamp:    150 }
+    l_leg_uay: {p:  5000.0,   d:   0.0,  i: 0.0,    i_clamp:    150 }
+    l_leg_lax: {p:  5000.0,   d:   0.0,  i: 0.0,    i_clamp:    150 }
+    r_leg_uhz: {p:  1000.0,  d:   0.0,  i: 0.0,      i_clamp:    0.0 }
+    r_leg_mhx: {p:  1000.0,   d:   0.0,  i: 0.0,     i_clamp:    50.0}
+    r_leg_lhy: {p:  1000.0,   d:   0.0,  i: 0.0,     i_clamp:    50.0}
+    r_leg_kny: {p:  6000.0,   d:   0.0,  i: 0.0,    i_clamp:    150 }
+    r_leg_uay: {p:  5000.0,   d:   0.0,  i: 0.0,    i_clamp:    150 }
+    r_leg_lax: {p:  5000.0,   d:   0.0,  i: 0.0,    i_clamp:    150 }
     l_arm_usy: {p:  2000.0, d:   3.0, i:   0.0, i_clamp:    0.0}
     l_arm_shx: {p:  1000.0, d:  20.0, i:   0.0, i_clamp:    0.0}
     l_arm_ely: {p:   200.0, d:   3.0, i:   0.0, i_clamp:    0.0}
@@ -55,10 +55,10 @@ atlas_controller:
     r_arm_elx: {p:   200.0, d:   3.0, i:   0.0, i_clamp:    0.0}
     r_arm_uwy: {p:    50.0, d:   0.1, i:   0.0, i_clamp:    0.0}
     r_arm_mwx: {p:   100.0, d:   0.2, i:   0.0, i_clamp:    0.0}
-    neck_ay:   {p:   200.0, d:   1.0, i:   0.0, i_clamp:    0.0}
-    back_lbz:  {p:  5000.0, d:   0.1, i:   0.0, i_clamp:    0.0}
-    back_mby:  {p:  5000.0, d:   5.0, i:   0.0, i_clamp:    0.0}
-    back_ubx:  {p:  5000.0, d:   5.0, i:   0.0, i_clamp:    0.0}
+    neck_ay:   {p:    20.0, d:   1.0, i:   0.0, i_clamp:    0.0}
+    back_lbz:  {p:    20.0, d:   0.1, i:   0.0, i_clamp:    0.0}
+    back_mby:  {p:  4000.0, d:  02.0, i:   0.0, i_clamp:    0.0}
+    back_ubx:  {p:  2000.0, d:  01.0, i:   0.0, i_clamp:    0.0}
   joint_trajectory_action_node:
     joints:
       - l_leg_uhz

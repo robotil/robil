@@ -26,6 +26,7 @@ from std_msgs.msg import Int32, Float64
 from preview_controller import ZMP_Preview_Controller
 from swing_trajectory import *
 from zmp_profiles import *
+from zmp_init import init_pose
 from preview_buffer import ZMP_Preview_Buffer
 import tf
 import copy
@@ -90,6 +91,8 @@ pelvis_des = rs.place_in_Ori( 0, 0, 0 ) # pelvis desired rotation (0,0,0)<=>stan
 
 max_step_time = 10.0 #[sec] the longest periodstep_length, of step that we plan to do
 
+# moving to intial pose:
+init_pose()
 # TODO: make sure robot is static (in start position) and tf is running
 # init Robot State using tf data getting hip to com relative position:
 rs.static_init_with_tf_data(ns.listener,bend_knees)

@@ -18,7 +18,7 @@
 
 import roslib; roslib.load_manifest('C42_ZMPWalk')
 import rospy
-from zmp_walk.msg import Position, Orientation, Pos_and_Ori
+from C42_ZMPWalk.msg import Position, Orientation, Pos_and_Ori
 import pylab as pl
 import math as ma
 import copy

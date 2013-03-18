@@ -95,19 +95,19 @@ def get_from_zmp(msg):
         rospy.loginfo('IKException: %s leg is out of reach, req pos: %f ,%f, %f',exc.foot,exc.requested_pos[0],exc.requested_pos[1],exc.requested_pos[2])
         return
 
-    ns.JC.set_pos('l_leg_lax',0.0 )# left_leg_angles[4] ) #JSC_l_leg_lax.getCMD(ns.LegAng.ang.lax) )
-    ns.JC.set_pos('l_leg_uay',0.0 )# left_leg_angles[5] )
-    ns.JC.set_pos('l_leg_kny',0.0 )# left_leg_angles[3] )
-    ns.JC.set_pos('l_leg_uhz',0.0 )# left_leg_angles[2] )
-    ns.JC.set_pos('l_leg_lhy',0.0 )# left_leg_angles[1] )
-    ns.JC.set_pos('l_leg_mhx',0.0 )# left_leg_angles[0] ) #JSC_l_leg_mhx.getCMD(ns.LegAng.ang.mhx) )
+    ns.JC.set_pos('l_leg_lax', left_leg_angles[4] ) #JSC_l_leg_lax.getCMD(ns.LegAng.ang.lax) )
+    ns.JC.set_pos('l_leg_uay', left_leg_angles[5] )
+    ns.JC.set_pos('l_leg_kny', left_leg_angles[3] )
+    ns.JC.set_pos('l_leg_uhz', left_leg_angles[2] )
+    ns.JC.set_pos('l_leg_lhy', left_leg_angles[1] )
+    ns.JC.set_pos('l_leg_mhx', left_leg_angles[0] ) #JSC_l_leg_mhx.getCMD(ns.LegAng.ang.mhx) )
 
-    ns.JC.set_pos('r_leg_lax',0.0 )# right_leg_angles[4] ) #JSC_r_leg_lax.getCMD(ns.LegAng.ang.lax + lax_stance) )
-    ns.JC.set_pos('r_leg_uay',0.0 )# right_leg_angles[5] )
-    ns.JC.set_pos('r_leg_kny',0.0 )# right_leg_angles[3] )
-    ns.JC.set_pos('r_leg_uhz',0.0 )# right_leg_angles[2] )
-    ns.JC.set_pos('r_leg_lhy',0.0 )# right_leg_angles[1] )
-    ns.JC.set_pos('r_leg_mhx',0.0 )# right_leg_angles[0] ) #JJSC_r_leg_mhx.getCMD(ns.LegAng.ang.mhx + mhx_stance) )
+    ns.JC.set_pos('r_leg_lax', right_leg_angles[4] ) #JSC_r_leg_lax.getCMD(ns.LegAng.ang.lax + lax_stance) )
+    ns.JC.set_pos('r_leg_uay', right_leg_angles[5] )
+    ns.JC.set_pos('r_leg_kny', right_leg_angles[3] )
+    ns.JC.set_pos('r_leg_uhz', right_leg_angles[2] )
+    ns.JC.set_pos('r_leg_lhy', right_leg_angles[1] )
+    ns.JC.set_pos('r_leg_mhx', right_leg_angles[0] ) #JJSC_r_leg_mhx.getCMD(ns.LegAng.ang.mhx + mhx_stance) )
     ns.JC.send_command()
 
     #     rospy.loginfo("JC L_leg: lax = %f effort = %f, uay = %f, kny = %f, uhz = %f, lhy = %f, mhx = %f effort = %f, mby = %f, ubx= %f" %  \
