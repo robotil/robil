@@ -38,10 +38,10 @@ class Snapshot {
 	 * Restores saved state for related document
 	 */
 	public void activate() {
-		// ***************************************************************************
-		// *** Clones elements & arrows from snapshot, and replace document's elements
+		// ****************************************************************************
+		// *** Clones elements & arrows from snapshot, and replaces document's elements
 		// *** Note: snapshot's elements & arrows must remain immutable
-		// ***************************************************************************
+		// ****************************************************************************
 		
 		// Cloned elements & arrows
 		ArrayList<GElement> elements = new ArrayList<GElement>();

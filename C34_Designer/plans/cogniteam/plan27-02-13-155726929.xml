@@ -1,0 +1,28 @@
+<plan descriptions="./plans/TaskDescriptions.xml">
+   <par name="skill4" x="899.0246847229649" y="16.6252594298207" collapsed="false" id="38e95426-0932-40d2-aefa-270a3dcd9298"> 
+         <par name="Perception" x="680.2352110387548" y="101.62525942982026" collapsed="false" id="50ae34a1-b4f6-42b9-a59e-23a1de45eaca"> 
+               <tsk name="LocalizationTrack" x="512.2352110387543" y="142.62525942982037" test_time="0" test_result="true" id="b680e465-1580-4fcd-964d-4ac78748b7d3" />
+               <tsk name="ObstacleDetection" x="691.2352110387548" y="163.62525942982026" test_time="0" test_result="true" id="56806741-11f0-45f8-992b-3a81f261bd49" />
+         </par>
+         <seq name="Mission" x="1099.0246847229664" y="97.62525942982049" collapsed="false" id="e6b9d1db-cbf5-4efb-8b22-f2c2e6130a3e"> 
+               <seq name="DriveMission" x="1137.7627799610616" y="254.29192609648734" collapsed="false" id="19ac91a7-5f3b-47d5-a2bb-9ef59c48c5ae"> 
+                     <seq name="InCar" x="1087.0045382028188" y="394.44210924666896" collapsed="false" id="cee78399-ac08-4713-9a85-542b10c3e7ff"> 
+                           <par name="Driving" x="1042.0045382028134" y="467.42013122469086" collapsed="false" id="6207a22b-f609-4f49-9579-2e83f0c45e36"> 
+                              <dec name="!L!" x="986.290252488525" y="517.4201312246913"> 
+                                    <seq name="Driving" x="1030.2133294116074" y="605.903647708209" collapsed="false" id="3121acdd-f660-4d53-96b2-47029c756b6f"> 
+                                          <seq name="@4" x="1104.4447219447243" y="687.0443167943175" collapsed="false" id="70f216a5-7259-412e-a108-658b5d28d109"> 
+                                                <tsk name="InitDrive" x="925.4764873063406" y="792.5277078585872" test_time="0" test_result="true" id="6e5cc7d2-bc5b-46c9-b6fc-9adb8ab9b935" />
+                                                <sel name="@5" x="1102.444721944724" y="748.0443167943178" collapsed="false" id="44efb3a3-36bc-460c-a765-923a3b1d891f"> 
+                                                      <tsk name="WayPointsDriving" x="1011.9764873063369" y="792.5352266555905" test_time="0" test_result="true" id="398165c8-1786-4ce4-b98b-37e5282d9a26" />
+                                                      <tsk name="FinishDrive" x="1199.0161505161584" y="791.901459651462" test_time="0" test_result="true" id="e69475b5-c614-47bf-89b5-def175bd06cf" />
+                                                </sel>
+                                                <tsk name="FinishDrive" x="1199.0161505161584" y="791.901459651462" test_time="0" test_result="true" id="e69475b5-c614-47bf-89b5-def175bd06cf" />
+                                          </seq>
+                                    </seq>
+                              </dec>
+                           </par>
+                     </seq>
+               </seq>
+         </seq>
+   </par>
+</plan>

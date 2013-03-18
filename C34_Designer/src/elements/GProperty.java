@@ -13,7 +13,6 @@ public class GProperty {
 	public boolean rightClicked = false;
 	public boolean collapsed = false;
 	public boolean isRoot = false;
-
 	public int testTime = Parameters.test_time;
 	public boolean testResult = Parameters.test_result;
 

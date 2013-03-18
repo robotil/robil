@@ -54,7 +54,7 @@ public abstract class GElement {
 		Paint paint;
 		Stroke strok;
 		Font font;
-
+		
 		public GraphProp(Graphics2D g) {
 			this.g = g;
 			this.paint = g.getPaint();

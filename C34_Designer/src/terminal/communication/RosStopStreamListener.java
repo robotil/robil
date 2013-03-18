@@ -2,11 +2,11 @@ package terminal.communication;
 
 import java.io.IOException;
 
-import document.BTDesigner;
 
 import logger.Log;
 import terminal.communication.RosPipe.RosTargets;
 import terminal.lineprocessors.StopStreamProcessor;
+import windows.designer.BTDesigner;
 
 public class RosStopStreamListener implements Runnable {
 

@@ -93,7 +93,7 @@ public:
     TaskResult task(const string& name, const string& uid, Arguments& args){
     	//ros::this_node::getName()
     	
-    	// TASK INPUT CHANNELS
+    	// TASK OUTPUT CHANNELS
     	ros::ServiceServer c31_PlanPath =
     			_node.advertiseService<C31_PathPlanner::C31_PlanPathRequest, C31_PathPlanner::C31_PlanPathResponse>(
     					STR(ros::this_node::getName()<<"/planPath"),boost::bind(&PathPlanningServer::srv_PlanPath,this,_1,_2)
@@ -103,7 +103,7 @@ public:
     					STR(ros::this_node::getName()<<"/getPath"),boost::bind(&PathPlanningServer::srv_GetPath,this,_1,_2)
     			);
 
-		//TASK OUTPUT CHANNELS
+		//TASK INPUT CHANNELS
     	ros::ServiceClient c22Client = _node.serviceClient<C22_GroundRecognitionAndMapping::C22>("C22");
 		ros::Subscriber c23Client = _node.subscribe("C23/object_deminsions", 1000, &PathPlanningServer::callbackNewTargetLocation, this );
 		
@@ -327,16 +327,21 @@ public:
 
 			PathPlanning::EditSession session = _planner.startEdit();
 
-			if(_planner.isMapReady()==false){ session.aborted(); return TaskResult(FAULT, "Map is not ready"); }
+			if(_planner.isMapReady()==false){
+				session.aborted();
+				return TaskResult(FAULT, "Map is not ready");
+			}
 
 			session.arguments.targetGoal="";
 			session.arguments.targetPosition.x=x;
 			session.arguments.targetPosition.y=y;
 			session.arguments.finish = _planner.cast(session.arguments.targetPosition);
-			stringstream info; info<<"CONVERT "
-			<<session.arguments.targetPosition.x<<","<<session.arguments.targetPosition.y
-			<<" -> "
-			<<session.arguments.finish.x<<","<<session.arguments.finish.y<<endl;
+
+			stringstream info;
+			info<<"CONVERT "
+					<<session.arguments.targetPosition.x<<","<<session.arguments.targetPosition.y
+					<<" -> "
+					<<session.arguments.finish.x<<","<<session.arguments.finish.y<<endl;
 			ROS_INFO(info.str().c_str());
 
 			return TaskResult(SUCCESS, "OK");
