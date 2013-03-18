@@ -7,8 +7,8 @@ import java.util.Collections;
 import java.util.Iterator;
 
 import terminal.commands.ServiceCaller;
-import document.BTDesigner;
-import document.ChooseRemotePlanDialog;
+import windows.ChooseRemotePlanDialog;
+import windows.designer.BTDesigner;
 
 public class LoadAndOpenAction extends AbstractDesignerAction implements
 		ActionListener {

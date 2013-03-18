@@ -3,8 +3,9 @@ package document.actions;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
-import document.BTDesigner;
-import document.TaskDescriptionEditor;
+import windows.TaskDescriptionEditor;
+import windows.designer.BTDesigner;
+
 
 public class OpenTaskDescriptionEditorAction extends AbstractDesignerAction
 		implements ActionListener {
@@ -16,12 +17,12 @@ public class OpenTaskDescriptionEditorAction extends AbstractDesignerAction
 	@Override
 	public void actionPerformed(ActionEvent e) {
 		if (this.designer == null || this.designer.getActiveTab() == null
-				|| this.designer.getActiveTab().doc == null
-				|| this.designer.getActiveTab().doc.task_description == null)
+				|| this.designer.getActiveTab().document == null
+				|| this.designer.getActiveTab().document.getTaskDescriptionProvider() == null)
 			return;
 
 		TaskDescriptionEditor editor = new TaskDescriptionEditor(
-				this.designer.getActiveTab().doc.task_description);
+				this.designer.getActiveTab().document.getTaskDescriptionProvider());
 		editor.setVisible(true);
 	}
 }

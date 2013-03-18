@@ -3,9 +3,10 @@ package document.actions;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
-import document.BTDesigner;
+import windows.designer.BTDesigner;
+
 import document.Document;
-import document.Toolbar;
+import document.ui.Toolbar;
 
 public class PointAction extends AbstractDesignerAction implements
 		ActionListener {
@@ -16,7 +17,7 @@ public class PointAction extends AbstractDesignerAction implements
 
 	@Override
 	public void actionPerformed(ActionEvent a) {
-		Document doc = getActiveTab().doc;
+		Document doc = getActiveTab().document;
 		doc.toolSelectionClean();
 		this.designer.toolbar.setTipText(Toolbar.TIP_move);
 	}

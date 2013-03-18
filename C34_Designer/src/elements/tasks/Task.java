@@ -5,10 +5,10 @@ import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.Graphics2D;
+import java.awt.Image;
 import java.awt.Point;
 import java.awt.Dialog.ModalityType;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.Map;
 
@@ -18,11 +18,11 @@ import logger.Log;
 
 import terminal.communication.StackStreamMessage;
 import terminal.communication.StackStreamMessage.ChangeType;
-import terminal.communication.StackStreamMessage.TaskFinishReason;
 
-import document.BTDesigner;
 import document.Document;
+import document.LookupTableRecord;
 import document.description.TaskDescription;
+import document.ui.Utilities;
 import elements.GElement;
 import elements.Tooltip;
 import elements.Tooltip.Position;
@@ -38,6 +38,8 @@ public class Task extends GElement implements View.ChangesListener {
 	public final static String TYPE_parallel = "parallel";
 	public final static String TYPE_switch = "switch";
 	
+	private final static Image LINK_IMAGE = Utilities.loadImage("link.png");
+	
 	public int seqNumber = 0;
 	public String text = "Noname";
 	public String type = TYPE_task;
@@ -48,6 +50,7 @@ public class Task extends GElement implements View.ChangesListener {
 	private Tooltip _runtimeInfo;
 	private Tooltip _planExecutionInfo;
 	
+	private LookupTableRecord _lookupOverride;
 	private Document _document;
 	private TaskResultCollection _resultsHistory = new TaskResultCollection();
 	private Date _runStart;
@@ -206,31 +209,60 @@ public class Task extends GElement implements View.ChangesListener {
 		// Draw collapse icon ************************************************************
 		// *******************************************************************************
 		if (this.property.collapsed) {
-			f = new Font(this.font.getFamily(), this.font.getStyle(),
-					(int) (fontsize * 0.8 * this.view.zoom));
+			f = new Font(this.font.getFamily(), this.font.getStyle(), (int) (fontsize * 0.8 * this.view.zoom));
 			g.setStroke(new BasicStroke(1));
 			cnt = getLocation().add(getSizeInternal()).getPoint();
 			Vec dim = new Vec(10, 10).scale(this.view.zoom);
+			
 			g.setPaint(Color.white);
 			g.fillRect(cnt.x, cnt.y, dim.getIntX(), dim.getIntY());
 			g.setPaint(Color.blue);
 			g.drawRect(cnt.x, cnt.y, dim.getIntX(), dim.getIntY());
-			g.drawLine(cnt.x + dim.getIntX() / 2, cnt.y
-					+ (int) (this.view.zoom * 2), cnt.x + dim.getIntX() / 2,
-					cnt.y + dim.getIntY() - (int) (this.view.zoom * 2));
-			g.drawLine(cnt.x + (int) (this.view.zoom * 2),
-					cnt.y + dim.getIntY() / 2, cnt.x + dim.getIntX()
-							- (int) (this.view.zoom * 2), cnt.y + dim.getIntY()
-							/ 2);
+			g.drawLine(cnt.x + dim.getIntX() / 2, cnt.y + (int) (this.view.zoom * 2), cnt.x + dim.getIntX() / 2, cnt.y + dim.getIntY() - (int) (this.view.zoom * 2));
+			g.drawLine(cnt.x + (int) (this.view.zoom * 2), cnt.y + dim.getIntY() / 2, cnt.x + dim.getIntX() - (int) (this.view.zoom * 2), cnt.y + dim.getIntY() / 2);
+		}
+		
+		// *******************************************************************************
+		// Lookup table override *********************************************************
+		// *******************************************************************************
+		if (this.isTaskType() && this.isOverrided()) {
+			
+			cnt = getLocation().getPoint();
+			g.drawImage(
+					LINK_IMAGE, 
+					cnt.x + (int)getSize().x - (int)(16.0 * this.view.zoom) / 2, 
+					cnt.y - (int)(16.0 * this.view.zoom) / 2, 
+					(int)(16.0 * this.view.zoom), 
+					(int)(16.0 * this.view.zoom), 
+					null);
 		}
 		
 		gp.restore();
 	}
 
-
 	// *******************************************************************************
 	// Getters & setters *************************************************************
 	// *******************************************************************************
+	
+	/**
+	 * Is task overrided by lookup table record
+	 * @return
+	 */
+	public boolean isOverrided() {
+		return this._lookupOverride != null;
+	}
+	
+	/**
+	 * Override task by lookup table record
+	 * @param lookupRecord
+	 */
+	public void overrideTask(LookupTableRecord lookupRecord) {
+		this._lookupOverride = lookupRecord;
+	}
+	
+	public String getOverridePlanFilename() {
+		return this._lookupOverride.getFileName();
+	}
 	
 	Vec getCenterInternal() {
 		return getLocation().add(getSizeInternal().scale(0.5));
