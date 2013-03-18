@@ -22,7 +22,7 @@ import rospy, sys #,os.path
 from pylab import *
 # from numpy import * # no need after line above
 from C42_ZMPWalk.msg import walking_trajectory, Position, Orientation, Pos_and_Ori  #traj
-from std_msgs.msg import Int32
+from std_msgs.msg import Int32, Float64
 from preview_controller import ZMP_Preview_Controller
 from swing_trajectory import *
 from zmp_profiles import *
@@ -30,6 +30,8 @@ from preview_buffer import ZMP_Preview_Buffer
 import tf
 import copy
 from robot_state import Robot_State
+from sensor_msgs.msg import Imu #Odometry
+from hip_z_orientation_correction import *
 
 class namespace: pass
 ns = namespace()
@@ -41,13 +43,27 @@ def listn_to_command(zmp_walk_command):
     rospy.loginfo("time:")
     rospy.loginfo(rospy.get_time())
 
+def listn_to_orientation_command(orientation_command): 
+    ns.Des_Orientation = (orientation_command.data)*math.pi/180.0
+    rospy.loginfo("recieved orientation command: orientation = %f" % (ns.Des_Orientation) )
+    rospy.loginfo("time:")
+    rospy.loginfo(rospy.get_time())
 # setup node:
 rospy.init_node('zmp_movement_plan')  #('ZMP_node')
 rospy.loginfo("started ZMP node")
 
 pub_zmp = rospy.Publisher('zmp_out', walking_trajectory ) #traj)
 sub_command = rospy.Subscriber('zmp_walk_command' , Int32 , listn_to_command)
+sub_orientation_command = rospy.Subscriber('orientation_command' , Float64 , listn_to_orientation_command)
+
 ns.listener = tf.TransformListener()
+
+# init hip_z_orientation_controller
+def get_imu(msg):  #listen to /atlas/imu/pose/pose/orientation
+    ns.imu_orientation = msg.orientation
+imu_ori_z_sub = rospy.Subscriber('/atlas/imu', Imu, get_imu)  #Odometry, get_imu) 
+
+orientation_correction = Orientation_Control()
 
 # sampling time:
 rate = 100  # [Hz]
@@ -59,14 +75,15 @@ out = walking_trajectory () #traj() # output message of topic 'zmp_out'
 #zc = 0#0.8455 # [m] COM height
 
 # Walking Parameters 
-step_length = 0.00001 # 0.03 #0.01  # [m]
+step_length = 0.03 #0.01  # [m]
 step_width  = 0.178  # 0.178  # [m]
-zmp_width   = 0.120  #0.02 # #0.168 #when lift foot 0.130, feet on ground 0.110
+zmp_width   = 0.173 #0.120  #0.02 # #0.168 #when lift foot 0.130, feet on ground 0.110
 step_time   = 1 #1   # [sec]
-bend_knees  = 0.12 #0.18 #0.04  # [m]    
-step_height = 0.00001 #0.05 #0.03 #0.05  # [m] 
-trans_ratio_of_step = 0.9 #1.0 #0.8 # units fraction: 0-1.0 ; fraction of step time to be used for transition. 1.0 = all of step time is transition 
+bend_knees  = 0.04 #0.12 #0.18 #0.04  # [m]    
+step_height = 0.03 #0.05 #0.03 #0.05  # [m] 
+trans_ratio_of_step = 1.0 #0.9 #1.0 #0.8 # units fraction: 0-1.0 ; fraction of step time to be used for transition. 1.0 = all of step time is transition 
 trans_slope_steepens_factor = 8/step_time #2 # 1 transition Sigmoid slope (a)
+ns.Des_Orientation = 0#-math.pi/2
 # Robot State object:
 rs = Robot_State('Robot State')
 pelvis_des = rs.place_in_Ori( 0, 0, 0 ) # pelvis desired rotation (0,0,0)<=>stand up straight
@@ -106,6 +123,13 @@ while not rospy.is_shutdown():
 
   # init output message (before starting to walk)
   [stance_hip_0, swing_y_sign, swing_hip_dy]=rs.Get_foot_coord_params() # assumes start walking in step phase 1 (set in rs init)
+
+  out.step_length = step_length
+  out.step_width = step_width
+  out.step_height = step_height
+  out.zmp_width = zmp_width
+  out.step_time = step_time
+  out.bend_knees = bend_knees
 
   out.stance_hip = copy.copy( stance_hip_0 )
   out.pelvis_d = pelvis_des
@@ -202,6 +226,10 @@ while not rospy.is_shutdown():
   #   Update Robot State and produce foot trajectory    #
   #                                                     #
   #######################################################
+      k_total = step_time*(1/dt)
+      k_start_swing =  floor(k_total/3)
+      k_stop_swing =   floor(2*k_total/3)
+
       # Update Robot State: getting joints locations using tf to process and store them in Robot State object 
       rs.getRobot_State( listener = ns.listener )                                                                         # moved to here by Israel 24.2 - to be used by previous lines
 
@@ -210,10 +238,10 @@ while not rospy.is_shutdown():
 
       robot_foot_state = copy.copy(rs.swing_foot_at_start_of_step_phase)  #copy.copy(rs.swing_foot)
 
-      [swing_k, lifting_swing_foot] = swing_traj.Get_swing_foot_traj(k, step_time, robot_foot_state, step_length,swing_foot_y, step_height,dt,pre_step,first_step,full_step,last_step)
-      
+      [swing_k, lifting_swing_foot] = swing_traj.Get_swing_foot_traj(k, step_time, robot_foot_state, step_length,swing_foot_y, step_height,dt,pre_step,first_step,full_step,last_step,k_total,k_start_swing,k_stop_swing)
       rs.Set_step_phase( foot_lift = lifting_swing_foot )
 
+      hip_z_rotation_correction = orientation_correction.hip_z_orientation_correction(ns.Des_Orientation,ns.imu_orientation,k,dt,rs.Get_step_phase(),k_total,k_start_swing,k_stop_swing)
 
   #######################################################
   #                                                     #
@@ -221,6 +249,13 @@ while not rospy.is_shutdown():
   #                                                     #
   #######################################################
      
+      out.step_length = step_length
+      out.step_width = step_width
+      out.step_height = step_height
+      out.zmp_width = zmp_width
+      out.step_time = step_time
+      out.bend_knees = bend_knees
+
       out.swing_foot = copy.copy(swing_k)                              #added by Israel 24.2
       out.swing_foot.y = copy.copy(swing_foot_y)                                         
 
@@ -244,6 +279,8 @@ while not rospy.is_shutdown():
       out.stance_hip_m = rs.stance_hip # last sampled value
       out.swing_hip_m = rs.swing_hip # last sampled value
       out.swing_foot_m = rs.swing_foot # filtered value
+
+      out.hip_z_orientation = hip_z_rotation_correction
 
       # rospy.loginfo("zmp_main go=1, stance foot: COMy = %f, out.hip_y = %f, stance_hip_0.y = %f, l_stance_hip_0 = %f " \
       #          % (COMy, out.stance_hip.y, stance_hip_0.y, rs.Get_l_stance_hip_0() ) )

@@ -35,11 +35,9 @@ class Swing_Trajectory:
 
 
 
-    def Get_swing_foot_traj(self, k, step_time, robot_foot_state, step_length,step_width, step_height,dt,pre_step,first_step,full_step,last_step):
+    def Get_swing_foot_traj(self, k, step_time, robot_foot_state, step_length,step_width, step_height,dt,pre_step,first_step,full_step,last_step,k_total,k_start_swing,k_stop_swing):
     
-        k_total = step_time*(1/dt)
-        k_start_swing =  floor(k_total/3)
-        k_stop_swing =   floor(2*k_total/3)
+
         
         res_swing_k = vector()
 

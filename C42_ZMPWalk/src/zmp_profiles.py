@@ -31,6 +31,44 @@ import rospy, sys, os.path
 from pylab import *
 
 # min jerk functions - added by Israel 24.2
+
+def  Min_jerk_by_k(x0,xf, number_of_samples,s): #, sample_time):
+    # x0,xf - are the starting and ending point position of the transition, accordingly
+   # rospy.loginfo("min_jerk_value=%d" % s)
+    # s is an index between 0 and number_of_samples-1 
+    s1 = s/(number_of_samples-1) # s/max(s)
+    min_jerk_value = x0 + (x0 -xf)*( 15*(s1)**4 - 6*(s1)**5 -10*(s1)**3 )
+                                                                    #  rospy.loginfo("min_jerk_value=%f" % min_jerk_value)
+    return (min_jerk_value)
+
+def Min_jerk_via_point_by_k(x0,xm,xf, number_of_samples, sample_time, s):
+    # x0,xm,xf - are the starting middle and ending point position of the transition, accordingly
+    # s is an index between 0 and number_of_samples-1 
+  #  rospy.loginfo("min_jerk_value=%d" % s)
+    N = number_of_samples
+    dt = sample_time
+    tf = (N-1)*dt
+    tau1 = 0.5
+    
+    tau = s*dt/tf
+
+    A1 = 1.0/(tf**5 * tau1**2 * (1.0 - tau1)**5 )
+    A2 = 1.0/(tf**5 * tau1**5 * (1.0 - tau1)**5 )
+
+    C1 = A1*( (xf-x0)*(300.0*tau1**5 - 1200.0*tau1**4 + 1600.0*tau1**3) + tau1**2*(-720.0*xf + 120.0*xm + 600.0*x0) + (x0-xm)*(300.0*tau1-200.0) )
+    pi1 = A2*( (xf-x0)*(120.0*tau1**5 - 300.0*tau1**4 + 200.0*tau1**3)  -20.0*(xm-x0) )
+    
+    if (tau <= tau1 ):
+        T1 = tau
+        min_jerk_value = (tf**5)/720.0*(pi1*(tau1**4*(15.0*T1**4-30.0*T1**3)+tau1**3*(80.0*T1**3-30.0*T1**4)-60.0*T1**3*tau1**2+30.0*T1**4*tau1-6*T1**5)+C1*(15.0*T1**4-10.0*T1**3-6.0*T1**5)) + x0
+
+    else:
+        T2 = tau
+        min_jerk_value = (tf**5)/720.0*(pi1*(tau1**4*(15.0*T2**4-30.0*T2**3+30.0*T2-15.0)+tau1**3*(-30.0*T2**4+ 80.0*T2**3-60.0*T2**2+10.0))+C1*(-6.0*T2**5+15.0*T2**4-10.0*T2**3 + 1.0)) + xf
+
+    return (min_jerk_value)
+    
+# min jerk functions - added by Israel 24.2
 def  transition_Min_jerk(x0,xf, number_of_samples): #, sample_time):
     # x0,xf - are the starting and ending point position of the transition, accordingly
     samples_array = linspace(0,number_of_samples-1, number_of_samples) #- floor(float(number_of_samples)/2)
