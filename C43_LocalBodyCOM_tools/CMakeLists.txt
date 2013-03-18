@@ -19,16 +19,15 @@ set(LIBRARY_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/lib)
 #uncomment if you have defined messages
 rosbuild_genmsg()
 #uncomment if you have defined services
-#rosbuild_gensrv()
+rosbuild_gensrv()
 
 #common commands for building c++ executables and libraries
-#rosbuild_add_library(${PROJECT_NAME} src/TestStability.cpp src/Kinematics.cpp)
-rosbuild_add_library(${PROJECT_NAME} src/Kinematics.cpp)
+rosbuild_add_library(${PROJECT_NAME} src/TestStability.cpp src/Kinematics.cpp)
 
 #target_link_libraries(${PROJECT_NAME} another_library)
 #rosbuild_add_boost_directories()
 #rosbuild_link_boost(${PROJECT_NAME} thread)
 
-rosbuild_add_executable(computeCOM src/computeCOM.cpp)
+rosbuild_add_executable(test_stability src/test_stability.cpp)
 # rosbuild_add_executable(test_pub_rate src/Check_pub_rate.cpp)
-target_link_libraries(computeCOM ${PROJECT_NAME})
+target_link_libraries(test_stability ${PROJECT_NAME})

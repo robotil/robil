@@ -1,7 +1,7 @@
 <package>
-  <description brief="Kinematics library for humanoid robots based on KDL: CoM">
+  <description brief="Kinematics library for humanoid robots based on KDL: CoM and static stability">
 
-     A small kinematics library for humanoid robots based on KDL. The main components are (recursive) center of mass.
+     A small kinematics library for humanoid robots based on KDL. The main components are (recursive) center of mass, (static) stability, and support polygon computations.
 
   </description>
   <author>Armin Hornung</author>
@@ -13,8 +13,10 @@
   <depend package="kdl_parser"/>
 
   <depend package="tf_conversions"/> 
+  <depend package="geometric_shapes"/>
   <depend package="sensor_msgs"/>
   <depend package="robot_state_publisher"/>
+  <depend package="visualization_msgs"/>
   <depend package="pcl" />
   
   <rosdep name="assimp" />
