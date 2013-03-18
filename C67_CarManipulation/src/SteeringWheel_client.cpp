@@ -29,9 +29,11 @@ int main (int argc, char **argv)
 	C67_CarManipulation::SteeringWheelGoal goal;
 	goal.angle = pi/4;
 	ac.sendGoal(goal);
+	ros::Duration(1).sleep();
 
 	//wait for the action to return
-	bool finished_before_timeout = ac.waitForResult(ros::Duration(15.0));
+	//std::cout << ac.getState().toString() << std::endl;
+	bool finished_before_timeout = ac.waitForResult(ros::Duration(7.0));
 
 	if (finished_before_timeout)
 	{
@@ -39,7 +41,13 @@ int main (int argc, char **argv)
 	ROS_INFO("Action finished: %s",state.toString().c_str());
 	}
 	else
-	ROS_INFO("Action did not finish before the time out.");
+	{
+		ROS_INFO("Action did not finish before the time out.");
+
+	}
+
+	//ac.cancelGoal();
+
 
 	//exit
 	return 0;
