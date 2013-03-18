@@ -18,13 +18,13 @@
 ####                                                                       ##
 #############################################################################
 
-import roslib; roslib.load_manifest('leg_ik')
+import roslib; roslib.load_manifest('C42_Leg_IK')
 from drc2_tools import *
 # from leg_ik.srv import *
 # from leg_ik.msg import *
 from std_msgs.msg import Float64
 from sensor_msgs.msg import *
-from zmp_walk.msg import walking_trajectory
+from C42_ZMPWalk.msg import walking_trajectory
 import rospy, math, sys
 from Impedance_Control import Joint_Stiffness_Controller
 from pylab import *
@@ -147,7 +147,7 @@ def LEG_IK():
     ns.RL = robot_listner()
     rospy.loginfo( "LEG_IK node is ready" )
     rospy.loginfo( "waiting 1 seconds for robot to initiate" )
-    yaml_pth = os.path.join(roslib.packages.get_pkg_dir('DRCSim2_tools'),'calibrated_controller_drc2_yuval.yaml')
+    yaml_pth = os.path.join(roslib.packages.get_pkg_dir('C42_DRCSim2_tools'),'calibrated_controller_drc2_yuval.yaml')
     ns.JC.set_default_gains_from_yaml(yaml_pth)
     ns.JC.reset_gains()
     sub1=rospy.Subscriber("zmp_out", walking_trajectory, get_from_zmp) # traj, get_from_zmp)

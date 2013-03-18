@@ -15,7 +15,7 @@
 ####                                                                         ##
 ###############################################################################
 
-import roslib; roslib.load_manifest('zmp_walk')
+import roslib; roslib.load_manifest('C42_ZMPWalk')
 import rospy, sys, os.path
 from pylab import *
 

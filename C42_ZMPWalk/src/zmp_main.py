@@ -17,11 +17,11 @@
 ####	                                                                  	       ##
 ###################################################################################			
 
-import roslib; roslib.load_manifest('zmp_walk') #roslib.load_manifest('leg_ik')
+import roslib; roslib.load_manifest('C42_ZMPWalk') #roslib.load_manifest('leg_ik')
 import rospy, sys #,os.path
 from pylab import *
 # from numpy import * # no need after line above
-from zmp_walk.msg import walking_trajectory, Position, Orientation, Pos_and_Ori  #traj
+from C42_ZMPWalk.msg import walking_trajectory, Position, Orientation, Pos_and_Ori  #traj
 from std_msgs.msg import Int32
 from preview_controller import ZMP_Preview_Controller
 from swing_trajectory import *

@@ -20,7 +20,7 @@
 ####                                                                         ##
 ###############################################################################
 
-import roslib; roslib.load_manifest('leg_ik')
+import roslib; roslib.load_manifest('C42_Leg_IK')
 import rospy
 
 
