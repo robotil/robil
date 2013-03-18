@@ -251,6 +251,12 @@ data=path - C11 it retrieves the path and sends it back to the operator</algorit
         <effects/>
         <algorithm/>
     </task>
+    <task name="OpenSpigot">
+        <conditions/>
+        <constraints/>
+        <effects/>
+        <algorithm/>
+    </task>
     <task name="ReturnToExitPosture">
         <conditions/>
         <constraints/>
