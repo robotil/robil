@@ -8,7 +8,7 @@ PKILLS=$CURR_WD'/.skill4_test1.txt'
 
 #roslaunch atlas_utils atlas_drc_vehicle_fire_hose.launch &
 source /usr/share/drcsim/setup.sh
-export ROS_PACKAGE_PATH=$ROS_PACKAGE_PATH:/var/lib/jenkins/
+#export ROS_PACKAGE_PATH=$ROS_PACKAGE_PATH:/var/lib/jenkins/
 #export ROS_PACKAGE_PATH=$ROS_PACKAGE_PATH:/home/${USER}/
 #roslaunch C51_CarOperation C51_completeLuanch.launch &
 rosrun C51_CarOperation DRC_Vehicle_Init_server.py &
