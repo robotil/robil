@@ -153,7 +153,7 @@ def LEG_IK():
     sub1=rospy.Subscriber("zmp_out", walking_trajectory, get_from_zmp) # traj, get_from_zmp)
 
     back_lbz = 0  
-    back_mby = 0.06
+    back_mby = 0#0.03#0.08# 0.06
     back_ubx = 0
     neck_ay = 0
     l_leg_uhz = 0 
