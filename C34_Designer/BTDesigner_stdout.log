@@ -1,0 +1,46 @@
+Redirecting all output to /home/ariy/robil/C34_Designer/BTDesigner_stdout.log
+[10:56:45][org.eclipse.jdt.internal.jarinjarloader.JarRsrcLoader.main:58][DEBUG] Load properties from /home/ariy/robil/C34_Designer/BTDesigner.xml
+[10:56:45][org.eclipse.jdt.internal.jarinjarloader.JarRsrcLoader.main:58][DEBUG] Properties :
+[10:56:45][org.eclipse.jdt.internal.jarinjarloader.JarRsrcLoader.main:58][DEBUG]    log_disabled_tags <- 
+[10:56:45][org.eclipse.jdt.internal.jarinjarloader.JarRsrcLoader.main:58][DEBUG]    log_print_ros_output <- true
+[10:56:45][org.eclipse.jdt.internal.jarinjarloader.JarRsrcLoader.main:58][DEBUG]    path_to_images <- ./images
+[10:56:45][org.eclipse.jdt.internal.jarinjarloader.JarRsrcLoader.main:58][DEBUG]    path_to_lookup <- ./plans/lookup.xml
+[10:56:45][org.eclipse.jdt.internal.jarinjarloader.JarRsrcLoader.main:58][DEBUG]    test_result <- true
+[10:56:45][org.eclipse.jdt.internal.jarinjarloader.JarRsrcLoader.main:58][DEBUG]    log_ros_progress_print_level <- 10
+[10:56:45][org.eclipse.jdt.internal.jarinjarloader.JarRsrcLoader.main:58][DEBUG]    path_to_address <- ./plans/TaskList.xml
+[10:56:45][org.eclipse.jdt.internal.jarinjarloader.JarRsrcLoader.main:58][DEBUG]    path_to_plans_on_executer <- plans/{FILENAME}
+[10:56:45][org.eclipse.jdt.internal.jarinjarloader.JarRsrcLoader.main:58][DEBUG]    path_to_undo <- ./.undo
+[10:56:45][org.eclipse.jdt.internal.jarinjarloader.JarRsrcLoader.main:58][DEBUG]    enableLinkConnection <- true
+[10:56:45][org.eclipse.jdt.internal.jarinjarloader.JarRsrcLoader.main:58][DEBUG]    executer_service <- /executer
+[10:56:45][org.eclipse.jdt.internal.jarinjarloader.JarRsrcLoader.main:58][DEBUG]    log_print_ros_commands <- true
+[10:56:45][org.eclipse.jdt.internal.jarinjarloader.JarRsrcLoader.main:58][DEBUG]    log_preview_lines_limit <- 500
+[10:56:45][org.eclipse.jdt.internal.jarinjarloader.JarRsrcLoader.main:58][DEBUG]    path_to_plans <- ./plans
+[10:56:45][org.eclipse.jdt.internal.jarinjarloader.JarRsrcLoader.main:58][DEBUG]    enableTaskIdRegeneration <- false
+[10:56:45][org.eclipse.jdt.internal.jarinjarloader.JarRsrcLoader.main:58][DEBUG]    log_print_running_tasks_id <- true
+[10:56:45][org.eclipse.jdt.internal.jarinjarloader.JarRsrcLoader.main:58][DEBUG]    test_time <- 0
+[10:56:45][org.eclipse.jdt.internal.jarinjarloader.JarRsrcLoader.main:58][DEBUG]    path_to_description <- ./plans/TaskDescriptions.xml
+[10:56:45][java.lang.Thread.run:679][STACKSTREAM] Try to connect to ROS topic: /executer/stack_stream
+[10:56:45][java.lang.Thread.run:679][STOPSTREAM] Try to connect to ROS topic: /executer/stop_stream
+[10:56:45][java.lang.Thread.run:679][ROSPIPE]    send message to ros.
+[10:56:45][java.lang.Thread.run:679][ROSPIPE]    send message to ros.
+[10:56:45][java.lang.Thread.run:679][DEBUG] Ros command (1) 
+[10:56:45][java.lang.Thread.run:679][DEBUG] Ros command (2) 
+[10:56:45][java.lang.Thread.run:679][ROSPIPE] Arg: rostopic ! echo ! /executer/stop_stream ! 
+[10:56:45][java.lang.Thread.run:679][ROSPIPE] Arg: rostopic ! echo ! /executer/stack_stream ! 
+[10:56:45][java.lang.Thread.run:679][ROSPIPE]    listen output stream from ros.
+[10:56:45][java.lang.Thread.run:679][ROSPIPE]    listen output stream from ros.
+[10:56:46][org.eclipse.jdt.internal.jarinjarloader.JarRsrcLoader.main:58][DEBUG] BTDesigner loaded
+[10:56:52][java.awt.EventDispatchThread.run:138][DEBUG] Plan has a descriptions attribute = ./plans/TaskDescriptions.xml
+[10:56:52][java.awt.EventDispatchThread.run:138][DEBUG] Task descriptions loaded from ./plans/TaskDescriptions.xml
+[10:57:15][java.awt.EventDispatchThread.run:138][DEBUG] Plan has a descriptions attribute = ./plans/TaskDescriptions.xml
+[10:57:15][java.awt.EventDispatchThread.run:138][DEBUG] Task descriptions loaded from ./plans/TaskDescriptions.xml
+[11:01:52][java.awt.EventDispatchThread.run:138][DEBUG] Plan has a descriptions attribute = ./plans/TaskDescriptions.xml
+[11:01:52][java.awt.EventDispatchThread.run:138][DEBUG] Task descriptions loaded from ./plans/TaskDescriptions.xml
+[11:02:14][java.awt.EventDispatchThread.run:138][DEBUG] Plan has a descriptions attribute = ./plans/TaskDescriptions.xml
+[11:02:14][java.awt.EventDispatchThread.run:138][DEBUG] Task descriptions loaded from ./plans/TaskDescriptions.xml
+[11:57:41][java.awt.EventDispatchThread.run:138][DEBUG] Plan has a descriptions attribute = ./plans/TaskDescriptions.xml
+[11:57:41][java.awt.EventDispatchThread.run:138][DEBUG] Task descriptions loaded from ./plans/TaskDescriptions.xml
+[11:57:59][java.awt.EventDispatchThread.run:138][DEBUG] Plan has a descriptions attribute = ./plans/TaskDescriptions.xml
+[11:57:59][java.awt.EventDispatchThread.run:138][DEBUG] Task descriptions loaded from ./plans/TaskDescriptions.xml
+[11:58:25][java.awt.EventDispatchThread.run:138][DEBUG] Plan has a descriptions attribute = ./plans/TaskDescriptions.xml
+[11:58:25][java.awt.EventDispatchThread.run:138][DEBUG] Task descriptions loaded from ./plans/TaskDescriptions.xml
