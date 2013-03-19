@@ -132,12 +132,14 @@ void ImageDraw::OnExecutionStatusUpdate(int status)
             ERunStatus = RUNNING_ENUM;
             ui.btnCreate->setEnabled(false);
             SltOnCreateClick(false);
+            ui.mapWidget->SetEditable(false);
           }
         else if (1 == status)
           {
             ui.btnPlayPause->setChecked(false);
             ERunStatus = PAUSED_ENUM;
             ui.btnCreate->setEnabled(true);
+            ui.mapWidget->SetEditable(true);
           }
         else if( 2 == status)
           {
@@ -145,6 +147,7 @@ void ImageDraw::OnExecutionStatusUpdate(int status)
             ERunStatus = STOPPED_ENUM;
             ui.btnCreate->setEnabled(false);
             SltOnCreateClick(false);
+            ui.mapWidget->SetEditable(false);
           }
 }
 
@@ -260,6 +263,7 @@ void ImageDraw::SltOnPlayPauseClick(bool checked)
                           ERunStatus = RUNNING_ENUM;
                           ui.btnCreate->setEnabled(false);
                           SltOnCreateClick(false);
+                          ui.mapWidget->SetEditable(false);
                   }
                 }
 	        else
@@ -275,6 +279,7 @@ void ImageDraw::SltOnPlayPauseClick(bool checked)
 	    C11node.Pause();
 	    ERunStatus = PAUSED_ENUM;
 	    ui.btnCreate->setEnabled(true);
+	    ui.mapWidget->SetEditable(true);
         }
 }
 
@@ -302,4 +307,9 @@ void ImageDraw::SltOnPathClick(bool checked)
 	{
 		ui.mapWidget->setMode(E_PATH_MODE);
 	}
+}
+
+void ImageDraw::SltOnPathUpdate(std::vector<StructPoint> points)
+{
+	C11node.SendPathUpdate(points);
 }

@@ -9,13 +9,6 @@
 #include "structs.h"
 #include "ui_imagedraw.h"
 
-typedef enum
-{
-  RUNNING_ENUM=0,
-  PAUSED_ENUM,
-  STOPPED_ENUM
-}EnumRunStatus;
-
 class ImageDraw : public QMainWindow, public IC11_Node_Subscriber
 {
 	Q_OBJECT
@@ -28,6 +21,8 @@ public slots:
 	void SltOnPlayPauseClick(bool);
 	void SltOnCreateClick(bool);
 	void SltOnPathClick(bool);
+
+	void SltOnPathUpdate(std::vector<StructPoint> points);
 
 signals:
 	void SigOnNewImg(QImage img);

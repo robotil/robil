@@ -387,3 +387,21 @@ void CRouteItem::updatePolygonPoints(QPointF p,QPointF pNew)
 			points[i] = pNew;
 	}
 }
+
+QPointF CRouteItem::GetPoint(int index)
+{
+	if(index < numOfPoints)
+	{
+		return points[index];
+	}
+	else
+	{
+		QPointF p(0,0);
+		return p;
+	}
+}
+
+int CRouteItem::GetNumOfPoints()
+{
+	return numOfPoints;
+}

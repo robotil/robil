@@ -16,6 +16,7 @@
 #include "C10_Common/pause_mission.h"
 #include "C10_Common/resume_mission.h"
 #include "C10_Common/execution_status_change.h"
+#include "C10_Common/path_update.h"
 #include "C10_Common/push_img.h"
 #include "C10_Common/push_occupancy_grid.h"
 #include "C10_Common/push_path.h"
@@ -64,6 +65,8 @@ public:
           void Resume();
           void Pause();
 
+          void SendPathUpdate(std::vector<StructPoint> points);
+
           static void viewImage(const sensor_msgs::ImageConstPtr& msg);
 //          static void StatusMessageCallback(const C11_Agent::C34C11_STTConstPtr);
 
@@ -88,6 +91,7 @@ private:
   ros::ServiceClient LoadMissionClient;// = _node.serviceClient<C11_Agent::mission_selection>("C11/mission_selection");
   ros::ServiceClient ResumeMissionClient;
   ros::ServiceClient PauseMissionClient;
+  ros::ServiceClient PathUpdateClient;
   image_transport::ImageTransport* it_;
   image_transport::Subscriber panoramic_image;
   ros::Subscriber status_subscriber;

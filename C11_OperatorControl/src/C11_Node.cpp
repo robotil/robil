@@ -63,6 +63,7 @@ bool C11_Node::init() {
 		LoadMissionClient = nh_->serviceClient<C10_Common::mission_selection>("MissionSelection");
 		ResumeMissionClient = nh_->serviceClient<C10_Common::resume_mission>("ResumeMission");
 		PauseMissionClient = nh_->serviceClient<C10_Common::pause_mission>("PauseMission");
+		PathUpdateClient = nh_->serviceClient<C10_Common::path_update>("PathUpdate");
 
 
         start();
@@ -236,6 +237,11 @@ void C11_Node::Pause()
             ROS_ERROR("Failed to call service C11_Agent::pause_mission");
             pIC11_Node_Subscriber->OnExecutionStatusUpdate(0);
         }
+}
+
+void C11_Node::SendPathUpdate(std::vector<StructPoint> points)
+{
+
 }
 
 /*int main(int argc, char **argv)
