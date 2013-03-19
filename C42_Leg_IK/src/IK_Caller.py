@@ -37,8 +37,15 @@ class Nasmpace: pass
 ns = Nasmpace()
 #ns.LegAng = LegIkResponse()
 
-PSC_right_swing_leg = Position_Stiffness_Controller('R_Swing Leg', 50000, True, False) # name, stiffness, triggered_controller, bypass_input2output [True/False]
+PSC_right_swing_leg = Position_Stiffness_Controller('R_Swing Leg', 30000, True, False) # name, stiffness, triggered_controller, bypass_input2output [True/False]
 PSC_left_swing_leg = Position_Stiffness_Controller('L_Swing Leg', 30000, True, False) # name, stiffness, triggered_controller, bypass_input2output [True/False]
+
+JSC_r_leg_mhx = Joint_Stiffness_Controller('r_leg_mhx', 8000, 0.05) # joint name, stiffness, update_period [sec]
+JSC_l_leg_mhx = Joint_Stiffness_Controller('l_leg_mhx', 8000, 0.05) # joint name, stiffness, update_period [sec]
+JSC_r_leg_lax = Joint_Stiffness_Controller('r_leg_lax', 5000, 0.05) # joint name, stiffness, update_period [sec]
+JSC_l_leg_lax = Joint_Stiffness_Controller('l_leg_lax', 5000, 0.05) # joint name, stiffness, update_period [sec]
+JSC_r_leg_uay = Joint_Stiffness_Controller('r_leg_uay', 1000, 0.05) # joint name, stiffness, update_period [sec]
+JSC_l_leg_uay = Joint_Stiffness_Controller('l_leg_uay', 1000, 0.05) # joint name, stiffness, update_period [sec]
 
 # swing_leg_ik = rospy.ServiceProxy('swing_leg_ik', LegIk)
 # stance_leg_ik = rospy.ServiceProxy('stance_leg_ik', LegIk)
@@ -95,46 +102,87 @@ def get_from_zmp(msg):
         rospy.loginfo('IKException: %s leg is out of reach, req pos: %f ,%f, %f',exc.foot,exc.requested_pos[0],exc.requested_pos[1],exc.requested_pos[2])
         return
 
-    ns.JC.set_pos('l_leg_lax', left_leg_angles[4] ) #JSC_l_leg_lax.getCMD(ns.LegAng.ang.lax) )
-    ns.JC.set_pos('l_leg_uay', left_leg_angles[5] )
-    ns.JC.set_pos('l_leg_kny', left_leg_angles[3] )
-    ns.JC.set_pos('l_leg_uhz', left_leg_angles[2] )
-    ns.JC.set_pos('l_leg_lhy', left_leg_angles[1] )
-    ns.JC.set_pos('l_leg_mhx', left_leg_angles[0] ) #JSC_l_leg_mhx.getCMD(ns.LegAng.ang.mhx) )
+###############################################3
 
-    ns.JC.set_pos('r_leg_lax', right_leg_angles[4] ) #JSC_r_leg_lax.getCMD(ns.LegAng.ang.lax + lax_stance) )
-    ns.JC.set_pos('r_leg_uay', right_leg_angles[5] )
-    ns.JC.set_pos('r_leg_kny', right_leg_angles[3] )
-    ns.JC.set_pos('r_leg_uhz', right_leg_angles[2] )
-    ns.JC.set_pos('r_leg_lhy', right_leg_angles[1] )
-    ns.JC.set_pos('r_leg_mhx', right_leg_angles[0] ) #JJSC_r_leg_mhx.getCMD(ns.LegAng.ang.mhx + mhx_stance) )
+
+
+    raise_foot_tip = 0.6
+
+    l_leg_lax =  JSC_l_leg_lax.getCMD( left_leg_angles[4] ) 
+    if ( msg.step_phase == 4 ): # left leg is swing
+        l_leg_uay = JSC_l_leg_uay.getCMD( left_leg_angles[5] - raise_foot_tip*msg.swing_foot.z) 
+    else:
+        l_leg_uay = JSC_l_leg_uay.getCMD( left_leg_angles[5] ) 
+    l_leg_kny = left_leg_angles[3]
+    l_leg_lhy = left_leg_angles[1] 
+    l_leg_mhx = left_leg_angles[0]
+
+    r_leg_lax = JSC_r_leg_lax.getCMD( right_leg_angles[4] ) 
+    if ( msg.step_phase == 2 ): # right leg is swing
+        r_leg_uay = JSC_r_leg_uay.getCMD( right_leg_angles[5] - raise_foot_tip*msg.swing_foot.z) 
+    else:
+        r_leg_uay =  JSC_r_leg_uay.getCMD( right_leg_angles[5] ) 
+    r_leg_kny = right_leg_angles[3] 
+    r_leg_lhy = right_leg_angles[1] 
+    r_leg_mhx = right_leg_angles[0]  
+        
+    back_mby =  0.1 
+    back_ubx =  0.0 
+    back_lbz =  0.00 
+
+
+    l_leg_uhz =  msg.hip_z_orientation.left 
+    r_leg_uhz =  msg.hip_z_orientation.right 
+
+
+
+
+    ns.JC.set_pos('l_leg_lax', l_leg_lax )
+    ns.JC.set_pos('l_leg_uay', l_leg_uay )
+    ns.JC.set_pos('l_leg_kny', l_leg_kny )
+    ns.JC.set_pos('l_leg_uhz', l_leg_uhz )
+    ns.JC.set_pos('l_leg_lhy', l_leg_lhy )
+    ns.JC.set_pos('l_leg_mhx', l_leg_mhx ) 
+
+    ns.JC.set_pos('r_leg_lax', r_leg_lax ) 
+    ns.JC.set_pos('r_leg_uay', r_leg_uay )
+    ns.JC.set_pos('r_leg_kny', r_leg_kny )
+    ns.JC.set_pos('r_leg_uhz', r_leg_uhz )
+    ns.JC.set_pos('r_leg_lhy', r_leg_lhy )
+    ns.JC.set_pos('r_leg_mhx', r_leg_mhx ) 
+
+    ns.JC.set_pos('back_mby', back_mby )
+
     ns.JC.send_command()
 
-    #     rospy.loginfo("JC L_leg: lax = %f effort = %f, uay = %f, kny = %f, uhz = %f, lhy = %f, mhx = %f effort = %f, mby = %f, ubx= %f" %  \
-    #                       (ns.LegAng.ang.lax, JSC_l_leg_lax.latest_effort, ns.LegAng.ang.uay, ns.LegAng.ang.kny, ns.LegAng.ang.uhz, \
-    #                        ns.LegAng.ang.lhy, ns.LegAng.ang.mhx, JSC_l_leg_mhx.latest_effort, ns.LegAng.ang.mby, ns.LegAng.ang.ubx))
-
-    
 
 
 ##########################################################################################
 # request from joint_states publisher joints state to update Stiffness Controllers state #
 ##########################################################################################
 
-# def get_joint_states(msg):
+def get_joint_states(msg):
     
-#     if JSC_l_leg_lax.JS_i == -1: # Update joint state indexs if not updated
-#         try:
-#             JSC_l_leg_lax.JS_i = msg.name.index(JSC_l_leg_lax.name)       
-#             JSC_l_leg_mhx.JS_i = msg.name.index(JSC_l_leg_mhx.name)        
-#             JSC_r_leg_lax.JS_i = msg.name.index(JSC_r_leg_lax.name)        
-#             JSC_r_leg_mhx.JS_i = msg.name.index(JSC_r_leg_mhx.name)
-        
-#         except rospy.ROSInterruptException: pass
-#         else:
-#             rospy.loginfo(" update Stiffness Controllers JS_i - successful")
+    if JSC_l_leg_lax.JS_i == -1: # Update joint state indexs if not updated
+        try:
+            JSC_l_leg_lax.JS_i = msg.name.index(JSC_l_leg_lax.name)       
+            JSC_l_leg_mhx.JS_i = msg.name.index(JSC_l_leg_mhx.name)        
+            JSC_r_leg_lax.JS_i = msg.name.index(JSC_r_leg_lax.name)        
+            JSC_r_leg_mhx.JS_i = msg.name.index(JSC_r_leg_mhx.name)
+            JSC_r_leg_uay.JS_i = msg.name.index(JSC_r_leg_uay.name)        
+            JSC_l_leg_uay.JS_i = msg.name.index(JSC_l_leg_uay.name)
 
-#     #rospy.loginfo("Stiffness Controllers joint state updated ")   
+        except rospy.ROSInterruptException: pass
+        else:
+            rospy.loginfo(" update Stiffness Controllers JS_i - successful")
+
+    JSC_l_leg_lax.UpdateState(msg.position[JSC_l_leg_lax.JS_i], msg.velocity[JSC_l_leg_lax.JS_i], msg.effort[JSC_l_leg_lax.JS_i], msg.header.stamp)
+    JSC_l_leg_mhx.UpdateState(msg.position[JSC_l_leg_mhx.JS_i], msg.velocity[JSC_l_leg_mhx.JS_i], msg.effort[JSC_l_leg_mhx.JS_i], msg.header.stamp)
+    JSC_r_leg_lax.UpdateState(msg.position[JSC_r_leg_lax.JS_i], msg.velocity[JSC_r_leg_lax.JS_i], msg.effort[JSC_r_leg_lax.JS_i], msg.header.stamp)
+    JSC_r_leg_mhx.UpdateState(msg.position[JSC_r_leg_mhx.JS_i], msg.velocity[JSC_r_leg_mhx.JS_i], msg.effort[JSC_r_leg_mhx.JS_i], msg.header.stamp) 
+    JSC_r_leg_uay.UpdateState(msg.position[JSC_r_leg_uay.JS_i], msg.velocity[JSC_r_leg_uay.JS_i], msg.effort[JSC_r_leg_uay.JS_i], msg.header.stamp)
+    JSC_l_leg_uay.UpdateState(msg.position[JSC_l_leg_uay.JS_i], msg.velocity[JSC_l_leg_uay.JS_i], msg.effort[JSC_l_leg_uay.JS_i], msg.header.stamp) 
+
 
 #######################################################################################
 #                                 init publishers                                     #
@@ -151,9 +199,12 @@ def LEG_IK():
     ns.JC.set_default_gains_from_yaml(yaml_pth)
     ns.JC.reset_gains()
     sub1=rospy.Subscriber("zmp_out", walking_trajectory, get_from_zmp) # traj, get_from_zmp)
+    sub2=rospy.Subscriber("joint_states", JointState, get_joint_states)
+    r_cont_sub = rospy.Subscriber('/atlas/r_foot_contact', Wrench, get_r_foot_contact)
+    l_cont_sub = rospy.Subscriber('/atlas/l_foot_contact', Wrench, get_l_foot_contact)
 
-    back_lbz = 0  
-    back_mby = 0#0.03#0.08# 0.06
+    back_lbz = 0.0
+    back_mby = 0.0#0.03#0.08# 0.06
     back_ubx = 0
     neck_ay = 0
     l_leg_uhz = 0 

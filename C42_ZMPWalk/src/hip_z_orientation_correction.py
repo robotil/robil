@@ -46,13 +46,13 @@ class Orientation_Control():
          if k==k_start_swing:
             self.Z_corr_avg = self.Z_corr_sum/k_start_swing
             self.Z_corr_sum = 0
-        
-         if abs(self.Z_corr_avg) >= 0.08:
-            del_Z_corr_max = 0.08
-         elif abs(self.Z_corr_avg) >= 0.03:
-            del_Z_corr_max = 0.03
+         const = 0.5
+         if abs(self.Z_corr_avg) >= const*0.06:
+            del_Z_corr_max = const*0.06
+         elif abs(self.Z_corr_avg) >= const*0.03:
+            del_Z_corr_max = const*0.03
          else: 
-            del_Z_corr_max = 0.01
+            del_Z_corr_max = const*0.01
 
          number_of_samples = k_stop_swing - k_start_swing
 
