@@ -206,7 +206,7 @@ class JointCommands_msg_handler(object):
 
 
 class robot_listner(object):
-    def __init__(self):
+    def __init__(self, enable_tf_Listener = False):
         if rospy.get_name() == '/unnamed':
             rospy.init_node('Joint_state_listner',anonymous=True)
 
@@ -215,7 +215,9 @@ class robot_listner(object):
         sub = rospy.Subscriber('/atlas/joint_states',JointState,self._update_state)
         subOd = rospy.Subscriber('/ground_truth_odom',Odometry,self._update_odom)
         
-        self.tfListen = tf.TransformListener()        
+        self.enable_tf_Listener = enable_tf_Listener
+        if self.enable_tf_Listener:
+            self.tfListen = tf.TransformListener()        
 
     def _update_state(self,msg):
         self.joint_state = msg 
@@ -252,15 +254,17 @@ class robot_listner(object):
 		return (y, p, r)
 		
     def get_transform(self,Frame1,Frame2,Time = rospy.Time(0)):
-		try:
-		    #self.tfListen.waitForTransform(Frame1, Frame2, Time, rospy.Duration(1), rospy.Duration(0.01))
-		    (trans,rot) = self.tfListen.lookupTransform(Frame1,Frame2,Time)
-		    return (trans, rot)
-		except tf.Exception as ex:
-		    print ex.args
-		    return
-            
-
+        if self.enable_tf_Listener:
+            try:
+                #self.tfListen.waitForTransform(Frame1, Frame2, Time, rospy.Duration(1), rospy.Duration(0.01))
+                (trans,rot) = self.tfListen.lookupTransform(Frame1,Frame2,Time)
+                return (trans, rot)
+            except tf.Exception as ex:
+                print ex.args
+                return
+        else:
+            (trans,rot) = ([0,0,0], [0,0,0])   
+            return (trans, rot)
 
 
 

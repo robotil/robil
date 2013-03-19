@@ -57,6 +57,7 @@ pub_zmp = rospy.Publisher('zmp_out', walking_trajectory ) #traj)
 sub_command = rospy.Subscriber('zmp_walk_command' , Int32 , listn_to_command)
 sub_orientation_command = rospy.Subscriber('orientation_command' , Float64 , listn_to_orientation_command)
 
+rospy.sleep(1)
 ns.listener = tf.TransformListener()
 
 # init hip_z_orientation_controller
@@ -91,8 +92,8 @@ pelvis_des = rs.place_in_Ori( 0, 0, 0 ) # pelvis desired rotation (0,0,0)<=>stan
 
 max_step_time = 10.0 #[sec] the longest periodstep_length, of step that we plan to do
 
-# moving to intial pose:
-init_pose()
+# moving to intial pose: 
+init_pose()  # !!! need to disable tf listener drc2_tools to prevent clash !!!
 # TODO: make sure robot is static (in start position) and tf is running
 # init Robot State using tf data getting hip to com relative position:
 rs.static_init_with_tf_data(ns.listener,bend_knees)
