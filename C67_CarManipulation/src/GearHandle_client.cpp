@@ -26,6 +26,7 @@ int main (int argc, char **argv)
   C67_CarManipulation::GearHandleGoal goal;
   goal.targetState = 1;
   ac.sendGoal(goal);
+  ros::Duration(1).sleep();
 
   //wait for the action to return
   bool finished_before_timeout = ac.waitForResult(ros::Duration(15.0));
