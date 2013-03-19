@@ -87,6 +87,9 @@ rosbuild_link_boost(SteeringWheel_server thread)
 rosbuild_add_executable(SteeringWheel_client src/SteeringWheel_client.cpp)
 rosbuild_link_boost(SteeringWheel_client thread)
 
+rosbuild_add_executable(SteeringWheel_client2 src/SteeringWheel_client2.cpp)
+rosbuild_link_boost(SteeringWheel_client2 thread)
+
 rosbuild_add_executable(GasPedal_server src/GasPedal_server.cpp)
 rosbuild_link_boost(GasPedal_server thread)
 
