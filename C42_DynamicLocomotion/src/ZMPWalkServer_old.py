@@ -13,12 +13,17 @@ from std_msgs.msg import Float64, Int32
 import geometry_msgs.msg as gm
 
 
-class ZmpWlkServer(object):
+#class ZmpWlkServer(object):
+class ZmpWlkServer(RobilTask):
   # create messages that are used to publish feedback/result
   _feedback = C42_DynamicLocomotion.msg.C42_ZmpWlkFeedback()
   _result   = C42_DynamicLocomotion.msg.C42_ZmpWlkResult()
     
   def __init__(self):
+    print "Init ZmpWalk TaskServer"
+    name = "ZmpWalk"
+    RobilTask.__init__(self, name)
+
     rospy.loginfo('zmp initialized')
     self.walk_pub = rospy.Publisher('zmp_walk_command',Int32)
     self._action_name = "/ZmpWalk"
