@@ -1,4 +1,4 @@
-V0.0.0.121
+V0.0.0.122
 ===========================================================
 C0_RobilTask     			0.5
 C0_Scripts     				0.16
@@ -14,7 +14,7 @@ C31_PathPlanner     			0.10
 C34_BTExecuter     			0.8
 C34_Designer     			0.26
 C34_Executer     			0.7
-C35_Monitoring     			0.5
+C35_Monitoring     			0.6
 C41_BodyControl     			0.1
 C41_QuasiStaticWalking     		0.4
 C41_QuasiStaticWalking_tools   	  	0.4
