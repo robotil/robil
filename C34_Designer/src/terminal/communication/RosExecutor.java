@@ -2,6 +2,8 @@ package terminal.communication;
 
 import java.util.ArrayList;
 
+import document.Parameters;
+
 import logger.Log;
 
 import terminal.commands.ServiceCaller;
@@ -15,8 +17,8 @@ public class RosExecutor {
 	public static final String RESUME = EXECUTER + "resume";
 	public static final String STEP = EXECUTER + "step";
 	public static final String PAUSE = EXECUTER + "pause";
-	public static final String STACK_STREAM = EXECUTER + "stack_stream";
-	public static final String STOP_STREAM = EXECUTER + "stop_stream";
+	// public static final String STACK_STREAM = EXECUTER + "stack_stream";
+	// public static final String STOP_STREAM = EXECUTER + "stop_stream";
 
 	private ArrayList<Thread> workerThreads;
 
@@ -32,7 +34,15 @@ public class RosExecutor {
 		for (Thread t : this.workerThreads)
 			t.start();
 	}
+	
+	public static String getStackStreamTopicName() {
+		return EXECUTER + Parameters.stack_stream_topic;
+	}
 
+	public static String getStopStreamTopicName() {
+		return EXECUTER + Parameters.stop_stream_topic;
+	}
+	
 	public void pauseBehaviorTree(String btName) {
 		ServiceCaller caller = new ServiceCaller();
 		Log.i("ROSEXECUTOR", "Pause " + btName);
