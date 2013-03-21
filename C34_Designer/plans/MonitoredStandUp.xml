@@ -1,0 +1,6 @@
+<plan descriptions="./plans/TaskDescriptions.xml">
+   <par name="mission" x="269.5" y="52.5" collapsed="false" id="abeb235f-5624-4349-a021-479e7328754d"> 
+         <tsk name="TimeoutMonitor(threshold=5)" x="143.5" y="143.5" test_time="0" test_result="true" id="96b8afdf-99ad-41b8-85a3-651cd59b56e4" />
+         <tsk name="StandUp" x="340.5" y="146.5" test_time="0" test_result="true" id="b1757ac2-2ce4-4c2e-abd0-400ba0bf9ef3" />
+   </par>
+</plan>
