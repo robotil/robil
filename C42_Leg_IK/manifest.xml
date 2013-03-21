@@ -8,7 +8,6 @@
   <license>BSD</license>
   <review status="unreviewed" notes=""/>
   <url>http://ros.org/wiki/leg_ik</url>
-  <depend package="C0_RobilTask"/>
   <depend package="rospy"/>
   <depend package="geometry_msgs"/>
   <depend package="std_msgs"/>
