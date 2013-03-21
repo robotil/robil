@@ -8,11 +8,12 @@
   <license>BSD</license>
   <review status="unreviewed" notes=""/>
   <url>http://ros.org/wiki/leg_ik</url>
+  <depend package="C0_RobilTask"/>
   <depend package="rospy"/>
   <depend package="geometry_msgs"/>
-  <depend package="control_msgs"/>
   <depend package="std_msgs"/>
   <depend package="C42_ZMPWalk"/>
+  <depend package="C42_DRCSim2_tools"/>
 
 </package>
 

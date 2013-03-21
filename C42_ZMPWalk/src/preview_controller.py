@@ -14,7 +14,7 @@
 ####                                                                         ##
 ###############################################################################
 
-import roslib; roslib.load_manifest('zmp_walk')
+import roslib; roslib.load_manifest('C42_ZMPWalk')
 import rospy, sys, os.path
 from pylab import *
 
@@ -39,8 +39,10 @@ class ZMP_Preview_Controller:
         [Sub_pathname, Script_Folder] = os.path.split(pathname)
 
         parameters_path = os.path.join(Sub_pathname, r"src/parameters/", parameters_folder_name + '/')
-        #rospy.loginfo("ZMP_Preview_Controller: %s parameters path: %s" % (self.name, parameters_path + 'A.txt') )
+        # rospy.loginfo("ZMP_Preview_Controller %s: pathname = %s, Script_Folder = %s, Sub_pathname = %s, parameters path = %s" %\
+        #  (self.name, pathname, Script_Folder, Sub_pathname, parameters_path + 'A.txt') )
 
+        #self.A = genfromtxt('/home/yuval/Projects/Robil/C42_ZMPWalk/src/parameters/sagital_x/A.txt') #parameters_path + 'A.txt')
         self.A = genfromtxt(parameters_path + 'A.txt')
         self.B = genfromtxt(parameters_path + 'B.txt')
         self.C = genfromtxt(parameters_path + 'C.txt')

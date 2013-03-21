@@ -1,0 +1,16 @@
+<package>
+  <description brief="DRCSim2_tools">
+
+     DRCSim2_tools
+
+  </description>
+  <author>Darpa Tech 3</author>
+  <license>BSD</license>
+  <review status="unreviewed" notes=""/>
+  <url>http://ros.org/wiki/DRCSim2_tools</url>
+  <depend package="osrf_msgs"/>
+  <depend package="sensor_msgs"/>
+  <depend package="tf"/>
+</package>
+
+
