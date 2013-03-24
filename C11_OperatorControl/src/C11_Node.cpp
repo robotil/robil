@@ -1,4 +1,5 @@
 #include <QImage>
+#include <QObject>
 #include <cv_bridge/cv_bridge.h>
 #include <opencv/highgui.h>
 #include "structs.h"
@@ -6,11 +7,15 @@
 
 //void C11_Node::viewImage(const sensor_msgs::ImageConstPtr& msg);
 IC11_Node_Subscriber* C11_Node::pIC11_Node_Subscriber;
+QTimer* C11_Node::WaitTimer;
 
 C11_Node::C11_Node(IC11_Node_Subscriber* subscriber)
 {
 	pIC11_Node_Subscriber = subscriber;
 	img_counter = 0;
+	WaitingForResponse = false;
+//	WaitTimer = new QTimer(this);
+//	connect(WaitTimer,SIGNAL(timeout()),this,SLOT(SltOnWaitTimeout()));
 }
 
 C11_Node::C11_Node(int argc, char** argv, IC11_Node_Subscriber* subscriber ):
@@ -19,11 +24,17 @@ C11_Node::C11_Node(int argc, char** argv, IC11_Node_Subscriber* subscriber ):
 {
 	pIC11_Node_Subscriber = subscriber;
 	img_counter = 0;
+	WaitingForResponse = false;
 }
 
 C11_Node::~C11_Node() {
 	delete it_;
 	delete nh_;
+//	if(WaitTimer != NULL)
+//	  {
+//	    delete WaitTimer;
+//	    WaitTimer =  NULL;
+//	  }
     if(ros::isStarted()) {
       ros::shutdown(); // explicitly needed since we use ros::start();
       ros::waitForShutdown();
@@ -50,6 +61,8 @@ bool C11_Node::init() {
 		if ( ! ros::master::check() ) {
 				return false;
 		}
+
+		WaitingForResponse = false;
 
 //		it_ = new image_transport::ImageTransport(*nh_);
 //		panoramic_image= it_->subscribe("C21/smallPanorama",1,&viewImage);
@@ -194,9 +207,31 @@ bool C11_Node::push_path_proccess(C10_Common::push_path::Request  &req, C10_Comm
 bool C11_Node::hmi_response_proccess(C10_Common::HMIResponse::Request  &req, C10_Common::HMIResponse::Response &res )
 {
         ROS_INFO("C11_OperatorControl: HMIResponse received!\n");
-        HMIRes = res;
+        WaitingForResponse = true;
+
+        pIC11_Node_Subscriber->OnHMIResponseReceived();
+        while(WaitingForResponse)
+        {
+            sleep(1);
+        }
+//        if(WaitTimer != NULL)
+//        {
+//            WaitTimer->setSingleShot(true);
+//            WaitTimer->start(10000);
+////            QTimer* myTimer = new QTimer(this);
+////            connect(myTimer, SIGNAL(timeout()), this, SLOT(SltOnWaitTimeout()));
+////            myTimer->start(10000);
+//        }
+//        QTimer::singleShot(10000,this,SLOT(SltOnWaitTimeout()));
+        ROS_INFO("C11_OperatorControl: HMIResponse sent!\n");
         return true;
 }
+
+//void C11_Node::SltOnWaitTimeout()
+//{
+//        ROS_INFO("C11_OperatorControl: SltOnWaitTimeout timeout!\n");
+//        WaitingForResponse = false;
+//}
 
 bool C11_Node::execution_status_change(C10_Common::execution_status_change::Request  &req, C10_Common::execution_status_change::Response &res )
 {
@@ -229,6 +264,12 @@ void C11_Node::LoadMission(int index)
 
 void C11_Node::Resume()
 {
+        if(WaitingForResponse)
+          {
+            ROS_INFO("C11_OperatorControl: Resume!\n");
+            WaitingForResponse = false;
+            return;
+          }
         C10_Common::resume_mission rs;
         if (!ResumeMissionClient.call(rs))
         {

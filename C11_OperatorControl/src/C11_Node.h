@@ -28,6 +28,7 @@
 #include <string>
 #include <QThread>
 #include <QStringListModel>
+//#include <QTimer>
 
 namespace enc=sensor_msgs::image_encodings;
 
@@ -39,6 +40,8 @@ class C11_Node : public QThread
 {
   Q_OBJECT
 
+// public Q_SLOTS:
+//         void SltOnWaitTimeout();
 
 public:
 
@@ -102,7 +105,8 @@ private:
   char** init_argv;
   int img_counter;
   static IC11_Node_Subscriber* pIC11_Node_Subscriber;
-  C10_Common::HMIResponse::Response HMIRes;
+  static QTimer* WaitTimer;
+  bool WaitingForResponse;
 };
 
 #endif // C11_NODE_H

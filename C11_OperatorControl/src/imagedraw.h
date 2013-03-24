@@ -3,6 +3,7 @@
 
 #include <QtGui/QMainWindow>
 #include <QMap>
+#include <QTimer>
 #include "graphicsview.h"
 #include "C11_Node.h"
 #include "C11_Node_Subscriber.h"
@@ -21,6 +22,7 @@ public slots:
 	void SltOnPlayPauseClick(bool);
 	void SltOnCreateClick(bool);
 	void SltOnPathClick(bool);
+	void SltOnWaitTimeout();
 
 	void SltOnPathUpdate(std::vector<StructPoint> points);
 
@@ -39,6 +41,8 @@ public:
 	virtual void OnOccupancyGridReceived(int grid[100][100], StructPoint robotPos, int xOffset, int yOffset, double orient);
 	virtual void OnPathReceived(std::vector<StructPoint> points);
 	virtual void OnExecutionStatusUpdate(int status);
+	virtual void OnHMIResponseReceived();
+	virtual void OnWaitResponseFinished();
 
 protected:
 	void CloseOpenedImages();
@@ -50,6 +54,7 @@ private:
 	QMap<int,CGraphicsView*> ImageAreas;
 	bool IsUpdateCurrentImg;	//don't create new image, update the current
 	EnumRunStatus ERunStatus;
+	QTimer* WaitTimer;
 };
 
 #endif // IMAGEDRAW_H
