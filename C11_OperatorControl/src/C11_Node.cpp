@@ -59,6 +59,7 @@ bool C11_Node::init() {
 		c11_push_img =	nh_->advertiseService("C11/push_img", &C11_Node::push_img_proccess, this);
 		c11_push_occupancy_grid = nh_->advertiseService("C11/push_occupancy_grid", &C11_Node::push_occupancy_grid_proccess, this);
 		c11_push_path = nh_->advertiseService("C11/push_path", &C11_Node::push_path_proccess, this);
+		c11_hmi_response = nh_->advertiseService("C11/HMIResponse", &C11_Node::hmi_response_proccess, this);
 		c11_execution_status_change = nh_->advertiseService("C11/execution_status_change", &C11_Node::execution_status_change, this);
 		LoadMissionClient = nh_->serviceClient<C10_Common::mission_selection>("MissionSelection");
 		ResumeMissionClient = nh_->serviceClient<C10_Common::resume_mission>("ResumeMission");
@@ -188,6 +189,13 @@ bool C11_Node::push_path_proccess(C10_Common::push_path::Request  &req, C10_Comm
 	pIC11_Node_Subscriber->OnPathReceived(points);
 	res.ACK.mes = 1;
 	return true;
+}
+
+bool C11_Node::hmi_response_proccess(C10_Common::HMIResponse::Request  &req, C10_Common::HMIResponse::Response &res )
+{
+        ROS_INFO("C11_OperatorControl: HMIResponse received!\n");
+        HMIRes = res;
+        return true;
 }
 
 bool C11_Node::execution_status_change(C10_Common::execution_status_change::Request  &req, C10_Common::execution_status_change::Response &res )

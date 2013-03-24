@@ -20,6 +20,7 @@
 #include "C10_Common/push_img.h"
 #include "C10_Common/push_occupancy_grid.h"
 #include "C10_Common/push_path.h"
+#include "C10_Common/HMIResponse.h"
 #include "C11_Node_Subscriber.h"
 #include <image_transport/image_transport.h>
 #include <sensor_msgs/image_encodings.h>
@@ -75,6 +76,7 @@ public:
           bool push_occupancy_grid_proccess(C10_Common::push_occupancy_grid::Request  &req,
                   		  C10_Common::push_occupancy_grid::Response &res );
           bool push_path_proccess(C10_Common::push_path::Request  &req, C10_Common::push_path::Response &res );
+          bool hmi_response_proccess(C10_Common::HMIResponse::Request  &req, C10_Common::HMIResponse::Response &res );
           bool execution_status_change(C10_Common::execution_status_change::Request  &req, C10_Common::execution_status_change::Response &res );
 
 Q_SIGNALS:
@@ -87,6 +89,7 @@ private:
   ros::ServiceServer c11_push_img;
   ros::ServiceServer c11_push_occupancy_grid;
   ros::ServiceServer c11_push_path;
+  ros::ServiceServer c11_hmi_response;
   ros::ServiceServer c11_execution_status_change;
   ros::ServiceClient LoadMissionClient;// = _node.serviceClient<C11_Agent::mission_selection>("C11/mission_selection");
   ros::ServiceClient ResumeMissionClient;
@@ -99,6 +102,7 @@ private:
   char** init_argv;
   int img_counter;
   static IC11_Node_Subscriber* pIC11_Node_Subscriber;
+  C10_Common::HMIResponse::Response HMIRes;
 };
 
 #endif // C11_NODE_H
