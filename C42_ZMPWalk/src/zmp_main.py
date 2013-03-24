@@ -77,12 +77,12 @@ out = walking_trajectory () #traj() # output message of topic 'zmp_out'
 #zc = 0#0.8455 # [m] COM height
 
 # Walking Parameters 
-step_length = 0.03 #0.01  # [m]
-step_width  = 0.178  # 0.178  # [m]
-zmp_width   = 0.173 #0.120  #0.02 # #0.168 #when lift foot 0.130, feet on ground 0.110
-step_time   = 1 #1   # [sec]
-bend_knees  = 0.04 #0.12 #0.18 #0.04  # [m]    
-step_height = 0.03 #0.05 #0.03 #0.05  # [m] 
+step_length = 0.1 #0.01  # [m]
+step_width  = 0.182#0.178  # 0.178  # [m]
+zmp_width   = 0.178 #0.120  #0.02 # #0.168 #when lift foot 0.130, feet on ground 0.110
+step_time   = 1.2 #1   # [sec]
+bend_knees  = 0.055 #0.12 #0.18 #0.04  # [m]    
+step_height = 0.035 #0.05 #0.03 #0.05  # [m] 
 trans_ratio_of_step = 1.0 #0.9 #1.0 #0.8 # units fraction: 0-1.0 ; fraction of step time to be used for transition. 1.0 = all of step time is transition 
 trans_slope_steepens_factor = 8/step_time #2 # 1 transition Sigmoid slope (a)
 ns.Des_Orientation = 0#-math.pi/2
@@ -331,7 +331,7 @@ while not rospy.is_shutdown():
               k = 1
               distance_x_ref = p_ref_x[0]
               rs.Set_step_phase(value = 3) # Double-Support right leg in front
-              #rospy.sleep(4)
+              # rospy.sleep(4)
               #exit()######################################################
               if ns.walk:
                 # make a full step:
@@ -359,7 +359,8 @@ while not rospy.is_shutdown():
                 rospy.loginfo("done step number = %d" % (steps_count) )
                 rospy.loginfo("time:")
                 rospy.loginfo(rospy.get_time())
-                #rospy.sleep(4)
+                # if k >= 5:
+                #rospy.sleep(3)
                 k = 1
                 distance_x_ref = p_ref_x[0]
                 if rs.Get_step_phase() >= 3:

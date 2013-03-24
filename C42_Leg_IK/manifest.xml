@@ -11,6 +11,7 @@
   <depend package="rospy"/>
   <depend package="geometry_msgs"/>
   <depend package="std_msgs"/>
+  <depend package="atlas_msgs"/>
   <depend package="C42_ZMPWalk"/>
   <depend package="C42_DRCSim2_tools"/>
 
