@@ -122,8 +122,8 @@ def get_from_zmp(msg):
           #   left_leg_angles = swing_leg_ik(msg.swing_foot,msg.swing_hip,msg.pelvis_m)
              right_leg_angles = stance_leg_ik(msg.stance_hip,msg.pelvis_d)
 
-        ns.actual_r_force_pub.publish( JSC_2_r_leg_lax.getAvgForce() ) # PSC_right_swing_leg.getAvgForce() )
-        ns.actual_l_force_pub.publish( JSC_2_l_leg_lax.getAvgForce() ) # PSC_left_swing_leg.getAvgForce() ) 
+        ns.actual_r_force_pub.publish( PSC_right_swing_leg.getAvgForce() ) # JSC_2_r_leg_lax.getAvgForce() ) # PSC_right_swing_leg.getAvgForce() ) #
+        ns.actual_l_force_pub.publish( PSC_left_swing_leg.getAvgForce() ) #JSC_2_l_leg_lax.getAvgForce() ) # PSC_left_swing_leg.getAvgForce() ) #
     except IKReachException as exc:
         rospy.loginfo('IKException: %s leg is out of reach, req pos: %f ,%f, %f',exc.foot,exc.requested_pos[0],exc.requested_pos[1],exc.requested_pos[2])
         return
