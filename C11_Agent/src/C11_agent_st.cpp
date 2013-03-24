@@ -14,6 +14,7 @@
 //#include "C11_Agent/set_forbidden_are.h"
 //#include "C11_Agent/override_local_path.h"
 #include "C11_PushServer.hpp"
+#include "C11_HMIResponseServer.hpp"
 //#include "TaskProxyConnectionByActionLib.h"
 #include "C34_Executer/run.h"
 #include "C34_Executer/stop.h"
@@ -215,6 +216,7 @@ int main(int argc, char **argv)
    ROS_INFO("C11_Agent started!\n");
 
    PushHMIServer pushS;
+   HMIResponseServer HMIResS;
  
 
   while (ros::ok())

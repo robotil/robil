@@ -21,10 +21,13 @@ ImageDraw::ImageDraw(int argc, char** argv, QWidget *parent, Qt::WFlags flags)
 	IsUpdateCurrentImg = false;
 	ERunStatus = STOPPED_ENUM;
 
+	WaitTimer = new QTimer(this);
+
 	connect(this,SIGNAL(SigOnNewImg(QImage)),this,SLOT(SltOnNewImg(QImage)),Qt::QueuedConnection);
 	connect(ui.btnPlayPause,SIGNAL(clicked(bool)),this,SLOT(SltOnPlayPauseClick(bool)));
 	connect(ui.btnCreate,SIGNAL(clicked(bool)),this,SLOT(SltOnCreateClick(bool)));
 	connect(ui.btnPath,SIGNAL(clicked(bool)),this,SLOT(SltOnPathClick(bool)));
+	connect(WaitTimer,SIGNAL(timeout()),this,SLOT(SltOnWaitTimeout()));
 
 	C11node.init();
 
@@ -38,7 +41,11 @@ ImageDraw::ImageDraw(int argc, char** argv, QWidget *parent, Qt::WFlags flags)
 
 ImageDraw::~ImageDraw()
 {
-
+  if(WaitTimer!=NULL)
+    {
+      delete WaitTimer;
+      WaitTimer = NULL;
+    }
 }
 
 void ImageDraw::CreateNewImageArea(QString imageName)
@@ -124,6 +131,32 @@ void ImageDraw::OnPathReceived(std::vector<StructPoint> points)
 	ui.mapWidget->AddPath(points);
 }
 
+void ImageDraw::OnHMIResponseReceived()
+{
+              ui.btnPlayPause->setChecked(false);
+              ERunStatus = PAUSED_ENUM;
+              ui.btnCreate->setEnabled(true);
+              ui.mapWidget->SetEditable(true);
+              WaitTimer->setSingleShot(true);
+              WaitTimer->start(10000);
+}
+
+void ImageDraw::SltOnWaitTimeout()
+{
+  std::cout << "SltOnWaitTimeout" << std::endl;
+  OnWaitResponseFinished();
+  C11node.Resume();
+}
+
+void ImageDraw::OnWaitResponseFinished()
+{
+              ui.btnPlayPause->setChecked(true);
+              ERunStatus = RUNNING_ENUM;
+              ui.btnCreate->setEnabled(false);
+              SltOnCreateClick(false);
+              ui.mapWidget->SetEditable(false);
+}
+
 void ImageDraw::OnExecutionStatusUpdate(int status)
 {
         if(0 == status)
@@ -132,12 +165,14 @@ void ImageDraw::OnExecutionStatusUpdate(int status)
             ERunStatus = RUNNING_ENUM;
             ui.btnCreate->setEnabled(false);
             SltOnCreateClick(false);
+            ui.mapWidget->SetEditable(false);
           }
         else if (1 == status)
           {
             ui.btnPlayPause->setChecked(false);
             ERunStatus = PAUSED_ENUM;
             ui.btnCreate->setEnabled(true);
+            ui.mapWidget->SetEditable(true);
           }
         else if( 2 == status)
           {
@@ -145,6 +180,7 @@ void ImageDraw::OnExecutionStatusUpdate(int status)
             ERunStatus = STOPPED_ENUM;
             ui.btnCreate->setEnabled(false);
             SltOnCreateClick(false);
+            ui.mapWidget->SetEditable(false);
           }
 }
 
@@ -260,6 +296,7 @@ void ImageDraw::SltOnPlayPauseClick(bool checked)
                           ERunStatus = RUNNING_ENUM;
                           ui.btnCreate->setEnabled(false);
                           SltOnCreateClick(false);
+                          ui.mapWidget->SetEditable(false);
                   }
                 }
 	        else
@@ -275,6 +312,7 @@ void ImageDraw::SltOnPlayPauseClick(bool checked)
 	    C11node.Pause();
 	    ERunStatus = PAUSED_ENUM;
 	    ui.btnCreate->setEnabled(true);
+	    ui.mapWidget->SetEditable(true);
         }
 }
 
@@ -302,4 +340,9 @@ void ImageDraw::SltOnPathClick(bool checked)
 	{
 		ui.mapWidget->setMode(E_PATH_MODE);
 	}
+}
+
+void ImageDraw::SltOnPathUpdate(std::vector<StructPoint> points)
+{
+	C11node.SendPathUpdate(points);
 }

@@ -24,6 +24,8 @@ public:
 	void MoveLineTo(QPointF p);
 	void drawReadyPath(QVector<QPointF> vec_p, bool b);
 	void drawReadyPolygon(QVector<QPointF> vec_p, bool b);
+	QPointF GetPoint(int index);
+	int GetNumOfPoints();
 
 private:
 	CLineItemList *pFirstLineItemList;
@@ -38,7 +40,7 @@ private:
 	CLineItemList* GoToLastLine();
 	void UpdatetLastPoint();
 	QColor penColor;
-	QPointF points[40];
+	QPointF points[100];
 	int numOfPointsInPoly;
 };
 
