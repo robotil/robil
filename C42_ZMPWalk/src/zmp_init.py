@@ -9,6 +9,18 @@ import rospy
 def init_pose():
     JC = JointCommands_msg_handler()
     RL = robot_listner()
+
+    # Off-set values for IK
+    rospy.set_param("/zmp_walking/IK_zero_pose", {'l_leg_uhz':0, 'l_leg_mhx':0, 'l_leg_lhy':-0.13, 
+                                   'l_leg_kny':0.13, 'l_leg_uay':0.0, 'l_leg_lax':0, 
+                                   'r_leg_uhz':0, 'r_leg_mhx':0, 'r_leg_lhy':-0.13, 
+                                   'r_leg_kny':0.13, 'r_leg_uay':0.0, 'r_leg_lax':0, 
+                                   'l_arm_usy':0, 'l_arm_shx':-1.3, 'l_arm_ely':0, 
+                                   'l_arm_elx':0, 'l_arm_uwy':0, 'l_arm_mwx':0, 
+                                   'r_arm_usy':0, 'r_arm_shx':1.3, 'r_arm_ely':0, 
+                                   'r_arm_elx':0, 'r_arm_uwy':0, 'r_arm_mwx':0, 
+                                   'neck_ay':0, 'back_lbz':0, 'back_mby':0, 'back_ubx':0})
+
     rospy.sleep(1)
     
     back_lbz = 0  
