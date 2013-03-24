@@ -59,7 +59,9 @@ public:
     // check that preempt has not been requested by the client
     while (ros::ok())
     {
+    	//ros::spinOnce();
     	// out of limit check
+    	//std::cout<<"count:"<<i<<std::endl;
     	if ((goal->angle < -pi/2)||(goal->angle > pi/2))
     	{
 			ROS_INFO("%s: Goal out of range[-pi/2,pi/2]", action_name_.c_str());

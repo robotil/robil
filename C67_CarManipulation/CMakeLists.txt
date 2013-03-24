@@ -60,14 +60,17 @@ target_link_libraries(lPoint2 Kinematics)
 rosbuild_add_executable(rPath src/rPath.cpp)
 target_link_libraries(rPath Kinematics)
 
+rosbuild_add_executable(lPath src/lPath.cpp)
+target_link_libraries(lPath Kinematics)
+
 rosbuild_add_executable(rJoint src/rJoint.cpp)
 target_link_libraries(rJoint Kinematics)
 
 rosbuild_add_executable(lJoint src/lJoint.cpp)
 target_link_libraries(lJoint Kinematics)
 
-rosbuild_add_executable(lPath src/lPath.cpp)
-target_link_libraries(lPath Kinematics)
+rosbuild_add_executable(bJoint src/bJoint.cpp)
+target_link_libraries(bJoint Kinematics)
 
 rosbuild_add_executable(WheelMove src/WheelMove2.cpp)
 target_link_libraries(WheelMove Kinematics)
@@ -83,6 +86,9 @@ rosbuild_link_boost(SteeringWheel_server thread)
 
 rosbuild_add_executable(SteeringWheel_client src/SteeringWheel_client.cpp)
 rosbuild_link_boost(SteeringWheel_client thread)
+
+rosbuild_add_executable(SteeringWheel_client2 src/SteeringWheel_client2.cpp)
+rosbuild_link_boost(SteeringWheel_client2 thread)
 
 rosbuild_add_executable(GasPedal_server src/GasPedal_server.cpp)
 rosbuild_link_boost(GasPedal_server thread)

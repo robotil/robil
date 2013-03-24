@@ -186,7 +186,8 @@ void MapMatrix::computeMMatrix(std::vector<pclPlane*>* mapPlanes,pcl::PointCloud
 					newPlane->addRating();
 					newPlane->rating=20;
 					ms->square_Planes->push_back(newPlane);
-					if (std::abs(angle)>25 && p.z>0.20){
+					ms->square_status = AVAILABLE;
+/*					if (std::abs(angle)>25 && p.z>0.20){
 						std::cout<<"angle:"<<angle<<std::endl;
 						ms->square_status = BLOCKED;
 					}
@@ -194,7 +195,7 @@ void MapMatrix::computeMMatrix(std::vector<pclPlane*>* mapPlanes,pcl::PointCloud
 						if(ms->square_status!=BLOCKED){
 							ms->square_status = AVAILABLE;
 						}
-					}
+					}*/
 				}else{
 					MPlane* temp=ms->getPlane(tempPlane);
 					 temp->addRating();
