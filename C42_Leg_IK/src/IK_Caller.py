@@ -21,13 +21,14 @@
 import roslib; roslib.load_manifest('C42_Leg_IK')
 from atlas_msgs.msg import ForceTorqueSensors
 from drc2_tools import *
+from foot_contact_filter import contact_filter
 # from leg_ik.srv import *
 # from leg_ik.msg import *
 from std_msgs.msg import Float64
 #from sensor_msgs.msg import *
 from C42_ZMPWalk.msg import walking_trajectory
 import rospy, math, sys
-from Impedance_Control import Joint_Stiffness_Controller , Joint_Stiffness_Controller_2 , Position_Stiffness_Controller
+from Impedance_Control import Joint_Stiffness_Controller , Joint_Stiffness_Controller_2 , Position_Stiffness_Controller, Position_Stiffness_Controller_2
 from pylab import *
 from leg_ik_func import swing_leg_ik,stance_leg_ik
 from IKException import IKReachException
@@ -45,8 +46,8 @@ JSC_l_leg_lax = Joint_Stiffness_Controller('l_leg_lax', 5500, 0.05) # joint name
 JSC_r_leg_uay = Joint_Stiffness_Controller('r_leg_uay', 8000, 0.05) # joint name, stiffness, update_period [sec]
 JSC_l_leg_uay = Joint_Stiffness_Controller('l_leg_uay', 8000, 0.05) # joint name, stiffness, update_period [sec]
 
-PSC_right_swing_leg = Position_Stiffness_Controller('R_Swing Leg', 101000, True, False) # name, stiffness, triggered_controller, bypass_input2output [True/False]
-PSC_left_swing_leg = Position_Stiffness_Controller('L_Swing Leg', 101000, True, False) # name, stiffness, triggered_controller, bypass_input2output [True/False]
+PSC2_right_swing_leg = Position_Stiffness_Controller_2('R_Swing Leg', 101000, False, False) # 101000, True, False) # name, stiffness, triggered_controller, bypass_input2output [True/False]
+PSC2_left_swing_leg = Position_Stiffness_Controller_2('L_Swing Leg', 101000, False, False) # 101000, True, False) # name, stiffness, triggered_controller, bypass_input2output [True/False]
 
 JSC_2_l_leg_lax = Joint_Stiffness_Controller_2('l_leg_lax', 650, 1000, 0.04) # joint name, stance_stiffness, swing_stiffness, activation_ZMP_point [m]
 JSC_2_r_leg_lax = Joint_Stiffness_Controller_2('r_leg_lax', 650, 1000, 0.04) # joint name, stance_stiffness, swing_stiffness, activation_ZMP_point [m]
@@ -68,23 +69,26 @@ JSC_2_r_leg_uay.ChangeStiffness(Joint_Stiffness_Controller_2.swing)
 
 # def get_r_foot_contact(msg):
     
-#     PSC_right_swing_leg.UpdateForce(msg.force.z)
+#     PSC2_right_swing_leg.UpdateForce(msg.force.z)
 #     JSC_2_r_leg_lax.UpdateFeedBack(msg.force.z, msg.torque.x)
 #     JSC_2_r_leg_uay.UpdateFeedBack(msg.force.z, msg.torque.x)
 
 # def get_l_foot_contact(msg):
     
-#     PSC_left_swing_leg.UpdateForce(msg.force.z) 
+#     PSC2_left_swing_leg.UpdateForce(msg.force.z) 
 #     JSC_2_l_leg_lax.UpdateFeedBack(msg.force.z, msg.torque.x) 
 #     JSC_2_l_leg_uay.UpdateFeedBack(msg.force.z, msg.torque.x)
 
 def get_foot_contact(msg):
-    
-    PSC_right_swing_leg.UpdateForce(-msg.r_foot.force.z)
+
+    ns.filter.update(msg)
+    buf = ns.filter.get_buffer()
+
+    PSC2_right_swing_leg.UpdateFeedBack(-msg.r_foot.force.z, -buf[0].r_foot.force.z )
     JSC_2_r_leg_lax.UpdateFeedBack(-msg.r_foot.force.z, -msg.r_foot.torque.x)
     JSC_2_r_leg_uay.UpdateFeedBack(-msg.r_foot.force.z, -msg.r_foot.torque.y)
    
-    PSC_left_swing_leg.UpdateForce(-msg.l_foot.force.z) 
+    PSC2_left_swing_leg.UpdateFeedBack(-msg.l_foot.force.z, -buf[0].l_foot.force.z) 
     JSC_2_l_leg_lax.UpdateFeedBack(-msg.l_foot.force.z, -msg.l_foot.torque.x) 
     JSC_2_l_leg_uay.UpdateFeedBack(-msg.l_foot.force.z, -msg.l_foot.torque.y)
 
@@ -101,29 +105,30 @@ def get_from_zmp(msg):
 
        # desired_normal_force = half_robot_weight - abs(msg.com_ref.y/com_y_max) * (half_robot_weight - min_support_force)
 
+
         if ( msg.step_phase == 1 ) or ( msg.step_phase == 2 ): # left leg is stance
             # [mhx,lhy,uhz,kny,lax,uay]
-            PSC_left_swing_leg.ByPassON()# bypass controller
-            PSC_right_swing_leg.ByPassOFF()
+            PSC2_left_swing_leg.ByPassON()# bypass controller
+            PSC2_right_swing_leg.ByPassOFF()
             swing_fixed = copy.deepcopy(msg.swing_foot)
-            swing_fixed.z = PSC_right_swing_leg.getCMD(msg.swing_foot.z,msg.zmp_ref.y,msg.step_phase ,msg.step_width,msg.zmp_width,msg.step_time,ns.des_l_force_pub,ns.des_r_force_pub)
+            swing_fixed.z = PSC2_right_swing_leg.getCMD(msg.swing_foot.z,msg.zmp_ref.y,msg.step_phase ,msg.step_width,msg.zmp_width,msg.step_time,ns.des_l_force_pub,ns.des_r_force_pub)
             
             right_leg_angles = swing_leg_ik(swing_fixed,msg.swing_hip,msg.pelvis_m)
         #    right_leg_angles = swing_leg_ik(msg.swing_foot,msg.swing_hip,msg.pelvis_m)
             left_leg_angles = stance_leg_ik(msg.stance_hip,msg.pelvis_d)
         elif ( msg.step_phase == 3 ) or ( msg.step_phase == 4 ): # right leg is stance
             # [mhx,lhy,uhz,kny,lax,uay]
-             PSC_right_swing_leg.ByPassON()  # bypass controller
-             PSC_left_swing_leg.ByPassOFF()
+             PSC2_right_swing_leg.ByPassON()  # bypass controller
+             PSC2_left_swing_leg.ByPassOFF()
              swing_fixed = copy.deepcopy(msg.swing_foot)
-             swing_fixed.z = PSC_left_swing_leg.getCMD(msg.swing_foot.z,msg.zmp_ref.y,msg.step_phase ,msg.step_width,msg.zmp_width,msg.step_time,ns.des_l_force_pub,ns.des_r_force_pub)
+             swing_fixed.z = PSC2_left_swing_leg.getCMD(msg.swing_foot.z,msg.zmp_ref.y,msg.step_phase ,msg.step_width,msg.zmp_width,msg.step_time,ns.des_l_force_pub,ns.des_r_force_pub)
 
              left_leg_angles = swing_leg_ik(swing_fixed,msg.swing_hip,msg.pelvis_m)
           #   left_leg_angles = swing_leg_ik(msg.swing_foot,msg.swing_hip,msg.pelvis_m)
              right_leg_angles = stance_leg_ik(msg.stance_hip,msg.pelvis_d)
 
-        ns.actual_r_force_pub.publish( PSC_right_swing_leg.getAvgForce() ) # JSC_2_r_leg_lax.getAvgForce() ) # PSC_right_swing_leg.getAvgForce() ) #
-        ns.actual_l_force_pub.publish( PSC_left_swing_leg.getAvgForce() ) #JSC_2_l_leg_lax.getAvgForce() ) # PSC_left_swing_leg.getAvgForce() ) #
+        ns.actual_r_force_pub.publish( PSC2_right_swing_leg.getFilteredForce() ) # getAvgForce() ) # JSC_2_r_leg_lax.getAvgForce() ) # PSC2_right_swing_leg.getAvgForce() ) #
+        ns.actual_l_force_pub.publish( PSC2_left_swing_leg.getFilteredForce() ) # getAvgForce() ) #JSC_2_l_leg_lax.getAvgForce() ) # PSC2_left_swing_leg.getAvgForce() ) #
     except IKReachException as exc:
         rospy.loginfo('IKException: %s leg is out of reach, req pos: %f ,%f, %f',exc.foot,exc.requested_pos[0],exc.requested_pos[1],exc.requested_pos[2])
         return
@@ -229,6 +234,10 @@ def LEG_IK():
     # r_cont_sub = rospy.Subscriber('/atlas/debug/r_foot_contact', Wrench, get_r_foot_contact)
     # l_cont_sub = rospy.Subscriber('/atlas/debug/l_foot_contact', Wrench, get_l_foot_contact)
     contact_sub = rospy.Subscriber('/atlas/force_torque_sensors', ForceTorqueSensors, get_foot_contact)
+    # contact sensor filter:
+    a = [1,-3.180638548874721,3.861194348994217,-2.112155355110971,0.438265142261981]
+    b = [0.0004165992044065786,0.001666396817626,0.002499595226439,0.001666396817626,0.0004165992044065786]
+    ns.filter = contact_filter(b = b, a = a, use_internal_subscriber = False)
 
     ns.des_l_force_pub = rospy.Publisher('/des_l_force', Float64)
     ns.des_r_force_pub = rospy.Publisher('/des_r_force', Float64)

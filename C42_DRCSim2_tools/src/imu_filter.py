@@ -1,5 +1,5 @@
 #! /usr/bin/env python
-import roslib; roslib.load_manifest('DRCSim2_tools')
+import roslib; roslib.load_manifest('C42_DRCSim2_tools')
 import rospy
 from sensor_msgs.msg import Imu
 from geometry_msgs.msg import Vector3

@@ -525,6 +525,8 @@ class Position_Stiffness_Controller_2:
         self.num_of_FB_samples = 0.0
         self.reset_sum_flag = False
 
+        self.FB_force_filtered = 0.0
+
         # Triggered Controller:
         self.trigger_event = False
         self.trigger_value = 200 # units [Nm] under this value the trigger will be set 
@@ -533,7 +535,7 @@ class Position_Stiffness_Controller_2:
 
 
     # External auxiliary method:
-    def UpdateFeedBack(self, force, torque):
+    def UpdateFeedBack(self, force, filtered_force):
         ## Average force between getCMD calls:
         self.num_of_FB_samples += 1.0
 
@@ -546,17 +548,16 @@ class Position_Stiffness_Controller_2:
 
         self.FB_force_avg = self.FB_force_sum/self.num_of_FB_samples
 
-        # TODO: Add filtered feedback force 
         ## Filtered force:
-        # self.FB_force_filtered = ...
+        self.FB_force_filtered = filtered_force
 
     # External auxiliary method:
     def getAvgForce(self):
         return (self.FB_force_avg)
 
-    # # External auxiliary method:
-    # def getFilteredForce(self):
-    #     return (self.FB_force_filtered)
+    # External auxiliary method:
+    def getFilteredForce(self):
+        return (self.FB_force_filtered)
 
     def ResetFB_Sum(self):
         self.FB_force_sum = 0.0
@@ -590,7 +591,7 @@ class Position_Stiffness_Controller_2:
         # Desired force profile of swing leg:
         force_des = self.desired_force(zmp_ref_y,step_phase ,step_width, zmp_width, step_time, des_l_force_pub, des_r_force_pub)
 
-        force_FB = self.FB_force_avg
+        force_FB = self.FB_force_filtered # self.FB_force_avg
        
         # Check trigger event if event has not yet occured and updates trigger_event accordingly
         if self.triggered_controller and not(self.trigger_event):

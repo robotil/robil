@@ -1,5 +1,5 @@
 #! /usr/bin/env python
-import roslib; roslib.load_manifest('DRCSim2_tools')
+import roslib; roslib.load_manifest('C42_DRCSim2_tools')
 import rospy
 from rosgraph_msgs.msg import Clock
 import threading

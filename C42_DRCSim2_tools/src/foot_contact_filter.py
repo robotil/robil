@@ -1,14 +1,15 @@
 #! /usr/bin/env python
-import roslib; roslib.load_manifest('DRCSim2_tools')
+import roslib; roslib.load_manifest('C42_DRCSim2_tools')
 import rospy
 import copy
 from atlas_msgs.msg import ForceTorqueSensors
 import control_primitives
 
 class contact_filter(control_primitives.filter):
-    def __init__(self,a,b):
+    def __init__(self,a,b, use_internal_subscriber = True):
         control_primitives.filter.__init__(self,a = a,b = b)
-        self.sub = rospy.Subscriber('/atlas/force_torque_sensors',ForceTorqueSensors,self.update)
+        if use_internal_subscriber:
+            self.sub = rospy.Subscriber('/atlas/force_torque_sensors',ForceTorqueSensors,self.update)
         self.u_buffer = [ForceTorqueSensors() for k in xrange(len(self.a))]
         self.y_buffer = [ForceTorqueSensors() for k in xrange(len(self.b))]
     def update(self,u):
@@ -26,7 +27,7 @@ class contact_filter(control_primitives.filter):
 if __name__ == '__main__':
     class test_filter(control_primitives.controller):
         def __init__(self):
-            control_primitives.controller.__init__(self,name = 'filter_test',Fs = 100)
+            control_primitives.controller.__init__(self,name = 'filter_test',Fs = 1000)
             self.pub = rospy.Publisher('/filtered_contacts',ForceTorqueSensors)
             # a = [1,-2.374094743709352,1.929355669091215,-0.532075368312092]
             # b = [0.002898194633721,0.008694583901164,0.008694583901164,0.002898194633721]
