@@ -391,9 +391,9 @@ class Position_Stiffness_Controller:
                 elif -1*correction_factor > self.limit_command_diff: 
                     correction_factor = -1*self.limit_command_diff
 
-                command_out = X_0 - correction_factor 
+                pos_command_out = X_0 - correction_factor 
             else:
-                command_out = X_0
+                pos_command_out = X_0
 
             # handle feedback filter:
             self.ResetSum()
@@ -401,14 +401,14 @@ class Position_Stiffness_Controller:
 
         else:
             input_command_delta_update = X_0 - self.last_X_0 
-            command_out = self.last_X_m + input_command_delta_update          
+            pos_command_out = self.last_X_m + input_command_delta_update          
 
-        self.last_X_m = command_out
+        self.last_X_m = pos_command_out
         self.last_X_0 = X_0
         rospy.loginfo("PSC_'%s' method getCMD: bypass_in2out-%s, X_0 = %f, output cmd = %f, force_des = %f, force_avg = %f " %  \
-                          (self.name, self.bypass_in2out, X_0, command_out, force_des, self.getAvgForce()))
+                          (self.name, self.bypass_in2out, X_0, pos_command_out, force_des, self.getAvgForce()))
 
-        return command_out 
+        return ( pos_command_out, desired_force_L , desired_force_R )
 
     def desired_force(self,zmp_ref_y,step_phase ,step_width,zmp_width,step_time):
 
@@ -607,21 +607,21 @@ class Position_Stiffness_Controller_2:
             elif -1*correction_factor > self.limit_command_diff: 
                 correction_factor = -1*self.limit_command_diff
 
-            command_out = X_0 - correction_factor 
+            pos_command_out = X_0 - correction_factor 
         else:
-            command_out = X_0      
+            pos_command_out = X_0      
 
         # rospy.loginfo("PSC2_'%s' method getCMD: bypass_in2out-%s, X_0 = %f, output cmd = %f, force_des = %f, force_avg = %f " %  \
-        #                   (self.name, self.bypass_in2out, X_0, command_out, force_des, self.getAvgForce()))
+        #                   (self.name, self.bypass_in2out, X_0, pos_command_out, force_des, self.getAvgForce()))
 
         # rospy.loginfo("PSC2_'%s' method getCMD: set_point = %f, cmd = %f, cmd correction = %f, force_des = %f, Fb force_avg = %f, N_samples = %f, force_FB = %f"\
-        #             %(self.name, X_0, command_out, correction_factor, force_des, self.FB_force_avg, self.num_of_FB_samples, force_FB ))
+        #             %(self.name, X_0, pos_command_out, correction_factor, force_des, self.FB_force_avg, self.num_of_FB_samples, force_FB ))
 
         self.reset_sum_flag = True
         self.last_X_0 = X_0
-        self.last_X_m = command_out
+        self.last_X_m = pos_command_out
 
-        return command_out 
+        return pos_command_out 
 
     def desired_force(self,zmp_ref_y,step_phase ,step_width, zmp_width, step_time, des_l_force_pub, des_r_force_pub):
 

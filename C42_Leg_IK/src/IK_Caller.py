@@ -118,8 +118,8 @@ def get_from_zmp(msg):
             PSC_left_swing_leg.ByPassON()# bypass controller
             PSC_right_swing_leg.ByPassOFF()
             swing_fixed = copy.deepcopy(msg.swing_foot)
-            swing_fixed.z = PSC_right_swing_leg.getCMD(msg.swing_foot.z,msg.zmp_ref.y,msg.step_phase ,msg.step_width,msg.zmp_width,msg.step_time,ns.des_l_force_pub,ns.des_r_force_pub)
-            
+            ( swing_fixed.z, desired_force_L , desired_force_R ) = PSC_right_swing_leg.getCMD(msg.swing_foot.z,msg.zmp_ref.y,msg.step_phase ,msg.step_width,msg.zmp_width,msg.step_time,ns.des_l_force_pub,ns.des_r_force_pub)
+
             right_leg_angles = swing_leg_ik(swing_fixed,msg.swing_hip,msg.pelvis_m)
         #    right_leg_angles = swing_leg_ik(msg.swing_foot,msg.swing_hip,msg.pelvis_m)
             left_leg_angles = stance_leg_ik(msg.stance_hip,msg.pelvis_d)
@@ -128,7 +128,7 @@ def get_from_zmp(msg):
              PSC_right_swing_leg.ByPassON()  # bypass controller
              PSC_left_swing_leg.ByPassOFF()
              swing_fixed = copy.deepcopy(msg.swing_foot)
-             swing_fixed.z = PSC_left_swing_leg.getCMD(msg.swing_foot.z,msg.zmp_ref.y,msg.step_phase ,msg.step_width,msg.zmp_width,msg.step_time,ns.des_l_force_pub,ns.des_r_force_pub)
+             ( swing_fixed.z, desired_force_L , desired_force_R ) = PSC_left_swing_leg.getCMD(msg.swing_foot.z,msg.zmp_ref.y,msg.step_phase ,msg.step_width,msg.zmp_width,msg.step_time,ns.des_l_force_pub,ns.des_r_force_pub)
 
              left_leg_angles = swing_leg_ik(swing_fixed,msg.swing_hip,msg.pelvis_m)
           #   left_leg_angles = swing_leg_ik(msg.swing_foot,msg.swing_hip,msg.pelvis_m)
@@ -140,8 +140,11 @@ def get_from_zmp(msg):
         rospy.loginfo('IKException: %s leg is out of reach, req pos: %f ,%f, %f',exc.foot,exc.requested_pos[0],exc.requested_pos[1],exc.requested_pos[2])
         return
 
-###############################################3
+    ## Joint Feed Forward effort:
+    l_leg_kny_eff = -desired_force_L/10.0
+    r_leg_kny_eff = -desired_force_R/10.0
 
+    ## Joint position command (to PID):
 
     raise_foot_tip = 0.2
 
@@ -173,17 +176,16 @@ def get_from_zmp(msg):
 
 
 
-
     ns.JC.set_pos('l_leg_lax', l_leg_lax )
     ns.JC.set_pos('l_leg_uay', l_leg_uay )
-    ns.JC.set_pos('l_leg_kny', l_leg_kny )
+    ns.JC.set_mixed('l_leg_kny', l_leg_kny_eff, l_leg_kny ) # set_pos('l_leg_kny', l_leg_kny )
     ns.JC.set_pos('l_leg_uhz', l_leg_uhz )
     ns.JC.set_pos('l_leg_lhy', l_leg_lhy )
     ns.JC.set_pos('l_leg_mhx', l_leg_mhx ) 
 
     ns.JC.set_pos('r_leg_lax', r_leg_lax ) 
     ns.JC.set_pos('r_leg_uay', r_leg_uay )
-    ns.JC.set_pos('r_leg_kny', r_leg_kny )
+    ns.JC.set_mixed('r_leg_kny', r_leg_kny_eff, r_leg_kny ) # set_pos('r_leg_kny', r_leg_kny )
     ns.JC.set_pos('r_leg_uhz', r_leg_uhz )
     ns.JC.set_pos('r_leg_lhy', r_leg_lhy )
     ns.JC.set_pos('r_leg_mhx', r_leg_mhx ) 
