@@ -257,7 +257,7 @@ class Joint_Stiffness_Controller_2:
 class Position_Stiffness_Controller:
     'This controller modifies a position command to achieve the desired stiffness of the system using force feedback'
     # Class parameters:
-    minimum_update_period = 0.05 #units [sec]; minimal time to average feedback below this value OUTPUT command 
+    minimum_update_period = 0.02 #0.05 #units [sec]; minimal time to average feedback below this value OUTPUT command 
                                  #             will not be modified    
     limit_command_diff = 0.1 # # units [meters]
     command_resolution = 0.002 #0.0001 # Command will change with steps greater than command_resolution
@@ -405,8 +405,8 @@ class Position_Stiffness_Controller:
 
         self.last_X_m = command_out
         self.last_X_0 = X_0
-        # rospy.loginfo("PSC_'%s' method getCMD: bypass_in2out-%s, X_0 = %f, output cmd = %f, force_des = %f, force_avg = %f " %  \
-        #                   (self.name, self.bypass_in2out, X_0, command_out, force_des, self.getAvgForce()))
+        rospy.loginfo("PSC_'%s' method getCMD: bypass_in2out-%s, X_0 = %f, output cmd = %f, force_des = %f, force_avg = %f " %  \
+                          (self.name, self.bypass_in2out, X_0, command_out, force_des, self.getAvgForce()))
 
         return command_out 
 
@@ -614,8 +614,8 @@ class Position_Stiffness_Controller_2:
         # rospy.loginfo("PSC2_'%s' method getCMD: bypass_in2out-%s, X_0 = %f, output cmd = %f, force_des = %f, force_avg = %f " %  \
         #                   (self.name, self.bypass_in2out, X_0, command_out, force_des, self.getAvgForce()))
 
-        # rospy.loginfo("PSC2_'%s' method getCMD: set_point = %f, cmd = %f, cmd correction = %f, Fb force_avg = %f, N_samples = %f, force_FB = %f"\
-        #             %(self.name, X_0, command_out, correction_factor, self.FB_force_avg, self.num_of_FB_samples, force_FB ))
+        # rospy.loginfo("PSC2_'%s' method getCMD: set_point = %f, cmd = %f, cmd correction = %f, force_des = %f, Fb force_avg = %f, N_samples = %f, force_FB = %f"\
+        #             %(self.name, X_0, command_out, correction_factor, force_des, self.FB_force_avg, self.num_of_FB_samples, force_FB ))
 
         self.reset_sum_flag = True
         self.last_X_0 = X_0
