@@ -34,7 +34,7 @@ class CMapMain : public QWidget
 
 signals:
 
-	void SigSendPathUpdate(std::vector<StructPoint> points);
+	void SigOperatorAction();
 
 public:
 	CMapMain(QWidget *parent = 0, Qt::WFlags flags = 0);
@@ -53,6 +53,7 @@ public:
 	void deletePath();
 	void deleteRoute(ModeDraw m);
 	void SetEditable(bool value);
+	std::vector<StructPoint> GetUpdatedRoute();
 
 private:
 	Ui::CMapMainClass ui;
@@ -103,7 +104,6 @@ private:
 	QPointF PointToPix(StructPoint point);
 	StructPoint PixToPoint(QPointF pix);
 	void CalculateCornerPos();
-	void RequestUpdates();
 	bool IsPointsEqual(StructPoint p1, StructPoint p2);
 	bool IsPointInPath(StructPoint p1);
 

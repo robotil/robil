@@ -28,7 +28,7 @@ ImageDraw::ImageDraw(int argc, char** argv, QWidget *parent, Qt::WFlags flags)
 	connect(ui.btnCreate,SIGNAL(clicked(bool)),this,SLOT(SltOnCreateClick(bool)));
 	connect(ui.btnPath,SIGNAL(clicked(bool)),this,SLOT(SltOnPathClick(bool)));
 	connect(WaitTimer,SIGNAL(timeout()),this,SLOT(SltOnWaitTimeout()));
-
+	connect(ui.mapWidget,SIGNAL(SigOperatorAction()),this,SLOT(SltOperatorAction()));
 	C11node.init();
 
 //	QString fileName = QFileDialog::getOpenFileName(this,
@@ -301,6 +301,11 @@ void ImageDraw::SltOnPlayPauseClick(bool checked)
                 }
 	        else
                 {
+	            std::vector<StructPoint> points = ui.mapWidget->GetUpdatedRoute();
+	            if(!points.empty())
+	              {
+	                C11node.SendPathUpdate(points);
+	              }
 	            C11node.Resume();
 	            ERunStatus = RUNNING_ENUM;
 	            ui.btnCreate->setEnabled(false);
@@ -342,7 +347,11 @@ void ImageDraw::SltOnPathClick(bool checked)
 	}
 }
 
-void ImageDraw::SltOnPathUpdate(std::vector<StructPoint> points)
+
+void ImageDraw::SltOperatorAction()
 {
-	C11node.SendPathUpdate(points);
+        if(WaitTimer->isActive())
+          {
+            WaitTimer->stop();
+          }
 }
