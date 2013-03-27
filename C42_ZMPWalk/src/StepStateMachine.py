@@ -155,7 +155,6 @@ class PreStepState(StepState):
         self._robotState.Set_step_phase(value = 1)                                                              # added by Israel to initiate step phase 24.2
           
         self._Strategy.LoadNewStep(self._p_ref_x_start,self._p_ref_x_forward_step,self._p_ref_y_start,r_[ self._p_ref_y_step_right, self._p_ref_y_step_left ])
-
         
     def OnExit(self):
         # completed pre_step
@@ -232,7 +231,7 @@ class StopLeftStepState(StepState):
         rospy.loginfo(rospy.get_time())
 
         self._fD = self._WalkingTrajectory.com_ref.x+self._step_length/2
-        self._robotState.Set_step_phase(value = 1)
+        self._robotState.Set_step_phase(value = 3)
 
         self._Strategy.LoadNewStep(self._p_ref_x_stop, self._p_ref_const_zero, self._p_ref_y_stop, self._p_ref_const_zero)
 
@@ -266,7 +265,7 @@ class StopRightStepState(StepState):
         rospy.loginfo(rospy.get_time())
 
         self._fD = self._WalkingTrajectory.com_ref.x+self._step_length/2
-        self._robotState.Set_step_phase(value = 3)
+        self._robotState.Set_step_phase(value = 1)
 
         self._Strategy.LoadNewStep(self._p_ref_x_stop, self._p_ref_const_zero, self._p_ref_y_stop, self._p_ref_const_zero)
 
@@ -411,15 +410,18 @@ class StepStateMachine(StateMachine):
     def Initialize(self):
         StateMachine.PerformTransition(self,"Initialize")
         self._stepCounter = 0
+        self._counter = 0
 
     def Fail(self):
         StateMachine.PerformTransition(self,"Fail")
 
     def Start(self):
-        StateMachine.PerformTransition(self,"Start")
+        if(StateMachine.PerformTransition(self,"Start")):
+            self._counter = 0
 
     def NextStep(self):
         StateMachine.PerformTransition(self,"NextStep")
+        self._counter = 0
 
     def Stop(self):
         StateMachine.PerformTransition(self,"Stop")
@@ -431,6 +433,7 @@ class StepStateMachine(StateMachine):
         return StateMachine.GetCurrentState(self).GetWalkingTrajectory(COMx, COMx_dot, p_pre_con_x,COMy, COMy_dot, p_pre_con_y,p_ref_x,p_ref_y,Des_Orientation,imu_orientation,self._counter,1.0/self._UpdateRateHz)
     
     def UpdatePreview(self):
+        #rospy.loginfo("UpdatePreview - StepTime(%f) Counter(%d) Timer(%f)" % (StateMachine.GetCurrentState(self).GetStepTime(),self._counter, self._counter*1.0/self._UpdateRateHz))
         if (StateMachine.GetCurrentState(self).GetStepTime() < self._counter*1.0/self._UpdateRateHz):
             self.NextStep()
             p_ref_x,p_ref_y = StateMachine.GetCurrentState(self).UpdatePreview()
@@ -438,7 +441,6 @@ class StepStateMachine(StateMachine):
             rospy.loginfo("done step number = %d" % (self._stepCounter))
             rospy.loginfo("time:")
             rospy.loginfo(rospy.get_time())
-            self._counter = 0
         else:
             p_ref_x,p_ref_y = StateMachine.GetCurrentState(self).UpdatePreview()
 

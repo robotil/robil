@@ -115,7 +115,7 @@ class StepStrategyWalk(StepStrategy):
     
     def GetWalkingTrajectory(self,COMx, COMx_dot, p_pre_con_x,COMy, COMy_dot, p_pre_con_y,p_ref_x,p_ref_y,D,step_length,step_width,step_height,\
         zmp_width,step_time,bend_knees,Des_Orientation,imu_orientation,k,dt,k_total,k_start_swing,k_stop_swing):
-       
+
         self._WalkingTrajectory.step_length = step_length
         self._WalkingTrajectory.step_width = step_width
         self._WalkingTrajectory.step_height = step_height

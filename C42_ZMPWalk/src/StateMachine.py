@@ -74,12 +74,15 @@ class StateMachine(object):
         
     def PerformTransition(self,strTransition):
         """
-            Perform transition strTransition
+            Perform transition strTransition, return true if transition took place
         """
+        result = False
         if((self._CurrentState.Name,strTransition) in self._Transitions):
             self._CurrentState.OnExit()
             self._CurrentState = self._States[self._Transitions[(self._CurrentState.Name,strTransition)]]
             self._CurrentState.OnEnter()
+            result = True
+        return result
 
 # a little testing script
 if __name__ == "__main__":
