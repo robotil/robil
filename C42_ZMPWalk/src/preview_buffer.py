@@ -41,6 +41,7 @@ class ZMP_Preview_Buffer:
         self.precede_time_samples = ceil (precede_time_samples) # number of samples to bring forward the step profile
         self.start_index = 0 # points to the current position in the buffer where the preview starts. We increment start_index on each time cycle
         self.data_end = 0 # start_index to where the data in the buffer ends (from where new data can be written into the buffer)   
+        self.end_of_step_preview = self.preview_size
 
     # Handling Buffer Stack:
     def clearBuffer(self):

@@ -405,8 +405,8 @@ class Position_Stiffness_Controller:
 
         self.last_X_m = pos_command_out
         self.last_X_0 = X_0
-        rospy.loginfo("PSC_'%s' method getCMD: bypass_in2out-%s, X_0 = %f, output cmd = %f, force_des = %f, force_avg = %f " %  \
-                          (self.name, self.bypass_in2out, X_0, pos_command_out, force_des, self.getAvgForce()))
+        # rospy.loginfo("PSC_'%s' method getCMD: bypass_in2out-%s, X_0 = %f, output cmd = %f, force_des = %f, force_avg = %f " %  \
+        #                   (self.name, self.bypass_in2out, X_0, pos_command_out, force_des, self.getAvgForce()))
 
         return ( pos_command_out, desired_force_L , desired_force_R )
 
