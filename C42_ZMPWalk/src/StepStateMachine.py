@@ -17,6 +17,7 @@ import rospy
 import tf
 from robot_state import Robot_State
 from zmp_init import init_pose
+from zmp_profiles import *
 import copy
 
 ###################################################################################
@@ -208,13 +209,32 @@ class StopLeftStepState(StepState):
         The StopLeftStepState class is intended to be used with the StepStateMachine class,
         When the ZMP stops walking on a left step
     """
-    def __init__(self,StepStrategy,dt):
+    def __init__(self,StepStrategy,walkingTrajectory,robotState,dt):
         StepState.__init__(self,"StopLeft",StepStrategy,dt)
+
+        self._WalkingTrajectory = walkingTrajectory
+        self._robotState = robotState
         
         self._pre_step = 0
         self._first_step = 0
         self._full_step = 0
         self._last_step = 1
+
+        # const template:
+        self._p_ref_const_zero = Constant_Template(0, self._step_time, dt)
+        # Stop walking profile:
+        self._p_ref_x_stop = Stop_sagital_x(0, self._step_length, self._trans_ratio_of_step, self._trans_slope_steepens_factor, self._step_time, dt)
+        self._p_ref_y_stop = Stop_lateral_y_from_left_foot(0, self._step_width, self._trans_ratio_of_step, self._trans_slope_steepens_factor, self._step_time, dt)
+
+
+    def OnEnter(self):
+        rospy.loginfo("Starting STOP LEFT step, time:")
+        rospy.loginfo(rospy.get_time())
+
+        self._fD = self._WalkingTrajectory.com_ref.x+self._step_length/2
+        self._robotState.Set_step_phase(value = 1)
+
+        self._Strategy.LoadNewStep(self._p_ref_x_stop, self._p_ref_const_zero, self._p_ref_y_stop, self._p_ref_const_zero)
 
 #----------------------------------------------------------------------------------
 
@@ -223,13 +243,32 @@ class StopRightStepState(StepState):
         The StopRightStepState class is intended to be used with the StepStateMachine class,
         When the ZMP stops walking on a right step
     """
-    def __init__(self,StepStrategy,dt):
+    def __init__(self,StepStrategy,walkingTrajectory,robotState,dt):
         StepState.__init__(self,"StopRight",StepStrategy,dt)
+
+        self._WalkingTrajectory = walkingTrajectory
+        self._robotState = robotState
         
         self._pre_step = 0
         self._first_step = 0
         self._full_step = 0
         self._last_step = 1
+
+        # const template:
+        self._p_ref_const_zero = Constant_Template(0, self._step_time, dt)
+        # Stop walking profile:
+        self._p_ref_x_stop = Stop_sagital_x(0, self._step_length, self._trans_ratio_of_step, self._trans_slope_steepens_factor, self._step_time, dt)
+        self._p_ref_y_stop = Stop_lateral_y_from_right_foot(0, self._step_width, self._trans_ratio_of_step, self._trans_slope_steepens_factor, self._step_time, dt)
+
+
+    def OnEnter(self):
+        rospy.loginfo("Starting STOP RIGHT step, time:")
+        rospy.loginfo(rospy.get_time())
+
+        self._fD = self._WalkingTrajectory.com_ref.x+self._step_length/2
+        self._robotState.Set_step_phase(value = 3)
+
+        self._Strategy.LoadNewStep(self._p_ref_x_stop, self._p_ref_const_zero, self._p_ref_y_stop, self._p_ref_const_zero)
 
 #----------------------------------------------------------------------------------
 
@@ -345,8 +384,8 @@ class StepStateMachine(StateMachine):
         StateMachine.AddState(self,PreStepState(self._StepStrategyNone,robotState,dt))
         StateMachine.AddState(self,FirstStepState(self._StepStrategyWalk,dt))
         StateMachine.AddState(self,StoppingFirstStepState(self._StepStrategyWalk,dt))
-        StateMachine.AddState(self,StopLeftStepState(self._StepStrategyWalk,dt))
-        StateMachine.AddState(self,StopRightStepState(self._StepStrategyWalk,dt))
+        StateMachine.AddState(self,StopLeftStepState(self._StepStrategyWalk,walkingTrajectory,robotState,dt))
+        StateMachine.AddState(self,StopRightStepState(self._StepStrategyWalk,walkingTrajectory,robotState,dt))
         StateMachine.AddState(self,StoppingLeftStepState(self._StepStrategyWalk,dt))
         StateMachine.AddState(self,StoppingRightStepState(self._StepStrategyWalk,dt))
         StateMachine.AddState(self,RightStepState(self._StepStrategyWalk,walkingTrajectory,robotState,dt))
