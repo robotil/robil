@@ -329,6 +329,8 @@ void ImageDraw::SltOnCreateClick(bool checked)
 		ui.btnNoGo->setEnabled(true);
 		ui.btnDoor->setEnabled(true);
 		ui.btnCarInt->setEnabled(true);
+		ui.btnRotate->setEnabled(true);
+		ui.btnSteps->setEnabled(true);
 	}
 	else
 	{
@@ -336,6 +338,8 @@ void ImageDraw::SltOnCreateClick(bool checked)
 		ui.btnNoGo->setEnabled(false);
 		ui.btnDoor->setEnabled(false);
 		ui.btnCarInt->setEnabled(false);
+		ui.btnRotate->setEnabled(false);
+		ui.btnSteps->setEnabled(false);
 	}
 }
 
