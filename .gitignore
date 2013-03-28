@@ -41,3 +41,5 @@ srv_gen/
 *Feedback.py
 *Result.py
 
+# Kubuntu specific files
+.directory
