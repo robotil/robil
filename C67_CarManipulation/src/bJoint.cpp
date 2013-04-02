@@ -59,18 +59,14 @@ void SetJointStates(const sensor_msgs::JointState::ConstPtr &_js)
 
 		// print current state
 		std::cout << "Current Position:\n";
-		IkSolution IkCurrent = IkSolution(_js->position[q4r],_js->position[q5r],
-			_js->position[q6r],	_js->position[q7r], _js->position[q8r], _js->position[q9r]);
-		IkCurrent.Print();	
-		RPY rCurrent = rPose(_js->position[q1], _js->position[q2],_js->position[q3],IkCurrent);
-		rCurrent.Print();
+		std::cout << "q1-q3:"<<" "<<_js->position[q1]<<" "<<_js->position[q2]<<" "<<_js->position[q3]<<"\n";
 
 		// print target
-		if (use_arg)
-		{
-			std::cout << "Target:\n";
-			argTarget.Print();
-		}		
+//		if (use_arg)
+//		{
+//			std::cout << "Target:\n";
+//			argTarget.Print();
+//		}
 	}	
 	
 }
@@ -78,21 +74,22 @@ void SetJointStates(const sensor_msgs::JointState::ConstPtr &_js)
 int main(int argc, char** argv)
 {
 	int pointsNum;
-	double seconds; 
-	if (argc == 9)
+	double seconds;
+	double angleVal[3] = {0};
+
+	if (argc == 4)
 	{
-		double dubGet[6];
-		for (int i=0; i<6; i++)
-		{
-			dubGet[i] = boost::lexical_cast<double>(argv[i+1]);
-		}
-		argTarget = RPY(dubGet[0],dubGet[1], dubGet[2], dubGet[3], dubGet[4], dubGet[5]);
-		seconds =  boost::lexical_cast<double>(argv[7]);
-		pointsNum = boost::lexical_cast<int>(argv[8]);
+		int		intGet;
+		double 	dubGet;
+
+		angleVal[0] = boost::lexical_cast<double>(argv[1]);
+		angleVal[1] = boost::lexical_cast<double>(argv[2]);
+		angleVal[2] = boost::lexical_cast<double>(argv[3]);
+
 		use_arg = true;
 	}
    
-  ros::init(argc, argv, "pub_path_command_rhand");
+  ros::init(argc, argv, "pub_joint_command_back");
 
   ros::NodeHandle* rosnode = new ros::NodeHandle();
 
@@ -209,59 +206,27 @@ int main(int argc, char** argv)
 			// check if no arguments			
 			if (!use_arg) break;			
 						
-			IkSolution IkCurrent = IkSolution(state[q4r], state[q5r], state[q6r], state[q7r],
-				state[q8r], state[q9r]);
-			IkSolution IkNext = rSearchSolution(state[q1], state[q2], state[q3], argTarget);
-			
-			// check if solution valid
-			if (IkNext.valid)
+
+
+			for (unsigned int j=0; j<jointcommands.name.size(); j++)
 			{
-				// print solution		
-				std::cout << "Solution/Command:\n";			
-				IkNext.Print();		
-				RPY r = rPose(state[q1], state[q2], state[q3], IkNext);
-				r.Print();	
-				std::cout << "error: " << IkNext.error << std::endl;
-			}
-			else
-			{
-				std::cout << "No Solution.\n";
-				break;
+				jointcommands.position[j] = state[j];
+				//std::cout << state[j] << " ";
 			}
 			
-			pPathPoints points = pPathPoints(IkCurrent, IkNext, pointsNum);
+			jointcommands.position[q1] = angleVal[0];
+			jointcommands.position[q2] = angleVal[1];
+			jointcommands.position[q3] = angleVal[2];
 			
-//			for (unsigned int j=0; j<jointcommands.name.size(); j++)
-//				{
-//					//jointcommands.position[j] = state[j];
-//					std::cout << state[j] << " ";
-//				}			
+			//ROS_INFO("");
+			//std::cout << i <<": ";
+			//points.Array[i].Print();
+			// print current state
+			std::cout << "New Position:\n";
+			std::cout << "q1-q3:"<<" "<<angleVal[0]<<" "<<angleVal[1]<<" "<<angleVal[2]<<"\n";
+			pub_joint_commands_.publish(jointcommands);
+
 			
-			for (int i=0; i<N; i++)
-			{
-				// ros::spinOnce();
-				// assign current joint angles 
-				for (unsigned int j=0; j<jointcommands.name.size(); j++)
-				{
-					jointcommands.position[j] = state[j];
-					//std::cout << state[j] << " ";
-				}
-				
-				jointcommands.position[q4r] = points.pArray[i]._q4;
-				jointcommands.position[q5r] = points.pArray[i]._q5;
-				jointcommands.position[q6r] = points.pArray[i]._q6;
-				jointcommands.position[q7r] = points.pArray[i]._q7;
-				jointcommands.position[q8r] = points.pArray[i]._q8;
-				jointcommands.position[q9r] = points.pArray[i]._q9;
-				
-				//ROS_INFO("");
-				//std::cout << i <<": ";				
-				//points.Array[i].Print();
-				
-				pub_joint_commands_.publish(jointcommands);					
-					
-				ros::Duration(seconds/pointsNum).sleep();
-			}
 			break;
 		}
 		ros::Duration(0.1).sleep();
