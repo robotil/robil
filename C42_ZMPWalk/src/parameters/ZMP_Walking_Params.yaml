@@ -1,0 +1,61 @@
+zmp_walking:
+  type: " "
+  joints:
+    - l_leg_uhz
+    - l_leg_mhx
+    - l_leg_lhy
+    - l_leg_kny
+    - l_leg_uay
+    - l_leg_lax
+    - r_leg_uhz
+    - r_leg_mhx
+    - r_leg_lhy
+    - r_leg_kny
+    - r_leg_uay
+    - r_leg_lax
+    - l_arm_usy
+    - l_arm_shx
+    - l_arm_ely
+    - l_arm_elx
+    - l_arm_uwy
+    - l_arm_mwx
+    - r_arm_usy
+    - r_arm_shx
+    - r_arm_ely
+    - r_arm_elx
+    - r_arm_uwy
+    - r_arm_mwx
+    - neck_ay
+    - back_lbz
+    - back_mby
+    - back_ubx
+  IK_zero_pose:
+    l_leg_uhz:  0.0
+    l_leg_mhx:  0.0
+    l_leg_lhy: -0.13
+    l_leg_kny:  0.13
+    l_leg_uay:  0.0
+    l_leg_lax:  0.0
+    r_leg_uhz:  0.0
+    r_leg_mhx:  0.0
+    r_leg_lhy: -0.13
+    r_leg_kny:  0.13
+    r_leg_uay:  0.0
+    r_leg_lax:  0.0
+    l_arm_usy:  0.0
+    l_arm_shx:  0.0
+    l_arm_ely:  0.0
+    l_arm_elx:  0.0
+    l_arm_uwy:  0.0
+    l_arm_mwx:  0.0
+    r_arm_usy:  0.0
+    r_arm_shx:  0.0
+    r_arm_ely:  0.0
+    r_arm_elx:  0.0
+    r_arm_uwy:  0.0
+    r_arm_mwx:  0.0
+    neck_ay:    0.0
+    back_lbz:   0.0
+    back_mby:   0.0
+    back_ubx:   0.0
+ 
