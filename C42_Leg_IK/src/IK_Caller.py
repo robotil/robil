@@ -236,10 +236,11 @@ def LEG_IK():
     ns.JC = JointCommands_msg_handler()
     ns.RL = robot_listner()
 
-    # zmp_walking_path = os.path.join(roslib.packages.get_pkg_dir('C42_ZMPWalk'),'ZMP_Walking_Params.yaml')
-    # zmp_walking_params_file = file(zmp_walking_path)
-    # ns.joints_offset = yaml.load(yaml_file)
-    ns.joints_offset = rospy.get_param("/zmp_walking/IK_zero_pose")
+    zmp_walking_path = os.path.join(roslib.packages.get_pkg_dir('C42_ZMPWalk'), r"src/parameters/",'ZMP_Walking_Params.yaml')
+    zmp_walking_params_file = file(zmp_walking_path)
+    ns.joints_offset = yaml.load(zmp_walking_params_file)
+    ns.joints_offset = ns.joints_offset['zmp_walking']['IK_zero_pose']
+    #ns.joints_offset = rospy.get_param("/zmp_walking/IK_zero_pose")
     
     rospy.loginfo( "LEG_IK node is ready" )
     rospy.loginfo( "waiting 1 seconds for robot to initiate" )
