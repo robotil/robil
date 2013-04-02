@@ -4,7 +4,10 @@ echo Start the skill4 test
 
 CURR_WD=$PWD
 PKILLS=$CURR_WD'/.skill4_test1.txt'
-#rm $PKILLS
+if [ -f "$PKILLS" ]
+    then
+       rm $PKILLS
+fi
 
 #roslaunch atlas_utils atlas_drc_vehicle_fire_hose.launch &
 source /usr/share/drcsim/setup.sh
