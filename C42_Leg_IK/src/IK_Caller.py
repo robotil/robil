@@ -33,6 +33,7 @@ from pylab import *
 from leg_ik_func import swing_leg_ik,stance_leg_ik
 from IKException import IKReachException
 from geometry_msgs.msg import *
+import yaml
 import copy
 
 class Nasmpace: pass
@@ -234,7 +235,12 @@ def LEG_IK():
     rospy.init_node('LEG_IK')
     ns.JC = JointCommands_msg_handler()
     ns.RL = robot_listner()
+
+    # zmp_walking_path = os.path.join(roslib.packages.get_pkg_dir('C42_ZMPWalk'),'ZMP_Walking_Params.yaml')
+    # zmp_walking_params_file = file(zmp_walking_path)
+    # ns.joints_offset = yaml.load(yaml_file)
     ns.joints_offset = rospy.get_param("/zmp_walking/IK_zero_pose")
+    
     rospy.loginfo( "LEG_IK node is ready" )
     rospy.loginfo( "waiting 1 seconds for robot to initiate" )
     yaml_pth = os.path.join(roslib.packages.get_pkg_dir('C42_DRCSim2_tools'),'calibrated_controller_drc2_yuval.yaml')
