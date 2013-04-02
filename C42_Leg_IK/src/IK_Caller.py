@@ -27,7 +27,7 @@ from foot_contact_filter import contact_filter
 from std_msgs.msg import Float64
 #from sensor_msgs.msg import *
 from C42_ZMPWalk.msg import walking_trajectory
-import rospy, math, sys
+import rospy, math, sys, os
 from Impedance_Control import Joint_Stiffness_Controller , Joint_Stiffness_Controller_2 , Position_Stiffness_Controller, Position_Stiffness_Controller_2
 from pylab import *
 from leg_ik_func import swing_leg_ik,stance_leg_ik
@@ -236,11 +236,12 @@ def LEG_IK():
     ns.JC = JointCommands_msg_handler()
     ns.RL = robot_listner()
 
-    # zmp_walking_path = os.path.join(roslib.packages.get_pkg_dir('C42_ZMPWalk'), r"src/parameters/",'ZMP_Walking_Params.yaml')
-    # zmp_walking_params_file = file(zmp_walking_path)
-    # ns.joints_offset = yaml.load(zmp_walking_params_file)
-    # ns.joints_offset = ns.joints_offset['zmp_walking']['IK_zero_pose']
-    ns.joints_offset = rospy.get_param("/zmp_walking/IK_zero_pose")
+    # Loading IK off-set values (These values represent the "zero pose" of the IK. They need to be added to the position calc. from the IK )
+    zmp_walking_path = os.path.join(roslib.packages.get_pkg_dir('C42_ZMPWalk'), r"src/parameters/",'ZMP_Walking_Params.yaml')
+    zmp_walking_params_file = file(zmp_walking_path)
+    ns.joints_offset = yaml.load(zmp_walking_params_file)
+    ns.joints_offset = ns.joints_offset['zmp_walking']['IK_zero_pose']
+    # ns.joints_offset = rospy.get_param("/zmp_walking/IK_zero_pose")
     
     rospy.loginfo( "LEG_IK node is ready" )
     rospy.loginfo( "waiting 1 seconds for robot to initiate" )
@@ -264,8 +265,7 @@ def LEG_IK():
     sub1=rospy.Subscriber("zmp_out", walking_trajectory, get_from_zmp) # traj, get_from_zmp)
     sub2=rospy.Subscriber("joint_states", JointState, get_joint_states)
 
-
-
+    # TODO: get the following values from initialization using a TOPIC with a flag to pause until Robot State static init is completed
     back_lbz = 0.0
     back_mby = 0.0#0.03#0.08# 0.06
     back_ubx = 0
