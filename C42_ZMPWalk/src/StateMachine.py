@@ -6,6 +6,10 @@
 # The code in this file is provided "as is" and comes with no warranty whatsoever
 ###################################################################################
 
+###################################################################################
+#--------------------------- Exception -------------------------------------------
+###################################################################################
+
 class StateMachineError(Exception):
     """
         For information as to why the exception was raised, see StateMachineError.Message attribute
@@ -13,6 +17,10 @@ class StateMachineError(Exception):
     def __init__(self,strMessage):
         self.Message = strMessage
     
+###################################################################################
+#--------------------------- State -----------------------------------------------
+###################################################################################
+
 class State(object):
     """
         The State class is intended to be used with the StateMachine class,
@@ -25,6 +33,10 @@ class State(object):
         pass
     def OnExit(self):
         pass
+
+###################################################################################
+#--------------------------- State Machine ----------------------------------------
+###################################################################################
 
 class StateMachine(object):
     """

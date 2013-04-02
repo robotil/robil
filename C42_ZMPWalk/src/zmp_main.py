@@ -31,6 +31,7 @@ import tf
 import copy
 from robot_state import Robot_State
 from StepStateMachine import *
+from ZmpLocalPathPlanner import *
 from sensor_msgs.msg import Imu #Odometry
 
 class namespace: pass
@@ -103,6 +104,8 @@ ZmpStateMachine = StepStateMachine(rs,out,ns.listener,Preview_Sagital_x,Preview_
 
 ZmpStateMachine.Initialize()
 
+ZmpLpp = LocalPathPlanner()
+
 # Main Loop
 while not rospy.is_shutdown():
     
@@ -111,12 +114,15 @@ while not rospy.is_shutdown():
     else:
         ZmpStateMachine.Stop()
         
+#    if (ZmpLpp.UpdatePosition(x,y)):
+#        ZmpStateMachine.Stop()
     p_ref_x,p_ref_y = ZmpStateMachine.UpdatePreview()
     [COMx, COMx_dot, p_pre_con_x] = Sagital_x_Preview_Controller.getCOM_ref( p_ref_x )
     [COMy, COMy_dot, p_pre_con_y] = Lateral_y_Preview_Controller.getCOM_ref( p_ref_y )
     rs.getRobot_State(listener = ns.listener)
     ZmpStateMachine.CalculateFootSwingTrajectory()
-    out = ZmpStateMachine.GetWalkingTrajectory(COMx, COMx_dot, p_pre_con_x,COMy, COMy_dot, p_pre_con_y,p_ref_x,p_ref_y,ns.Des_Orientation,ns.imu_orientation)
+    requiredYaw = ZmpLpp.GetTargetYaw()
+    out = ZmpStateMachine.GetWalkingTrajectory(COMx, COMx_dot, p_pre_con_x,COMy, COMy_dot, p_pre_con_y,p_ref_x,p_ref_y,requiredYaw,ns.imu_orientation)
     pub_zmp.publish(out)
     
     interval.sleep()
