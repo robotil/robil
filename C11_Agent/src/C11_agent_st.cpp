@@ -10,6 +10,7 @@
 #include "C10_Common/pause_mission.h"
 #include "C10_Common/resume_mission.h"
 #include "C10_Common/execution_status_change.h"
+#include "C10_Common/path_update.h"
 //#include "C11_Agent/ask_for_image.h"
 //#include "C11_Agent/set_forbidden_are.h"
 //#include "C11_Agent/override_local_path.h"
@@ -20,6 +21,7 @@
 #include "C34_Executer/stop.h"
 #include "C34_Executer/resume.h"
 #include "C34_Executer/pause.h"
+#include "C31_PathPlanner/C31_Waypoints.h"
 #include <sstream>
 #include <stdlib.h>
 
@@ -28,6 +30,7 @@ ros::Subscriber status_subscriber;
 std::string tree_id_str;
 ros::ServiceClient c34StopClient;
 ros::ServiceClient c11ExecutionStatusChangeClient;
+ros::Publisher path_update_pub;
 
 
 //bool PathPlan(C11_Agent::C11::Request& req,
@@ -179,6 +182,14 @@ bool ResumeMission(C10_Common::resume_mission::Request& req,
   }
 }
 
+bool PathUpdate(C10_Common::path_update::Request& req,
+                C10_Common::path_update::Response& res)
+{
+          path_update_pub.publish(req.PTH);
+          res.ACK.mes = 1;
+          return true;
+}
+
 
 //bool AskForImage(C11_Agent::ask_for_image::Request& req,
 //		C11_Agent::ask_for_image::Response& res)
@@ -205,10 +216,13 @@ int main(int argc, char **argv)
    
 //   ros::Publisher stt_pub = n.advertise<C11_Agent::C34C11_STT>("c11_stt", 1000);
 
+     path_update_pub = n.advertise<C31_PathPlanner::C31_Waypoints>("c11_path_update",10000);
+
 //   ros::ServiceServer service = n.advertiseService("PathPlan", PathPlan);
    ros::ServiceServer service_MissionSelection = n.advertiseService("MissionSelection", MissionSelection);
    ros::ServiceServer service_PauseMission = n.advertiseService("PauseMission", PauseMission);
    ros::ServiceServer service_ResumeSelection = n.advertiseService("ResumeMission", ResumeMission);
+   ros::ServiceServer service_PathUpdate = n.advertiseService("PathUpdate", PathUpdate);
 //   ros::ServiceServer service_AskForImage = n.advertiseService("AskForImage", AskForImage);
 
    ros::Rate loop_rate(10);

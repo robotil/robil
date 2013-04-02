@@ -276,11 +276,12 @@ void CMapMain::setMode(ModeDraw m,QVector<QPointF> vecPoints)
                       {
                         deleteReadyPath();
                       }
-                    if(routePath != NULL)
+                      if(routePath != NULL)
                       {
                         deletePath();
                       }
-            IsPathChanged = true;
+                        IsPathChanged = true;
+                        emit SigOperatorAction();
 			routePath = new CRouteItem(ui.graphicsView->scene());
 			ui.graphicsView->scene()->addItem(routePath);
 			break;
@@ -382,7 +383,6 @@ bool CMapMain::eventFilter(QObject *o, QEvent* e)
 	{
 		case QEvent::GraphicsSceneMouseDoubleClick:
 		{
-			QGraphicsSceneMouseEvent* event = static_cast<QGraphicsSceneMouseEvent*>(e);
 			stopDrawing();
 			return true;
 			break;
@@ -404,7 +404,6 @@ bool CMapMain::eventFilter(QObject *o, QEvent* e)
 		}
 		case QEvent::GraphicsSceneMouseRelease:
 		{
-			QGraphicsSceneMouseEvent* event = static_cast<QGraphicsSceneMouseEvent*>(e);
 			releasePoint();
 			return true;
 			break;
@@ -448,6 +447,7 @@ void CMapMain::MovePoint(QPointF p)
 		if(routeSelected == routePathReady)
 		{
 			IsPathChanged = true;
+			emit SigOperatorAction();
 		}
 	}
 	else
@@ -468,6 +468,7 @@ void CMapMain::MoveLine(QPointF p)
 		if(routeSelected == routePathReady)
 		{
 			IsPathChanged = true;
+			emit SigOperatorAction();
 		}
 	}
 }
@@ -587,7 +588,6 @@ void CMapMain::selectPoint()
 											if(!b)
 											{
 												b = checkSelectedArc();
-												int y=0;
 											}
 										}
 									}
@@ -655,6 +655,8 @@ void CMapMain::releasePoint()
 						routeSelected->ReleasePoint();
 					break;
 				}
+			default:
+			      break;
 			}
 		}
 		Moving = false;
@@ -698,9 +700,11 @@ QPointF CMapMain::PointToPix(StructPoint point)
 
 StructPoint CMapMain::PixToPoint(QPointF pix)
 {
+        std::cout<<"pixX: "<<pix.x()<<" pixY: "<<pix.y()<<"\n";
 	StructPoint point;
-	point.x = RobotPos.x - ((pix.x() - 400 - 50)/(-32));
-	point.y = RobotPos.y -+ ((pix.y() + 160 - 930)/(32));
+	point.x = RobotPos.x - ((pix.x() - 400 - 50)/(32));
+	point.y = RobotPos.y + ((pix.y() + 160 - 930)/(32));
+	point.y *= -1;
 	std::cout<<"WorldPosX: "<<point.x<<" WorldPosY: "<<point.y<<"\n";
 	return point;
 }
@@ -729,24 +733,26 @@ void CMapMain::SetEditable(bool value)
 	IsEditable = value;
 }
 
-void CMapMain::RequestUpdates()
+std::vector<StructPoint> CMapMain::GetUpdatedRoute()
 {
-	if(IsPathChanged)
-	{
-		StructPoint p;
-		for(int i=0; i<routePathReady->GetNumOfPoints(); i++)
-		{
-			p = PixToPoint(routePathReady->GetPoint(i));
-			if(!IsPointInPath(p))
-			{
-				LastUpdatedRoute.push_back(p);
-			}
-		}
-		if(!LastUpdatedRoute.empty())
-		{
-			emit SigSendPathUpdate(LastUpdatedRoute);
-		}
-	}
+        std::cout<<"GetUpdatedRoute \n";
+        if(IsPathChanged)
+        {
+                StructPoint p;
+                for(int i=0; i<routePathReady->GetNumOfPoints(); i++)
+                {
+                        p = PixToPoint(routePathReady->GetPoint(i));
+                        if(!IsPointInPath(p))
+                        {
+                                LastUpdatedRoute.push_back(p);
+                        }
+                }
+                if(!LastUpdatedRoute.empty())
+                {
+                        std::cout<<"LastUpdatedRoute not empty \n";
+                }
+        }
+        return LastUpdatedRoute;
 }
 
 bool CMapMain::IsPointsEqual(StructPoint p1, StructPoint p2)
