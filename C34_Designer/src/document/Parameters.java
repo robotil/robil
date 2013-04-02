@@ -25,7 +25,7 @@ public class Parameters {
 	public static String log_disabled_tags = "";
 	public static String stack_stream_topic = "stack_stream";
 	public static String stop_stream_topic = "stop_stream";
-	public static boolean compact_stack_message = true;
+	public static boolean compact_stack_message = false;
 
 	public static boolean set(String key, String value) {
 		Class<Parameters> pclass = Parameters.class;
