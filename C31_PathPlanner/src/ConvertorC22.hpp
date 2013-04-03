@@ -135,7 +135,7 @@ static Gps2Grid extractLocation(C22_GroundRecognitionAndMapping::C22::Response &
 //		ROS_INFO("... new data converted : gps point = %f,%f  related to  grid cell = %i,%i",  gps.x, gps.y,  wp.x, wp.y);
 //	}
 //	return Gps2Grid(gps,wp);
-	extractLocation(res.drivingPath, prop);
+	return extractLocation(res.drivingPath, prop);
 };
 
 static MapProperties extractMapProperties(C22_GroundRecognitionAndMapping::C22::Response &res){
@@ -160,7 +160,7 @@ static MapProperties extractMapProperties(C22_GroundRecognitionAndMapping::C22::
 //		ROS_INFO("... new data converted : new map anchor is ( cell = 0,0 gps = %f,%f )",  gps.x, gps.y);
 //	}
 //	return MapProperties(cell_resolution_in_meters, gps, wp);
-	extractMapProperties(res.drivingPath);
+	return extractMapProperties(res.drivingPath);
 };
 
 
