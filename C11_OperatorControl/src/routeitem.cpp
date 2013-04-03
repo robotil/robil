@@ -108,6 +108,7 @@ void CRouteItem::addPointToLine(QPointF p,bool ShowLines)
 			currentItemList->getNextLineItem()->addPointItem1(p);
 		}
 	}
+	points[numOfPoints] = p;
 	numOfPoints++;
 }
 bool CRouteItem::isPointOnEdge(CLineItemList *ItmList,QPointF p)

@@ -22,9 +22,8 @@ public slots:
 	void SltOnPlayPauseClick(bool);
 	void SltOnCreateClick(bool);
 	void SltOnPathClick(bool);
+	void SltOperatorAction();
 	void SltOnWaitTimeout();
-
-	void SltOnPathUpdate(std::vector<StructPoint> points);
 
 signals:
 	void SigOnNewImg(QImage img);

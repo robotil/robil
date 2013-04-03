@@ -3,6 +3,7 @@
 #include <cv_bridge/cv_bridge.h>
 #include <opencv/highgui.h>
 #include "structs.h"
+#include "C31_PathPlanner/C31_Waypoints.h"
 #include "C11_Node.h"
 
 //void C11_Node::viewImage(const sensor_msgs::ImageConstPtr& msg);
@@ -290,7 +291,20 @@ void C11_Node::Pause()
 
 void C11_Node::SendPathUpdate(std::vector<StructPoint> points)
 {
-
+        std::cout<<"Send path update with: " << points.size() <<"points \n";
+        C10_Common::path_update pu;
+//        C31_PathPlanner::C31_Waypoints waypoints;
+        C31_PathPlanner::C31_Location location;
+        for(int i=0; i<points.size(); i++)
+          {
+            location.x = points[i].x;
+            location.y = points[i].y;
+            pu.request.PTH.points.push_back(location);
+          }
+        if(!PathUpdateClient.call(pu))
+        {
+            ROS_ERROR("Failed to call service C11_Agent::path_update");
+        }
 }
 
 /*int main(int argc, char **argv)
