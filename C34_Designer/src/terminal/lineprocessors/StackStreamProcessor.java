@@ -5,6 +5,7 @@ import terminal.communication.CompactStackStreamMessageParser;
 import terminal.communication.MessageParser;
 import terminal.communication.StackStreamMessage;
 import terminal.communication.StackStreamMessageParser;
+import terminal.communication.UniversalStackStreamMessageParser;
 import windows.designer.BTDesigner;
 import document.Document;
 import document.Parameters;
@@ -18,14 +19,16 @@ public class StackStreamProcessor implements LineProcessor {
 	public StackStreamProcessor(BTDesigner designer) {
 		this._designer = designer;
 		
-		if (Parameters.compact_stack_message) {
-			_messageParser = new CompactStackStreamMessageParser();
-			Log.i("STACKSTREAM", "Using compact stack stream message parser");
-		}
-		else {
-			_messageParser = new StackStreamMessageParser();
-			Log.i("STACKSTREAM", "Using regular stack stream message parser");
-		}
+//		if (Parameters.compact_stack_message) {
+//			_messageParser = new CompactStackStreamMessageParser();
+//			Log.i("STACKSTREAM", "Using compact stack stream message parser");
+//		}
+//		else {
+//			_messageParser = new StackStreamMessageParser();
+//			Log.i("STACKSTREAM", "Using regular stack stream message parser");
+//		}
+		_messageParser = new UniversalStackStreamMessageParser();
+		Log.i("STACKSTREAM", "Using universal stack stream message parser");
 	}
 	
 	@Override
