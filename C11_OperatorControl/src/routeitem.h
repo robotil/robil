@@ -26,6 +26,7 @@ public:
 	void drawReadyPolygon(QVector<QPointF> vec_p, bool b);
 	QPointF GetPoint(int index);
 	int GetNumOfPoints();
+	QVector<QPointF> getRoutePoints();
 
 private:
 	CLineItemList *pFirstLineItemList;

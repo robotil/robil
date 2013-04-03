@@ -46,6 +46,36 @@ CRouteItem::~CRouteItem()
 		delete curLineItem;	
 	}
 }
+
+QVector<QPointF> CRouteItem::getRoutePoints()
+{
+	QPointF p;
+	QVector<QPointF> pointVec;	
+	CLineItemList *prevLineItem = NULL;
+
+	if(pFirstLineItemList != NULL)
+	{
+		CLineItemList *curLineItem = pFirstLineItemList;
+		for(int i=0; i<numOfPoints; i++)
+		{
+			prevLineItem = curLineItem;
+
+			if(curLineItem->getNextLineItem()!=NULL)
+			{
+				curLineItem = curLineItem->getNextLineItem();
+				p = prevLineItem->getLineItem()->getPointItem1()->getPoint();
+				pointVec.insert(i,p);
+			}
+			else
+			{
+				p = curLineItem->getLineItem()->getPointItem1()->getPoint();
+				pointVec.insert(i,p);
+			}
+		}	
+	}
+	return pointVec;
+}
+
 QRectF CRouteItem::boundingRect()  const
 {
     return QRectF(0, 0, 950, 1000);
@@ -108,7 +138,6 @@ void CRouteItem::addPointToLine(QPointF p,bool ShowLines)
 			currentItemList->getNextLineItem()->addPointItem1(p);
 		}
 	}
-	points[numOfPoints] = p;
 	numOfPoints++;
 }
 bool CRouteItem::isPointOnEdge(CLineItemList *ItmList,QPointF p)
