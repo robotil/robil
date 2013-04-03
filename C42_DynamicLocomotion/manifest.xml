@@ -14,10 +14,9 @@
   <depend package="std_msgs"/>
   <depend package="geometry_msgs"/>
   <depend package="control_msgs"/>
-  <depend package="pr2_mechanism_msgs"/>
   <depend package="C31_PathPlanner"/>
   <depend package="C42_DRCSim2_tools"/>
-  <depend package="zmp_walk"/>
+  <depend package="C42_ZMPWalk"/>
 </package>
 
 
