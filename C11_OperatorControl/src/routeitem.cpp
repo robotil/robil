@@ -108,6 +108,7 @@ void CRouteItem::addPointToLine(QPointF p,bool ShowLines)
 			currentItemList->getNextLineItem()->addPointItem1(p);
 		}
 	}
+	points[numOfPoints] = p;
 	numOfPoints++;
 }
 bool CRouteItem::isPointOnEdge(CLineItemList *ItmList,QPointF p)
@@ -386,4 +387,22 @@ void CRouteItem::updatePolygonPoints(QPointF p,QPointF pNew)
 		if(points[i] == p)
 			points[i] = pNew;
 	}
+}
+
+QPointF CRouteItem::GetPoint(int index)
+{
+	if(index < numOfPoints)
+	{
+		return points[index];
+	}
+	else
+	{
+		QPointF p(0,0);
+		return p;
+	}
+}
+
+int CRouteItem::GetNumOfPoints()
+{
+	return numOfPoints;
 }
