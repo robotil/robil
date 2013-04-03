@@ -138,6 +138,86 @@ ModeDraw CMapMain::getMode()
 {
 	return mode;
 }
+QVector<QPointF> CMapMain::getRoutePath()
+{
+	QVector<QPointF> vecPoints;
+
+	if(routePath!=NULL)
+	{
+		vecPoints = routePath->getRoutePoints();
+	}
+	else
+	{
+		if(routePathReady!=NULL)
+		{
+			vecPoints = routePathReady->getRoutePoints();
+		}
+	}
+	
+	return vecPoints;
+}
+QVector<QPointF> CMapMain::getRoute(ModeDraw route)
+{
+	QVector<QPointF> vecPoints;
+
+	switch(route)
+	{
+	case E_READY_POLYGON_MODE:
+		{
+			if(routePolygonReady!=NULL)
+			{
+				vecPoints = routePolygonReady->getRoutePoints();	
+			}
+			break;
+		}
+	case E_READY_PATH_MODE:
+		{
+			if(routePathReady!=NULL)
+			{
+				vecPoints = routePathReady->getRoutePoints();
+			}
+			break;
+		}
+		case E_READY_STEPS_MODE:
+		{
+			if(routeStepsReady!=NULL)
+			{
+				vecPoints = routeStepsReady->getRoutePoints();
+			}
+			break;
+		}
+		case E_PATH_MODE:
+		{
+			if(routePath!=NULL)
+			{
+				vecPoints = routePath->getRoutePoints();
+			}
+			break;
+		}
+	case E_STEPS_MODE:
+		{
+			if(routeSteps!=NULL)
+			{
+				vecPoints = routeSteps->getRoutePoints();
+			}
+			break;
+		}
+	case E_POLYGON_MODE:
+		{
+			if(routePolygon!=NULL)
+			{
+				vecPoints = routePolygon->getRoutePoints();
+			}
+			break;
+		}
+	default:
+		{
+			
+			break;
+		}
+	} 
+	return vecPoints;
+}
 void CMapMain::setMode(ModeDraw m)
 {
 	QVector<QPointF> vecP;
@@ -738,10 +818,11 @@ std::vector<StructPoint> CMapMain::GetUpdatedRoute()
         std::cout<<"GetUpdatedRoute \n";
         if(IsPathChanged)
         {
+                QVector<QPointF> vec = getRoutePath();
                 StructPoint p;
-                for(int i=0; i<routePathReady->GetNumOfPoints(); i++)
+                for(int i=0; i<vec.size(); i++)
                 {
-                        p = PixToPoint(routePathReady->GetPoint(i));
+                        p = PixToPoint(vec[i]);
                         if(!IsPointInPath(p))
                         {
                                 LastUpdatedRoute.push_back(p);

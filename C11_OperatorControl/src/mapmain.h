@@ -54,6 +54,8 @@ public:
 	void deleteRoute(ModeDraw m);
 	void SetEditable(bool value);
 	std::vector<StructPoint> GetUpdatedRoute();
+	QVector<QPointF> getRoutePath();
+	QVector<QPointF> getRoute(ModeDraw route);
 
 private:
 	Ui::CMapMainClass ui;
