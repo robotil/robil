@@ -185,6 +185,7 @@ bool ResumeMission(C10_Common::resume_mission::Request& req,
 bool PathUpdate(C10_Common::path_update::Request& req,
                 C10_Common::path_update::Response& res)
 {
+          ROS_INFO("path update received\n");
           path_update_pub.publish(req.PTH);
           res.ACK.mes = 1;
           return true;
