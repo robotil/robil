@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
 from collections import deque
+import math
 
 ###################################################################################
 # File created by David Dovrat, 2013.
@@ -79,7 +80,7 @@ class Segment(object):
             Returns the yaw in radians  - TODO - What a=is the coordinate system?
         """
         u = [self._Target.GetX() - self._Source.GetX(),self._Target.GetY() - self._Source.GetY()]
-        _u_ = sqrt(u[0]**2+u[1]**2)
+        _u_ = math.sqrt(u[0]**2+u[1]**2)
         
         if (_u_>0):
             u = [u[0]/_u_, u[1]/_u_]
