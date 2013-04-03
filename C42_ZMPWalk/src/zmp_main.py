@@ -109,7 +109,7 @@ while not rospy.is_shutdown():
     if(ns.walk):
         ZmpStateMachine.Start()
     else:
-        ZmpStateMachine.Stop()
+        ZmpStateMachine.EmergencyStop()
         
     p_ref_x,p_ref_y = ZmpStateMachine.UpdatePreview()
     [COMx, COMx_dot, p_pre_con_x] = Sagital_x_Preview_Controller.getCOM_ref( p_ref_x )
