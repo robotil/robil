@@ -226,14 +226,14 @@ public class Task extends GElement implements View.ChangesListener {
 		// Lookup table override *********************************************************
 		// *******************************************************************************
 		if (this.isTaskType() && this.isOverrided()) {
-			
+			int iconSize = 20;
 			cnt = getLocation().getPoint();
 			g.drawImage(
 					LINK_IMAGE, 
-					cnt.x + (int)getSize().x - (int)(16.0 * this.view.zoom) / 2, 
-					cnt.y - (int)(16.0 * this.view.zoom) / 2, 
-					(int)(16.0 * this.view.zoom), 
-					(int)(16.0 * this.view.zoom), 
+					cnt.x + (int)getSize().x - (int)(iconSize * this.view.zoom) / 2, 
+					cnt.y - (int)(iconSize * this.view.zoom) / 2, 
+					(int)(iconSize * this.view.zoom), 
+					(int)(iconSize * this.view.zoom), 
 					null);
 		}
 		

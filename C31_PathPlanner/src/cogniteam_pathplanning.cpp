@@ -36,18 +36,27 @@
 using namespace std;
 
 // -------------------------- MAP ---------------------------------------------
-
-Map::Map(int w, int h):_w(w),_h(h){
+int Map::map_id_counter = 0;
+Map::Map(int w, int h):map_id(map_id_counter++), _w(w),_h(h){
 	_data.resize(_w*_h);
 	for(size_t i=0;i<_data.size();i++) _data[i]=ST_UNCHARTED;
 }
-Map::Map(int w, int h, char* cmap):_w(w),_h(h){
+Map::Map(int w, int h, char* cmap):map_id(map_id_counter++), _w(w),_h(h){
 	_data.resize(_w*_h);
 	for(size_t i=0;i<_data.size();i++) _data[i]=cmap[i];
 }
-Map::Map(const Map& map):_w(map._w),_h(map._h){
+Map::Map(const Map& map):map_id(map_id_counter++), _w(map._w),_h(map._h){
 	_data.resize(_w*_h);
 	for(size_t i=0;i<_data.size();i++) _data[i]=map._data[i];
+}
+
+const Map& Map::operator=(const Map& other){
+	_w = other._w; _h = other._h;
+	if(_data.size()!=other._data.size()){
+		_data.resize(_w*_h);
+	}
+	for(size_t i=0;i<_data.size();i++) _data[i]=other._data[i];
+	return *this;
 }
 
 ostream& operator<<(ostream& out, const Map& m){

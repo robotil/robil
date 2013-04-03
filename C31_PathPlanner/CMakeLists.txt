@@ -41,6 +41,11 @@ rosbuild_add_executable(planner_test src/planning_test.cpp)
 rosbuild_add_executable(planner_test src/cogniteam_pathplanning.cpp)
 rosbuild_add_executable(planner_test src/PField.cpp)
 
+
+rosbuild_add_executable(map_generator src/map_generator.cpp)
+rosbuild_add_executable(map_generator src/cogniteam_pathplanning.cpp)
+rosbuild_add_executable(map_generator src/PField.cpp)
+
 #rosbuild_add_executable(lpp src/lpp.cpp)
 #rosbuild_link_boost(lpp thread)
 
