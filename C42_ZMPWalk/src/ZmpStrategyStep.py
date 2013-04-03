@@ -34,6 +34,7 @@ class StepStrategy(object):
         self._pelvis_des = self._RobotState.place_in_Ori( 0, 0, 0 ) # pelvis desired rotation (0,0,0)<=>stand up straight
 
     def LoadNewStep(self,new_step_x,following_steps_cycle_x,new_step_y,following_steps_cycle_y):
+        rospy.loginfo("ZmpStrategyStep LoadNewStep: _DistanceRefX = %f, new_step_x[0] = %f, new_step_y[0] = %f" % (self._DistanceRefX, new_step_x[0], new_step_y[0]) )
         self._ZMP_Preview_BufferX.load_NewStep(new_step_x + self._DistanceRefX,following_steps_cycle_x)
         self._ZMP_Preview_BufferY.load_NewStep(new_step_y,following_steps_cycle_y)
 
