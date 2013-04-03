@@ -107,24 +107,43 @@ public:
     	//ros::this_node::getName()
     	
     	// TASK OUTPUT CHANNELS
+    	ROS_INFO("advertise service /planPath <C31_PathPlanner::C31_PlanPath> ");
     	ros::ServiceServer c31_PlanPath =
     			_node.advertiseService<C31_PathPlanner::C31_PlanPathRequest, C31_PathPlanner::C31_PlanPathResponse>(
     					STR(ros::this_node::getName()<<"/planPath"),boost::bind(&PathPlanningServer::srv_PlanPath,this,_1,_2)
     			);
+    	ROS_INFO("advertise service /getPath <C31_PathPlanner::C31_GetPath>");
     	ros::ServiceServer c31_GetPath =
     			_node.advertiseService<C31_PathPlanner::C31_GetPathRequest, C31_PathPlanner::C31_GetPathResponse>(
     					STR(ros::this_node::getName()<<"/getPath"),boost::bind(&PathPlanningServer::srv_GetPath,this,_1,_2)
     			);
+    	ROS_INFO("advertise topic /path <C31_PathPlanner::C31_Waypoints>");
     	ros::Publisher c32_PathPublisher =
     			_node.advertise<C31_PathPlanner::C31_Waypoints>("/path", 10);
 
 		//TASK INPUT CHANNELS
+    	ROS_INFO("subscribe to service /C22 <C22_GroundRecognitionAndMapping::C22>");
     	ros::ServiceClient c22Client = _node.serviceClient<C22_GroundRecognitionAndMapping::C22>("C22");
+    	
+		ROS_INFO("subscribe to topic /C22_pub <C22_GroundRecognitionAndMapping::C22C0_PATH>");
     	ros::Subscriber c22c0Client = _node.subscribe("C22_pub", 1000, &PathPlanningServer::callbackNewMap, this );
+    	
+		ROS_INFO("subscribe to topic /C23/object_deminsions <C23_ObjectRecognition::C23C0_ODIM>");
 		ros::Subscriber c23Client = _node.subscribe("C23/object_deminsions", 1000, &PathPlanningServer::callbackNewTargetLocation, this );
 
 		#define TURNON_REQUEST_MAP
 		//#define TURNON_REQUEST_TARGET_LOCATION
+		
+		#ifdef TURNON_REQUEST_MAP
+			ROS_INFO("TURNON_REQUEST_MAP is defined");
+		#else
+			ROS_INFO("TURNON_REQUEST_MAP is undefined");
+		#endif
+		#ifdef TURNON_REQUEST_TARGET_LOCATION
+			ROS_INFO("TURNON_REQUEST_TARGET_LOCATION is defined");
+		#else
+			ROS_INFO("TURNON_REQUEST_TARGET_LOCATION is undefined");
+		#endif
 		
         while(true){
             if (isPreempt()){
