@@ -111,9 +111,9 @@ while not rospy.is_shutdown():
     else:
         ZmpStateMachine.EmergencyStop()
         
-    p_ref_x,p_ref_y = ZmpStateMachine.UpdatePreview()
-    [COMx, COMx_dot, p_pre_con_x] = Sagital_x_Preview_Controller.getCOM_ref( p_ref_x )
-    [COMy, COMy_dot, p_pre_con_y] = Lateral_y_Preview_Controller.getCOM_ref( p_ref_y )
+    p_ref_x,p_ref_y,new_step_trigger_x,new_step_trigger_y = ZmpStateMachine.UpdatePreview()
+    [COMx, COMx_dot, p_pre_con_x] = Sagital_x_Preview_Controller.getCOM_ref( p_ref_x,new_step_trigger_x )
+    [COMy, COMy_dot, p_pre_con_y] = Lateral_y_Preview_Controller.getCOM_ref( p_ref_y,new_step_trigger_y )
     rs.getRobot_State(listener = ns.listener)
     ZmpStateMachine.CalculateFootSwingTrajectory()
     out = ZmpStateMachine.GetWalkingTrajectory(COMx, COMx_dot, p_pre_con_x,COMy, COMy_dot, p_pre_con_y,p_ref_x,p_ref_y,ns.Des_Orientation,ns.imu_orientation)

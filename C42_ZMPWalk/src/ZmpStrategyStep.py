@@ -26,6 +26,7 @@ class StepStrategy(object):
     def __init__(self,robotState,walkingTrajectory,transformListener,ZMP_Preview_BufferX,ZMP_Preview_BufferY):
         self._RobotState = robotState
         self._WalkingTrajectory = walkingTrajectory
+        self._WalkingTrajectory.step_length = 0.0
         self._TransformListener = transformListener
         self._DistanceRefX = 0
         self._ZMP_Preview_BufferX = ZMP_Preview_BufferX
@@ -33,15 +34,18 @@ class StepStrategy(object):
 
         self._pelvis_des = self._RobotState.place_in_Ori( 0, 0, 0 ) # pelvis desired rotation (0,0,0)<=>stand up straight
 
+        self._previous_step_length = 0.0
+
     def LoadNewStep(self,new_step_x,following_steps_cycle_x,new_step_y,following_steps_cycle_y):
         rospy.loginfo("ZmpStrategyStep LoadNewStep: _DistanceRefX = %f, new_step_x[0] = %f, new_step_y[0] = %f" % (self._DistanceRefX, new_step_x[0], new_step_y[0]) )
+        self._previous_step_length = self._WalkingTrajectory.step_length
         self._ZMP_Preview_BufferX.load_NewStep(new_step_x + self._DistanceRefX,following_steps_cycle_x)
         self._ZMP_Preview_BufferY.load_NewStep(new_step_y,following_steps_cycle_y)
 
     def UpdatePreview(self):
-        p_ref_x = self._ZMP_Preview_BufferX.update_Preview()
-        p_ref_y = self._ZMP_Preview_BufferY.update_Preview()
-        return p_ref_x,p_ref_y
+        p_ref_x,loaded_new_step_trigger_x = self._ZMP_Preview_BufferX.update_Preview()
+        p_ref_y,loaded_new_step_trigger_y = self._ZMP_Preview_BufferY.update_Preview()
+        return p_ref_x,p_ref_y,loaded_new_step_trigger_x,loaded_new_step_trigger_y
 
         
 #----------------------------------------------------------------------------------
@@ -68,7 +72,7 @@ class StepStrategyNone(StepStrategy):
         # init output message (before starting to walk)
         [stance_hip_0, swing_y_sign, swing_hip_dy]=self._RobotState.Get_foot_coord_params() # assumes start walking in step phase 1 (set in self._RobotState init)
 
-        self._WalkingTrajectory.step_length = step_length
+        self._WalkingTrajectory.step_length = 0.0
         self._WalkingTrajectory.step_width = step_width
         self._WalkingTrajectory.step_height = step_height
         self._WalkingTrajectory.zmp_width = zmp_width
@@ -126,7 +130,7 @@ class StepStrategyWalk(StepStrategy):
 
         self._WalkingTrajectory.swing_foot = copy.copy(self._swing_k)                              #added by Israel 24.2
         self._WalkingTrajectory.swing_foot.y = copy.copy(self._swing_foot_y)
-        self._WalkingTrajectory.stance_hip.x = COMx + self._stance_hip_0.x-D
+        self._WalkingTrajectory.stance_hip.x = COMx + self._stance_hip_0.x - self._previous_step_length/2 #-D #TODO: incorporate step_length of previous step in Robot State and include it in stance_hip_0.x (foot coord. change)
         self._WalkingTrajectory.stance_hip.y = COMy + self._stance_hip_0.y
         self._WalkingTrajectory.stance_hip.z = self._stance_hip_0.z
         
@@ -149,9 +153,11 @@ class StepStrategyWalk(StepStrategy):
         
         self._WalkingTrajectory.hip_z_orientation = self._OrientationCorrection.hip_z_orientation_correction(Des_Orientation,imu_orientation,k,dt,self._RobotState.Get_step_phase(),k_total,k_start_swing,k_stop_swing)
 
+        self._previous_iteration_step_length = copy.copy(self._WalkingTrajectory.step_length)
+
         return self._WalkingTrajectory
         
     def UpdatePreview(self):
-        p_ref_x,p_ref_y = StepStrategy.UpdatePreview(self)
+        p_ref_x,p_ref_y,loaded_new_step_trigger_x,loaded_new_step_trigger_y = StepStrategy.UpdatePreview(self)
         self._DistanceRefX = copy.copy(p_ref_x[0])
-        return p_ref_x,p_ref_y
+        return p_ref_x,p_ref_y,loaded_new_step_trigger_x,loaded_new_step_trigger_y

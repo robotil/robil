@@ -45,7 +45,7 @@ class StepState(State):
         
         # Step parameters
         self._fD = 0.0               # Distance? I don't know...
-        self._DistanceRefX = 0.0
+        #self._DistanceRefX = 0.0
         
         self._pre_step = 0
         self._first_step = 0
@@ -529,7 +529,7 @@ class StepStateMachine(StateMachine):
         # Add states
         StateMachine.AddState(self,InitializeStepState(self._StepStrategyNone,dt))
         StateMachine.AddState(self,FailureStepState(self._StepStrategyNone,dt))
-        StateMachine.AddState(self,PreStepState(self._StepStrategyNone,robotState,dt))
+        StateMachine.AddState(self,PreStepState(self._StepStrategyWalk,robotState,dt))
         StateMachine.AddState(self,FirstStepState(self._StepStrategyWalk,dt))
         StateMachine.AddState(self,PreStoppingFirstStepState(self._StepStrategyWalk,walkingTrajectory,robotState,dt))
         StateMachine.AddState(self,PreStoppingLeftStepState(self._StepStrategyWalk,walkingTrajectory,robotState,dt))
@@ -602,16 +602,16 @@ class StepStateMachine(StateMachine):
         #rospy.loginfo("UpdatePreview - StepTime(%f) Counter(%d) Timer(%f)" % (StateMachine.GetCurrentState(self).GetStepTime(),self._counter, self._counter*1.0/self._UpdateRateHz))
         if (StateMachine.GetCurrentState(self).GetStepTime() < self._counter*1.0/self._UpdateRateHz):
             self.NextStep()
-            p_ref_x,p_ref_y = StateMachine.GetCurrentState(self).UpdatePreview()
+            p_ref_x,p_ref_y,loaded_new_step_trigger_x,loaded_new_step_trigger_y = StateMachine.GetCurrentState(self).UpdatePreview()
             self._stepCounter = StateMachine.GetCurrentState(self).UpdateStepCounter(self._stepCounter)
             rospy.loginfo("done step number = %d" % (self._stepCounter))
             rospy.loginfo("time:")
             rospy.loginfo(rospy.get_time())
         else:
-            p_ref_x,p_ref_y = StateMachine.GetCurrentState(self).UpdatePreview()
+            p_ref_x,p_ref_y,loaded_new_step_trigger_x,loaded_new_step_trigger_y = StateMachine.GetCurrentState(self).UpdatePreview()
 
         self._counter = self._counter+1
-        return p_ref_x,p_ref_y  
+        return p_ref_x,p_ref_y,loaded_new_step_trigger_x,loaded_new_step_trigger_y  
 
 ###################################################################################
 # a little testing script
