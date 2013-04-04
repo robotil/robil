@@ -61,7 +61,7 @@ public class Document extends JPanel {
 	private static final long serialVersionUID = 2195280758622734696L;
 
 	enum TreeChangeType {
-		Add, AddArrow, Remove, RemoveArrow, SubTreeRemove, TreeCopy, ArrowModify
+		Add, AddArrow, Remove, RemoveArrow, SubTreeRemove, TreeCopy, ArrowModify, Modify
 	}
 
 	public static final String tabulation = "   ";
@@ -1091,14 +1091,11 @@ public class Document extends JPanel {
 		
 		if (!_treeChangeEvent) 
 			_treeChangeEvent = true;
-		
-
 	}
 	
 	void onTreeChange(TreeChangeType changeType, GElement element) {
 		_treeChangeNestingCounter--;
 		if (_treeChangeNestingCounter == 0)	
-
 			_treeChangeEvent = false;
 		
 		if (_historyManager.isReady() && !_buildTime && !_treeChangeEvent)
@@ -1119,12 +1116,20 @@ public class Document extends JPanel {
 		/**
 		 * Update lookup table overrides
 		 */
-		if (changeType == TreeChangeType.Add && element.isTaskType()) {
+		if (element.isTaskType()) {
 			if (_lookupTable.containsTask(element.getAsTask().getNameWithoutParameters()))
 				element.getAsTask().overrideTask(_lookupTable.getByTaskName(element.getAsTask().getNameWithoutParameters()));
 		}
 		
 		updateUndoRedoButtonsState();
+	}
+	
+	private void onTreeChange() {
+		updateOverrides();
+	}
+	
+	private void onBeforeTreeChange() {
+		
 	}
 
 	private void onDocumentLoad(String fileName) {
@@ -1183,7 +1188,6 @@ public class Document extends JPanel {
 	
 	public void onStop(StopStreamMessage message) {
 		Log.i("STOPSTREAM", "Plan execution finished [" + message.getFinishReason() + "]");
-		// _isRunning = false;
 		
 		_currentPlanExecution.stop(
 				findTaskById(message.getTargetTaskId()),
@@ -1193,7 +1197,10 @@ public class Document extends JPanel {
 		
 		_executionResults.add(_currentPlanExecution);
 
-		_planExecutionMessage = _currentPlanExecution.toString();
+		_planExecutionMessage = _currentPlanExecution.toString() + String.format("(%d)", message.getFinishCode());
+		
+		if (!message.getFinishReasonDescription().equals("")) 
+			_planExecutionMessage += ":" + message.getFinishReasonDescription();
 		
 		if (_currentPlanExecution.isFailure())
 			_planExecutionMessage = "$RED$" + _planExecutionMessage;
@@ -1201,8 +1208,8 @@ public class Document extends JPanel {
 		repaint();
 	}
 	
-	// ******************************paint****************************************************
-	// Misc
+	// **********************************************************************************
+	// ** Misc **************************************************************************
 	// **********************************************************************************
 	
 	private String _planExecutionMessage = "Idle";
@@ -1254,13 +1261,16 @@ public class Document extends JPanel {
 	}
 	
 	public void undo() {
-		try {
-			if (_historyManager.hasUndo())
+		onBeforeTreeChange();
+		if (_historyManager.hasUndo())
+			try {
 				_historyManager.undo();
-		} catch (Exception e) {
-			Log.e(e);
-			return; 
-		}
+			} catch (Exception e) {
+				Log.e(e);
+				return; 
+			} finally {
+				onTreeChange();
+			}
 		
 		_documentChanged = true;
 		
@@ -1269,12 +1279,15 @@ public class Document extends JPanel {
 	}
 	
 	public void redo() {
+		onBeforeTreeChange();
 		if (_historyManager.hasRedo())
 			try {
 				_historyManager.redo();
 			} catch (Exception e) {
 				Log.e(e);
 				return; 
+			} finally {
+				onTreeChange();
 			}
 		
 		_documentChanged = true;

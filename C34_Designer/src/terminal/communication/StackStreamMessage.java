@@ -5,7 +5,7 @@ package terminal.communication;
  * @author blackpc
  *
  */
-public class StackStreamMessage {
+public class StackStreamMessage implements IMessage<StackStreamMessage> {
 
 	public enum ChangeType {
 		TaskStarted(0),
@@ -147,6 +147,7 @@ public class StackStreamMessage {
 		return newMessage;
 	}
 
+	@Override
 	public void clone(StackStreamMessage message) {
 		setChangeType(message.getChangeType());
 		setPlanLabel(message.getPlanLabel());
