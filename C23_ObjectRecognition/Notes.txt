@@ -1,5 +1,12 @@
 C23 Object Recognition.
 ============================
+
+Version 1.0
+Please read the attached manual under docs (docs/manual.pdf)
+
+--------------
+
+
 Version: beta 0.05
 Changes:
 1. Added the new Polaris car to detection list.
@@ -16,7 +23,7 @@ call rosservice with the supplied plan: $> rosservice call /executer/run T plan.
 
 Expected behaviour: if you add the polaris car, and the robot sees the passenger side, it will print and broadcast the coordination.
 
-
+------------------
 Version: beta 0.03
 
 Changes from beta 0.02

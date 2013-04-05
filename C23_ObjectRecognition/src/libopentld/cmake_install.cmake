@@ -1,4 +1,4 @@
-# Install script for directory: /home/isl/darpa/c23_Object_Recognition/src/libopentld
+# Install script for directory: /home/lar1/Desktop/robilGitNew/robil/C23_ObjectRecognition/src/libopentld
 
 # Set the install prefix
 IF(NOT DEFINED CMAKE_INSTALL_PREFIX)

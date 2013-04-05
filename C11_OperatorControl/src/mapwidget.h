@@ -15,7 +15,6 @@ public:
 private:
 
 protected:
-	void mouseReleaseEvent ( QMouseEvent * event );
 };
 
 #endif // MAPWIDGET_H

@@ -1,0 +1,9 @@
+<plan descriptions="./plans/TaskDescriptions.xml">
+   <par name="mainMission" x="437.5" y="70.5" collapsed="false" id="b3ae4a16-7120-4fd8-b1a0-00d1bf633cb1"> 
+         <par name="mission" x="342.5" y="215.5" collapsed="false" id="abeb235f-5624-4349-a021-479e7328754d"> 
+               <tsk name="TimeoutMonitor(threshold=5)" x="216.5" y="306.5" test_time="0" test_result="true" id="96b8afdf-99ad-41b8-85a3-651cd59b56e4" />
+               <tsk name="StandUp" x="413.5" y="309.5" test_time="0" test_result="true" id="b1757ac2-2ce4-4c2e-abd0-400ba0bf9ef3" />
+         </par>
+         <tsk name="TimeoutMonitor(threshold=15)" x="543.5" y="216.5" test_time="0" test_result="true" id="bba66087-4318-4947-b908-6e2929e9d842" />
+   </par>
+</plan>

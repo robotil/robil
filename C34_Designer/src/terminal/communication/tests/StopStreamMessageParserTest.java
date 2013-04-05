@@ -39,4 +39,21 @@ public class StopStreamMessageParserTest {
 		assertEquals(PlanFinishReason.Failure, message.getFinishReason());
 		assertEquals("00fa77be-648c-4c24-a20f-3c53a371179e", message.getTargetTaskId());
 	}
+	
+	@Test
+	public void testParseFailureWithDescription() {
+		String testInputString = 
+				"data: ExeFinished: notification from EUrbCpdWWy\n" +
+				"Unknown():FAILURE(1000):Some strange reason;\n" + 
+				" Parallel(event1) [id=b056135a-e4e8-4ca6-8f02-86c0f16f03f6]:FAILURE(1);\n" + 
+				"  Task(Monitor(target=LiveLock)) [id=00fa77be-648c-4c24-a20f-3c53a371179e]:FAILURE(1):Task server is not connected.;";
+		
+		StopStreamMessage message = _parser.parse(testInputString);
+		
+		assertNotNull("Message is null", message);
+		assertEquals(PlanFinishReason.Failure, message.getFinishReason());
+		assertEquals("Some strange reason", message.getFinishReasonDescription());
+		assertEquals(1000, message.getFinishCode());
+		assertEquals("00fa77be-648c-4c24-a20f-3c53a371179e", message.getTargetTaskId());
+	}
 }

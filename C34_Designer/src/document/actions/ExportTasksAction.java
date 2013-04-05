@@ -3,7 +3,8 @@ package document.actions;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
-import document.BTDesigner;
+import windows.designer.BTDesigner;
+
 
 public class ExportTasksAction extends AbstractDesignerAction implements
 		ActionListener {
@@ -16,11 +17,11 @@ public class ExportTasksAction extends AbstractDesignerAction implements
 	public void actionPerformed(ActionEvent arg0) {
 
 		if (this.designer.getActiveTab() != null
-				&& this.designer.getActiveTab().doc != null) {
+				&& this.designer.getActiveTab().document != null) {
 			String fileName = Dialogs.saveFile("Export tasks", "");
 
 			if (!fileName.equals(""))
-				this.designer.getActiveTab().doc.exportTasks(fileName);
+				this.designer.getActiveTab().document.exportTasks(fileName);
 		}
 	}
 
