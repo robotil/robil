@@ -88,7 +88,9 @@ class StepState(State):
 
     def UpdatePreview(self):
         return self._Strategy.UpdatePreview()
-
+    
+    def GetId(self):
+        raise StepStateMachineError("Forgot to implement GetId did ya?!")
         
 #----------------------------------------------------------------------------------
 
@@ -99,6 +101,9 @@ class IdleStepState(StepState):
     """
     def __init__(self,StepStrategy,dt):
         StepState.__init__(self,"Idle",StepStrategy,dt)
+        
+    def GetId(self):
+        return 0
         
 #----------------------------------------------------------------------------------
 
@@ -114,6 +119,9 @@ class InitializeStepState(StepState):
         # moving to intial pose:
         init_pose()  # !!! need to disable tf listener drc2_tools to prevent clash !!!
         self._Strategy.Initialize(self._bend_knees)
+        
+    def GetId(self):
+        return 1
 
 #----------------------------------------------------------------------------------
 
@@ -125,6 +133,8 @@ class FailureStepState(StepState):
     def __init__(self,StepStrategy,dt):
         StepState.__init__(self,"Failing",StepStrategy,dt)
         
+    def GetId(self):
+        return -1
 #----------------------------------------------------------------------------------
 
 class PreStepState(StepState):
@@ -162,6 +172,9 @@ class PreStepState(StepState):
         rospy.loginfo("time:")
         rospy.loginfo(rospy.get_time())
 
+    def GetId(self):
+        return 2
+    
 #----------------------------------------------------------------------------------
 
 class FirstStepState(StepState):
@@ -186,6 +199,9 @@ class FirstStepState(StepState):
         stepCounter = stepCounter+1
         return stepCounter
 
+    def GetId(self):
+        return 3
+    
 #----------------------------------------------------------------------------------
 
 class PreStoppingFirstStepState(StepState):
@@ -204,6 +220,9 @@ class PreStoppingFirstStepState(StepState):
 
     def OnEnter(self):
         self._fD = self._WalkingTrajectory.com_ref.x+self._step_length/2
+        
+    def GetId(self):
+        return 14
 
 #----------------------------------------------------------------------------------
 
@@ -238,6 +257,9 @@ class StopLeftStepState(StepState):
         self._robotState.Set_step_phase(value = 3)
 
         self._Strategy.LoadNewStep(self._p_ref_x_stop, self._p_ref_const_zero, self._p_ref_y_stop, self._p_ref_const_zero)
+        
+    def GetId(self):
+        return 13
 
 #----------------------------------------------------------------------------------
 
@@ -272,6 +294,9 @@ class StopRightStepState(StepState):
         self._robotState.Set_step_phase(value = 1)
 
         self._Strategy.LoadNewStep(self._p_ref_x_stop, self._p_ref_const_zero, self._p_ref_y_stop, self._p_ref_const_zero)
+        
+    def GetId(self):
+        return 12    
 
 #----------------------------------------------------------------------------------
 
@@ -287,6 +312,9 @@ class PreStoppingLeftStepState(StepState):
     def OnEnter(self):
         self._fD = self._WalkingTrajectory.com_ref.x+self._step_length/2
 
+    def GetId(self):
+        return 6
+    
 #----------------------------------------------------------------------------------
 
 class PreStoppingRightStepState(StepState):
@@ -300,6 +328,9 @@ class PreStoppingRightStepState(StepState):
         
     def OnEnter(self):
         self._fD = self._WalkingTrajectory.com_ref.x+self._step_length/2
+        
+    def GetId(self):
+        return 7
 
 #----------------------------------------------------------------------------------
 
@@ -320,6 +351,9 @@ class EmergencyStopState(StepState):
     def OnEnter(self):
         self._fD = self._WalkingTrajectory.com_ref.x+self._step_length/2
 
+    def GetId(self):
+        return 15
+    
 #----------------------------------------------------------------------------------
 
 class StoppingLeftStepState(StepState):
@@ -351,6 +385,9 @@ class StoppingLeftStepState(StepState):
         self._robotState.Set_step_phase(value = 3)
         self._Strategy.LoadNewStep(self._p_ref_x_forward_step, r_[self._p_ref_x_forward_step, self._p_ref_x_stop], self._p_ref_y_step_right,r_[self._p_ref_y_step_left, self._p_ref_y_stop])
 
+    def GetId(self):
+        return 9
+    
 #----------------------------------------------------------------------------------
 
 class PreStopLeftStepState(StepState):
@@ -384,6 +421,9 @@ class PreStopLeftStepState(StepState):
         self._robotState.Set_step_phase(value = 3)
         self._Strategy.LoadNewStep(self._p_ref_x_forward_step, r_[self._p_ref_x_stop, self._p_ref_const_zero], self._p_ref_y_step_right,r_[self._p_ref_y_stop, self._p_ref_const_zero])
 
+    def GetId(self):
+        return 10
+    
 #----------------------------------------------------------------------------------
 
 class StoppingRightStepState(StepState):
@@ -415,6 +455,9 @@ class StoppingRightStepState(StepState):
         self._robotState.Set_step_phase(value = 1)
         self._Strategy.LoadNewStep(self._p_ref_x_forward_step, r_[self._p_ref_x_forward_step, self._p_ref_x_stop], self._p_ref_y_step_left,r_[self._p_ref_y_step_right, self._p_ref_y_stop])
 
+    def GetId(self):
+        return 8
+    
 #----------------------------------------------------------------------------------
 
 class PreStopRightStepState(StepState):
@@ -448,6 +491,9 @@ class PreStopRightStepState(StepState):
         self._robotState.Set_step_phase(value = 1)
         self._Strategy.LoadNewStep(self._p_ref_x_forward_step, r_[self._p_ref_x_stop, self._p_ref_const_zero], self._p_ref_y_step_left,r_[self._p_ref_y_stop, self._p_ref_const_zero])
 
+    def GetId(self):
+        return 11
+    
 #----------------------------------------------------------------------------------
 
 class RightStepState(StepState):
@@ -477,6 +523,9 @@ class RightStepState(StepState):
         stepCounter = stepCounter+1
         return stepCounter
                 
+    def GetId(self):
+        return 5
+    
 #----------------------------------------------------------------------------------
 
 class LeftStepState(StepState):
@@ -505,6 +554,8 @@ class LeftStepState(StepState):
         stepCounter = stepCounter+1
         return stepCounter
    
+    def GetId(self):
+        return 4
 
 ###################################################################################
 #--------------------------- State Machine ----------------------------------------
@@ -612,6 +663,8 @@ class StepStateMachine(StateMachine):
 
         self._counter = self._counter+1
         return p_ref_x,p_ref_y,loaded_new_step_trigger_x,loaded_new_step_trigger_y  
+    def GetStateId(self):
+        return StateMachine.GetCurrentState(self).GetId()
 
 ###################################################################################
 # a little testing script
