@@ -10,15 +10,13 @@ from computeTree import *
 from RobilTaskPy import *
 
 
-TASK_RESULT_REJECT=1
-TASK_RESULT_OK=0
-TASK_RESULT_PLAN=-1
 DEFAULT_THRESHOLD_TIME = 10000	#Should not be used!
+DEADLINE = 30
 
 
 	
 
-class MonitorTimeServer(RobilTask):
+class MonitorProgressServer(RobilTask):
     _startTime = 0.0
     _monitoredNodeId = ""
     _monitoredTaskFinishedOnTime = False
@@ -26,10 +24,11 @@ class MonitorTimeServer(RobilTask):
     _nodeStartTimesById = {}
     _nodeExecutionTimesById = {}
     _thresholdTime = DEFAULT_THRESHOLD_TIME
+    _priorE = 0.0
  
 
     def __init__(self,event_file,name):
-        print "TIME MONITOR SERVER STARTED"
+        print "PROGRESS MONITOR SERVER STARTED"
         rospy.Subscriber("/executer/stack_stream", String, self.callback)
         constructTree(event_file)		
         RobilTask.__init__(self, name)
@@ -45,17 +44,19 @@ class MonitorTimeServer(RobilTask):
         self._monitoredNodeId = parameters['param']
         
         #calc self._monitoredNodeId attributs (prob, sd, E) from the ORIGINAL tree - NOT DEBUG MODE 
-        (prob, sd, E) = getNodeInfo(self._monitoredNodeId)
+        (prob, std, E) = getNodeInfo(self._monitoredNodeId)
+        self._priorE = E
    	  # if the node existes--> it has attrib E-> suppose to be always true- unless we're not consistent with the event- get the time.      
         if E!=None:
-		self._thresholdTime = E * 1.3
-		rospy.loginfo("Monitored Node is:%s, with threshold time:%f",self._monitoredNodeId,self._thresholdTime)
+            self._thresholdTime = E * 1.3
+            rospy.loginfo("Monitored Node is:%s, with threshold time:%f",self._monitoredNodeId,self._thresholdTime)
+            self.progressEstimation(std, E, DEADLINE, DEADLINE)
         else:
-		rospy.loginfo("ERROR: Can't find monitored node with id:%s", self._monitoredNodeId)
+            rospy.loginfo("ERROR: Can't find monitored node with id:%s", self._monitoredNodeId)
         
         # the monitor loop - run as long as: self._monitoredNodeId didn't pass self._thresholdTime
         while ((not rospy.is_shutdown()) 
-        and ((time.time() - self._nodeStartTimesById.get(self._monitoredNodeId, self._startTime)) < self._thresholdTime) 
+#        and ((time.time() - self._nodeStartTimesById.get(self._monitoredNodeId, self._startTime)) < self._thresholdTime) 
         and (not self._monitoredTaskFinishedOnTime)):
             rospy.sleep(0.2)
             
@@ -93,14 +94,14 @@ class MonitorTimeServer(RobilTask):
             #local var -temp
             nodeTime = current_time - start_time
 
-            print "Added debug info: ***[%s]***" % (str(node_success) + " " + str(nodeTime))
             #calc self._monitoredNodeId attributs (prob, sd, E) from the tree IN DEBUG MODE, AFTER UPDATING THE REAL TIME
-            (prob, sd, E) = nodeDataInDebugMode(nodeTime,node_success,node_id, self._monitoredNodeId, 100 )
-            
-            if self._monitoredNodeId:
-			self._thresholdTime = E * 1.3
-			print "Updated threshold time of monitored node to:%f" % self._thresholdTime
-
+            (prob, std, E) = nodeDataInDebugMode(nodeTime,node_success,node_id, self._monitoredNodeId, 100 )
+            self._thresholdTime = E * 1.3
+            self.progressEstimation(std, E, DEADLINE, self._priorE)
+#            if self._monitoredNodeId:
+#			self._thresholdTime = E * 1.3
+#			print "Updated threshold time of monitored node to:%f" % self._thresholdTime
+                
 #			print "Node with id=%s has ended after %f seconds" % (node_id, self._node_execution_times_by_id[node_id])
             if self._monitoredNodeId == node_id:    
 			rospy.loginfo("The node we are monitoring has ended! Time:%f, Node_id:%s",self._nodeExecutionTimesById.get(node_id),self._monitoredNodeId)
@@ -117,9 +118,25 @@ class MonitorTimeServer(RobilTask):
   
   
  
-		
-		
-		
+    def progressEstimation (self, std, E, deadLine, PriorE ):
+       print "bla"
+       K = 1
+       #Current expected completion time + K*std >= deadline : we are highly likely not to make it
+       if ((E+K*std)>=deadLine):
+           print "we are highly likely not to make it.."
+       #Current expected completion time >= deadline: only 50% that we make it    
+       elif (E>= deadline):
+           print "only 50% that we make it.."
+       #Current expected completion time - K*std >= deadline: there is a reasonable chance that we will not make it    
+       elif ((E-K*std)>=deadLine):    
+           print "there is a reasonable chance that we will make it.."
+       
+       #Current expected completion time > Prior expected completion time + K*std: we are progressing slower than expected
+       if (E > (PriorE + K*std)):
+           print "we are progressing slower than expected"
+       #Current expected completion time < Prior expected completion time - K*std: we are progressing faster than expected    
+       elif (E > (PriorE - K*std)):
+           print "we are progressing faster than expected"    
 	
 	
     

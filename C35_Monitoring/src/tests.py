@@ -1242,11 +1242,12 @@ def test32():
     if monitordNode:
         print "Success probability in offline mode monitor: Mission: %f" % monitordNode.getProbAtIndex(0)
         print "Average success time monitor: Mission= %f" % monitordNode.getAverageSuccTime(0)
+        print "SD success time monitor: Mission= %f" % monitordNode.getSDSuccTime(0)
     monitordNode=tree.getWrappedNode("b9e18714-4869-422c-bc38-cb2dca88c530")
     if monitordNode:
         print "Success probability in offline mode monitor: ExitFromCar: %f" % monitordNode.getProbAtIndex(0)
         print "Average success time monitor: ExitFromCar= %f" % monitordNode.getAverageSuccTime(0)
-    
+        print "SD success time monitor: Mission= %f" % monitordNode.getSDSuccTime(0)
     root.treeToXml("output/skill4_after_run.xml") 
     print("test 32.2: success!")
     print "Success probability in offline mode - root: %f" % root.getChild(0).getProbAtIndex(0)
