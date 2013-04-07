@@ -2,8 +2,8 @@
 #include <QPainter>
 #include <QGraphicsScene>
 
-CLineItemList::CLineItemList(QPointF p,bool ShowLines,QGraphicsScene* scene)
-	:LineItem(p,p,scene)
+CLineItemList::CLineItemList(QPointF p,bool ShowLines,QGraphicsScene* scene, QColor c)
+	:LineItem(p,p,scene,c)
 {
 	pNextLineItemList = NULL;
 	pScene = scene;
@@ -15,6 +15,7 @@ CLineItemList::CLineItemList(QPointF p,bool ShowLines,QGraphicsScene* scene)
 	update();
 	pScene->update();
 	pPointPressedInLine = NULL;
+	penColor = c;
 }
 CLineItemList::~CLineItemList()
 {
@@ -33,7 +34,7 @@ void CLineItemList::addPointItem1(QPointF p)
 
 	if(pNextLineItemList==NULL)
 	{
-		pNextLineItemList = new CLineItemList(p,b_ShowLines,pScene);
+		pNextLineItemList = new CLineItemList(p,b_ShowLines,pScene,penColor);
 		if(b_ShowLines)
 			pScene->addItem(pNextLineItemList);
 

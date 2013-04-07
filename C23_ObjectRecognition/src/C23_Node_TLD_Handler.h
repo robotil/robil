@@ -49,6 +49,7 @@ class C23_Node_TLD_Handler {
         
     private:
         int getBBFromUser(IplImage*img, CvRect &rect);
+        
 
 };
 

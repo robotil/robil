@@ -3,7 +3,8 @@ package document.actions;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
-import document.BTDesigner;
+import windows.designer.BTDesigner;
+
 import document.Document;
 import document.Parameters;
 
@@ -23,7 +24,7 @@ public class SaveXMLAction extends AbstractDesignerAction implements
 					Parameters.path_to_plans);
 
 		} else if (e.getActionCommand().equals("file_save")) {
-			Document document = getActiveTab().doc;
+			Document document = getActiveTab().document;
 			fileName = document.getAbsoluteFilePath();
 		}
 
@@ -32,7 +33,7 @@ public class SaveXMLAction extends AbstractDesignerAction implements
 		}
 		
 		// savePlan(fileName);
-		getActiveTab().doc.save(fileName);
+		getActiveTab().document.save(fileName);
 	}
 
 	private void savePlan(String path) {
@@ -40,7 +41,7 @@ public class SaveXMLAction extends AbstractDesignerAction implements
 		// "Save Plan",
 		// JOptionPane.ERROR_MESSAGE);
 		// return;
-		getActiveTab().doc.compile(path, true, true);
+		getActiveTab().document.compile(path, true, true);
 		// document.setCurrentWorkingFile(path);
 	}
 }

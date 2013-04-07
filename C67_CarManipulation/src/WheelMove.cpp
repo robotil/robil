@@ -266,7 +266,7 @@ int main(int argc, char** argv)
 				jointcommands.position[q8l] = lIkCurrent._q8 + i*lIkDelta._q8/2;
 				jointcommands.position[q9l] = lIkCurrent._q9 + i*lIkDelta._q9/2;
 				pub_joint_commands_.publish(jointcommands);
-				sleep(Delay[callback_called]/2);
+				sleep(Delay[callback_called]/N);
 				//std::cout << i << std::endl;
  				
 			}

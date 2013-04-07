@@ -1,3 +1,26 @@
 #!/bin/bash
-function test_file { c="rosrun C31_PathPlanner planner_test $@"; f=test_result_MAP_1_FROM_$1_$2_TO_$3_$4; echo $c > $f; $c >> $f; }
-while read line;do test_file $line; done
+function test_file { 
+	map=$5.grid 
+	c="rosrun C31_PathPlanner planner_test $1 $2 $3 $4 $map $6"; 
+	f=test_result_MAP_$5_FROM_$1_$2_TO_$3_$4_RR_$6; 
+	echo $c > $f; 
+	$c >> $f; 
+}
+
+function phelp {
+	echo "create test files"
+	echo "Syntax 1: cat points | ./create_tests"
+	echo "Syntax 2: ./create_tests points"
+	echo "Syntax of points file:"
+	echo "    from_x from_y to_x to_y map_file_name_without_extention number_of_celles_for_inflation"
+	exit 0
+}
+
+if [[ $@ = '-h' ]];then phelp; fi
+if [[ $@ = '-help' ]];then phelp; fi
+
+if [[ $# = '0' ]];then 
+	while read line;do if [[ $(echo $line | wc -w) = '0' ]];then continue; else test_file $line;fi; done
+else 
+	cat $1 | while read line;do if [[ $(echo $line | wc -w) = '0' ]];then continue; else test_file $line;fi; done
+fi

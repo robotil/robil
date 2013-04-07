@@ -3,9 +3,10 @@ package document.actions;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
-import document.BTDesigner;
+import windows.designer.BTDesigner;
+
 import document.Document;
-import document.Toolbar;
+import document.ui.Toolbar;
 
 public class CopyTreeAction extends AbstractDesignerAction implements
 		ActionListener {
@@ -16,7 +17,7 @@ public class CopyTreeAction extends AbstractDesignerAction implements
 
 	@Override
 	public void actionPerformed(ActionEvent a) {
-		Document document = getActiveTab().doc;
+		Document document = getActiveTab().document;
 		document.toolSelectionClean();
 		document.copyElement = true;
 		this.designer.toolbar.setTipText(Toolbar.TIP_copy);

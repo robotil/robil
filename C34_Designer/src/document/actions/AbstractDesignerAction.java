@@ -3,7 +3,8 @@ package document.actions;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
-import document.BTDesigner;
+import windows.designer.BTDesigner;
+
 
 /**
  * An abstract designer action listener, use it if your action listener utilize

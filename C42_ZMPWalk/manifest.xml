@@ -11,6 +11,7 @@
   <depend package="std_msgs"/>
   <depend package="rospy"/>
   <depend package="tf"/>
+  <depend package="C42_DRCSim2_tools"/>
 
 </package>
 

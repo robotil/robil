@@ -306,7 +306,7 @@ Matrix RPY::FromRPY()
 
 void RPY::Print()
 {
-	std::cout << "RPY(" << x << ", "<< y << ", " << z << ", " << R << ", " << P << ", " << Y << ")\n";
+	std::cout << "RPY(" << x << " "<< y << " " << z << " " << R << " " << P << " " << Y << ")\n";
 }
 
 

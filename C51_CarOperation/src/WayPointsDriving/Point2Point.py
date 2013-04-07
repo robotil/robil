@@ -88,17 +88,17 @@ class MemberFunc():
         
 #--------------------Define Membership Functions Variables ----------------------------------#
 
-OrientationMF= [ MemberFunc([-180,  -180,  -90,  -60]),  MemberFunc([-70,  -30,  -20]),  MemberFunc([-40,  0,  40]),  MemberFunc([20,  30,  70]),  MemberFunc([60,  90,  180,  180])]#[VNO NO ZO PO VPO]   
+OrientationMF= [ MemberFunc([-1,  -1,  -(60.0/180.0),  -(30.0/180.0)]),  MemberFunc([-(60.0/180.0),  -(30.0/180.0),  0]),  MemberFunc([-(5.0/180.0),  0,  (5.0/180.0)]),  MemberFunc([0,  30.0/180.0,  60.0/180.0]),  MemberFunc([30.0/180.0, 60.0/180.0,  1,  1])]#[VNO NO ZO PO VPO]   
 
 #Distance
-DistanceMF= [ MemberFunc([0, 0,  1, 2]),  MemberFunc([1,  3, 5]),   MemberFunc([4,  7,  100000,  100000])] #[CLOSE FAR VFAR] 
+DistanceMF= [ MemberFunc([0, 0,  3.5, 7]),  MemberFunc([3.5,  13.5, 23.5]),   MemberFunc([20,  30,  100000,  100000])] #[CLOSE FAR VFAR] 
 
 #Speed
 SpeedMF = [ MemberFunc([1,  1.5,  2]) ,  MemberFunc([1.5,  2.25,  3]),   MemberFunc([2.5,  6,  6])] #[SLOW  FAST  VFAST ]
 
 
 #Circular Speed
-CircularSpeedMF = [ MemberFunc([-12,  -9,  -6]),  MemberFunc([-4,  -2,  0]),  MemberFunc([-2,  0,  2]),  MemberFunc([0,  2,  4]),   MemberFunc([6,   9,  12])] # [HL L  ST  R  HR]
+CircularSpeedMF = [ MemberFunc([-15,  -10,  -5]),  MemberFunc([-7.5,  -3,  0]),  MemberFunc([-1,  0,  1]),  MemberFunc([0,  5,  10]),   MemberFunc([3,   7.5,  15])] # [HL L  ST  R  HR]
 
 #-------------------End of Definition --------------------------------------------------------------#
 
@@ -119,7 +119,10 @@ RuleArray=[
 # -------------------------End of Rules -------------------------------------------------------------#
 
 def P2P(Distance, dOrientation):
-        
+        SF=-1.0/90.0/360.0*Distance+19.0/(18.0*180)
+        #SF = 1/180
+        if SF<1.0/360.0:
+            SF=1.0/360.0
         OrientationMFflag=[0, 0, 0, 0, 0]
         DistanceMFflag=[0, 0, 0]
         SpeedMFflag = [0, 0, 0]
@@ -130,6 +133,11 @@ def P2P(Distance, dOrientation):
             dOrientation-=360
         if dOrientation<-180:
             dOrientation+=360
+        dOrientation = dOrientation*SF
+        if dOrientation>1:
+            dOrientation=1
+        if dOrientation<-1:
+            dOrientation=-1
         #print "Distance %f, Orientation %f" %(Distance, dOrientation)
         pos=0
         for i in OrientationMF: #Define which Membership functions of the Orientation are relevant
@@ -190,10 +198,11 @@ def P2P(Distance, dOrientation):
                 
                 SpeedArea+=Area
                 SpeedMoment+=Area*CM
-        
-	if SpeedArea!=0:
-           speed=SpeedMoment/SpeedArea
+        speed = 0
+        CircularSpeed = 0
+        if SpeedArea!=0:
+            speed=SpeedMoment/SpeedArea
         if CSpeedArea!=0:
-	   CircularSpeed=CSpeedMoment/CSpeedArea
+            CircularSpeed=CSpeedMoment/CSpeedArea
         #print "Moment %f Area %f" %(CSpeedMoment, CircularSpeedArea)
         return [speed, CircularSpeed] 

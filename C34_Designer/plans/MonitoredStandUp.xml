@@ -1,0 +1,8 @@
+<plan descriptions="./plans/TaskDescriptions.xml">
+   <par name="mission" x="249.5" y="61.5" collapsed="false" id="abeb235f-5624-4349-a021-479e7328754d"> 
+         <tsk name="FallingMonitor" x="61.5" y="181.5" test_time="0" test_result="true" id="56b8afdf-99ad-41b8-85a3-651cd59b56e4" />
+         <tsk name="StabilityMonitor" x="188.0" y="248.5" test_time="0" test_result="true" id="44b8afdf-99ad-41b8-85a3-651cd59b56e4" />
+         <tsk name="TimeoutMonitor(threshold=25)" x="321.5" y="175.5" test_time="0" test_result="true" id="96b8afdf-99ad-41b8-85a3-651cd59b56e4" />
+         <tsk name="StandUp" x="528.5" y="249.5" test_time="0" test_result="true" id="b1757ac2-2ce4-4c2e-abd0-400ba0bf9ef3" />
+   </par>
+</plan>
