@@ -33,32 +33,32 @@ atlas_controller:
   gains:
 
     l_leg_uhz: {p:  8000.0,   d:   0.0,  i:   0.0,    i_clamp:    0.0 }
-    l_leg_mhx: {p:  5000.0,   d:   0.0,  i:  50.0,    i_clamp:   50.0 }
+    l_leg_mhx: {p:  7000.0,   d:   0.5,  i:  150.0,    i_clamp:   150.0 }
     l_leg_lhy: {p:  5000.0,   d:   0.2,  i:  50.0,    i_clamp:   50.0 }
     l_leg_kny: {p:  5000.0,   d:   0.4,  i: 500.0,    i_clamp:  150.0 }
     l_leg_uay: {p:  7000.0,   d:   1.5,  i: 150.0,    i_clamp:   50.0 }
-    l_leg_lax: {p:  5500.0,   d:   0.2,  i: 150.0,    i_clamp:   50.0 }
+    l_leg_lax: {p:  6500.0,   d:   0.6,  i: 150.0,    i_clamp:   150.0 }
 
     r_leg_uhz: {p:  8000.0,   d:   0.0,  i:   0.0,    i_clamp:    0.0 }
-    r_leg_mhx: {p:  5000.0,   d:   0.0,  i:  50.0,    i_clamp:   50.0 }
+    r_leg_mhx: {p:  7000.0,   d:   0.5,  i:  150.0,    i_clamp:   150.0 }
     r_leg_lhy: {p:  5000.0,   d:   0.2,  i:  50.0,    i_clamp:   50.0 }
     r_leg_kny: {p:  5000.0,   d:   0.4,  i: 500.0,    i_clamp:  150.0 }
     r_leg_uay: {p:  7000.0,   d:   1.5,  i: 150.0,    i_clamp:   50.0 }
-    r_leg_lax: {p:  5500.0,   d:   0.2,  i: 150.0,    i_clamp:   50.0 }
+    r_leg_lax: {p:  6500.0,   d:   0.6,  i: 150.0,    i_clamp:   150.0 }
 
-    l_arm_usy: {p:  2000.0, d:   3.0, i:   0.0, i_clamp:    0.0}
-    l_arm_shx: {p:  1000.0, d:  20.0, i:   0.0, i_clamp:    0.0}
-    l_arm_ely: {p:   200.0, d:   3.0, i:   0.0, i_clamp:    0.0}
-    l_arm_elx: {p:   200.0, d:   3.0, i:   0.0, i_clamp:    0.0}
-    l_arm_uwy: {p:    50.0, d:   0.1, i:   0.0, i_clamp:    0.0}
-    l_arm_mwx: {p:   100.0, d:   0.2, i:   0.0, i_clamp:    0.0}
+    l_arm_usy: {p:  1000.0, d:   30.0, i:   50.0, i_clamp:    0.0}
+    l_arm_shx: {p:  150.0, d:  13.0, i:   50.0, i_clamp:    0.0}
+    l_arm_ely: {p:   800.0, d:   3.0, i:   1.0, i_clamp:    0.0}
+    l_arm_elx: {p:   400.0, d:   3.0, i:   150.0, i_clamp:    0.0}
+    l_arm_uwy: {p:    150.0, d:   0.1, i:   0.0, i_clamp:    0.0}
+    l_arm_mwx: {p:   300.0, d:   0.2, i:   0.0, i_clamp:    0.0}
 
-    r_arm_usy: {p:  2000.0, d:   3.0, i:   0.0, i_clamp:    0.0}
-    r_arm_shx: {p:  1000.0, d:  20.0, i:   0.0, i_clamp:    0.0}
-    r_arm_ely: {p:   200.0, d:   3.0, i:   0.0, i_clamp:    0.0}
-    r_arm_elx: {p:   200.0, d:   3.0, i:   0.0, i_clamp:    0.0}
-    r_arm_uwy: {p:    50.0, d:   0.1, i:   0.0, i_clamp:    0.0}
-    r_arm_mwx: {p:   100.0, d:   0.2, i:   0.0, i_clamp:    0.0}
+    r_arm_usy: {p:  1000.0, d:   30.0, i:   50.0, i_clamp:    0.0}
+    r_arm_shx: {p:  150.0, d:  13.0, i:   50.0, i_clamp:    0.0}
+    r_arm_ely: {p:   800.0, d:   3.0, i:   1.0, i_clamp:    0.0}
+    r_arm_elx: {p:   400.0, d:   3.0, i:   150.0, i_clamp:    0.0}
+    r_arm_uwy: {p:    150.0, d:   0.1, i:   0.0, i_clamp:    0.0}
+    r_arm_mwx: {p:   300.0, d:   0.2, i:   0.0, i_clamp:    0.0}
 
     neck_ay:   {p:   200.0, d:  1.0, i:   0.0, i_clamp:    0.0}
 

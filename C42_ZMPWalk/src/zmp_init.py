@@ -42,13 +42,13 @@ def init_pose():
     l_arm_usy = 0.9
     l_arm_shx = -1.35
     l_arm_ely = 2.3
-    l_arm_elx = 1.7
+    l_arm_elx = 1.6
     l_arm_uwy = 0
     l_arm_mwx = 0.0
     r_arm_usy = 0.9
     r_arm_shx = 1.35
     r_arm_ely = 2.3
-    r_arm_elx = -1.7
+    r_arm_elx = -1.6
     r_arm_uwy = 0
     r_arm_mwx = 0.0
 
