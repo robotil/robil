@@ -67,7 +67,7 @@ class StepStrategyNone(StepStrategy):
     def CalculateFootSwingTrajectory(self,step_time,step_length,step_width,step_height,dt,pre_step,first_step,full_step,last_step,k,k_total,k_start_swing,k_stop_swing):
         pass 
     
-    def GetWalkingTrajectory(self,COMx, COMx_dot, p_pre_con_x,COMy, COMy_dot, p_pre_con_y,p_ref_x,p_ref_y,D,step_length,step_width,step_height,zmp_width,step_time,bend_knees,Des_Orientation,imu_orientation,k,dt,k_total,k_start_swing,k_stop_swing):
+    def GetWalkingTrajectory(self,COMx, COMx_dot, p_pre_con_x,COMy, COMy_dot, p_pre_con_y,p_ref_x,p_ref_y,step_length,step_width,step_height,zmp_width,step_time,bend_knees,Des_Orientation,imu_orientation,k,dt,k_total,k_start_swing,k_stop_swing):
 
         # init output message (before starting to walk)
         [stance_hip_0, swing_y_sign, swing_hip_dy]=self._RobotState.Get_foot_coord_params() # assumes start walking in step phase 1 (set in self._RobotState init)
@@ -118,7 +118,7 @@ class StepStrategyWalk(StepStrategy):
         [self._swing_k, lifting_swing_foot] = self._SwingTrajectory.Get_swing_foot_traj(k, step_time, robot_foot_state, step_length,self._swing_foot_y,step_height,dt,pre_step,first_step,full_step,last_step,k_total,k_start_swing,k_stop_swing)
         self._RobotState.Set_step_phase( foot_lift = lifting_swing_foot )
     
-    def GetWalkingTrajectory(self,COMx, COMx_dot, p_pre_con_x,COMy, COMy_dot, p_pre_con_y,p_ref_x,p_ref_y,D,step_length,step_width,step_height,\
+    def GetWalkingTrajectory(self,COMx, COMx_dot, p_pre_con_x,COMy, COMy_dot, p_pre_con_y,p_ref_x,p_ref_y,step_length,step_width,step_height,\
         zmp_width,step_time,bend_knees,Des_Orientation,imu_orientation,k,dt,k_total,k_start_swing,k_stop_swing):
 
         self._WalkingTrajectory.step_length = step_length

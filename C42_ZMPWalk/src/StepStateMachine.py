@@ -44,7 +44,7 @@ class StepState(State):
         self._Strategy = StepStrategy
         
         # Step parameters
-        self._fD = 0.0               # Distance? I don't know...
+        # self._fD = 0.0     #!!! moved into preview_controller !!!#        # Distance? I don't know...
         #self._DistanceRefX = 0.0
         
         self._pre_step = 0
@@ -83,7 +83,7 @@ class StepState(State):
 
     def GetWalkingTrajectory(self,COMx, COMx_dot, p_pre_con_x,COMy, COMy_dot, p_pre_con_y,p_ref_x,p_ref_y,Des_Orientation,imu_orientation,k,dt):
         return self._Strategy.GetWalkingTrajectory(COMx, COMx_dot, p_pre_con_x,COMy, COMy_dot, p_pre_con_y,p_ref_x,p_ref_y, \
-            self._fD,self._step_length,self._step_width,self._step_height,self._zmp_width,self._step_time,self._bend_knees, \
+            self._step_length,self._step_width,self._step_height,self._zmp_width,self._step_time,self._bend_knees, \
             Des_Orientation,imu_orientation,k,dt,self._k_total,self._k_start_swing,self._k_stop_swing)
 
     def UpdatePreview(self):
@@ -219,7 +219,7 @@ class PreStoppingFirstStepState(StepState):
         self._last_step = 1
 
     def OnEnter(self):
-        self._fD = self._WalkingTrajectory.com_ref.x+self._step_length/2
+        pass
         
     def GetId(self):
         return 14
@@ -253,7 +253,6 @@ class StopLeftStepState(StepState):
         rospy.loginfo("Starting STOP LEFT step, time:")
         rospy.loginfo(rospy.get_time())
 
-        self._fD = self._WalkingTrajectory.com_ref.x+self._step_length/2
         self._robotState.Set_step_phase(value = 3)
 
         self._Strategy.LoadNewStep(self._p_ref_x_stop, self._p_ref_const_zero, self._p_ref_y_stop, self._p_ref_const_zero)
@@ -290,7 +289,6 @@ class StopRightStepState(StepState):
         rospy.loginfo("Starting STOP RIGHT step, time:")
         rospy.loginfo(rospy.get_time())
 
-        self._fD = self._WalkingTrajectory.com_ref.x+self._step_length/2
         self._robotState.Set_step_phase(value = 1)
 
         self._Strategy.LoadNewStep(self._p_ref_x_stop, self._p_ref_const_zero, self._p_ref_y_stop, self._p_ref_const_zero)
@@ -310,7 +308,7 @@ class PreStoppingLeftStepState(StepState):
         self._WalkingTrajectory = walkingTrajectory
 
     def OnEnter(self):
-        self._fD = self._WalkingTrajectory.com_ref.x+self._step_length/2
+        pass
 
     def GetId(self):
         return 6
@@ -327,7 +325,7 @@ class PreStoppingRightStepState(StepState):
         self._WalkingTrajectory = walkingTrajectory
         
     def OnEnter(self):
-        self._fD = self._WalkingTrajectory.com_ref.x+self._step_length/2
+        pass
         
     def GetId(self):
         return 7
@@ -349,7 +347,7 @@ class EmergencyStopState(StepState):
         self._last_step = 1
 
     def OnEnter(self):
-        self._fD = self._WalkingTrajectory.com_ref.x+self._step_length/2
+        pass
 
     def GetId(self):
         return 15
@@ -381,7 +379,6 @@ class StoppingLeftStepState(StepState):
         rospy.loginfo("Starting STOP LEFT step, time:")
         rospy.loginfo(rospy.get_time())
 
-        self._fD = self._WalkingTrajectory.com_ref.x+self._step_length/2
         self._robotState.Set_step_phase(value = 3)
         self._Strategy.LoadNewStep(self._p_ref_x_forward_step, r_[self._p_ref_x_forward_step, self._p_ref_x_stop], self._p_ref_y_step_right,r_[self._p_ref_y_step_left, self._p_ref_y_stop])
 
@@ -417,7 +414,6 @@ class PreStopLeftStepState(StepState):
         rospy.loginfo("continue STOP LEFT step, time:")
         rospy.loginfo(rospy.get_time())
 
-        self._fD = self._WalkingTrajectory.com_ref.x+self._step_length/2
         self._robotState.Set_step_phase(value = 3)
         self._Strategy.LoadNewStep(self._p_ref_x_forward_step, r_[self._p_ref_x_stop, self._p_ref_const_zero], self._p_ref_y_step_right,r_[self._p_ref_y_stop, self._p_ref_const_zero])
 
@@ -451,7 +447,6 @@ class StoppingRightStepState(StepState):
         rospy.loginfo("Starting STOP Right step, time:")
         rospy.loginfo(rospy.get_time())
 
-        self._fD = self._WalkingTrajectory.com_ref.x+self._step_length/2
         self._robotState.Set_step_phase(value = 1)
         self._Strategy.LoadNewStep(self._p_ref_x_forward_step, r_[self._p_ref_x_forward_step, self._p_ref_x_stop], self._p_ref_y_step_left,r_[self._p_ref_y_step_right, self._p_ref_y_stop])
 
@@ -487,7 +482,6 @@ class PreStopRightStepState(StepState):
         rospy.loginfo("continue STOP RIGHT step, time:")
         rospy.loginfo(rospy.get_time())
 
-        self._fD = self._WalkingTrajectory.com_ref.x+self._step_length/2
         self._robotState.Set_step_phase(value = 1)
         self._Strategy.LoadNewStep(self._p_ref_x_forward_step, r_[self._p_ref_x_stop, self._p_ref_const_zero], self._p_ref_y_step_left,r_[self._p_ref_y_stop, self._p_ref_const_zero])
 
@@ -513,7 +507,6 @@ class RightStepState(StepState):
         
     def OnEnter(self):
         rospy.loginfo("starting right step")
-        self._fD = self._WalkingTrajectory.com_ref.x+self._step_length/2
         self._robotState.Set_step_phase(value = 1)
 
         self._Strategy.LoadNewStep(self._p_ref_x_forward_step,self._p_ref_x_forward_step,self._p_ref_y_step_left,r_[ self._p_ref_y_step_right,self._p_ref_y_step_left ])
@@ -545,7 +538,6 @@ class LeftStepState(StepState):
         
     def OnEnter(self):
         rospy.loginfo("starting left step")
-        self._fD = self._WalkingTrajectory.com_ref.x+self._step_length/2
         self._robotState.Set_step_phase(value = 3)
         
         self._Strategy.LoadNewStep(self._p_ref_x_forward_step,self._p_ref_x_forward_step,self._p_ref_y_step_right,r_[ self._p_ref_y_step_left, self._p_ref_y_step_right ])
