@@ -1,0 +1,8 @@
+<plan descriptions="./plans/TaskDescriptions.xml">
+   <par name="MissionControl" x="431.5" y="113.5" collapsed="false" id="a76020cf-1a8c-49cc-ba58-32e9a71a4d5b" Failuredistribution="[]" probability="1.0 0 " Successdistribution="C[[5.17652201653,100]] C[]" DEBUG="True 5.17652201653"> 
+         <seq name="mission" x="399.5" y="206.5" collapsed="false" id="563a39ca-99df-45dc-a369-73c7af2fe951" Failuredistribution="C[[30.0,34][31.0,41][32.0,39][33.0,55][34.0,53][35.0,49][36.0,43][37.0,54][38.0,50][39.0,49][40.0,19]] C[]" probability="0.514 0  " Successdistribution="C[[1.0,74][2.0,135][3.0,113][4.0,141][5.0,51]] C[]"> 
+               <tsk name="MountVehicle(param=Mount)" x="278.5" y="302.5" test_time="0" test_result="true" id="8399979d-e1c7-4490-b567-60c7d70b7596" Successdistribution="U[1.0,5.0] U[24.0,25.0]" Failuredistribution="U[30.0,40.0] U[20.0,30.0]" probability="0.5 0.5  "/>
+         </seq>
+         <tsk name="MonitorTime(param=563a39ca-99df-45dc-a369-73c7af2fe951)" x="528.5" y="205.5" test_time="0" test_result="true" id="e0ed8565-f533-4b36-b72a-48a6cd269b22" Successdistribution="U[10000.0,10000.0] U[10000.0,10000.0]" Failuredistribution="U[10000.0,10000.0] U[10000.0,10000.0]" probability="1.0 1.0  "/>
+   </par>
+</plan>
