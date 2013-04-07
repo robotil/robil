@@ -57,6 +57,7 @@ rospy.loginfo("started ZMP node")
 ns.Des_Orientation = 0#-math.pi/2
 
 pub_zmp = rospy.Publisher('zmp_out', walking_trajectory ) #traj)
+pub_state = rospy.Publisher('zmp_state',Int32)
 sub_command = rospy.Subscriber('zmp_walk_command' , Int32 , listn_to_command)
 sub_orientation_command = rospy.Subscriber('orientation_command' , Float64 , listn_to_orientation_command)
 
@@ -112,18 +113,21 @@ while not rospy.is_shutdown():
     if(ns.walk):
         ZmpStateMachine.Start()
     else:
-        ZmpStateMachine.Stop()
+        ZmpStateMachine.EmergencyStop()
         
+
 #    if (ZmpLpp.UpdatePosition(x,y)):
 #        ZmpStateMachine.Stop()
-    p_ref_x,p_ref_y = ZmpStateMachine.UpdatePreview()
-    [COMx, COMx_dot, p_pre_con_x] = Sagital_x_Preview_Controller.getCOM_ref( p_ref_x )
-    [COMy, COMy_dot, p_pre_con_y] = Lateral_y_Preview_Controller.getCOM_ref( p_ref_y )
+    p_ref_x,p_ref_y,new_step_trigger_x,new_step_trigger_y = ZmpStateMachine.UpdatePreview()
+    [COMx, COMx_dot, p_pre_con_x] = Sagital_x_Preview_Controller.getCOM_ref( p_ref_x,new_step_trigger_x )
+    [COMy, COMy_dot, p_pre_con_y] = Lateral_y_Preview_Controller.getCOM_ref( p_ref_y,new_step_trigger_y )
+
     rs.getRobot_State(listener = ns.listener)
     ZmpStateMachine.CalculateFootSwingTrajectory()
     requiredYaw = ns.Des_Orientation # ZmpLpp.GetTargetYaw()
     out = ZmpStateMachine.GetWalkingTrajectory(COMx, COMx_dot, p_pre_con_x,COMy, COMy_dot, p_pre_con_y,p_ref_x,p_ref_y,requiredYaw,ns.imu_orientation)
     pub_zmp.publish(out)
+    pub_state.publish(ZmpStateMachine.GetStateId())
     
     interval.sleep()
 
