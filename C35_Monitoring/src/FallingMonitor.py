@@ -10,7 +10,7 @@ class FallingMonitor(RobilTask):
 	
 	def callback(self, data):
 		if data.data:
-			print "In callback, detected fall message."
+			#print "In callback, detected fall message."
 			FallingMonitor.robot_has_fallen = True
 	
 	def __init__(self, name):
@@ -20,8 +20,8 @@ class FallingMonitor(RobilTask):
 		RobilTask.__init__(self, name)
 	
 	def task(self, name, uid, parameters):
-		print "Start Monitoring falling of the robot, parameters: " 
-		print parameters
+		print "Start Monitoring falling of the robot." 
+		#print parameters
 		d = rospy.Duration(1,0)
 		while not FallingMonitor.robot_has_fallen:	
 			print FallingMonitor.robot_has_fallen
