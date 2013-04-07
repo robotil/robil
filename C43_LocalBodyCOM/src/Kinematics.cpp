@@ -150,14 +150,11 @@ void Kinematics::computeCOMRecurs(const KDL::SegmentMap::const_iterator& current
   double jnt_p = 0.0;
 
   if (current_seg->second.segment.getJoint().getType() != KDL::Joint::None){
-      if ( (current_seg->second.segment.getJoint().getName() != "imu_joint") && (current_seg->second.segment.getJoint().getName() != "hokuyo_joint") ) 
-          { // Yuval added if, because of fake "imu_joint" in drcsim-1.3 and "hokuyo_joint" not published in joint_state drcsim-2.2
           std::map<std::string, double>::const_iterator jnt = joint_positions.find(current_seg->second.segment.getJoint().getName());
 
           if (jnt == joint_positions.end()){
-              ROS_WARN("Could not find joint %s of %s in joint positions. Aborting tree branch.", current_seg->second.segment.getJoint().getName().c_str(), current_seg->first.c_str());
               return;
-          }
+              ROS_WARN("Could not find joint %s of %s in joint positions. Aborting tree branch.", current_seg->second.segment.getJoint().getName().c_str(), current_seg->first.c_str());
           jnt_p = jnt->second;
       }
   }
@@ -176,6 +173,8 @@ void Kinematics::computeCOMRecurs(const KDL::SegmentMap::const_iterator& current
   double current_m = current_seg->second.segment.getInertia().getMass();
 
   com = com + current_m * (current_frame*current_cog);
+
+//  ROS_INFO("%s with mass %f", current_seg->second.segment.getJoint().getName().c_str(), current_m);
 
   m += current_m;
 
@@ -221,7 +220,7 @@ void Kinematics::computeCOM(const std::map<std::string, double>& joint_positions
   }
 
   com = 1.0/mass * com;
-  ROS_DEBUG("Total mass: %f CoG: (%f %f %f)", mass, com.x(), com.y(), com.z());
+  // ROS_INFO("Total mass: %f CoG: (%f %f %f)", mass, com.x(), com.y(), com.z());
 
   COM.setValue(com.x(), com.y(), com.z());
   tf::TransformKDLToTF(right_foot_tf, tf_right_foot);
