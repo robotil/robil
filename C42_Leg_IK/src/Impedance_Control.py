@@ -8,7 +8,7 @@
 ####    1) class "Joint_Stiffness_Controller":                               ##
 ####       The purpose of this controller is to limit the effort of the      ## 
 ####       join. Because of uncertainty of the structure* the desired angle  ##
-####       might not fit the structure which can cause a build up of moment. ##   
+####       might not fit the structure which can cause a build up of torque. ##   
 ####       This controller regulates the input of a joint position           ##
 ####       controller by aspiring to minimize its error while compromising   ##
 ####       the error from the desired angle so that we will get a better fit ##
@@ -20,7 +20,7 @@
 ####                                                                         ##
 ###############################################################################
 
-import roslib; roslib.load_manifest('leg_ik')
+import roslib; roslib.load_manifest('C42_Leg_IK')
 import rospy
 
 
@@ -41,7 +41,7 @@ class Joint_Stiffness_Controller:
     def __init__(self, name, stiffness, update_period):
         self.name = name
         #self.limit_command_diff = limit_command_diff
-        self.K = stiffness # parameter to tune
+        self.K_current = stiffness # parameter to tune
         self.last_update_stamp = rospy.Time()
         self.avg_start_time = rospy.Time()
         self.update_period = update_period
@@ -113,7 +113,7 @@ class Joint_Stiffness_Controller:
                 #J =  set_point - position_avg #self.latest_position ##self.latest_effort # units [Nm] J~=err*PID can try to use err = ??? 
                 J =  self.getAvgEffort() # units [Nm] J~=err*PID can try to use err = ??? 
                 
-                correction_factor = J/self.K
+                correction_factor = J/self.K_current
                 if correction_factor > self.limit_command_diff:
                     correction_factor = self.limit_command_diff
                 # elif -1*correction_factor > self.limit_command_diff: # added without checking need to check that it works
@@ -140,7 +140,107 @@ class Joint_Stiffness_Controller:
 
         return command 
 
+#################################################################################
+#     Joint_Stiffness_Controller 2 - using ground reaction feedback             #
+#################################################################################
 
+
+class Joint_Stiffness_Controller_2:
+    'This controller regulates the input of a joint position controller to limit effort output so that foot stays on ground'
+    # Class parameters:
+    limit_command_diff = 0.02 # units [rad]
+    # command_resolution = 0.002 #0.0001 # Command will change with steps greater than command_resolution
+    #                                    # Should be greater than steady state noise (PID error)
+
+    # leg_phase_type:
+    stance = 'stance'
+    swing = 'swing' 
+
+    def __init__(self, name, stance_stiffness, swing_stiffness, activation_ZMP_point):
+        self.name = name
+        self.K_stance = stance_stiffness  # parameter to tune
+        self.K_swing = swing_stiffness    # parameter to tune
+        self.K_current = swing_stiffness 
+        self.activation_ZMP_point = activation_ZMP_point # when the torque/force is greater than this value we start to reduce the effort of the joint
+        
+        self.last_set_point = 0.0 # set point
+        self.last_command = 0.0
+
+        # FeedBack data:
+        self.FB_force_avg = 0.0
+        self.FB_torque_avg = 0.0
+
+        self.FB_force_sum = 0.0
+        self.FB_torque_sum = 0.0
+
+        self.num_of_FB_samples = 0.0
+        self.reset_sum_flag = False
+
+    # External auxiliary method:
+    def UpdateFeedBack(self, force, torque):
+        self.num_of_FB_samples += 1.0
+
+        if self.reset_sum_flag or (self.num_of_FB_samples <= 0.0) or (self.num_of_FB_samples > 150) :
+            self.ResetFB_Sum()
+            self.num_of_FB_samples = 1.0
+            self.reset_sum_flag = False
+
+
+        self.FB_force_sum += force
+        self.FB_torque_sum += torque
+
+        self.FB_force_avg = self.FB_force_sum/self.num_of_FB_samples
+        self.FB_torque_avg = self.FB_torque_sum/self.num_of_FB_samples
+
+
+    def ResetFB_Sum(self):
+        self.FB_force_sum = 0.0
+        self.FB_torque_sum = 0.0
+        self.num_of_FB_samples = 0.0
+
+    # External auxiliary method:
+    def ChangeStiffness(self, leg_phase_type):
+        if leg_phase_type == Joint_Stiffness_Controller_2.stance:
+            self.K_current = self.K_stance
+        elif leg_phase_type == Joint_Stiffness_Controller_2.swing:
+            self.K_current = self.K_swing
+
+    # External auxiliary method:
+    def getCMD(self, set_point): # set_point = original input to joint position controller 
+
+        if self.FB_force_avg == 0:
+            force_avg = 10.0  # units [N]
+        else:
+            force_avg = self.FB_force_avg
+
+
+        J_extra =  abs(self.FB_torque_avg) - self.activation_ZMP_point*force_avg # units [Nm], excess torque beyond the ZMP activation point
+        if J_extra > 0.0: # if measered torque is greater than activation ZMP point we start to reduce joint effort
+
+            # rospy.loginfo("SC_'%s' method getCMD: update time = %f, position_sum = %f, effort_sum = %f" %  \
+            #              (self.name,time_from_avg_start,self.position_sum,self.effort_sum))
+                
+            correction_factor = J_extra/self.K_current             # may want to normalize using force_avg?
+            # limit controllers response:
+            if correction_factor > self.limit_command_diff:
+                correction_factor = self.limit_command_diff
+            # determine sign of correction factor:
+            if self.FB_torque_avg < 0.0:
+                correction_factor = -1.0*correction_factor
+      
+            command = set_point + correction_factor  
+            
+        else:
+            command = set_point
+        
+        rospy.loginfo("JSC2_'%s' method getCMD: set_point = %f, cmd = %f, J_extra = %f, Fb J = %f, Fb F = %f, N_samples = %f, force_avg = %f"\
+                    %(self.name, set_point, command, J_extra, self.FB_torque_avg, self.FB_force_avg, self.num_of_FB_samples, force_avg ))
+
+        self.reset_sum_flag = True
+        self.last_set_point = set_point
+        self.last_command = command
+
+        return (command) 
 
 
 #################################################################################
@@ -159,7 +259,7 @@ class Position_Stiffness_Controller:
 
     def __init__(self, name, stiffness, triggered_controller, bypass_input2output):
         self.name = name
-        self.K_m = stiffness # parameter to tune
+        self.K_current_m = stiffness # parameter to tune
         #self.B_m = damping   # parameter to tune
         self.triggered_controller = triggered_controller
         self.update_command = not(triggered_controller) # flag to enable update of controller output command when trigger is disabled
@@ -265,7 +365,7 @@ class Position_Stiffness_Controller:
             # OUTPUT COMMAND:
             if (self.update_command or self.trigger_event) and ( not self.bypass_in2out): # if update of output command is enabled 
                      
-                correction_factor = (force_des - force_avg)/self.K_m
+                correction_factor = (force_des - force_avg)/self.K_current_m
                 # output cmd saturation (clamp):
                 if correction_factor > self.limit_command_diff: 
                     correction_factor = self.limit_command_diff
@@ -323,7 +423,7 @@ class Position_Stiffness_Controller:
 #     Fint_sum = 0
 
 #     def __init__(self, stiffness, damping):
-#         self.K_m = stiffness # parameter to tune
+#         self.K_current_m = stiffness # parameter to tune
 #         self.B_m = damping   # parameter to tune
 #         self.last_update_stamp = rospy.Time()
 #         self.avg_start_time = rospy.Time()     
@@ -370,7 +470,7 @@ class Position_Stiffness_Controller:
 #         #         #J =  set_point - position_avg #self.latest_position ##self.latest_effort # units [Nm] J~=err*PID can try to use err = ??? 
 #         #         J =  self.getAvgEffort() # units [Nm] J~=err*PID can try to use err = ??? 
 #         #         #K =  10000 #Stiffness - parameter to tune
-#         #         correction_factor = J/self.K
+#         #         correction_factor = J/self.K_current
 #         #         if correction_factor > self.limit_command_diff:
 #         #             correction_factor = self.limit_command_diff
 #         #         # error = last_set_point-latest_position
