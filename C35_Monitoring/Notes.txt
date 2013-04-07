@@ -102,7 +102,7 @@ C34_Designer/plans/MonitoredStandUp.xml
 run and resume
 threshold values can be changed in the xml files, just change the threshold parameters.
 "falling messages" can be sent from command line using: rostopic pub -1 /C35/falling std_msgs/Bool -- 1
-"stability messages" can be sent from command line using: rostopic pub -1 /C35/falling std_msgs/Bool -- [1-5]
+"stability messages" can be sent from command line using: rostopic pub -1 /C35/stability std_msgs/Int8 -- [1-5]
 
 Known Bugs:
 ==========

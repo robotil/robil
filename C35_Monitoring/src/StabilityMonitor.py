@@ -24,7 +24,7 @@ class StabilityMonitor(RobilTask):
 		d = rospy.Duration(1,0)
 		while StabilityMonitor.robot_stability_measure > 1:	
 			if self.isPreepted():
-				print "Preempt fall monitoring task"
+				print "Preempt stability monitoring task"
 				return RTResult_PREEPTED()
 			rospy.sleep(d)
 		print "Robot is dangerously unstable! EXITING..."
