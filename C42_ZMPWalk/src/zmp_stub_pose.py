@@ -1,27 +1,12 @@
 #! /usr/bin/env python
-
-###################################################################################
-####                                                                             ##
-####  Reset_start_pose.py (based on zmp_init.py)                                 ##
-####  Created - Yuval 7/04/2013                                                  ##
-####                                                                             ##
-####    run this script to reset robots pose to "zero" and Reset Model Poses.    ##
-####                                                                             ##
-####    To run script: rosrun C42_ZMPWalk scripts/Reset_start_pose.py            ##
-####   ( Make sure no other joint commands are being sent while running script ) ##
-####                                                                             ##
-###################################################################################     
-
-
 import roslib
 roslib.load_manifest('C42_ZMPWalk')
 from drc2_tools import *
 import roslib
 import os
 import rospy
-from std_srvs.srv import Empty
 
-def init_pose():
+def stub_pose():
     JC = JointCommands_msg_handler()
     RL = robot_listner()
 
@@ -55,13 +40,13 @@ def init_pose():
     r_leg_uay = 0.0
     r_leg_lax = 0.0
     l_arm_usy = 0
-    l_arm_shx = -1.0
+    l_arm_shx = -1.3
     l_arm_ely = 0
     l_arm_elx = 0
     l_arm_uwy = 0
     l_arm_mwx = 0
     r_arm_usy = 0
-    r_arm_shx = 1.0
+    r_arm_shx = 1.3
     r_arm_ely = 0
     r_arm_elx = 0
     r_arm_uwy = 0
@@ -79,9 +64,5 @@ def init_pose():
     init_pos = RL.current_pos()
     JC.send_pos_traj(init_pos,des_pos,3,0.1)
 
-    rospy.wait_for_service('gazebo/reset_models')
-    reset_gazebo_model = rospy.ServiceProxy('gazebo/reset_models', Empty)
-    reset_gazebo_model()
-
 if __name__ == '__main__':
-    init_pose()
+    stub_pose()

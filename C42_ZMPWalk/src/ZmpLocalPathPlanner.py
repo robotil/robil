@@ -102,7 +102,7 @@ class LocalPathPlanner(object):
         self._Path = deque([])
         self._Position = Waypoint()
         self._CurrentSegment = Segment(self._Position,self._Position)
-        self._CloseEnoughToTarget = 0.5
+        self._CloseEnoughToTarget = 0.2 #0.5       
         
     def SetPath(self,waypointList):
         self._Path = deque(waypointList)
@@ -119,9 +119,15 @@ class LocalPathPlanner(object):
         
     def GetPathError(self):
         return self._CurrentSegment.GetDistanceFrom(self._Position)
+        
+    def GetPos(self):
+		return self._Position
     
     def GetTargetYaw(self):
         return self._CurrentSegment.GetYaw()
+        
+    def GetCurrentSegment(self):
+		return self._CurrentSegment
     
     def UpdatePosition(self,CoordinateX,CoordinateY):
         """

@@ -1,0 +1,12 @@
+Robot waits for start,then goes to path planner and asks for the path, takes points from path and makes teleportation between points. 
+
+To test stub:
+
+1. run ZMP_stub.py: 
+   rosrun C42_ZMPWalk ZMP_stub.py
+
+2. run C31_clone to emulate the C31PathPlanner (publish a path message): 
+   rosrun C42_ZMPWalk scripts/C31_Clone.py
+
+3. execute using C0 task_tester: 
+   rosrun C0_RobilTask task_tester FollowPath
