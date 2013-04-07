@@ -25,8 +25,6 @@ protected:
 	ros::ServiceClient traj_vector_cli_;
 	ros::ServiceClient arms_val_calc_cli_;
 	ros::Publisher traj_action_pub_;
-	//ros::Subscriber l_leg_uhz_sub_,l_leg_mhx_sub_,l_leg_lhy_sub_,l_leg_kny_sub_,l_leg_uay_sub_,l_leg_lax_sub_;
-	//ros::Subscriber r_leg_uhz_sub_,r_leg_mhx_sub_,r_leg_lhy_sub_,r_leg_kny_sub_,r_leg_uay_sub_,r_leg_lax_sub_;
 	ros::Subscriber joint_states_sub_;
 	double q0_l,q1_l,q2_l,q3_l,q4_l,q5_l;
 	double q0_r,q1_r,q2_r,q3_r,q4_r,q5_r;
@@ -55,8 +53,6 @@ public:
 		while(!arms_val_calc_cli_.waitForExistence(ros::Duration(1.0))){
 			ROS_INFO("Waiting for the arms_val_calc_srv server");
 		}
-		//traj_vector_cli_ = nh_.subscribe("trajectory_vector", 1, &com_error_node::get_com_from_hrl_kinematics, this);
-		//support_polygon_sub_ = nh_.subscribe("support_polygon", 1, &com_error_node::get_support_polygon_from_hrl_kinematics, this);
 
 		joint_states_sub_ = nh_.subscribe("/atlas/joint_states",100,&move_hand_service::joint_states_CB,this);
 
@@ -92,14 +88,20 @@ public:
 	}
 
 	bool gen_traj(move_hand::move_hand::Request &req, move_hand::move_hand::Response &res){
-		traj_splitter_to_vector::trajectory_vector traj_vec_srv;
+		traj_splitter_to_vector::trajectory_vector traj_vec_left_srv;
+		traj_splitter_to_vector::trajectory_vector traj_vec_right_srv;
 		//control_msgs::FollowJointTrajectoryGoal goal;
 		osrf_msgs::JointCommands jointcommands;
-		ROS_INFO("Received request to move %s to (%f,%f,%f)", req.LinkToMove.c_str(), req.PositionDestination.x, req.PositionDestination.y, req.PositionDestination.z);
-		traj_vec_srv.request.Position = req.PositionDestination;
-		traj_vec_srv.request.Angle = req.AngleDestination;
-		traj_vec_srv.request.segments_number = 1000 ;
-		traj_vec_srv.request.total_time = 5 ;
+		//ROS_INFO("Received request to move %s to (%f,%f,%f)", req.LinkToMove.c_str(), req.PositionDestination.x, req.PositionDestination.y, req.PositionDestination.z);
+		traj_vec_left_srv.request.Position = req.PositionDestination_left;
+		traj_vec_left_srv.request.Angle = req.AngleDestination_left;
+		traj_vec_left_srv.request.segments_number = 1000 ;
+		traj_vec_left_srv.request.total_time = 5 ;
+
+                traj_vec_right_srv.request.Position = req.PositionDestination_right;
+                traj_vec_right_srv.request.Angle = req.AngleDestination_right;
+                traj_vec_right_srv.request.segments_number = 1000 ;
+                traj_vec_right_srv.request.total_time = 5 ;
 		/*
 	trajectory_msgs::JointTrajectory jt;
 	jt.header.stamp = ros::Time::now();
@@ -171,7 +173,7 @@ public:
 			jointcommands.kp_velocity[i]  = 0;
 		}
 
-		if(traj_vector_cli_.call(traj_vec_srv)){
+		if(traj_vector_cli_.call(traj_vec_left_srv)&&traj_vector_cli_.call(traj_vec_right_srv)){
 			double p0_l,p1_l,p2_l,p3_l,p4_l,p5_l;
 			double p0_r,p1_r,p2_r,p3_r,p4_r,p5_r;
 			p0_l = q0_l;
@@ -190,196 +192,89 @@ public:
 			//ROS_INFO("Response from trajectory vector service: Position size %d", (int) traj_vec_srv.response.PositionArray.size());
 			//ROS_INFO("Response from trajectory vector service: Angle size %d", (int) traj_vec_srv.response.AngleArray.size());
 			double current_dt = 0;
-			for(unsigned int ind = 0; ind < traj_vec_srv.response.PositionArray.size(); ind++){
-				arms_val_calc::arms_val_calc v;
+			if (traj_vec_left_srv.response.PositionArray.size() != traj_vec_right_srv.response.PositionArray.size()) return false;
+			for(unsigned int ind = 0; ind < traj_vec_left_srv.response.PositionArray.size(); ind++){
+				arms_val_calc::arms_val_calc v_left,v_right;
 				//ROS_INFO("Response from trajectory vector service example: %f", traj_vec_srv.response.PositionArray[ind].x);
-				v.request.x_dot = traj_vec_srv.response.PositionArray[ind].x;
-				v.request.y_dot = traj_vec_srv.response.PositionArray[ind].y;
-				v.request.z_dot = traj_vec_srv.response.PositionArray[ind].z;
-				v.request.roll_dot = traj_vec_srv.response.AngleArray[ind].x;
-				v.request.pitch_dot = traj_vec_srv.response.AngleArray[ind].y;
-				v.request.yaw_dot = traj_vec_srv.response.AngleArray[ind].z;
+				v_left.request.x_dot = traj_vec_left_srv.response.PositionArray[ind].x;
+				v_left.request.y_dot = traj_vec_left_srv.response.PositionArray[ind].y;
+				v_left.request.z_dot = traj_vec_left_srv.response.PositionArray[ind].z;
+				v_left.request.roll_dot = traj_vec_left_srv.response.AngleArray[ind].x;
+				v_left.request.pitch_dot = traj_vec_left_srv.response.AngleArray[ind].y;
+				v_left.request.yaw_dot = traj_vec_left_srv.response.AngleArray[ind].z;
+
+                                v_right.request.x_dot = traj_vec_right_srv.response.PositionArray[ind].x;
+                                v_right.request.y_dot = traj_vec_right_srv.response.PositionArray[ind].y;
+                                v_right.request.z_dot = traj_vec_right_srv.response.PositionArray[ind].z;
+                                v_right.request.roll_dot = traj_vec_right_srv.response.AngleArray[ind].x;
+                                v_right.request.pitch_dot = traj_vec_right_srv.response.AngleArray[ind].y;
+                                v_right.request.yaw_dot = traj_vec_right_srv.response.AngleArray[ind].z;
 				/*ROS_INFO("Pose of dt %f: (%f,%f,%f)",traj_vec_srv.response.dt[ind], traj_vec_srv.response.PositionArray[ind].x,
 						traj_vec_srv.response.PositionArray[ind].y, traj_vec_srv.response.PositionArray[ind].z);*/
 
-				if(arms_val_calc_cli_.call(v)){
-					//trajectory_msgs::JointTrajectoryPoint p;
+				if(arms_val_calc_cli_.call(v_left)&&arms_val_calc_cli_.call(v_right)){
 
-					/*
-		q0_l=state->position[joints["l_arm_usy"]];
-		q1_l=state->position[joints["l_arm_shx"]];
-		q2_l=state->position[joints["l_arm_ely"]];
-		q3_l=state->position[joints["l_arm_elx"]];
-		q4_l=state->position[joints["l_arm_uwy"]];
-		q5_l=state->position[joints["l_arm_mwx"]];*/
-
-					if(!req.LinkToMove.compare("hand")){
-						jointcommands.position[joints["l_arm_usy"]] = p0_l + v.response.q_left_dot[0]*traj_vec_srv.response.dt[ind];
-						jointcommands.velocity[joints["l_arm_usy"]] = p0_l + v.response.q_left_dot[0];
-						p0_l = jointcommands.position[joints["l_arm_usy"]];
-						jointcommands.position[joints["l_arm_shx"]] = p1_l + v.response.q_left_dot[1]*traj_vec_srv.response.dt[ind];
-						jointcommands.velocity[joints["l_arm_shx"]] = p0_l + v.response.q_left_dot[1];
-						p1_l = jointcommands.position[joints["l_arm_shx"]];
-						jointcommands.position[joints["l_arm_ely"]] = p2_l + v.response.q_left_dot[2]*traj_vec_srv.response.dt[ind];
-						jointcommands.velocity[joints["l_arm_ely"]] = p0_l + v.response.q_left_dot[2];
-						p2_l = jointcommands.position[joints["l_arm_ely"]];
-						jointcommands.position[joints["l_arm_elx"]] = p3_l + v.response.q_left_dot[3]*traj_vec_srv.response.dt[ind];
-						jointcommands.velocity[joints["l_arm_elx"]] = p0_l + v.response.q_left_dot[3];
-						p3_l = jointcommands.position[joints["l_arm_elx"]];
-						jointcommands.position[joints["l_arm_uwy"]] = p4_l + v.response.q_left_dot[4]*traj_vec_srv.response.dt[ind];
-						jointcommands.velocity[joints["l_arm_uwy"]] = p0_l + v.response.q_left_dot[4];
-						p4_l = jointcommands.position[joints["l_arm_uwy"]];
-						jointcommands.position[joints["l_arm_mwx"]] = p5_l + v.response.q_left_dot[5]*traj_vec_srv.response.dt[ind];
-						jointcommands.velocity[joints["l_arm_mwx"]] = p0_l + v.response.q_left_dot[5];
-						p5_l = jointcommands.position[joints["l_arm_mwx"]];
-						//ROS_INFO("Sent to left leg (%f, %f, %f, %f, %f, %f)", p0_l, p1_l, p2_l, p3_l, p4_l, p5_l);
-						/*goal.trajectory.points[ind].velocities[0] = v.response.q_left_dot[0];
-					goal.trajectory.points[ind].velocities[1] = v.response.q_left_dot[1];
-					goal.trajectory.points[ind].velocities[2] = v.response.q_left_dot[2];
-					goal.trajectory.points[ind].velocities[3] = v.response.q_left_dot[3];
-					goal.trajectory.points[ind].velocities[4] = v.response.q_left_dot[4];
-					goal.trajectory.points[ind].velocities[5] = v.response.q_left_dot[5];*/
-						/*
-
-		q0_r=state->position[joints["r_arm_usy"]];
-		q1_r=state->position[joints["r_arm_shx"]];
-		q2_r=state->position[joints["r_arm_ely"]];
-		q3_r=state->position[joints["r_arm_elx"]];
-		q4_r=state->position[joints["r_arm_uwy"]];
-		q5_r=state->position[joints["r_arm_mwx"]];
-						 */
-						jointcommands.position[joints["r_arm_usy"]] = p0_r + v.response.q_right_dot[0]*traj_vec_srv.response.dt[ind];
-						jointcommands.velocity[joints["r_arm_usy"]] = p0_l + v.response.q_right_dot[0];
-						p0_r = jointcommands.position[joints["r_arm_usy"]];
-						jointcommands.position[joints["r_arm_shx"]] = p1_r + v.response.q_right_dot[1]*traj_vec_srv.response.dt[ind];
-						jointcommands.velocity[joints["r_arm_shx"]] = p0_l + v.response.q_right_dot[1];
-						p1_r = jointcommands.position[joints["r_arm_shx"]];
-						jointcommands.position[joints["r_arm_ely"]] = p2_r + v.response.q_right_dot[2]*traj_vec_srv.response.dt[ind];
-						jointcommands.velocity[joints["r_arm_ely"]] = p0_l + v.response.q_right_dot[2];
-						p2_r = jointcommands.position[joints["r_arm_ely"]];
-						jointcommands.position[joints["r_arm_elx"]] = p3_r + v.response.q_right_dot[3]*traj_vec_srv.response.dt[ind];
-						jointcommands.velocity[joints["r_arm_elx"]] = p0_l + v.response.q_right_dot[3];
-						p3_r = jointcommands.position[joints["r_arm_elx"]];
-						jointcommands.position[joints["r_arm_uwy"]] = p4_r + v.response.q_right_dot[4]*traj_vec_srv.response.dt[ind];
-						jointcommands.velocity[joints["r_arm_uwy"]] = p0_l + v.response.q_right_dot[4];
-						p4_r = jointcommands.position[joints["r_arm_uwy"]];
-						jointcommands.position[joints["r_arm_mwx"]] = p5_r + v.response.q_right_dot[5]*traj_vec_srv.response.dt[ind];
-						jointcommands.velocity[joints["r_arm_mwx"]] = p0_l + v.response.q_right_dot[5];
-						p5_r = jointcommands.position[joints["r_arm_mwx"]];
-						//ROS_INFO("Sent to right leg (%f, %f, %f, %f, %f, %f)", p0_r, p1_r, p2_r, p3_r, p4_r, p5_r);
-					}else{
-						if(!req.LinkToMove.compare("l_arm")){
-							jointcommands.position[joints["l_arm_usy"]] = p0_l + v.response.q_left_dot[0]*traj_vec_srv.response.dt[ind];
-							jointcommands.velocity[joints["l_arm_usy"]] = p0_l + v.response.q_left_dot[0];
+							jointcommands.position[joints["l_arm_usy"]] = p0_l + v_left.response.q_left_dot[0]*traj_vec_left_srv.response.dt[ind];
+							jointcommands.velocity[joints["l_arm_usy"]] = v_left.response.q_left_dot[0];
 							p0_l = jointcommands.position[joints["l_arm_usy"]];
-							jointcommands.position[joints["l_arm_shx"]] = p1_l + v.response.q_left_dot[1]*traj_vec_srv.response.dt[ind];
-							jointcommands.velocity[joints["l_arm_shx"]] = p0_l + v.response.q_left_dot[1];
+							jointcommands.position[joints["l_arm_shx"]] = p1_l + v_left.response.q_left_dot[1]*traj_vec_left_srv.response.dt[ind];
+							jointcommands.velocity[joints["l_arm_shx"]] = v_left.response.q_left_dot[1];
 							p1_l = jointcommands.position[joints["l_arm_shx"]];
-							jointcommands.position[joints["l_arm_ely"]] = p2_l + v.response.q_left_dot[2]*traj_vec_srv.response.dt[ind];
-							jointcommands.velocity[joints["l_arm_ely"]] = p0_l + v.response.q_left_dot[2];
+							jointcommands.position[joints["l_arm_ely"]] = p2_l + v_left.response.q_left_dot[2]*traj_vec_left_srv.response.dt[ind];
+							jointcommands.velocity[joints["l_arm_ely"]] = v_left.response.q_left_dot[2];
 							p2_l = jointcommands.position[joints["l_arm_ely"]];
-							jointcommands.position[joints["l_arm_elx"]] = p3_l + v.response.q_left_dot[3]*traj_vec_srv.response.dt[ind];
-							jointcommands.velocity[joints["l_arm_elx"]] = p0_l + v.response.q_left_dot[3];
+							jointcommands.position[joints["l_arm_elx"]] = p3_l + v_left.response.q_left_dot[3]*traj_vec_left_srv.response.dt[ind];
+							jointcommands.velocity[joints["l_arm_elx"]] = v_left.response.q_left_dot[3];
 							p3_l = jointcommands.position[joints["l_arm_elx"]];
-							jointcommands.position[joints["l_arm_uwy"]] = p4_l + v.response.q_left_dot[4]*traj_vec_srv.response.dt[ind];
-							jointcommands.velocity[joints["l_arm_uwy"]] = p0_l + v.response.q_left_dot[4];
+							jointcommands.position[joints["l_arm_uwy"]] = p4_l + v_left.response.q_left_dot[4]*traj_vec_left_srv.response.dt[ind];
+							jointcommands.velocity[joints["l_arm_uwy"]] = v_left.response.q_left_dot[4];
 							p4_l = jointcommands.position[joints["l_arm_uwy"]];
-							jointcommands.position[joints["l_arm_mwx"]] = p5_l + v.response.q_left_dot[5]*traj_vec_srv.response.dt[ind];
-							jointcommands.velocity[joints["l_arm_mwx"]] = p0_l + v.response.q_left_dot[5];
+							jointcommands.position[joints["l_arm_mwx"]] = p5_l + v_left.response.q_left_dot[5]*traj_vec_left_srv.response.dt[ind];
+							jointcommands.velocity[joints["l_arm_mwx"]] = v_left.response.q_left_dot[5];
 							p5_l = jointcommands.position[joints["l_arm_mwx"]];
-							//ROS_INFO("Sent to left leg (%f, %f, %f, %f, %f, %f)", p0_l, p1_l, p2_l, p3_l, p4_l, p5_l);
-							jointcommands.position[joints["r_arm_usy"]] = positions[joints["r_arm_usy"]];
-							jointcommands.position[joints["r_arm_shx"]] = positions[joints["r_arm_shx"]];
-							jointcommands.position[joints["r_arm_ely"]] = positions[joints["r_arm_ely"]];
-							jointcommands.position[joints["r_arm_elx"]] = positions[joints["r_arm_elx"]];
-							jointcommands.position[joints["r_arm_uwy"]] = positions[joints["r_arm_uwy"]];
-							jointcommands.position[joints["r_arm_mwx"]] = positions[joints["r_arm_mwx"]];
-						}else{
-							if(!req.LinkToMove.compare("r_arm")){
-								jointcommands.position[joints["r_arm_usy"]] = p0_r + v.response.q_right_dot[0]*traj_vec_srv.response.dt[ind];
-								jointcommands.velocity[joints["r_arm_usy"]] = p0_l + v.response.q_right_dot[0];
+
+
+								jointcommands.position[joints["r_arm_usy"]] = p0_r + v_right.response.q_right_dot[0]*traj_vec_right_srv.response.dt[ind];
+								//jointcommands.velocity[joints["r_arm_usy"]] = v_right.response.q_right_dot[0];
 								p0_r = jointcommands.position[joints["r_arm_usy"]];
-								jointcommands.position[joints["r_arm_shx"]] = p1_r + v.response.q_right_dot[1]*traj_vec_srv.response.dt[ind];
-								jointcommands.velocity[joints["r_arm_shx"]] = p0_l + v.response.q_right_dot[1];
+								jointcommands.position[joints["r_arm_shx"]] = p1_r + v_right.response.q_right_dot[1]*traj_vec_right_srv.response.dt[ind];
+								//jointcommands.velocity[joints["r_arm_shx"]] = v_right.response.q_right_dot[1];
 								p1_r = jointcommands.position[joints["r_arm_shx"]];
-								jointcommands.position[joints["r_arm_ely"]] = p2_r + v.response.q_right_dot[2]*traj_vec_srv.response.dt[ind];
-								jointcommands.velocity[joints["r_arm_ely"]] = p0_l + v.response.q_right_dot[2];
+								jointcommands.position[joints["r_arm_ely"]] = p2_r + v_right.response.q_right_dot[2]*traj_vec_right_srv.response.dt[ind];
+								//jointcommands.velocity[joints["r_arm_ely"]] = v_right.response.q_right_dot[2];
 								p2_r = jointcommands.position[joints["r_arm_ely"]];
-								jointcommands.position[joints["r_arm_elx"]] = p3_r + v.response.q_right_dot[3]*traj_vec_srv.response.dt[ind];
-								jointcommands.velocity[joints["r_arm_elx"]] = p0_l + v.response.q_right_dot[3];
+								jointcommands.position[joints["r_arm_elx"]] = p3_r + v_right.response.q_right_dot[3]*traj_vec_right_srv.response.dt[ind];
+								//jointcommands.velocity[joints["r_arm_elx"]] = v_right.response.q_right_dot[3];
 								p3_r = jointcommands.position[joints["r_arm_elx"]];
-								jointcommands.position[joints["r_arm_uwy"]] = p4_r + v.response.q_right_dot[4]*traj_vec_srv.response.dt[ind];
-								jointcommands.velocity[joints["r_arm_uwy"]] = p0_l + v.response.q_right_dot[4];
+								jointcommands.position[joints["r_arm_uwy"]] = p4_r + v_right.response.q_right_dot[4]*traj_vec_right_srv.response.dt[ind];
+								//jointcommands.velocity[joints["r_arm_uwy"]] = v_right.response.q_right_dot[4];
 								p4_r = jointcommands.position[joints["r_arm_uwy"]];
-								jointcommands.position[joints["r_arm_mwx"]] = p5_r + v.response.q_right_dot[5]*traj_vec_srv.response.dt[ind];
-								jointcommands.velocity[joints["r_arm_mwx"]] = p0_l + v.response.q_right_dot[5];
+								jointcommands.position[joints["r_arm_mwx"]] = p5_r + v_right.response.q_right_dot[5]*traj_vec_right_srv.response.dt[ind];
+								//jointcommands.velocity[joints["r_arm_mwx"]] = v_right.response.q_right_dot[5];
 								p5_r = jointcommands.position[joints["r_arm_mwx"]];
-								//ROS_INFO("Sent to left leg (%f, %f, %f, %f, %f, %f)", p0_r, p1_r, p2_r, p3_r, p4_r, p5_r);
-								jointcommands.position[joints["l_arm_usy"]] = positions[joints["l_arm_usy"]];
-								jointcommands.position[joints["l_arm_shx"]] = positions[joints["l_arm_shx"]];
-								jointcommands.position[joints["l_arm_ely"]] = positions[joints["l_arm_ely"]];
-								jointcommands.position[joints["l_arm_elx"]] = positions[joints["l_arm_elx"]];
-								jointcommands.position[joints["l_arm_uwy"]] = positions[joints["l_arm_uwy"]];
-								jointcommands.position[joints["l_arm_mwx"]] = positions[joints["l_arm_mwx"]];
-							}else{
-								ROS_ERROR("Wrong link name");
-								res.success = false;
-								return false;
-							}
-						}
-					}
-					/*goal.trajectory.points[ind].velocities[6] = v.response.q_right_dot[0];
-					goal.trajectory.points[ind].velocities[7] = v.response.q_right_dot[1];
-					goal.trajectory.points[ind].velocities[8] = v.response.q_right_dot[2];
-					goal.trajectory.points[ind].velocities[9] = v.response.q_right_dot[3];
-					goal.trajectory.points[ind].velocities[10] = v.response.q_right_dot[4];
-					goal.trajectory.points[ind].velocities[11] = v.response.q_right_dot[5];*/
-					/*
-        	    jointcommands.name.push_back("l_arm_usy");
-        	    jointcommands.name.push_back("l_arm_shx");
-        	    jointcommands.name.push_back("l_arm_ely");
-        	    jointcommands.name.push_back("l_arm_elx");
-        	    jointcommands.name.push_back("l_arm_uwy");
-        	    jointcommands.name.push_back("l_arm_mwx");
-					 */
+
 					jointcommands.position[joints["l_leg_uhz"]] = positions[joints["l_leg_uhz"]];
 					jointcommands.position[joints["l_leg_mhx"]] = positions[joints["l_leg_mhx"]];
 					jointcommands.position[joints["l_leg_lhy"]] = positions[joints["l_leg_lhy"]];
 					jointcommands.position[joints["l_leg_kny"]] = positions[joints["l_leg_kny"]];
 					jointcommands.position[joints["l_leg_uay"]] = positions[joints["l_leg_uay"]];
 					jointcommands.position[joints["l_leg_lax"]] = positions[joints["l_leg_lax"]];
-					//ROS_INFO("%f, %f, %f, %f, %f, %f", jointcommands.position[12], jointcommands.position[13], jointcommands.position[14], jointcommands.position[15], jointcommands.position[16], jointcommands.position[17]);
-					/*
-        	    jointcommands.name.push_back("r_arm_usy");
-        	    jointcommands.name.push_back("r_arm_shx");
-        	    jointcommands.name.push_back("r_arm_ely");
-        	    jointcommands.name.push_back("r_arm_elx");
-        	    jointcommands.name.push_back("r_arm_uwy");
-        	    jointcommands.name.push_back("r_arm_mwx");
-					 */
+
 					jointcommands.position[joints["r_leg_uhz"]] = positions[joints["r_leg_uhz"]];
 					jointcommands.position[joints["r_leg_mhx"]] = positions[joints["r_leg_mhx"]];
 					jointcommands.position[joints["r_leg_lhy"]] = positions[joints["r_leg_lhy"]];
 					jointcommands.position[joints["r_leg_kny"]] = positions[joints["r_leg_kny"]];
 					jointcommands.position[joints["r_leg_uay"]] = positions[joints["r_leg_uay"]];
 					jointcommands.position[joints["r_leg_lax"]] = positions[joints["r_leg_lax"]];
-					//ROS_INFO("%f, %f, %f, %f, %f, %f", jointcommands.position[18], jointcommands.position[19], jointcommands.position[20], jointcommands.position[21], jointcommands.position[22], jointcommands.position[23]);
-					/*
-        	    jointcommands.name.push_back("neck_ay"  );
-        	    jointcommands.name.push_back("back_lbz" );
-        	    jointcommands.name.push_back("back_mby" );
-        	    jointcommands.name.push_back("back_ubx" );
-					 */
+
 					jointcommands.position[joints["neck_ay"]] = positions[joints["neck_ay"]];
 					jointcommands.position[joints["back_lbz"]] = positions[joints["back_lbz"]];
 					jointcommands.position[joints["back_mby"]] = positions[joints["back_mby"]];
 					jointcommands.position[joints["back_ubx"]] = positions[joints["back_ubx"]];
-					//ROS_INFO("%f, %f, %f, %f", jointcommands.position[24], jointcommands.position[25], jointcommands.position[26], jointcommands.position[27]);
 
 					// To be reached 1+ind second after the start of the trajectory
-					current_dt += traj_vec_srv.response.dt[ind];
 					pub_joint_commands_.publish(jointcommands);
-					ros::Duration(traj_vec_srv.response.dt[ind]).sleep();
+					ros::Duration(traj_vec_left_srv.response.dt[ind]).sleep();
 				}else{
 					ROS_ERROR("Could not reach gen arms velocity vector server");
 					res.success = false;
