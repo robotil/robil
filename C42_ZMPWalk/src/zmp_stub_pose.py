@@ -6,7 +6,7 @@ import roslib
 import os
 import rospy
 
-def init_pose():
+def stub_pose():
     JC = JointCommands_msg_handler()
     RL = robot_listner()
 
@@ -23,22 +23,22 @@ def init_pose():
 
     rospy.sleep(1)
     
-    back_lbz = 0  
-    back_mby = 0
-    back_ubx = 0
-    neck_ay = 0
-    l_leg_uhz = 0 
-    l_leg_mhx = -0.00096
-    l_leg_lhy = -0.3564
-    l_leg_kny = 0.6244
-    l_leg_uay = -0.2680
-    l_leg_lax = 0.0009
-    r_leg_uhz = 0
-    r_leg_mhx = -0.00096
-    r_leg_lhy = -0.3564
-    r_leg_kny = 0.6244
-    r_leg_uay = -0.268
-    r_leg_lax = 0.0009
+    back_lbz = 0.0  
+    back_mby = 0.0
+    back_ubx = 0.0
+    neck_ay = 0.0
+    l_leg_uhz = 0.0 
+    l_leg_mhx = 0.0
+    l_leg_lhy = 0.0
+    l_leg_kny = 0.0
+    l_leg_uay = 0.0
+    l_leg_lax = 0.0
+    r_leg_uhz = 0.0
+    r_leg_mhx = 0.0
+    r_leg_lhy = 0.0
+    r_leg_kny = 0.0
+    r_leg_uay = 0.0
+    r_leg_lax = 0.0
     l_arm_usy = 0
     l_arm_shx = -1.3
     l_arm_ely = 0
@@ -62,7 +62,7 @@ def init_pose():
     JC.set_default_gains_from_yaml(yaml_pth)
     JC.reset_gains()
     init_pos = RL.current_pos()
-    JC.send_pos_traj(init_pos,des_pos,5,0.1)
+    JC.send_pos_traj(init_pos,des_pos,3,0.1)
 
 if __name__ == '__main__':
-    init_pose()
+    stub_pose()
