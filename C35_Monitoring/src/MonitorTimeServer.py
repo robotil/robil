@@ -10,10 +10,9 @@ from computeTree import *
 from RobilTaskPy import *
 
 
-TASK_RESULT_REJECT=1
-TASK_RESULT_OK=0
-TASK_RESULT_PLAN=-1
+
 DEFAULT_THRESHOLD_TIME = 10000	#Should not be used!
+PARAM = 0
 
 
 	
@@ -31,7 +30,7 @@ class MonitorTimeServer(RobilTask):
     def __init__(self,event_file,name):
         print "TIME MONITOR SERVER STARTED"
         rospy.Subscriber("/executer/stack_stream", String, self.callback)
-        constructTree(event_file)		
+        constructTree(event_file, PARAM)		
         RobilTask.__init__(self, name)
 
 
@@ -45,7 +44,7 @@ class MonitorTimeServer(RobilTask):
         self._monitoredNodeId = parameters['param']
         
         #calc self._monitoredNodeId attributs (prob, sd, E) from the ORIGINAL tree - NOT DEBUG MODE 
-        (prob, sd, E) = getNodeInfo(self._monitoredNodeId)
+        (prob, sd, E) = getNodeInfo(self._monitoredNodeId, PARAM)
    	  # if the node existes--> it has attrib E-> suppose to be always true- unless we're not consistent with the event- get the time.      
         if E!=None:
 		self._thresholdTime = E * 1.3
@@ -95,7 +94,7 @@ class MonitorTimeServer(RobilTask):
 
             print "Added debug info: ***[%s]***" % (str(node_success) + " " + str(nodeTime))
             #calc self._monitoredNodeId attributs (prob, sd, E) from the tree IN DEBUG MODE, AFTER UPDATING THE REAL TIME
-            (prob, sd, E) = nodeDataInDebugMode(nodeTime,node_success,node_id, self._monitoredNodeId, 100 )
+            (prob, sd, E) = nodeDataInDebugMode(nodeTime,node_success,node_id, self._monitoredNodeId, 100 ,PARAM )
             
             if self._monitoredNodeId:
 			self._thresholdTime = E * 1.3

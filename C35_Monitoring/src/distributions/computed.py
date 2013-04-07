@@ -119,7 +119,7 @@ class Computed(Distribution):
        numOfValues =0.0
        for key in timeValueMap:
            numOfValues = numOfValues + float(timeValueMap.get(key))
-           var = var + ((float(timeValueMap.get(key)) - avg)**2)*float(key)
+           var = var + ((float(key) - avg)**2)*float(timeValueMap.get(key))
        if  numOfValues==0:
             return float(0)    
        return math.sqrt(var/numOfValues)    

@@ -8,10 +8,14 @@ import C0_RobilTask.msg
 from std_msgs.msg import String
 from computeTree import *
 from RobilTaskPy import *
+from std_msgs.msg import  Float32
+from std_msgs.msg import Int32MultiArray
+from C35_Monitoring.msg import progress
 
 
 DEFAULT_THRESHOLD_TIME = 10000	#Should not be used!
 DEADLINE = 30
+PARAM = 0
 
 
 	
@@ -30,8 +34,9 @@ class MonitorProgressServer(RobilTask):
     def __init__(self,event_file,name):
         print "PROGRESS MONITOR SERVER STARTED"
         rospy.Subscriber("/executer/stack_stream", String, self.callback)
-        constructTree(event_file)		
+        constructTree(event_file, PARAM)		
         RobilTask.__init__(self, name)
+        self.resultPublisher = rospy.Publisher("C35/Progress",progress)
 
 
   
@@ -41,10 +46,9 @@ class MonitorProgressServer(RobilTask):
         rospy.loginfo("%s: Start: task name = %s",self._action_name, name);
         rospy.loginfo("%s: Start: task id = %s", self._action_name, uid);
         rospy.loginfo("%s: Start: task params = %s", self._action_name, parameters);
-        self._monitoredNodeId = parameters['param']
         
         #calc self._monitoredNodeId attributs (prob, sd, E) from the ORIGINAL tree - NOT DEBUG MODE 
-        (prob, std, E) = getNodeInfo(self._monitoredNodeId)
+        (prob, std, E) = getNodeInfo(self._monitoredNodeId, PARAM)
         self._priorE = E
    	  # if the node existes--> it has attrib E-> suppose to be always true- unless we're not consistent with the event- get the time.      
         if E!=None:
@@ -93,9 +97,17 @@ class MonitorProgressServer(RobilTask):
             self._nodeExecutionTimesById[node_id] = current_time - start_time
             #local var -temp
             nodeTime = current_time - start_time
-
+#            print "self._nodeStartTimesById" 
+#            print self._nodeStartTimesById
+#            print "self._nodeExecutionTimesById"
+#            print self._nodeExecutionTimesById
             #calc self._monitoredNodeId attributs (prob, sd, E) from the tree IN DEBUG MODE, AFTER UPDATING THE REAL TIME
-            (prob, std, E) = nodeDataInDebugMode(nodeTime,node_success,node_id, self._monitoredNodeId, 100 )
+            
+            (prob, std, E) = nodeDataInDebugMode(nodeTime,node_success,node_id, self._monitoredNodeId, 100, PARAM )
+#            print "************************"
+#            print nodeTime,node_success,node_id
+#            print prob, std, E
+#            print "************************"
             self._thresholdTime = E * 1.3
             self.progressEstimation(std, E, DEADLINE, self._priorE)
 #            if self._monitoredNodeId:
@@ -119,24 +131,36 @@ class MonitorProgressServer(RobilTask):
   
  
     def progressEstimation (self, std, E, deadLine, PriorE ):
-       print "bla"
+#       print ("bla%f,%f" %(std, E))
        K = 1
+       dangerZone=[]
        #Current expected completion time + K*std >= deadline : we are highly likely not to make it
        if ((E+K*std)>=deadLine):
            print "we are highly likely not to make it.."
+           dangerZone.append(1)
        #Current expected completion time >= deadline: only 50% that we make it    
-       elif (E>= deadline):
+       elif (E>= deadLine):
            print "only 50% that we make it.."
+           dangerZone.append(2)
        #Current expected completion time - K*std >= deadline: there is a reasonable chance that we will not make it    
        elif ((E-K*std)>=deadLine):    
-           print "there is a reasonable chance that we will make it.."
+           print "there is a reasonable chance that we will not make it.."
+           dangerZone.append(3)
+       else:
+           print "everything is OK!"
+           dangerZone.append(4)
+       
        
        #Current expected completion time > Prior expected completion time + K*std: we are progressing slower than expected
        if (E > (PriorE + K*std)):
            print "we are progressing slower than expected"
+           dangerZone.append(1)
        #Current expected completion time < Prior expected completion time - K*std: we are progressing faster than expected    
        elif (E > (PriorE - K*std)):
-           print "we are progressing faster than expected"    
+           print "we are progressing faster than expected"
+           dangerZone.append(-1)
+           
+       self.resultPublisher.publish(dangerZone)    
 	
 	
     
