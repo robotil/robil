@@ -2,7 +2,7 @@
 
 from collections import deque
 import math
-import rospy    # TODO - get rid of all these loginfo when done debugging
+#import rospy    # TODO - get rid of all these loginfo when done debugging
 
 ###################################################################################
 # File created by David Dovrat, 2013.
@@ -99,8 +99,8 @@ class Segment(object):
             y = 0.0
             x = 0.0
 
-        rospy.loginfo('GetDistanceFromSegment: _u_ = %f sagital = %f; lateral = %f' %(_u_,x,y) )
-        rospy.loginfo('GetDistanceFromSegment: Source(x,y) = (%f,%f) Target(x,y) = (%f,%f)' %(self._Source.GetX(),self._Source.GetY(),self._Target.GetX(),self._Target.GetY()) )
+        #rospy.loginfo('GetDistanceFromSegment: _u_ = %f sagital = %f; lateral = %f' %(_u_,x,y) )
+        #rospy.loginfo('GetDistanceFromSegment: Source(x,y) = (%f,%f) Target(x,y) = (%f,%f)' %(self._Source.GetX(),self._Source.GetY(),self._Target.GetX(),self._Target.GetY()) )
 
         return x,y
     
@@ -166,17 +166,16 @@ class LocalPathPlanner(object):
         bStop = False
         sagital,lateral = self._CurrentSegment.GetDistanceFrom(self._Position)
         distanceFromTarget = self._CurrentSegment.GetTarget().GetDistanceFrom(self._Position)
-        rospy.loginfo('UpdatePosition: distanceFromTarget = %f' %(distanceFromTarget))
+        #rospy.loginfo('UpdatePosition: distanceFromTarget = %f' %(distanceFromTarget))
         if ((sagital>0.0)or(distanceFromTarget < self._CloseEnough)):
             if(len(self._Path)==0):
                 bStop = True
-                rospy.loginfo('UpdatePosition: Stopping')
+                #rospy.loginfo('UpdatePosition: Stopping')
             else:
-                rospy.loginfo('UpdatePosition: Path next point before pop (x,y) = (%f,%f)' %(self._Path[0].GetX(),self._Path[0].GetY()))
+                #rospy.loginfo('UpdatePosition: Path next point before pop (x,y) = (%f,%f)' %(self._Path[0].GetX(),self._Path[0].GetY()))
                 self._CurrentSegment.SetSource(self._CurrentSegment.GetTarget())
                 self._CurrentSegment.SetTarget(self._Path.popleft())
-            rospy.loginfo('UpdatePosition: Path next point (x,y) = (%f,%f)' %(self._Path[0].GetX(),self._Path[0].GetY()))
-            rospy.loginfo('UpdatePosition:  New Segment: Size = %s' %(self._CurrentSegment._Source.GetDistanceFrom(self._CurrentSegment._Target) ) )
+            #rospy.loginfo('UpdatePosition:  New Segment: Size = %s' %(self._CurrentSegment._Source.GetDistanceFrom(self._CurrentSegment._Target) ) )
         return bStop
         
   
