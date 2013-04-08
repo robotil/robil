@@ -11,6 +11,7 @@
   <depend package="osrf_msgs"/>
   <depend package="sensor_msgs"/>
   <depend package="tf"/>
+  <depend package="atlas_msgs"/>
 </package>
 
 

@@ -17,6 +17,9 @@
   <depend package="C31_PathPlanner"/>
   <depend package="C42_DRCSim2_tools"/>
   <depend package="C42_ZMPWalk"/>
+  <depend package="C42_Leg_IK"/>
+  <depend package="C43_LocalBodyCOM"/>
+
 </package>
 
 
