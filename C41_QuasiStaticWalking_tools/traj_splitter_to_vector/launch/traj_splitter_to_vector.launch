@@ -1,7 +1,4 @@
 <launch>
 	<node name="$(anon traj_vector_server)" pkg="traj_splitter_to_vector" type="traj_vector_server" cwd="node" output="screen" />
-<<<<<<< HEAD
 	<node name="$(anon walking_trajectory_vector)" pkg="traj_splitter_to_vector" type="walking_trajectory_vector" cwd="node" output="screen" />
-=======
->>>>>>> f4c2e197eabcae2f73b561c8e94024fb7b184d1e
 </launch>
