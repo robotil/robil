@@ -2,6 +2,7 @@
 
 from collections import deque
 import math
+import rospy    # TODO - get rid of all these loginfo when done debugging
 
 ###################################################################################
 # File created by David Dovrat, 2013.
@@ -47,14 +48,16 @@ class Segment(object):
         The Segment class represents a part in a path between two waypoints: Source to Target
     """  
     def __init__(self,waypointSource,waypointTarget):
-        self._Source = waypointSource
-        self._Target = waypointTarget
+        self._Source = Waypoint(waypointSource.GetX(),waypointSource.GetY())
+        self._Target = Waypoint(waypointTarget.GetX(),waypointTarget.GetY())
         
     def SetSource(self,waypointSource):
-        self._Source = waypointSource
+        self._Source._fX = waypointSource._fX
+        self._Source._fY = waypointSource._fY
     
     def SetTarget(self,waypointTarget):
-        self._Target = waypointTarget
+        self._Target._fX = waypointTarget._fX
+        self._Target._fY = waypointTarget._fY
         
     def GetSource(self):
         return self._Source
@@ -63,31 +66,58 @@ class Segment(object):
         return self._Target
         
     def GetDistanceFrom(self,waypoint):
+        """
+            Returns the distance between the segment and the input waypoint in the following format:
+            x,y = GetDistanceFrom(waypoint)
+                where x is the distance in the u vector direction:
+                    x<0 means that waypoint is |x| distance from the segment's source in the direction of -u
+                    x=0 means that the waypoint is between the segment's source and target
+                    x>0 means that the waypoint is |x| distance away from the segment's target, in the direction of u
+                y is the lateral distance from the segment:
+                    y<0 means that the waypoint is to the right of the segment
+                    y=0 means that the waypoint is on the segment
+                    y>0 means that the waypoint is to the left of the segment
+        """
         u = [self._Target.GetX() - self._Source.GetX(),self._Target.GetY() - self._Source.GetY()]
         v = [waypoint.GetX() - self._Source.GetX(),waypoint.GetY() - self._Source.GetY()]
         
         _u_ = math.sqrt(u[0]**2+u[1]**2)
-        # a X b = _a_*_b_*sin(alpha) => _b_*sin(alpha) = a X b /_a_
+
+        # a X b = |a|*|b|*sin(alpha) => |b|*sin(alpha) = a X b /|a|
+        # a dot b = |a|*|b|*cos(alpha) => |b|*cos(alpha) = a dot b /|a|
+
         if (_u_>0):
-            vectorDistance = (u[0]*v[1]-u[1]*v[0])/_u_
+            y = (u[0]*v[1]-u[1]*v[0])/_u_
+            x = (u[0]*v[0]+u[1]*v[1])/_u_
+            if(x>_u_):
+                # distance from target
+                x = x-_u_
+            elif (x>0):
+                # between target and source
+                x = 0.0
         else:
-            vectorDistance = 0.0
- 
-        return vectorDistance
+            y = 0.0
+            x = 0.0
+
+        rospy.loginfo('GetDistanceFromSegment: _u_ = %f sagital = %f; lateral = %f' %(_u_,x,y) )
+        rospy.loginfo('GetDistanceFromSegment: Source(x,y) = (%f,%f) Target(x,y) = (%f,%f)' %(self._Source.GetX(),self._Source.GetY(),self._Target.GetX(),self._Target.GetY()) )
+
+        return x,y
     
     def GetYaw(self):
         """
-            Returns the yaw in radians  - TODO - What a=is the coordinate system?
+            Returns the yaw in radians - in Front Left Up Coordinates, with the origin set at system init
         """
         u = [self._Target.GetX() - self._Source.GetX(),self._Target.GetY() - self._Source.GetY()]
         _u_ = math.sqrt(u[0]**2+u[1]**2)
-        
         if (_u_>0):
             u = [u[0]/_u_, u[1]/_u_]
         else:
             u = [1,0]
+
+        #rospy.loginfo('GetYaw: u_norm = %f; u_x = %f, u_y = %f' %(_u_,u[0],u[1] ) )
         
-        return math.acos(u[0])
+        return math.atan2(u[1],u[0])
 
 ###################################################################################
 #--------------------------- Local Path Planner -----------------------------------
@@ -101,8 +131,8 @@ class LocalPathPlanner(object):
     def __init__(self):
         self._Path = deque([])
         self._Position = Waypoint()
-        self._CurrentSegment = Segment(self._Position,self._Position)
-        self._CloseEnoughToTarget = 0.2 #0.5       
+        self._CurrentSegment = Segment(self._Position,self._Position) 
+        self._CloseEnough = 0.2   
         
     def SetPath(self,waypointList):
         self._Path = deque(waypointList)
@@ -112,23 +142,21 @@ class LocalPathPlanner(object):
                 self._CurrentSegment.SetTarget(self._Position)
             else:
                 self._CurrentSegment.SetSource(self._Position)
-                self._CurrentSegment.SetTarget(self._Path[0])
+                self._CurrentSegment.SetTarget(self._Path.popleft())
         else:
             self._CurrentSegment.SetSource(self._Path.popleft())
-            self._CurrentSegment.SetTarget(self._Path[0])    
+            self._CurrentSegment.SetTarget(self._Path.popleft())    
         
     def GetPathError(self):
-        return self._CurrentSegment.GetDistanceFrom(self._Position)
+        sagital,lateral = self._CurrentSegment.GetDistanceFrom(self._Position)
+        return lateral
         
     def GetPos(self):
 		return self._Position
     
     def GetTargetYaw(self):
         return self._CurrentSegment.GetYaw()
-        
-    def GetCurrentSegment(self):
-		return self._CurrentSegment
-    
+            
     def UpdatePosition(self,CoordinateX,CoordinateY):
         """
             Updates the position, returns true if at end of current path, false otherwise
@@ -136,12 +164,19 @@ class LocalPathPlanner(object):
         self._Position.SetX(CoordinateX)
         self._Position.SetY(CoordinateY)
         bStop = False
-        if (self._CurrentSegment.GetTarget().GetDistanceFrom(self._Position) < self._CloseEnoughToTarget):
-            self._CurrentSegment.SetSource(self._CurrentSegment.GetTarget())
-            if(len(self._Path)<1):
+        sagital,lateral = self._CurrentSegment.GetDistanceFrom(self._Position)
+        distanceFromTarget = self._CurrentSegment.GetTarget().GetDistanceFrom(self._Position)
+        rospy.loginfo('UpdatePosition: distanceFromTarget = %f' %(distanceFromTarget))
+        if ((sagital>0.0)or(distanceFromTarget < self._CloseEnough)):
+            if(len(self._Path)==0):
                 bStop = True
+                rospy.loginfo('UpdatePosition: Stopping')
             else:
+                rospy.loginfo('UpdatePosition: Path next point before pop (x,y) = (%f,%f)' %(self._Path[0].GetX(),self._Path[0].GetY()))
+                self._CurrentSegment.SetSource(self._CurrentSegment.GetTarget())
                 self._CurrentSegment.SetTarget(self._Path.popleft())
+            rospy.loginfo('UpdatePosition: Path next point (x,y) = (%f,%f)' %(self._Path[0].GetX(),self._Path[0].GetY()))
+            rospy.loginfo('UpdatePosition:  New Segment: Size = %s' %(self._CurrentSegment._Source.GetDistanceFrom(self._CurrentSegment._Target) ) )
         return bStop
         
   

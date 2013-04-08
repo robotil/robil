@@ -17,18 +17,17 @@ class MyTask(RobilTask):
         RobilTask.__init__(self, name)
         stub_pose()
         self._PP = LocalPathPlanner()
+        self._done = False
+        self._Walk = False    
+        self._lock = Lock() 
         self._odom_sub = rospy.Subscriber('/ground_truth_odom',Odometry,self._odom_cb)
         self._path_sub = rospy.Subscriber('/C31PathPlanner',C31_Waypoints,self._path_cb)
         self._vel_pub = rospy.Publisher('/atlas/cmd_vel',Twist)
         self._mode_pub = rospy.Publisher('/atlas/mode',String)
-        self._done = False
-        self._Walk = False    
-        self._lock = Lock() 
+
         
     def _odom_cb(self,odom):
         self._done = self._PP.UpdatePosition(odom.pose.pose.position.x,odom.pose.pose.position.y)
-        seg = self._PP.GetCurrentSegment()
-        des = seg.GetTarget()
         if self._Walk:
             Vel = Twist()
             lin = self._get_vel()
@@ -44,21 +43,14 @@ class MyTask(RobilTask):
         
     def _get_vel(self):
         vel = 1.0 #0.5
-        segment = self._PP.GetCurrentSegment()
-        a = segment.GetSource()
-        b = segment.GetTarget()
-        u = [b.GetX()-a.GetX(),b.GetY()-a.GetY()]
-        norm_u = math.sqrt(u[0]**2+u[1]**2)
-        if norm_u == 0:
-            V = Vector3(0,0,0)
-        else:
-            V = Vector3(vel*u[0]/norm_u,vel*u[1]/norm_u,0)
+        yaw = self._PP.GetTargetYaw()
+        V = Vector3(vel*math.cos(yaw),vel*math.sin(yaw),0)
         rospy.loginfo('Vel = %s done: %s',V,self._done)
         return V
         
     def task(self, name, uid, parameters):
         print "Start FollowPath"
-        r = rospy.Rate(0.1)
+        r = rospy.Rate(1)
         self._Walk = True
         Vel = Twist()
         while not self._done:
