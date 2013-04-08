@@ -50,7 +50,7 @@ class MyTask(RobilTask):
         
     def task(self, name, uid, parameters):
         print "Start FollowPath"
-        r = rospy.Rate(1)
+        r = rospy.Rate(10)
         self._Walk = True
         Vel = Twist()
         while not self._done:

@@ -158,18 +158,19 @@ class LocalPathPlanner(object):
 
     def GetCloseEnoughToTargetDistance(self):
         turningRadius = 3.25
-        result = 0.5 #by default
+        theta = 0.0
         if(0 == len(self._Path)):
+            # Last segment
             result = 0.2
         else:
             NextSegment = Segment(self._CurrentSegment.GetTarget(),self._Path[0])
             theta = NextSegment.GetYaw()-self._CurrentSegment.GetYaw()
             if(0 == math.sin(theta)):
                 # If theta is 0 or 180, then it would be better to reach the point than to throw an exception...
-                result = 3.5
+                result = 0.1
             else:
-                result = math.fabs(turningRadius*math.cos(theta/2)/math.sin(theta/2)) # Ask Dave
-        #rospy.loginfo('GetCloseEnoughToTargetDistance: %f' %(result))
+                result = math.fabs(turningRadius*math.tan(theta/2)) # Ask Dave
+        #rospy.loginfo('GetCloseEnoughToTargetDistance: %f, theta = %f' %(result,theta))
         return result
             
     def UpdatePosition(self,CoordinateX,CoordinateY):
