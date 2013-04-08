@@ -99,6 +99,7 @@ class MyTask(RobilTask):
 
         self._pub_zmp = rospy.Publisher('zmp_out', walking_trajectory ) #traj)
         self._pub_state = rospy.Publisher('zmp_state',Int32)
+        self._pub_error = rospy.Publisher('zmp_error',Float64)
         self._sub_orientation_command = rospy.Subscriber('orientation_command' , Float64 , self._listn_to_orientation_command)
 
         self._imu_ori_z_sub = rospy.Subscriber('/atlas/imu', Imu, self._get_imu)  #Odometry, get_imu) 
@@ -147,6 +148,7 @@ class MyTask(RobilTask):
             self._out = self._ZmpStateMachine.GetWalkingTrajectory(COMx, COMx_dot, p_pre_con_x,COMy, COMy_dot, p_pre_con_y,self._p_ref_x,self._p_ref_y,requiredYaw,self._imu_orientation)
             self._pub_zmp.publish(self._out)
             self._pub_state.publish(self._ZmpStateMachine.GetStateId())
+            self._pub_error.publish(self._ZmpLpp.GetPathError())
 
             self._interval.sleep()
 

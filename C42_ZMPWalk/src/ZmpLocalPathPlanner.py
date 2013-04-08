@@ -132,7 +132,6 @@ class LocalPathPlanner(object):
         self._Path = deque([])
         self._Position = Waypoint()
         self._CurrentSegment = Segment(self._Position,self._Position) 
-        self._CloseEnough = 0.2   
         
     def SetPath(self,waypointList):
         self._Path = deque(waypointList)
@@ -156,6 +155,22 @@ class LocalPathPlanner(object):
     
     def GetTargetYaw(self):
         return self._CurrentSegment.GetYaw()
+
+    def GetCloseEnoughToTargetDistance(self):
+        turningRadius = 3.25
+        result = 0.5 #by default
+        if(0 == len(self._Path)):
+            result = 0.2
+        else:
+            NextSegment = Segment(self._CurrentSegment.GetTarget(),self._Path[0])
+            theta = NextSegment.GetYaw()-self._CurrentSegment.GetYaw()
+            if(0 == math.sin(theta)):
+                # If theta is 0 or 180, then it would be better to reach the point than to throw an exception...
+                result = 3.5
+            else:
+                result = math.fabs(turningRadius*math.cos(theta/2)/math.sin(theta/2)) # Ask Dave
+        #rospy.loginfo('GetCloseEnoughToTargetDistance: %f' %(result))
+        return result
             
     def UpdatePosition(self,CoordinateX,CoordinateY):
         """
@@ -167,7 +182,7 @@ class LocalPathPlanner(object):
         sagital,lateral = self._CurrentSegment.GetDistanceFrom(self._Position)
         distanceFromTarget = self._CurrentSegment.GetTarget().GetDistanceFrom(self._Position)
         #rospy.loginfo('UpdatePosition: distanceFromTarget = %f' %(distanceFromTarget))
-        if ((sagital>0.0)or(distanceFromTarget < self._CloseEnough)):
+        if ((sagital>0.0)or(distanceFromTarget < self.GetCloseEnoughToTargetDistance())):
             if(len(self._Path)==0):
                 bStop = True
                 #rospy.loginfo('UpdatePosition: Stopping')
