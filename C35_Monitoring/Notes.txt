@@ -17,9 +17,9 @@ Requires python ver 2.7.3. In order to test the code run the following:
 1. roslaunch C46_MountVehicle atlas_profile_lower.launch
 2. run designer and executer
 3. rosrun C46_MountVehicle C46_Node.py
-4. rosrun C35_Monitoring C35_Node.py
-5. in designer load tree located in C35_monitoring/src/tests/simple_monitoring_example.xml
-6. run the tree
+4. rosrun C35_Monitoring C35_Node.py, in  C35_Node, make sure that you sent the right xml file. for example: MonitorTimeServer("tests/simple_monitor_example.xml", "MonitorTime")
+5. in designer load tree located in C35_monitoring/src/tests/simple_monitoring_example.xml. IF THE DESIGNER REFUSES, MOVE FILE TO C34_Designer/plans/ )
+6. run the tree, resume
 
 How to Check (skill4):
 ============
