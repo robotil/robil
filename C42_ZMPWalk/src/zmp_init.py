@@ -23,8 +23,40 @@ def init_pose():
 
     rospy.sleep(1)
     
+    # set for: step width - 18.2 , bend knees - 5
+    # back_lbz = 0.0            # 0
+    # back_mby = 0.03 #0.03#0.08# 1
+    # back_ubx = 0              # 2
+    # neck_ay = 0               # 3
+    # l_leg_uhz = 0             # 4
+    # l_leg_mhx = -0.002495     # 5
+    # l_leg_lhy = -0.375655     # 6
+    # l_leg_kny = 0.8012917     # 7
+    # l_leg_uay = -0.42493      # 8
+    # l_leg_lax = 0.00401678    # 9
+    # r_leg_uhz = 0             # 10
+    # r_leg_mhx = 0.003149327   # 11
+    # r_leg_lhy = -0.3754637    # 12
+    # r_leg_kny = 0.801291726   # 13
+    # r_leg_uay = -0.42325      # 14
+    # r_leg_lax = -0.003149877  # 15
+    # l_arm_usy = 0.9           # 16
+    # l_arm_shx = -1.35         # 17
+    # l_arm_ely = 2.3           # 18
+    # l_arm_elx = 1.6           # 19
+    # l_arm_uwy = 0             # 20
+    # l_arm_mwx = 0.0           # 21
+    # r_arm_usy = 0.9           # 22
+    # r_arm_shx = 1.35          # 23
+    # r_arm_ely = 2.3           # 24
+    # r_arm_elx = -1.6          # 25
+    # r_arm_uwy = 0             # 26
+    # r_arm_mwx = 0.0           # 27
+
+    # set for: step width - 17.8 , bend knees - 4
+
     back_lbz = 0.0
-    back_mby = 0.06 #0.03#0.08# 0.06
+    back_mby = 0.03 #0.03#0.08# 0.06
     back_ubx = 0
     neck_ay = 0
     l_leg_uhz = 0 

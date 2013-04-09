@@ -376,7 +376,7 @@ class Robot_State:
 
         # constraint: we want hips height (z) and advance (x) to be the same
         hip_height = 0.7999 - bend_knees #(self.l_stance_hip_0.z + self.r_stance_hip_0.z)/2
-        hip_sagital = 0.05 #0.05 #-0.02 # (self.l_stance_hip_0.x + self.r_stance_hip_0.x)/2 # x position relative to foot
+        hip_sagital = 0.083 #0.05 #-0.02 # (self.l_stance_hip_0.x + self.r_stance_hip_0.x)/2 # x position relative to foot
         self.l_stance_hip_0[2] = hip_height; self.r_stance_hip_0[2] = hip_height; # update z coord.
         self.l_stance_hip_0[0] = hip_sagital; self.r_stance_hip_0[0] = hip_sagital; # update x coord.
 
