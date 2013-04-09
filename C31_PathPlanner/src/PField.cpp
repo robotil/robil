@@ -11,6 +11,7 @@ typedef vector<Vec2d> Points;
 #define DISPLAY_FORCES  0
 #define DISPLAY_SMOOTHED_PATH 0
 #define DISPLAY_SMOOTHED_REDUCED_PATH 0
+#define DISPLAY_SMOOTHED_REDUCEDFIX_PATH 0
 
 namespace {
 	
@@ -59,6 +60,12 @@ Path PField::smoothWaypoints(const SmoothingParameters& in_params)const{
 }
 Points PField::smooth(const SmoothingParameters& in_params)const{
 	SmoothingParameters params = in_params;
+	if(opath.size()==0){
+		cout<<"WARNING: path size is zero."<<endl;
+
+		return convert(opath, map);
+	}
+
 	if(params.repulsorType==RT_ERROR)  params.repulsorType = RT_R1;
 	if(params.attractorType==AT_ERROR) params.attractorType = AT_A1;
 	if(params.maxIterationNumber==0) params.maxIterationNumber = (long)round(2*opath.size()/params.stepRate);
@@ -78,7 +85,8 @@ Points PField::smooth(const SmoothingParameters& in_params)const{
 		}
 	#endif
 	
-	Points reduced = reducePath(points,params);
+	Points reduced = reducePath(points, params);
+	reduced = reducePath(reduced, params);
 	
 	#if DISPLAY_SMOOTHED_REDUCED_PATH == 1
 		cout<<"reduced "<<endl;
@@ -86,8 +94,17 @@ Points PField::smooth(const SmoothingParameters& in_params)const{
 			cout<<reduced[i].x<<"\t"<<reduced[i].y<<endl;
 		}
 	#endif
+
+	Points reduced_fixed = addPointsToPath(reduced, params);
+
+	#if DISPLAY_SMOOTHED_REDUCEDFIX_PATH == 1
+		cout<<"reduced fixed "<<endl;
+		for(size_t i=0;i<reduced_fixed.size();i++){
+			cout<<reduced_fixed[i].x<<"\t"<<reduced_fixed[i].y<<endl;
+		}
+	#endif
 	
-	return reduced;
+	return reduced_fixed;
 }
 
 struct Position{
@@ -395,6 +412,46 @@ PField::Points PField::reducePath(const Points& path, const SmoothingParameters&
 	
 	return rpath;
 }
+
+
+PField::Points PField::addPointsToPath(const Points& path, const SmoothingParameters& params) const{
+	if(path.size()<2) return path;
+	Points rpath;
+	rpath.push_back(path[0]);
+	for(size_t i=0,j=1; j<path.size(); i++,j++){
+		double d = (path[j]-path[i]).len();
+		double r = params.distanceBetweenPoints;
+		if(d > params.distanceBetweenPoints*1.4){
+			double n = d / params.distanceBetweenPoints;
+			int in1 = (int)n;
+			int in2 = in1+1;
+			double dd1 = ::fabs( d - in1*params.distanceBetweenPoints);
+			double dd2 = ::fabs( d - in2*params.distanceBetweenPoints);
+			bool dd1dd2 = dd1<dd2;
+			double x=0;
+			if(dd1dd2){
+				x = dd1/in1;
+				r = r+x;
+			}else{
+				x = dd2/in2;
+				r = r-x;
+			}
+
+			int nn = d/r;
+#define N(x) ", "#x"="<<x
+			cout<<"adding points: d="<<d<<N(n)<<N(in1)<<N(in2)<<N(dd1)<<N(dd2)<<N(dd1dd2)<<N(x)<<N(r)<<N(nn)<<endl;
+#undef N
+
+			for(int e=1; e<nn; e++)
+				rpath.push_back(path[i] + (path[j]-path[i]).scale((double)e/(double)n));
+		}
+		rpath.push_back(path[j]);
+
+	}
+	return rpath;
+}
+
+
 
 Path PField::castPath(const Points& points)const{
 	return convert(points, map);

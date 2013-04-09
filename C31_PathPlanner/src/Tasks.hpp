@@ -12,6 +12,7 @@
 //messages
 #include <C31_PathPlanner/C31_PlanPath.h>
 #include <C31_PathPlanner/C31_GetPath.h>
+#include <C31_PathPlanner/C31_Exception.h>
 
 using namespace std;
 using namespace C0_RobilTask;
@@ -50,9 +51,10 @@ class PathPlanningServer:public RobilTask{
 	};
 	Statistic statistic;
 
+	ros::Publisher* c31_Exception;
 public:
     PathPlanningServer(PathPlanning& planner, string name = "/PathPlanning"):
-    	RobilTask(name), _planner(planner), new_map_or_location(false)
+    	RobilTask(name), _planner(planner), new_map_or_location(false), c31_Exception(NULL)
     {
     	_planner.setChangeNotifier(boost::bind(&PathPlanningServer::dataChanged, this));
 
@@ -118,8 +120,13 @@ public:
     					STR(ros::this_node::getName()<<"/getPath"),boost::bind(&PathPlanningServer::srv_GetPath,this,_1,_2)
     			);
     	ROS_INFO("advertise topic /path <C31_PathPlanner::C31_Waypoints>");
-    	ros::Publisher c32_PathPublisher =
+    	ros::Publisher c31_PathPublisher =
     			_node.advertise<C31_PathPlanner::C31_Waypoints>("/path", 10);
+
+    	ROS_INFO("advertise topic /path/exceptions <C31_PathPlanner::C31_Exception>");
+    	ros::Publisher c31_Exception =
+    			_node.advertise<C31_PathPlanner::C31_Exception>("/path/exceptions", 10);
+    	this->c31_Exception= &c31_Exception;
 
 		//TASK INPUT CHANNELS
     	ROS_INFO("subscribe to service /C22 <C22_GroundRecognitionAndMapping::C22>");
@@ -150,6 +157,7 @@ public:
 
                 /* HERE PROCESS PREEMPTION OR INTERAPT */
 
+            	this->c31_Exception=0;
             	return TaskResult::Preempted();
             }
 
@@ -175,7 +183,9 @@ public:
 					SET_CURRENT_TIME(statistic.time_plan_startPlanning);
 					ROS_INFO("%s: plan path", _name.c_str());
 					if( _planner.plan() ){
-						publish_new_plan(c32_PathPublisher);
+						publish_new_plan(c31_PathPublisher);
+					}else{
+						throw_exception(C31_PathPlanner::C31_Exception::TYPE_NOSOLUTIONFORPLAN, "No solution for plan found.");
 					}
 					SET_CURRENT_TIME(statistic.time_plan_stopPlanning);
 
@@ -191,6 +201,7 @@ public:
             sleep(1000); //millisec
         }
 
+        this->c31_Exception=0;
         return TaskResult::FAULT();
     }
 
@@ -206,6 +217,15 @@ public:
 			ROS_INFO("PATH: cell:%i,%i  ->  gps:%f,%f", (int) wp.x, (int) wp.y, (float) gpsp.x, (float) gpsp.y);
     	}
     	return gpspath;
+    }
+
+    void throw_exception(int type, std::string desc){
+    	C31_PathPlanner::C31_Exception exc;
+		exc.type = type;
+		exc.description = desc;
+		if(c31_Exception) c31_Exception->publish(exc);
+
+		this->_planner.events().push(cast(exc));
     }
 
     //=================== NEW DATA REQUESTS ===============================================
@@ -268,16 +288,22 @@ public:
 				onNewLocation( gps_grid.gps, gps_grid.cell );
 				
 			}else{
-				if(!map_size_ok) ROS_ERROR("Map gotten from C22_GroundRecognitionAndMapping::C22 is EMPTY (size=0x0)");
-				if(!robot_location_ok)
+				if(!map_size_ok){
+					ROS_ERROR("Map gotten from C22_GroundRecognitionAndMapping::C22 is EMPTY (size=0x0)");
+					throw_exception(C31_PathPlanner::C31_Exception::TYPE_MAPISEMPTY, "Map gotten from C22_GroundRecognitionAndMapping::C22 is EMPTY (size=0x0)");
+				}
+				if(!robot_location_ok){
 					ROS_ERROR("Map gotten from C22_GroundRecognitionAndMapping::C22 is out of map: map.offset=(%f,%f), map.size=(%f,%f), robot=(%f,%f)",
 							(float) mprop.gps.x, (float) mprop.gps.y,
 							(float) map.w()*mprop.resolution, (float) map.h()*mprop.resolution,
 							(float) gps_grid.gps.x , (float) gps_grid.gps.y
 					);
+					throw_exception(C31_PathPlanner::C31_Exception::TYPE_ROBOTOUTOFMAP, "Map gotten from C22_GroundRecognitionAndMapping::C22 is out of map");
+				}
 			}
 		}else{
 			ROS_ERROR("Failed to call service C22_GroundRecognitionAndMapping::C22");
+			throw_exception(C31_PathPlanner::C31_Exception::TYPE_FAILTEDTOCALLSERVICEC22, "Failed to call service C22_GroundRecognitionAndMapping::C22");
 		}
     }
 
@@ -303,13 +329,18 @@ public:
 			onNewLocation( gps_grid.gps, gps_grid.cell );
 
 		}else{
-			if(!map_size_ok) ROS_ERROR("Map gotten from C22_pub<C22_GroundRecognitionAndMapping::C22C0_PATH> is EMPTY (size=0x0)");
-			if(!robot_location_ok)
+			if(!map_size_ok){
+				ROS_ERROR("Map gotten from C22_pub<C22_GroundRecognitionAndMapping::C22C0_PATH> is EMPTY (size=0x0)");
+				throw_exception(C31_PathPlanner::C31_Exception::TYPE_MAPISEMPTY, "Map gotten from C22_GroundRecognitionAndMapping::C22 is EMPTY (size=0x0)");
+			}
+			if(!robot_location_ok){
 				ROS_ERROR("Robot location gotten from C22_pub<C22_GroundRecognitionAndMapping::C22C0_PATH> is out of map: map.offset=(%f,%f), map.size=(%f,%f), robot=(%f,%f)",
 						(float) mprop.gps.x, (float) mprop.gps.y,
 						(float) map.w()*mprop.resolution, (float) map.h()*mprop.resolution,
 						(float) gps_grid.gps.x , (float) gps_grid.gps.y
 				);
+				throw_exception(C31_PathPlanner::C31_Exception::TYPE_ROBOTOUTOFMAP, "Map gotten from C22_GroundRecognitionAndMapping::C22 is out of map");
+			}
 		}
 
 	}
@@ -382,7 +413,7 @@ public:
     	PathPlanning::EditSession session = _planner.startEdit();
     	session.arguments.start = wp;
     	session.arguments.selfLocation = pos;
-		ROS_INFO("GPS_GRID_CASTING: start=#(%f,%f)->#(%i,%i), finis=(%f,%f)->(%i,%i), robot.R=%f->%i (from onNewLocation(pos=wp))",
+		ROS_INFO("GPS_GRID_CASTING: start=#(%f,%f)->#(%i,%i), finis=(%fpathplanningfocus,%f)->(%i,%i), robot.R=%f->%i (from onNewLocation(pos=wp))",
 			(float) session.arguments.selfLocation.x, (float) session.arguments.selfLocation.y, (int) session.arguments.start.x, (int) session.arguments.start.y,
 			(float) session.arguments.targetPosition.x,(float)  session.arguments.targetPosition.y, (int) session.arguments.finish.x,(int) session.arguments.finish.y,
 			(float) session.constraints.dimentions.gps_radius, (int) session.constraints.dimentions.radius
@@ -461,6 +492,32 @@ public:
         return TaskResult::FAULT();
     }
 
+};
+
+class Task_whileSolution:public RobilTask{
+	PathPlanning& _planner;
+public:
+	Task_whileSolution(PathPlanning& planner, string name = "/whileSolution"):
+    	RobilTask(name), _planner(planner)
+    {  }
+
+    TaskResult task(const string& name, const string& uid, Arguments& args){
+    	Events::Queue events(_planner.events());
+    	while(true){
+    		if(isPreempt()){
+
+    			return TaskResult::Preempted();
+    		}
+    		if(events.empty() == false){
+    			Event e = events.pop();
+    			if(e.type == Event::TYPE_NOSOLUTIONFORPLAN){
+    				return TaskResult(RobilTask::FAULT, e.description);
+    			}
+    		}
+    		sleep(100); //millisec
+    	}
+        return TaskResult::FAULT();
+    }
 };
 
 #endif //_PATH_PLANNING_SERVER_H_

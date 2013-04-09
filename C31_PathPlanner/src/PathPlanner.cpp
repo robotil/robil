@@ -40,11 +40,12 @@
 
 			LOCK( locker_aft )
 				path = _path;
-				plan_created = true;
+				plan_created = path.size()>0;
 			UNLOCK( locker_aft )
 		}else{
 			ROS_INFO("PathPlanning::plan : %s","map is not ready => can not calculate path");
 		}
+		ROS_INFO("PathPlanning::plan : %s","no path calculated");
 		return plan_created;
 	}
 

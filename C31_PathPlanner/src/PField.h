@@ -42,7 +42,15 @@ public:
 				maxIterationNumber==0 || stepRate == 0 ||
 				distanceBetweenPoints==0 || maxAngleWhileReducing==0 ||
 				repulsorType==RT_ERROR || attractorType==AT_ERROR
-			) return true;
+			){
+				cout<<"SmoothingParameters::notDefined=true: "
+					<<(viewRadiusForward==0)<<(viewRadiusSide==0)
+					<<(maxIterationNumber==0)<<(stepRate==0)
+					<<(distanceBetweenPoints==0)<<(maxAngleWhileReducing==0)
+					<<(repulsorType==RT_ERROR)<<(attractorType==AT_ERROR)
+				<<endl;
+				return true;
+			}
 			return false;
 		}
 	};
@@ -66,10 +74,10 @@ public:
 	Path castPath(const Points& points)const;
 
 private:
-
+public://<- for testing only
 	Points simulate(const SmoothingParameters& params) const;
 	Points reducePath(const Points& path, const SmoothingParameters& params) const;
-
+	Points addPointsToPath(const Points& path, const SmoothingParameters& params) const;
 };
 
 #endif

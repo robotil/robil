@@ -12,6 +12,8 @@
 #include "ConvertorC22.hpp"
 #include "ConvertorC23.hpp"
 
+#include "Events.hpp"
+
 
 using namespace std;
 using namespace C0_RobilTask;
@@ -153,6 +155,7 @@ class PathPlanning{
 
 	//-------------- EVENTS ----------------------------
 	boost::shared_ptr<ChangesNotification> changeNotification;
+	Events _events;
 	//--------------------------------------------------
 
 public:
@@ -182,6 +185,7 @@ public:
 	void setChangeNotifier(CALLBACK cb){ changeNotification = boost::shared_ptr<ChangesNotification>(new _ChangesNotification<CALLBACK>(cb)); }
 
 	bool plan();
+	Events& events(){ return _events; }
 
 	class EditSession{
 		boost::shared_ptr<boost::mutex::scoped_lock> l;
