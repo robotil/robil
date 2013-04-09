@@ -31,8 +31,9 @@ public class LoadAndOpenAction extends AbstractDesignerAction implements
 			String currentFile = itr.next().trim();
 			boolean flagValid = true;
 
-			if (currentFile.startsWith("content")
-					|| currentFile.contains("just_names")) {
+			if (currentFile.startsWith("content") || 
+					currentFile.contains("just_names") || 
+					currentFile.contains(".jn")) {
 				flagValid = false;
 			}
 

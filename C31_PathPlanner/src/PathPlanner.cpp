@@ -7,8 +7,8 @@
 #define UNLOCK( X ) X = boost::shared_ptr<boost::mutex::scoped_lock>();
 
 
-void PathPlanning::plan(){
-
+	bool PathPlanning::plan(){
+		bool plan_created = false;
 		LOCK( locker_bfr )
 			PlanningInputData _data(data);
 		UNLOCK( locker_bfr )
@@ -40,10 +40,12 @@ void PathPlanning::plan(){
 
 			LOCK( locker_aft )
 				path = _path;
+				plan_created = true;
 			UNLOCK( locker_aft )
 		}else{
 			ROS_INFO("PathPlanning::plan : %s","map is not ready => can not calculate path");
 		}
+		return plan_created;
 	}
 
 	#define TRANSLATE_GPS_TO_GRID(x, v) ( mapProperties.anchor.x + round( ( v - mapProperties.gps.x) / mapProperties.resolution ) )

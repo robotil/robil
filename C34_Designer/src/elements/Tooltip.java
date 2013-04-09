@@ -52,8 +52,8 @@ public class Tooltip extends GElement {
 		this.cloneInit(tooltip);
 		tooltip._textPosition = new Vec(this._textPosition);
 		tooltip._message = new String(this._message);
-		// tooltip._textPosition = this._textPosition;
 		tooltip._title = new String(this._title);
+		tooltip._position = this._position;
 		return tooltip;
 	}
 

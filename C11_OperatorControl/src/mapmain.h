@@ -32,6 +32,10 @@ class CMapMain : public QWidget
 {
 	Q_OBJECT
 
+signals:
+
+	void SigOperatorAction();
+
 public:
 	CMapMain(QWidget *parent = 0, Qt::WFlags flags = 0);
 	CMapMain(int arr[100][100],QWidget *parent = 0, Qt::WFlags flags = 0);
@@ -48,6 +52,10 @@ public:
 	void deleteReadyPath();
 	void deletePath();
 	void deleteRoute(ModeDraw m);
+	void SetEditable(bool value);
+	std::vector<StructPoint> GetUpdatedRoute();
+	QVector<QPointF> getRoutePath();
+	QVector<QPointF> getRoute(ModeDraw route);
 
 private:
 	Ui::CMapMainClass ui;
@@ -62,6 +70,10 @@ private:
 	sItemPressed PixPressed;
 	QPointF PressPoint;
 	QPointF ReleasePoint;
+	bool IsEditable;
+	bool IsPathChanged;
+	std::vector<StructPoint> LastReceivedRoute;
+	std::vector<StructPoint> LastUpdatedRoute;
 
 	CRouteItem *routeSelected;
 
@@ -92,7 +104,10 @@ private:
 	bool checkSelectedPoint(CRouteItem *Route);
 	bool checkSelectedEdge(CRouteItem *Route);
 	QPointF PointToPix(StructPoint point);
+	StructPoint PixToPoint(QPointF pix);
 	void CalculateCornerPos();
+	bool IsPointsEqual(StructPoint p1, StructPoint p2);
+	bool IsPointInPath(StructPoint p1);
 
 	StructIntPoint CalculateGridPoint(StructIntPoint pointFromRos);
 

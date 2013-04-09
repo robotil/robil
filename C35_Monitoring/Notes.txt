@@ -84,19 +84,25 @@ TODO - Need to formalize the alerts raised by the monitor
 
 
 =======================
-Timeout Monitor
+Timeout Monitor, Falling Monitor, and Stability Monitor
 =======================
-#description: a task which receives as a parameter a threshold value, and after threshold seconds, aborts with failure, unless preempted.
+#description (Timeout Monitor): a task which receives as a parameter a threshold value, and after threshold seconds, aborts with failure, unless preempted.
+#description (Falling Monitor): a task which listens on topic /C35/falling for boolean values [0,1], and aborts with failure when 1 is heard (meaning the robot has fallen).
+#description (Stability Monitor): a task which listens on topic /C35/stability for int8 values [1-5] (5 being the most stable), and aborts with failure when 1 is heard (meaning the robot is dangerously unstable).
 in order to run test (requires stand_up module):
 roslaunch atlas_utils atlas.launch
 rosrun C34_Executer executer
 rosrun C34_Designer run.sh 
 rosrun C35_Monitoring TimeoutMonitor.py
+rosrun C35_Monitoring FallingMonitor.py
+rosrun C35_Monitoring StabilityMonitor.py
 rosrun C48_StandUp Fall.py
 rosrun C48_StandUp C48_StandUp.py
-in designer, open either C34_Designer/plans/DoubleMonitoredStandUp.xml  or  C34_Designer/plans/MonitoredStandUp.xml
+C34_Designer/plans/MonitoredStandUp.xml
 run and resume
 threshold values can be changed in the xml files, just change the threshold parameters.
+"falling messages" can be sent from command line using: rostopic pub -1 /C35/falling std_msgs/Bool -- 1
+"stability messages" can be sent from command line using: rostopic pub -1 /C35/stability std_msgs/Int8 -- [1-5]
 
 Known Bugs:
 ==========

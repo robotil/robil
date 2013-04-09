@@ -179,7 +179,7 @@
                                  <tsk name="PathPlanning" x="493.9987661970451" y="479.8831404377021" test_time="0" test_result="true" id="32da76e3-cd3b-456e-84d4-9dfe611b91c6" />
                               <dec name="!L!" x="621.6178138160924" y="479.04980710436894"> 
                                     <seq name="Driving" x="610.28448048276" y="534.2640928186535" collapsed="true" id="3121acdd-f660-4d53-96b2-47029c756b6f"> 
-                                          <tsk name="PathPlanningFocus(target=FORWARD)" x="363.160420332384" y="635.673867254739" test_time="0" test_result="true" id="5668a95a-a827-472a-bae2-b4fff00a36a7" />
+                                          <tsk name="PathPlanningFocus(target=Gate)" x="363.160420332384" y="635.673867254739" test_time="0" test_result="true" id="5668a95a-a827-472a-bae2-b4fff00a36a7" />
                                           <par name="OperatorCheckPoint" x="485.8924558407454" y="677.7933413479054" collapsed="true" id="0af635ea-6766-4022-a8cc-9e4cebb71e02"> 
                                              <dec name="L" x="455.47578917407753" y="705.2933413479027"> 
                                                    <seq name="Stabilization" x="379.16543286371314" y="734.2879023424762" collapsed="false" id="35f3a57d-9b0d-4e59-abd5-6ea21870ccd2"> 

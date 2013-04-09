@@ -15,6 +15,7 @@ import java.awt.event.ActionListener;
 
 import javax.swing.BorderFactory;
 import javax.swing.DefaultCellEditor;
+import javax.swing.DropMode;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JComponent;
@@ -33,6 +34,7 @@ import document.LookupTable;
 import document.LookupTableRecord;
 import document.Parameters;
 import document.ParametersXmlHandler;
+import document.ui.Utilities;
 
 public class LookupTableEditor extends JFrame {
 
@@ -286,6 +288,9 @@ public class LookupTableEditor extends JFrame {
 				return comp;
 			}
 		};
+		
+//		_jTable.setDragEnabled(true);
+//		_jTable.setDropMode(DropMode.INSERT);
 		_jTable.getColumnModel().getColumn(1).setCellEditor(new DefaultCellEditor(new JComboBox(LookupTableRecord.getTypeValues())));
 		_jTable.getColumnModel().getColumn(2).setCellEditor(new DefaultCellEditor(new JComboBox(LookupTableRecord.getPlannerValues())));
 		_jTable.setRowHeight(28);
@@ -311,7 +316,7 @@ public class LookupTableEditor extends JFrame {
 		c.gridy = 3;
 		c.weightx = 0.0;
 		c.weighty = 0.0;
-		add(new JButton("Save") {
+		add(new JButton("Save", Utilities.loadIcon("save.png")) {
 			private static final long serialVersionUID = 1L;
 			{
 				addActionListener(new ActionListener() {
@@ -323,6 +328,7 @@ public class LookupTableEditor extends JFrame {
 						dispose();						
 					}
 				});
+				setBorder(BorderFactory.createEmptyBorder(10, 15, 10, 15));
 			}
 		}, c);
 		
