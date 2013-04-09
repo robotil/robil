@@ -549,6 +549,36 @@ class LeftStepState(StepState):
     def GetId(self):
         return 4
 
+#----------------------------------------------------------------------------------
+
+class TurnRight_LeftStepState(StepState):
+    """
+        The TurnRight_LeftStepState class is intended to be used with the StepStateMachine class,
+        When the ZMP begins a right turn taking a left step
+    """
+    def __init__(self,StepStrategy,walkingTrajectory,robotState,dt):
+        StepState.__init__(self,"TurnRightBeginLeft",StepStrategy,dt)
+        self._WalkingTrajectory = walkingTrajectory
+        self._robotState = robotState
+        
+        self._pre_step = 0
+        self._first_step = 0
+        self._full_step = 1
+        self._last_step = 0
+        
+    def OnEnter(self):
+        rospy.loginfo("starting turn right with left step")
+        self._robotState.Set_step_phase(value = 3)
+        
+        self._Strategy.LoadNewStep(self._p_ref_x_forward_step,self._p_ref_x_forward_step,self._p_ref_y_step_right,r_[ self._p_ref_y_step_left, self._p_ref_y_step_right ])
+
+    def UpdateStepCounter(self,stepCounter):
+        stepCounter = stepCounter+1
+        return stepCounter
+   
+    def GetId(self):
+        return 16
+
 ###################################################################################
 #--------------------------- State Machine ----------------------------------------
 ###################################################################################
@@ -644,6 +674,7 @@ class StepStateMachine(StateMachine):
     def UpdatePreview(self):
         #rospy.loginfo("UpdatePreview - StepTime(%f) Counter(%d) Timer(%f)" % (StateMachine.GetCurrentState(self).GetStepTime(),self._counter, self._counter*1.0/self._UpdateRateHz))
         if (StateMachine.GetCurrentState(self).GetStepTime() < self._counter*1.0/self._UpdateRateHz):
+            # add turn
             self.NextStep()
             p_ref_x,p_ref_y,loaded_new_step_trigger_x,loaded_new_step_trigger_y = StateMachine.GetCurrentState(self).UpdatePreview()
             self._stepCounter = StateMachine.GetCurrentState(self).UpdateStepCounter(self._stepCounter)
