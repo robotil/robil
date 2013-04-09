@@ -10,7 +10,7 @@
 ####     ( with other nodes: roslaunch C42_ZMPWalk zmp_walk.launch )             ##
 ####    2) run C31_clone to emulate the C31PathPlanner (publish a path message): ##
 ####       rosrun C42_ZMPWalk scripts/C31_Clone.py                               ##
-####    3) start walking: rosrun C0_RobilTask task_tester C42_ZMPwalk            ##
+####    3) start walking: rosrun C0_RobilTask task_tester ZmpWalk                ##
 ####    stops walking: i) when reached goal position (set by C31_PathPlanner).   ##
 ####                   ii) or preempted goal by task handler which will cause an ##
 ####                      Emergency Stop.                                        ##
@@ -46,7 +46,7 @@ from C31_PathPlanner.msg import C31_Waypoints
 class MyTask(RobilTask):
 
     def __init__(self, name):
-        print "Init C42_ZMPWalk"
+        print "Init ZmpWalk"
         RobilTask.__init__(self, name)
 
         self._Des_Orientation = 0#-math.pi/2
@@ -126,7 +126,7 @@ class MyTask(RobilTask):
         self._imu_orientation = msg.orientation
         
     def task(self, name, uid, parameters):
-        print "Start C42_ZMPwalk"
+        print "Start ZmpWalk"
 
         self._ZmpStateMachine.Initialize()
         self._ZmpStateMachine.Start()
@@ -134,7 +134,7 @@ class MyTask(RobilTask):
         while not self._done:
             if self.isPreepted():
                 self._ZmpStateMachine.EmergencyStop()
-                print "Preempt C42_ZMPWalk: EmergencyStop"
+                print "Preempt ZmpWalk: EmergencyStop"
                 self._ZmpStateMachine.EmergencyStop()
                 return RTResult_PREEPTED()
             self._p_ref_x,self._p_ref_y,new_step_trigger_x,new_step_trigger_y = self._ZmpStateMachine.UpdatePreview()
@@ -154,11 +154,11 @@ class MyTask(RobilTask):
 
         self._ZmpStateMachine.EmergencyStop() #        self._ZmpStateMachine.Stop()
 
-        print "Finish C42_ZMPWalk"
+        print "Finish ZmpWalk"
         return RTResult_SUCCESSED("Finished in Success")
 
 if __name__ == '__main__':
     rospy.init_node('C42_ZMPwalkNode')
-    MyTask("C42_ZMPwalk")
+    MyTask("ZmpWalk")
     rospy.spin()
     print "C42_ZMPwalkNode Closed"
