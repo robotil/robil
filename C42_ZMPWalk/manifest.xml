@@ -9,8 +9,12 @@
   <review status="unreviewed" notes=""/>
   <url>http://ros.org/wiki/zmp_walk</url>
   <depend package="std_msgs"/>
+  <depend package="C0_RobilTask"/>
+  <depend package="C31_PathPlanner"/>
+  <depend package="geometry_msgs"/>
   <depend package="rospy"/>
   <depend package="tf"/>
+  <depend package="C42_DRCSim2_tools"/>
 
 </package>
 

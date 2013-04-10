@@ -10,18 +10,18 @@ C35_Monitoring
 3. When running a Monitoring task (e.g., MonitorTime(param=563a39ca-99df-45dc-a369-73c7af2fe951)), the task monitors the node with the id given in param. If the node takes longer than (T*average_computed_time) for that node, it exists with failure, which terminates the monitored node (the monitoring node is always the monitored node's sibling in the BTree, and their parent is always a parallel node).
 
 
-How to Check (outdated):
+How to Check:
 
 ============
 Requires python ver 2.7.3. In order to test the code run the following:
-1. roslaunch C46_MountVehicle atlas_profile_lower.launch
+1. Launch drc sim
 2. run designer and executer
 3. rosrun C46_MountVehicle C46_Node.py
-4. rosrun C35_Monitoring C35_Node.py
-5. in designer load tree located in C35_monitoring/src/tests/simple_monitoring_example.xml
-6. run the tree
+4. rosrun C35_Monitoring C35_Node.py, in  C35_Node, make sure that you sent the right xml file. for example: MonitorTimeServer("tests/simple_monitor_example.xml", "MonitorTime")
+5. in designer load tree located in C35_monitoring/src/tests/simple_monitoring_example.xml. IF THE DESIGNER REFUSES, MOVE FILE TO C34_Designer/plans/ )
+6. run the tree, resume
 
-How to Check (skill4):
+How to Check (skill4) (oudated):
 ============
 Requires python ver 2.7.3. In order to test the code run the following:
 1. Launch drc sim
@@ -37,9 +37,7 @@ Known Bugs:
 
 Known Limitations:
 =================
-TODO - the module still doesn't update its statistics, given runtime information. This means that the threshold for monitored nodes doesn't change during runtime.
 xml file is hardcoded, instead of being given as cmd line argument.
-Not sure yet how multiple monitoring nodes within the same subtree are handled. Should be checked.
 
 
 
@@ -79,3 +77,36 @@ Known Limitations:
 =================
 TODO - Need to get threshold function from Oded.
 TODO - Need to formalize the alerts raised by the monitor
+
+
+
+
+=======================
+Timeout Monitor, Falling Monitor, and Stability Monitor
+=======================
+#description (Timeout Monitor): a task which receives as a parameter a threshold value, and after threshold seconds, aborts with failure, unless preempted.
+#description (Falling Monitor): a task which listens on topic /C35/falling for boolean values [0,1], and aborts with failure when 1 is heard (meaning the robot has fallen).
+#description (Stability Monitor): a task which listens on topic /C35/stability for int8 values [1-5] (5 being the most stable), and aborts with failure when 1 is heard (meaning the robot is dangerously unstable).
+in order to run test (requires stand_up module):
+roslaunch atlas_utils atlas.launch
+rosrun C34_Executer executer
+rosrun C34_Designer run.sh 
+rosrun C35_Monitoring TimeoutMonitor.py
+rosrun C35_Monitoring FallingMonitor.py
+rosrun C35_Monitoring StabilityMonitor.py
+rosrun C48_StandUp Fall.py
+rosrun C48_StandUp C48_StandUp.py
+C34_Designer/plans/MonitoredStandUp.xml
+run and resume
+threshold values can be changed in the xml files, just change the threshold parameters.
+"falling messages" can be sent from command line using: rostopic pub -1 /C35/falling std_msgs/Bool -- 1
+"stability messages" can be sent from command line using: rostopic pub -1 /C35/stability std_msgs/Int8 -- [1-5]
+
+Known Bugs:
+==========
+
+
+Known Limitations:
+=================
+Not related to monitoring, but stand_up module does not react to preemption.
+

@@ -32,7 +32,8 @@ int main (int argc, char **argv)
 	ros::Duration(1).sleep();
 
 	//wait for the action to return
-	//std::cout << ac.getState().toString() << std::endl;
+	std::cout << ac.getState().toString() << std::endl;
+	std::cout << ac.getResult() << std::endl;
 	bool finished_before_timeout = ac.waitForResult(ros::Duration(7.0));
 
 	if (finished_before_timeout)
@@ -43,6 +44,9 @@ int main (int argc, char **argv)
 	else
 	{
 		ROS_INFO("Action did not finish before the time out.");
+		std::cout << ac.getResult() << std::endl;
+		std::cout << ac.getState().toString() << std::endl;
+		ac.cancelGoal();
 
 	}
 

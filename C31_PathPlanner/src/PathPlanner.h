@@ -181,7 +181,7 @@ public:
 	template <typename CALLBACK>
 	void setChangeNotifier(CALLBACK cb){ changeNotification = boost::shared_ptr<ChangesNotification>(new _ChangesNotification<CALLBACK>(cb)); }
 
-	void plan();
+	bool plan();
 
 	class EditSession{
 		boost::shared_ptr<boost::mutex::scoped_lock> l;

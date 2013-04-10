@@ -50,8 +50,8 @@ include_directories(srv_gen/cpp/include)
 
 
 rosbuild_add_boost_directories()
-#rosbuild_add_executable(c11 src/C11_Node.cpp)
-rosbuild_add_executable(c11 src/main.cpp
+#rosbuild_add_executable(C11 src/C11_Node.cpp)
+rosbuild_add_executable(C11 src/main.cpp
     ${uis_h} ${qt_hdrs} ${qt_srcs} ${qt_moc_srcs})
-target_link_libraries(c11 ${QT_LIBRARIES})
-rosbuild_link_boost(c11 thread signals)
+target_link_libraries(C11 ${QT_LIBRARIES})
+rosbuild_link_boost(C11 thread signals)
