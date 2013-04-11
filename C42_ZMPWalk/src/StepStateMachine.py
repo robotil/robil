@@ -592,9 +592,13 @@ class StepStateMachine(StateMachine):
         self._counter = 0
         self._stepCounter = 0
         self._UpdateRateHz = UpdateRateHz
-        self._TurnCmdInput = 0.0 # Input Turn command recieved by StepStateMachine: Angle in [rad], signs: (+) turn left, (-) turn right
-        self._ExecutedTurnCmd = 0.0 # Turn command that is being carried out 
-        self._TurnThreshold = 0.030 # units [rad], above this value 
+        # Turn Variables:
+        self._TurnCmdInput = 0.0        # units [rad], Input Turn command recieved by StepStateMachine, angle signs: (+) turn left, (-) turn right
+        self._ExecutedTurnCmd = 0.0     # units [rad], Turn command that is being carried out
+        self._TotalTurnRemaining = 0.0   # units [rad], total turn remaining to perform 
+        # Turn Parameters:
+        self._MaxStepTurn = 45*math.pi/180 # units [rad], the maximal Turn that can be performed in one step sequance 
+        self._TurnThreshold = 0.030        # units [rad], below this value a turn will not be performed 
         # Set up strategies
         self._StepStrategyNone = StepStrategyNone(robotState,walkingTrajectory,transformListener,ZMP_Preview_BufferX,ZMP_Preview_BufferY)
         self._StepStrategyWalk = StepStrategyWalk(robotState,walkingTrajectory,transformListener,SwingTrajectory,orientation_correction,ZMP_Preview_BufferX,ZMP_Preview_BufferY)
@@ -662,6 +666,14 @@ class StepStateMachine(StateMachine):
         StateMachine.PerformTransition(self,"NextStep")
         self._counter = 0
 
+    def TurnLeft(self):
+        StateMachine.PerformTransition(self,"TurnLeft")
+        self._counter = 0
+
+    def TurnRight(self):
+        StateMachine.PerformTransition(self,"TurnRight")
+        self._counter = 0
+
     def Stop(self):
         StateMachine.PerformTransition(self,"Stop")
 
@@ -677,10 +689,15 @@ class StepStateMachine(StateMachine):
     def UpdatePreview(self):
         #rospy.loginfo("UpdatePreview - StepTime(%f) Counter(%d) Timer(%f)" % (StateMachine.GetCurrentState(self).GetStepTime(),self._counter, self._counter*1.0/self._UpdateRateHz))
         if (StateMachine.GetCurrentState(self).GetStepTime() < self._counter*1.0/self._UpdateRateHz):
-            # add turn
-            #if self._DecideToTurn():
+            # End of step Transitions:
+            if self._DecideToTurn():
+                if self._ExecutedTurnCmd > 0:
+                    self.TurnLeft()
+                else:
+                    self.TurnRight()
+            else:
+                self.NextStep()
 
-            self.NextStep()
             p_ref_x,p_ref_y,loaded_new_step_trigger_x,loaded_new_step_trigger_y = StateMachine.GetCurrentState(self).UpdatePreview()
             self._stepCounter = StateMachine.GetCurrentState(self).UpdateStepCounter(self._stepCounter)
             rospy.loginfo("done step number = %d" % (self._stepCounter))
@@ -698,9 +715,29 @@ class StepStateMachine(StateMachine):
     def GetTurnCmd(self, turn_cmd):
         self._TurnCmdInput = turn_cmd
 
-    # def _DecideToTurn(self):
-    #     if ( abs(self._TurnCmdInput) >= self._TurnThreshold ) and ():
-    #     return 
+    def _DecideToTurn(self):
+        result = False
+        # if completed previous turn command Update from Turn Input command:
+        if ( abs(self._TotalTurnRemaining) < self._TurnThreshold ):
+            if ( abs(self._TurnCmdInput) >= self._TurnThreshold ):
+                self._TotalTurnRemaining = self._TurnCmdInput
+            else:
+                self._TotalTurnRemaining = 0.0
+        # sign of turn:
+        if self._TotalTurnRemaining > 0.0:
+            turn_sign = 1
+        else:
+            turn_sign = -1
+        # divid "big" Turn into a few steps 
+        if abs(self._TotalTurnRemaining) >= self._MaxStepTurn:
+            self._ExecutedTurnCmd = self._MaxStepTurn*turn_sign
+        else:
+            self._ExecutedTurnCmd = self._TotalTurnRemaining
+
+
+        if ( abs(self._TurnCmdInput) >= self._TurnThreshold ) and ():
+
+        return result
 
 ###################################################################################
 # a little testing script
