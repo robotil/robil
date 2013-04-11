@@ -592,6 +592,9 @@ class StepStateMachine(StateMachine):
         self._counter = 0
         self._stepCounter = 0
         self._UpdateRateHz = UpdateRateHz
+        self._TurnCmdInput = 0.0 # Input Turn command recieved by StepStateMachine: Angle in [rad], signs: (+) turn left, (-) turn right
+        self._ExecutedTurnCmd = 0.0 # Turn command that is being carried out 
+        self._TurnThreshold = 0.030 # units [rad], above this value 
         # Set up strategies
         self._StepStrategyNone = StepStrategyNone(robotState,walkingTrajectory,transformListener,ZMP_Preview_BufferX,ZMP_Preview_BufferY)
         self._StepStrategyWalk = StepStrategyWalk(robotState,walkingTrajectory,transformListener,SwingTrajectory,orientation_correction,ZMP_Preview_BufferX,ZMP_Preview_BufferY)
@@ -675,6 +678,8 @@ class StepStateMachine(StateMachine):
         #rospy.loginfo("UpdatePreview - StepTime(%f) Counter(%d) Timer(%f)" % (StateMachine.GetCurrentState(self).GetStepTime(),self._counter, self._counter*1.0/self._UpdateRateHz))
         if (StateMachine.GetCurrentState(self).GetStepTime() < self._counter*1.0/self._UpdateRateHz):
             # add turn
+            #if self._DecideToTurn():
+
             self.NextStep()
             p_ref_x,p_ref_y,loaded_new_step_trigger_x,loaded_new_step_trigger_y = StateMachine.GetCurrentState(self).UpdatePreview()
             self._stepCounter = StateMachine.GetCurrentState(self).UpdateStepCounter(self._stepCounter)
@@ -686,8 +691,16 @@ class StepStateMachine(StateMachine):
 
         self._counter = self._counter+1
         return p_ref_x,p_ref_y,loaded_new_step_trigger_x,loaded_new_step_trigger_y  
+    
     def GetStateId(self):
         return StateMachine.GetCurrentState(self).GetId()
+
+    def GetTurnCmd(self, turn_cmd):
+        self._TurnCmdInput = turn_cmd
+
+    # def _DecideToTurn(self):
+    #     if ( abs(self._TurnCmdInput) >= self._TurnThreshold ) and ():
+    #     return 
 
 ###################################################################################
 # a little testing script
