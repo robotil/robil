@@ -1,0 +1,49 @@
+# zmp.txt
+# rospy.get_time()),zmp_x,zmp_y,nsw.phase,msg.zmp_ref.x,msg.zmp_ref.y,msg.com_ref.x,msg.com_ref.y))
+# zmp_right
+# (rospy.get_time()),ns.zmpx_r,ns.zmpy_r,nsw.phase,msg.zmp_ref.x,msg.zmp_ref.y).
+# zmp_left
+# (rospy.get_time()),ns.zmpx_l,ns.zmpy_l,nsw.phase,msg.zmp_ref.x,msg.zmp_ref.y)
+# right_contact_F_T
+# str(rospy.get_time()),ns.response[6],ns.response[7],ns.response[8],ns.response[9],ns.response[10],ns.response[11],nsw.phase,ns.num_of_samples))
+
+left_contact_F_T
+(rospy.get_time()),ns.response[0],ns.response[1],ns.response[2],ns.response[3],ns.response[4],ns.response[5],nsw.phase,ns.num_of_samples))
+
+ns.response = [nl.force_x,nl.force_y,nl.force_z,nl.t_x,nl.t_y,nl.t_z,nl.t_x,nl.t_y,nl.t_z ,nr.force_x,nr.force_y,nr.force_z,nr.t_x,nr.t_y,nr.t_z]
+
+
+
+zmp = fscanfMat(['ros/bags/bags/bags1/zmp.txt']);
+zmp_right = fscanfMat(['ros/bags/bags/bags1/zmp_right_foot.txt']);
+zmp_left = fscanfMat(['ros/bags/bags/bags1/zmp_left_foot.txt']);
+right_contact = fscanfMat(['ros/bags/bags/bags1/right_foot_walk.txt']);
+left_contact = fscanfMat(['ros/bags/bags/bags1/left_foot_walk.txt']);
+fall_data = fscanfMat(['ros/bags/bags/bags1/fall_data.txt']);
+[nr,nc]=size(zmp_right);
+num=nr;
+t=linspace(zmp_right(1,1),zmp_right(num,1),num);
+side_y=0.062;
+back_x=-0.083;
+front_x= 0.1754;
+zero=0;
+##t(:),back_x,t(:),front_x,'back_x','front_x',
+plot(zmp_right(:,1),zmp_right(:,2),zmp_right(:,1),zmp_right(:,5),zmp_right(:,1),zmp_right(:,4),zmp_left(:,1),zmp_left(:,2),zmp_left(:,1),zmp_left(:,5),zmp_left(:,1),zmp_left(:,4),fall_data(1,1),zero,'o-g');
+legend('zmp_right x real ','right ref x','right phase','zmp_left x real ','left ref x','left phase');
+figure;
+plot(zmp_left(:,1),zmp_left(:,2),zmp_left(:,1),zmp_left(:,5));
+legend('zmp_left x real ','left ref x');
+figure;
+
+plot(left_contact(:,1),left_contact(:,2),right_contact(:,1),right_contact(:,2));
+legend('l_force_x','r_force_x');
+figure;
+
+plot(left_contact(:,1),left_contact(:,3),right_contact(:,1),right_contact(:,3));
+legend('l_force_y','r_force_y');
+figure;
+
+plot(left_contact(:,1),left_contact(:,4),right_contact(:,1),right_contact(:,4));
+legend('l_force_z','r_force_z');
+figure;
+

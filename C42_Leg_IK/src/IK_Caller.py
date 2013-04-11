@@ -40,32 +40,28 @@ class Nasmpace: pass
 ns = Nasmpace()
 #ns.LegAng = LegIkResponse()
 
-JSC_r_leg_mhx = Joint_Stiffness_Controller('r_leg_mhx', 8000, 0.05) # joint name, stiffness, update_period [sec]
-JSC_l_leg_mhx = Joint_Stiffness_Controller('l_leg_mhx', 8000, 0.05) # joint name, stiffness, update_period [sec]
-JSC_r_leg_lax = Joint_Stiffness_Controller('r_leg_lax', 5500, 0.05) # joint name, stiffness, update_period [sec]
-JSC_l_leg_lax = Joint_Stiffness_Controller('l_leg_lax', 5500, 0.05) # joint name, stiffness, update_period [sec]
-JSC_r_leg_uay = Joint_Stiffness_Controller('r_leg_uay', 8000, 0.05) # joint name, stiffness, update_period [sec]
-JSC_l_leg_uay = Joint_Stiffness_Controller('l_leg_uay', 8000, 0.05) # joint name, stiffness, update_period [sec]
+JSC_r_leg_mhx = Joint_Stiffness_Controller('r_leg_mhx', 9000*9999, 0.04) # joint name, stiffness, update_period [sec]
+JSC_l_leg_mhx = Joint_Stiffness_Controller('l_leg_mhx', 9000*9999, 0.04) # joint name, stiffness, update_period [sec]
+JSC_r_leg_lax = Joint_Stiffness_Controller('r_leg_lax', 8500*9999, 0.04) # joint name, stiffness, update_period [sec]
+JSC_l_leg_lax = Joint_Stiffness_Controller('l_leg_lax', 8500*9999, 0.04) # joint name, stiffness, update_period [sec]
+JSC_r_leg_uay = Joint_Stiffness_Controller('r_leg_uay', 5000, 0.03) # joint name, stiffness, update_period [sec]
+JSC_l_leg_uay = Joint_Stiffness_Controller('l_leg_uay', 5000, 0.03) # joint name, stiffness, update_period [sec]
 
-PSC_right_swing_leg = Position_Stiffness_Controller('R_Swing Leg', 270000, False, False) # 210000 # 101000, True, False) # name, stiffness, triggered_controller, bypass_input2output [True/False]
-PSC_left_swing_leg = Position_Stiffness_Controller('L_Swing Leg', 270000, False, False) # 210000 # 101000, True, False) # name, stiffness, triggered_controller, bypass_input2output [True/False]
+PSC_right_swing_leg = Position_Stiffness_Controller('R_Swing Leg', 350000, False, False) # 210000 # 101000, True, False) # name, stiffness, triggered_controller, bypass_input2output [True/False]
+PSC_left_swing_leg = Position_Stiffness_Controller('L_Swing Leg', 350000, False, False) # 210000 # 101000, True, False) # name, stiffness, triggered_controller, bypass_input2output [True/False]
 
-PSC2_right_swing_leg = Position_Stiffness_Controller_2('R_Swing Leg', 301000, False, False) # 101000, True, False) # name, stiffness, triggered_controller, bypass_input2output [True/False]
-PSC2_left_swing_leg = Position_Stiffness_Controller_2('L_Swing Leg', 301000, False, False) # 101000, True, False) # name, stiffness, triggered_controller, bypass_input2output [True/False]
+PSC2_right_swing_leg = Position_Stiffness_Controller_2('R_Swing Leg', 0, False, False) # 101000, True, False) # name, stiffness, triggered_controller, bypass_input2output [True/False]
+PSC2_left_swing_leg = Position_Stiffness_Controller_2('L_Swing Leg', 0, False, False) # 101000, True, False) # name, stiffness, triggered_controller, bypass_input2output [True/False]
 
 JSC_2_l_leg_lax = Joint_Stiffness_Controller_2('l_leg_lax', 650, 1000, 0.04) # joint name, stance_stiffness, swing_stiffness, activation_ZMP_point [m]
 JSC_2_r_leg_lax = Joint_Stiffness_Controller_2('r_leg_lax', 650, 1000, 0.04) # joint name, stance_stiffness, swing_stiffness, activation_ZMP_point [m]
 JSC_2_l_leg_lax.ChangeStiffness(Joint_Stiffness_Controller_2.stance)
 JSC_2_r_leg_lax.ChangeStiffness(Joint_Stiffness_Controller_2.swing)
 
-JSC_2_l_leg_uay = Joint_Stiffness_Controller_2('l_leg_uay', 650, 1000, 0.04) # joint name, stance_stiffness, swing_stiffness, activation_ZMP_point [m]
-JSC_2_r_leg_uay = Joint_Stiffness_Controller_2('r_leg_uay', 650, 1000, 0.04) # joint name, stance_stiffness, swing_stiffness, activation_ZMP_point [m]
+JSC_2_l_leg_uay = Joint_Stiffness_Controller_2('l_leg_uay', 50000, 50000, 0.04) # joint name, stance_stiffness, swing_stiffness, activation_ZMP_point [m]
+JSC_2_r_leg_uay = Joint_Stiffness_Controller_2('r_leg_uay', 50000, 50000, 0.04) # joint name, stance_stiffness, swing_stiffness, activation_ZMP_point [m]
 JSC_2_l_leg_uay.ChangeStiffness(Joint_Stiffness_Controller_2.stance)
 JSC_2_r_leg_uay.ChangeStiffness(Joint_Stiffness_Controller_2.swing)
-
-# swing_leg_ik = rospy.ServiceProxy('swing_leg_ik', LegIk)
-# stance_leg_ik = rospy.ServiceProxy('stance_leg_ik', LegIk)
-
 
 ##########################################################################################
 # request from foot contact publisher to update Position Stiffness Controllers avg force #
@@ -135,8 +131,8 @@ def get_from_zmp(msg):
           #   left_leg_angles = swing_leg_ik(msg.swing_foot,msg.swing_hip,msg.pelvis_m)
              right_leg_angles = stance_leg_ik(msg.stance_hip,msg.pelvis_d)
 
-        ns.actual_r_force_pub.publish( PSC2_right_swing_leg.getFilteredForce() ) # getAvgForce() ) # JSC_2_r_leg_lax.getAvgForce() ) # PSC2_right_swing_leg.getAvgForce() ) #
-        ns.actual_l_force_pub.publish( PSC2_left_swing_leg.getFilteredForce() ) # getAvgForce() ) #JSC_2_l_leg_lax.getAvgForce() ) # PSC2_left_swing_leg.getAvgForce() ) #
+        ns.actual_r_force_pub.publish( -PSC2_right_swing_leg.getFilteredForce() ) # getAvgForce() ) # JSC_2_r_leg_lax.getAvgForce() ) # PSC2_right_swing_leg.getAvgForce() ) #
+        ns.actual_l_force_pub.publish( -PSC2_left_swing_leg.getFilteredForce() ) # getAvgForce() ) #JSC_2_l_leg_lax.getAvgForce() ) # PSC2_left_swing_leg.getAvgForce() ) #
     except IKReachException as exc:
         rospy.loginfo('IKException: %s leg is out of reach, req pos: %f ,%f, %f',exc.foot,exc.requested_pos[0],exc.requested_pos[1],exc.requested_pos[2])
         return
@@ -145,29 +141,39 @@ def get_from_zmp(msg):
     l_leg_kny_eff = -desired_force_L/10.0
     r_leg_kny_eff = -desired_force_R/10.0
 
+    l_leg_lax_eff = -desired_force_L/25.0
+    r_leg_lax_eff = -desired_force_R/25.0
+    
+    if msg.step_phase==1 or msg.step_phase==2 :
+       l_leg_mhx_eff =  desired_force_L/55.0 - desired_force_R/55.0 
+       r_leg_mhx_eff = -desired_force_R/55.0 + desired_force_L/55.0 
+    else:
+       l_leg_mhx_eff =  desired_force_L/55.0 - desired_force_R/55.0 
+       r_leg_mhx_eff = -desired_force_R/55.0 + desired_force_L/55.0 
+
     ## Joint position command (to PID):
 
-    raise_foot_tip = 0.2
+    raise_foot_tip = 0.0
 
     l_leg_lax =  JSC_l_leg_lax.getCMD( left_leg_angles[4] ) 
     if ( msg.step_phase == 4 ): # left leg is swing
-        l_leg_uay = JSC_l_leg_uay.getCMD( left_leg_angles[5] - raise_foot_tip*msg.swing_foot.z) 
+        l_leg_uay = JSC_2_l_leg_uay.getCMD( left_leg_angles[5] - raise_foot_tip*msg.swing_foot.z) 
     else:
-        l_leg_uay = JSC_l_leg_uay.getCMD( left_leg_angles[5] ) 
+        l_leg_uay = JSC_2_l_leg_uay.getCMD( left_leg_angles[5] ) 
     l_leg_kny = left_leg_angles[3] + ns.joints_offset['l_leg_kny'] 
     l_leg_lhy = left_leg_angles[1] + ns.joints_offset['l_leg_lhy']
     l_leg_mhx = left_leg_angles[0]
 
     r_leg_lax = JSC_r_leg_lax.getCMD( right_leg_angles[4] ) 
     if ( msg.step_phase == 2 ): # right leg is swing
-        r_leg_uay = JSC_r_leg_uay.getCMD( right_leg_angles[5] - raise_foot_tip*msg.swing_foot.z) 
+        r_leg_uay = JSC_2_r_leg_uay.getCMD( right_leg_angles[5] - raise_foot_tip*msg.swing_foot.z) 
     else:
-        r_leg_uay =  JSC_r_leg_uay.getCMD( right_leg_angles[5] ) 
+        r_leg_uay =  JSC_2_r_leg_uay.getCMD( right_leg_angles[5] ) 
     r_leg_kny = right_leg_angles[3] + ns.joints_offset['r_leg_kny'] 
     r_leg_lhy = right_leg_angles[1] + ns.joints_offset['r_leg_lhy']
     r_leg_mhx = right_leg_angles[0]  
         
-    back_mby =  0.0 
+    back_mby =  0.03 
     back_ubx =  0.0 
     back_lbz =  0.0 
 
@@ -177,28 +183,44 @@ def get_from_zmp(msg):
 
 
 
-    ns.JC.set_pos('l_leg_lax', l_leg_lax )
+    ns.JC.set_mixed('l_leg_lax', l_leg_lax_eff,l_leg_lax )
     ns.JC.set_pos('l_leg_uay', l_leg_uay )
     ns.JC.set_mixed('l_leg_kny', l_leg_kny_eff, l_leg_kny ) # set_pos('l_leg_kny', l_leg_kny )
     ns.JC.set_pos('l_leg_uhz', l_leg_uhz )
     ns.JC.set_pos('l_leg_lhy', l_leg_lhy )
     ns.JC.set_pos('l_leg_mhx', l_leg_mhx ) 
+    #ns.JC.set_mixed('l_leg_mhx',l_leg_mhx_eff, l_leg_mhx ) 
 
-    ns.JC.set_pos('r_leg_lax', r_leg_lax ) 
+    ns.JC.set_mixed('r_leg_lax', r_leg_lax_eff,r_leg_lax ) 
     ns.JC.set_pos('r_leg_uay', r_leg_uay )
     ns.JC.set_mixed('r_leg_kny', r_leg_kny_eff, r_leg_kny ) # set_pos('r_leg_kny', r_leg_kny )
     ns.JC.set_pos('r_leg_uhz', r_leg_uhz )
     ns.JC.set_pos('r_leg_lhy', r_leg_lhy )
     ns.JC.set_pos('r_leg_mhx', r_leg_mhx ) 
+    #ns.JC.set_mixed('r_leg_mhx', r_leg_mhx_eff,r_leg_mhx ) 
 
     ns.JC.set_pos('back_mby', back_mby )
     ns.JC.set_pos('back_ubx', back_ubx )
     ns.JC.set_pos('back_lbz', back_lbz )
 
+    # if msg.step_phase == 1 and ns.start_walk_flag: 
+
+    #   ns.JC.set_gains('r_leg_lax',100,0,0)
+    # #  ns.JC.set_gains('l_leg_lax',0,0,0)
+    # #  ns.JC.set_gains('r_leg_mhx',0,0,0)
+    #   ns.JC.set_gains('l_leg_mhx',100,0,0)
+    #   ns.JC.reset_gains()
+
+    # if msg.step_phase == 2 and ns.start_walk_flag:
+     
+    #   yaml_pth = os.path.join(roslib.packages.get_pkg_dir('C42_DRCSim2_tools'),'calibrated_controller_drc2_Israel.yaml')
+    #   ns.JC.set_default_gains_from_yaml(yaml_pth)
+    #   ns.JC.reset_gains()
+    #   ns.start_walk_flag = 0
+
+
     ns.JC.send_command()
-
-
-
+    
 ##########################################################################################
 # request from joint_states publisher joints state to update Stiffness Controllers state #
 ##########################################################################################
@@ -245,7 +267,7 @@ def LEG_IK():
     
     rospy.loginfo( "LEG_IK node is ready" )
     rospy.loginfo( "waiting 1 seconds for robot to initiate" )
-    yaml_pth = os.path.join(roslib.packages.get_pkg_dir('C42_DRCSim2_tools'),'calibrated_controller_drc2_yuval.yaml')
+    yaml_pth = os.path.join(roslib.packages.get_pkg_dir('C42_DRCSim2_tools'),'calibrated_controller_drc2_Israel.yaml')
     ns.JC.set_default_gains_from_yaml(yaml_pth)
     ns.JC.reset_gains()
     # r_cont_sub = rospy.Subscriber('/atlas/debug/r_foot_contact', Wrench, get_r_foot_contact)
@@ -265,9 +287,17 @@ def LEG_IK():
     sub1=rospy.Subscriber("zmp_out", walking_trajectory, get_from_zmp) # traj, get_from_zmp)
     sub2=rospy.Subscriber("joint_states", JointState, get_joint_states)
 
+
+    ns.start_walk_flag = 1 #################### KJGHLKJGLKJGLKJjjjjH&7777777777777777777777777777777777777#             IUOoooooooPT(*&G:OIUGP(*YT))
+
+
+
     # TODO: get the following values from initialization using a TOPIC with a flag to pause until Robot State static init is completed
+
+
+    # set for: step width - 18.2 , bend knees - 5
     back_lbz = 0.0
-    back_mby = 0.0#0.03#0.08# 0.06
+    back_mby = 0.03 #0.03#0.08# 0.06
     back_ubx = 0
     neck_ay = 0
     l_leg_uhz = 0 
@@ -282,18 +312,18 @@ def LEG_IK():
     r_leg_kny = 0.6244
     r_leg_uay = -0.268
     r_leg_lax = 0.0009
-    l_arm_usy = 0
-    l_arm_shx = -1.3
-    l_arm_ely = 0
-    l_arm_elx = 0
+    l_arm_usy = 0.9
+    l_arm_shx = -1.35
+    l_arm_ely = 2.3
+    l_arm_elx = 1.6
     l_arm_uwy = 0
-    l_arm_mwx = 0
-    r_arm_usy = 0
-    r_arm_shx = 1.3
-    r_arm_ely = 0
-    r_arm_elx = 0
+    l_arm_mwx = 0.0
+    r_arm_usy = 0.9
+    r_arm_shx = 1.35
+    r_arm_ely = 2.3
+    r_arm_elx = -1.6
     r_arm_uwy = 0
-    r_arm_mwx = 0
+    r_arm_mwx = 0.0
 
     cur_pos = [ back_lbz, back_mby, back_ubx, neck_ay,
       l_leg_uhz, l_leg_mhx, l_leg_lhy, l_leg_kny, l_leg_uay, l_leg_lax,
