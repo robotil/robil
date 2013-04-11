@@ -14,14 +14,16 @@
 #include <osrf_msgs/JointCommands.h>
 #include <string>
 #include <map>
-
+#include "move_hand/pelvis_move_hand.h"
+#include <Eigen/Dense>
+#include <tf/transform_listener.h>
 
 class move_hand_service{
 
 protected:
-	ros::NodeHandle nh_, nh2_;
+	ros::NodeHandle nh_, nh2_,nh3_;
 	ros::NodeHandle* rosnode;
-	ros::ServiceServer move_hand_srv_;
+	ros::ServiceServer move_hand_srv_,pelvis_move_hand_srv_;
 	ros::ServiceClient traj_vector_cli_;
 	ros::ServiceClient arms_val_calc_cli_;
 	ros::Publisher traj_action_pub_;
@@ -29,13 +31,44 @@ protected:
 	double q0_l,q1_l,q2_l,q3_l,q4_l,q5_l;
 	double q0_r,q1_r,q2_r,q3_r,q4_r,q5_r;
 	actionlib::SimpleActionClient<control_msgs::FollowJointTrajectoryAction> traj_client_;
+	tf::TransformListener listener;
 	std::map <std::string, int> joints;
 	std::vector<double> positions;
 	ros::Publisher pub_joint_commands_;
 
 private:
 	int _n;
+	 double QuatToRoll(double x, double y, double z, double w){
+	        return atan2(2*(w*x + y*z), 1 - 2*(pow(x,2) + pow(y,2)));
+	    }
+	    double QuatToRoll(const tf::Quaternion &quat){
+	        return atan2(2*(quat.w()*quat.x() + quat.y()*quat.z()), 1 - 2*(pow(quat.x(),2) + pow(quat.y(),2)));
+	    }
+	    double QuatToRoll(const geometry_msgs::Quaternion &quat){
+	        return atan2(2*(quat.w*quat.x + quat.y*quat.z), 1 - 2*(pow(quat.x,2) + pow(quat.y,2)));
+	    }
 
+
+	    double QuatToPitch(double x, double y, double z, double w){
+	        return asin(2*(w*y - z*x));
+	    }
+	    double QuatToPitch(const tf::Quaternion &quat){
+	        return asin(2*(quat.w()*quat.y() - quat.z()*quat.x()));
+	    }
+	    double QuatToPitch(const geometry_msgs::Quaternion &quat){
+	        return asin(2*(quat.w*quat.y - quat.z*quat.x));
+	    }
+
+
+	    double QuatToYaw(double x, double y, double z, double w){
+	        return atan2(2*(w*z + x*y), 1 - 2*(pow(y,2) + pow(z,2)));
+	    }
+	    double QuatToYaw(const tf::Quaternion &quat){
+	        return atan2(2*(quat.w()*quat.z() + quat.x()*quat.y()), 1 - 2*(pow(quat.y(),2) + pow(quat.z(),2)));
+	    }
+	    double QuatToYaw(const geometry_msgs::Quaternion &quat){
+	        return atan2(2*(quat.w*quat.z + quat.x*quat.y), 1 - 2*(pow(quat.y,2) + pow(quat.z,2)));
+	    }
 public:
 	move_hand_service():
 		traj_client_(nh2_,"atlas_controller/follow_joint_trajectory", true)
@@ -64,6 +97,10 @@ public:
 
 		move_hand_srv_ = nh_.advertiseService("move_hand", &move_hand_service::gen_traj, this);
 		ROS_INFO("running move hand service");
+
+		pelvis_move_hand_srv_ = nh3_.advertiseService("pelvis_move_hand",&move_hand_service::pelvis_move_hand_CB,this);
+		ROS_INFO("running pelvis move hand service");
+
 	}
 	~move_hand_service(){
 		//delete traj_client_;
@@ -302,6 +339,132 @@ public:
 		}
 		res.success = true;
 		return true;
+	}
+
+	bool pelvis_move_hand_CB(move_hand::pelvis_move_handRequest &req,move_hand::pelvis_move_handResponse &res){
+	  double cosr_left,sinr_left,cosp_left,sinp_left,cosy_left,siny_left,cosr_right,sinr_right,cosp_right,sinp_right,cosy_right,siny_right;
+	  double cosr_tf_left,sinr_tf_left,cosp_tf_left,sinp_tf_left,cosy_tf_left,siny_tf_left,cosr_tf_right,sinr_tf_right,cosp_tf_right,sinp_tf_right,cosy_tf_right,siny_tf_right;
+	  cosr_left = cos(req.AngleDestination_left.x);
+	  cosp_left = cos(req.AngleDestination_left.y);
+	  cosy_left = cos(req.AngleDestination_left.z);
+          sinr_left = sin(req.AngleDestination_left.x);
+          sinp_left = sin(req.AngleDestination_left.y);
+          siny_left = sin(req.AngleDestination_left.z);
+
+          cosr_right = cos(req.AngleDestination_right.x);
+          cosp_right = cos(req.AngleDestination_right.y);
+          cosy_right = cos(req.AngleDestination_right.z);
+          sinr_right = sin(req.AngleDestination_right.x);
+          sinp_right = sin(req.AngleDestination_right.y);
+          siny_right = sin(req.AngleDestination_right.z);
+
+          Eigen::Matrix4f left_in,right_in,tf_left,tf_right;
+
+          left_in <<     cosp_left*cosy_left,     cosy_left*sinp_left*sinr_left-cosr_left*siny_left,     sinr_left*siny_left+cosr_left*cosy_left*sinp_left,     req.PositionDestination_left.x,
+                         cosp_left*siny_left,     cosr_left*cosy_left+cosy_left*sinp_left*sinr_left,     cosr_left*sinp_left*siny_left-cosy_left*sinr_left,     req.PositionDestination_left.y,
+                         -sinp_left,                    cosp_left*sinr_left,                                      cosp_left*cosr_left,                          req.PositionDestination_left.z,
+                           0,                                       0,                                                   0,                                                  1;
+
+          right_in <<     cosp_right*cosy_right,     cosy_right*sinp_right*sinr_right-cosr_right*siny_right,     sinr_right*siny_right+cosr_right*cosy_right*sinp_right,     req.PositionDestination_right.x,
+                         cosp_right*siny_right,     cosr_right*cosy_right+cosy_right*sinp_right*sinr_right,     cosr_right*sinp_right*siny_right-cosy_right*sinr_right,     req.PositionDestination_right.y,
+                         -sinp_right,                    cosp_right*sinr_right,                                      cosp_right*cosr_right,                                 req.PositionDestination_right.z,
+                           0,                                    0,                                                              0,                                                  1;
+          tf::StampedTransform transform_left,transform_right,transform_left_finger,transform_right_finger;
+          ROS_INFO("taking tf info");
+          try {
+              listener.waitForTransform("/l_clav","/pelvis",ros::Time(0),ros::Duration(0.2));
+              listener.lookupTransform("/l_clav","/pelvis",ros::Time(0),transform_left);
+            } catch (tf::TransformException &ex) {
+              ROS_ERROR("%s",ex.what());
+            }
+
+            try {
+                listener.waitForTransform("/r_clav","/pelvis",ros::Time(0),ros::Duration(0.2));
+                listener.lookupTransform("/r_clav","/pelvis",ros::Time(0),transform_right);
+              } catch (tf::TransformException &ex) {
+                ROS_ERROR("%s",ex.what());
+              }
+
+              try {
+                  listener.waitForTransform("/l_clav","/left_f1_0",ros::Time(0),ros::Duration(0.2));
+                  listener.lookupTransform("/l_clav","/left_f1_0",ros::Time(0),transform_left_finger);
+                } catch (tf::TransformException &ex) {
+                  ROS_ERROR("%s",ex.what());
+                }
+
+                try {
+                    listener.waitForTransform("/r_clav","/right_f1_0",ros::Time(0),ros::Duration(0.2));
+                    listener.lookupTransform("/r_clav","/right_f1_0",ros::Time(0),transform_right_finger);
+                  } catch (tf::TransformException &ex) {
+                    ROS_ERROR("%s",ex.what());
+                  }
+
+              cosr_tf_left = cos(QuatToRoll(transform_left.getRotation()));
+                cosp_tf_left = cos(QuatToPitch(transform_left.getRotation()));
+                cosy_tf_left = cos(QuatToYaw(transform_left.getRotation()));
+                sinr_tf_left = sin(QuatToRoll(transform_left.getRotation()));
+                sinp_tf_left = sin(QuatToPitch(transform_left.getRotation()));
+                siny_tf_left = sin(QuatToYaw(transform_left.getRotation()));
+
+                cosr_tf_right = cos(QuatToRoll(transform_right.getRotation()));
+                  cosp_tf_right = cos(QuatToPitch(transform_right.getRotation()));
+                  cosy_tf_right = cos(QuatToYaw(transform_right.getRotation()));
+                  sinr_tf_right = sin(QuatToRoll(transform_right.getRotation()));
+                  sinp_tf_right = sin(QuatToPitch(transform_right.getRotation()));
+                  siny_tf_right = sin(QuatToYaw(transform_right.getRotation()));
+
+                  tf_left <<     cosp_tf_left*cosy_tf_left,     cosy_tf_left*sinp_tf_left*sinr_tf_left-cosr_tf_left*siny_tf_left,     sinr_tf_left*siny_tf_left+cosr_tf_left*cosy_tf_left*sinp_tf_left,     transform_left.getOrigin().getX(),
+                                 cosp_tf_left*siny_tf_left,     cosr_tf_left*cosy_tf_left+cosy_tf_left*sinp_tf_left*sinr_tf_left,     cosr_tf_left*sinp_tf_left*siny_tf_left-cosy_tf_left*sinr_tf_left,     transform_left.getOrigin().getY(),
+                                 -sinp_tf_left,                    cosp_tf_left*sinr_tf_left,                                              cosp_tf_left*cosr_tf_left,                                       transform_left.getOrigin().getZ(),
+                                   0,                                       0,                                                                               0,                                                            1;
+
+                  tf_right <<     cosp_tf_right*cosy_tf_right,     cosy_tf_right*sinp_tf_right*sinr_tf_right-cosr_tf_right*siny_tf_right,     sinr_tf_right*siny_tf_right+cosr_tf_right*cosy_tf_right*sinp_tf_right,     transform_right.getOrigin().getX(),
+                                 cosp_tf_right*siny_tf_right,     cosr_tf_right*cosy_tf_right+cosy_tf_right*sinp_tf_right*sinr_tf_right,     cosr_tf_right*sinp_tf_right*siny_tf_right-cosy_tf_right*sinr_tf_right,     transform_right.getOrigin().getY(),
+                                 -sinp_tf_right,                    cosp_tf_right*sinr_tf_right,                                              cosp_tf_right*cosr_tf_right,                                              transform_right.getOrigin().getZ(),
+                                   0,                                       0,                                                                               0,                                                            1;
+
+                  Eigen::Matrix4f right_mat,left_mat;
+                  std::cout << "tf_right: " <<tf_right<< std::endl;
+                  std::cout << "right_in: " <<tf_right<< std::endl;
+
+                  right_mat = tf_right * right_in;
+                  left_mat = tf_left * left_in;
+                  move_hand::move_hand move_hand_msg;
+
+                  if(!(req.PositionDestination_left.x==0 && req.PositionDestination_left.y==0 && req.PositionDestination_left.z==0))
+                  {
+                  move_hand_msg.request.PositionDestination_left.x = left_mat(0,3) - transform_left_finger.getOrigin().getX();
+                  move_hand_msg.request.PositionDestination_left.y = left_mat(1,3) - transform_left_finger.getOrigin().getY();
+                  move_hand_msg.request.PositionDestination_left.z = left_mat(2,3) - transform_left_finger.getOrigin().getZ();
+
+                  move_hand_msg.request.AngleDestination_left.x = (atan2((double)left_mat(2,1),(double)left_mat(2,2))) - QuatToRoll(transform_left_finger.getRotation());
+                  move_hand_msg.request.AngleDestination_left.y = (atan2((double)left_mat(2,0)*-1,sqrt(pow((double)left_mat(2,1),2)+pow((double)left_mat(2,2),2))))- QuatToPitch(transform_left_finger.getRotation());
+                  move_hand_msg.request.AngleDestination_left.z = (atan2((double)left_mat(1,0),(double)left_mat(0,0)))- QuatToYaw(transform_left_finger.getRotation());
+                  ROS_INFO("left x y z roll pitch yaw: %f %f %f %f %f %f",move_hand_msg.request.PositionDestination_left.x,move_hand_msg.request.PositionDestination_left.y,move_hand_msg.request.PositionDestination_left.z,
+                                                                           move_hand_msg.request.AngleDestination_left.x,move_hand_msg.request.AngleDestination_left.y,move_hand_msg.request.AngleDestination_left.z);
+                  }
+                  if(!(req.PositionDestination_right.x==0 && req.PositionDestination_right.y==0 && req.PositionDestination_right.z==0))
+                  {
+                  move_hand_msg.request.PositionDestination_right.x = right_mat(0,3) - transform_right_finger.getOrigin().getX();
+                  move_hand_msg.request.PositionDestination_right.y = right_mat(1,3) - transform_right_finger.getOrigin().getY();
+                  move_hand_msg.request.PositionDestination_right.z = right_mat(2,3) - transform_right_finger.getOrigin().getZ();
+
+                  move_hand_msg.request.AngleDestination_right.x = (atan2((double)right_mat(2,1),(double)right_mat(2,2))) - QuatToRoll(transform_right_finger.getRotation());
+                  move_hand_msg.request.AngleDestination_right.y = (atan2((double)right_mat(2,0)*-1,sqrt(pow((double)right_mat(2,1),2)+pow((double)right_mat(2,2),2)))) - QuatToPitch(transform_right_finger.getRotation());
+                  move_hand_msg.request.AngleDestination_right.z = (atan2((double)right_mat(1,0),(double)right_mat(0,0)))- QuatToYaw(transform_right_finger.getRotation());
+                  ROS_INFO("right x y z roll pitch yaw: %f %f %f %f %f %f",move_hand_msg.request.PositionDestination_right.x,move_hand_msg.request.PositionDestination_right.y,move_hand_msg.request.PositionDestination_right.z,
+                                                                          move_hand_msg.request.AngleDestination_right.x,move_hand_msg.request.AngleDestination_right.y,move_hand_msg.request.AngleDestination_right.z);
+                  }
+
+                  ROS_INFO("moving hand");
+
+                  if (gen_traj(move_hand_msg.request,move_hand_msg.response))
+                  {
+                    res.success = move_hand_msg.response.success;
+                    return true;
+                  }
+                  ROS_INFO("move_hand service not up");
+                  return false;
 	}
 };
 int main(int argc, char **argv)
