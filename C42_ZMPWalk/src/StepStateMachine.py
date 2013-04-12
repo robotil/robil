@@ -119,6 +119,11 @@ class InitializeStepState(StepState):
         # moving to intial pose:
         init_pose()  # !!! need to disable tf listener drc2_tools to prevent clash !!!
         self._Strategy.Initialize(self._bend_knees)
+        # init _PreviewState and _StatePreviewBuffer:
+        self._PreviewState = StateMachine.GetCurrentState(self)
+        state,transition_exists = StateMachine.GetStateAtTransition(self,self._PreviewState.Name,"Start")
+        self._PreviewState = state
+
         
     def GetId(self):
         return 1
@@ -580,6 +585,26 @@ class TurnRight_LeftStepState(StepState):
         return 16
 
 ###################################################################################
+#------------------------------ Preview -------------------------------------------
+###################################################################################
+
+class BufferData(object):
+    """
+        The BufferData class is intended to be used with the StepStateMachine class,
+        it contains preview data of StepStateMachine of which steps are going to performed next.
+    """
+    def __init__(self,strNextTransition,turn_angle,step_length,step_width,step_width,zmp_width,step_time,bend_knees,step_height,trans_ratio_of_step):
+        self.NextTransition = strNextTransition
+        self._turn_angle  = turn_angle   # [rad]
+        self._step_length = step_length  # [m]
+        self._step_width  = step_width   # [m]
+        self._zmp_width   = zmp_width    # [m]
+        self._step_time   = step_time    # [sec]
+        self._bend_knees  = bend_knees   # [m]     
+        self._step_height = step_height  # [m] 
+        self._trans_ratio_of_step = trans_ratio_of_step # units fraction: 0-1.0 ; fraction of step time to be used for transition. 1.0 = all of step time is transition
+
+###################################################################################
 #--------------------------- State Machine ----------------------------------------
 ###################################################################################
 
@@ -649,7 +674,10 @@ class StepStateMachine(StateMachine):
         StateMachine.AddTransition(self,"StopRight",            "NextStep",     "Idle")
         StateMachine.AddTransition(self,"StopLeft",             "NextStep",     "Idle")
         StateMachine.AddTransition(self,"EmergencyStop",        "NextStep",     "Idle")
-
+        # Preview of State Machine:
+        self._PreviewState = StateMachine.GetCurrentState(self) # the state at which the preview is
+        self._StatePreviewBuffer = deque([]) # contains a list of BufferData class, infomation needed from _CurrentState to _PreviewState: Transitions, step times,...
+ 
     def Initialize(self):
         StateMachine.PerformTransition(self,"Initialize")
         self._stepCounter = 0
