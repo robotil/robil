@@ -651,4 +651,17 @@ TurnRight
 NextState</panel_attributes>
     <additional_attributes>24;128;24;64;128;64;184;24</additional_attributes>
   </element>
+  <element>
+    <type>com.umlet.element.Relation</type>
+    <coordinates>
+      <x>688</x>
+      <y>264</y>
+      <w>208</w>
+      <h>144</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;-
+ 
+TurnRight</panel_attributes>
+    <additional_attributes>24;24;136;64;192;128</additional_attributes>
+  </element>
 </diagram>

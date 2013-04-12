@@ -689,7 +689,8 @@ class StepStateMachine(StateMachine):
     def UpdatePreview(self):
         #rospy.loginfo("UpdatePreview - StepTime(%f) Counter(%d) Timer(%f)" % (StateMachine.GetCurrentState(self).GetStepTime(),self._counter, self._counter*1.0/self._UpdateRateHz))
         if (StateMachine.GetCurrentState(self).GetStepTime() < self._counter*1.0/self._UpdateRateHz):
-            # End of step Transitions:
+            # TODO: Transition need to be received from StepStatePreviewBuffer
+            # End of step -> State Transitions:
             if self._DecideToTurn():
                 if self._ExecutedTurnCmd > 0:
                     self.TurnLeft()
@@ -716,27 +717,32 @@ class StepStateMachine(StateMachine):
         self._TurnCmdInput = turn_cmd
 
     def _DecideToTurn(self):
+        # 1) A NEW turn command is excuted only after completing previous turning command.
+        # 2) A turn command may take a few turn step cycles (for larg turn commands).
+        # 3) A turn will be performed only above a certain threshold (_TurnThreshold).
         result = False
-        # if completed previous turn command Update from Turn Input command:
+        # 1) if completed previous turn command Update from Turn Input command:
         if ( abs(self._TotalTurnRemaining) < self._TurnThreshold ):
             if ( abs(self._TurnCmdInput) >= self._TurnThreshold ):
-                self._TotalTurnRemaining = self._TurnCmdInput
+                self._TotalTurnRemaining = copy.copy(self._TurnCmdInput)
             else:
                 self._TotalTurnRemaining = 0.0
         # sign of turn:
         if self._TotalTurnRemaining > 0.0:
-            turn_sign = 1
+            turn_sign = 1 # left turn
         else:
-            turn_sign = -1
-        # divid "big" Turn into a few steps 
+            turn_sign = -1 # right turn
+        # 2) divid "big" Turn into a few steps: 
         if abs(self._TotalTurnRemaining) >= self._MaxStepTurn:
+            # turn needs more than one turn step seq.
             self._ExecutedTurnCmd = self._MaxStepTurn*turn_sign
+            self._TotalTurnRemaining = self._TotalTurnRemaining - self._ExecutedTurnCmd
         else:
-            self._ExecutedTurnCmd = self._TotalTurnRemaining
-
-
-        if ( abs(self._TurnCmdInput) >= self._TurnThreshold ) and ():
-
+            self._ExecutedTurnCmd = copy.copy(self._TotalTurnRemaining)
+            self._TotalTurnRemaining = 0.0
+        # 3) Check if need to turn:
+        if ( abs(self._ExecutedTurnCmd) >= self._TurnThreshold ):
+            result = True
         return result
 
 ###################################################################################
