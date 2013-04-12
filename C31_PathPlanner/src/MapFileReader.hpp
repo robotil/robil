@@ -23,7 +23,7 @@ struct CanNotOpenFile{};
 struct CanNotFindDimentions{};
 struct Dim{ int w; int h; bool reversed; };
 
-Dim getDim(const vector<string>& lines){
+static Dim getDim(const vector<string>& lines){
 	if(lines.size()<2) throw CanNotFindDimentions();
 	Dim d={0,0, false};
 	stringstream ww(lines[0]);
@@ -42,7 +42,7 @@ Dim getDim(const vector<string>& lines){
 	return d;
 }
 
-vector<char> readMap(string fname, size_t& w, size_t& h, bool verb=false){
+static vector<char> readMap(string fname, size_t& w, size_t& h, bool verb=false){
 	ifstream f(fname.c_str());
 	stringstream sl;
 	string line;

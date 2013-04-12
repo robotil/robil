@@ -164,6 +164,38 @@ public:
 					ROS_INFO("path BINGO");
 					return path_task();
 				}
+    			else if(str == "cabin_image")
+                                {
+    			                return TaskResult::SUCCESS ();
+                                }
+    			else if(str == "cabin_parametrics")
+                                {
+                                        return TaskResult::SUCCESS ();
+                                }
+    			else if(str == "inSideCabin_image")
+                                {
+                                        return TaskResult::SUCCESS ();
+                                }
+    			else if(str == "InSideCabin_parametrics")
+                                {
+                                        return TaskResult::SUCCESS ();
+                                }
+    			else if(str == "vehicle_parametrics")
+                                {
+                                        return TaskResult::SUCCESS ();
+                                }
+    			else if(str == "door_image")
+                                {
+                                        return TaskResult::SUCCESS ();
+                                }
+    			else if(str == "door_parameters")
+                                {
+                                        return TaskResult::SUCCESS ();
+                                }
+    			else if(str == "objects")
+                                {
+                                        return TaskResult::SUCCESS ();
+                                }
     		}
     	}
     	return TaskResult::FAULT();

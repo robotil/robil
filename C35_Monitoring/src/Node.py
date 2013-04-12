@@ -430,6 +430,7 @@ class node:
 
     def getRandomProb(self, index):
         x = random.random()
+        #print "getRandomProb", self.getAttrib("name"),self.getProbAtIndex(index)
         p = float(self.getProbAtIndex(index))
         if p==None:
             return None
@@ -538,13 +539,15 @@ class node:
                     return (float(self.probTable[index][0])/float(self.probTable[index][1]))
                 return 0
         return None
+        
+        
+        
     #node- run func 
     def run(self, index):
         a = None
         if (node.debugMode):
             tmpIndex  = index
             a = self.DEBUG
-            
             if (a!=None):
                 if not(self.boolWhoAmI("tsk")): 
                     if (self.monitor):
@@ -562,20 +565,7 @@ class node:
         self.DEBUG[1] = float(self.DEBUG[1])
         #self.setAttrib("DEBUG", self.DEBUG )
         self._updateDebugAttribToXmlFile()
-        self.upadtewholetree(self.myTree.rootNode)
         
-    
-#        self._setBubbleDebugChild()
-    
-    def upadtewholetree(self,recnode):
-        for child in recnode.childList :
-            child._updateChildDebug()
-            self.upadtewholetree(child)
-        
-#    def _setBubbleDebugChild(self):
-#        if self.parent :
-#            self.parent.setDebug(self.DEBUG[0]+" "+self.DEBUG[1])
-            
     #run as base case func
     def runAsBaseCase (self, index):
         debug = node.run(self, index)
@@ -611,15 +601,36 @@ class node:
        self.probTable = []
        self.distTableSucc = []
        self.distTableFail = [] 
-       self.setAttrib("Successdistribution",[])
-       self.setAttrib("probability",[])
-       self.setAttrib("Failuredistribution",[])  
+       try:
+           del self.treeInst.attrib["Successdistribution"]
+       except:
+           pass
+       try:
+           del self.treeInst.attrib["probability"]
+       except:
+           pass
+       try:
+           del self.treeInst.attrib["Failuredistribution"]
+       except:
+           pass
+#       self.setAttrib("Successdistribution",[])
+#       self.setAttrib("probability",[])
+#       self.setAttrib("Failuredistribution",[])  
        self.reset = True
        
+      #clear whole tree property
+    def clearWholeTree(self):
+        childlist = self.getChildren()
+        if childlist !=None:
+            for child in childlist:
+                child.clear()
+                child.clearWholeTree()
+        
      #run plan  
     def runPlan(self, index):
       children = self.getChildren()
       children[0].run(index) 
+      
 
     #get average to success time
     def getAverageSuccTime(self, index):
@@ -628,7 +639,13 @@ class node:
         else:
             return float('Inf')
 
-
+    def getSDSuccTime(self, index):
+        if self.getDistSuccByIndex(index) != None:
+            return self.getDistSuccByIndex(index).SDTime()
+        else:
+            return float(0)
+            
+            
  #table is the name of the table needed- attribute
     def _createDistTable(self,table):
         string = self.getAttrib(str(table))

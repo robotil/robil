@@ -8,8 +8,9 @@ import javax.swing.JOptionPane;
 import javax.swing.JTable;
 import javax.swing.table.AbstractTableModel;
 
-import document.PropertiesEditor;
-import document.PropertiesXmlHandler;
+import windows.ParametersEditor;
+
+import document.ParametersXmlHandler;
 
 public class PropertiesEditorAction implements ActionListener {
 
@@ -26,7 +27,7 @@ public class PropertiesEditorAction implements ActionListener {
 
 		//------------------ OPEN -----------------------
 		if (a.getActionCommand().equals("open_properties_dialog")) {
-			PropertiesEditor.show(PropertiesXmlHandler.lastPath);
+			ParametersEditor.show(ParametersXmlHandler.lastPath);
 			
 		} else 
 		//------------------ LOAD -----------------------	
@@ -37,8 +38,8 @@ public class PropertiesEditorAction implements ActionListener {
 //				if (path != null) {
 //					PropertiesXmlHandler.lastPath = path;
 //				}
-				PropertiesXmlHandler
-						.loadAndSetProperties(PropertiesXmlHandler.lastPath);
+				ParametersXmlHandler
+						.loadAndSetProperties(ParametersXmlHandler.lastPath);
 
 				updateTable();
 
@@ -58,8 +59,8 @@ public class PropertiesEditorAction implements ActionListener {
 
 				// updateTable();
 
-				PropertiesXmlHandler.setParametersFromTable(this.table);
-				PropertiesXmlHandler.saveToFile(PropertiesXmlHandler.lastPath);
+				ParametersXmlHandler.setParametersFromTable(this.table);
+				ParametersXmlHandler.saveToFile(ParametersXmlHandler.lastPath);
 
 				JOptionPane.showMessageDialog(null, "Properties file saved");
 				this.frame.dispose();

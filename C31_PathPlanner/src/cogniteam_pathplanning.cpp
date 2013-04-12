@@ -36,18 +36,27 @@
 using namespace std;
 
 // -------------------------- MAP ---------------------------------------------
-
-Map::Map(int w, int h):_w(w),_h(h){
+int Map::map_id_counter = 0;
+Map::Map(int w, int h):map_id(map_id_counter++), _w(w),_h(h){
 	_data.resize(_w*_h);
 	for(size_t i=0;i<_data.size();i++) _data[i]=ST_UNCHARTED;
 }
-Map::Map(int w, int h, char* cmap):_w(w),_h(h){
+Map::Map(int w, int h, char* cmap):map_id(map_id_counter++), _w(w),_h(h){
 	_data.resize(_w*_h);
 	for(size_t i=0;i<_data.size();i++) _data[i]=cmap[i];
 }
-Map::Map(const Map& map):_w(map._w),_h(map._h){
+Map::Map(const Map& map):map_id(map_id_counter++), _w(map._w),_h(map._h){
 	_data.resize(_w*_h);
 	for(size_t i=0;i<_data.size();i++) _data[i]=map._data[i];
+}
+
+const Map& Map::operator=(const Map& other){
+	_w = other._w; _h = other._h;
+	if(_data.size()!=other._data.size()){
+		_data.resize(_w*_h);
+	}
+	for(size_t i=0;i<_data.size();i++) _data[i]=other._data[i];
+	return *this;
 }
 
 ostream& operator<<(ostream& out, const Map& m){
@@ -430,26 +439,37 @@ Map MapEditor::replace(const Map& source, const char from, const char to)const{
 }
 
 Map MapEditor::coloring(const Map& source, size_t x, size_t y, const char av, const char bl)const{
+	//ALLOCATE MEMORY FOR COLORED MAP AND FOR VISITED/UNVISITED FLAGES
 	Map visited(source.w(), source.h());
 	Map res(source.w(), source.h());
-	//cout<<": "<<(int)source(x,y)<<": "<<(int)av<<": "<<(int)bl<<endl;
+	//START COLORING PROCESS
 	coloring(source, x, y, source(x,y), av, bl, visited, res);
+	//COLOR ALL UNVISITED CELLS IN RESULT MAP AS BLOCKED
 	for( size_t y=0; y<source.h(); y++){for( size_t x=0; x<source.w(); x++){
 		if(visited(x,y)==Map::ST_UNCHARTED) res(x,y)=bl;
 	}}
 	return res;
 }
 void MapEditor::coloring(const Map& source, size_t x, size_t y, const char c, const char av, const char bl, Map& visited, Map& res)const{
+	//IF CURRENT CELL IS VISITED RETURN
 	if(visited(x,y)==Map::ST_BLOCKED) return;
+	//IF CURRETN CELL IS UNVISITED => SELECT IT AS VISITED
 	visited(x,y) = Map::ST_BLOCKED;
+	//IF CURRENT CELL HAS RIGHT COLOR (COLOR OF FIRST CELL, LIKELY AVALIABLE) DO
 	if(c == source(x,y)){
+		//IN RESULT MAP COLOR THE CELL AS AVALIABLE
 		res(x,y)=av;
-		if(x>0)coloring(source, x-1, y, c, av, bl, visited, res);
-		if(x<source.w()-1)coloring(source, x+1, y, c, av, bl, visited, res);
-		if(y>0)coloring(source, x, y-1, c, av, bl, visited, res);
-		if(y<source.h()-1)coloring(source, x, y+1, c, av, bl, visited, res);
+		//CONTINUE SPREAD TO ALL CONRNERS OF THE EARTH
+		if(x>0)				coloring(source, x-1, y, c, av, bl, visited, res);
+		if(x<source.w()-1)	coloring(source, x+1, y, c, av, bl, visited, res);
+		if(y>0)				coloring(source, x, y-1, c, av, bl, visited, res);
+		if(y<source.h()-1)	coloring(source, x, y+1, c, av, bl, visited, res);
 	}
-	else res(x,y)=bl;
+	//IF CURRENT CELL HAS NOT RIGHT COLOR (COLOR OF FIRST CELL, LIKELY AVALIABLE) DO
+	else{
+		//IN RESULT MAP COLOR THE CELL AS BLOCKED
+		res(x,y)=bl;
+	}
 }
 
 // -------------------------------------------------------------------------------
@@ -799,7 +819,8 @@ PField::Points searchPath(const Map& source_map, const Waypoint& start, const Wa
 		e.coloring( 
 			e.replace(
 				i.inflate(source_map), 
-				Map::ST_UNCHARTED, Map::ST_AVAILABLE), 
+				Map::ST_UNCHARTED, Map::ST_AVAILABLE
+			),
 			start.x, start.y, Map::ST_AVAILABLE,Map::ST_BLOCKED
 		);
 	

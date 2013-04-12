@@ -39,14 +39,20 @@ rosbuild_add_boost_directories()
 #link_directories (${PROJECT_SOURCE_DIR}/lib)
 
 #------------------------ executer -------------------------
-rosbuild_add_executable(executer src/TaskProxyConnectionByActionLib.cpp)
-rosbuild_add_executable(executer src/executer.cpp)
-
-rosbuild_link_boost(executer thread)
-rosbuild_link_boost(executer system)
-rosbuild_link_boost(executer filesystem)
-
+rosbuild_add_executable(executer 
+	src/TaskProxyConnectionByActionLib.cpp
+	src/executer.cpp
+)
+rosbuild_link_boost(executer thread system filesystem)
 target_link_libraries (executer BTExecuter)
+
+#-----
+
+rosbuild_add_executable(stack_stream_filter 
+	src/stack_stream_filter.cpp
+)
+rosbuild_link_boost(stack_stream_filter thread system filesystem regex)
+
 
 #------------------------ test_action_client ---------------
 #rosbuild_add_executable(test_action_client src/test_action_client.cpp)

@@ -2,7 +2,7 @@
 #include <QPainter>
 #include <QGraphicsScene>
 
-CLineItem::CLineItem(QPointF p1,QPointF p2,QGraphicsScene* scene)
+CLineItem::CLineItem(QPointF p1,QPointF p2,QGraphicsScene* scene,QColor c)
 	:QGraphicsLineItem(p1.x(),p1.y(),p2.x(),p2.y()),pointItem1(p1,scene),pointItem2(p2,scene)
 {
 	QGraphicsScene* pScene;
@@ -14,12 +14,14 @@ CLineItem::CLineItem(QPointF p1,QPointF p2,QGraphicsScene* scene)
 	update();
 	pScene->update();
 	bEndLine = false;
+	penColor = c;
 }
-CLineItem::CLineItem(QGraphicsScene* scene)
+CLineItem::CLineItem(QGraphicsScene* scene,QColor c)
 	:pointItem1(scene),pointItem2(scene)
 {
 	QGraphicsScene* pScene;
 	pScene = scene;
+	penColor = c;
 	pScene->addItem(&pointItem1);
 	points[0] = pointItem1.getPoint();
 	points[1] = pointItem2.getPoint();
@@ -37,10 +39,8 @@ bool CLineItem::getEndLine()
 }
 CLineItem::~CLineItem()
 {
-	//delete pPressedPoint;
-	//delete pScene;
+	
 }
-//bool CLineItem::collidesWithItem ( const QGraphicsItem * other, Qt::ItemSelectionMode mode = Qt::IntersectsItemShape ) const
 QPainterPath CLineItem::shape()  const 
 {
 	QPainterPath path;
@@ -76,8 +76,8 @@ QRectF CLineItem::boundingRect()  const
 void CLineItem::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget)
 {
 	QLineF line(pointItem1.getPoint(), pointItem2.getPoint());
-	painter->setPen(QPen(Qt::darkBlue, 3, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin));
-	//painter->setBrush(QBrush(QColor(Qt::black)));
+	//painter->setPen(QPen(Qt::darkBlue, 3, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin));	
+	painter->setPen(QPen(/*Qt::darkYellow*/penColor, 2, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin));	
 	painter->drawLine(line);
 }
 CPointItem* CLineItem::getPointItem1()

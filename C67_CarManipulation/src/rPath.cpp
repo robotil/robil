@@ -92,7 +92,7 @@ int main(int argc, char** argv)
 		use_arg = true;
 	}
    
-  ros::init(argc, argv, "pub_joint_command_rhand");
+  ros::init(argc, argv, "pub_path_command_rhand");
 
   ros::NodeHandle* rosnode = new ros::NodeHandle();
 

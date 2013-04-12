@@ -3,8 +3,9 @@ package document.actions;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
-import document.PropertiesEditor;
-import document.PropertiesXmlHandler;
+import windows.ParametersEditor;
+
+import document.ParametersXmlHandler;
 
 public class PropertiesAction implements ActionListener {
 
@@ -13,6 +14,6 @@ public class PropertiesAction implements ActionListener {
 
 	@Override
 	public void actionPerformed(ActionEvent a) {
-		PropertiesEditor.show(PropertiesXmlHandler.lastPath);
+		ParametersEditor.show(ParametersXmlHandler.lastPath);
 	}
 }

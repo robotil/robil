@@ -1242,11 +1242,12 @@ def test32():
     if monitordNode:
         print "Success probability in offline mode monitor: Mission: %f" % monitordNode.getProbAtIndex(0)
         print "Average success time monitor: Mission= %f" % monitordNode.getAverageSuccTime(0)
+        print "SD success time monitor: Mission= %f" % monitordNode.getSDSuccTime(0)
     monitordNode=tree.getWrappedNode("b9e18714-4869-422c-bc38-cb2dca88c530")
     if monitordNode:
         print "Success probability in offline mode monitor: ExitFromCar: %f" % monitordNode.getProbAtIndex(0)
         print "Average success time monitor: ExitFromCar= %f" % monitordNode.getAverageSuccTime(0)
-    
+        print "SD success time monitor: Mission= %f" % monitordNode.getSDSuccTime(0)
     root.treeToXml("output/skill4_after_run.xml") 
     print("test 32.2: success!")
     print "Success probability in offline mode - root: %f" % root.getChild(0).getProbAtIndex(0)
@@ -1270,52 +1271,52 @@ def _createUniformDist(parmA,parmB):
    return Uniform(float(parmA),float(parmB))
 
 if __name__ == "__main__":
-#    #run the 10 tests
-#    test32()
-    
-    if len(sys.argv) == 2 and sys.argv[1] == "all":
-	test1()
-	test2()
-	test3()
-	test4()
-	test5()
-	test6()
-	test7()
-	test8()
-	test9()
-	test10()
-#    test11()
-	test12()
-	test14()
-	test15()
-	test16()
-	test17()
-	test18()
-	test19()
-	test20()
-	test21()
-	test22()
-	test23()
-	test24()
-	test25()
-	test26()
- 	test27()
-  	test28()
-	test29()
-	test31()
-      
-    elif len(sys.argv) == 2 and sys.argv[1] == "events":
-	test21()
-	test22()
-	test23()
-	test27()
-	test28()
-	test29()
-    elif len(sys.argv) == 2 and sys.argv[1] == "demo":
-	test24()
-	test25()
-    elif len(sys.argv) == 2 and sys.argv[1] == "integration":
-	test30()
-    else:
-	print "please provide one of the following command line arguments: [all,events,demo]"
-#     
+    #run the 10 tests
+    test32()
+#    
+#    if len(sys.argv) == 2 and sys.argv[1] == "all":
+#	test1()
+#	test2()
+#	test3()
+#	test4()
+#	test5()
+#	test6()
+#	test7()
+#	test8()
+#	test9()
+#	test10()
+##    test11()
+#	test12()
+#	test14()
+#	test15()
+#	test16()
+#	test17()
+#	test18()
+#	test19()
+#	test20()
+#	test21()
+#	test22()
+#	test23()
+#	test24()
+#	test25()
+#	test26()
+# 	test27()
+#  	test28()
+#	test29()
+#	test31()
+#      
+#    elif len(sys.argv) == 2 and sys.argv[1] == "events":
+#	test21()
+#	test22()
+#	test23()
+#	test27()
+#	test28()
+#	test29()
+#    elif len(sys.argv) == 2 and sys.argv[1] == "demo":
+#	test24()
+#	test25()
+#    elif len(sys.argv) == 2 and sys.argv[1] == "integration":
+#	test30()
+#    else:
+#	print "please provide one of the following command line arguments: [all,events,demo]"
+     

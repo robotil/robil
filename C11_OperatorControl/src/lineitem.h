@@ -8,8 +8,8 @@
 class CLineItem : public QGraphicsLineItem
 {
 public:
-	CLineItem(QPointF p1,QPointF p2,QGraphicsScene* scene);
-	CLineItem(QGraphicsScene* scene);
+	CLineItem(QPointF p1,QPointF p2,QGraphicsScene* scene,QColor c=Qt::darkBlue);
+	CLineItem(QGraphicsScene* scene,QColor c=Qt::darkBlue);
 	~CLineItem();
 	QPainterPath shape()  const ;
 	QRectF boundingRect() const;
@@ -36,6 +36,7 @@ private:
 	CPointItem *pPressedPoint;
 	QPointF points[2];
 	bool bEndLine;
+	QColor penColor;
 };
 
 #endif // LINEITEM_H

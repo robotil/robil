@@ -27,8 +27,8 @@ set(LIBRARY_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/lib)
 rosbuild_genmsg()
 #uncomment if you have defined services
 rosbuild_gensrv()
-set(qt_hdrs src/graphicsview.h src/imagedraw.h src/C11_Node.h src/mapmain.h src/mapwidget.h src/pixitem.h src/routeitem.h src/lineItemlist.h src/lineitem.h src/pointitem.h src/structs.h)
-set(qt_srcs src/graphicsview.cpp src/imagedraw.cpp src/main.cpp src/C11_Node.cpp src/mapmain.cpp src/mapwidget.cpp src/pixitem.cpp src/routeitem.cpp src/lineitemlist.cpp src/lineitem.cpp src/pointitem.cpp)
+set(qt_hdrs src/graphicsview.h src/imagedraw.h src/C11_Node.h src/mapmain.h src/mapwidget.h src/pixitem.h src/routeitem.h src/lineItemlist.h src/lineitem.h src/pointitem.h src/structs.h src/arcitem.h src/polygonitem.h src/traingleitem.h)
+set(qt_srcs src/graphicsview.cpp src/imagedraw.cpp src/main.cpp src/C11_Node.cpp src/mapmain.cpp src/mapwidget.cpp src/pixitem.cpp src/routeitem.cpp src/lineitemlist.cpp src/lineitem.cpp src/pointitem.cpp src/arcitem.cpp src/polygonitem.cpp src/traingleitem.cpp)
 
 qt4_automoc(${qt_srcs})
 QT4_WRAP_CPP(qt_moc_srcs ${qt_hdrs})
@@ -50,8 +50,8 @@ include_directories(srv_gen/cpp/include)
 
 
 rosbuild_add_boost_directories()
-#rosbuild_add_executable(c11 src/C11_Node.cpp)
-rosbuild_add_executable(c11 src/main.cpp
+#rosbuild_add_executable(C11 src/C11_Node.cpp)
+rosbuild_add_executable(C11 src/main.cpp
     ${uis_h} ${qt_hdrs} ${qt_srcs} ${qt_moc_srcs})
-target_link_libraries(c11 ${QT_LIBRARIES})
-rosbuild_link_boost(c11 thread signals)
+target_link_libraries(C11 ${QT_LIBRARIES})
+rosbuild_link_boost(C11 thread signals)
