@@ -131,7 +131,8 @@ class LocalPathPlanner(object):
     def __init__(self):
         self._Path = deque([])
         self._Position = Waypoint()
-        self._CurrentSegment = Segment(self._Position,self._Position) 
+        self._CurrentSegment = Segment(self._Position,self._Position)
+        self._PathReady = False 
         
     def SetPath(self,waypointList):
         self._Path = deque(waypointList)
@@ -144,7 +145,8 @@ class LocalPathPlanner(object):
                 self._CurrentSegment.SetTarget(self._Path.popleft())
         else:
             self._CurrentSegment.SetSource(self._Path.popleft())
-            self._CurrentSegment.SetTarget(self._Path.popleft())    
+            self._CurrentSegment.SetTarget(self._Path.popleft()) 
+        self._PathReady = True   
         
     def GetPathError(self):
         sagital,lateral = self._CurrentSegment.GetDistanceFrom(self._Position)
@@ -186,6 +188,7 @@ class LocalPathPlanner(object):
         if ((sagital>0.0)or(distanceFromTarget < self.GetCloseEnoughToTargetDistance())):
             if(len(self._Path)==0):
                 bStop = True
+                self._PathReady = False
                 #rospy.loginfo('UpdatePosition: Stopping')
             else:
                 #rospy.loginfo('UpdatePosition: Path next point before pop (x,y) = (%f,%f)' %(self._Path[0].GetX(),self._Path[0].GetY()))
@@ -194,6 +197,8 @@ class LocalPathPlanner(object):
             #rospy.loginfo('UpdatePosition:  New Segment: Size = %s' %(self._CurrentSegment._Source.GetDistanceFrom(self._CurrentSegment._Target) ) )
         return bStop
         
+    def Stop(self):
+        self._PathReady = False 
   
 
 ###################################################################################

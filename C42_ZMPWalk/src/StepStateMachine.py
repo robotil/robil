@@ -587,11 +587,9 @@ class StepStateMachine(StateMachine):
         StateMachine.AddState(self,LeftStepState(self._StepStrategyWalk,walkingTrajectory,robotState,dt))
         StateMachine.AddState(self,EmergencyStopState(self._StepStrategyWalk,walkingTrajectory,robotState,dt))
         # Add transitions
-        StateMachine.AddTransition(self,"Idle",                 "Initialize",   "Initializing")
         StateMachine.AddTransition(self,"Initializing",         "Fail",         "Failing")
         StateMachine.AddTransition(self,"Initializing",         "Start",        "PreStep")
         #StateMachine.AddTransition(self,"Initializing",         "Stop",         "Idle")
-        StateMachine.AddTransition(self,"Failing",              "Initialize",   "Initializing")
         #StateMachine.AddTransition(self,"Failing",              "Stop",         "Idle")
         StateMachine.AddTransition(self,"PreStep",              "NextStep",     "FirstStep")
         StateMachine.AddTransition(self,"FirstStep",            "NextStep",     "Left")
@@ -614,9 +612,11 @@ class StepStateMachine(StateMachine):
         StateMachine.AddTransition(self,"EmergencyStop",        "NextStep",     "Idle")
 
     def Initialize(self):
-        StateMachine.PerformTransition(self,"Initialize")
         self._stepCounter = 0
         self._counter = 0
+        self._CurrentState.OnExit()
+        self._CurrentState = self._States["Initializing"]
+        self._CurrentState.OnEnter()
 
     def Fail(self):
         StateMachine.PerformTransition(self,"Fail")

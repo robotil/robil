@@ -134,6 +134,7 @@ class MyTask(RobilTask):
         while not self._done:
             if self.isPreepted():
                 self._ZmpStateMachine.EmergencyStop()
+                self._ZmpLpp.Stop()
                 print "Preempt ZmpWalk: EmergencyStop"
                 self._ZmpStateMachine.EmergencyStop()
                 return RTResult_PREEPTED()
