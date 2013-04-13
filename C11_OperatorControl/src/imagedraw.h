@@ -3,9 +3,11 @@
 
 #include <QtGui/QMainWindow>
 #include <QMap>
+#include <QTimer>
 #include "graphicsview.h"
 #include "C11_Node.h"
 #include "C11_Node_Subscriber.h"
+#include "structs.h"
 #include "ui_imagedraw.h"
 
 class ImageDraw : public QMainWindow, public IC11_Node_Subscriber
@@ -20,6 +22,8 @@ public slots:
 	void SltOnPlayPauseClick(bool);
 	void SltOnCreateClick(bool);
 	void SltOnPathClick(bool);
+	void SltOperatorAction();
+	void SltOnWaitTimeout();
 
 signals:
 	void SigOnNewImg(QImage img);
@@ -33,7 +37,11 @@ public:
 	//C11_Node_Subscriber implementation
 	virtual void OnImgReceived(QImage image);
 	virtual void OnImgReceived(std::string fileName);
-	virtual void OnOccupancyGridReceived(int grid[48][48]);
+	virtual void OnOccupancyGridReceived(int grid[100][100], StructPoint robotPos, int xOffset, int yOffset, double orient);
+	virtual void OnPathReceived(std::vector<StructPoint> points);
+	virtual void OnExecutionStatusUpdate(int status);
+	virtual void OnHMIResponseReceived();
+	virtual void OnWaitResponseFinished();
 
 protected:
 	void CloseOpenedImages();
@@ -44,6 +52,8 @@ private:
 	int ImageAreaCount;
 	QMap<int,CGraphicsView*> ImageAreas;
 	bool IsUpdateCurrentImg;	//don't create new image, update the current
+	EnumRunStatus ERunStatus;
+	QTimer* WaitTimer;
 };
 
 #endif // IMAGEDRAW_H

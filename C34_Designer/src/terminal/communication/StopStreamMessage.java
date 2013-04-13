@@ -2,7 +2,7 @@ package terminal.communication;
 
 import java.util.ArrayList;
 
-public class StopStreamMessage {
+public class StopStreamMessage implements IMessage<StopStreamMessage> {
 	
 	public enum PlanFinishReason {
 		Success("OK"),
@@ -30,8 +30,10 @@ public class StopStreamMessage {
 	}
 	
 	private PlanFinishReason _finishReason = PlanFinishReason.Success;
-	private ArrayList<String> _failedTasks = new ArrayList<String>();
+	private ArrayList<String> _tasksTree = new ArrayList<String>();
+	private int _finishCode;
 	private String _targetTaskId = "";
+	private String _finishReasonDescription = "";
 
 	public PlanFinishReason getFinishReason() {
 		return _finishReason;
@@ -45,6 +47,23 @@ public class StopStreamMessage {
 		this._finishReason = PlanFinishReason.typeOf(finishReason);
 	}
 	
+	public void setFinishReasonDescription(String finishReason) {
+		if (finishReason != null)
+			this._finishReasonDescription = finishReason;
+	}
+	
+	public String getFinishReasonDescription() {
+		return this._finishReasonDescription;
+	}
+	
+	public int getFinishCode() {
+		return this._finishCode;
+	}
+	
+	public void setFinishCode(int finishCode) {
+		this._finishCode = finishCode;
+	}
+	
 	public String getTargetTaskId() {
 		return _targetTaskId;
 	}
@@ -54,20 +73,26 @@ public class StopStreamMessage {
 			this._targetTaskId = targetTaskId;
 	}
 
-	public ArrayList<String> getFailedTasks() {
-		return _failedTasks;
+	public ArrayList<String> getTasksTree() {
+		return _tasksTree;
 	}
 
 	public void setFailedTasks(ArrayList<String> failedTasks) {
-		this._failedTasks = failedTasks;
+		this._tasksTree = failedTasks;
 	}
 	
 	@Override
 	public String toString() {
 		return String.format(
-				"Finish reason: %s\nFailed task: %s",
+				"Finish reason: %s\nLast task: %s",
 				getFinishReason().toString(),
 				getTargetTaskId()
 				);
+	}
+
+	@Override
+	public void clone(StopStreamMessage source) {
+		// TODO Clone
+		
 	}
 }

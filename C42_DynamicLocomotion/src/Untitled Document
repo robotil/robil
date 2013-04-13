@@ -1,0 +1,21 @@
+#!/usr/bin/env python
+ import roslib; roslib.load_manifest('C42_DynamicLocomotion')
+ 
+ from C42_DynamicLocomotion.srv import *
+ import rospy
+ 
+ def pathis():
+     print "Path_x is [%s] Path_y is [%s]"%(points.x[0], points.y[0])
+     return C31_Location(points.x[0] points.y[0])
+ 
+ def C31_GetPath():
+     rospy.init_node('C31_GetPath')
+     points.x = [0 1 2 3]
+     points.y = [1 2 3 4]
+     path = rospy.Service('path', C31_Waypoints, pathis)
+     rospy.spin()
+ 
+ if __name__ == "__main__":
+     C31_GetPath()
+
+

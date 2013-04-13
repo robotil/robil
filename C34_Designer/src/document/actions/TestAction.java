@@ -3,7 +3,8 @@ package document.actions;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
-import document.BTDesigner;
+import windows.designer.BTDesigner;
+
 
 public class TestAction extends AbstractDesignerAction implements
 		ActionListener {
@@ -14,6 +15,6 @@ public class TestAction extends AbstractDesignerAction implements
 
 	@Override
 	public void actionPerformed(ActionEvent a) {
-		getActiveTab().doc.test();
+		getActiveTab().document.test();
 	}
 }

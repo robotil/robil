@@ -3,15 +3,12 @@ package terminal.communication;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import logger.Log;
-import logger.LogManager;
-
 /**
  * 
  * @author blackpc
  *
  */
-public class StackStreamMessageParser {
+public class StackStreamMessageParser extends MessageParser<StackStreamMessage> {
 	
 	private static final String SUCCESS_OR_FAILURE_PATTERN =
 			"(?:.*?(FAILURE|SUCCESS)\\((\\-?\\d+)\\)\\:?([^\\$]*))?";
@@ -20,7 +17,7 @@ public class StackStreamMessageParser {
 			"(?:\\[id=([\\w\\-\\_]+)\\])?" + SUCCESS_OR_FAILURE_PATTERN;
 	
 	private static final String MESSAGE_FORMAT_PATTERN =   
-			"data: ExeStack: changed : (\\w+) code=(\\d), node=(\\w+)\\((.*?)(?:\\)\\(|\\)\\s|\\)$)\\s?" + MESSAGE_TASK_ID_PATTERN; // [id=PP_ID]($Task(PathPlanning) [id=PP_ID]:FAILURE(1000)$)";
+			"data: ExeStack: changed : (\\w+) code=(\\d), node=(\\w+)\\((.*?)(?:\\)\\(|\\)\\s|\\)$)\\s?" + MESSAGE_TASK_ID_PATTERN;
 	
 	private final Pattern _messageRegexPattern = Pattern.compile(MESSAGE_FORMAT_PATTERN);
 	
@@ -44,6 +41,7 @@ public class StackStreamMessageParser {
 	 * @param inputString 
 	 * @return Message
 	 */
+	@Override
 	public StackStreamMessage parse(String inputString) {
 		StackStreamMessage message = new StackStreamMessage();
 		
@@ -70,11 +68,5 @@ public class StackStreamMessageParser {
 		
 		return message;
 	}
-	
-	public static void main(String[] args) {
-		LogManager.redirectStandardAndErrorOutput("test_stdoutput.txt");
-		Log.d("Test message");
-		
-		Log.i("Test message");
-	}
+
 }

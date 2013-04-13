@@ -4,6 +4,7 @@
 <log_print_ros_output value="true"/>
 <path_to_images value="./images"/>
 <path_to_lookup value="./plans/lookup.xml"/>
+<stop_stream_topic value="stop_stream"/>
 <test_result value="true"/>
 <log_ros_progress_print_level value="10"/>
 <path_to_address value="./plans/TaskList.xml"/>
@@ -15,6 +16,8 @@
 <log_preview_lines_limit value="500"/>
 <path_to_plans value="./plans"/>
 <enableTaskIdRegeneration value="false"/>
+<stack_stream_topic value="stack_stream"/>
+<compact_stack_message value="false"/>
 <log_print_running_tasks_id value="true"/>
 <test_time value="0"/>
 <path_to_description value="./plans/TaskDescriptions.xml"/>

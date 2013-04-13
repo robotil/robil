@@ -33,7 +33,7 @@ for dir in "$ROS_WD"/*; do
                 bn=` basename $dir`
                 echo "bn=$bn"
                 if [ "$bn" != "C0_Scripts" -a "$bn" != "C41_BodyControl" -a "$bn" != "C41_QuasiStaticWalking_tools" ]; then
-                                if [ "$bn" != "launch" -a "$bn" != "C66_Grasp_tools" ]; then
+                                if [ "$bn" != "launch" -a "$bn" != "C66_Grasp_tools" -a "$bn" != "C43_LocalBodyCOM_tools" ]; then
 					echo ">> $dir" 
 					cd $dir
 					#rosmake --pjobs=4;

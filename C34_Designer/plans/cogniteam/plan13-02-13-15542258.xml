@@ -1,0 +1,7 @@
+<plan descriptions="./plans/TaskDescriptions.xml">
+   <seq name="T1" x="338.5" y="75.5" collapsed="false" id="791dac63-db03-4c14-a553-aad4daac3060"> 
+         <tsk name="Ta" x="249.5" y="165.5" test_time="0" test_result="true" id="6eed785d-e996-4dcf-902f-83d859740df6" />
+         <tsk name="Tb" x="352.5" y="163.5" test_time="0" test_result="true" id="e9a098fd-365c-4688-a95e-2567c0f8b50e" />
+         <tsk name="Tc" x="466.5" y="162.5" test_time="0" test_result="true" id="890edbae-ed52-45f6-ac3f-c1d4b3fddd19" />
+   </seq>
+</plan>

@@ -12,8 +12,10 @@
 #include <sensor_msgs/image_encodings.h>
 #include <image_transport/image_transport.h>
 #include "C22_GroundRecognitionAndMapping/C22.h"
+#include "C31_PathPlanner/C31_GetPath.h"
 #include "C10_Common/push_img.h"
 #include "C10_Common/push_occupancy_grid.h"
+#include "C10_Common/push_path.h"
 
 using namespace std;
 using namespace C0_RobilTask;
@@ -101,6 +103,43 @@ public:
 		return TaskResult::SUCCESS ();
 	}
 
+	TaskResult path_task()
+	{
+		ROS_INFO("C11_Agent: path_task begin!\n");
+		ros::ServiceClient c31Client = _node.serviceClient<C31_PathPlanner::C31_GetPath>("C31_GlobalPathPlanner/getPath");
+		C31_PathPlanner::C31_GetPath srv31;
+		if (!c31Client.call(srv31))
+		{
+			ROS_ERROR("couldn't get a path, exiting\n");
+			return TaskResult::FAULT();
+		}
+
+		ROS_INFO("C11_Agent: path received!\n");
+		cout<<srv31.response.path<<"\n";
+
+		ros::ServiceClient c11Client = _node.serviceClient<C10_Common::push_path>("C11/push_path");
+
+		C10_Common::push_path srv11;
+
+		srv11.request.PTH = srv31.response.path;
+		if (!c11Client.call(srv11))
+		{
+			ROS_ERROR("couldn't get a C11 reply, exiting\n");
+			return TaskResult::FAULT();
+
+		}
+
+		ROS_INFO("C11_Agent: path sent!\n");
+
+		if (srv11.response.ACK.mes != 1) {
+			ROS_ERROR("C11 ack is fault, exiting\n");
+			return TaskResult::FAULT();
+		 }
+
+		ROS_INFO("C11_Agent: path_task end!\n");
+		return TaskResult::SUCCESS ();
+	}
+
     TaskResult task(const string& name, const string& uid, Arguments& args){
 
     	ROS_INFO("C11_Agent: PushHMI called!\n");
@@ -120,6 +159,43 @@ public:
     				ROS_INFO("occupancy_grid BINGO");
     				return occupancy_grid_task();
 				}
+    			else if(str == "path")
+				{
+					ROS_INFO("path BINGO");
+					return path_task();
+				}
+    			else if(str == "cabin_image")
+                                {
+    			                return TaskResult::SUCCESS ();
+                                }
+    			else if(str == "cabin_parametrics")
+                                {
+                                        return TaskResult::SUCCESS ();
+                                }
+    			else if(str == "inSideCabin_image")
+                                {
+                                        return TaskResult::SUCCESS ();
+                                }
+    			else if(str == "InSideCabin_parametrics")
+                                {
+                                        return TaskResult::SUCCESS ();
+                                }
+    			else if(str == "vehicle_parametrics")
+                                {
+                                        return TaskResult::SUCCESS ();
+                                }
+    			else if(str == "door_image")
+                                {
+                                        return TaskResult::SUCCESS ();
+                                }
+    			else if(str == "door_parameters")
+                                {
+                                        return TaskResult::SUCCESS ();
+                                }
+    			else if(str == "objects")
+                                {
+                                        return TaskResult::SUCCESS ();
+                                }
     		}
     	}
     	return TaskResult::FAULT();

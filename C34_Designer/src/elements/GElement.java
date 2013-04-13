@@ -54,7 +54,7 @@ public abstract class GElement {
 		Paint paint;
 		Stroke strok;
 		Font font;
-
+		
 		public GraphProp(Graphics2D g) {
 			this.g = g;
 			this.paint = g.getPaint();
@@ -105,7 +105,7 @@ public abstract class GElement {
 		n.view = (n.view.clone());
 		n.xmlElement = this.xmlElement;
 		n.id = new UUID(this.id.getMostSignificantBits(), this.id.getLeastSignificantBits());
-		n.property = this.property.clone();
+		// n.property = this.property.clone();
 	}
 
 	abstract public void cloneReconnect(Map<GElement, GElement> link);
@@ -115,7 +115,7 @@ public abstract class GElement {
 	}
 
 	protected Vec getLocation() {
-		return this.property.loc.scale(this.view.zoom).add(this.view.loc);
+		return this.property.location.scale(this.view.zoom).add(this.view.loc);
 	}
 
 	public GProperty getProperty() {

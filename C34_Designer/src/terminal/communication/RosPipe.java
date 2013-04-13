@@ -119,7 +119,7 @@ public class RosPipe {
 		}
 		
 		if(Parameters.log_print_ros_commands){
-			System.out.print("Ros command ("+stream_id+") ");
+			Log.d("Ros command ("+stream_id+") ");
 			printArgArray(arg_list);
 		}
 		ProcessBuilder pb = new ProcessBuilder(arg_list);

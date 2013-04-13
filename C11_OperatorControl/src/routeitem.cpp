@@ -2,41 +2,80 @@
 #include <QPainter>
 #include <QGraphicsScene>
 
-QPointF points[40];
-int numOfPointsInPoly;
+//QPointF points[40];
+//int numOfPointsInPoly;
 	
-CRouteItem::CRouteItem(QGraphicsScene* scene)
+CRouteItem::CRouteItem(QGraphicsScene* scene, QColor c)
 {
 	pFirstLineItemList = NULL;
 	pScene = scene;
 	numOfPoints = 0;
+	numOfPointsInPoly = 0;
 	pPressedPointInLineList = NULL;
 	isPoly = false;
+	penColor = c;
 }
 CRouteItem::~CRouteItem()
 {
+	if(isPoly)
+	{
+		for(int i=0;i<numOfPointsInPoly; i++)
+			points[i] = QPoint(0.0,0.0);
+	}
+	
 	delete pPressedPointInLineList;
 	
 	CLineItemList *prevLineItem = NULL;
-	CLineItemList *curLineItem = pFirstLineItemList;
-
-	//while(curLineItem->getNextLineItem()!=NULL)
-	for(int i=0; i<numOfPoints; i++)
+	if(pFirstLineItemList != NULL)
 	{
-		prevLineItem = curLineItem;
+		CLineItemList *curLineItem = pFirstLineItemList;
+		for(int i=0; i<numOfPoints; i++)
+		{
+			prevLineItem = curLineItem;
 
+			if(curLineItem->getNextLineItem()!=NULL)
+			{
+				curLineItem = curLineItem->getNextLineItem();
+				delete prevLineItem;
+			}
+		}
 		if(curLineItem->getNextLineItem()!=NULL)
 		{
-			curLineItem = curLineItem->getNextLineItem();
-			delete prevLineItem;
+			curLineItem=NULL;
 		}
+		delete curLineItem;	
 	}
-	if(curLineItem->getNextLineItem()!=NULL)
-	{
-		curLineItem=NULL;
-	}
-	delete curLineItem;	
 }
+
+QVector<QPointF> CRouteItem::getRoutePoints()
+{
+	QPointF p;
+	QVector<QPointF> pointVec;	
+	CLineItemList *prevLineItem = NULL;
+
+	if(pFirstLineItemList != NULL)
+	{
+		CLineItemList *curLineItem = pFirstLineItemList;
+		for(int i=0; i<numOfPoints; i++)
+		{
+			prevLineItem = curLineItem;
+
+			if(curLineItem->getNextLineItem()!=NULL)
+			{
+				curLineItem = curLineItem->getNextLineItem();
+				p = prevLineItem->getLineItem()->getPointItem1()->getPoint();
+				pointVec.insert(i,p);
+			}
+			else
+			{
+				p = curLineItem->getLineItem()->getPointItem1()->getPoint();
+				pointVec.insert(i,p);
+			}
+		}	
+	}
+	return pointVec;
+}
+
 QRectF CRouteItem::boundingRect()  const
 {
     return QRectF(0, 0, 950, 1000);
@@ -52,8 +91,11 @@ QPainterPath CRouteItem::shape()  const
 }
 void CRouteItem::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget)
 {
-	painter->setPen(QPen(Qt::darkYellow, 2, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin));
-	painter->setBrush(QBrush(QColor(255,255,0,100)));
+	painter->setPen(QPen(/*Qt::darkYellow*/penColor, 2, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin));	
+	if(isPoly)
+	{
+		painter->setBrush(QBrush(QColor(255,255,0,100)));	
+	}
 	painter->drawPolygon(points,numOfPointsInPoly);
 }
 
@@ -64,7 +106,7 @@ void CRouteItem::addPointToLine(QPointF p,bool ShowLines)
 			
 	if(pFirstLineItemList==NULL)
 	{
-		pFirstLineItemList = new CLineItemList(p,ShowLines,pScene);
+		pFirstLineItemList = new CLineItemList(p,ShowLines,pScene,penColor);
 		pScene->addItem(pFirstLineItemList);
 		pScene->update();
 		update();
@@ -106,6 +148,57 @@ bool CRouteItem::isContain(CLineItemList *ItmList,QPointF p)
 {
 	return ItmList->isContain(p);	
 }
+void CRouteItem::drawReadyPolygon(QVector<QPointF> vec_p, bool b)
+{
+	CLineItemList *ItemList;
+	QPointF pp;
+	QVector<QPointF>::iterator iter;
+    for(iter = vec_p.begin(); iter!= vec_p.end(); iter++)
+    {
+        pp=*iter;
+		addPointToLine(pp,b);
+		if(iter == vec_p.begin())
+		{
+			ItemList = pFirstLineItemList;
+			points[vec_p.indexOf(*iter)] = ItemList->getLineItem()->getPoint1();
+		}
+		else
+		{
+			ItemList = ItemList->getNextLineItem();
+			points[vec_p.indexOf(*iter)] = ItemList->getLineItem()->getPoint1();
+		}
+	}
+
+	ItemList->LastPoint(pFirstLineItemList->getLineItem()->getPoint1());//update: ItemList->point2 = ItemList->point1
+	ItemList->setNextLineItem(pFirstLineItemList);
+	ItemList->getLineItem()->setEndLine(true);
+	numOfPointsInPoly = numOfPoints;
+	isPoly = true;	
+}
+void CRouteItem::drawReadyPath(QVector<QPointF> vec_p, bool b)
+{
+  if(vec_p.empty())
+    {
+      return;
+    }
+	CLineItemList *ItemList;
+	QPointF pp;
+
+	QVector<QPointF>::iterator iter;
+
+    for(iter = vec_p.begin(); iter!= vec_p.end(); iter++)
+    {
+        pp=*iter;
+		addPointToLine(pp,b);
+		if(iter == vec_p.begin())
+		{
+			ItemList = pFirstLineItemList;
+		}
+		else
+			ItemList = ItemList->getNextLineItem();
+    }
+    ItemList->LastPoint(ItemList->getLineItem()->getPoint1());
+}
 void CRouteItem::ReleasePoint()
 {
 	pPressedPointInLineList->getLineItem()->setRadius(10);
@@ -131,7 +224,7 @@ bool CRouteItem::selectEdge(QPointF p)
 				
 				if(pPressedPointInLineList->getNextLineItem() !=NULL)
 				{
-					AddedLineItem = new CLineItemList(p,true,pScene);
+					AddedLineItem = new CLineItemList(p,true,pScene,penColor);
 					pScene->addItem(AddedLineItem);
 					pScene->update();
 					
@@ -184,7 +277,7 @@ CLineItemList* CRouteItem::GoToLastLine()
 }
 void CRouteItem::updatePoints()
 {
-	int i=0;
+//	int i=0;
 	CLineItemList *curLineItem = pFirstLineItemList;
 
 	//while(curLineItem->getNextLineItem()!=NULL)
@@ -323,4 +416,22 @@ void CRouteItem::updatePolygonPoints(QPointF p,QPointF pNew)
 		if(points[i] == p)
 			points[i] = pNew;
 	}
+}
+
+QPointF CRouteItem::GetPoint(int index)
+{
+	if(index < numOfPoints)
+	{
+		return points[index];
+	}
+	else
+	{
+		QPointF p(0,0);
+		return p;
+	}
+}
+
+int CRouteItem::GetNumOfPoints()
+{
+	return numOfPoints;
 }

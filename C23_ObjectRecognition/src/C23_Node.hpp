@@ -25,10 +25,11 @@ class C23_Node {
 public:
 
 	  C23_Node(std::string left_camera,std::string right_camera);
-	  bool detectAndTrack(MODELS model);
+	  bool detectAndTrack(const char* target);
 	  void callback(const sensor_msgs::ImageConstPtr& left_msg,const sensor_msgs::ImageConstPtr& right_msg);
 	  void startDetection();
 	  void stopDetection();
+	  bool learnObject(const char* target);
 private:
   ros::NodeHandle nh_;
   image_transport::ImageTransport it_;
@@ -40,8 +41,13 @@ private:
   message_filters::Synchronizer< MySyncPolicy > sync;
   TLD tld;
   C23_Node_TLD_Handler *tldh_;
-  MODELS currentModel_;
-  bool ready;
+ 
+  TldMode _mode;
+  bool detect;
+  bool done_processing;
+  ros::Publisher objectDetectedPublisher;
+  ros::Publisher objectDeminsionsPublisher;
+  char _path[1000];
   
 public:
     int x,y,width,height;

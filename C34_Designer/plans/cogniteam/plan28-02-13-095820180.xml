@@ -1,0 +1,30 @@
+<plan descriptions="./plans/TaskDescriptions.xml">
+<par name="skill4" x="509.0708607691419" y="39.51847732303955" collapsed="false" id="38e95426-0932-40d2-aefa-270a3dcd9298">
+<par name="Perception" x="290.28138708493174" y="124.5184773230391" collapsed="false" id="50ae34a1-b4f6-42b9-a59e-23a1de45eaca">
+<tsk name="LocalizationTrack" x="64.28138708493123" y="141.5184773230392" test_time="0" test_result="true" id="b680e465-1580-4fcd-964d-4ac78748b7d3" />
+<tsk name="ObstacleDetection" x="301.28138708493174" y="186.5184773230391" test_time="0" test_result="true" id="56806741-11f0-45f8-992b-3a81f261bd49" />
+</par>
+<seq name="Mission" x="661.9280036262862" y="79.08990589446783" collapsed="false" id="e6b9d1db-cbf5-4efb-8b22-f2c2e6130a3e">
+<seq name="DriveMission" x="657.8089560072401" y="170.04228684684958" collapsed="false" id="19ac91a7-5f3b-47d5-a2bb-9ef59c48c5ae">
+<seq name="InCar" x="562.7649999632802" y="224.47818428274473" collapsed="false" id="cee78399-ac08-4713-9a85-542b10c3e7ff">
+<par name="Driving" x="472.0507142489885" y="244.59906340362363" collapsed="false" id="6207a22b-f609-4f49-9579-2e83f0c45e36">
+<dec name="!L!" x="396.3364285346999" y="288.88477768933745">
+<seq name="Driving" x="460.2595054577826" y="383.08257988714024" collapsed="false" id="3121acdd-f660-4d53-96b2-47029c756b6f">
+<seq name="@4" x="534.4908979908998" y="464.2232489732483" collapsed="false" id="70f216a5-7259-412e-a108-658b5d28d109">
+<tsk name="InitDrive" x="355.5226633525156" y="569.7066400375179" test_time="0" test_result="true" id="6e5cc7d2-bc5b-46c9-b6fc-9adb8ab9b935" />
+<sel name="@5" x="532.4908979908996" y="525.2232489732486" collapsed="false" id="44efb3a3-36bc-460c-a765-923a3b1d891f">
+<tsk name="WayPointsDriving" x="442.022663352512" y="569.7141588345212" test_time="0" test_result="true" id="398165c8-1786-4ce4-b98b-37e5282d9a26" />
+<tsk name="FinishDrive" x="629.0623265623394" y="569.0803918303927" test_time="0" test_result="true" id="e69475b5-c614-47bf-89b5-def175bd06cf" />
+</sel>
+<tsk name="FinishDrive" x="629.0623265623394" y="569.0803918303927" test_time="0" test_result="true" id="e69475b5-c614-47bf-89b5-def175bd06cf" />
+</seq>
+<tsk name="PathPlanningFocus(target=FORWARD)" x="661.4687786407433" y="468.65902098989574" test_time="0" test_result="true" id="5668a95a-a827-472a-bae2-b4fff00a36a7" />
+</seq>
+</dec>
+<tsk name="PathPlanning" x="492.0507142489908" y="284.5990634036232" test_time="0" test_result="true" id="32da76e3-cd3b-456e-84d4-9dfe611b91c6" />
+</par>
+</seq>
+</seq>
+</seq>
+</par>
+</plan>
