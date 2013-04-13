@@ -20,6 +20,9 @@ def nodeDataInDebugMode(nodeTime, nodeSuccFail, nodeID, monitordNodeID, numOfIte
    
    #check if the node monitor is the root
     
+    if monitordNodeID != "":
+        monitorNode= newTree.getWrappedNode(monitordNodeID)
+    
     #get pointer to the monitored node
     finished_node = newTree.getWrappedNode(nodeID)
     finished_node.setDebug(str(nodeSuccFail) + " " + str(nodeTime))
@@ -37,8 +40,6 @@ def nodeDataInDebugMode(nodeTime, nodeSuccFail, nodeID, monitordNodeID, numOfIte
     if monitordNodeID == "":
         root = newTree.getRoot()
         monitorNode = root.getChild(0)
-    else:
-        monitorNode= newTree.getWrappedNode(monitordNodeID)    
     
     #take E,prob and standarte deviation  from the debug node,
     E =  monitorNode.getAverageSuccTime(param)

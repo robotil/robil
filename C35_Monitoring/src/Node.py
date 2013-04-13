@@ -577,9 +577,9 @@ class node:
             return None
         a[0]= randP             
         if a[0]:
-            a[1] = self.getDistSuccByIndex(index).calcProb()
+            a[1] = float(self.getDistSuccByIndex(index).calcProb())
         else:          
-            a[1] = self.getDistFailByIndex(index).calcProb()
+            a[1] = float(self.getDistFailByIndex(index).calcProb())
 
         return a
         
