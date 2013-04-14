@@ -19,6 +19,7 @@ from robot_state import Robot_State
 from zmp_init import init_pose
 from zmp_profiles import *
 import copy
+from collections import deque
 
 ###################################################################################
 #--------------------------- Exceptions -------------------------------------------
@@ -119,12 +120,7 @@ class InitializeStepState(StepState):
         # moving to intial pose:
         init_pose()  # !!! need to disable tf listener drc2_tools to prevent clash !!!
         self._Strategy.Initialize(self._bend_knees)
-        # init _PreviewState and _StatePreviewBuffer:
-        self._PreviewState = StateMachine.GetCurrentState(self)
-        state,transition_exists = StateMachine.GetStateAtTransition(self,self._PreviewState.Name,"Start")
-        self._PreviewState = state
-
-        
+                
     def GetId(self):
         return 1
 
@@ -593,7 +589,7 @@ class BufferData(object):
         The BufferData class is intended to be used with the StepStateMachine class,
         it contains preview data of StepStateMachine of which steps are going to performed next.
     """
-    def __init__(self,strNextTransition,turn_angle,step_length,step_width,step_width,zmp_width,step_time,bend_knees,step_height,trans_ratio_of_step):
+    def __init__(self,strNextTransition,turn_angle,step_length,step_width,zmp_width,step_time,bend_knees,step_height,trans_ratio_of_step):
         self.NextTransition = strNextTransition
         self._turn_angle  = turn_angle   # [rad]
         self._step_length = step_length  # [m]
@@ -614,13 +610,7 @@ class StepStateMachine(StateMachine):
     """
     
     def __init__(self,robotState,walkingTrajectory,transformListener,ZMP_Preview_BufferX,ZMP_Preview_BufferY,SwingTrajectory,UpdateRateHz,orientation_correction):
-        self._counter = 0
-        self._stepCounter = 0
         self._UpdateRateHz = UpdateRateHz
-        # Turn Variables:
-        self._TurnCmdInput = 0.0        # units [rad], Input Turn command recieved by StepStateMachine, angle signs: (+) turn left, (-) turn right
-        self._ExecutedTurnCmd = 0.0     # units [rad], Turn command that is being carried out
-        self._TotalTurnRemaining = 0.0   # units [rad], total turn remaining to perform 
         # Turn Parameters:
         self._MaxStepTurn = 45*math.pi/180 # units [rad], the maximal Turn that can be performed in one step sequance 
         self._TurnThreshold = 0.030        # units [rad], below this value a turn will not be performed 
@@ -675,9 +665,23 @@ class StepStateMachine(StateMachine):
         StateMachine.AddTransition(self,"StopLeft",             "NextStep",     "Idle")
         StateMachine.AddTransition(self,"EmergencyStop",        "NextStep",     "Idle")
         # Preview of State Machine:
-        self._PreviewState = StateMachine.GetCurrentState(self) # the state at which the preview is
         self._StatePreviewBuffer = deque([]) # contains a list of BufferData class, infomation needed from _CurrentState to _PreviewState: Transitions, step times,...
- 
+        self._PreviewState = StateMachine.GetCurrentState(self) # the state at which the preview is
+        # Values at init: (to enable reset of init values without recreating object)
+        # self.init_values() # commented because done externaly (at begining of task)
+    
+    def init_values(self):
+        self._counter = 0
+        self._stepCounter = 0
+        # Turn Variables:
+        self._TurnCmdInput = 0.0        # units [rad], Input Turn command recieved by StepStateMachine, angle signs: (+) turn left, (-) turn right
+        self._ExecutedTurnCmd = 0.0     # units [rad], Turn command that is being carried out
+        self._TotalTurnRemaining = 0.0   # units [rad], total turn remaining to perform 
+        # init _PreviewState and _StatePreviewBuffer:
+        state,transition_exists = StateMachine.GetStateAtTransition(self,"PreStep","NextStep")
+        self._PreviewState = state # initialized to "FirstStep"
+        rospy.loginfo("class StepStateMachine init_values: PreviewState = %s" % (self._PreviewState.Name) )
+
     def Initialize(self):
         StateMachine.PerformTransition(self,"Initialize")
         self._stepCounter = 0
@@ -717,15 +721,16 @@ class StepStateMachine(StateMachine):
     def UpdatePreview(self):
         #rospy.loginfo("UpdatePreview - StepTime(%f) Counter(%d) Timer(%f)" % (StateMachine.GetCurrentState(self).GetStepTime(),self._counter, self._counter*1.0/self._UpdateRateHz))
         if (StateMachine.GetCurrentState(self).GetStepTime() < self._counter*1.0/self._UpdateRateHz):
-            # TODO: Transition need to be received from StepStatePreviewBuffer
-            # End of step -> State Transitions:
-            if self._DecideToTurn():
-                if self._ExecutedTurnCmd > 0:
-                    self.TurnLeft()
-                else:
-                    self.TurnRight()
-            else:
-                self.NextStep()
+            # # TODO: Transition need to be received from StepStatePreviewBuffer
+            # # End of step -> State Transitions:
+            # if self._DecideToTurn():
+            #     if self._ExecutedTurnCmd > 0:
+            #         self.TurnLeft()
+            #     else:
+            #         self.TurnRight()
+            # else:
+            #     self.NextStep()
+            self.NextStep()
 
             p_ref_x,p_ref_y,loaded_new_step_trigger_x,loaded_new_step_trigger_y = StateMachine.GetCurrentState(self).UpdatePreview()
             self._stepCounter = StateMachine.GetCurrentState(self).UpdateStepCounter(self._stepCounter)

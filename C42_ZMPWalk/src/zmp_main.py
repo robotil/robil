@@ -128,6 +128,7 @@ class MyTask(RobilTask):
     def task(self, name, uid, parameters):
         print "Start ZmpWalk"
 
+        self._ZmpStateMachine.init_values()
         self._ZmpStateMachine.Initialize()
         self._ZmpStateMachine.Start()
 
