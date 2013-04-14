@@ -18,7 +18,7 @@
 ###################################################################################     
 
 import roslib; roslib.load_manifest('C42_ZMPWalk')
-import rospy, sys #,os.path
+import rospy, sys ,os
 from pylab import *
 # from numpy import * # no need after line above
 from C42_ZMPWalk.msg import walking_trajectory, Position, Orientation, Pos_and_Ori  #traj
@@ -33,6 +33,7 @@ from robot_state import Robot_State
 from StepStateMachine import *
 from ZmpLocalPathPlanner import *
 from sensor_msgs.msg import Imu #Odometry
+import yaml
 
 class namespace: pass
 ns = namespace()
@@ -71,8 +72,10 @@ imu_ori_z_sub = rospy.Subscriber('/atlas/imu', Imu, get_imu)  #Odometry, get_imu
 
 orientation_correction = Orientation_Control()
 
-# sampling time:
-rate = 100  # [Hz]
+zmp_walking_path = os.path.join(roslib.packages.get_pkg_dir('C42_ZMPWalk'), r"src/parameters/",'ZMP_Walking_Params.yaml')
+zmp_walking_params_file = file(zmp_walking_path)
+parameters_file = yaml.load(zmp_walking_params_file)
+rate = parameters_file['zmp_walking']['walking_parameters']['rate']
 dt = 1.0/rate # [sec] # sample time (was named time_step)
 interval = rospy.Rate(rate)
 

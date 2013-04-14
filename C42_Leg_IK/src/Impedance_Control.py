@@ -257,7 +257,7 @@ class Joint_Stiffness_Controller_2:
 class Position_Stiffness_Controller:
     'This controller modifies a position command to achieve the desired stiffness of the system using force feedback'
     # Class parameters:
-    minimum_update_period = 0.02 #0.05 #units [sec]; minimal time to average feedback below this value OUTPUT command 
+    minimum_update_period = 0.002 #0.05 #units [sec]; minimal time to average feedback below this value OUTPUT command 
                                  #             will not be modified    
     limit_command_diff = 0.1 # # units [meters]
     command_resolution = 0.002 #0.0001 # Command will change with steps greater than command_resolution
@@ -340,14 +340,15 @@ class Position_Stiffness_Controller:
     def ByPassStatus(self):
         return (self.bypass_in2out) 
 
-    def getCMD(self, X_0,zmp_ref_y,step_phase ,step_width,zmp_width,step_time,des_l_force_pub,des_r_force_pub): # X_0 = original position input command
+    def getCMD(self, X_0,zmp_ref_y,step_phase ,step_width,zmp_width,step_time,dt,des_l_force_pub,des_r_force_pub,des_lax_torque_pub,des_rax_torque_pub): # X_0 = original position input command
        
 
-        [desired_force_L , desired_force_R]  = self.desired_force(zmp_ref_y,step_phase ,step_width,zmp_width,step_time)
+        [desired_force_L , desired_force_R ,des_t_ax_L ,des_t_ax_R]  = self.desired_force(zmp_ref_y,step_phase ,step_width,zmp_width,step_time,dt)
 
         des_l_force_pub.publish( desired_force_L )
         des_r_force_pub.publish( desired_force_R )
-
+        des_lax_torque_pub.publish( des_t_ax_L )
+        des_rax_torque_pub.publish( des_t_ax_R )
 
 
 
@@ -408,16 +409,16 @@ class Position_Stiffness_Controller:
         # rospy.loginfo("PSC_'%s' method getCMD: bypass_in2out-%s, X_0 = %f, output cmd = %f, force_des = %f, force_avg = %f " %  \
         #                   (self.name, self.bypass_in2out, X_0, pos_command_out, force_des, self.getAvgForce()))
 
-        return ( pos_command_out, desired_force_L , desired_force_R )
+        return ( pos_command_out, desired_force_L , desired_force_R ,des_t_ax_L ,des_t_ax_R)
 
-    def desired_force(self,zmp_ref_y,step_phase ,step_width,zmp_width,step_time):
+    def desired_force(self,zmp_ref_y,step_phase ,step_width,zmp_width,step_time,dt):
 
         Mtot = 91.4
         g = 9.81
         Mass_tr = 0.05*Mtot
         ZMP_tr = 0.1*zmp_width
         alpha_min = 0.1
-        dt = 0.01
+
 
         foot_length = 0.0825+0.1775
         foot_height = 0.05
@@ -466,23 +467,12 @@ class Position_Stiffness_Controller:
         f_R =  alpha*Mtot*g
         f_L =  (1-alpha)*Mtot*g
 
-          
- #       pl = zmp_ref_y - left_foot_y
- #       pr = zmp_ref_y - right_foot_y
-        
- #       if (zmp_ref_y - left_foot_y > 0) or (zmp_ref_y -left_zmp_tr > 0) :
- #           alpha =0
- #       elif  (right_foot_y - zmp_ref_y > 0) or (right_zmp_tr - zmp_ref_y > 0) :
- #           alpha=1
-  #      else:
-  #          alpha = abs(-pl)/abs(pl-pr)
-        
-            
- #       f_R =  alpha*Mtot*g
-  #      f_L =  (1-alpha)*Mtot*g
+        t_ax_R = (-step_width/2-zmp_ref_y)*f_R
+        t_ax_L = ( step_width/2-zmp_ref_y)*f_L
 
 
-        return ([f_L , f_R])
+
+        return ([f_L , f_R , t_ax_L , t_ax_R])
 
 
 #################################################################################
@@ -586,10 +576,10 @@ class Position_Stiffness_Controller_2:
     def ByPassStatus(self):
         return (self.bypass_in2out) 
 
-    def getCMD(self, X_0,zmp_ref_y,step_phase ,step_width,zmp_width,step_time,des_l_force_pub,des_r_force_pub): # X_0 = original position input command
+    def getCMD(self, X_0,zmp_ref_y,step_phase ,step_width,zmp_width,step_time,des_l_force_pub,des_r_force_pub,des_lax_torque_pub,des_rax_torque_pub): # X_0 = original position input command
         
         # Desired force profile of swing leg:
-        force_des = self.desired_force(zmp_ref_y,step_phase ,step_width, zmp_width, step_time, des_l_force_pub, des_r_force_pub)
+        force_des = self.desired_force(zmp_ref_y,step_phase ,step_width, zmp_width, step_time, des_l_force_pub, des_r_force_pub,des_lax_torque_pub,des_rax_torque_pub)
 
         force_FB = self.FB_force_filtered # self.FB_force_avg
        
@@ -623,7 +613,7 @@ class Position_Stiffness_Controller_2:
 
         return pos_command_out 
 
-    def desired_force(self,zmp_ref_y,step_phase ,step_width, zmp_width, step_time, des_l_force_pub, des_r_force_pub):
+    def desired_force(self,zmp_ref_y,step_phase ,step_width, zmp_width, step_time, des_l_force_pub, des_r_force_pub,des_lax_torque_pub,des_rax_torque_pub):
 
         Mtot = 91.4
         g = 9.81
@@ -679,23 +669,14 @@ class Position_Stiffness_Controller_2:
         f_R =  alpha*Mtot*g
         f_L =  (1-alpha)*Mtot*g
 
-          
- #       pl = zmp_ref_y - left_foot_y
- #       pr = zmp_ref_y - right_foot_y
-        
- #       if (zmp_ref_y - left_foot_y > 0) or (zmp_ref_y -left_zmp_tr > 0) :
- #           alpha =0
- #       elif  (right_foot_y - zmp_ref_y > 0) or (right_zmp_tr - zmp_ref_y > 0) :
- #           alpha=1
-  #      else:
-  #          alpha = abs(-pl)/abs(pl-pr)
-        
-            
- #       f_R =  alpha*Mtot*g
-  #      f_L =  (1-alpha)*Mtot*g
+        t_ax_R = (-step_width/2-zmp_ref_y)*f_R
+        t_ax_L = ( step_width/2-zmp_ref_y)*f_L
+
 
         des_l_force_pub.publish( f_L )
         des_r_force_pub.publish( f_R )
+        des_lax_torque_pub.publish( t_ax_L )
+        des_rax_torque_pub.publish( t_ax_R )
 
         if (step_phase == 1) or (step_phase == 2) : # left leg is stance
            force_des_swing_leg = f_R

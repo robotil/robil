@@ -1,5 +1,7 @@
 zmp_walking:
   type: " "
+  walking_parameters:
+    rate: 400
   joints:
     - l_leg_uhz
     - l_leg_mhx
