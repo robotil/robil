@@ -682,6 +682,7 @@ class StepStateMachine(StateMachine):
         self._PreviewState = state # initialized to "FirstStep"
         rospy.loginfo("class StepStateMachine init_values: PreviewState = %s" % (self._PreviewState.Name) )
 
+
     def Initialize(self):
         StateMachine.PerformTransition(self,"Initialize")
         self._stepCounter = 0
@@ -720,7 +721,12 @@ class StepStateMachine(StateMachine):
     
     def UpdatePreview(self):
         #rospy.loginfo("UpdatePreview - StepTime(%f) Counter(%d) Timer(%f)" % (StateMachine.GetCurrentState(self).GetStepTime(),self._counter, self._counter*1.0/self._UpdateRateHz))
-        if (StateMachine.GetCurrentState(self).GetStepTime() < self._counter*1.0/self._UpdateRateHz):
+        if (StateMachine.GetCurrentState(self).GetStepTime() <= self._counter*1.0/self._UpdateRateHz):
+            self._stepCounter = StateMachine.GetCurrentState(self).UpdateStepCounter(self._stepCounter)
+            rospy.loginfo("done step number = %d" % (self._stepCounter))
+            rospy.loginfo("time:")
+            rospy.loginfo(rospy.get_time())
+
             # # TODO: Transition need to be received from StepStatePreviewBuffer
             # # End of step -> State Transitions:
             # if self._DecideToTurn():
@@ -731,14 +737,13 @@ class StepStateMachine(StateMachine):
             # else:
             #     self.NextStep()
             self.NextStep()
-
             p_ref_x,p_ref_y,loaded_new_step_trigger_x,loaded_new_step_trigger_y = StateMachine.GetCurrentState(self).UpdatePreview()
-            self._stepCounter = StateMachine.GetCurrentState(self).UpdateStepCounter(self._stepCounter)
-            rospy.loginfo("done step number = %d" % (self._stepCounter))
-            rospy.loginfo("time:")
-            rospy.loginfo(rospy.get_time())
+            #rospy.loginfo("StepStateMachine UpdatePreview: _counter = %f, p_ref_x[0] = %f, p_ref_y[0] = %f" % (self._counter, p_ref_x[0], p_ref_y[0]) )                   
         else:
             p_ref_x,p_ref_y,loaded_new_step_trigger_x,loaded_new_step_trigger_y = StateMachine.GetCurrentState(self).UpdatePreview()
+            # if (StateMachine.GetCurrentState(self).GetStepTime() <= (self._counter+2)*1.0/self._UpdateRateHz):
+            #     rospy.loginfo("StepStateMachine UpdatePreview: _counter = %f, p_ref_x[0] = %f, p_ref_y[0] = %f" % (self._counter, p_ref_x[0], p_ref_y[0]) )
+
 
         self._counter = self._counter+1
         return p_ref_x,p_ref_y,loaded_new_step_trigger_x,loaded_new_step_trigger_y  

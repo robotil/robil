@@ -42,6 +42,12 @@ class StepStrategy(object):
         self._ZMP_Preview_BufferX.load_NewStep(new_step_x + self._DistanceRefX,following_steps_cycle_x)
         self._ZMP_Preview_BufferY.load_NewStep(new_step_y,following_steps_cycle_y)
 
+    def LoadPreviewStep(self,preview_step_x,preview_step_y,):
+        rospy.loginfo("ZmpStrategyStep LoadPreviewStep: _DistanceRefX = %f, new_step_x[0] = %f, new_step_y[0] = %f" % (self._DistanceRefX, preview_step_x[0], preview_step_y[0]) )
+        self._previous_step_length = self._WalkingTrajectory.step_length
+        self._ZMP_Preview_BufferX.load_PreviewStep(preview_step_x)
+        self._ZMP_Preview_BufferY.load_PreviewStep(preview_step_y)
+
     def UpdatePreview(self):
         p_ref_x,loaded_new_step_trigger_x = self._ZMP_Preview_BufferX.update_Preview()
         p_ref_y,loaded_new_step_trigger_y = self._ZMP_Preview_BufferY.update_Preview()
