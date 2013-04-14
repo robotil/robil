@@ -17,8 +17,6 @@ def nodeDataInDebugMode(nodeTime, nodeSuccFail, nodeID, monitordNodeID, numOfIte
     monitorNode = None
    # print "E="+ str(Ctree.myTree.getWrappedNode(monitordNodeID).getAverageSuccTime(0))  
    # print "prob="+str(Ctree.myTree.getWrappedNode(monitordNodeID).getProbAtIndex(0))
-   
-   #check if the node monitor is the root
     
     #get pointer to the monitored node
     finished_node = newTree.getWrappedNode(nodeID)
@@ -33,7 +31,7 @@ def nodeDataInDebugMode(nodeTime, nodeSuccFail, nodeID, monitordNodeID, numOfIte
     newTree.treeToXml("output/"+Ctree.filePath[6:-4]+"_"+monitordNodeID+"_after_run_debug_true.xml")
     newTree = xmlTree("output/"+Ctree.filePath[6:-4]+"_"+monitordNodeID+"_after_run_debug_true.xml")
     newTree.createWrapperTreeMap("id")
-    
+    #check if the node monitor is the root
     if monitordNodeID == "":
         root = newTree.getRoot()
         monitorNode = root.getChild(0)
@@ -46,7 +44,6 @@ def nodeDataInDebugMode(nodeTime, nodeSuccFail, nodeID, monitordNodeID, numOfIte
     sd = monitorNode.getSDSuccTime(param)
     #clear tree from calculations
     root = newTree.getRoot()
-    root.getChildren()
     root.clearWholeTree()
     
     #print update tree to xml file
