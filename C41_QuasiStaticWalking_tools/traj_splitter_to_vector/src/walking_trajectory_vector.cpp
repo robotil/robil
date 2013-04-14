@@ -62,6 +62,9 @@ public:
 			res.AngleArray[i].x = 0;
 			res.AngleArray[i].y = 0;
 			res.AngleArray[i].z = 0;
+			ROS_INFO("x of i %d: %f", i, x);
+			ROS_INFO("zdot of i %d: %16.10Lf", i, z);
+			ROS_INFO("xdot of i %d: %16.10f", i, xdot);
 		}
 
 
@@ -106,7 +109,7 @@ public:
 			ROS_INFO("zdot of i %d: %16.10Lf", i, z);
 			ROS_INFO("xdot of i %d: %16.10f", i, xdot);
 			res.PositionArray[i].y = 0;
-			res.PositionArray[i].z = (i>segments_number-100) ? 0 : -z;
+			res.PositionArray[i].z = (i==segments_number-1) ? 0 : -z;
 			res.AngleArray[i].x = 0;
 			res.AngleArray[i].y = 0;
 			res.AngleArray[i].z = 0;
