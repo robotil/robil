@@ -14,6 +14,7 @@
   <depend package="tf"/>
   <depend package="C0_RobilTask"/>
   <depend package="move_hand"/>
+  <depend package="hand_grasp"/>
 </package>
 
 
