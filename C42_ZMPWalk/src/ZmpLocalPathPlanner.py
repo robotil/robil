@@ -182,24 +182,29 @@ class LocalPathPlanner(object):
         self._Position.SetX(CoordinateX)
         self._Position.SetY(CoordinateY)
         bStop = False
-        sagital,lateral = self._CurrentSegment.GetDistanceFrom(self._Position)
-        distanceFromTarget = self._CurrentSegment.GetTarget().GetDistanceFrom(self._Position)
-        #rospy.loginfo('UpdatePosition: distanceFromTarget = %f' %(distanceFromTarget))
-        if ((sagital>0.0)or(distanceFromTarget < self.GetCloseEnoughToTargetDistance())):
-            if(len(self._Path)==0):
-                bStop = True
-                self._PathReady = False
-                #rospy.loginfo('UpdatePosition: Stopping')
-            else:
-                #rospy.loginfo('UpdatePosition: Path next point before pop (x,y) = (%f,%f)' %(self._Path[0].GetX(),self._Path[0].GetY()))
-                self._CurrentSegment.SetSource(self._CurrentSegment.GetTarget())
-                self._CurrentSegment.SetTarget(self._Path.popleft())
-            #rospy.loginfo('UpdatePosition:  New Segment: Size = %s' %(self._CurrentSegment._Source.GetDistanceFrom(self._CurrentSegment._Target) ) )
+        if self.IsActive():
+            sagital,lateral = self._CurrentSegment.GetDistanceFrom(self._Position)
+            distanceFromTarget = self._CurrentSegment.GetTarget().GetDistanceFrom(self._Position)
+            #rospy.loginfo('UpdatePosition: distanceFromTarget = %f' %(distanceFromTarget))
+            if ((sagital>0.0)or(distanceFromTarget < self.GetCloseEnoughToTargetDistance())):
+                if(len(self._Path)==0):
+                    bStop = True
+                    self._PathReady = False
+                    #rospy.loginfo('UpdatePosition: Stopping')
+                else:
+                    #rospy.loginfo('UpdatePosition: Path next point before pop (x,y) = (%f,%f)' %(self._Path[0].GetX(),self._Path[0].GetY()))
+                    self._CurrentSegment.SetSource(self._CurrentSegment.GetTarget())
+                    self._CurrentSegment.SetTarget(self._Path.popleft())
+                #rospy.loginfo('UpdatePosition:  New Segment: Size = %s' %(self._CurrentSegment._Source.GetDistanceFrom(self._CurrentSegment._Target) ) )
+        else:
+            bStop = True
         return bStop
         
     def Stop(self):
         self._PathReady = False 
-  
+
+    def IsActive(self):
+        return self._PathReady
 
 ###################################################################################
 # a little testing script

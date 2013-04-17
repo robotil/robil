@@ -109,11 +109,14 @@ class MyTask(RobilTask):
         self._done = self._ZmpLpp.UpdatePosition(odom.pose.pose.position.x,odom.pose.pose.position.y)
         
     def _path_cb(self,path):
+        
         rospy.loginfo('got path %s',path)
+        
         p = []
         for wp in path.points:
             p.append(Waypoint(wp.x,wp.y))
         self._ZmpLpp.SetPath(p)
+        
     
     def _listn_to_orientation_command(self,orientation_command): 
         self._Des_Orientation = (orientation_command.data)*math.pi/180.0
@@ -128,10 +131,19 @@ class MyTask(RobilTask):
     def task(self, name, uid, parameters):
         print "Start ZmpWalk"
 
+        self._ZmpLpp.Stop()
         self._ZmpStateMachine.Initialize()
+
+        while not self._ZmpLpp.IsActive():
+            if self.isPreepted():
+                self._ZmpLpp.Stop()
+                print "Preempt ZmpWalk: Preemted before path was received"
+                return RTResult_PREEPTED()
+            self._interval.sleep()
+        
         self._ZmpStateMachine.Start()
 
-        while not self._done:
+        while self._ZmpLpp.IsActive():
             if self.isPreepted():
                 self._ZmpStateMachine.EmergencyStop()
                 self._ZmpLpp.Stop()
