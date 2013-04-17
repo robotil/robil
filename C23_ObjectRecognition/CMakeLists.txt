@@ -59,9 +59,8 @@ if(NOT USE_SYSTEM_LIBS)
 endif(NOT USE_SYSTEM_LIBS)
 
 add_subdirectory(src/libopentld)
-
 target_link_libraries(c23 ${PCL_LIBRARIES} libopentld cvblobs ${OpenCV_LIBS} )
-rosbuild_add_executable(c23 src/c23.cpp src/C23_Node.cpp src/C23_Node_TLD_Handler.cpp)
+rosbuild_add_executable(c23  src/c23.cpp   src/GeneralDetector.cpp src/C23_Node_TLD_Handler.cpp  src/svmlight/svm_common.o src/svmlight/svm_hideo.o src/svmlight/svm_learn.o )
 #rosbuild_add_executable(test1 src/C21testNode.cpp)
 #rosbuild_link_boost(test1 thread signals)
 #target_link_libraries(test1 ${OpenCV_LIBS} ${PCL_LIBRARIES})

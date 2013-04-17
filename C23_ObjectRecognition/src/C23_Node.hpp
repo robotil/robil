@@ -13,8 +13,9 @@
 #include <image_transport/subscriber_filter.h>
 #include "libopentld/tld/TLD.h"
 #include "C23_Node_TLD_Handler.h"
-
+#include "HOGDetection.hpp"
 #include "C23_Utils.hpp"
+#include "GeneralDetector.hpp"
 
 namespace enc=sensor_msgs::image_encodings;
 using namespace tld;
@@ -41,12 +42,13 @@ private:
   message_filters::Synchronizer< MySyncPolicy > sync;
   TLD tld;
   C23_Node_TLD_Handler *tldh_;
- 
+  GeneralDetector detector;
   TldMode _mode;
   bool detect;
   bool done_processing;
   ros::Publisher objectDetectedPublisher;
   ros::Publisher objectDeminsionsPublisher;
+  ros::Publisher vel_pub_;
   char _path[1000];
   
 public:
