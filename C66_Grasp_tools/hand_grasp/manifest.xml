@@ -1,0 +1,18 @@
+<package>
+  <description brief="hand_grasp">
+
+     hand_grasp
+
+  </description>
+  <author>Amit</author>
+  <license>BSD</license>
+  <review status="unreviewed" notes=""/>
+  <url>http://ros.org/wiki/hand_grasp</url>
+  <depend package="roscpp"/>
+  <depend package="osrf_msgs"/>
+  <depend package="atlas_utils"/>
+  <depend package="atlas_msgs"/>
+
+</package>
+
+

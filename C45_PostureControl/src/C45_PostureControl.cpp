@@ -6,7 +6,7 @@
  * 		/back_ubx_position_controller/command topic
  *
  * Advertises:
- * 		stability_maintainer_action action
+ * 		posture_controller_action action
  */
 
 
@@ -28,7 +28,7 @@
 #include <sensor_msgs/JointState.h>
 #include <osrf_msgs/JointCommands.h>
 
-class stability_maintainer{
+class posture_controller{
 private:
 	ros::NodeHandle nh_, nh2_, nh3_, nh4_;
 	ros::NodeHandle* rosnode;
@@ -54,7 +54,7 @@ private:
 	ros::Subscriber joint_states_sub_;
 
 public:
-	stability_maintainer(std::string name)
+	posture_controller(std::string name)
 	:as_(nh_, name, false), action_name_(name), traj_client_(nh2_,"atlas_controller/follow_joint_trajectory", true) {
 
 		rosnode = new ros::NodeHandle();
@@ -85,14 +85,14 @@ public:
 		back_ubx_stab_pid.initPid(p,i,d,M_PI,-M_PI);*/
 		COM_error_client = nh_.serviceClient<C45_PostureControl::com_error>("com_error");
 		back_lbz_poller_cli_ = nh_.serviceClient<C45_PostureControl::back_lbz_poller_service>("back_lbz_poller_service");
-		joint_states_sub_ = nh_.subscribe("/atlas/joint_states",100,&stability_maintainer::joint_states_CB,this);
+		joint_states_sub_ = nh_.subscribe("/atlas/joint_states",100,&posture_controller::joint_states_CB,this);
 		pub_joint_commands_ = rosnode->advertise<osrf_msgs::JointCommands>("/atlas/joint_commands", 1, true);
 
 		//Set callback functions
-		as_.registerGoalCallback(boost::bind(&stability_maintainer::goalCB, this));
-		as_.registerPreemptCallback(boost::bind(&stability_maintainer::preemptCB, this));
+		as_.registerGoalCallback(boost::bind(&posture_controller::goalCB, this));
+		as_.registerPreemptCallback(boost::bind(&posture_controller::preemptCB, this));
 
-		//back_lbz_state_sub_ = nh_.subscribe("/back_lbz_position_controller/state",100,&stability_maintainer::back_lbz_state_CB,this);
+		//back_lbz_state_sub_ = nh_.subscribe("/back_lbz_position_controller/state",100,&posture_controller::back_lbz_state_CB,this);
 
 		//
 		back_mby_pub = nh2_.advertise<std_msgs::Float64>("/back_mby_position_controller/command",1000,true);
@@ -102,7 +102,7 @@ public:
 		as_.start();
 		ROS_INFO("started");
 	}
-	~stability_maintainer(){}
+	~posture_controller(){}
 	/*void back_lbz_state_CB(const pr2_controllers_msgs::JointControllerStateConstPtr& back_lbz_state){
 		ROS_ERROR("process value %f", back_lbz_state->process_value);
 		back_lbz_state_=back_lbz_state->process_value;
@@ -293,7 +293,7 @@ public:
 			jointcommands.position[joints["r_arm_uwy"]] = positions[joints["r_arm_uwy"]];
 			jointcommands.position[joints["r_arm_mwx"]] = positions[joints["r_arm_mwx"]];
 			jointcommands.position[joints["neck_ay"]] = positions[joints["neck_ay"]];
-			jointcommands.position[joints["back_lbz"]] = start_back_lbz+(part*i);
+			jointcommands.position[joints["back_lbz"]] = start_back_lbz+(part*(i+1));
 			jointcommands.position[joints["back_mby"]] = positions[joints["back_mby"]];
 			jointcommands.position[joints["back_ubx"]] = positions[joints["back_ubx"]];
 
@@ -375,10 +375,10 @@ public:
 };
 
 int main(int argc, char **argv) {
-	ros::init(argc, argv, "C45_PostureControl_maintain_stability");
+	ros::init(argc, argv, "C45_PostureControl_controller");
 
-	stability_maintainer* stab_maintainer = new stability_maintainer("C45_PostureControl");
-	ROS_INFO("Running stability maintainer action");
+	posture_controller* posture_control = new posture_controller("C45_PostureControl");
+	ROS_INFO("Running posture controller action");
 	ros::spin();
 
 	return 0;

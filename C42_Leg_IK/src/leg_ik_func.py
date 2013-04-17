@@ -8,7 +8,7 @@
 ####                                                                         ##
 ###############################################################################
 import roslib
-roslib.load_manifest('leg_ik')
+roslib.load_manifest('C42_Leg_IK')
 import rospy, math , sys  
 import tf
 import roslib;

@@ -16,6 +16,7 @@
 //#include "C11_Agent/override_local_path.h"
 #include "C11_PushServer.hpp"
 #include "C11_HMIResponseServer.hpp"
+#include "C11_UntilOperatorIntervention.hpp"
 //#include "TaskProxyConnectionByActionLib.h"
 #include "C34_Executer/run.h"
 #include "C34_Executer/stop.h"
@@ -185,6 +186,7 @@ bool ResumeMission(C10_Common::resume_mission::Request& req,
 bool PathUpdate(C10_Common::path_update::Request& req,
                 C10_Common::path_update::Response& res)
 {
+          ROS_INFO("path update received\n");
           path_update_pub.publish(req.PTH);
           res.ACK.mes = 1;
           return true;
