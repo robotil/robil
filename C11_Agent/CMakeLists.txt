@@ -23,7 +23,7 @@ rosbuild_gensrv()
 
 #set(hdrs src/PushHMIServer.hpp src/HMIResponseServer.hpp)
 set(srcs src/C11_agent_st.cpp)
-set(hdrs src/C11_PushServer.hpp src/C11_HMIResponseServer.hpp)
+set(hdrs src/C11_PushServer.hpp src/C11_HMIResponseServer.hpp src/C11_UntilOperatorIntervention.hpp)
 
 #common commands for building c++ executables and libraries
 #rosbuild_add_library(${PROJECT_NAME} src/example.cpp)
