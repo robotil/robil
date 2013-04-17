@@ -55,6 +55,7 @@ float64 	zmp_width
 float64 	step_time
 float64 	bend_knees
 
+
 ================================================================================
 MSG: C42_ZMPWalk/Position
 float64 x

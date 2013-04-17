@@ -40,15 +40,15 @@ class Nasmpace: pass
 ns = Nasmpace()
 #ns.LegAng = LegIkResponse()
 
-JSC_r_leg_mhx = Joint_Stiffness_Controller('r_leg_mhx', 9000*999999, 0.04) # joint name, stiffness, update_period [sec]
-JSC_l_leg_mhx = Joint_Stiffness_Controller('l_leg_mhx', 9000*999999, 0.04) # joint name, stiffness, update_period [sec]
-JSC_r_leg_lax = Joint_Stiffness_Controller('r_leg_lax', 8500*999999, 0.04) # joint name, stiffness, update_period [sec]
-JSC_l_leg_lax = Joint_Stiffness_Controller('l_leg_lax', 8500*999999, 0.04) # joint name, stiffness, update_period [sec]
+JSC_r_leg_mhx = Joint_Stiffness_Controller('r_leg_mhx', 9000**9, 0.04) # joint name, stiffness, update_period [sec]
+JSC_l_leg_mhx = Joint_Stiffness_Controller('l_leg_mhx', 9000**9, 0.04) # joint name, stiffness, update_period [sec]
+JSC_r_leg_lax = Joint_Stiffness_Controller('r_leg_lax', 8500**9, 0.04) # joint name, stiffness, update_period [sec]
+JSC_l_leg_lax = Joint_Stiffness_Controller('l_leg_lax', 8500**9, 0.04) # joint name, stiffness, update_period [sec]
 JSC_r_leg_uay = Joint_Stiffness_Controller('r_leg_uay', 0, 0.03) # joint name, stiffness, update_period [sec]
 JSC_l_leg_uay = Joint_Stiffness_Controller('l_leg_uay', 0, 0.03) # joint name, stiffness, update_period [sec]
 
-PSC_right_swing_leg = Position_Stiffness_Controller('R_Swing Leg', 5500000, False, False) # 210000 # 101000, True, False) # name, stiffness, triggered_controller, bypass_input2output [True/False]
-PSC_left_swing_leg = Position_Stiffness_Controller('L_Swing Leg',  5500000, False, False) # 210000 # 101000, True, False) # name, stiffness, triggered_controller, bypass_input2output [True/False]
+PSC_right_swing_leg = Position_Stiffness_Controller('R_Swing Leg', 16000000, False, False) # 210000 # 101000, True, False) # name, stiffness, triggered_controller, bypass_input2output [True/False]
+PSC_left_swing_leg = Position_Stiffness_Controller('L_Swing Leg',  16000000, False, False) # 210000 # 101000, True, False) # name, stiffness, triggered_controller, bypass_input2output [True/False]
 
 PSC2_right_swing_leg = Position_Stiffness_Controller_2('R_Swing Leg', 0, False, False) # 101000, True, False) # name, stiffness, triggered_controller, bypass_input2output [True/False]
 PSC2_left_swing_leg = Position_Stiffness_Controller_2('L_Swing Leg', 0, False, False) # 101000, True, False) # name, stiffness, triggered_controller, bypass_input2output [True/False]
@@ -58,11 +58,14 @@ JSC_2_r_leg_lax = Joint_Stiffness_Controller_2('r_leg_lax', 0, 0, 0.04) # joint 
 JSC_2_l_leg_lax.ChangeStiffness(Joint_Stiffness_Controller_2.stance)
 JSC_2_r_leg_lax.ChangeStiffness(Joint_Stiffness_Controller_2.swing)
 
-JSC_2_l_leg_uay = Joint_Stiffness_Controller_2('l_leg_uay', 25000*1000000, 25000*1000000, 0.04) # joint name, stance_stiffness, swing_stiffness, activation_ZMP_point [m]
-JSC_2_r_leg_uay = Joint_Stiffness_Controller_2('r_leg_uay', 25000*1000000, 25000*1000000, 0.04) # joint name, stance_stiffness, swing_stiffness, activation_ZMP_point [m]
+JSC_2_l_leg_uay = Joint_Stiffness_Controller_2('l_leg_uay', 4000**9, 66000**9, 0.06) # joint name, stance_stiffness, swing_stiffness, activation_ZMP_point [m]
+JSC_2_r_leg_uay = Joint_Stiffness_Controller_2('r_leg_uay', 4000**9, 66000**9, 0.06) # joint name, stance_stiffness, swing_stiffness, activation_ZMP_point [m]
 
-JSC_2_l_leg_kny = Joint_Stiffness_Controller_2('l_leg_kny', 25000*1000000, 25000*1000000, 0.04) # joint name, stance_stiffness, swing_stiffness, activation_ZMP_point [m]
-JSC_2_r_leg_kny = Joint_Stiffness_Controller_2('r_leg_kny', 25000*1000000, 25000*1000000, 0.04) # joint name, stance_stiffness, swing_stiffness, activation_ZMP_point [m]
+JSC_2_l_leg_kny = Joint_Stiffness_Controller_2('l_leg_kny', 4000**9, 46000**9, 0.06) # joint name, stance_stiffness, swing_stiffness, activation_ZMP_point [m]
+JSC_2_r_leg_kny = Joint_Stiffness_Controller_2('r_leg_kny', 4000**9, 46000**9, 0.06) # joint name, stance_stiffness, swing_stiffness, activation_ZMP_point [m]
+
+JSC_2_l_leg_lhy = Joint_Stiffness_Controller_2('l_leg_lhy', 4000**9, 70000**9, 0.06) # joint name, stance_stiffness, swing_stiffness, activation_ZMP_point [m]
+JSC_2_r_leg_lhy = Joint_Stiffness_Controller_2('r_leg_lhy', 4000**9, 70000**9, 0.06) # joint name, stance_stiffness, swing_stiffness, activation_ZMP_point [m]
 
 JSC_2_l_leg_uay.ChangeStiffness(Joint_Stiffness_Controller_2.stance)
 JSC_2_r_leg_uay.ChangeStiffness(Joint_Stiffness_Controller_2.swing)
@@ -92,12 +95,15 @@ def get_foot_contact(msg):
     PSC2_right_swing_leg.UpdateFeedBack(-msg.r_foot.force.z, -buf[0].r_foot.force.z )
     JSC_2_r_leg_lax.UpdateFeedBack(-msg.r_foot.force.z, -msg.r_foot.torque.x)
     JSC_2_r_leg_uay.UpdateFeedBack(-msg.r_foot.force.z, -msg.r_foot.torque.y)
-   
+    JSC_2_r_leg_kny.UpdateFeedBack(-msg.r_foot.force.z, -msg.r_foot.torque.y)
+    JSC_2_r_leg_lhy.UpdateFeedBack(-msg.r_foot.force.z, -msg.r_foot.torque.y)
+
     PSC_left_swing_leg.UpdateForce( -msg.l_foot.force.z ) # -buf[0].l_foot.force.z ) #-msg.l_foot.force.z ) # 
     PSC2_left_swing_leg.UpdateFeedBack(-msg.l_foot.force.z, -buf[0].l_foot.force.z) 
     JSC_2_l_leg_lax.UpdateFeedBack(-msg.l_foot.force.z, -msg.l_foot.torque.x) 
     JSC_2_l_leg_uay.UpdateFeedBack(-msg.l_foot.force.z, -msg.l_foot.torque.y)
-
+    JSC_2_l_leg_kny.UpdateFeedBack(-msg.l_foot.force.z, -msg.l_foot.torque.y)
+    JSC_2_l_leg_lhy.UpdateFeedBack(-msg.l_foot.force.z, -msg.l_foot.torque.y)
 #################################################################################
 #                     request from IK and publish angles                        #
 #################################################################################
@@ -134,7 +140,7 @@ def get_from_zmp(msg):
              left_leg_angles = swing_leg_ik(swing_fixed,msg.swing_hip,msg.pelvis_m)
           #   left_leg_angles = swing_leg_ik(msg.swing_foot,msg.swing_hip,msg.pelvis_m)
              right_leg_angles = stance_leg_ik(msg.stance_hip,msg.pelvis_d)
-        rospy.loginfo('del=%f' %(msg.swing_foot.z-swing_fixed.z))
+
 
         ns.swing_z_del.publish(msg.swing_foot.z-swing_fixed.z)
 
@@ -148,41 +154,46 @@ def get_from_zmp(msg):
     l_leg_kny_eff = 0#-desired_force_L/10.0
     r_leg_kny_eff = 0#-desired_force_R/10.0
 
-    l_leg_lax_eff = -desired_force_L/25.0#-des_t_ax_L/2
-    r_leg_lax_eff = -desired_force_R/25.0#-des_t_ax_R/2
+    l_leg_lax_eff = 0#-desired_force_L/45.0#-des_t_ax_L/2
+    r_leg_lax_eff = 0#-desired_force_R/45.0#-des_t_ax_R/2
     
     if msg.step_phase==1 or msg.step_phase==2 :
-       l_leg_mhx_eff =  desired_force_L/45.0 - desired_force_R/45.0  + 23
-       r_leg_mhx_eff = -desired_force_R/25.0 + desired_force_L/25.0  - 23 
+       l_leg_mhx_eff = 0# desired_force_L/55.0 - desired_force_R/55.0  + 21
+       r_leg_mhx_eff = 0#-desired_force_R/35.0 + desired_force_L/35.0  - 21 
     else:
-       l_leg_mhx_eff =  desired_force_L/25.0 - desired_force_R/25.0  + 23
-       r_leg_mhx_eff = -desired_force_R/45.0 + desired_force_L/45.0  - 23
+       l_leg_mhx_eff = 0# desired_force_L/35.0 - desired_force_R/35.0  + 21
+       r_leg_mhx_eff = 0#-desired_force_R/55.0 + desired_force_L/55.0  - 21
 
     ## Joint position command (to PID):
 
-    l_leg_lax =  JSC_l_leg_lax.getCMD( left_leg_angles[4] ) 
+    #left leg:
     if ( msg.step_phase == 4 ): # left leg is swing
         l_leg_uay = JSC_2_l_leg_uay.getCMD( left_leg_angles[5] ) 
         l_leg_kny = JSC_2_l_leg_kny.getCMD( left_leg_angles[3] + ns.joints_offset['l_leg_kny'] )
+        l_leg_lhy = JSC_2_l_leg_kny.getCMD( left_leg_angles[1] + ns.joints_offset['l_leg_lhy'] )
     else:
-        l_leg_uay = left_leg_angles[5] #l_leg_uay = JSC_2_l_leg_uay.getCMD( left_leg_angles[5] ) 
+        l_leg_uay = left_leg_angles[5] 
         l_leg_kny = left_leg_angles[3] + ns.joints_offset['l_leg_kny']
-    #l_leg_kny = left_leg_angles[3] + ns.joints_offset['l_leg_kny'] 
-    l_leg_lhy = left_leg_angles[1] + ns.joints_offset['l_leg_lhy']
+        l_leg_lhy = left_leg_angles[1] + ns.joints_offset['l_leg_lhy']
+    
+    l_leg_lax =  JSC_l_leg_lax.getCMD( left_leg_angles[4] ) 
     l_leg_mhx = left_leg_angles[0]
+    
+    #right leg:
+    if ( msg.step_phase == 2 ): # right leg is swing
+        r_leg_uay = JSC_2_r_leg_uay.getCMD( right_leg_angles[5] ) 
+        r_leg_kny = JSC_2_r_leg_kny.getCMD( right_leg_angles[3] + ns.joints_offset['r_leg_kny'] )
+        r_leg_lhy = JSC_2_r_leg_kny.getCMD( right_leg_angles[1] + ns.joints_offset['r_leg_lhy'] )
+    else:
+        r_leg_uay = right_leg_angles[5]
+        r_leg_kny = right_leg_angles[3] + ns.joints_offset['r_leg_kny']
+        r_leg_lhy = right_leg_angles[1] + ns.joints_offset['r_leg_lhy']
 
     r_leg_lax = JSC_r_leg_lax.getCMD( right_leg_angles[4] ) 
-    if ( msg.step_phase == 2 ): # right leg is swing
-        r_leg_uay = right_leg_angles[5] #JSC_2_r_leg_uay.getCMD( right_leg_angles[5]) 
-        r_leg_kny = JSC_2_r_leg_kny.getCMD( right_leg_angles[3] + ns.joints_offset['r_leg_kny'] )
-    else:
-        r_leg_uay =  JSC_2_r_leg_uay.getCMD( right_leg_angles[5] ) 
-        r_leg_kny = right_leg_angles[3] + ns.joints_offset['r_leg_kny']
-   # r_leg_kny = right_leg_angles[3] + ns.joints_offset['r_leg_kny'] 
-    r_leg_lhy = right_leg_angles[1] + ns.joints_offset['r_leg_lhy']
     r_leg_mhx = right_leg_angles[0]  
         
-    back_mby =  0.03 
+
+    back_mby =  0.06 
     back_ubx =  0.0 
     back_lbz =  0.0 
 
@@ -191,18 +202,16 @@ def get_from_zmp(msg):
 
     ns.JC.set_mixed('l_leg_lax', l_leg_lax_eff,l_leg_lax )
     ns.JC.set_pos('l_leg_uay', l_leg_uay )
-    ns.JC.set_mixed('l_leg_kny', l_leg_kny_eff, l_leg_kny ) # set_pos('l_leg_kny', l_leg_kny )
+    ns.JC.set_mixed('l_leg_kny', l_leg_kny_eff, l_leg_kny )
     ns.JC.set_pos('l_leg_uhz', l_leg_uhz )
     ns.JC.set_pos('l_leg_lhy', l_leg_lhy )
-    #ns.JC.set_pos('l_leg_mhx', l_leg_mhx ) 
     ns.JC.set_mixed('l_leg_mhx',l_leg_mhx_eff, l_leg_mhx ) 
 
     ns.JC.set_mixed('r_leg_lax', r_leg_lax_eff,r_leg_lax ) 
     ns.JC.set_pos('r_leg_uay', r_leg_uay )
-    ns.JC.set_mixed('r_leg_kny', r_leg_kny_eff, r_leg_kny ) # set_pos('r_leg_kny', r_leg_kny )
+    ns.JC.set_mixed('r_leg_kny', r_leg_kny_eff, r_leg_kny )
     ns.JC.set_pos('r_leg_uhz', r_leg_uhz )
     ns.JC.set_pos('r_leg_lhy', r_leg_lhy )
-    #ns.JC.set_pos('r_leg_mhx', r_leg_mhx ) 
     ns.JC.set_mixed('r_leg_mhx', r_leg_mhx_eff,r_leg_mhx ) 
 
     ns.JC.set_pos('back_mby', back_mby )

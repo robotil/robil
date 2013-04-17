@@ -16,7 +16,6 @@
 ####    step_length,step_width and step_time                                     ##
 ####                                                                             ##
 ###################################################################################     
-
 import roslib; roslib.load_manifest('C42_ZMPWalk')
 import rospy, sys ,os
 from pylab import *
