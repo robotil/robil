@@ -103,42 +103,8 @@ def get_foot_contact(msg):
 
     rospy.loginfo(nl.t_x)
     rospy.loginfo(nr.t_x)
-    #rospy.loginfo(nr.t_x)
-    #rospy.loginfo(nr.t_y)
+    
 
-    # nr.force_x = -msg.r_foot.force.x 
-    # nr.force_y = -msg.r_foot.force.y 
-    # nr.force_z = -msg.r_foot.force.z 
-    # nr.t_x = -msg.r_foot.torque.x
-    # nr.t_y = -msg.r_foot.torque.y
-    # nr.t_z = -msg.r_foot.torque.z
-
-
-    # nl.force_x = -msg.l_foot.force.x 
-    # nl.force_y = -msg.l_foot.force.y 
-    # nl.force_z = -msg.l_foot.force.z 
-    # nl.t_x =  -msg.l_foot.torque.x
-    # nl.t_y =  -msg.l_foot.torque.y
-    # nl.t_z =  -msg.l_foot.torque.z
-
-
-# def get_foot_contact(msg):
-
-#     ns.num_of_samples += 1
-
-#     nr.force_x = nr.force_x + msg.r_foot.force.x
-#     nr.force_y = nr.force_y + msg.r_foot.force.y
-#     nr.force_z = nr.force_z + msg.r_foot.force.z
-#     nr.t_x = nr.t_x + msg.r_foot.torque.x
-#     nr.t_y = nr.t_y + msg.r_foot.torque.y
-#     nr.t_z = nr.t_z + msg.r_foot.torque.z
-
-#     nl.force_x = nl.force_x +  msg.l_foot.force.x
-#     nl.force_y = nl.force_y +  msg.l_foot.force.y
-#     nl.force_z = nl.force_z +  msg.l_foot.force.z
-#     nl.t_x = nl.t_x + msg.l_foot.torque.x
-#     nl.t_y = nl.t_y + msg.l_foot.torque.y
-#     nl.t_z = nl.t_z + msg.l_foot.torque.z
 
     
 
@@ -165,30 +131,7 @@ def ResetSum():
 
 def getAvgForce_Torque():
 
-   # # if ns.num_of_samples != 0:
-   #    rospy.get_time()
-   #    nl.force_x = nl.force_x/ns.num_of_samples
-   #    nl.force_y = nl.force_y/ns.num_of_samples
-   #    nl.force_z = nl.force_z/ns.num_of_samples
-   #    nl.t_x = nl.t_x/ns.num_of_samples
-   #    nl.t_y = nl.t_y/ns.num_of_samples
-   #    nl.t_z = nl.t_z/ns.num_of_samples
-     
-
-   #    nr.force_x = nr.force_x/ns.num_of_samples
-   #    nr.force_y = nr.force_y/ns.num_of_samples
-   #    nr.force_z = nr.force_z/ns.num_of_samples
-   #    nr.t_x = nr.t_x/ns.num_of_samples
-   #    nr.t_y = nr.t_y/ns.num_of_samples
-   #    nr.t_z = nr.t_z/ns.num_of_samples
-      
-   #    ns.response = [nl.force_x,nl.force_y,nl.force_z,nl.t_x,nl.t_y,nl.t_z,nl.t_x,nl.t_y,nl.t_z ,nr.force_x,nr.force_y,nr.force_z,nr.t_x,nr.t_y,nr.t_z] 
-
-   #    ResetSum()
-
-   # # else:
-
-       
+          
       ns.response = [nl.force_x, nl.force_y, nl.force_z, nl.t_x, nl.t_y, nl.t_z, nr.force_x, nr.force_y, nr.force_z, nr.t_x, nr.t_y, nr.t_z] 
       #rospy.loginfo(ns.response)
 
