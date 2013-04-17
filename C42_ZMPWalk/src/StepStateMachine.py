@@ -120,6 +120,23 @@ class InitializeStepState(StepState):
         # moving to intial pose:
         init_pose()  # !!! need to disable tf listener drc2_tools to prevent clash !!!
         self._Strategy.Initialize(self._bend_knees)
+
+    # TO BE USED IN THE FUTURE:
+    # def OnExit(self):
+    #     # init _PreviewState and _StatePreviewBuffer:
+    #     state,transition_exists = StateMachine.GetStateAtTransition(self,"PreStep","NextStep")
+    #     self._PreviewState = state # initialized to "FirstStep"
+    #     if NeedToTurn():
+    #         turn_dir = GetTurnDirection() # returns: "TurnRight" or "TurnLeft"
+    #         if turn_dir = "TurnRight": # !!! "TurnLeft" can only start after Left Step !!!
+    #             state,transition_exists = StateMachine.GetStateAtTransition(self,"FirstStep",turn_dir)
+    #             self._PreviewState = state
+    #             self._Strategy.LoadNewStep(self._p_ref_x_start,self._p_ref_x_Rturn_step,self._p_ref_y_start,r_[ self._p_ref_y_Rturn_step_right, self._p_ref_y_Rturn_step_left ]) # new_step, following_steps_cycle
+    #     else:
+    #         state,transition_exists = StateMachine.GetStateAtTransition(self,"FirstStep","NextStep")
+    #         self._PreviewState = state
+    #         self._Strategy.LoadNewStep(self._p_ref_x_start,self._p_ref_x_forward_step,self._p_ref_y_start,r_[ self._p_ref_y_step_right, self._p_ref_y_step_left ]) # new_step, following_steps_cycle
+    #     #rospy.loginfo("class StepStateMachine init_values: PreviewState = %s" % (self._PreviewState.Name) )   
                 
     def GetId(self):
         return 1
@@ -163,9 +180,9 @@ class PreStepState(StepState):
         rospy.loginfo("time:")
         rospy.loginfo(rospy.get_time())
 
-        self._robotState.Set_step_phase(value = 1)                                                              # added by Israel to initiate step phase 24.2
-          
-        self._Strategy.LoadNewStep(self._p_ref_x_start,self._p_ref_x_forward_step,self._p_ref_y_start,r_[ self._p_ref_y_step_right, self._p_ref_y_step_left ])
+        self._robotState.Set_step_phase(value = 1)
+
+        self._Strategy.LoadNewStep(self._p_ref_x_start,self._p_ref_x_forward_step,self._p_ref_y_start,r_[ self._p_ref_y_step_right, self._p_ref_y_step_left ]) # new_step, following_steps_cycle
         
     def OnExit(self):
         # completed pre_step
@@ -664,9 +681,6 @@ class StepStateMachine(StateMachine):
         StateMachine.AddTransition(self,"StopRight",            "NextStep",     "Idle")
         StateMachine.AddTransition(self,"StopLeft",             "NextStep",     "Idle")
         StateMachine.AddTransition(self,"EmergencyStop",        "NextStep",     "Idle")
-        # Preview of State Machine:
-        self._StatePreviewBuffer = deque([]) # contains a list of BufferData class, infomation needed from _CurrentState to _PreviewState: Transitions, step times,...
-        self._PreviewState = StateMachine.GetCurrentState(self) # the state at which the preview is
         # Values at init: (to enable reset of init values without recreating object)
         # self.init_values() # commented because done externaly (at begining of task)
     
@@ -676,12 +690,11 @@ class StepStateMachine(StateMachine):
         # Turn Variables:
         self._TurnCmdInput = 0.0        # units [rad], Input Turn command recieved by StepStateMachine, angle signs: (+) turn left, (-) turn right
         self._ExecutedTurnCmd = 0.0     # units [rad], Turn command that is being carried out
-        self._TotalTurnRemaining = 0.0   # units [rad], total turn remaining to perform 
-        # init _PreviewState and _StatePreviewBuffer:
-        state,transition_exists = StateMachine.GetStateAtTransition(self,"PreStep","NextStep")
-        self._PreviewState = state # initialized to "FirstStep"
-        rospy.loginfo("class StepStateMachine init_values: PreviewState = %s" % (self._PreviewState.Name) )
-
+        self._TotalTurnRemaining = 0.0   # units [rad], total turn remaining to perform
+        self._DistanceToNextTurn = 0.5
+        # Preview of State Machine:
+        self._StatePreviewBuffer = deque([]) # contains a list of BufferData class, infomation needed from _CurrentState to _PreviewState: Transitions, step times,...
+        self._PreviewState = StateMachine.GetCurrentState(self) # the state at which the preview is 
 
     def Initialize(self):
         StateMachine.PerformTransition(self,"Initialize")
@@ -751,13 +764,26 @@ class StepStateMachine(StateMachine):
     def GetStateId(self):
         return StateMachine.GetCurrentState(self).GetId()
 
-    def GetTurnCmd(self, turn_cmd):
+    def SetTurnCmd(self, turn_cmd):
         self._TurnCmdInput = turn_cmd
 
+    def SetDistanceToNextTurn(self, distance):
+        self._DistanceToNextTurn = distance
+
+    def NeedToTurn(self):
+        """
+          Function returns True if _PreviewState needs to move to one of the TURN STATES
+          else return False
+        """
+        # TODO: check condition if turn is needed
+        return False
+
     def _DecideToTurn(self):
-        # 1) A NEW turn command is excuted only after completing previous turning command.
-        # 2) A turn command may take a few turn step cycles (for larg turn commands).
-        # 3) A turn will be performed only above a certain threshold (_TurnThreshold).
+        """
+          1) A NEW turn command is excuted only after completing previous turning command.
+          2) A turn command may take a few turn step cycles (for larg turn commands).
+          3) A turn will be performed only above a certain threshold (_TurnThreshold).
+        """
         result = False
         # 1) if completed previous turn command Update from Turn Input command:
         if ( abs(self._TotalTurnRemaining) < self._TurnThreshold ):
