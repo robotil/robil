@@ -10,9 +10,13 @@
 #include <ros/package.h>
 #include <C23_ObjectRecognition/C23C0_OD.h>
 #include <C23_ObjectRecognition/C23C0_ODIM.h>
+#include "GeneralDetector.hpp"
+#include <geometry_msgs/Twist.h>
 
 
-
+//#define _LEARNING
+//#define TESTING
+//#define CREATING_IMAGES
 
 static const char WINDOW[] = "Image window";
 
@@ -26,12 +30,11 @@ C23_Node::C23_Node(std::string left_camera,std::string right_camera) :
 		sync( MySyncPolicy( 10 ), left_image_sub_, right_image_sub_ ),
 		detect(false),done_processing(true)
 	  {
-	    //ready=false;
 		sync.registerCallback( boost::bind( &C23_Node::callback, this, _1, _2 ) );  //Specifying what to do with the data
-		//service = nh_.advertiseService("C23", &C23_Node::proccess, this); //Specifying what to do when a reconstructed 3d scene is requested
 		ROS_INFO("service on\n");
+		vel_pub_ = nh_.advertise<geometry_msgs::Twist>("cmd_vel", 1);
 		objectDetectedPublisher = nh_.advertise<C23_ObjectRecognition::C23C0_OD>("C23/object_detected", 1);
-        objectDeminsionsPublisher = nh_.advertise<C23_ObjectRecognition::C23C0_ODIM>("C23/object_deminsions", 1);
+    objectDeminsionsPublisher = nh_.advertise<C23_ObjectRecognition::C23C0_ODIM>("C23/object_deminsions", 1);
 		
 	  }
 /**
@@ -65,7 +68,7 @@ bool C23_Node::detectAndTrack(const char* target) {
     }
     sprintf(_path,"%s/models/%s.mdl%c",ros::package::getPath("C23_ObjectRecognition").c_str(),target,'\0');
     x = -1;
-    
+    detector.initialize("carEntry");
     _mode = TRACKING;
     done_processing = true;
     detect=true;
@@ -79,6 +82,7 @@ bool C23_Node::learnObject(const char* target) {
         free(tldh_);
         tldh_ = NULL;
     }
+  
     sprintf(_path,"%s/models/%s.mdl%c",ros::package::getPath("C23_ObjectRecognition").c_str(),target,'\0');
     _mode = LEARNING;
     
@@ -92,8 +96,10 @@ bool C23_Node::learnObject(const char* target) {
 void C23_Node::callback(const sensor_msgs::ImageConstPtr& left_msg,const sensor_msgs::ImageConstPtr& right_msg){
  
  cv_bridge::CvImagePtr cv_ptr;
-    
+ static int count = 1;
+ ROS_INFO("I was called with: %d",done_processing);
  if(detect && done_processing) {
+ 
     done_processing = false;
 
     try {
@@ -107,37 +113,88 @@ void C23_Node::callback(const sensor_msgs::ImageConstPtr& left_msg,const sensor_
     }
 
     IplImage tosave=cv_ptr->image;
-    int percent = 30;
+    int percent = 100;
     IplImage *destination = cvCreateImage
-    ( cvSize((int)((tosave.width*percent)/20) , (int)((tosave.height*percent)/20) ),
+    ( cvSize((int)((tosave.width*percent)/100) , (int)((tosave.height*percent)/100) ),
                              tosave.depth, tosave.nChannels );
     
 
     cvResize(&tosave, destination);
-
+    detector.initialize("CarEntry");
     if(tldh_ == NULL) {
 
         char buf[10000];
       
       
         tldh_ = new C23_Node_TLD_Handler(_mode, _path);
-
         tldh_->init(destination);
     } else {
-
-        
+   
+                                    //  #ifdef CREATING_IMAGES
+                                    //      Mat img(destination);
+                                         // char buff[1000];
+                                    //     sprintf(buff,"training/car_driver/yair/image%d.jpg%c",i,'\0');
+                                     //     imwrite(buff,img);
+                                     //     i++;
+                                     //     return;
+        ROS_INFO("Trying TLD...");
         tldh_->processFrame(destination, &x, &y, &width, &height, &confident);
+        if(x == -1) {
+        ROS_INFO("Failed %d",count);
+          count++;
+        }
+        if(count == 50) {
+          detector.detect(destination);
+          if(detector._x != -1) {
+            delete tldh_;
+            tldh_ = new C23_Node_TLD_Handler(_mode, _path);
+            tldh_->setBB(destination,detector._x,detector._y,detector._width,detector._height);
+            count = 1;
+            ROS_INFO("initializing tld with bb: %d,%d,%d,%d",detector._x,detector._y,detector._width,detector._height);
+            done_processing = true;
+          
+          }
+        }
+                                       /*   if(x!= -1) {
+                                            cvSetImageROI(destination,cvRect(x,y,width,height));
+                                            IplImage *tmp =  cvCreateImage ( cvSize(width,height),tosave.depth, tosave.nChannels );
+
+                                            cvCopy(destination,tmp,NULL);
+
+                                            cvResetImageROI(destination);
+                                            cvReleaseImage(destination);
+                                            IplImage* img = cvCloneImage(tmp);
+                                            Mat kuku;
+                                            Mat imgMat(img); 
+                                            Size s(210*1.5,132*1.5);
+
+                                            resize(imgMat,kuku, s);
+                                            char buff[1000];
+
+                                            sprintf(buff,"training/car_front/positive/car_rear%d.jpg%c",i,'\0');
+                                            ROS_INFO("Saving: %s",buff);
+                                            imwrite(buff,kuku);
+                                            i++;
+                                           // if(i > 671) { return; }
+                                         } */
+                                     //    #endif
+        
+       
         C23_ObjectRecognition::C23C0_OD msg;
         C23_ObjectRecognition::C23C0_ODIM msg2;
+        string object = "CarEntry";
         msg.ObjectDetected = (x != -1 ? 1 : 0);
         msg2.x = x;
         msg2.y = y;
         msg2.width = width;
         msg2.height = height;
+        msg2.Object = object;
+        msg.Object = object;
         objectDeminsionsPublisher.publish(msg2);
         objectDetectedPublisher.publish(msg);
     }
     done_processing = true;
+    
    }
 }
 void C23_Node::startDetection() {
