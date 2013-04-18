@@ -45,7 +45,7 @@ void GeneralDetector::initialize(const string& object) {
   cout << "Test: " << (ros::package::getPath("C23_ObjectRecognition") +"/training/background_svm.dat").c_str() << endl;
   
   cout << "Loading vocabulary ... " << endl;
-  cv::FileStorage fs2("training/vocabulary.yml", cv::FileStorage::READ);
+  cv::FileStorage fs2((ros::package::getPath("C23_ObjectRecognition") +"/training/vocabulary.yml").c_str(), cv::FileStorage::READ);
   fs2["vocabulary"] >> vocabulary;
   fs2.release();
   bowide->setVocabulary(vocabulary);
@@ -144,8 +144,8 @@ void GeneralDetector::detect(Mat img) {
         bowide->compute(subImg, keypoints, response_hist);
         //  cout << "Done subimage 2" << endl;
         char buff[1000];
-        sprintf(buff,"training/majd/image%d.jpg%c",count2,'\0');
-        imwrite(buff,subImg);
+      //  sprintf(buff,"training/majd/image%d.jpg%c",count2,'\0');
+       // imwrite(buff,subImg);
         if(response_hist.empty()) continue;
         int i =0;
         for (map<string,CvSVM>::iterator it = classes_classifiers.begin(); it != classes_classifiers.end(); ++it) {
@@ -186,7 +186,7 @@ void GeneralDetector::detect(Mat img) {
   detector.detect(subImg, keypoints);
   cv::drawKeypoints(subImg, keypoints, output2);
   // imwrite("daniel.jpg",output);
-  cv::imwrite("sift_result.jpg", output2);
+//  cv::imwrite("sift_result.jpg", output2);
   cout << "Best match: " << bestMatch << endl;
   _x = x_;
   _y = y_;
