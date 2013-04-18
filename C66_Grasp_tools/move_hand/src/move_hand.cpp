@@ -15,15 +15,16 @@
 #include <string>
 #include <map>
 #include "move_hand/pelvis_move_hand.h"
+#include "move_hand/matrix.h"
 #include <Eigen/Dense>
 #include <tf/transform_listener.h>
 
 class move_hand_service{
 
 protected:
-	ros::NodeHandle nh_, nh2_,nh3_;
+	ros::NodeHandle nh_, nh2_,nh3_,nh4_;
 	ros::NodeHandle* rosnode;
-	ros::ServiceServer move_hand_srv_,pelvis_move_hand_srv_;
+	ros::ServiceServer move_hand_srv_,pelvis_move_hand_srv_,C66_matrix_srv_;
 	ros::ServiceClient traj_vector_cli_;
 	ros::ServiceClient arms_val_calc_cli_;
 	ros::Publisher traj_action_pub_;
@@ -100,6 +101,8 @@ public:
 
 		pelvis_move_hand_srv_ = nh3_.advertiseService("pelvis_move_hand",&move_hand_service::pelvis_move_hand_CB,this);
 		ROS_INFO("running pelvis move hand service");
+
+		C66_matrix_srv_ = nh4_.advertiseService("C66_matrix",&move_hand_service::matrix_in,this);
 
 	}
 	~move_hand_service(){
@@ -228,7 +231,7 @@ public:
 
 			//ROS_INFO("Response from trajectory vector service: Position size %d", (int) traj_vec_srv.response.PositionArray.size());
 			//ROS_INFO("Response from trajectory vector service: Angle size %d", (int) traj_vec_srv.response.AngleArray.size());
-			double current_dt = 0;
+			//double current_dt = 0;
 			if (traj_vec_left_srv.response.PositionArray.size() != traj_vec_right_srv.response.PositionArray.size()) return false;
 			for(unsigned int ind = 0; ind < traj_vec_left_srv.response.PositionArray.size(); ind++){
 				arms_val_calc::arms_val_calc v_left,v_right;
@@ -466,6 +469,65 @@ public:
                   ROS_INFO("move_hand service not up");
                   return false;
 	}
+
+	bool matrix_in(move_hand::matrixRequest &req,move_hand::matrixResponse &res){
+	  Eigen::Matrix4f in_mat;
+	  in_mat << req.matrix[0], req.matrix[1], req.matrix[2], req.matrix[3],
+	            req.matrix[4], req.matrix[5], req.matrix[6], req.matrix[7],
+	            req.matrix[8], req.matrix[9], req.matrix[10],req.matrix[11],
+	            req.matrix[12],req.matrix[13],req.matrix[14],req.matrix[15];
+
+
+	  Eigen::Matrix4f TF1;
+	            TF1(0,0)=0.956958030337725;
+	            TF1(0,1)=0.187313741592912;
+	            TF1(0,2)=-0.221686468650221;
+	            TF1(0,3)=0.555000000000000;
+	            TF1(1,0)=0.226085162286393;
+	            TF1(1,1)=0.132946235442734;
+	            TF1(1,2)=0.974105103609595;
+	            TF1(1,3)=-0.289000000000000;
+	            TF1(2,0)= 0.181980294444418;
+	            TF1(2,1)=-0.982297722533646;
+	            TF1(2,2)=-0.044433734247019;
+	            TF1(2,3)=0.136000000000000;
+	            TF1(3,0)=0;
+	            TF1(3,1)=0;
+	            TF1(3,2)=0;
+	            TF1(3,3)=1;
+	            Eigen::Matrix4f mat;
+	            mat=in_mat*TF1;
+	            double x= mat(0,3);
+	            double y= mat(1,3);
+	            double z= mat(2,3);
+	            double roll    =(std::atan2((double)mat(2,1),(double)mat(2,2)));
+	            double pitch = (std::atan2((double)-mat(2,0),std::sqrt(std::pow((double)mat(2,1),2) +std::pow((double)mat(2,2),2) )));
+	            double yaw   = (std::atan2((double)mat(1,0),(double)mat(0,0)));
+	            std::cout<<"x:"<<x<<"\n";
+	            std::cout<<"y:"<<y<<"\n";
+	            std::cout<<"z:"<<z<<"\n";
+	            std::cout<<"roll:"<<roll<<"\n";
+	            std::cout<<"pitch:"<<pitch<<"\n";
+	            std::cout<<"yaw:"<<yaw<<"\n";
+
+	            move_hand::pelvis_move_hand move_msg;
+
+	                move_msg.request.PositionDestination_right.x =  x;
+	                move_msg.request.PositionDestination_right.y =  y;
+	                move_msg.request.PositionDestination_right.z =  z;
+
+	                move_msg.request.AngleDestination_right.x = roll;
+	                move_msg.request.AngleDestination_right.y = pitch;
+	                move_msg.request.AngleDestination_right.z = yaw;
+          if (pelvis_move_hand_CB(move_msg.request,move_msg.response))
+          {
+            res.success = move_msg.response.success;
+            return true;
+          }
+          ROS_INFO("error in pelvis_move_hand service");
+          return false;
+	}
+
 };
 int main(int argc, char **argv)
 {
