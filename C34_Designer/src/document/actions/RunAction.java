@@ -9,7 +9,7 @@ import javax.swing.JOptionPane;
 import logger.Log;
 
 import terminal.communication.Utils;
-import document.BTDesigner;
+import windows.designer.BTDesigner;
 import document.Document;
 import document.Parameters;
 
@@ -52,18 +52,19 @@ public class RunAction extends AbstractDesignerAction implements ActionListener 
 	}
 
 	private void runPlan() {
-		Document doc = getActiveTab().doc;
-		String fileName = doc.getShortFilePath();
+		Document doc = getActiveTab().document;
+		doc.onRun();
+		String fileName = doc.getFileNameOnly();
 		if (Parameters.path_to_plans_on_executer.equals("{LOCALPATH}")) {
 			fileName = doc.getAbsoluteFilePath();
 		} else if (Parameters.path_to_plans_on_executer.equals("{FILENAME}")) {
 
 		} else if (Parameters.path_to_plans_on_executer.contains("{FILENAME}")) {
 			fileName = Parameters.path_to_plans_on_executer.replace(
-					"{FILENAME}", doc.getShortFilePath());
+					"{FILENAME}", doc.getFileNameOnly());
 		} else {
 			fileName = Parameters.path_to_plans_on_executer + File.separator
-					+ doc.getShortFilePath();
+					+ doc.getFileNameOnly();
 		}
 
 		Log.i("ROSACTION", "RUN PLAN FILE : " + fileName);
@@ -107,5 +108,6 @@ public class RunAction extends AbstractDesignerAction implements ActionListener 
 	private void stopPlan() {
 		String id = getActiveTab().getID();
 		this.designer.rosExecutor.stopBehaviorTree(id);
+		getActiveTab().document.onStop();
 	}
 }

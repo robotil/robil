@@ -5,4 +5,31 @@ Prerequisites:
 To run:
 2) Launch:
 roslaunch C66_Grasp C66_Grasp.launch
-2) Call action PickUp with no parameters.
+
+for manual use:
+
+3) rosservice call /pelvis_move_hand "PositionDestination_left:
+  x: 0.0
+  y: 0.0
+  z: 0.0 
+AngleDestination_left:
+  x: 0.0
+  y: 0.0
+  z: 0.0 
+PositionDestination_right:
+  x: 0.0
+  y: 0.0
+  z: 0.0
+AngleDestination_right:
+  x: 0.0
+  y: 0.0
+  z: 0.0" 
+
+
+
+#if (x==0 and y==0 and z==0) hand will not move, so you can move only one hand if you want.
+
+4)for right_grasp: 	rostopic pub /hand_grasp_right hand_grasp/grasp "strength: 20.0"
+for left_grasp:	 rostopic pub /hand_grasp_left hand_grasp/grasp "strength: 20.0"
+
+if strength == 0 will open hand

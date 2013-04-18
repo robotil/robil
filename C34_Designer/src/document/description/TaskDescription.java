@@ -20,6 +20,8 @@ import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 
+import logger.Log;
+
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -172,6 +174,7 @@ public class TaskDescription {
 					return root;
 				}
 			};
+			
 		for (int i = 0; i < nl.getLength(); i++) {
 			if (nl.item(i).getNodeType() != Element.ELEMENT_NODE)
 				continue;
@@ -197,6 +200,10 @@ public class TaskDescription {
 
 	public TaskDescription(String fname) throws ParserConfigurationException,
 			SAXException, IOException {
+		
+		if (!(new File(fname).exists()))
+			save(fname);
+		
 		DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
 		DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
 		Document doc = dBuilder.parse(new File(fname));
@@ -296,11 +303,11 @@ public class TaskDescription {
 			transformer.transform(new DOMSource(doc), result);
 
 		} catch (TransformerConfigurationException e) {
-			e.printStackTrace();
+			Log.e(e);
 		} catch (TransformerException e) {
-			e.printStackTrace();
+			Log.e(e);
 		} catch (IOException e) {
-			e.printStackTrace();
+			Log.e(e);
 		}
 	}
 

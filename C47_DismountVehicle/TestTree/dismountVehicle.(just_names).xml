@@ -1,5 +1,0 @@
-<plan>
-   <seq name="mission"> 
-         <tsk name="DismountVehicle()" />
-   </seq>
-</plan>

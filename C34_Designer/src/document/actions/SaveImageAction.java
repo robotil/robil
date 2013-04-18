@@ -3,10 +3,13 @@ package document.actions;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
-import document.BTDesigner;
+import windows.designer.BTDesigner;
+
+import logger.Log;
+
 import document.Document;
 import document.Parameters;
-import document.Toolbar;
+import document.ui.Toolbar;
 
 public class SaveImageAction extends AbstractDesignerAction implements
 		ActionListener {
@@ -23,13 +26,13 @@ public class SaveImageAction extends AbstractDesignerAction implements
 			return;
 		}
 
-		Document document = getActiveTab().doc;
+		Document document = getActiveTab().document;
 
 		try {
 			Toolbar.getSaveSnapShot(document, fileName);
 		} catch (Exception ex) {
 			// TODO Auto-generated catch block
-			ex.printStackTrace();
+			Log.e(ex);
 		}
 	}
 }

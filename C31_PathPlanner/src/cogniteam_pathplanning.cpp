@@ -18,21 +18,45 @@
 
 #define PRINT_AS_VECTORS 1
 
+// #define SET_PARAMETERS(pf_params)\
+// 	pf_params.viewRadiusForward = 5;\
+// 	pf_params.viewRadiusSide = 2;\
+// 	pf_params.stepRate=0.6;\
+// 	pf_params.inertia=pow(1/pf_params.viewRadiusForward*0.5,2);\
+// 	pf_params.distanceBetweenPoints = 2;\
+// 	pf_params.maxAngleWhileReducing = Vec2d::d2r(10);
+#define SET_PARAMETERS(pf_params)\
+	pf_params.viewRadiusForward = 15;\
+	pf_params.viewRadiusSide = 4;\
+	pf_params.stepRate=0.3;\
+	pf_params.inertia=pow(1/pf_params.viewRadiusForward*0.5,2);\
+	pf_params.distanceBetweenPoints = 2;\
+	pf_params.maxAngleWhileReducing = Vec2d::d2r(10);
+
 using namespace std;
 
 // -------------------------- MAP ---------------------------------------------
-
-Map::Map(int w, int h):_w(w),_h(h){
+int Map::map_id_counter = 0;
+Map::Map(int w, int h):map_id(map_id_counter++), _w(w),_h(h){
 	_data.resize(_w*_h);
 	for(size_t i=0;i<_data.size();i++) _data[i]=ST_UNCHARTED;
 }
-Map::Map(int w, int h, char* cmap):_w(w),_h(h){
+Map::Map(int w, int h, char* cmap):map_id(map_id_counter++), _w(w),_h(h){
 	_data.resize(_w*_h);
 	for(size_t i=0;i<_data.size();i++) _data[i]=cmap[i];
 }
-Map::Map(const Map& map):_w(map._w),_h(map._h){
+Map::Map(const Map& map):map_id(map_id_counter++), _w(map._w),_h(map._h){
 	_data.resize(_w*_h);
 	for(size_t i=0;i<_data.size();i++) _data[i]=map._data[i];
+}
+
+const Map& Map::operator=(const Map& other){
+	_w = other._w; _h = other._h;
+	if(_data.size()!=other._data.size()){
+		_data.resize(_w*_h);
+	}
+	for(size_t i=0;i<_data.size();i++) _data[i]=other._data[i];
+	return *this;
 }
 
 ostream& operator<<(ostream& out, const Map& m){
@@ -415,26 +439,37 @@ Map MapEditor::replace(const Map& source, const char from, const char to)const{
 }
 
 Map MapEditor::coloring(const Map& source, size_t x, size_t y, const char av, const char bl)const{
+	//ALLOCATE MEMORY FOR COLORED MAP AND FOR VISITED/UNVISITED FLAGES
 	Map visited(source.w(), source.h());
 	Map res(source.w(), source.h());
-	//cout<<": "<<(int)source(x,y)<<": "<<(int)av<<": "<<(int)bl<<endl;
+	//START COLORING PROCESS
 	coloring(source, x, y, source(x,y), av, bl, visited, res);
+	//COLOR ALL UNVISITED CELLS IN RESULT MAP AS BLOCKED
 	for( size_t y=0; y<source.h(); y++){for( size_t x=0; x<source.w(); x++){
 		if(visited(x,y)==Map::ST_UNCHARTED) res(x,y)=bl;
 	}}
 	return res;
 }
 void MapEditor::coloring(const Map& source, size_t x, size_t y, const char c, const char av, const char bl, Map& visited, Map& res)const{
+	//IF CURRENT CELL IS VISITED RETURN
 	if(visited(x,y)==Map::ST_BLOCKED) return;
+	//IF CURRETN CELL IS UNVISITED => SELECT IT AS VISITED
 	visited(x,y) = Map::ST_BLOCKED;
+	//IF CURRENT CELL HAS RIGHT COLOR (COLOR OF FIRST CELL, LIKELY AVALIABLE) DO
 	if(c == source(x,y)){
+		//IN RESULT MAP COLOR THE CELL AS AVALIABLE
 		res(x,y)=av;
-		if(x>0)coloring(source, x-1, y, c, av, bl, visited, res);
-		if(x<source.w()-1)coloring(source, x+1, y, c, av, bl, visited, res);
-		if(y>0)coloring(source, x, y-1, c, av, bl, visited, res);
-		if(y<source.h()-1)coloring(source, x, y+1, c, av, bl, visited, res);
+		//CONTINUE SPREAD TO ALL CONRNERS OF THE EARTH
+		if(x>0)				coloring(source, x-1, y, c, av, bl, visited, res);
+		if(x<source.w()-1)	coloring(source, x+1, y, c, av, bl, visited, res);
+		if(y>0)				coloring(source, x, y-1, c, av, bl, visited, res);
+		if(y<source.h()-1)	coloring(source, x, y+1, c, av, bl, visited, res);
 	}
-	else res(x,y)=bl;
+	//IF CURRENT CELL HAS NOT RIGHT COLOR (COLOR OF FIRST CELL, LIKELY AVALIABLE) DO
+	else{
+		//IN RESULT MAP COLOR THE CELL AS BLOCKED
+		res(x,y)=bl;
+	}
 }
 
 // -------------------------------------------------------------------------------
@@ -442,27 +477,27 @@ void MapEditor::coloring(const Map& source, size_t x, size_t y, const char c, co
 int cogniteam_pathplanning_test_map_inflation(int argc, char** argv) {
 	cout << "START" << endl; // prints PP
 
-	char cmap[]={
-			0,0,0,0,0, 0,0,0,0,0, 0,0,0,0,0, 0,0,0,0,0, 0,
-			0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-			0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-			0,0,0,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-			0,0,0,0,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-
-			0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-			0,0,0,0,0,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-			0,0,0,0,0,0,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,
-			0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-			0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-
-			0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,1,1,
-			0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,0,1,1,1,1,1,
-			0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,
-			0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,0,0,0,
-			0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-
-			0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
-	};
+// 	char cmap[]={
+// 			0,0,0,0,0, 0,0,0,0,0, 0,0,0,0,0, 0,0,0,0,0, 0,
+// 			0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+// 			0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+// 			0,0,0,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+// 			0,0,0,0,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+// 
+// 			0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+// 			0,0,0,0,0,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+// 			0,0,0,0,0,0,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,
+// 			0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+// 			0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+// 
+// 			0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,1,1,
+// 			0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,0,1,1,1,1,1,
+// 			0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,
+// 			0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,0,0,0,
+// 			0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+// 
+// 			0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+// 	};
 	char cmap1[]={
 			0,0,0,0,0, 0,0,0,0,0, 0,0,0,0,0, 0,0,0,0,0, 0,
 			0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
@@ -498,6 +533,7 @@ int cogniteam_pathplanning_test_map_inflation(int argc, char** argv) {
 
 #include <cstdlib>
 #include <cstdio>
+#include "MapFileReader.hpp"
 int cogniteam_pathplanning_test(int argc, char** argv) {
 	cout << "START" << endl; // prints PP
 
@@ -551,23 +587,35 @@ int cogniteam_pathplanning_test(int argc, char** argv) {
 		0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
 		0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
 	};
-	
+
+
 	clock_t start_time = clock();
 	
 	char* cmap = cmap_1;
 	size_t w=48,h=48;
+	
+	
+	vector<char> map_from_file;
+	if(argc>5){
+		cout<<"map from file: "<<argv[5]<<endl;
+		map_from_file = map_file_reader::readMap(argv[5], w, h);
+		cmap = map_from_file.data();
+	}
+	
 	
 	Map map(w, h, cmap);
 	cout<<"map source"<<endl<<map<<endl;
 	
 	long _sx=atoi(argv[1]), _sy=atoi(argv[2]);
 	long _ex=atoi(argv[3]), _ey=atoi(argv[4]);
+	long _rr=atoi(argv[6]);
 	
 	#define START_P _sx,_sy 
 	#define END_P   _ex,_ey
 	
 	#define POINTS START_P, END_P
 	
+	printf("Robot radius : %i celles \n", _rr);
 	printf("Plan path : from %i,%i to %i,%i \n", POINTS);
 	
 	if(map.inRange(END_P)==false){
@@ -588,7 +636,7 @@ int cogniteam_pathplanning_test(int argc, char** argv) {
 	
 	clock_t time_inflator = clock();
 	
-	Inflator i( 1 , Map::ST_BLOCKED);
+	Inflator i( _rr , Map::ST_BLOCKED);
 	MapEditor e;
 	
 	map = 
@@ -689,13 +737,8 @@ int cogniteam_pathplanning_test(int argc, char** argv) {
 	
 	PField pf(input_map, res_path);
 	PField::SmoothingParameters pf_params;
-	pf_params.viewRadiusForward = 5;
-	pf_params.viewRadiusSide = 2;
-	pf_params.stepRate=0.6;
-	pf_params.inertia=pow(1/pf_params.viewRadiusForward*0.5,2);
-	pf_params.distanceBetweenPoints = 2;
-	pf_params.maxAngleWhileReducing = Vec2d::d2r(10);
-
+	SET_PARAMETERS(pf_params)
+	
 	clock_t time_smoothing = clock();
 	
 	PField::Points smoothed_points= pf.smooth(pf_params);
@@ -724,12 +767,12 @@ int cogniteam_pathplanning_test(int argc, char** argv) {
 #endif
 //#define STR_TIME(x) ((double)x)/(double)CLOCKS_PER_SEC/1000.0<<" msec"
 #define STR_TIME(x) x<<" clocks"
-	cout<<"TIMES:"<<endl;
-	cout<<"   total : "<<STR_TIME(start_time)<<endl;
-	cout<<"   inflation : "<<STR_TIME(time_inflator)<<endl;
-	cout<<"   quad tree : "<<STR_TIME(time_qt)<<endl;
-	cout<<"   A* : "<<STR_TIME(time_astar)<<endl;
-	cout<<"   smoothing : "<<STR_TIME(time_smoothing)<<endl;
+// 	cout<<"TIMES:"<<endl;
+// 	cout<<"   total : "<<STR_TIME(start_time)<<endl;
+// 	cout<<"   inflation : "<<STR_TIME(time_inflator)<<endl;
+// 	cout<<"   quad tree : "<<STR_TIME(time_qt)<<endl;
+// 	cout<<"   A* : "<<STR_TIME(time_astar)<<endl;
+// 	cout<<"   smoothing : "<<STR_TIME(time_smoothing)<<endl;
 	
 	cout << endl << "END" << endl; // prints PP
 	return 0;
@@ -758,7 +801,10 @@ PField::Points searchPath(const Map& source_map, const Waypoint& start, const Wa
 		return PField::Points();
 	}
 	
-	Inflator i( constraints.dimentions.radius , Map::ST_BLOCKED);
+	size_t rr = constraints.dimentions.radius;
+	if( rr<constraints.dimentions.radius) rr++;
+	
+	Inflator i( rr , Map::ST_BLOCKED);
 	MapEditor e;
 	
 // 	Map map =  i.inflate(source_map);
@@ -773,7 +819,8 @@ PField::Points searchPath(const Map& source_map, const Waypoint& start, const Wa
 		e.coloring( 
 			e.replace(
 				i.inflate(source_map), 
-				Map::ST_UNCHARTED, Map::ST_AVAILABLE), 
+				Map::ST_UNCHARTED, Map::ST_AVAILABLE
+			),
 			start.x, start.y, Map::ST_AVAILABLE,Map::ST_BLOCKED
 		);
 	
@@ -826,12 +873,7 @@ PField::Points searchPath(const Map& source_map, const Waypoint& start, const Wa
 	}
 
 	PField::SmoothingParameters pf_params;
-	pf_params.viewRadiusForward = 5;
-	pf_params.viewRadiusSide = 2;
-	pf_params.stepRate=0.6;
-	pf_params.inertia=pow(1/pf_params.viewRadiusForward*0.5,2);
-	pf_params.distanceBetweenPoints = 2;
-	pf_params.maxAngleWhileReducing = Vec2d::d2r(10); // unused
+	SET_PARAMETERS(pf_params)
 
 	PField pf(map, path);
 	PField::Points smoothed_path = pf.smooth(pf_params);

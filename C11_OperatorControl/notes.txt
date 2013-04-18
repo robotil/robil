@@ -1,11 +1,6 @@
 version 0.6
-Fixed: The module crashes after 1-2 pictures
 
 
-========================================================
-KNOWN BUGS:
-The module crashes after 1-2 pictures
-============================================
 To be able to make this package you should have the next packages installed beforehand:
 ros-fuerte-qt-ros
 ros-fuerte-qt-gui-core
@@ -13,12 +8,13 @@ You may install them using: sudo apt-get install
 
 //CHECK INSTRUCTIONS:
 1. Run Gazibo simulator - roslaunch atlas_utils atlas.launch
-2. Run C21_VisionAndLidar - rosrun C21_VisionAndLidar C21
-3. Run C22_GroundRecognitionAndMapping - rosrun C22_GroundRecognitionAndMapping C22
-4. Run C34_Executor - rosrun C34_Executer executer
+2. Run perception modules - C0_Scripts/perception.sh
+3. Run C34_Executor - rosrun C34_Executer executer
+4. Run C31_PathPlanner - C0_Scripts/withPathtest.sh
 5. Run C11_Agent - rosrun C11_Agent C11_Agent
 6. Run C11_OperatorControl - roslaunch C11_OperatorControl C11.launch
 7. Push 'Play' button
 8. The icon should be cnahged to 'Pause'
 9. After few seconds image should be received.
 10. After few seconds occupancy grid should be updated.
+11. After few seconds path should be updated.

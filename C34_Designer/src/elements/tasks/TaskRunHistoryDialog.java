@@ -13,6 +13,8 @@ import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.UIManager;
 
+import document.PlanExecution;
+
 import elements.tasks.TaskResultCollection.EventListenerArgs;
 
 public class TaskRunHistoryDialog extends JDialog {
@@ -20,6 +22,7 @@ public class TaskRunHistoryDialog extends JDialog {
 	
 	private final Task _task;
 	private JTextArea _txtOutput;
+	private PlanExecution _lastPlan;
 	
 	public TaskRunHistoryDialog(JFrame parent, Task task) {
 		this._task = task;
@@ -44,6 +47,11 @@ public class TaskRunHistoryDialog extends JDialog {
 		_task.getRunResults().addEventListener(new TaskResultCollection.EventListener() {
 			@Override
 			public void onAdd(EventListenerArgs e) {
+				if (e.taskResult.getPlanExecution() != _lastPlan) {
+					_txtOutput.append("------------\n");
+					_lastPlan = e.taskResult.getPlanExecution();
+				}
+				
 				_txtOutput.append(e.taskResult.toString() + "\n");
 				_txtOutput.setCaretPosition(_txtOutput.getDocument().getLength());
 			}
@@ -91,10 +99,17 @@ public class TaskRunHistoryDialog extends JDialog {
 		_txtOutput = new JTextArea();
 		
 		_txtOutput.setEditable(false);
-		for (TaskResult result : _task.getRunResults())
-			_txtOutput.append(result + "\n");
 		
-		// txtOutput.getHighlighter().addHighlight(0, 10, new DefaultHighlighter.DefaultHighlightPainter(Color.RED)));
+		PlanExecution prevPlan = null;
+		for (TaskResult result : _task.getRunResults()) {
+			if (prevPlan != result.getPlanExecution()) {
+				_txtOutput.append("------------\n");
+				prevPlan = result.getPlanExecution();
+			}
+				
+			_txtOutput.append(result + "\n");
+			_lastPlan = result.getPlanExecution();
+		}
 		
 		_txtOutput.setCaretPosition(_txtOutput.getDocument().getLength());
 

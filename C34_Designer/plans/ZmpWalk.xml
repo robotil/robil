@@ -1,0 +1,6 @@
+<plan descriptions="./plans/TaskDescriptions.xml">
+   <seq name="mission" x="277.5" y="93.5" collapsed="false" id="535a7e5f-ef6c-4375-9084-c372509d5b12"> 
+         <tsk name="C42_ZMPwalk" x="184.5" y="242.5" test_time="0" test_result="true" id="46255ec5-3549-43f5-8bc1-d33105a8e609" />
+         <tsk name="FollowPath" x="525.5" y="268.5" test_time="0" test_result="true" id="0111189f-02a9-491a-a7f8-a9b43b3d9f66" />
+   </seq>
+</plan>

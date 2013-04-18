@@ -5,10 +5,10 @@ import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.Graphics2D;
+import java.awt.Image;
 import java.awt.Point;
 import java.awt.Dialog.ModalityType;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.Map;
 
@@ -18,13 +18,14 @@ import logger.Log;
 
 import terminal.communication.StackStreamMessage;
 import terminal.communication.StackStreamMessage.ChangeType;
-import terminal.communication.StackStreamMessage.TaskFinishReason;
 
-import document.BTDesigner;
 import document.Document;
+import document.LookupTableRecord;
 import document.description.TaskDescription;
+import document.ui.Utilities;
 import elements.GElement;
 import elements.Tooltip;
+import elements.Tooltip.Position;
 import elements.Vec;
 import elements.View;
 import elements.Tooltip.ToolTipDesign;
@@ -37,6 +38,8 @@ public class Task extends GElement implements View.ChangesListener {
 	public final static String TYPE_parallel = "parallel";
 	public final static String TYPE_switch = "switch";
 	
+	private final static Image LINK_IMAGE = Utilities.loadImage("link.png");
+	
 	public int seqNumber = 0;
 	public String text = "Noname";
 	public String type = TYPE_task;
@@ -45,14 +48,15 @@ public class Task extends GElement implements View.ChangesListener {
 	private Tooltip _tooltip;	
 	private Tooltip _debugInfo;
 	private Tooltip _runtimeInfo;
+	private Tooltip _planExecutionInfo;
+	
+	private LookupTableRecord _lookupOverride;
 	private Document _document;
 	private TaskResultCollection _resultsHistory = new TaskResultCollection();
 	private Date _runStart;
 	private Date _runFinish;
 	private boolean _runFailed;
-	private boolean _isRunning;
 	
-
 	final int shortTextLen = 25;
 
 	public Task() {
@@ -60,6 +64,7 @@ public class Task extends GElement implements View.ChangesListener {
 		this._tooltip = new Tooltip(this);
 		this._debugInfo = new Tooltip(this, ToolTipDesign.DebugInfo);
 		this._runtimeInfo = new Tooltip(this, ToolTipDesign.RuntimeInfo);
+		this._planExecutionInfo = new Tooltip(this, ToolTipDesign.PlanExecutionInfo, Position.Top);
 	}
 
 	private boolean isDebugViewEnabled() {
@@ -82,18 +87,17 @@ public class Task extends GElement implements View.ChangesListener {
 		if (this.type != null)
 			n.type = new String(this.type);
 		
+		n.view = this.getView();
 		n.seqNumber = this.seqNumber;
 		
 		n._debugInfo = (Tooltip)this._debugInfo.clone(n);
 		n._runtimeInfo = (Tooltip)this._runtimeInfo.clone(n);
+		n._planExecutionInfo = (Tooltip)this._planExecutionInfo.clone(n);
+		
 		n._resultsHistory = this._resultsHistory;
-		n._debugInfo = this._debugInfo;
-		n._runtimeInfo = this._runtimeInfo;
 		n._runFailed = this._runFailed;
 		n._runFinish = this._runFinish;
 		n._runStart = this._runStart;
-		n._isRunning = this._isRunning;
-		
 		
 		return n;
 	}
@@ -165,17 +169,27 @@ public class Task extends GElement implements View.ChangesListener {
 		// *******************************************************************************
 		if (this.type.equalsIgnoreCase(TYPE_task) && this.property.leftClicked && this.taskDescriptionProvider != null) {
 			this._tooltip.setView(this.getView());
+			updateTaskDescriptionMessage();
 			this._tooltip.paint(g);
 		}
 		else if (this.type.equalsIgnoreCase(TYPE_task) && isDebugViewEnabled()) {
 			// Draw debug info tooltip
 			this._debugInfo.setView(this.getView());
-			this._debugInfo.setMessage(String.format("Duration: %d\n%sDebug: %b", this.property.test_time, !this.property.test_result ? "$RED$" : "",this.property.test_result));
+			this._debugInfo.setMessage(String.format("Duration: %d\n%sDebug: %b", this.property.testTime, !this.property.testResult ? "$RED$" : "",this.property.testResult));
 			this._debugInfo.paint(g);
 		} else if (this.type.equalsIgnoreCase(TYPE_task) && isRuntimeViewEnabled()) {
 			// this._runtimeInfo.setMessage(getRunResultsString());
 			this._runtimeInfo.setView(this.getView());
 			this._runtimeInfo.paint(g);
+		}
+		
+		// *******************************************************************************
+		// Root element - show plan execution result *************************************
+		// *******************************************************************************
+		if (this._document != null && this.getProperty().isRoot && this._document.isRuntimeViewEnabled()) {
+			this._planExecutionInfo.setMessage("", this._document.getPlanExecutionMessage());
+			this._planExecutionInfo.setView(this.getView());
+			this._planExecutionInfo.paint(g);
 		}
 		
 		// *******************************************************************************
@@ -186,8 +200,7 @@ public class Task extends GElement implements View.ChangesListener {
 					(int) (fontsize * 0.8 * this.view.zoom));
 			g.setFont(f);
 			g.setPaint(Color.blue);
-			tdim = new Vec(getTextSize(g, "" + this.seqNumber)).scale(0.5)
-					.getDimension();
+			tdim = new Vec(getTextSize(g, "" + this.seqNumber)).scale(0.5).getDimension();
 			cnt = getLocation().getPoint();
 			drawString(g, "" + this.seqNumber, cnt.x - tdim.width, cnt.y - tdim.height);
 		}
@@ -196,31 +209,60 @@ public class Task extends GElement implements View.ChangesListener {
 		// Draw collapse icon ************************************************************
 		// *******************************************************************************
 		if (this.property.collapsed) {
-			f = new Font(this.font.getFamily(), this.font.getStyle(),
-					(int) (fontsize * 0.8 * this.view.zoom));
+			f = new Font(this.font.getFamily(), this.font.getStyle(), (int) (fontsize * 0.8 * this.view.zoom));
 			g.setStroke(new BasicStroke(1));
 			cnt = getLocation().add(getSizeInternal()).getPoint();
 			Vec dim = new Vec(10, 10).scale(this.view.zoom);
+			
 			g.setPaint(Color.white);
 			g.fillRect(cnt.x, cnt.y, dim.getIntX(), dim.getIntY());
 			g.setPaint(Color.blue);
 			g.drawRect(cnt.x, cnt.y, dim.getIntX(), dim.getIntY());
-			g.drawLine(cnt.x + dim.getIntX() / 2, cnt.y
-					+ (int) (this.view.zoom * 2), cnt.x + dim.getIntX() / 2,
-					cnt.y + dim.getIntY() - (int) (this.view.zoom * 2));
-			g.drawLine(cnt.x + (int) (this.view.zoom * 2),
-					cnt.y + dim.getIntY() / 2, cnt.x + dim.getIntX()
-							- (int) (this.view.zoom * 2), cnt.y + dim.getIntY()
-							/ 2);
+			g.drawLine(cnt.x + dim.getIntX() / 2, cnt.y + (int) (this.view.zoom * 2), cnt.x + dim.getIntX() / 2, cnt.y + dim.getIntY() - (int) (this.view.zoom * 2));
+			g.drawLine(cnt.x + (int) (this.view.zoom * 2), cnt.y + dim.getIntY() / 2, cnt.x + dim.getIntX() - (int) (this.view.zoom * 2), cnt.y + dim.getIntY() / 2);
+		}
+		
+		// *******************************************************************************
+		// Lookup table override *********************************************************
+		// *******************************************************************************
+		if (this.isTaskType() && this.isOverrided()) {
+			int iconSize = 20;
+			cnt = getLocation().getPoint();
+			g.drawImage(
+					LINK_IMAGE, 
+					cnt.x + (int)getSize().x - (int)(iconSize * this.view.zoom) / 2, 
+					cnt.y - (int)(iconSize * this.view.zoom) / 2, 
+					(int)(iconSize * this.view.zoom), 
+					(int)(iconSize * this.view.zoom), 
+					null);
 		}
 		
 		gp.restore();
 	}
 
-
 	// *******************************************************************************
 	// Getters & setters *************************************************************
 	// *******************************************************************************
+	
+	/**
+	 * Is task overrided by lookup table record
+	 * @return
+	 */
+	public boolean isOverrided() {
+		return this._lookupOverride != null;
+	}
+	
+	/**
+	 * Override task by lookup table record
+	 * @param lookupRecord
+	 */
+	public void overrideTask(LookupTableRecord lookupRecord) {
+		this._lookupOverride = lookupRecord;
+	}
+	
+	public String getOverridePlanFilename() {
+		return this._lookupOverride.getFileName();
+	}
 	
 	Vec getCenterInternal() {
 		return getLocation().add(getSizeInternal().scale(0.5));
@@ -292,7 +334,7 @@ public class Task extends GElement implements View.ChangesListener {
 	}
 	
 	public boolean isRunning() {
-		return _isRunning || getProperty().running;
+		return getProperty().running;
 	}
 
 	public void setDocument(Document document) {
@@ -305,7 +347,10 @@ public class Task extends GElement implements View.ChangesListener {
 	
 	public void setTaskDescriptionProvider(TaskDescription provider) {
 		this.taskDescriptionProvider = provider;
-
+		updateTaskDescriptionMessage();
+	}
+	
+	public void updateTaskDescriptionMessage() {
 		String cleanName = getNameWithoutParameters();
 		TaskDescription.TaskInfo taskDesc = this.taskDescriptionProvider.get(cleanName);
 		if (taskDesc != null)
@@ -334,12 +379,18 @@ public class Task extends GElement implements View.ChangesListener {
 		return "" + this.type + "{" + this.text + "}";
 	}
 
+	public void clearRunning() {
+		getProperty().running = false;
+		_runFailed = false;
+		_runtimeInfo.setMessage("");
+	}
+	
 	// *******************************************************************************
 	// Events ************************************************************************
 	// *******************************************************************************
 	
 	public void onMessageReceive(StackStreamMessage message) {
-		TaskResult taskResult = new TaskResult(message.getTaskResultCode(), message.getTaskResultDescription());
+		TaskResult taskResult = new TaskResult(message.getTaskResultCode(), message.getTaskResultDescription(), _document.getCurrentPlanExecution());
 		
 		// _results.add(taskResult);
 		
@@ -350,20 +401,25 @@ public class Task extends GElement implements View.ChangesListener {
 		
 	}
 	
+	public void onPlanRun() {
+		clearRunning();
+	}
+	
 	public void onStart() {
-		_isRunning = true;
 		_runStart = new Date();
 		_runFinish = new Date();
 		_runFailed = false;
+		getProperty().running = true;
 		
 		this._runtimeInfo.setMessage(
 				String.format("[%s] %s", new SimpleDateFormat("HH:mm:ss").format(_runStart), "Running..."));
 	}
 	
 	public void onStop(TaskResult taskResult, StackStreamMessage message) {
-		_isRunning = false;
+		// _isRunning = false;
 		_runFinish = taskResult.getFinishTime();
 		_runFailed = taskResult.isFailure();
+		getProperty().running = false;
 		taskResult.setStartTime(_runStart);
 		
 		if (message.getTaskFinishReason() == null) {
