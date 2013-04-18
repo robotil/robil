@@ -13,7 +13,6 @@
 #include <image_transport/subscriber_filter.h>
 #include "libopentld/tld/TLD.h"
 #include "C23_Node_TLD_Handler.h"
-#include "HOGDetection.hpp"
 #include "C23_Utils.hpp"
 #include "GeneralDetector.hpp"
 
