@@ -47,6 +47,7 @@ class ZMP_Preview_Buffer:
     # Handling Buffer Stack:
     def clearBuffer(self):
         self._buffer = zeros(self._buffer_size) # clear buffer
+        self._start_index = 0
         self._data_end = 0
 
     def pushData(self,new_data):
@@ -58,6 +59,7 @@ class ZMP_Preview_Buffer:
         else:  # load part of new data according to the available space
             self._buffer[self._data_end : self._buffer_size] = new_data[0 : self._buffer_size - self._data_end]
             self._data_end = self._buffer_size
+            rospy.loginfo("ZMP_Preview_Buffer %s: unable to load all data because buffer is full. Buffer size = data_end = %f" % (self._name, self._data_end) )
 
     def buffer_Is_notFull(self):
         if self._data_end < self._buffer_size:  # if the is available space in buffer
@@ -72,7 +74,6 @@ class ZMP_Preview_Buffer:
         #  them selves until filling the required space in the buffer.
         # is handled by off_set <-- !!!Attention!!! continuity should be kept from new_step to 
         #        following_steps_cycle and between begining and end of following_steps_cycle      
-        self._start_index = 0
         step_length = len(new_step)
         self._end_of_step_preview = step_length+self._preview_size
 
@@ -87,6 +88,24 @@ class ZMP_Preview_Buffer:
             off_set = self._buffer[self._data_end-1] - 2*following_steps_cycle[0] + following_steps_cycle[1]# we add off_set to following_steps_cycle to insure continuity
             self.pushData( following_steps_cycle + off_set )
             #rospy.loginfo("ZMP_Preview_Buffer %s: data_end = %f" % (self._name, self._data_end) )
+
+        self._NewStep_trigger = True
+
+        return
+
+    def load_PreviewStep(self, new_preview_step): 
+        # Loads new preview of (future) step into end of buffer according to the following steps:
+        # 1) Shifts preview of previous step (last_preview) to begining of buffer. (last preview becomes current step to be excuted)
+        # 2) Load buffer with new_preview_step after last_preview.
+
+        end_index = self._start_index + self._preview_size
+        last_preview = self._buffer[self._start_index : end_index]
+
+        self.clearBuffer() # clear buffer
+        self.pushData( last_preview )
+        following_preview = new_preview_step[self._precede_time_samples :] # new_preview_step with (lead) time shift
+        off_set = self._buffer[self._data_end-1] - 2*following_preview[0] + following_preview[1]# we add off_set to following_preview to insure continuity
+        self.pushData( following_preview + off_set )
 
         self._NewStep_trigger = True
 

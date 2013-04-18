@@ -58,13 +58,16 @@ class StateMachine(object):
     
     def GetStateAtTransition(self,strStartState,strTransition):
         """
-            Returns the state transitioned to from strStartState by strTransition
+            Returns the state transitioned to from strStartState by strTransition,
+            and true if transition exists (leads to a different state) 
         """
         if((strStartState,strTransition) in self._Transitions):
             state = self._States[self._Transitions[(strStartState,strTransition)]]
+            transition_exists = True
         else:
             state = self._States[strStartState]
-        return state
+            transition_exists = False
+        return state,transition_exists
     
     def AddState(self,cState):
         """

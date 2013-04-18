@@ -19,6 +19,7 @@ from robot_state import Robot_State
 from zmp_init import init_pose
 from zmp_profiles import *
 import copy
+from collections import deque
 
 ###################################################################################
 #--------------------------- Exceptions -------------------------------------------
@@ -119,7 +120,24 @@ class InitializeStepState(StepState):
         # moving to intial pose:
         init_pose()  # !!! need to disable tf listener drc2_tools to prevent clash !!!
         self._Strategy.Initialize(self._bend_knees)
-        
+
+    # TO BE USED IN THE FUTURE:
+    # def OnExit(self):
+    #     # init _PreviewState and _StatePreviewBuffer:
+    #     state,transition_exists = StateMachine.GetStateAtTransition(self,"PreStep","NextStep")
+    #     self._PreviewState = state # initialized to "FirstStep"
+    #     if NeedToTurn():
+    #         turn_dir = GetTurnDirection() # returns: "TurnRight" or "TurnLeft"
+    #         if turn_dir = "TurnRight": # !!! "TurnLeft" can only start after Left Step !!!
+    #             state,transition_exists = StateMachine.GetStateAtTransition(self,"FirstStep",turn_dir)
+    #             self._PreviewState = state
+    #             self._Strategy.LoadNewStep(self._p_ref_x_start,self._p_ref_x_Rturn_step,self._p_ref_y_start,r_[ self._p_ref_y_Rturn_step_right, self._p_ref_y_Rturn_step_left ]) # new_step, following_steps_cycle
+    #     else:
+    #         state,transition_exists = StateMachine.GetStateAtTransition(self,"FirstStep","NextStep")
+    #         self._PreviewState = state
+    #         self._Strategy.LoadNewStep(self._p_ref_x_start,self._p_ref_x_forward_step,self._p_ref_y_start,r_[ self._p_ref_y_step_right, self._p_ref_y_step_left ]) # new_step, following_steps_cycle
+    #     #rospy.loginfo("class StepStateMachine init_values: PreviewState = %s" % (self._PreviewState.Name) )   
+                
     def GetId(self):
         return 1
 
@@ -162,9 +180,9 @@ class PreStepState(StepState):
         rospy.loginfo("time:")
         rospy.loginfo(rospy.get_time())
 
-        self._robotState.Set_step_phase(value = 1)                                                              # added by Israel to initiate step phase 24.2
-          
-        self._Strategy.LoadNewStep(self._p_ref_x_start,self._p_ref_x_forward_step,self._p_ref_y_start,r_[ self._p_ref_y_step_right, self._p_ref_y_step_left ])
+        self._robotState.Set_step_phase(value = 1)
+
+        self._Strategy.LoadNewStep(self._p_ref_x_start,self._p_ref_x_forward_step,self._p_ref_y_start,r_[ self._p_ref_y_step_right, self._p_ref_y_step_left ]) # new_step, following_steps_cycle
         
     def OnExit(self):
         # completed pre_step
@@ -549,6 +567,56 @@ class LeftStepState(StepState):
     def GetId(self):
         return 4
 
+#----------------------------------------------------------------------------------
+
+class TurnRight_LeftStepState(StepState):
+    """
+        The TurnRight_LeftStepState class is intended to be used with the StepStateMachine class,
+        When the ZMP begins a right turn taking a left step
+    """
+    def __init__(self,StepStrategy,walkingTrajectory,robotState,dt):
+        StepState.__init__(self,"TurnRightBeginLeft",StepStrategy,dt)
+        self._WalkingTrajectory = walkingTrajectory
+        self._robotState = robotState
+        
+        self._pre_step = 0
+        self._first_step = 0
+        self._full_step = 1
+        self._last_step = 0
+        
+    def OnEnter(self):
+        rospy.loginfo("starting turn right with left step")
+        self._robotState.Set_step_phase(value = 3)
+        
+        self._Strategy.LoadNewStep(self._p_ref_x_forward_step,self._p_ref_x_forward_step,self._p_ref_y_step_right,r_[ self._p_ref_y_step_left, self._p_ref_y_step_right ])
+
+    def UpdateStepCounter(self,stepCounter):
+        stepCounter = stepCounter+1
+        return stepCounter
+   
+    def GetId(self):
+        return 16
+
+###################################################################################
+#------------------------------ Preview -------------------------------------------
+###################################################################################
+
+class BufferData(object):
+    """
+        The BufferData class is intended to be used with the StepStateMachine class,
+        it contains preview data of StepStateMachine of which steps are going to performed next.
+    """
+    def __init__(self,strNextTransition,turn_angle,step_length,step_width,zmp_width,step_time,bend_knees,step_height,trans_ratio_of_step):
+        self.NextTransition = strNextTransition
+        self._turn_angle  = turn_angle   # [rad]
+        self._step_length = step_length  # [m]
+        self._step_width  = step_width   # [m]
+        self._zmp_width   = zmp_width    # [m]
+        self._step_time   = step_time    # [sec]
+        self._bend_knees  = bend_knees   # [m]     
+        self._step_height = step_height  # [m] 
+        self._trans_ratio_of_step = trans_ratio_of_step # units fraction: 0-1.0 ; fraction of step time to be used for transition. 1.0 = all of step time is transition
+
 ###################################################################################
 #--------------------------- State Machine ----------------------------------------
 ###################################################################################
@@ -559,9 +627,10 @@ class StepStateMachine(StateMachine):
     """
     
     def __init__(self,robotState,walkingTrajectory,transformListener,ZMP_Preview_BufferX,ZMP_Preview_BufferY,SwingTrajectory,UpdateRateHz,orientation_correction):
-        self._counter = 0
-        self._stepCounter = 0
         self._UpdateRateHz = UpdateRateHz
+        # Turn Parameters:
+        self._MaxStepTurn = 45*math.pi/180 # units [rad], the maximal Turn that can be performed in one step sequance 
+        self._TurnThreshold = 0.030        # units [rad], below this value a turn will not be performed 
         # Set up strategies
         self._StepStrategyNone = StepStrategyNone(robotState,walkingTrajectory,transformListener,ZMP_Preview_BufferX,ZMP_Preview_BufferY)
         self._StepStrategyWalk = StepStrategyWalk(robotState,walkingTrajectory,transformListener,SwingTrajectory,orientation_correction,ZMP_Preview_BufferX,ZMP_Preview_BufferY)
@@ -610,10 +679,23 @@ class StepStateMachine(StateMachine):
         StateMachine.AddTransition(self,"StopRight",            "NextStep",     "Idle")
         StateMachine.AddTransition(self,"StopLeft",             "NextStep",     "Idle")
         StateMachine.AddTransition(self,"EmergencyStop",        "NextStep",     "Idle")
+        # Values at init: (to enable reset of init values without recreating object)
+        # self.init_values() # commented because done externaly (at begining of task)
+    
+    def init_values(self):
+        self._counter = 0
+        self._stepCounter = 0
+        # Turn Variables:
+        self._TurnCmdInput = 0.0        # units [rad], Input Turn command recieved by StepStateMachine, angle signs: (+) turn left, (-) turn right
+        self._ExecutedTurnCmd = 0.0     # units [rad], Turn command that is being carried out
+        self._TotalTurnRemaining = 0.0   # units [rad], total turn remaining to perform
+        self._DistanceToNextTurn = 0.5
+        # Preview of State Machine:
+        self._StatePreviewBuffer = deque([]) # contains a list of BufferData class, infomation needed from _CurrentState to _PreviewState: Transitions, step times,...
+        self._PreviewState = StateMachine.GetCurrentState(self) # the state at which the preview is 
 
     def Initialize(self):
-        self._stepCounter = 0
-        self._counter = 0
+        self.init_values()
         self._CurrentState.OnExit()
         self._CurrentState = self._States["Initializing"]
         self._CurrentState.OnEnter()
@@ -627,6 +709,14 @@ class StepStateMachine(StateMachine):
 
     def NextStep(self):
         StateMachine.PerformTransition(self,"NextStep")
+        self._counter = 0
+
+    def TurnLeft(self):
+        StateMachine.PerformTransition(self,"TurnLeft")
+        self._counter = 0
+
+    def TurnRight(self):
+        StateMachine.PerformTransition(self,"TurnRight")
         self._counter = 0
 
     def Stop(self):
@@ -643,20 +733,80 @@ class StepStateMachine(StateMachine):
     
     def UpdatePreview(self):
         #rospy.loginfo("UpdatePreview - StepTime(%f) Counter(%d) Timer(%f)" % (StateMachine.GetCurrentState(self).GetStepTime(),self._counter, self._counter*1.0/self._UpdateRateHz))
-        if (StateMachine.GetCurrentState(self).GetStepTime() < self._counter*1.0/self._UpdateRateHz):
-            self.NextStep()
-            p_ref_x,p_ref_y,loaded_new_step_trigger_x,loaded_new_step_trigger_y = StateMachine.GetCurrentState(self).UpdatePreview()
+        if (StateMachine.GetCurrentState(self).GetStepTime() <= self._counter*1.0/self._UpdateRateHz):
             self._stepCounter = StateMachine.GetCurrentState(self).UpdateStepCounter(self._stepCounter)
             rospy.loginfo("done step number = %d" % (self._stepCounter))
             rospy.loginfo("time:")
             rospy.loginfo(rospy.get_time())
+
+            # # TODO: Transition need to be received from StepStatePreviewBuffer
+            # # End of step -> State Transitions:
+            # if self._DecideToTurn():
+            #     if self._ExecutedTurnCmd > 0:
+            #         self.TurnLeft()
+            #     else:
+            #         self.TurnRight()
+            # else:
+            #     self.NextStep()
+            self.NextStep()
+            p_ref_x,p_ref_y,loaded_new_step_trigger_x,loaded_new_step_trigger_y = StateMachine.GetCurrentState(self).UpdatePreview()
+            #rospy.loginfo("StepStateMachine UpdatePreview: _counter = %f, p_ref_x[0] = %f, p_ref_y[0] = %f" % (self._counter, p_ref_x[0], p_ref_y[0]) )                   
         else:
             p_ref_x,p_ref_y,loaded_new_step_trigger_x,loaded_new_step_trigger_y = StateMachine.GetCurrentState(self).UpdatePreview()
+            # if (StateMachine.GetCurrentState(self).GetStepTime() <= (self._counter+2)*1.0/self._UpdateRateHz):
+            #     rospy.loginfo("StepStateMachine UpdatePreview: _counter = %f, p_ref_x[0] = %f, p_ref_y[0] = %f" % (self._counter, p_ref_x[0], p_ref_y[0]) )
+
 
         self._counter = self._counter+1
         return p_ref_x,p_ref_y,loaded_new_step_trigger_x,loaded_new_step_trigger_y  
+    
     def GetStateId(self):
         return StateMachine.GetCurrentState(self).GetId()
+
+    def SetTurnCmd(self, turn_cmd):
+        self._TurnCmdInput = turn_cmd
+
+    def SetDistanceToNextTurn(self, distance):
+        self._DistanceToNextTurn = distance
+
+    def NeedToTurn(self):
+        """
+          Function returns True if _PreviewState needs to move to one of the TURN STATES
+          else return False
+        """
+        # TODO: check condition if turn is needed
+        return False
+
+    def _DecideToTurn(self):
+        """
+          1) A NEW turn command is excuted only after completing previous turning command.
+          2) A turn command may take a few turn step cycles (for larg turn commands).
+          3) A turn will be performed only above a certain threshold (_TurnThreshold).
+        """
+        result = False
+        # 1) if completed previous turn command Update from Turn Input command:
+        if ( abs(self._TotalTurnRemaining) < self._TurnThreshold ):
+            if ( abs(self._TurnCmdInput) >= self._TurnThreshold ):
+                self._TotalTurnRemaining = copy.copy(self._TurnCmdInput)
+            else:
+                self._TotalTurnRemaining = 0.0
+        # sign of turn:
+        if self._TotalTurnRemaining > 0.0:
+            turn_sign = 1 # left turn
+        else:
+            turn_sign = -1 # right turn
+        # 2) divid "big" Turn into a few steps: 
+        if abs(self._TotalTurnRemaining) >= self._MaxStepTurn:
+            # turn needs more than one turn step seq.
+            self._ExecutedTurnCmd = self._MaxStepTurn*turn_sign
+            self._TotalTurnRemaining = self._TotalTurnRemaining - self._ExecutedTurnCmd
+        else:
+            self._ExecutedTurnCmd = copy.copy(self._TotalTurnRemaining)
+            self._TotalTurnRemaining = 0.0
+        # 3) Check if need to turn:
+        if ( abs(self._ExecutedTurnCmd) >= self._TurnThreshold ):
+            result = True
+        return result
 
 ###################################################################################
 # a little testing script
