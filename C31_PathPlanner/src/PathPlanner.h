@@ -11,6 +11,7 @@
 #include "cogniteam_pathplanning.h"
 #include "ConvertorC22.hpp"
 #include "ConvertorC23.hpp"
+#include "ConvertorC11.hpp"
 
 #include "Events.hpp"
 
@@ -22,13 +23,15 @@ using namespace C0_RobilTask;
 typedef GPSPoint TargetPosition;
 typedef GPSPoint Localization;
 typedef std::string TargetGoal;
+typedef std::vector<GPSPoint> GPSTransits;
 
 struct Editable_Constraints{
 	RobotDimentions& dimentions;
 	Transits& transits;
+	GPSTransits& gps_transits;
 	Attractors& attractors;
-	Editable_Constraints(RobotDimentions& dimentions, Transits& transits, Attractors& attractors)
-	:dimentions(dimentions),transits(transits),attractors(attractors){}
+	Editable_Constraints(RobotDimentions& dimentions, Transits& transits, GPSTransits& gps_transits, Attractors& attractors)
+	:dimentions(dimentions),transits(transits),gps_transits(gps_transits),attractors(attractors){}
 };
 
 class PlanningArguments{
@@ -139,6 +142,7 @@ class PathPlanning{
 	TargetGoal targetGoal;
 	GPSPoint selfLocation;
 	MapProperties mapProperties;
+	GPSTransits gps_transits;
 
 	PlanningInputData data;
 	SmoothedPath path;
@@ -166,6 +170,7 @@ public:
 		targetGoal(""),
 		selfLocation(0,0), 
 		mapProperties(0.25, GPSPoint(0,0), Waypoint(0,0)),
+		gps_transits(),
 		//input data 
 		data(),
 		//output data
@@ -176,7 +181,7 @@ public:
 		   constraints(data.dimentions, data.transits, data.attractors), results(path),
 		//...read-write
 		ed_arguments(data.map, data.start, data.finish, targetPosition, targetGoal, selfLocation, mapProperties),
-		ed_constraints(data.dimentions, data.transits, data.attractors)
+		ed_constraints(data.dimentions, data.transits, gps_transits, data.attractors)
 	{
 
 	}
@@ -239,6 +244,8 @@ public:
 	Waypoint cast(const GPSPoint& gps)const;
 	GPSPoint cast(const Waypoint& wp)const;
 	GPSPoint cast(const Vec2d& wp)const;
+	std::vector<Waypoint> cast(const std::vector<GPSPoint>& gps_vector)const;
+	std::vector<TransitWaypoint> castToTransits(const std::vector<GPSPoint>& gps_vector)const;
 
 #undef SYNCHRONIZED
 #undef LOCK

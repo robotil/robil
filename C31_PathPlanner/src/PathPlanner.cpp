@@ -147,6 +147,39 @@
 		#undef TRANSLATE
 	}
 
+	std::vector<Waypoint> PathPlanning::cast(const std::vector<GPSPoint>& gps_vector)const{
+		#define TRANSLATE(x) TRANSLATE_POINT_GPS_TO_GRID(x)
+
+		if(isMapReady()==false){
+			return std::vector<Waypoint>();
+		}
+
+		std::vector<Waypoint> wp_vector;
+		for(size_t i=0; i<gps_vector.size(); i++){
+			GPSPoint gps( gps_vector[i].x, gps_vector[i].y);
+			long x ( TRANSLATE(x) );
+			long y ( TRANSLATE(y) );
+
+			if(data.map.inRange(x, y)==false){
+				ROS_INFO(STR("x or y not in map range: "<<x<<","<<y));
+				data.map.approximate(arguments.start.x, arguments.start.y, x, y);
+			}
+
+			wp_vector.push_back( Waypoint((size_t)x, (size_t)y) );
+
+		}
+
+		return wp_vector;
+
+		#undef TRANSLATE
+	}
+	std::vector<TransitWaypoint> PathPlanning::castToTransits(const std::vector<GPSPoint>& gps_vector)const{
+		std::vector<Waypoint> wp_vector = cast(gps_vector);
+		Transits transits;
+		for(size_t i=0;i<wp_vector.size();i++){ TransitWaypoint twp; twp.x=wp_vector[i].x; twp.y=wp_vector[i].y; transits.push_back(twp); }
+		return transits;
+	}
+
 
 	
 	

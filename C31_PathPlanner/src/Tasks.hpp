@@ -138,6 +138,9 @@ public:
 		ROS_INFO("subscribe to topic /C23/object_deminsions <C23_ObjectRecognition::C23C0_ODIM>");
 		ros::Subscriber c23Client = _node.subscribe("C23/object_deminsions", 1000, &PathPlanningServer::callbackNewTargetLocation, this );
 
+		ROS_INFO("subscribe to topic /c11_path_update <C31_PathPlanner/C31_Waypoints>");
+		ros::Subscriber c11Client = _node.subscribe("/c11_path_update", 1000, &PathPlanningServer::callbackTransitPoints, this );
+
 		#define TURNON_REQUEST_MAP
 		//#define TURNON_REQUEST_TARGET_LOCATION
 		
@@ -381,6 +384,9 @@ public:
     	//......I can't complete this code, because C23C0_ODIM message doesn't contain object name
 		onNewTargetLocation( extractObjectLocation( *msg ) );
 	}
+    void callbackTransitPoints(const C31_PathPlanner::C31_Waypoints::ConstPtr & msg){
+		onNewTransitPoints( extractPoints( *msg ) );
+	}
 
     //=================== NEW DATA INPUT ==================================================
     void dataChanged(){
@@ -403,17 +409,25 @@ public:
     	session.arguments.start = _planner.cast(session.arguments.selfLocation);
     	session.arguments.finish = _planner.cast(session.arguments.targetPosition);
     	session.constraints.dimentions.radius = _planner.castLength(session.constraints.dimentions.gps_radius);
-		ROS_INFO("GPS_GRID_CASTING: start=*(%f,%f)->(%i,%i), finis=*(%f,%f)->(%i,%i), robot.R=*%f->%i (from onNewMap)",
+    	session.constraints.transits = _planner.castToTransits(session.constraints.gps_transits);
+		ROS_INFO("GPS_GRID_CASTING: start=*(%f,%f)->(%i,%i), finish=*(%f,%f)->(%i,%i), robot.R=*%f->%i (from onNewMap)",
 			(float) session.arguments.selfLocation.x, (float) session.arguments.selfLocation.y, (int) session.arguments.start.x, (int) session.arguments.start.y,
 			(float) session.arguments.targetPosition.x,(float)  session.arguments.targetPosition.y, (int) session.arguments.finish.x,(int) session.arguments.finish.y,
 			(float) session.constraints.dimentions.gps_radius, (int) session.constraints.dimentions.radius
 		);
+		ROS_INFO("GPS_GRID_CASTING: Transits: (from onNewMap)");
+		for(size_t i=0;i<session.constraints.transits.size();i++){
+			ROS_INFO("... gps(%f,%f) -> wp(%i,%i)",
+				(float) session.constraints.gps_transits[i].x, (float)session.constraints.gps_transits[i].y,
+				(int) session.constraints.transits[i].x, (int) session.constraints.transits[i].y
+			);
+		}
     }
     void onNewLocation(const GPSPoint& pos, const Waypoint& wp){
     	PathPlanning::EditSession session = _planner.startEdit();
     	session.arguments.start = wp;
     	session.arguments.selfLocation = pos;
-		ROS_INFO("GPS_GRID_CASTING: start=#(%f,%f)->#(%i,%i), finis=(%fpathplanningfocus,%f)->(%i,%i), robot.R=%f->%i (from onNewLocation(pos=wp))",
+		ROS_INFO("GPS_GRID_CASTING: start=#(%f,%f)->#(%i,%i), finish=(%f,%f)->(%i,%i), robot.R=%f->%i (from onNewLocation(pos=wp))",
 			(float) session.arguments.selfLocation.x, (float) session.arguments.selfLocation.y, (int) session.arguments.start.x, (int) session.arguments.start.y,
 			(float) session.arguments.targetPosition.x,(float)  session.arguments.targetPosition.y, (int) session.arguments.finish.x,(int) session.arguments.finish.y,
 			(float) session.constraints.dimentions.gps_radius, (int) session.constraints.dimentions.radius
@@ -423,7 +437,7 @@ public:
     	PathPlanning::EditSession session = _planner.startEdit();
     	session.arguments.targetPosition = pos;
     	session.arguments.finish = _planner.cast(session.arguments.targetPosition);
-		ROS_INFO("GPS_GRID_CASTING: start=(%f,%f)->(%i,%i), finis=#(%f,%f)->(%i,%i), robot.R=%f->%i (from onNewTargetLocation)",
+		ROS_INFO("GPS_GRID_CASTING: start=(%f,%f)->(%i,%i), finish=#(%f,%f)->(%i,%i), robot.R=%f->%i (from onNewTargetLocation)",
 			(float) session.arguments.selfLocation.x, (float) session.arguments.selfLocation.y, (int) session.arguments.start.x, (int) session.arguments.start.y,
 			(float) session.arguments.targetPosition.x,(float)  session.arguments.targetPosition.y, (int) session.arguments.finish.x,(int) session.arguments.finish.y,
 			(float) session.constraints.dimentions.gps_radius, (int) session.constraints.dimentions.radius
@@ -433,11 +447,23 @@ public:
     	PathPlanning::EditSession session = _planner.startEdit();
     	session.arguments.start = _planner.cast(pos);
     	session.arguments.selfLocation = pos;
-		ROS_INFO("GPS_GRID_CASTING: start=#(%f,%f)->(%i,%i), finis=(%f,%f)->(%i,%i), robot.R=%f->%i (from onNewLocation(pos=?))",
+		ROS_INFO("GPS_GRID_CASTING: start=#(%f,%f)->(%i,%i), finish=(%f,%f)->(%i,%i), robot.R=%f->%i (from onNewLocation(pos=?))",
 			(float) session.arguments.selfLocation.x, (float) session.arguments.selfLocation.y, (int) session.arguments.start.x, (int) session.arguments.start.y,
 			(float) session.arguments.targetPosition.x,(float)  session.arguments.targetPosition.y, (int) session.arguments.finish.x,(int) session.arguments.finish.y,
 			(float) session.constraints.dimentions.gps_radius, (int) session.constraints.dimentions.radius
 		);
+    }
+    void onNewTransitPoints(const std::vector<GPSPoint> points){
+    	PathPlanning::EditSession session = _planner.startEdit();
+   		session.constraints.gps_transits = points;
+    	session.constraints.transits = _planner.castToTransits(session.constraints.gps_transits);
+		ROS_INFO("GPS_GRID_CASTING: Transits: (from NewTransitPoints)");
+		for(size_t i=0;i<session.constraints.transits.size();i++){
+			ROS_INFO("... gps(%f,%f) -> wp(%i,%i)",
+				(float) session.constraints.gps_transits[i].x, (float)session.constraints.gps_transits[i].y,
+				(int) session.constraints.transits[i].x, (int) session.constraints.transits[i].y
+			);
+		}
     }
     void onNewConstraints(const Constraints& constr){
     	PathPlanning::EditSession session = _planner.startEdit();
