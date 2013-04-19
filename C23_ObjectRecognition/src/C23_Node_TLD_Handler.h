@@ -23,6 +23,7 @@ class C23_Node_TLD_Handler {
         TldRetval init(IplImage* img= NULL);
         TldRetval saveCurrentModel(const char*);
         TldRetval loadModel(string path);
+        TldRetval setBB(IplImage* img, int x, int y, int width, int height);
         TldRetval processFrame(IplImage* img, int *x, int *y, int *width, int *height, float *confident);
         
     public:

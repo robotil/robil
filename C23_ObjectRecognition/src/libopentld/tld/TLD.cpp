@@ -30,6 +30,7 @@
 #include "NNClassifier.h"
 #include "TLDUtil.h"
 
+
 using namespace std;
 using namespace cv;
 
@@ -108,7 +109,7 @@ void TLD::processImage(const Mat &img)
     Mat grey_frame;
     cvtColor(img, grey_frame, CV_RGB2GRAY);
     currImg = grey_frame; // Store new image , right after storeCurrentData();
-
+    ROS_INFO("Tracker: %d, Detector: %d, Alternating: %d",trackerEnabled,detectorEnabled,alternating);
     if(trackerEnabled)
     {
         medianFlowTracker->track(prevImg, currImg, prevBB);
