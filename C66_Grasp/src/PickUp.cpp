@@ -23,10 +23,10 @@ public:
 
 	  pelvis_move_hand_cli_ = nh_.serviceClient<move_hand::pelvis_move_hand>("pelvis_move_hand");
 
-		while(!move_hand_cli_.waitForExistence(ros::Duration(0.1))){
+/*		while(!move_hand_cli_.waitForExistence(ros::Duration(0.1))){
 			ROS_INFO("Waiting for the move_hand server");
 		}
-
+*/
 		//Set callback functions
 		as_.registerGoalCallback(boost::bind(&PickUp::goalCB, this));
 //		as_.registerPreemptCallback(boost::bind(&PickUp::preemptCB, this));
