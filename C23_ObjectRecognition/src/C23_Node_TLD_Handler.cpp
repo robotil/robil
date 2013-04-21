@@ -26,7 +26,50 @@ C23_Node_TLD_Handler::C23_Node_TLD_Handler(TldMode mode, const char* modelPath) 
     _window = "Image window";
     
 }
+C23_Node_TLD_Handler::~C23_Node_TLD_Handler() {
+}
+TldRetval C23_Node_TLD_Handler::setBB(IplImage* img, int x, int y, int width, int height) {
+  Mat grey(img->height, img->width, CV_8UC1);
+  cvtColor(cv::Mat(img), grey, CV_BGR2GRAY);
+  ROS_INFO("Init func: 1\n");
+  tld->detectorCascade->imgWidth = grey.cols;
+  tld->detectorCascade->imgHeight = grey.rows;
+  tld->detectorCascade->imgWidthStep = grey.step;
+  ROS_INFO("Init func: 2\n");
+
+  if(_initialBB == NULL)
+  {
+      _initialBB = new int[4];
+  }
+  _initialBB[0] = x;
+  _initialBB[1] = y;
+  _initialBB[2] = width;
+  _initialBB[3] = height;
+
+ 
+
+
+  ROS_INFO("Init func: 5\n");
+  bool reuseFrameOnce = false;
+  bool skipProcessingOnce = false;
+
+ 
+
+  ROS_INFO("Init func: 5.2");
+  Rect bb = tldArrayToRect(_initialBB);
+
+  printf("Starting at %d %d %d %d\n", bb.x, bb.y, bb.width, bb.height);
+  ROS_INFO("Init func: 6");
+  ROS_INFO("%d %d %d %d",bb.x, bb.y, bb.width, bb.height);
+  tld->selectObject(grey, &bb);
+  ROS_INFO("Init func: 7");
+  skipProcessingOnce = true;
+  reuseFrameOnce = true;
+  
+
+}
 TldRetval C23_Node_TLD_Handler::init(IplImage* img) {
+
     Mat grey(img->height, img->width, CV_8UC1);
     cvtColor(cv::Mat(img), grey, CV_BGR2GRAY);
     ROS_INFO("Init func: 1\n");
@@ -151,7 +194,7 @@ TldRetval C23_Node_TLD_Handler::processFrame(IplImage* img, int *x, int *y, int 
 
         if(tld->currBB != NULL) {
              CvScalar rectangleColor = (confident) ? blue : yellow;
-             cvRectangle(img, tld->currBB->tl(), tld->currBB->br(), rectangleColor, 8, 8, 0);
+             cvRectangle(img, tld->currBB->tl(), tld->currBB->br(), rectangleColor, 1, 8, 0);
         }
      
 ///////    My adding   /////////////////////
