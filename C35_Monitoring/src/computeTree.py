@@ -18,6 +18,9 @@ def nodeDataInDebugMode(nodeTime, nodeSuccFail, nodeID, monitordNodeID, numOfIte
    # print "E="+ str(Ctree.myTree.getWrappedNode(monitordNodeID).getAverageSuccTime(0))  
    # print "prob="+str(Ctree.myTree.getWrappedNode(monitordNodeID).getProbAtIndex(0))
     
+    if monitordNodeID != "":
+        monitorNode= newTree.getWrappedNode(monitordNodeID)
+    
     #get pointer to the monitored node
     finished_node = newTree.getWrappedNode(nodeID)
     finished_node.setDebug(str(nodeSuccFail) + " " + str(nodeTime))
@@ -35,8 +38,11 @@ def nodeDataInDebugMode(nodeTime, nodeSuccFail, nodeID, monitordNodeID, numOfIte
     if monitordNodeID == "":
         root = newTree.getRoot()
         monitorNode = root.getChild(0)
+<<<<<<< HEAD
     else:
         monitorNode = newTree.getWrappedNode(monitordNodeID)    
+=======
+>>>>>>> 029658a54707dc9e8869336e045f969133a07f0f
     
     #take E,prob and standarte deviation  from the debug node,
     E =  monitorNode.getAverageSuccTime(param)
