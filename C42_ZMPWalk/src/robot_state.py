@@ -126,7 +126,7 @@ class Robot_State:
         return()
 
     # External auxiliary method:
-    def Get_foot_coord_params(self,step_width):
+    def Get_foot_coord_params(self,step_width,step_length):
     # Retrieves parameters that are depended on the coordinate system that we are using (right or left foot).
     # Which coordinate system we are using is determined by the current step phase:
         if ( self.__step_phase == 1 ) or ( self.__step_phase == 2 ):
@@ -144,8 +144,9 @@ class Robot_State:
             res_pelvis_pos_0[1] = step_width/2
             res_swing_y_sign = 1.0 # relative direction of swing leg from current coord system
         
-        res_stance_hip_0[0] = res_stance_hip_0[0] - self.change_in_foot_coordinates[0]/2
+        res_stance_hip_0[0] = res_stance_hip_0[0] - self._previous_step_length/2 # self.change_in_foot_coordinates[0]/2
         res_swing_hip_dy = self.swing_hip_dy*res_swing_y_sign # swing hip relative position to stance hip
+        self._previous_step_length = step_length
         return(self.array2Pos( res_stance_hip_0 ), res_swing_y_sign, res_swing_hip_dy )
 
     # Class internal auxiliary method:
@@ -391,6 +392,7 @@ class Robot_State:
         step_width = (lf_step_width + rf_step_width)/2
 
         # constraint: we want hips height (z) and advance (x) to be the same
+        self._previous_step_length = 0.0
         hip_height = 0.7999 - bend_knees #(self.l_stance_hip_0.z + self.r_stance_hip_0.z)/2
         hip_sagital = 0.05 #0.05 #-0.02 # (self.l_stance_hip_0.x + self.r_stance_hip_0.x)/2 # x position relative to foot
         self.l_stance_hip_0[2] = hip_height; self.r_stance_hip_0[2] = hip_height; # update z coord.

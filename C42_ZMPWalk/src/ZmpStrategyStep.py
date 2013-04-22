@@ -119,7 +119,7 @@ class StepStrategyWalk(StepStrategy):
         self._OrientationCorrection = orientation_correction
     
     def CalculateFootSwingTrajectory(self,step_time,step_length,step_width,step_height,dt,pre_step,first_step,full_step,last_step,k,k_total,k_start_swing,k_stop_swing):
-        [self._stance_hip_0, swing_y_sign, self._swing_hip_dy] = self._RobotState.Get_foot_coord_params(step_width)
+        [self._stance_hip_0, swing_y_sign, self._swing_hip_dy] = self._RobotState.Get_foot_coord_params(step_width,step_length)
         self._swing_foot_y = step_width*swing_y_sign # final position of swing_foot y coordinate
         robot_foot_state = copy.copy(self._RobotState.swing_foot_at_start_of_step_phase)  #copy.copy(self._RobotState.swing_foot)
         [self._swing_k, lifting_swing_foot] = self._SwingTrajectory.Get_swing_foot_traj(k, step_time, robot_foot_state, step_length,self._swing_foot_y,step_height,dt,pre_step,first_step,full_step,last_step,k_total,k_start_swing,k_stop_swing)
@@ -138,7 +138,7 @@ class StepStrategyWalk(StepStrategy):
         self._WalkingTrajectory.swing_foot = copy.copy(self._swing_k)                              #added by Israel 24.2
         self._WalkingTrajectory.swing_foot.y = copy.copy(self._swing_foot_y)
         self._WalkingTrajectory.stance_hip.x = COMx + self._stance_hip_0.x #- self._previous_step_length/2 #-D #TODO: incorporate step_length of previous step in Robot State and include it in stance_hip_0.x (foot coord. change)
-                                                   # implemented in robot_state->Get_foot_coord_params: res_stance_hip_0[0] = res_stance_hip_0[0] - self.change_in_foot_coordinates[0]/2
+                                                   # implemented in robot_state->Get_foot_coord_params: res_stance_hip_0[0] = res_stance_hip_0[0] - self._previous_step_length/2
         self._WalkingTrajectory.stance_hip.y = COMy + self._stance_hip_0.y
         self._WalkingTrajectory.stance_hip.z = self._stance_hip_0.z
         
