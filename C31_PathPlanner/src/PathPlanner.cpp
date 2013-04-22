@@ -27,7 +27,7 @@
 			Constraints constraints(_data.dimentions, _data.transits, _data.attractors);
 			
 			_data.map(_data.start.x, _data.start.y) = Map::ST_AVAILABLE;
-			SmoothedPath _path = searchPath(_data.map, _data.start, _data.finish, constraints);
+			SmoothedPath _path = searchPath_transitAccurate(_data.map, _data.start, _data.finish, constraints);
 			ROS_INFO("Calculated path: %s",STR(_path));
 			
 			PField pf(_data.map, Path());

@@ -39,7 +39,7 @@ public:
 		bool notDefined()const{
 			if(
 				viewRadiusForward==0 || viewRadiusSide==0 ||
-				maxIterationNumber==0 || stepRate == 0 ||
+				maxIterationNumber<0 || stepRate == 0 ||
 				distanceBetweenPoints==0 || maxAngleWhileReducing==0 ||
 				repulsorType==RT_ERROR || attractorType==AT_ERROR
 			){
@@ -78,6 +78,7 @@ public://<- for testing only
 	Points simulate(const SmoothingParameters& params) const;
 	Points reducePath(const Points& path, const SmoothingParameters& params) const;
 	Points addPointsToPath(const Points& path, const SmoothingParameters& params) const;
+	Points addPointsToPath(const Points& path, double distBtwPoints) const;
 };
 
 #endif
