@@ -61,12 +61,13 @@ public:
     }
 
     bool srv_PlanPath( C31_PathPlanner::C31_PlanPathRequest& req, C31_PathPlanner::C31_PlanPathResponse& res){
+    	/*[CURRENTLLY NOT ACTUAL]
 		ROS_INFO("START CALCULATION OF GLOBAL PATH PLANNER");
 
 		PathPlanning planner;
 
 		{ PathPlanning::EditSession session = planner.startEdit();
-		  //TODO: fill data of planner from message
+		  //TODO:  [CURRENTLLY NOT ACTUAL] fill data of planner from message
 		}
 
 		planner.plan();
@@ -77,8 +78,8 @@ public:
 				const Vec2d& wp = session.results.path[i];
 				gpspath.push_back(planner.cast(wp));
 			}
-			//TODO: fill message by planner results
-		}
+			//TODO:  [CURRENTLLY NOT ACTUAL] fill message by planner results
+		}*/
 		return true;
     }
 
@@ -109,11 +110,13 @@ public:
     	//ros::this_node::getName()
     	
     	// TASK OUTPUT CHANNELS
+    	/* [CURRENTLLY NOT ACTUAL]
     	ROS_INFO("advertise service /planPath <C31_PathPlanner::C31_PlanPath> ");
     	ros::ServiceServer c31_PlanPath =
     			_node.advertiseService<C31_PathPlanner::C31_PlanPathRequest, C31_PathPlanner::C31_PlanPathResponse>(
     					STR(ros::this_node::getName()<<"/planPath"),boost::bind(&PathPlanningServer::srv_PlanPath,this,_1,_2)
     			);
+    	*/
     	ROS_INFO("advertise service /getPath <C31_PathPlanner::C31_GetPath>");
     	ros::ServiceServer c31_GetPath =
     			_node.advertiseService<C31_PathPlanner::C31_GetPathRequest, C31_PathPlanner::C31_GetPathResponse>(
@@ -176,8 +179,11 @@ public:
 				if(needNewLoc) requestNewLocation();
 				if(needNewTargetLoc) requestNewTargetLocation();
 
+				bool targetDefined = false;
+				{PathPlanning::ReadSession sess = _planner.startReading(); targetDefined = sess.arguments.targetDefined;}
+
             LOCK( locker )
-            if(exists_new_map_or_location()){
+            if(exists_new_map_or_location() && targetDefined){
 
 					map_and_location_gotten();
 
@@ -380,9 +386,14 @@ public:
     	//onNewTargetLocation(NEW_TARGET_LOCATION_GPS)
     }
     void callbackNewTargetLocation(const C23_ObjectRecognition::C23C0_ODIM::ConstPtr & msg){
-    	//TODO: WE NEED FILTER GOTTEN LOCATIONS FOR CURRENTLY DEFINED FOR TRUCKING
-    	//......I can't complete this code, because C23C0_ODIM message doesn't contain object name
-		onNewTargetLocation( extractObjectLocation( *msg ) );
+    	std::string objectName = "";
+    	{
+    		PathPlanning::ReadSession session = _planner.startReading();
+    		objectName = session.arguments.targetGoal;
+    	}
+    	if( objectName == msg->Object ){
+    		onNewTargetLocation( extractObjectLocation( *msg ) );
+    	}
 	}
     void callbackTransitPoints(const C31_PathPlanner::C31_Waypoints::ConstPtr & msg){
 		onNewTransitPoints( extractPoints( *msg ) );
@@ -407,7 +418,8 @@ public:
     	session.arguments.map = map;
     	session.arguments.mapProperties = prop;
     	session.arguments.start = _planner.cast(session.arguments.selfLocation);
-    	session.arguments.finish = _planner.cast(session.arguments.targetPosition);
+    	if(session.arguments.targetDefined)
+    		session.arguments.finish = _planner.cast(session.arguments.targetPosition);
     	session.constraints.dimentions.radius = _planner.castLength(session.constraints.dimentions.gps_radius);
     	session.constraints.transits = _planner.castToTransits(session.constraints.gps_transits);
 		ROS_INFO("GPS_GRID_CASTING: start=*(%f,%f)->(%i,%i), finish=*(%f,%f)->(%i,%i), robot.R=*%f->%i (from onNewMap)",
@@ -435,8 +447,9 @@ public:
     }
     void onNewTargetLocation(const GPSPoint& pos){
     	PathPlanning::EditSession session = _planner.startEdit();
-    	session.arguments.targetPosition = pos;
-    	session.arguments.finish = _planner.cast(session.arguments.targetPosition);
+    	session.arguments.defineTarget( pos );
+    	if(session.arguments.targetDefined)
+    		session.arguments.finish = _planner.cast(session.arguments.targetPosition);
 		ROS_INFO("GPS_GRID_CASTING: start=(%f,%f)->(%i,%i), finish=#(%f,%f)->(%i,%i), robot.R=%f->%i (from onNewTargetLocation)",
 			(float) session.arguments.selfLocation.x, (float) session.arguments.selfLocation.y, (int) session.arguments.start.x, (int) session.arguments.start.y,
 			(float) session.arguments.targetPosition.x,(float)  session.arguments.targetPosition.y, (int) session.arguments.finish.x,(int) session.arguments.finish.y,
@@ -490,15 +503,15 @@ public:
 
 			PathPlanning::EditSession session = _planner.startEdit();
 
+			//TODO: this check may be removed, but need testing after removing.
 			if(_planner.isMapReady()==false){
 				session.aborted();
 				return TaskResult(FAULT, "Map is not ready");
 			}
 
-			session.arguments.targetGoal="";
-			session.arguments.targetPosition.x=x;
-			session.arguments.targetPosition.y=y;
-			session.arguments.finish = _planner.cast(session.arguments.targetPosition);
+			session.arguments.defineTarget(TargetPosition(x,y));
+			if(session.arguments.targetDefined)
+				session.arguments.finish = _planner.cast(session.arguments.targetPosition);
 
 			stringstream info;
 			info<<"CONVERT "
@@ -506,6 +519,24 @@ public:
 					<<" -> "
 					<<session.arguments.finish.x<<","<<session.arguments.finish.y<<endl;
 			ROS_INFO(info.str().c_str());
+
+			return TaskResult(SUCCESS, "OK");
+		}else
+		if( args.find("target")!=args.end() ){
+			std::string objectName = args["target"];
+
+			ROS_INFO("%s: set planning goal to target = %s", _name.c_str(), objectName.c_str());
+
+			PathPlanning::EditSession session = _planner.startEdit();
+
+//			if(_planner.isMapReady()==false){
+//				session.aborted();
+//				return TaskResult(FAULT, "Map is not ready");
+//			}
+
+			session.arguments.defineTarget( objectName );
+			if(session.arguments.targetDefined)
+				session.arguments.finish = _planner.cast(session.arguments.targetPosition);
 
 			return TaskResult(SUCCESS, "OK");
 		}else{
