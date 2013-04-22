@@ -11,6 +11,9 @@
 #include "cogniteam_pathplanning.h"
 #include "ConvertorC22.hpp"
 #include "ConvertorC23.hpp"
+#include "ConvertorC11.hpp"
+
+#include "Events.hpp"
 
 
 using namespace std;
@@ -20,13 +23,15 @@ using namespace C0_RobilTask;
 typedef GPSPoint TargetPosition;
 typedef GPSPoint Localization;
 typedef std::string TargetGoal;
+typedef std::vector<GPSPoint> GPSTransits;
 
 struct Editable_Constraints{
 	RobotDimentions& dimentions;
 	Transits& transits;
+	GPSTransits& gps_transits;
 	Attractors& attractors;
-	Editable_Constraints(RobotDimentions& dimentions, Transits& transits, Attractors& attractors)
-	:dimentions(dimentions),transits(transits),attractors(attractors){}
+	Editable_Constraints(RobotDimentions& dimentions, Transits& transits, GPSTransits& gps_transits, Attractors& attractors)
+	:dimentions(dimentions),transits(transits),gps_transits(gps_transits),attractors(attractors){}
 };
 
 class PlanningArguments{
@@ -34,6 +39,7 @@ public:
 	const Map& map;
 	const Waypoint& start;
 	const Waypoint& finish;
+	const bool& targetDefined;
 	const TargetPosition& targetPosition;
 	const TargetGoal& targetGoal;
 	const GPSPoint& selfLocation;
@@ -41,7 +47,8 @@ public:
 	PlanningArguments(
 		const Map& map, 
 		const Waypoint& start, 
-		const Waypoint& finish, 
+		const Waypoint& finish,
+		const bool& targetDef,
 		const TargetPosition& targetPos, 
 		const TargetGoal& targetGoal, 
 		const GPSPoint& sloc, 
@@ -50,6 +57,7 @@ public:
 		map(map), 
 		start(start), 
 		finish(finish), 
+		targetDefined(targetDef),
 		targetPosition(targetPos), 
 		targetGoal(targetGoal), 
 		selfLocation(sloc), 
@@ -61,14 +69,18 @@ public:
 	Map& map;
 	Waypoint& start;
 	Waypoint& finish;
+public:
+	bool& targetDefined;
 	TargetPosition& targetPosition;
 	TargetGoal& targetGoal;
+public:
 	GPSPoint& selfLocation;
 	MapProperties& mapProperties;
 	Editable_PlanningArguments(
 		Map& map, 
 		Waypoint& start, 
-		Waypoint& finish, 
+		Waypoint& finish,
+		bool& targetDef,
 		TargetPosition& targetPos, 
 		TargetGoal& targetGoal,
 		GPSPoint& sloc, 
@@ -78,11 +90,24 @@ public:
 		map(map), 
 		start(start), 
 		finish(finish), 
+		targetDefined(targetDef),
 		targetPosition(targetPos), 
 		targetGoal(targetGoal),
 		selfLocation(sloc), 
 		mapProperties(mapProperties)
 	{   }
+
+	void defineTarget(const TargetGoal& goal){
+		targetDefined = false;
+		targetGoal = goal;
+	}
+	void defineTarget(const TargetPosition& pos){
+		targetDefined = true;
+		targetPosition = pos;
+	}
+//	bool getTargetDefined()const{ return targetDefined; }
+//	const TargetGoal& getTargetGoal()const{ return targetGoal; }
+//	const TargetPosition& getTargetPosition()const{ return targetPosition; }
 };
 
 class PlanningResult{
@@ -133,10 +158,12 @@ class PathPlanning{
 	};
 
 	//-------------- DATA ------------------------------
+	bool targetDefined;
 	TargetPosition targetPosition;
 	TargetGoal targetGoal;
 	GPSPoint selfLocation;
 	MapProperties mapProperties;
+	GPSTransits gps_transits;
 
 	PlanningInputData data;
 	SmoothedPath path;
@@ -153,27 +180,30 @@ class PathPlanning{
 
 	//-------------- EVENTS ----------------------------
 	boost::shared_ptr<ChangesNotification> changeNotification;
+	Events _events;
 	//--------------------------------------------------
 
 public:
 
 	PathPlanning():
 		//temporal data
+		targetDefined(false),
 		targetPosition(0,0), 
 		targetGoal(""),
 		selfLocation(0,0), 
 		mapProperties(0.25, GPSPoint(0,0), Waypoint(0,0)),
+		gps_transits(),
 		//input data 
 		data(),
 		//output data
 		path(),
 		//parameters interfaces
 		//...read-only
-		   arguments(data.map, data.start, data.finish, targetPosition, targetGoal, selfLocation, mapProperties),
+		   arguments(data.map, data.start, data.finish, targetDefined, targetPosition, targetGoal, selfLocation, mapProperties),
 		   constraints(data.dimentions, data.transits, data.attractors), results(path),
 		//...read-write
-		ed_arguments(data.map, data.start, data.finish, targetPosition, targetGoal, selfLocation, mapProperties),
-		ed_constraints(data.dimentions, data.transits, data.attractors)
+		ed_arguments(data.map, data.start, data.finish, targetDefined, targetPosition, targetGoal, selfLocation, mapProperties),
+		ed_constraints(data.dimentions, data.transits, gps_transits, data.attractors)
 	{
 
 	}
@@ -182,6 +212,7 @@ public:
 	void setChangeNotifier(CALLBACK cb){ changeNotification = boost::shared_ptr<ChangesNotification>(new _ChangesNotification<CALLBACK>(cb)); }
 
 	bool plan();
+	Events& events(){ return _events; }
 
 	class EditSession{
 		boost::shared_ptr<boost::mutex::scoped_lock> l;
@@ -235,6 +266,8 @@ public:
 	Waypoint cast(const GPSPoint& gps)const;
 	GPSPoint cast(const Waypoint& wp)const;
 	GPSPoint cast(const Vec2d& wp)const;
+	std::vector<Waypoint> cast(const std::vector<GPSPoint>& gps_vector)const;
+	std::vector<TransitWaypoint> castToTransits(const std::vector<GPSPoint>& gps_vector)const;
 
 #undef SYNCHRONIZED
 #undef LOCK

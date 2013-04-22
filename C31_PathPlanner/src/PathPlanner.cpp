@@ -27,7 +27,7 @@
 			Constraints constraints(_data.dimentions, _data.transits, _data.attractors);
 			
 			_data.map(_data.start.x, _data.start.y) = Map::ST_AVAILABLE;
-			SmoothedPath _path = searchPath(_data.map, _data.start, _data.finish, constraints);
+			SmoothedPath _path = searchPath_transitAccurate(_data.map, _data.start, _data.finish, constraints);
 			ROS_INFO("Calculated path: %s",STR(_path));
 			
 			PField pf(_data.map, Path());
@@ -40,11 +40,12 @@
 
 			LOCK( locker_aft )
 				path = _path;
-				plan_created = true;
+				plan_created = path.size()>0;
 			UNLOCK( locker_aft )
 		}else{
 			ROS_INFO("PathPlanning::plan : %s","map is not ready => can not calculate path");
 		}
+		ROS_INFO("PathPlanning::plan : %s","no path calculated");
 		return plan_created;
 	}
 
@@ -144,6 +145,39 @@
 		return GPSPoint(x, y);
 
 		#undef TRANSLATE
+	}
+
+	std::vector<Waypoint> PathPlanning::cast(const std::vector<GPSPoint>& gps_vector)const{
+		#define TRANSLATE(x) TRANSLATE_POINT_GPS_TO_GRID(x)
+
+		if(isMapReady()==false){
+			return std::vector<Waypoint>();
+		}
+
+		std::vector<Waypoint> wp_vector;
+		for(size_t i=0; i<gps_vector.size(); i++){
+			GPSPoint gps( gps_vector[i].x, gps_vector[i].y);
+			long x ( TRANSLATE(x) );
+			long y ( TRANSLATE(y) );
+
+			if(data.map.inRange(x, y)==false){
+				ROS_INFO(STR("x or y not in map range: "<<x<<","<<y));
+				data.map.approximate(arguments.start.x, arguments.start.y, x, y);
+			}
+
+			wp_vector.push_back( Waypoint((size_t)x, (size_t)y) );
+
+		}
+
+		return wp_vector;
+
+		#undef TRANSLATE
+	}
+	std::vector<TransitWaypoint> PathPlanning::castToTransits(const std::vector<GPSPoint>& gps_vector)const{
+		std::vector<Waypoint> wp_vector = cast(gps_vector);
+		Transits transits;
+		for(size_t i=0;i<wp_vector.size();i++){ TransitWaypoint twp; twp.x=wp_vector[i].x; twp.y=wp_vector[i].y; transits.push_back(twp); }
+		return transits;
 	}
 
 
