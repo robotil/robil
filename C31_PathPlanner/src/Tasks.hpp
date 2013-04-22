@@ -202,7 +202,7 @@ public:
 
             UNLOCK( locker )
 
-            		ROS_INFO("%s: wait for new data (map, location, target, constraints, etc.)", _name.c_str());
+            		ROS_INFO("%s: wait for new data (map, location, target, constraints, etc.)%s", _name.c_str(), (targetDefined?"":", target still not defined"));
 
             }
 

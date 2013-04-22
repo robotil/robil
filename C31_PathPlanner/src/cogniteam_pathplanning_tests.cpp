@@ -546,7 +546,7 @@ int cogniteam_pathplanning_test_transits(int argc, char** argv) {
 
 	long _sx=atoi(argv[1]), _sy=atoi(argv[2]);
 	long _ex=atoi(argv[3]), _ey=atoi(argv[4]);
-	long _rr=atoi(argv[6]);
+	long _rr=argc>6 ? 2 : atoi(argv[6]);
 
 	#define START_P _sx,_sy
 	#define END_P   _ex,_ey
@@ -563,10 +563,12 @@ int cogniteam_pathplanning_test_transits(int argc, char** argv) {
 	Waypoint start(START_P), finish(END_P);
 	RobotDimentions dimentions; dimentions.radius = _rr;
 	Transits transits;
-		TransitWaypoint wp1={36,48}; cout<<"add transit: "<<wp1.x<<","<<wp1.y<<endl;
-		TransitWaypoint wp2={10,53}; cout<<"add transit: "<<wp2.x<<","<<wp2.y<<endl;
-		transits.push_back(wp1);
-		transits.push_back(wp2);
+		int tpn = argc>7 ?  atoi(argv[7]) : 0;
+		printf("transit points number : %i \n", tpn);
+		for(int i=8;i<tpn*2+8 && argc>i+1;i+=2){
+			TransitWaypoint wp1={atoi(argv[i]),atoi(argv[i+1])}; cout<<"add transit: "<<wp1.x<<","<<wp1.y<<endl;
+			transits.push_back(wp1);
+		}
 	Attractors attractors;
 	Constraints con(dimentions, transits, attractors);
 
