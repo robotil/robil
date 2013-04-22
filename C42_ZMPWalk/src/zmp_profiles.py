@@ -215,6 +215,51 @@ def  Start_sagital_x(ZMP_start_pos, step_length, trans_ratio_of_step, trans_slop
 
     return (p_ref_x)
 
+## Start_sagital_x was divided into two single steps: Pre_Step_sagital_x and First_Step_sagital_x
+def  Pre_Step_sagital_x(ZMP_start_pos, step_length, trans_ratio_of_step, trans_slope_steepens_factor, step_time, sample_time):
+    samples_in_step = ceil (step_time / sample_time)
+    samples_in_transition = floor (trans_ratio_of_step * samples_in_step)
+    samples_in_start_step_trans = floor (samples_in_transition/2)
+    samples_in_end_step_trans = samples_in_transition - samples_in_start_step_trans
+    samples_in_step_without_trans = samples_in_step - samples_in_transition
+    # One step sequence is divided into the following sampling order:
+    # 1) samples_in_start_step_trans
+    # 2) samples_in_step_without_trans
+    # 3) samples_in_end_step_trans
+    # total number of samples = samples_in_step
+
+    # step 1 : stand in place, see Start_lateral_y (step 1)
+    #p_ref0_0x = zeros( samples_in_start_step_trans + samples_in_step_without_trans )
+    p_ref0_0x = ZMP_start_pos*ones( samples_in_step )
+    
+    p_ref_x = p_ref0_0x 
+
+    return (p_ref_x)
+
+def  First_Step_sagital_x(ZMP_start_pos, step_length, trans_ratio_of_step, trans_slope_steepens_factor, step_time, sample_time):
+    samples_in_step = ceil (step_time / sample_time)
+    samples_in_transition = floor (trans_ratio_of_step * samples_in_step)
+    samples_in_start_step_trans = floor (samples_in_transition/2)
+    samples_in_end_step_trans = samples_in_transition - samples_in_start_step_trans
+    samples_in_step_without_trans = samples_in_step - samples_in_transition
+    # One step sequence is divided into the following sampling order:
+    # 1) samples_in_start_step_trans
+    # 2) samples_in_step_without_trans
+    # 3) samples_in_end_step_trans
+    # total number of samples = samples_in_step
+
+    # step 2 until last transition of step2 : stand in place, see Start_lateral_y (step 1)
+    #p_ref0_0x = zeros( samples_in_start_step_trans + samples_in_step_without_trans )
+    p_ref0_0x = ZMP_start_pos*ones( samples_in_start_step_trans + samples_in_step_without_trans )
+    
+    # step 2 end: transition
+    #half_trans_x = ZMP_start_pos + transitionSigmoid_firstHalf(step_length/2 - ZMP_start_pos, trans_slope_steepens_factor, samples_in_end_step_trans, sample_time)
+    half_trans_x = transition_Min_jerk_firstHalf( ZMP_start_pos, step_length/2, samples_in_end_step_trans, samples_in_transition)
+
+    p_ref_x = r_[ p_ref0_0x , half_trans_x ]
+
+    return (p_ref_x)
+
 def  Step_forward_x(ZMP_start_pos, step_length, trans_ratio_of_step, trans_slope_steepens_factor, step_time, sample_time):
     samples_in_step = ceil (step_time / sample_time)
     samples_in_transition = floor (trans_ratio_of_step * samples_in_step)
@@ -311,6 +356,65 @@ def  Start_lateral_y_weight_to_left_foot(ZMP_start_pos, step_width, trans_ratio_
     half_trans_y = transition_Min_jerk_firstHalf(0,step_width/2, samples_in_end_step_trans, samples_in_transition)
 
     p_ref_y = r_[ p_ref0_0y , trans_y_small_step, p_ref1y, step_width/2 - half_trans_y]
+
+    return (p_ref_y)
+
+## Start_lateral_y_weight_to_left_foot was divided into two single steps: Pre_Step_lateral_y and First_Step_lateral_y
+def  Pre_Step_lateral_y(ZMP_start_pos, step_width, trans_ratio_of_step, trans_slope_steepens_factor, step_time, sample_time):
+    # tuning parameters:
+    #trans_slope_steepens_factor = 1 # slop factor of transition, bigger values give a steeper slop
+
+    samples_in_step = ceil (step_time / sample_time)
+    samples_in_transition = floor (trans_ratio_of_step * samples_in_step)
+    samples_in_start_step_trans = floor (samples_in_transition/2)
+    samples_in_end_step_trans = samples_in_transition - samples_in_start_step_trans
+    samples_in_step_without_trans = samples_in_step - samples_in_transition
+    # One step sequence is divided into the following sampling order:
+    # 1) samples_in_start_step_trans 
+    # 2) samples_in_step_without_trans
+    # 3) samples_in_end_step_trans
+    # total number of samples = samples_in_step
+
+    # step 1 : stand in place (we want to minimize the transient effect of the preview)
+    # can be skiped in the future by inserting the appropriate initial conditions to the preview controller 
+    #p_ref0_0y = (step_width/2)*ones( samples_in_start_step_trans + samples_in_step_without_trans )
+    p_ref0_0y = ZMP_start_pos*ones( samples_in_start_step_trans + samples_in_step_without_trans )
+    #p_ref0_0y = ZMP_start_pos*ones( samples_in_step )      
+
+    # step 1 end: transition
+    half_trans_y = transition_Min_jerk_firstHalf( ZMP_start_pos, step_width/4.0, samples_in_start_step_trans, samples_in_transition)
+    
+    p_ref_y = r_[ p_ref0_0y , half_trans_y ]
+
+    return (p_ref_y)
+
+def  First_Step_lateral_y(ZMP_start_pos, step_width, trans_ratio_of_step, trans_slope_steepens_factor, step_time, sample_time):
+    # tuning parameters:
+    #trans_slope_steepens_factor = 1 # slop factor of transition, bigger values give a steeper slop
+
+    samples_in_step = ceil (step_time / sample_time)
+    samples_in_transition = floor (trans_ratio_of_step * samples_in_step)
+    samples_in_start_step_trans = floor (samples_in_transition/2)
+    samples_in_end_step_trans = samples_in_transition - samples_in_start_step_trans
+    samples_in_step_without_trans = samples_in_step - samples_in_transition
+    # One step sequence is divided into the following sampling order:
+    # 1) samples_in_start_step_trans 
+    # 2) samples_in_step_without_trans
+    # 3) samples_in_end_step_trans
+    # total number of samples = samples_in_step
+
+    # step 2 begin : transition
+    half_trans_y_begin = transition_Min_jerk_secondHalf( step_width/4.0, step_width/2.0, samples_in_start_step_trans, samples_in_transition)
+    #half_trans_y_begin = transition_Min_jerk_secondHalf( ZMP_start_pos, step_width/2.0, samples_in_start_step_trans, samples_in_transition)
+    
+    # step 2 middle: with out transitions
+    p_ref1y = step_width/2.0*ones( samples_in_step_without_trans )
+
+    # step 2 end: transition
+    # half_trans_y = transitionSigmoid_firstHalf(step_width/2, trans_slope_steepens_factor, samples_in_end_step_trans, sample_time)
+    half_trans_y = transition_Min_jerk_firstHalf(0,step_width/2, samples_in_end_step_trans, samples_in_transition)
+
+    p_ref_y = r_[ half_trans_y_begin, p_ref1y, step_width/2 - half_trans_y]
 
     return (p_ref_y)
 

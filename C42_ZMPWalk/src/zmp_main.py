@@ -150,7 +150,8 @@ class MyTask(RobilTask):
                 print "Preempt ZmpWalk: EmergencyStop"
                 self._ZmpStateMachine.EmergencyStop()
                 return RTResult_PREEPTED()
-            self._ZmpStateMachine.SetTurnCmd(turn_cmd = 30*math.pi/180)
+            self._ZmpStateMachine.SetTurnCmd(turn_cmd = 0.0*math.pi/180)
+            self._ZmpStateMachine.SetDistanceToNextTurn(distance = 1.0)
             self._p_ref_x,self._p_ref_y,new_step_trigger_x,new_step_trigger_y = self._ZmpStateMachine.UpdatePreview()
             [COMx, COMx_dot, p_pre_con_x] = self._Sagital_x_Preview_Controller.getCOM_ref( self._p_ref_x,new_step_trigger_x )
             [COMy, COMy_dot, p_pre_con_y] = self._Lateral_y_Preview_Controller.getCOM_ref( self._p_ref_y,new_step_trigger_y )
