@@ -71,6 +71,11 @@ class StepState(State):
         # 2) preceeding steps (full_step)
         self._p_ref_x = Step_forward_x(0, self._step_length, self._trans_ratio_of_step, self._trans_slope_steepens_factor, self._step_time, dt)
         self._p_ref_y = Step_onto_right_foot(0, self._zmp_width, self._trans_ratio_of_step, self._trans_slope_steepens_factor, self._step_time, dt)
+
+        # Starting New Step Trigger: to indicate that entering the state starts a new step
+        # States that don't start a new step should change the values to false in the OnEnter function 
+        self._NewStep_trigger_X = True
+        self._NewStep_trigger_Y = True
     
     def GetStepTime(self):
         return self._step_time
@@ -98,6 +103,13 @@ class StepState(State):
 
     def GetZmpProfileY(self):
         return self._p_ref_y
+
+    def GetNewStepTrigger(self):
+        return self._NewStep_trigger_X,self._NewStep_trigger_Y
+
+    def ResetNewStepTrigger(self):
+        self._NewStep_trigger_X = False
+        self._NewStep_trigger_Y = False
         
 #----------------------------------------------------------------------------------
 
@@ -123,6 +135,9 @@ class InitializeStepState(StepState):
         StepState.__init__(self,"Initializing",StepStrategy,dt)
         
     def OnEnter(self):
+        # state is not starting a new step:
+        self._NewStep_trigger_X = False
+        self._NewStep_trigger_Y = False
         # moving to intial pose:
         init_pose()  # !!! need to disable tf listener drc2_tools to prevent clash !!!
         self._Strategy.Initialize(self._bend_knees)
@@ -139,7 +154,12 @@ class FailureStepState(StepState):
     """
     def __init__(self,StepStrategy,dt):
         StepState.__init__(self,"Failing",StepStrategy,dt)
-        
+    
+    def OnEnter(self):
+        # state is not starting a new step:
+        self._NewStep_trigger_X = False
+        self._NewStep_trigger_Y = False
+
     def GetId(self):
         return -1
 #----------------------------------------------------------------------------------
@@ -173,6 +193,9 @@ class PreStepState(StepState):
         rospy.loginfo(rospy.get_time())
 
         self._robotState.Set_step_phase(value = 1)
+        # state is starting a new step:
+        self._NewStep_trigger_X = True
+        self._NewStep_trigger_Y = True
 
         #self._Strategy.LoadNewStep(self._p_ref_x_start,self._p_ref_x_forward_step,self._p_ref_y_start,r_[ self._p_ref_y_step_right, self._p_ref_y_step_left ]) # new_step, following_steps_cycle
         
@@ -202,7 +225,12 @@ class FirstStepState(StepState):
 
         self._p_ref_x = First_Step_sagital_x(0, self._step_length, self._trans_ratio_of_step, self._trans_slope_steepens_factor, self._step_time, dt)
         self._p_ref_y = First_Step_lateral_y(0, self._zmp_width, self._trans_ratio_of_step, self._trans_slope_steepens_factor, self._step_time, dt)
- 
+    
+    def OnEnter(self):
+        # state is not starting a new step:
+        self._NewStep_trigger_X = False
+        self._NewStep_trigger_Y = False
+
     def OnExit(self):
         rospy.loginfo("done first step")
         rospy.loginfo("time:")
@@ -527,6 +555,9 @@ class RightStepState(StepState):
     def OnEnter(self):
         rospy.loginfo("starting right step")
         self._robotState.Set_step_phase(value = 1)
+        # state is starting a new step:
+        self._NewStep_trigger_X = True
+        self._NewStep_trigger_Y = True
 
         #self._Strategy.LoadNewStep(self._p_ref_x_forward_step,self._p_ref_x_forward_step,self._p_ref_y_step_left,r_[ self._p_ref_y_step_right,self._p_ref_y_step_left ])
 
@@ -560,6 +591,9 @@ class LeftStepState(StepState):
     def OnEnter(self):
         rospy.loginfo("starting left step")
         self._robotState.Set_step_phase(value = 3)
+        # state is starting a new step:
+        self._NewStep_trigger_X = True
+        self._NewStep_trigger_Y = True
         
         #self._Strategy.LoadNewStep(self._p_ref_x_forward_step,self._p_ref_x_forward_step,self._p_ref_y_step_right,r_[ self._p_ref_y_step_left, self._p_ref_y_step_right ])
 
@@ -830,7 +864,7 @@ class StepStateMachine(StateMachine):
             # if (StateMachine.GetCurrentState(self).GetStepTime() <= (self._counter+2)*1.0/self._UpdateRateHz):
             #     rospy.loginfo("StepStateMachine UpdatePreview: _counter = %f, p_ref_x[0] = %f, p_ref_y[0] = %f" % (self._counter, p_ref_x[0], p_ref_y[0]) )
         self._counter = self._counter+1
-        return p_ref_x,p_ref_y,loaded_new_step_trigger_x,loaded_new_step_trigger_y  
+        return p_ref_x,p_ref_y
     
     def GetStateId(self):
         return StateMachine.GetCurrentState(self).GetId()
@@ -913,6 +947,14 @@ class StepStateMachine(StateMachine):
             self._ZMP_Preview_BufferY.load_PreviewStep(self._PreviewState.GetZmpProfileY())
         else:
             rospy.loginfo("StepStateMachine _PromotePreviewState: ERROR state transition doesn't exist")
+
+    def GetNewStepTrigger(self):
+        return StateMachine.GetCurrentState(self).GetNewStepTrigger()
+
+    def ResetNewStepTrigger(self):
+        StateMachine.GetCurrentState(self).ResetNewStepTrigger()
+
+
         
 
 ###################################################################################

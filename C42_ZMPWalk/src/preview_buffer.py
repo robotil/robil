@@ -133,8 +133,8 @@ class ZMP_Preview_Buffer:
             self._start_index = self._buffer_size - self._preview_size
 
         preview = self._buffer[self._start_index : end_index]
-        if self._start_index > 100:
-            rospy.loginfo("ZMP_Preview_Buffer %s: start_index = %f, end_index = %f, start value = %f " % (self._name, self._start_index, end_index,self._buffer[self._start_index] ) )
+        # if 5 > self._start_index or 115 < self._start_index:
+        #     rospy.loginfo("ZMP_Preview_Buffer %s: start_index = %f, end_index = %f, start value = %f " % (self._name, self._start_index, end_index,self._buffer[self._start_index] ) )
 
         if self._start_index >= 1 : # On the second update of preview (after one loop iteration) the trigger of loading a new step is returned to false
             self._NewStep_trigger = False

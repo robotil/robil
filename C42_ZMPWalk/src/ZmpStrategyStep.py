@@ -137,7 +137,8 @@ class StepStrategyWalk(StepStrategy):
 
         self._WalkingTrajectory.swing_foot = copy.copy(self._swing_k)                              #added by Israel 24.2
         self._WalkingTrajectory.swing_foot.y = copy.copy(self._swing_foot_y)
-        self._WalkingTrajectory.stance_hip.x = COMx + self._stance_hip_0.x - self._previous_step_length/2 #-D #TODO: incorporate step_length of previous step in Robot State and include it in stance_hip_0.x (foot coord. change)
+        self._WalkingTrajectory.stance_hip.x = COMx + self._stance_hip_0.x #- self._previous_step_length/2 #-D #TODO: incorporate step_length of previous step in Robot State and include it in stance_hip_0.x (foot coord. change)
+                                                   # implemented in robot_state->Get_foot_coord_params: res_stance_hip_0[0] = res_stance_hip_0[0] - self.change_in_foot_coordinates[0]/2
         self._WalkingTrajectory.stance_hip.y = COMy + self._stance_hip_0.y
         self._WalkingTrajectory.stance_hip.z = self._stance_hip_0.z
         

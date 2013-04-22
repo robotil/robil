@@ -144,6 +144,7 @@ class Robot_State:
             res_pelvis_pos_0[1] = step_width/2
             res_swing_y_sign = 1.0 # relative direction of swing leg from current coord system
         
+        res_stance_hip_0[0] = res_stance_hip_0[0] - self.change_in_foot_coordinates[0]/2
         res_swing_hip_dy = self.swing_hip_dy*res_swing_y_sign # swing hip relative position to stance hip
         return(self.array2Pos( res_stance_hip_0 ), res_swing_y_sign, res_swing_hip_dy )
 
