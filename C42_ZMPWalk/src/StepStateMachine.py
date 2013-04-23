@@ -98,11 +98,8 @@ class StepState(State):
     def GetId(self):
         raise StepStateMachineError("Forgot to implement GetId did ya?!")
 
-    def GetZmpProfileX(self):
-        return self._p_ref_x
-
-    def GetZmpProfileY(self):
-        return self._p_ref_y
+    def GetZmpProfilesXY(self):
+        return self._p_ref_x,self._p_ref_y
 
     def GetNewStepTrigger(self):
         return self._NewStep_trigger_X,self._NewStep_trigger_Y
@@ -110,6 +107,9 @@ class StepState(State):
     def ResetNewStepTrigger(self):
         self._NewStep_trigger_X = False
         self._NewStep_trigger_Y = False
+
+    def SetTurnAngle(self,angle):
+        self._turn_angle  = angle # [rad]
         
 #----------------------------------------------------------------------------------
 
@@ -615,19 +615,19 @@ class TurnRight_LeftStepState(StepState):
         StepState.__init__(self,"TurnRightBeginLeft",StepStrategy,dt)
         self._WalkingTrajectory = walkingTrajectory
         self._robotState = robotState
+        self._dt = dt
         
         self._pre_step = 0
         self._first_step = 0
         self._full_step = 1
         self._last_step = 0
-
-        #TODO
-        #self._p_ref_x = 
-        #self._p_ref_y = 
         
     def OnEnter(self):
         rospy.loginfo("starting turn right with left step")
         self._robotState.Set_step_phase(value = 3)
+        # state is starting a new step:
+        self._NewStep_trigger_X = True
+        self._NewStep_trigger_Y = True
         
         #self._Strategy.LoadNewStep(self._p_ref_x_forward_step,self._p_ref_x_forward_step,self._p_ref_y_step_right,r_[ self._p_ref_y_step_left, self._p_ref_y_step_right ])
 
@@ -637,6 +637,10 @@ class TurnRight_LeftStepState(StepState):
    
     def GetId(self):
         return 16
+
+    def GetZmpProfilesXY(self):
+        self._p_ref_x,self._p_ref_y = Turn_second_half_of_step(0, self._zmp_width, self._trans_ratio_of_step, self._trans_slope_steepens_factor, self._step_time, self._dt, self._turn_angle)
+        return self._p_ref_x,self._p_ref_y
 
 #----------------------------------------------------------------------------------
 
@@ -662,6 +666,9 @@ class TurnRight_RightStepState(StepState):
     def OnEnter(self):
         rospy.loginfo("finishing turn right with right step")
         self._robotState.Set_step_phase(value = 1)
+        # state is starting a new step:
+        self._NewStep_trigger_X = True
+        self._NewStep_trigger_Y = True
         
         #self._Strategy.LoadNewStep(self._p_ref_x_forward_step,self._p_ref_x_forward_step,self._p_ref_y_step_right,r_[ self._p_ref_y_step_left, self._p_ref_y_step_right ])
 
@@ -913,6 +920,8 @@ class StepStateMachine(StateMachine):
         # 3) Check if need to turn:
         if ( abs(self._ExecutedTurnCmd) >= self._TurnThreshold ):
             result = True
+        else:
+            self._ExecutedTurnCmd = 0.0
         return result
 
     def _GetPreviewTransition(self):
@@ -922,6 +931,7 @@ class StepStateMachine(StateMachine):
         """
         if self._DecideToTurn():
             turn_dir = self.GetTurnDirection() # returns: "TurnRight" or "TurnLeft"
+            rospy.loginfo("StepStateMachine _GetPreviewTransition: turn_dir =  %s" % ( turn_dir ))
             state,transition_exists = StateMachine.GetStateAtTransition(self,self._PreviewState.Name,turn_dir)
             if transition_exists: # !!! "TurnLeft" can only start after Left Step and "TurnRight" can only start after Right Step !!!
                 transition = turn_dir
@@ -940,11 +950,13 @@ class StepStateMachine(StateMachine):
         state,transition_exists = StateMachine.GetStateAtTransition(self,self._PreviewState.Name,transition)
         if transition_exists:
             self._PreviewState = state
+            self._PreviewState.SetTurnAngle(self._ExecutedTurnCmd)
             StepData = BufferData(transition,state._turn_angle,state._step_length,state._step_width,state._zmp_width,state._step_time,state._bend_knees,state._step_height,state._trans_ratio_of_step)
             self._StatePreviewBuffer.append(StepData)
             rospy.loginfo("StepStateMachine _PromotePreviewState: _StatePreviewBuffer NextTransition= %s" % ( self._StatePreviewBuffer[-1].GetNextTransition() ))
-            self._ZMP_Preview_BufferX.load_PreviewStep(self._PreviewState.GetZmpProfileX())
-            self._ZMP_Preview_BufferY.load_PreviewStep(self._PreviewState.GetZmpProfileY())
+            zmpProfileX,zmpProfileY = self._PreviewState.GetZmpProfilesXY()
+            self._ZMP_Preview_BufferX.load_PreviewStep(zmpProfileX)
+            self._ZMP_Preview_BufferY.load_PreviewStep(zmpProfileY)
         else:
             rospy.loginfo("StepStateMachine _PromotePreviewState: ERROR state transition doesn't exist")
 

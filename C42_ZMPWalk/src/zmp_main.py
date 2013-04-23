@@ -132,6 +132,7 @@ class MyTask(RobilTask):
         print "Start ZmpWalk"
 
         self._ZmpLpp.Stop()
+        self._ZmpStateMachine.SetTurnCmd(turn_cmd = -30.0*math.pi/180) # NEED TO REMOVE - for debug use of turn step
         self._ZmpStateMachine.Initialize()
 
         while not self._ZmpLpp.IsActive():
@@ -150,7 +151,7 @@ class MyTask(RobilTask):
                 print "Preempt ZmpWalk: EmergencyStop"
                 self._ZmpStateMachine.EmergencyStop()
                 return RTResult_PREEPTED()
-            self._ZmpStateMachine.SetTurnCmd(turn_cmd = 0.0*math.pi/180)
+            self._ZmpStateMachine.SetTurnCmd(turn_cmd = -30.0*math.pi/180)
             self._ZmpStateMachine.SetDistanceToNextTurn(distance = 1.0)
             self._p_ref_x,self._p_ref_y = self._ZmpStateMachine.UpdatePreview()
             new_step_trigger_x,new_step_trigger_y = self._ZmpStateMachine.GetNewStepTrigger()
