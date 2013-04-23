@@ -73,9 +73,9 @@ class StepState(State):
         self._p_ref_y = Step_onto_right_foot(0, self._zmp_width, self._trans_ratio_of_step, self._trans_slope_steepens_factor, self._step_time, dt)
 
         # Starting New Step Trigger: to indicate that entering the state starts a new step
-        # States that don't start a new step should change the values to false in the OnEnter function 
-        self._NewStep_trigger_X = True
-        self._NewStep_trigger_Y = True
+        # States that start a new step should change the values to True in the OnEnter function 
+        self._NewStep_trigger_X = False
+        self._NewStep_trigger_Y = False
     
     def GetStepTime(self):
         return self._step_time

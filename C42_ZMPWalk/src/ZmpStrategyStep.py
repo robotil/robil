@@ -28,31 +28,9 @@ class StepStrategy(object):
         self._WalkingTrajectory = walkingTrajectory
         self._WalkingTrajectory.step_length = 0.0
         self._TransformListener = transformListener
-        self._DistanceRefX = 0
-        self._ZMP_Preview_BufferX = ZMP_Preview_BufferX
-        self._ZMP_Preview_BufferY = ZMP_Preview_BufferY
 
         self._pelvis_des = self._RobotState.place_in_Ori( 0, 0, 0 ) # pelvis desired rotation (0,0,0)<=>stand up straight
         # self._pelvis_des = self._RobotState.place_in_Pos_Ori( 0, 0, 0, 0, 0, 0 ) # change for performing TURN STEP
-
-        self._previous_step_length = 0.0
-
-    def LoadNewStep(self,new_step_x,following_steps_cycle_x,new_step_y,following_steps_cycle_y):
-        rospy.loginfo("ZmpStrategyStep LoadNewStep: _DistanceRefX = %f, new_step_x[0] = %f, new_step_y[0] = %f" % (self._DistanceRefX, new_step_x[0], new_step_y[0]) )
-        self._previous_step_length = self._WalkingTrajectory.step_length
-        self._ZMP_Preview_BufferX.load_NewStep(new_step_x + self._DistanceRefX,following_steps_cycle_x)
-        self._ZMP_Preview_BufferY.load_NewStep(new_step_y,following_steps_cycle_y)
-
-    def LoadPreviewStep(self,preview_step_x,preview_step_y,):
-        rospy.loginfo("ZmpStrategyStep LoadPreviewStep: _DistanceRefX = %f, new_step_x[0] = %f, new_step_y[0] = %f" % (self._DistanceRefX, preview_step_x[0], preview_step_y[0]) )
-        self._previous_step_length = self._WalkingTrajectory.step_length
-        self._ZMP_Preview_BufferX.load_PreviewStep(preview_step_x)
-        self._ZMP_Preview_BufferY.load_PreviewStep(preview_step_y)
-
-    def UpdatePreview(self):
-        p_ref_x,loaded_new_step_trigger_x = self._ZMP_Preview_BufferX.update_Preview()
-        p_ref_y,loaded_new_step_trigger_y = self._ZMP_Preview_BufferY.update_Preview()
-        return p_ref_x,p_ref_y,loaded_new_step_trigger_x,loaded_new_step_trigger_y
 
         
 #----------------------------------------------------------------------------------
@@ -164,8 +142,3 @@ class StepStrategyWalk(StepStrategy):
         self._previous_iteration_step_length = copy.copy(self._WalkingTrajectory.step_length)
 
         return self._WalkingTrajectory
-        
-    def UpdatePreview(self):
-        p_ref_x,p_ref_y,loaded_new_step_trigger_x,loaded_new_step_trigger_y = StepStrategy.UpdatePreview(self)
-        self._DistanceRefX = copy.copy(p_ref_x[0])
-        return p_ref_x,p_ref_y,loaded_new_step_trigger_x,loaded_new_step_trigger_y
