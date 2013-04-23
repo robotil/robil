@@ -16,8 +16,6 @@
 
 #include "cogniteam_pathplanning.h"
 
-#define PRINT_AS_VECTORS 1
-
 #include "cogniteam_pathplanner_parameters.h"
 
 using namespace std;
@@ -490,21 +488,20 @@ PField::Points searchPath(const Map& source_map, const Waypoint& start, const Wa
 	
 	Inflator i( rr , Map::ST_BLOCKED);
 	MapEditor e;
-	
-// 	Map map =  i.inflate(source_map);
-	
-// 	Map map =  
-// 		e.replace(
-// 			i.inflate(source_map), 
-// 			Map::ST_UNCHARTED, Map::ST_AVAILABLE)
-// 	;
+
+	Map inflated_map = e.replace(
+			i.inflate(source_map),
+			Map::ST_UNCHARTED, Map::ST_AVAILABLE
+		);
+
+	if( inflated_map(start.x, start.y)==Map::ST_BLOCKED || inflated_map(finish.x, finish.y)==Map::ST_BLOCKED ){
+		cout<<"searchPath: "<<"some of interesting points are not available (after inflation)"<<endl;
+		return PField::Points();
+	}
 
 	Map map = 
 		e.coloring( 
-			e.replace(
-				i.inflate(source_map), 
-				Map::ST_UNCHARTED, Map::ST_AVAILABLE
-			),
+			inflated_map,
 			start.x, start.y, Map::ST_AVAILABLE,Map::ST_BLOCKED
 		);
 	
@@ -581,12 +578,19 @@ PField::Points searchPath_transitAccurate(const Map& source_map, const Waypoint&
 	Inflator i( rr , Map::ST_BLOCKED);
 	MapEditor e;
 
+	Map inflated_map = e.replace(
+			i.inflate(source_map),
+			Map::ST_UNCHARTED, Map::ST_AVAILABLE
+		);
+
+	if( inflated_map(start.x, start.y)==Map::ST_BLOCKED || inflated_map(finish.x, finish.y)==Map::ST_BLOCKED ){
+		cout<<"searchPath: "<<"some of interesting points are not available (after inflation)"<<endl;
+		return PField::Points();
+	}
+
 	Map map =
 		e.coloring(
-			e.replace(
-				i.inflate(source_map),
-				Map::ST_UNCHARTED, Map::ST_AVAILABLE
-			),
+			inflated_map,
 			start.x, start.y, Map::ST_AVAILABLE,Map::ST_BLOCKED
 		);
 
