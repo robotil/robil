@@ -49,7 +49,7 @@ parameters_file = yaml.load(zmp_walking_params_file)
 
 
       
-load_step_length_params_for = '2cm' 
+load_step_length_params_for = '15cm' 
 
        
 
@@ -311,7 +311,7 @@ def get_joint_states(msg):
 def LEG_IK():
 
     rospy.init_node('LEG_IK')
-    ns.JC = JointCommands_msg_handler()
+    ns.JC = AtlasCommand_msg_handler()
     ns.RL = robot_listner()
 
     # Loading IK off-set values (These values represent the "zero pose" of the IK. They need to be added to the position calc. from the IK )
@@ -388,13 +388,18 @@ def LEG_IK():
     r_arm_uwy = 0
     r_arm_mwx = 0.0
 
-    cur_pos = [ back_lbz, back_mby, back_ubx, neck_ay,
+    des_pos = [ back_lbz, back_mby, back_ubx, neck_ay,
       l_leg_uhz, l_leg_mhx, l_leg_lhy, l_leg_kny, l_leg_uay, l_leg_lax,
       r_leg_uhz, r_leg_mhx, r_leg_lhy, r_leg_kny, r_leg_uay, r_leg_lax,
       l_arm_usy, l_arm_shx, l_arm_ely, l_arm_elx, l_arm_uwy, l_arm_mwx,
       r_arm_usy, r_arm_shx, r_arm_ely, r_arm_elx, r_arm_uwy, r_arm_mwx]
     # cur_pos = ns.RL.current_pos()
-    ns.JC.set_all_pos(cur_pos)
+    
+ #ns.JC.set_all_pos(cur_pos)
+    T=5
+    dt=0.1
+    cur_pos = [2.438504816382192e-05, 0.0015186156379058957, 9.983908967114985e-06, -0.0010675729718059301, -0.0003740221436601132, 0.06201673671603203, -0.2333149015903473, 0.5181407332420349, -0.27610817551612854, -0.062101610004901886, 0.00035181696875952184, -0.06218484416604042, -0.2332201600074768, 0.51811283826828, -0.2762000858783722, 0.06211360543966293, 0.29983898997306824, -1.303462266921997, 2.0007927417755127, 0.49823325872421265, 0.0003098883025813848, -0.0044272784143686295, 0.29982614517211914, 1.3034454584121704, 2.000779867172241, -0.498238742351532, 0.0003156556049361825, 0.004448802210390568]
+    ns.JC.send_pos_traj(cur_pos,des_pos,T,dt )
     rospy.sleep(1)
 
     rospy.spin()

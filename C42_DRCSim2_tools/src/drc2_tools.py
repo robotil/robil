@@ -234,9 +234,9 @@ class robot_listner(object):
         if rospy.get_name() == '/unnamed':
             rospy.init_node('Joint_state_listner',anonymous=True)
 
-        self.atlas_state = AtlasState()
+        self.joint_state = AtlasState()
         self.odometry = Odometry()
-        sub = rospy.Subscriber('/atlas/atlas_states',AtlasState,self._update_state)
+        sub = rospy.Subscriber('/atlas/atlas_state',AtlasState,self._update_state)
         subOd = rospy.Subscriber('/ground_truth_odom',Odometry,self._update_odom)
         
         self.enable_tf_Listener = enable_tf_Listener

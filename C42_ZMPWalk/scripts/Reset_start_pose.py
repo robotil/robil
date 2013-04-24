@@ -21,7 +21,7 @@ import rospy
 from std_srvs.srv import Empty
 
 def init_pose():
-    JC = JointCommands_msg_handler()
+    JC = AtlasCommand_msg_handler()
     RL = robot_listner()
 
     # # Off-set values for IK

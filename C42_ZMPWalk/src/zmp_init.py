@@ -7,7 +7,7 @@ import os
 import rospy
 
 def init_pose():
-    JC = JointCommands_msg_handler()
+    JC = AtlasCommand_msg_handler()
     RL = robot_listner()
 
     # # Off-set values for IK
