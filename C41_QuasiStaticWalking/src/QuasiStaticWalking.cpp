@@ -46,9 +46,9 @@ public:
 		while(!pelvis_leg_target_cli_.waitForExistence(ros::Duration(0.1))){
 			ROS_INFO("Waiting for the pelvis_leg_target server");
 		}
-		while(!getPath_cli_.waitForExistence(ros::Duration(0.1))){
+		/*while(!getPath_cli_.waitForExistence(ros::Duration(0.1))){
 			ROS_INFO("Waiting for the /C31_GlobalPathPlanner/getPath server");
-		}
+		}*/
 
 		//Set callback functions
 		as_.registerGoalCallback(boost::bind(&QuasiStaticWalking::goalCB, this));
@@ -77,14 +77,14 @@ public:
 		ROS_INFO("Start time: %f", ros::Time::now().toSec());
 
 		std::string g = as_.acceptNewGoal()->parameters;
-
+/*
 		C31_PathPlanner::C31_GetPath getpath;
 		if(!getPath_cli_.call(getpath)){
 			C0_RobilTask::RobilTaskResult _res;
 			_res.success = C0_RobilTask::RobilTask::FAULT;
 			as_.setSucceeded(_res);
 			return;
-		}
+		}*/
 
 		//TODO: turn to waypoint
 
@@ -109,43 +109,10 @@ public:
 				return;
 			}
 
-			leg_target.request.leg = "r_foot";
-			if(!pelvis_leg_target_cli_.call(leg_target)){
-				ROS_ERROR("Could not move to right leg");
-				C0_RobilTask::RobilTaskResult _res;
-				_res.success = C0_RobilTask::RobilTask::FAULT;
-				as_.setSucceeded(_res);
-				return;
-			}
 
-			leg_target.request.leg = "r_foot";
-			if(!pelvis_leg_target_cli_.call(leg_target)){
-				ROS_ERROR("Could not move to right leg");
-				C0_RobilTask::RobilTaskResult _res;
-				_res.success = C0_RobilTask::RobilTask::FAULT;
-				as_.setSucceeded(_res);
-				return;
-			}
-
-			move_pelvis.request.PositionDestination.x = 0.0;
-			move_pelvis.request.PositionDestination.y = 0.0;
-			move_pelvis.request.PositionDestination.z = -0.1;
-			move_pelvis.request.AngleDestination.x = 0.0;
-			move_pelvis.request.AngleDestination.y = 0.0;
-			move_pelvis.request.AngleDestination.z = 0.0;
-			move_pelvis.request.LinkToMove = "l_leg";
-			ROS_INFO("Moving left leg up");
-			if(!move_pelvis_cli_.call(move_pelvis)){
-				ROS_ERROR("Could not move left leg up");
-				C0_RobilTask::RobilTaskResult _res;
-				_res.success = C0_RobilTask::RobilTask::FAULT;
-				as_.setSucceeded(_res);
-				return;
-			}
-
-			move_pelvis.request.PositionDestination.x = -0.1;
+			move_pelvis.request.PositionDestination.x = -0.15;
 			move_pelvis.request.PositionDestination.y = -0.0;
-			move_pelvis.request.PositionDestination.z = 0.08;
+			move_pelvis.request.PositionDestination.z = 0.10;
 			move_pelvis.request.AngleDestination.x = 0.0;
 			move_pelvis.request.AngleDestination.y = 0.0;
 			move_pelvis.request.AngleDestination.z = 0.0;
@@ -168,42 +135,10 @@ public:
 				as_.setSucceeded(_res);
 				return;
 			}
-			leg_target.request.leg = "l_foot";
-			if(!pelvis_leg_target_cli_.call(leg_target)){
-				ROS_ERROR("Could not move to left leg");
-				C0_RobilTask::RobilTaskResult _res;
-				_res.success = C0_RobilTask::RobilTask::FAULT;
-				as_.setSucceeded(_res);
-				return;
-			}
-			leg_target.request.leg = "l_foot";
-			if(!pelvis_leg_target_cli_.call(leg_target)){
-				ROS_ERROR("Could not move to left leg");
-				C0_RobilTask::RobilTaskResult _res;
-				_res.success = C0_RobilTask::RobilTask::FAULT;
-				as_.setSucceeded(_res);
-				return;
-			}
 
-			move_pelvis.request.PositionDestination.x = 0.0;
-			move_pelvis.request.PositionDestination.y = 0.0;
-			move_pelvis.request.PositionDestination.z = -0.1;
-			move_pelvis.request.AngleDestination.x = 0.0;
-			move_pelvis.request.AngleDestination.y = 0.0;
-			move_pelvis.request.AngleDestination.z = 0.0;
-			move_pelvis.request.LinkToMove = "r_leg";
-			ROS_INFO("Moving right leg up");
-			if(!move_pelvis_cli_.call(move_pelvis)){
-				ROS_ERROR("Could not move left leg up");
-				C0_RobilTask::RobilTaskResult _res;
-				_res.success = C0_RobilTask::RobilTask::FAULT;
-				as_.setSucceeded(_res);
-				return;
-			}
-
-			move_pelvis.request.PositionDestination.x = -0.1;
+			move_pelvis.request.PositionDestination.x = -0.15;
 			move_pelvis.request.PositionDestination.y = -0.0;
-			move_pelvis.request.PositionDestination.z = 0.08;
+			move_pelvis.request.PositionDestination.z = 0.10;
 			move_pelvis.request.AngleDestination.x = 0.0;
 			move_pelvis.request.AngleDestination.y = 0.0;
 			move_pelvis.request.AngleDestination.z = 0.0;

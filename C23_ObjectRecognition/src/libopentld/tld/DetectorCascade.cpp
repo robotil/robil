@@ -292,7 +292,7 @@ void DetectorCascade::detect(const Mat &img)
     ensembleClassifier->nextIteration(img);
 
     #pragma omp parallel for
-
+    ROS_INFO("numWindows: %d",numWindows);
     for(int i = 0; i < numWindows; i++)
     {
 
@@ -329,14 +329,14 @@ void DetectorCascade::detect(const Mat &img)
 
         if(!ensembleClassifier->filter(i))
         {
-            continue;
+           continue;
         }
 
         if(!nnClassifier->filter(img, i))
         {
             continue;
         }
-
+        
         detectionResult->confidentIndices->push_back(i);
 
 

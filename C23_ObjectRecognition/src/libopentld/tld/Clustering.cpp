@@ -113,6 +113,8 @@ void Clustering::clusterConfidentIndices()
     calcDistances(distances);
     int *clusterIndices = new int[numConfidentIndices];
     cluster(distances, clusterIndices);
+    ROS_INFO("Number of bbs: %d",numConfidentIndices);
+
 
     if(detectionResult->numClusters == 1)
     {

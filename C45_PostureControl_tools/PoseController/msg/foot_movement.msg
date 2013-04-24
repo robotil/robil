@@ -1,0 +1,12 @@
+float64 l_leg_uhz
+float64 l_leg_mhx
+float64 l_leg_lhy
+float64 l_leg_kny
+float64 l_leg_uay
+float64 l_leg_lax
+float64 r_leg_uhz
+float64 r_leg_mhx
+float64 r_leg_lhy
+float64 r_leg_kny
+float64 r_leg_uay
+float64 r_leg_lax

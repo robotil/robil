@@ -9,13 +9,17 @@ int main(int argc, char** argv){
 	  ros::NodeHandle node;
 
 	  PathPlanning pathplanning;
+
+	  //Main tasks
 	  PathPlanningServer task_pathplanning(pathplanning);
 	  PathPlanningFocusServer task_pathplanningfocus(pathplanning);
+
+	  //utilities
+	  Task_whileSolution task_whileSolution(pathplanning);
 
 	  ros::spin();
 	  return 0;
 
-	//return cogniteam_pathplanning_test_map_inflation(argc, argv);
 
 }
 

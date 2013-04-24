@@ -1,0 +1,5 @@
+<plan descriptions="./plans/TaskDescriptions.xml">
+   <seq name="qual2" x="382.5" y="129.5" collapsed="false" id="a2810db0-703c-4cf4-9691-b26e46848d62"> 
+         <tsk name="PickUp" x="429.5" y="300.5" test_time="0" test_result="true" id="702fac91-7bc0-471a-aeee-6dc6b54d228e" />
+   </seq>
+</plan>

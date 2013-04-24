@@ -29,22 +29,27 @@ rosbuild_add_boost_directories()
 #rosbuild_add_executable(example examples/example.cpp)
 #target_link_libraries(example ${PROJECT_NAME})
 
-
-
+#---------- MAIN NODE -----------
 rosbuild_add_executable(gpp src/gpp.cpp)
 rosbuild_add_executable(gpp src/cogniteam_pathplanning.cpp)
 rosbuild_add_executable(gpp src/PathPlanner.cpp)
 rosbuild_add_executable(gpp src/PField.cpp)
 #rosbuild_link_boost(gpp thread)
 
-rosbuild_add_executable(planner_test src/planning_test.cpp)
-rosbuild_add_executable(planner_test src/cogniteam_pathplanning.cpp)
-rosbuild_add_executable(planner_test src/PField.cpp)
-
-
+#---------- UTILS ---------------
 rosbuild_add_executable(map_generator src/map_generator.cpp)
 rosbuild_add_executable(map_generator src/cogniteam_pathplanning.cpp)
 rosbuild_add_executable(map_generator src/PField.cpp)
+
+#---------- TESTES --------------
+
+rosbuild_add_executable(test_planner src/test_planning.cpp src/cogniteam_pathplanning.cpp src/PField.cpp)
+rosbuild_add_executable(test_addPointsToPath src/test_addPointsToPath.cpp src/cogniteam_pathplanning.cpp src/PField.cpp)
+rosbuild_add_executable(test_planner_transit src/test_planning_with_transit.cpp src/cogniteam_pathplanning.cpp src/PField.cpp)
+
+#---------- SIMULATORS ----------
+rosbuild_add_executable(test_c11_simulator src/test_c11_simulator.cpp)
+
 
 #rosbuild_add_executable(lpp src/lpp.cpp)
 #rosbuild_link_boost(lpp thread)

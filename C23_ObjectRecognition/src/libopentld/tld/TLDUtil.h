@@ -28,7 +28,7 @@
 #define TLDUTIL_H_
 
 #include <utility>
-
+#include "ros/ros.h"
 #include <opencv/cv.h>
 
 namespace tld

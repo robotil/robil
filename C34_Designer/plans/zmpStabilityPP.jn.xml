@@ -1,0 +1,30 @@
+<plan descriptions="./plans/TaskDescriptions.xml">
+   <seq name="event2"> 
+         <par name="@1"> 
+               <par name="Perception"> 
+                     <tsk name="LocalizationTrack" />
+                     <tsk name="ObstacleDetection" />
+                     <tsk name="PathPlanning" />
+               </par>
+               <par name="MissionProgress"> 
+                     <tsk name="TimeoutMonitor(threshold=50000000)" />
+                  <dec name="!L!"> 
+                        <seq name="Mission"> 
+                              <tsk name="StandUp" />
+                              <par name="@3"> 
+                                    <tsk name="FallingMonitor" />
+                                 <dec name="!L!"> 
+                                       <seq name="SearchObjectAndGo"> 
+                                             <tsk name="PathPlanningFocus(x=0,y=10)" />
+                                          <dec name="!L!"> 
+                                                <tsk name="C42_ZMPwalk" />
+                                          </dec>
+                                       </seq>
+                                 </dec>
+                              </par>
+                        </seq>
+                  </dec>
+               </par>
+         </par>
+   </seq>
+</plan>

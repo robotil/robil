@@ -2,6 +2,7 @@
 #include <pelvis_leg_target/pelvis_leg_target.h>
 #include <tf/transform_listener.h>
 #include <move_pelvis/move_pelvis.h>
+#include <hrl_kinematics/TestStability.h>
 
 class move_to_leg{
 private:
@@ -9,15 +10,26 @@ private:
 	tf::TransformListener listener;
 	ros::ServiceClient move_pelvis_client;
 	ros::ServiceServer srv_server;
+	ros::Subscriber pcom_sub_;
+	geometry_msgs::Point com;
 
 public:
 	move_to_leg(){
 		move_pelvis_client = nh_.serviceClient<move_pelvis::move_pelvis>("move_pelvis");
+		pcom_sub_ = nh_.subscribe("projected_com", 1, &move_to_leg::get_com_from_hrl_kinematics, this);
 		srv_server = nh_.advertiseService("pelvis_leg_target",&move_to_leg::srv_CB,this);
 	}
 
 
 	~move_to_leg(){
+	}
+
+	void get_com_from_hrl_kinematics(const visualization_msgs::MarkerConstPtr& comMarker){
+		//ROS_INFO("# of points: %d", (int) comMarker->points.size());
+
+		com = comMarker->pose.position;
+		//this->_CoM.x = com.x();
+		//this->_CoM.y = com.y();
 	}
 
 	bool srv_CB(pelvis_leg_target::pelvis_leg_targetRequest &req,pelvis_leg_target::pelvis_leg_targetResponse &res){
@@ -30,8 +42,8 @@ public:
 		}
 		move_pelvis::move_pelvis move_pelvis_srv;
 
-		move_pelvis_srv.request.PositionDestination.x=transform.getOrigin().x();
-		move_pelvis_srv.request.PositionDestination.y=transform.getOrigin().y();
+		move_pelvis_srv.request.PositionDestination.x=transform.getOrigin().x()+0.03-com.x;
+		move_pelvis_srv.request.PositionDestination.y=transform.getOrigin().y()-com.y;
 		move_pelvis_srv.request.PositionDestination.z=0;
 		move_pelvis_srv.request.LinkToMove = "pelvis";
 		move_pelvis_srv.request.AngleDestination.x=0;move_pelvis_srv.request.AngleDestination.y=0;move_pelvis_srv.request.AngleDestination.z=0;
