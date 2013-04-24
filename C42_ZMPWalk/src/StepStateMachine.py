@@ -629,8 +629,6 @@ class TurnRight_LeftStepState(StepState):
         self._NewStep_trigger_X = True
         self._NewStep_trigger_Y = True
         
-        #self._Strategy.LoadNewStep(self._p_ref_x_forward_step,self._p_ref_x_forward_step,self._p_ref_y_step_right,r_[ self._p_ref_y_step_left, self._p_ref_y_step_right ])
-
     def UpdateStepCounter(self,stepCounter):
         stepCounter = stepCounter+1
         return stepCounter
@@ -639,7 +637,7 @@ class TurnRight_LeftStepState(StepState):
         return 16
 
     def GetZmpProfilesXY(self):
-        self._p_ref_x,self._p_ref_y = Turn_second_half_of_step(0, self._zmp_width, self._trans_ratio_of_step, self._trans_slope_steepens_factor, self._step_time, self._dt, self._turn_angle)
+        self._p_ref_x,self._p_ref_y = Turn_second_half_of_step(0, self._step_length, self._zmp_width, self._trans_ratio_of_step, self._trans_slope_steepens_factor, self._step_time, self._dt, self._turn_angle)
         return self._p_ref_x,self._p_ref_y
 
 #----------------------------------------------------------------------------------
@@ -659,9 +657,7 @@ class TurnRight_RightStepState(StepState):
         self._full_step = 1
         self._last_step = 0
 
-        #TODO
-        #self._p_ref_x = 
-        #self._p_ref_y = 
+        self._p_ref_y = Step_onto_left_foot(0, self._zmp_width, self._trans_ratio_of_step, self._trans_slope_steepens_factor, self._step_time, dt)
         
     def OnEnter(self):
         rospy.loginfo("finishing turn right with right step")
@@ -713,6 +709,7 @@ class StepStateMachine(StateMachine):
     def __init__(self,robotState,walkingTrajectory,transformListener,ZMP_Preview_BufferX,ZMP_Preview_BufferY,SwingTrajectory,UpdateRateHz,orientation_correction):
         self._UpdateRateHz = UpdateRateHz
         # Turn Parameters:
+        self._TurnCmdInput = 0.0        # units [rad], Input Turn command recieved by StepStateMachine, angle signs: (+) turn left, (-) turn right
         self._MaxStepTurn = 45*math.pi/180 # units [rad], the maximal Turn that can be performed in one step sequance 
         self._TurnThreshold = 0.030        # units [rad], below this value a turn will not be performed 
         self._ZMP_Preview_BufferX = ZMP_Preview_BufferX
@@ -780,7 +777,7 @@ class StepStateMachine(StateMachine):
         self._counter = 0
         self._stepCounter = 0
         # Turn Variables:
-        self._TurnCmdInput = 0.0        # units [rad], Input Turn command recieved by StepStateMachine, angle signs: (+) turn left, (-) turn right
+        # cmd needs to be received # self._TurnCmdInput = 0.0        # units [rad], Input Turn command recieved by StepStateMachine, angle signs: (+) turn left, (-) turn right
         self._ExecutedTurnCmd = 0.0     # units [rad], Turn command that is being carried out
         self._TotalTurnRemaining = 0.0   # units [rad], total turn remaining to perform
         self._DistanceToNextTurn = 0.5

@@ -553,33 +553,34 @@ def  Stop_lateral_y_from_right_foot(ZMP_start_pos, step_width, trans_ratio_of_st
 # angle thetta is with respect to the x axes
 #if turn to left thetta is positive
 #if turn to right thetta is negative
-def  Turn_second_half_of_step(ZMP_start_pos, step_length, trans_ratio_of_step, trans_slope_steepens_factor, step_time, sample_time,thetta):
+def  Turn_second_half_of_step(ZMP_start_pos, step_length, step_width, trans_ratio_of_step, trans_slope_steepens_factor, step_time, sample_time,thetta):
     ## First Step of a two step turn sequence, rotates the second half of the ZMP step profile by angle thetta. 
 
     p_ref_x_forward_step = Step_forward_x(ZMP_start_pos, step_length, trans_ratio_of_step, trans_slope_steepens_factor, step_time, sample_time)
     if 0.0 >= thetta: # TURNING RIGHT - right foot is stance (coord. system is relative to right foot)
-        p_ref_y_side_step = Step_onto_right_foot(ZMP_start_pos, step_length, trans_ratio_of_step, trans_slope_steepens_factor, step_time, sample_time)
+        p_ref_y_side_step = Step_onto_right_foot(ZMP_start_pos, step_width, trans_ratio_of_step, trans_slope_steepens_factor, step_time, sample_time)
     else: # TURNING LEFT - left foot is stance (coord. system is relative to letf foot)
-        p_ref_y_side_step = Step_onto_left_foot(ZMP_start_pos, step_length, trans_ratio_of_step, trans_slope_steepens_factor, step_time, sample_time)
+        p_ref_y_side_step = Step_onto_left_foot(ZMP_start_pos, step_width, trans_ratio_of_step, trans_slope_steepens_factor, step_time, sample_time)
 
     Rz_thetta = array([[cos(thetta), -sin(thetta)],
                        [sin(thetta),  cos(thetta)]])  
                              
     
-    samples = floor(p_ref_x_forward_step.size/2)
-    turn_start_pos_x = p_ref_x_forward_step[samples]
-    turn_start_pos_y = p_ref_y_side_step[samples]
+    samples_first_half = floor(p_ref_x_forward_step.size/2)
+    samples_second_half = p_ref_x_forward_step.size - samples_first_half
+    turn_start_pos_x = p_ref_x_forward_step[samples_first_half]
+    turn_start_pos_y = p_ref_y_side_step[samples_first_half]
 
-    p_ref1x = p_ref_x_forward_step[0:samples-1]
-    p_ref1y = p_ref_y_side_step[0:samples-1]
+    p_ref1x = p_ref_x_forward_step[0:samples_first_half]
+    p_ref1y = p_ref_y_side_step[0:samples_first_half]
 
-    p_ref_turnx = p_ref_x_forward_step[samples:]-turn_start_pos_x*ones( samples )
-    p_ref_turny = p_ref_y_side_step[samples:]-turn_start_pos_y*ones( samples )
+    p_ref_turnx = p_ref_x_forward_step[samples_first_half:]-turn_start_pos_x*ones( samples_second_half )
+    p_ref_turny = p_ref_y_side_step[samples_first_half:]-turn_start_pos_y*ones( samples_second_half )
 
     p_turn_all= array([p_ref_turnx,p_ref_turny])
 
-    turn_poz =   array([turn_start_pos_x*ones( samples ),
-                        turn_start_pos_y*ones( samples )])
+    turn_poz =   array([turn_start_pos_x*ones( samples_second_half ),
+                        turn_start_pos_y*ones( samples_second_half )])
 
     p_turn = dot(Rz_thetta,p_turn_all) + turn_poz
     # print(samples)
@@ -591,15 +592,15 @@ def  Turn_second_half_of_step(ZMP_start_pos, step_length, trans_ratio_of_step, t
     return p_turn_x,p_turn_y
    
 # # DON'T NEED TO ROTATE SECOND STEP (because stance foot is rotating)
-# def  Turn_first_half_of_step(ZMP_start_pos, step_length, trans_ratio_of_step, trans_slope_steepens_factor, step_time, sample_time,thetta):
+# def  Turn_first_half_of_step(ZMP_start_pos, step_length, step_width, trans_ratio_of_step, trans_slope_steepens_factor, step_time, sample_time,thetta):
 # """
 #     Second Step of a two step turn sequence, rotates the first half of the ZMP step profile by angle thetta. 
 # """
 #     p_ref_x_forward_step = Step_forward_x(ZMP_start_pos, step_length, trans_ratio_of_step, trans_slope_steepens_factor, step_time, sample_time)
 #     if 0.0 >= thetta: # TURNING RIGHT - left foot is stance (coord. system is relative to letf foot)
-#         p_ref_y_side_step = Step_onto_left_foot(ZMP_start_pos, step_length, trans_ratio_of_step, trans_slope_steepens_factor, step_time, sample_time)
+#         p_ref_y_side_step = Step_onto_left_foot(ZMP_start_pos, step_width, trans_ratio_of_step, trans_slope_steepens_factor, step_time, sample_time)
 #     else: #TURNING LEFT - right foot is stance (coord. system is relative to right foot)
-#         p_ref_y_side_step = Step_onto_right_foot(ZMP_start_pos, step_length, trans_ratio_of_step, trans_slope_steepens_factor, step_time, sample_time)
+#         p_ref_y_side_step = Step_onto_right_foot(ZMP_start_pos, step_width, trans_ratio_of_step, trans_slope_steepens_factor, step_time, sample_time)
 
 #     Rz_thetta = array([[cos(thetta), -sin(thetta)],
 #                        [sin(thetta),  cos(thetta)]])  
