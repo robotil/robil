@@ -7,7 +7,7 @@ import os
 import rospy
 
 def init_pose():
-    JC = JointCommands_msg_handler()
+    JC = AtlasCommand_msg_handler()
     RL = robot_listner()
 
     # # Off-set values for IK
@@ -23,11 +23,39 @@ def init_pose():
 
     rospy.sleep(1)
     
-    back_lbz = 0  
-    back_mby = 0
-    back_ubx = 0
-    neck_ay = 0
-    l_leg_uhz = 0 
+    #back_lbz = 0  
+    #back_mby = 0
+    #back_ubx = 0
+ #   neck_ay = 0
+ #  l_leg_uhz = 0 
+  #  l_leg_mhx = -0.00096
+ #  l_leg_lhy = -0.3564
+ #   l_leg_kny = 0.6244
+  #  l_leg_uay = -0.2680
+  #  l_leg_lax = 0.0009
+  #  r_leg_uhz = 0
+   # r_leg_mhx = -0.00096
+  #  r_leg_lhy = -0.3564
+  #  r_leg_kny = 0.6244
+ #   r_leg_uay = -0.268
+ #   r_leg_lax = 0.0009
+  #  l_arm_usy = 0
+ #   l_arm_shx = -1.3
+ #   l_arm_ely = 0
+  #  l_arm_elx = 0
+  #  l_arm_uwy = 0
+   # l_arm_mwx = 0
+  #  r_arm_usy = 0
+  #  r_arm_shx = 1.3
+   # r_arm_ely = 0
+ #   r_arm_elx = 0
+  #  r_arm_uwy = 0
+#    r_arm_mwx = 0
+    back_lbz = 0.0#
+    back_mby = 0.03 #0.03#0.08# 0.06
+    back_ubx =  0
+    neck_ay = 0.0#0
+    l_leg_uhz =0.0# 0 
     l_leg_mhx = -0.00096
     l_leg_lhy = -0.3564
     l_leg_kny = 0.6244
@@ -35,22 +63,23 @@ def init_pose():
     l_leg_lax = 0.0009
     r_leg_uhz = 0
     r_leg_mhx = -0.00096
-    r_leg_lhy = -0.3564
+    r_leg_lhy =0 -0.3564
     r_leg_kny = 0.6244
-    r_leg_uay = -0.268
+    r_leg_uay =0 -0.268
     r_leg_lax = 0.0009
-    l_arm_usy = 0
-    l_arm_shx = -1.3
-    l_arm_ely = 0
-    l_arm_elx = 0
-    l_arm_uwy = 0
-    l_arm_mwx = 0
-    r_arm_usy = 0
-    r_arm_shx = 1.3
-    r_arm_ely = 0
-    r_arm_elx = 0
+    l_arm_usy = 0.9
+    l_arm_shx = -1.35
+    l_arm_ely = 2.3
+    l_arm_elx = 1.6
+    l_arm_uwy = 0.0#0
+    l_arm_mwx = 0.0#0.0
+    r_arm_usy = 0.9
+    r_arm_shx = 1.35
+    r_arm_ely = 2.3
+    r_arm_elx = -1.6
     r_arm_uwy = 0
-    r_arm_mwx = 0
+    r_arm_mwx = 0.0
+
 
     des_pos = [ back_lbz, back_mby, back_ubx, neck_ay,
       l_leg_uhz, l_leg_mhx, l_leg_lhy, l_leg_kny, l_leg_uay, l_leg_lax,

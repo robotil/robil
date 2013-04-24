@@ -35,11 +35,12 @@ from IKException import IKReachException
 from geometry_msgs.msg import *
 import yaml
 import copy
+from sensor_msgs.msg import *#JointState
 
 class Nasmpace: pass
 ns = Nasmpace()
 #ns.LegAng = LegIkResponse()
-
+ns.currentJointState = JointState()
 JSC_r_leg_mhx = Joint_Stiffness_Controller('r_leg_mhx', 9000*9999, 0.04) # joint name, stiffness, update_period [sec]
 JSC_l_leg_mhx = Joint_Stiffness_Controller('l_leg_mhx', 9000*9999, 0.04) # joint name, stiffness, update_period [sec]
 JSC_r_leg_lax = Joint_Stiffness_Controller('r_leg_lax', 8500*9999, 0.04) # joint name, stiffness, update_period [sec]
@@ -226,7 +227,7 @@ def get_from_zmp(msg):
 ##########################################################################################
 
 def get_joint_states(msg):
-    
+    ns.currentJointState=msg
     if JSC_l_leg_lax.JS_i == -1: # Update joint state indexs if not updated
         try:
             JSC_l_leg_lax.JS_i = msg.name.index(JSC_l_leg_lax.name)       
@@ -255,8 +256,13 @@ def get_joint_states(msg):
 def LEG_IK():
 
     rospy.init_node('LEG_IK')
-    ns.JC = JointCommands_msg_handler()
+    rospy.loginfo( "waiting 1 seconds for robot to initiate" )
+    ns.JC = AtlasCommand_msg_handler()
     ns.RL = robot_listner()
+    ns.pub= rospy.Publisher('atlas/atlas_command', AtlasCommand)
+    
+   
+    
 
     # Loading IK off-set values (These values represent the "zero pose" of the IK. They need to be added to the position calc. from the IK )
     zmp_walking_path = os.path.join(roslib.packages.get_pkg_dir('C42_ZMPWalk'), r"src/parameters/",'ZMP_Walking_Params.yaml')
@@ -285,7 +291,8 @@ def LEG_IK():
     ns.actual_r_force_pub = rospy.Publisher('/actual_r_force', Float64)
 
     sub1=rospy.Subscriber("zmp_out", walking_trajectory, get_from_zmp) # traj, get_from_zmp)
-    sub2=rospy.Subscriber("joint_states", JointState, get_joint_states)
+    sub2=rospy.Subscriber("/atlas/joint_states", JointState, get_joint_states)
+    rospy.loginfo( "waiting 1 seconds for robot to initiate222" )
 
 
     ns.start_walk_flag = 1 #################### KJGHLKJGLKJGLKJjjjjH&7777777777777777777777777777777777777#             IUOoooooooPT(*&G:OIUGP(*YT))
@@ -296,11 +303,11 @@ def LEG_IK():
 
 
     # set for: step width - 18.2 , bend knees - 5
-    back_lbz = 0.0
+    back_lbz = 0.0#
     back_mby = 0.03 #0.03#0.08# 0.06
-    back_ubx = 0
-    neck_ay = 0
-    l_leg_uhz = 0 
+    back_ubx =  0
+    neck_ay = 0.0#0
+    l_leg_uhz =0.0# 0 
     l_leg_mhx = -0.00096
     l_leg_lhy = -0.3564
     l_leg_kny = 0.6244
@@ -308,16 +315,16 @@ def LEG_IK():
     l_leg_lax = 0.0009
     r_leg_uhz = 0
     r_leg_mhx = -0.00096
-    r_leg_lhy = -0.3564
+    r_leg_lhy =0 -0.3564
     r_leg_kny = 0.6244
-    r_leg_uay = -0.268
+    r_leg_uay =0 -0.268
     r_leg_lax = 0.0009
     l_arm_usy = 0.9
     l_arm_shx = -1.35
     l_arm_ely = 2.3
     l_arm_elx = 1.6
-    l_arm_uwy = 0
-    l_arm_mwx = 0.0
+    l_arm_uwy = 0.0#0
+    l_arm_mwx = 0.0#0.0
     r_arm_usy = 0.9
     r_arm_shx = 1.35
     r_arm_ely = 2.3
@@ -331,7 +338,21 @@ def LEG_IK():
       l_arm_usy, l_arm_shx, l_arm_ely, l_arm_elx, l_arm_uwy, l_arm_mwx,
       r_arm_usy, r_arm_shx, r_arm_ely, r_arm_elx, r_arm_uwy, r_arm_mwx]
     # cur_pos = ns.RL.current_pos()
-    ns.JC.set_all_pos(cur_pos)
+    rospy.loginfo( "waiting 1 seconds for robot to initiate3333" )
+    #rospy.loginfo(ns.currentJointState.position)
+    
+    #for k in xrange(0,len(cur_pos)):
+      
+      
+      #ns.currentPosition[k] = ns.currentJointState.position[k]
+      
+    #ns.JC.set_all_pos(cur_pos)
+    T=5
+    dt=0.1
+    initialposition = [2.438504816382192e-05, 0.0015186156379058957, 9.983908967114985e-06, -0.0010675729718059301, -0.0003740221436601132, 0.06201673671603203, -0.2333149015903473, 0.5181407332420349, -0.27610817551612854, -0.062101610004901886, 0.00035181696875952184, -0.06218484416604042, -0.2332201600074768, 0.51811283826828, -0.2762000858783722, 0.06211360543966293, 0.29983898997306824, -1.303462266921997, 2.0007927417755127, 0.49823325872421265, 0.0003098883025813848, -0.0044272784143686295, 0.29982614517211914, 1.3034454584121704, 2.000779867172241, -0.498238742351532, 0.0003156556049361825, 0.004448802210390568]
+    ns.JC.send_pos_traj(initialposition,cur_pos,T,dt )
+    rospy.loginfo( "waiting 1 seconds for robot to initiate4444" )
+    
     rospy.sleep(1)
 
     rospy.spin()
