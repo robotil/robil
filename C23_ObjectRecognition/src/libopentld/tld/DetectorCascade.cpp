@@ -47,14 +47,22 @@ DetectorCascade::DetectorCascade()
     imgWidth = -1;
 
     shift = 0.1;
-    minScale = -10;
+   /* minScale = -10;
     maxScale = 10;
     minSize = 25;
     imgWidthStep = -1;
 
     numTrees = 13;
     numFeatures = 10;
+*/
+    minScale = -20;
+    maxScale = 20;
+    minSize = 25;
+    imgWidthStep = -1;
 
+    numTrees = 15;
+    numFeatures = 13;
+    
     initialised = false;
 
     foregroundDetector = new ForegroundDetector();

@@ -1,0 +1,76 @@
+def root {
+	event2{
+		||{
+			||Perception{
+				LocalizationTrack
+				ObstacleDetection
+				PathPlanning
+			}
+			||{
+				Monitor(target=LiveLock)
+				<!L!>Mission{
+					StandUp
+					||{
+						Monitor(target=Falling)
+						<!L!>{
+							SearchObject(target=A)
+							||{
+								TrackObject(target=A)
+								{
+									PathPlanningFocus(target=A)
+									TurnTo(target=A)
+									OperatorControlPoint(data=[panoramic_image,occupancy_grid,path])
+									<!L!>??{
+										||AdvanceByWalkingAlongPath{
+											FollowPath
+											||{
+												<F:1>whilePlaceToThreadIn
+												<F:2>whileSolution
+												<F:2>untilOperatorIntervention
+												<F:2>untilSpeedAveregeIsLowerThen(kmh=?)
+											}
+										}
+										1 NoPlaceToTreadIn{
+											Stop
+											PlanDetour
+											OperatorControlPoint(data=[panoramic_image])
+										}
+										2 NoSolution{
+											OperatorControlPoint(data=[panoramic_image])
+										}
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+}
+
+def OperatorControlPoint{
+	||{
+		<L>Stabilization{
+			Monitor(target=Stable)
+			PostureControl(pose=stabilization)
+		}
+		<T>{
+			||TimeControl{
+				OperatorRequest{
+					For(OperatorControlPoint.data){
+						PushHMI(data=$[OperatorControlPoint.data#])
+					}
+					HMIResponce
+				}
+				Monitor(target=Timeout)
+			}
+		}
+	}
+}
+
+
+
+
+
+

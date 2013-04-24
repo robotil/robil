@@ -17,38 +17,64 @@ run client:
 rosrun C67_CarManipulation SteeringWheel_client 
 -------------------------------------------------------------------------------
 
-to test the rPoint,lPoint nodes, run it with *RPY parameters.
+to test the rPath,lPath nodes, run it with *RPY parameters time and NO. of points.
 
 for example:
 
-right hand:
-rosrun C67_CarManipulation rPoint .257 -.648 .420 .1 -.1 1.336
-
+right hand(x y z R P Y sec points_Number):
+rosrun C67_CarManipulation rPath 0.499917 -0.625275 0.391767 -1.536377 0.400938 -0.019710 2 100
+rosrun C67_CarManipulation rPath 0.440300 -0.209759 0.245574 -1.863805 0.361662 0.810374 2 100
 left hand:
-rosrun C67_CarManipulation lPoint .261 .632 .465 .007 -.026 -1.498
+rosrun C67_CarManipulation lPath 0.499917 0.625275 0.391767 1.536377 0.400938 0.019710 2 100
+rosrun C67_CarManipulation lPath 0.440300 0.209759 0.245574 1.863805 0.361662 -0.810374 2 100
 
 if solution exists the movement command will be transfered to the DRC module.
 if no solution was found, no command will be sent to the module.
 
+to see only arms position run nodes w/o parameters.
+
 Prints
 ======
+-Current Position and arm 6 angles
+if parameters where given
+-the RPY Target
 if solution exists the node prints:
--the RPY command
--time stamp 
--summed error, target vs. solution
--the last 5 arm's angles before command
--the last 5 arm's new angles in the command.
+-solution for arm's 6 angles
+-RPY of solution
+-total error of solution compared to target
 
 example print: 
-RPY(0.257, -0.648, 0.42, 0.1, -0.1, 1.336)
-[ INFO] [1361356348.839777701, 12350.913000000]: 
-error: 0.00545672
-q5-q9 old:0.427901, 1.304104, -1.360446, -1.186743, 0.403391
-q5-q9:0.418074, 1.226236, -1.389139, -1.167793, 0.413008
+Current Position:
+q4-q9:0.005872, 0.036718, 1.621916, -1.495941, -1.570388, 0.060688
+RPY(0.503866 -0.622425 0.392048 -1.537426 0.401099 -0.014788)
+Target:
+RPY(0.499917 -0.625275 0.391767 -1.536377 0.400938 -0.019710)
+Solution/Command:
+q4-q9:0.010000, 0.192323, 1.416106, -1.501731, -1.402116, 0.260856
+RPY(0.499248 -0.628592 0.389581 -1.533828 0.411311 -0.035146)
+error: 0.029256
+---------------------------------------------------------------------------------------
+to test the rJoint,lJoint nodes, run it with the actuator number and angle time and NO. of points.
+the relevant arm angles are q4-q9, q4->r_clav/l_clav, q9->r_hand/l_hand
 
-if no solution was found, the node prints:
-No solution found.
+for example
+turn right q9(last) to angle 0.2 
+rJoint (angle angle_value time NumOfPoints)
+rosrun C67_CarManipulation rJoint 9 0.2 2 100
 
+to see only arms position run nodes w/o parameters.
+
+example print:
+Current Position:
+q4-q9:0.019041, 0.109008, 1.856177, -1.485410, -1.571013, 0.175345
+RPY(0.531952 -0.547437 0.239556 -1.458226 0.753246 0.160728)
+angle q9: 0.200000 Limits(-1.571000, 0.436000)
+q4-q9:0.019041, 0.109008, 1.856177, -1.485410, -1.571013, 0.200000
+RPY(0.528851 -0.547337 0.235189 -1.455533 0.777741 0.164615)
+ 
+
+---------------------------------------------------------------------------------------
 *RPY parameters are x,y,z,R,P,Y: x,y,z - position, R,P,Y - orientation.
--------------------------------------------------------------------------------
+The Orientation is pelvis to middle finger base (right_f1_base/left_f1_base)
+--------------------------------------------------------------------------------------
 

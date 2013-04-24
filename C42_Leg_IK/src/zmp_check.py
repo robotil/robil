@@ -1,7 +1,5 @@
 #!/usr/bin/env python
 ########################3
-# cd Projects/Robil/C42_Leg_IK/src
-# python zmp_check.py
 #############
 ####
 
@@ -20,8 +18,6 @@ from IKException import IKReachException
 from geometry_msgs.msg import *
 import copy
 from atlas_msgs.msg import ForceTorqueSensors
-from foot_contact_filter import contact_filter
-
 
 #from Impedance_Control import Position_Stiffness_Controller
 class Nasmpace_zmp: pass
@@ -80,31 +76,22 @@ def get_walking_data(msg):
 
 
 def get_foot_contact(msg):
-    # y_filt = ForceTorqueSensors()
-    
-    ns.filter.update(msg)
-    buf = ns.filter.get_buffer()
 
-    nr.force_x = -buf[0].r_foot.force.x
-    nr.force_y = -buf[0].r_foot.force.y
-    nr.force_z = -buf[0].r_foot.force.z 
-    nr.t_x = -buf[0].r_foot.torque.x
-    nr.t_y = -buf[0].r_foot.torque.y
-    nr.t_z = -buf[0].r_foot.torque.z
+    ns.num_of_samples += 1
 
+    nr.force_x = nr.force_x + msg.r_foot.force.x
+    nr.force_y = nr.force_y + msg.r_foot.force.y
+    nr.force_z = nr.force_z + msg.r_foot.force.z
+    nr.t_x = nr.t_x + msg.r_foot.torque.x
+    nr.t_y = nr.t_y + msg.r_foot.torque.y
+    nr.t_z = nr.t_z + msg.r_foot.torque.z
 
-    nl.force_x = -buf[0].l_foot.force.x
-    nl.force_y = -buf[0].l_foot.force.y
-    nl.force_z = -buf[0].l_foot.force.z
-    nl.t_x =  -buf[0].l_foot.torque.x
-    nl.t_y =  -buf[0].l_foot.torque.y
-    nl.t_z =  -buf[0].l_foot.torque.z
-
-
-    rospy.loginfo(nl.t_x)
-    rospy.loginfo(nr.t_x)
-    
-
+    nl.force_x = nl.force_x +  msg.l_foot.force.x
+    nl.force_y = nl.force_y +  msg.l_foot.force.y
+    nl.force_z = nl.force_z +  msg.l_foot.force.z
+    nl.t_x = nl.t_x + msg.l_foot.torque.x
+    nl.t_y = nl.t_y + msg.l_foot.torque.y
+    nl.t_z = nl.t_z + msg.l_foot.torque.z
 
     
 
@@ -131,16 +118,38 @@ def ResetSum():
 
 def getAvgForce_Torque():
 
-          
-      ns.response = [nl.force_x, nl.force_y, nl.force_z, nl.t_x, nl.t_y, nl.t_z, nr.force_x, nr.force_y, nr.force_z, nr.t_x, nr.t_y, nr.t_z] 
-      #rospy.loginfo(ns.response)
+   # if ns.num_of_samples != 0:
+      rospy.get_time()
+      nl.force_x = nl.force_x/ns.num_of_samples
+      nl.force_y = nl.force_y/ns.num_of_samples
+      nl.force_z = nl.force_z/ns.num_of_samples
+      nl.t_x = nl.t_x/ns.num_of_samples
+      nl.t_y = nl.t_y/ns.num_of_samples
+      nl.t_z = nl.t_z/ns.num_of_samples
+     
+
+      nr.force_x = nr.force_x/ns.num_of_samples
+      nr.force_y = nr.force_y/ns.num_of_samples
+      nr.force_z = nr.force_z/ns.num_of_samples
+      nr.t_x = nr.t_x/ns.num_of_samples
+      nr.t_y = nr.t_y/ns.num_of_samples
+      nr.t_z = nr.t_z/ns.num_of_samples
+      
+      ns.response = [nl.force_x,nl.force_y,nl.force_z,nl.t_x,nl.t_y,nl.t_z,nl.t_x,nl.t_y,nl.t_z ,nr.force_x,nr.force_y,nr.force_z,nr.t_x,nr.t_y,nr.t_z] 
+
+      ResetSum()
+
+   # else:
+
+      
+     # ns.response = [nl.force_x,nl.force_y,nl.force_z,nl.t_x,nl.t_y,nl.t_z,nl.t_x,nl.t_y,nl.t_z ,nr.force_x,nr.force_y,nr.force_z,nr.t_x,nr.t_y,nr.t_z] 
 
      
 
-      left_contact_F_T.write(' %s %s %s %s %s %s\n'  %(str(rospy.get_time()),ns.response[2],ns.response[3],ns.response[4],nsw.phase,ns.num_of_samples))  
+      left_contact_F_T.write('%s %s %s %s %s %s %s %s %s\n'  %(str(rospy.get_time()),ns.response[0],ns.response[1],ns.response[2],ns.response[3],ns.response[4],ns.response[5],nsw.phase,ns.num_of_samples))  
     
 
-      right_contact_F_T.write(' %s %s %s %s %s %s\n'  %(str(rospy.get_time()),ns.response[8],ns.response[9],ns.response[10],nsw.phase,ns.num_of_samples))
+      right_contact_F_T.write('%s %s %s %s %s %s %s %s %s\n'  %(str(rospy.get_time()),ns.response[6],ns.response[7],ns.response[8],ns.response[9],ns.response[10],ns.response[11],nsw.phase,ns.num_of_samples))
       return (ns.response) 
 
 
@@ -152,8 +161,6 @@ def getAvgForce_Torque():
 def zmp_calculation(msg):
 
   getAvgForce_Torque()
-  #ns.response = [nl.force_x, nl.force_y, nl.force_z, nl.t_x, nl.t_y, nl.t_z,
-  #               nr.force_x, nr.force_y, nr.force_z, nr.t_x, nr.t_y, nr.t_z] 
 
   if ( nsw.phase == 1 ) or ( nsw.phase == 2 ): # left leg is stance
     M_tot_y = ns.response[4] + ns.response[10] + ns.response[8]*nsw.swing.x
@@ -164,7 +171,6 @@ def zmp_calculation(msg):
     zmp_x = ns.zmpx_l 
     zmp_y = ns.zmpy_l
     zmp_left.write('%s %s %s %s %s %s\n'  %(str(rospy.get_time()),ns.zmpx_l,ns.zmpy_l,nsw.phase,msg.zmp_ref.x,msg.zmp_ref.y))
-    zmp_right.write('%s %s %s %s %s %s\n'  %(str(rospy.get_time()),0,0,0,0,0))
 
   if ( nsw.phase == 3 ) or ( nsw.phase == 4 ): # right leg is stance 
     M_tot_y = ns.response[4] + ns.response[10] + ns.response[2]*nsw.swing.x
@@ -174,19 +180,14 @@ def zmp_calculation(msg):
     ns.zmpy_r = M_tot_x/(F_tot_z + 0.0000001)
     zmp_x = ns.zmpx_r
     zmp_y = ns.zmpy_r
-    zero=0
     zmp_right.write('%s %s %s %s %s %s\n'  %(str(rospy.get_time()),ns.zmpx_r,ns.zmpy_r,nsw.phase,msg.zmp_ref.x,msg.zmp_ref.y))
-    zmp_left.write('%s %s %s %s %s %s\n'  %(str(rospy.get_time()),0,0,0,0,0))
+
   zmp.write('%s %s %s %s %s %s %s %s\n'  %(str(rospy.get_time()),zmp_x,zmp_y,nsw.phase,msg.zmp_ref.x,msg.zmp_ref.y,msg.com_ref.x,msg.com_ref.y))
   
   nsw.out.zmpx_r = ns.zmpx_r
   nsw.out.zmpy_r = ns.zmpy_r
   nsw.out.zmpx_l = ns.zmpx_l
   nsw.out.zmpy_l = ns.zmpy_l
-  nsw.out.zmpyBound1 =  0.062
-  nsw.out.zmpyBound2 = -0.062
-  nsw.out.zmpxBound1 = 0.1754
-  nsw.out.zmpxBound2 = -0.083
   nsw.pub_zmp.publish(nsw.out)
 
 def zmp_check():
@@ -199,16 +200,11 @@ def zmp_check():
     rospy.sleep(0.5)
 
     contact_sub = rospy.Subscriber('/atlas/force_torque_sensors', ForceTorqueSensors, get_foot_contact)
-    
-    #contact_sub = rospy.Subscriber('/atlas/force_torque_sensors', ForceTorqueSensors, get_foot_contact)
-    # contact sensor filter:
-    a = [1,-3.180638548874721,3.861194348994217,-2.112155355110971,0.438265142261981]
-    b = [0.0004165992044065786,0.001666396817626,0.002499595226439,0.001666396817626,0.0004165992044065786]
-    ns.filter = contact_filter(b = b, a = a, use_internal_subscriber = False)
-
     walking = rospy.Subscriber("zmp_out", walking_trajectory, get_walking_data)
     nsw.out = zmp_real()
  
+
+    
 
 if __name__ == '__main__':
 
@@ -220,12 +216,3 @@ if __name__ == '__main__':
 
     zmp_check()
     rospy.spin()
-
-
-
-
-
-
-
-
-

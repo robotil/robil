@@ -16,7 +16,10 @@ from math import *
 from LogData import LOG
 from Point2Point import P2P
 from tf.transformations import euler_from_quaternion
-#from C31_PathPlanner.srv import C31_GetPath
+import time
+from datetime import datetime
+
+from C31_PathPlanner.srv import C31_GetPath
 
 class Drive(object):
     _feedback = C51_CarOperation.msg.DriveFeedback()
@@ -62,9 +65,8 @@ class Drive(object):
                 return True
             return False    
     def DriveCallback(self, goal):
-        #self.path=getPath()
-        self.path=[(26, -16),  (-20, -20), (-10, -10), (0, 0)]
-        #self._feedback.WayPointsGiven = []
+        self.path=getPath()
+        self.path = [(5, 5)]
         #DRC Vehicles controllers online - should be replaced with C67 module
         #hb=handB()         #handbrake online
         gasP=Gas() #gas pedal online
@@ -87,68 +89,81 @@ class Drive(object):
             self.sub = rospy.Subscriber('/ground_truth_odom', Odometry,self.callback ) #get atlas location
             while not rospy.is_shutdown():
                 DATA=LOG()
+                DATA.StartDrive = DATA.getTime()
                 i=0
                 brakeP.brake(0)
-                for object in self.path:
-                    if self._as.is_preempt_requested():
-                        success = False
-                        rospy.loginfo('%s: Preempted' % self._action_name)
-                        self._as.set_preempted()
-                        gasP.gas(0)
-                        return
-                    #self._feedback.WayPointsGiven.append(object)
-                    DATA.WayPoint(object)
-                    flag=b=m=0
-                    if(object[1]-self.world.pose.pose.position.y==0): #define the normal to the way points for: "isPassedNormal" function
-                        b=object[0]
-                        if object[0]>self.world.pose.pose.position.x:
-                            flag=1
+                if not self.path:
+                    self.path=getPath()
+                    print self.path
+                else:
+                    for object in self.path:
+                        if self._as.is_preempt_requested():
+                            success = False
+                            rospy.loginfo('%s: Preempted' % self._action_name)
+                            self._as.set_preempted()
+                            gasP.gas(0)
+                            return
+                        #self._feedback.WayPointsGiven.append(object)
+                        DATA.WayPoint(object)
+                        flag=b=m=0
+                        if(object[1]-self.world.pose.pose.position.y==0): #define the normal to the way points for: "isPassedNormal" function
+                            b=object[0]
+                            if object[0]>self.world.pose.pose.position.x:
+                                flag=1
+                            else:
+                                flag=2
                         else:
-                            flag=2
-                    else:
-                        m=-1* float((object[0]-self.world.pose.pose.position.x)/(object[1]-self.world.pose.pose.position.y))
-                        b= float(object[1])-m*float(object[0])
-                        if object[1]>self.world.pose.pose.position.y:
-                            flag=3
-                        else:
-                            flag=4
-                    al=atan2(object[1]-self.world.pose.pose.position.y,  object[0]-self.world.pose.pose.position.x)*180/pi
-                    try:
-                        m1=atan2(self.path[i+1][1]-object[1], self.path[i+1][0]-object[0])*180/pi
-                    except: 
-                        m1=360
-                    if (abs(al-m1)>20 and self.DistanceToWP(object)>5) :
-                        print "-------------------------------"
-                        print "Driving to way point x=%f, y=%f" %(object[0],object[1])
-                        while (self.isPassedNormal(self.world.pose.pose.position.x,self.world.pose.pose.position.y, m, b,flag)):
-                            if self._as.is_preempt_requested():
-                                success = False
-                                rospy.loginfo('%s: Preempted' % self._action_name)
-                                self._as.set_preempted()
-                                gasP.gas(0)
-                                return
-                            DATA.MyPath(self.world.pose.pose.position.x, self.world.pose.pose.position.y)
-                            [speed, Cspeed]=P2P(self.DistanceToWP(object), self.OrientationErrorToWP(object)) 
-                            gasP.gas(speed)
-                            Steer.turn(Cspeed)
-                        DATA.DistanceError([self.world.pose.pose.position.x-object[0], self.world.pose.pose.position.y-object[1]])
-                        DATA.PassedWayPoint(object)
-                        newMsg=Monitoring()
-                        newMsg.LastWPpassed = object
-                        newMsg.MyLoc4LastWP= [self.world.pose.pose.position.x , self.world.pose.pose.position.y]
-                        self.feedback_publisher.publish(newMsg)
-                        print newMsg,  "shmulik"
-                        #self._feedback.LastWPpassed_Y = object[1]
-                        #self._feedback.MyLoc4LastWP= [self.world.pose.pose.position.x , self.world.pose.pose.position.y]
-                        #self._feedback.MyLoc4LastWP_Y=  self.world.pose.pose.position.y
-                        #print self._feedback
-                        self._feedback.complete = 32.22
-                        self._as.publish_feedback(self._feedback)
-                        print "arrived at Way point"
-                    i+=1
-                #self.path=getPath() #Note - the module is still not ready to be fully operable because it always considers your location as (0,0) and does not update your location.
+                            m=-1* float((object[0]-self.world.pose.pose.position.x)/(object[1]-self.world.pose.pose.position.y))
+                            b= float(object[1])-m*float(object[0])
+                            if object[1]>self.world.pose.pose.position.y:
+                                flag=3
+                            else:
+                                flag=4
+                        al=atan2(object[1]-self.world.pose.pose.position.y,  object[0]-self.world.pose.pose.position.x)*180/pi
+                        try:
+                            m1=atan2(self.path[i+1][1]-object[1], self.path[i+1][0]-object[0])*180/pi
+                        except: 
+                            m1=360
+                        if success:#(abs(al-m1)>20 and self.DistanceToWP(object)>5) :
+                            print "-------------------------------"
+                            print "Driving to way point x=%f, y=%f" %(object[0],object[1])
+                            while (self.isPassedNormal(self.world.pose.pose.position.x,self.world.pose.pose.position.y, m, b,flag)):
+                                if self._as.is_preempt_requested():
+                                    success = False
+                                    rospy.loginfo('%s: Preempted' % self._action_name)
+                                    self._as.set_preempted()
+                                    gasP.gas(0)
+                                    return
+                                rospy.sleep(0.02)
+                                print "still driving"
+                                DATA.MyPath(self.world.pose.pose.position.x, self.world.pose.pose.position.y)
+                                [speed, Cspeed]=P2P(self.DistanceToWP(object), self.OrientationErrorToWP(object)) 
+                                gasP.gas(speed/100)
+                                Steer.turn(Cspeed)
+                            DATA.DistanceError(sqrt((self.world.pose.pose.position.x-object[0])*(self.world.pose.pose.position.x-object[0])+( self.world.pose.pose.position.y-object[1])*( self.world.pose.pose.position.y-object[1])))
+                            DATA.PassedWayPoint(object)
+                            if object==[30, 30]:
+                                rospy.sleep(2)
+                            newMsg=Monitoring()
+                            newMsg.LastWPpassed = object
+                            newMsg.MyLoc4LastWP= [self.world.pose.pose.position.x , self.world.pose.pose.position.y]
+                            self.feedback_publisher.publish(newMsg)
+                            print newMsg
+                            #self._feedback.LastWPpassed_Y = object[1]
+                            #self._feedback.MyLoc4LastWP= [self.world.pose.pose.position.x , self.world.pose.pose.position.y]
+                            #self._feedback.MyLoc4LastWP_Y=  self.world.pose.pose.position.y
+                            #print self._feedback
+                            self._feedback.complete = 32.22
+                            self._as.publish_feedback(self._feedback)
+                            print "arrived at Way point"
+                        i+=1
+                    #self.path=getPath() #Note - the module is still not ready to be fully operable because it always considers your location as (0,0) and does not update your location.
                 #print self.path
+
                 self.path=[]
+                DATA.FinishDrive = DATA.getTime()
+                DATA.print2file()
+                print "Finished generating log.txt"
                 if not self.path:
                     gasP.gas(0)
                     brakeP.brake(0)
@@ -158,7 +173,7 @@ class Drive(object):
                     self._result.plan = "finished driving car"
                     break   
             
-        #plotGraph(DATA)    
+        plotGraph(DATA)    
         if success:
             rospy.loginfo('Finished Driving!! Please run "FinishDrive" client, in order to pull hand brake.')
             self._as.set_succeeded(self._result)
@@ -167,18 +182,18 @@ class Drive(object):
 def getPath():
     #rospy.wait_for_service('C31_GlobalPathPlanner/getPath')
     try:
-        print "Connecting to C31_GlobalPathPlanner/getPath"
+        rospy.loginfo ("Connecting to C31_GlobalPathPlanner/getPath")
         add_two_ints = rospy.ServiceProxy('C31_GlobalPathPlanner/getPath', C31_GetPath)
         array = add_two_ints().path.points
         array2=[(po.x, po.y) for po in array]
         if array2==[]:
-            print "No way points!!! check preception module"
+            rospy.loginfo ("No way points!!! check preception module")
         else:
-            print "Way Points collected"
+             rospy.loginfo ( "Way Points collected")
         return array2
     except rospy.ServiceException, e:
-       print "Check that C31 is running properly." 
-       print "try running in terminal: rosservice call /C31_GlobalPathPlanner/getPath "
+        rospy.loginfo ( "Check that C31 is running properly." )
+        rospy.loginfo ( "try running in terminal: rosservice call /C31_GlobalPathPlanner/getPath ")
 #=========================================================================================#
 #----------DRC vehicle controllers.....note! - will be erased once the C67 module is complete----------------#
 #=========================================================================================#

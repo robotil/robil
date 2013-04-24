@@ -163,7 +163,7 @@ void C22_Node::callback(const C21_VisionAndLidar::C21_C22::ConstPtr& pclMsg,cons
 	  vg.filter (*cloud_filtered);
 	 pcl::StatisticalOutlierRemoval<pcl::PointXYZ> sor;
 	  sor.setInputCloud (cloud_filtered);
-	  sor.setMeanK (100);
+	  sor.setMeanK (600);
 	  sor.setStddevMulThresh (1.0);
 	  sor.filter (*cloud_filtered);
 

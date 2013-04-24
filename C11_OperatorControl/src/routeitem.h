@@ -8,7 +8,7 @@
 class CRouteItem : public QGraphicsItem
 {
 public:
-	CRouteItem(QGraphicsScene* scene);
+	CRouteItem(QGraphicsScene* scene, QColor c =Qt::darkBlue);
 	~CRouteItem();
 	void addPointToLine(QPointF p,bool ShowLines);
 	QRectF boundingRect() const;
@@ -22,6 +22,11 @@ public:
 	void ReleasePoint();
 	bool selectEdge(QPointF p);
 	void MoveLineTo(QPointF p);
+	void drawReadyPath(QVector<QPointF> vec_p, bool b);
+	void drawReadyPolygon(QVector<QPointF> vec_p, bool b);
+	QPointF GetPoint(int index);
+	int GetNumOfPoints();
+	QVector<QPointF> getRoutePoints();
 
 private:
 	CLineItemList *pFirstLineItemList;
@@ -35,6 +40,9 @@ private:
 	bool isPoly;
 	CLineItemList* GoToLastLine();
 	void UpdatetLastPoint();
+	QColor penColor;
+	QPointF points[100];
+	int numOfPointsInPoly;
 };
 
 #endif // ROUTEITEM_H

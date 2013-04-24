@@ -2,6 +2,10 @@
 <!-- Launch the atlas & vehicle & fire hose world-->
 <include file="$(find atlas_utils)/launch/atlas_drc_vehicle_fire_hose.launch" />
 
+<!-- Atlas, enter car!!!-->
+<include  file="$(find C51_CarOperation)/launch/bash.launch" />
+
+
 <!-- Start Drive Init server -->
 <node name="InitDrive" pkg="C51_CarOperation" type="DRC_Vehicle_Init_server.py" />
 
@@ -14,4 +18,3 @@
 
 </launch>
   
-

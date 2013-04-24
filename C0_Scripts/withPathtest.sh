@@ -13,7 +13,7 @@ echo "Done "
 echo $C31_PID  >> $PKILL
 cd $CURR_WD
 
-rosservice call executer/run T /home/userws4/git/robil/C0_Scripts/pln
+rosservice call executer/run T $ROBIL/C0_Scripts/pln
 rosservice call executer/resume T
-rosservice call executer/run T1 /home/userws4/git/robil/C0_Scripts/pln1
+rosservice call executer/run T1 $ROBIL/C0_Scripts/pln1
 rosservice call executer/resume T1

@@ -174,6 +174,7 @@ public class TaskDescription {
 					return root;
 				}
 			};
+			
 		for (int i = 0; i < nl.getLength(); i++) {
 			if (nl.item(i).getNodeType() != Element.ELEMENT_NODE)
 				continue;
