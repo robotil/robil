@@ -1,116 +1,52 @@
 Redirecting all output to /home/ariy/robil/C34_Designer/BTDesigner_stdout.log
-[14:36:44][org.eclipse.jdt.internal.jarinjarloader.JarRsrcLoader.main:58][DEBUG] Load properties from /home/ariy/robil/C34_Designer/BTDesigner.xml
-[14:36:45][org.eclipse.jdt.internal.jarinjarloader.JarRsrcLoader.main:58][DEBUG] Properties :
-[14:36:45][org.eclipse.jdt.internal.jarinjarloader.JarRsrcLoader.main:58][DEBUG]    log_disabled_tags <- 
-[14:36:45][org.eclipse.jdt.internal.jarinjarloader.JarRsrcLoader.main:58][DEBUG]    log_print_ros_output <- true
-[14:36:45][org.eclipse.jdt.internal.jarinjarloader.JarRsrcLoader.main:58][DEBUG]    path_to_images <- ./images
-[14:36:45][org.eclipse.jdt.internal.jarinjarloader.JarRsrcLoader.main:58][DEBUG]    path_to_lookup <- ./plans/lookup.xml
-[14:36:45][org.eclipse.jdt.internal.jarinjarloader.JarRsrcLoader.main:58][DEBUG]    test_result <- true
-[14:36:45][org.eclipse.jdt.internal.jarinjarloader.JarRsrcLoader.main:58][DEBUG]    log_ros_progress_print_level <- 10
-[14:36:45][org.eclipse.jdt.internal.jarinjarloader.JarRsrcLoader.main:58][DEBUG]    path_to_address <- ./plans/TaskList.xml
-[14:36:45][org.eclipse.jdt.internal.jarinjarloader.JarRsrcLoader.main:58][DEBUG]    path_to_plans_on_executer <- plans/{FILENAME}
-[14:36:45][org.eclipse.jdt.internal.jarinjarloader.JarRsrcLoader.main:58][DEBUG]    path_to_undo <- ./.undo
-[14:36:45][org.eclipse.jdt.internal.jarinjarloader.JarRsrcLoader.main:58][DEBUG]    enableLinkConnection <- true
-[14:36:45][org.eclipse.jdt.internal.jarinjarloader.JarRsrcLoader.main:58][DEBUG]    executer_service <- /executer
-[14:36:45][org.eclipse.jdt.internal.jarinjarloader.JarRsrcLoader.main:58][DEBUG]    log_print_ros_commands <- true
-[14:36:45][org.eclipse.jdt.internal.jarinjarloader.JarRsrcLoader.main:58][DEBUG]    log_preview_lines_limit <- 500
-[14:36:45][org.eclipse.jdt.internal.jarinjarloader.JarRsrcLoader.main:58][DEBUG]    path_to_plans <- ./plans
-[14:36:45][org.eclipse.jdt.internal.jarinjarloader.JarRsrcLoader.main:58][DEBUG]    enableTaskIdRegeneration <- false
-[14:36:45][org.eclipse.jdt.internal.jarinjarloader.JarRsrcLoader.main:58][DEBUG]    log_print_running_tasks_id <- true
-[14:36:45][org.eclipse.jdt.internal.jarinjarloader.JarRsrcLoader.main:58][DEBUG]    test_time <- 0
-[14:36:45][org.eclipse.jdt.internal.jarinjarloader.JarRsrcLoader.main:58][DEBUG]    path_to_description <- ./plans/TaskDescriptions.xml
-[14:36:45][java.lang.Thread.run:679][STACKSTREAM] Try to connect to ROS topic: /executer/stack_stream
-[14:36:45][java.lang.Thread.run:679][STOPSTREAM] Try to connect to ROS topic: /executer/stop_stream
-[14:36:45][java.lang.Thread.run:679][ROSPIPE]    send message to ros.
-[14:36:45][java.lang.Thread.run:679][ROSPIPE]    send message to ros.
-[14:36:45][java.lang.Thread.run:679][DEBUG] Ros command (1) 
-[14:36:45][java.lang.Thread.run:679][DEBUG] Ros command (2) 
-[14:36:45][java.lang.Thread.run:679][ROSPIPE] Arg: rostopic ! echo ! /executer/stop_stream ! 
-[14:36:45][java.lang.Thread.run:679][ROSPIPE] Arg: rostopic ! echo ! /executer/stack_stream ! 
-[14:36:45][java.lang.Thread.run:679][ROSPIPE]    listen output stream from ros.
-[14:36:45][java.lang.Thread.run:679][ROSPIPE]    listen output stream from ros.
-[14:36:46][org.eclipse.jdt.internal.jarinjarloader.JarRsrcLoader.main:58][DEBUG] BTDesigner loaded
-[14:36:55][java.awt.EventDispatchThread.run:138][DEBUG] Plan has a descriptions attribute = ./plans/TaskDescriptions.xml
-[14:36:55][java.awt.EventDispatchThread.run:138][DEBUG] Task descriptions loaded from ./plans/TaskDescriptions.xml
-[14:38:03][java.awt.EventDispatchThread.run:138][DEBUG] Plan has a descriptions attribute = ./plans/TaskDescriptions.xml
-[14:38:03][java.awt.EventDispatchThread.run:138][DEBUG] Task descriptions loaded from ./plans/TaskDescriptions.xml
-[14:38:22][java.awt.EventDispatchThread.run:138][DEBUG] Plan has a descriptions attribute = ./plans/TaskDescriptions.xml
-[14:38:22][java.awt.EventDispatchThread.run:138][DEBUG] Task descriptions loaded from ./plans/TaskDescriptions.xml
-[14:39:12][java.awt.EventDispatchThread.run:138][DEBUG] Plan has a descriptions attribute = ./plans/TaskDescriptions.xml
-[14:39:12][java.awt.EventDispatchThread.run:138][DEBUG] Task descriptions loaded from ./plans/TaskDescriptions.xml
-[14:41:15][java.awt.EventDispatchThread.run:138][DEBUG] Save properties to /home/ariy/robil/C34_Designer/BTDesigner.xml
-[14:41:51][java.awt.EventDispatchThread.run:138][DEBUG] Save properties to /home/ariy/robil/C34_Designer/BTDesigner.xml
-[14:42:21][java.awt.EventDispatchThread.run:138][DEBUG] Save properties to /home/ariy/robil/C34_Designer/BTDesigner.xml
-[14:42:36][java.awt.EventDispatchThread.run:138][DEBUG] Save properties to /home/ariy/robil/C34_Designer/BTDesigner.xml
-[14:42:46][java.awt.EventDispatchThread.run:138][DEBUG] Task descriptions file successfully saved to ./plans/TaskDescriptions.xml
-[14:42:46][java.awt.EventDispatchThread.run:138][DEBUG] description attribute added to plan = descriptions="./plans/TaskDescriptions.xml"
-[14:42:46][java.awt.EventDispatchThread.run:138][DEBUG] description attribute added to plan = descriptions="./plans/TaskDescriptions.xml"
-[14:42:51][java.awt.EventDispatchThread.run:138][DEBUG] Plan has a descriptions attribute = ./plans/TaskDescriptions.xml
-[14:42:51][java.awt.EventDispatchThread.run:138][DEBUG] Task descriptions loaded from ./plans/TaskDescriptions.xml
-[14:44:02][java.awt.EventDispatchThread.run:138][DEBUG] Save properties to /home/ariy/robil/C34_Designer/BTDesigner.xml
-[14:44:13][java.awt.EventDispatchThread.run:138][DEBUG] Plan has a descriptions attribute = ./plans/TaskDescriptions.xml
-[14:44:13][java.awt.EventDispatchThread.run:138][DEBUG] Task descriptions loaded from ./plans/TaskDescriptions.xml
-[14:44:33][java.awt.EventDispatchThread.run:138][DEBUG] Plan has a descriptions attribute = ./plans/TaskDescriptions.xml
-[14:44:33][java.awt.EventDispatchThread.run:138][DEBUG] Task descriptions loaded from ./plans/TaskDescriptions.xml
-[14:45:13][java.awt.EventDispatchThread.run:138][ROSACTION] RUN PLAN FILE : plans/comp1.xml
-[14:45:13][java.awt.EventDispatchThread.run:138][ROSACTION] Set active tab id to aeoDHRyhCJ
-[14:45:13][java.awt.EventDispatchThread.run:138][ROSEXECUTOR] Run aeoDHRyhCJ
-[14:45:13][java.awt.EventDispatchThread.run:138][ROSPIPE]    send message to ros.
-[14:45:13][java.awt.EventDispatchThread.run:138][DEBUG] Ros command (3) 
-[14:45:13][java.awt.EventDispatchThread.run:138][ROSPIPE] Arg: rosservice ! call ! /executer/run ! aeoDHRyhCJ ! plans/comp1.xml ! 
-[14:45:13][java.awt.EventDispatchThread.run:138][ROSPIPE]    listen output stream from ros.
-[14:45:13][java.awt.EventDispatchThread.run:138][ROSACTION] GET ACTIVE TAB ID = aeoDHRyhCJ
-[14:45:13][java.awt.EventDispatchThread.run:138][ROSEXECUTOR] Resume aeoDHRyhCJ
-[14:45:13][java.awt.EventDispatchThread.run:138][ROSPIPE]    send message to ros.
-[14:45:13][java.awt.EventDispatchThread.run:138][DEBUG] Ros command (4) 
-[14:45:13][java.awt.EventDispatchThread.run:138][ROSPIPE] Arg: rosservice ! call ! /executer/resume ! aeoDHRyhCJ ! 
-[14:45:13][java.awt.EventDispatchThread.run:138][ROSPIPE]    listen output stream from ros.
-[14:45:14][java.awt.EventDispatchThread.run:138][ROSACTION] RUN PLAN FILE : plans/comp1.xml
-[14:45:14][java.awt.EventDispatchThread.run:138][ROSACTION] Set active tab id to MYesSsNItG
-[14:45:14][java.awt.EventDispatchThread.run:138][ROSEXECUTOR] Run MYesSsNItG
-[14:45:14][java.awt.EventDispatchThread.run:138][ROSPIPE]    send message to ros.
-[14:45:14][java.awt.EventDispatchThread.run:138][DEBUG] Ros command (5) 
-[14:45:14][java.awt.EventDispatchThread.run:138][ROSPIPE] Arg: rosservice ! call ! /executer/run ! MYesSsNItG ! plans/comp1.xml ! 
-[14:45:14][java.awt.EventDispatchThread.run:138][ROSPIPE]    listen output stream from ros.
-[14:45:14][java.awt.EventDispatchThread.run:138][ROSACTION] GET ACTIVE TAB ID = MYesSsNItG
-[14:45:14][java.awt.EventDispatchThread.run:138][ROSEXECUTOR] Resume MYesSsNItG
-[14:45:14][java.awt.EventDispatchThread.run:138][ROSPIPE]    send message to ros.
-[14:45:14][java.awt.EventDispatchThread.run:138][DEBUG] Ros command (6) 
-[14:45:14][java.awt.EventDispatchThread.run:138][ROSPIPE] Arg: rosservice ! call ! /executer/resume ! MYesSsNItG ! 
-[14:45:14][java.awt.EventDispatchThread.run:138][ROSPIPE]    listen output stream from ros.
-[14:45:16][java.awt.EventDispatchThread.run:138][ROSACTION] RUN PLAN FILE : plans/comp1.xml
-[14:45:16][java.awt.EventDispatchThread.run:138][ROSACTION] Set active tab id to FZquAPeEKB
-[14:45:16][java.awt.EventDispatchThread.run:138][ROSEXECUTOR] Run FZquAPeEKB
-[14:45:16][java.awt.EventDispatchThread.run:138][ROSPIPE]    send message to ros.
-[14:45:16][java.awt.EventDispatchThread.run:138][DEBUG] Ros command (7) 
-[14:45:16][java.awt.EventDispatchThread.run:138][ROSPIPE] Arg: rosservice ! call ! /executer/run ! FZquAPeEKB ! plans/comp1.xml ! 
-[14:45:16][java.awt.EventDispatchThread.run:138][ROSPIPE]    listen output stream from ros.
-[14:45:16][java.awt.EventDispatchThread.run:138][ROSACTION] GET ACTIVE TAB ID = FZquAPeEKB
-[14:45:16][java.awt.EventDispatchThread.run:138][ROSEXECUTOR] Resume FZquAPeEKB
-[14:45:16][java.awt.EventDispatchThread.run:138][ROSPIPE]    send message to ros.
-[14:45:16][java.awt.EventDispatchThread.run:138][DEBUG] Ros command (8) 
-[14:45:16][java.awt.EventDispatchThread.run:138][ROSPIPE] Arg: rosservice ! call ! /executer/resume ! FZquAPeEKB ! 
-[14:45:16][java.awt.EventDispatchThread.run:138][ROSPIPE]    listen output stream from ros.
-[14:45:16][java.awt.EventDispatchThread.run:138][ROSEXECUTOR] Stop FZquAPeEKB
-[14:45:16][java.awt.EventDispatchThread.run:138][ROSPIPE]    send message to ros.
-[14:45:16][java.awt.EventDispatchThread.run:138][DEBUG] Ros command (9) 
-[14:45:16][java.awt.EventDispatchThread.run:138][ROSPIPE] Arg: rosservice ! call ! /executer/stop ! FZquAPeEKB ! 
-[14:45:16][java.awt.EventDispatchThread.run:138][ROSPIPE]    listen output stream from ros.
-[14:45:17][java.awt.EventDispatchThread.run:138][INFO] Plan execution aborted
-[14:45:19][java.awt.EventDispatchThread.run:138][ROSEXECUTOR] Stop FZquAPeEKB
-[14:45:19][java.awt.EventDispatchThread.run:138][ROSPIPE]    send message to ros.
-[14:45:19][java.awt.EventDispatchThread.run:138][DEBUG] Ros command (10) 
-[14:45:19][java.awt.EventDispatchThread.run:138][ROSPIPE] Arg: rosservice ! call ! /executer/stop ! FZquAPeEKB ! 
-[14:45:19][java.awt.EventDispatchThread.run:138][ROSPIPE]    listen output stream from ros.
-[14:45:20][java.awt.EventDispatchThread.run:138][INFO] Plan execution aborted
+[10:21:39][windows.designer.BTDesigner.main:85][DEBUG] Load properties from /home/ariy/robil/C34_Designer/BTDesigner.xml
+[10:21:39][windows.designer.BTDesigner.main:85][DEBUG] Properties :
+[10:21:39][windows.designer.BTDesigner.main:85][DEBUG]    log_disabled_tags <- 
+[10:21:40][windows.designer.BTDesigner.main:85][DEBUG]    log_print_ros_output <- true
+[10:21:40][windows.designer.BTDesigner.main:85][DEBUG]    path_to_images <- ./images
+[10:21:40][windows.designer.BTDesigner.main:85][DEBUG]    path_to_lookup <- ./plans/lookup.xml
+[10:21:40][windows.designer.BTDesigner.main:85][DEBUG]    stop_stream_topic <- stop_stream
+[10:21:40][windows.designer.BTDesigner.main:85][DEBUG]    test_result <- true
+[10:21:40][windows.designer.BTDesigner.main:85][DEBUG]    log_ros_progress_print_level <- 10
+[10:21:40][windows.designer.BTDesigner.main:85][DEBUG]    path_to_address <- ./plans/TaskList.xml
+[10:21:40][windows.designer.BTDesigner.main:85][DEBUG]    path_to_plans_on_executer <- plans/{FILENAME}
+[10:21:40][windows.designer.BTDesigner.main:85][DEBUG]    path_to_undo <- ./.undo
+[10:21:40][windows.designer.BTDesigner.main:85][DEBUG]    enableLinkConnection <- true
+[10:21:40][windows.designer.BTDesigner.main:85][DEBUG]    executer_service <- /executer
+[10:21:40][windows.designer.BTDesigner.main:85][DEBUG]    log_print_ros_commands <- true
+[10:21:40][windows.designer.BTDesigner.main:85][DEBUG]    log_preview_lines_limit <- 500
+[10:21:40][windows.designer.BTDesigner.main:85][DEBUG]    path_to_plans <- ./plans
+[10:21:40][windows.designer.BTDesigner.main:85][DEBUG]    enableTaskIdRegeneration <- false
+[10:21:40][windows.designer.BTDesigner.main:85][DEBUG]    stack_stream_topic <- stack_stream
+[10:21:40][windows.designer.BTDesigner.main:85][DEBUG]    compact_stack_message <- false
+[10:21:40][windows.designer.BTDesigner.main:85][DEBUG]    log_print_running_tasks_id <- true
+[10:21:40][windows.designer.BTDesigner.main:85][DEBUG]    test_time <- 0
+[10:21:40][windows.designer.BTDesigner.main:85][DEBUG]    path_to_description <- ./plans/TaskDescriptions.xml
+[10:21:40][java.lang.Thread.run:679][STACKSTREAM] Using universal stack stream message parser
+[10:21:40][java.lang.Thread.run:679][STOPSTREAM] Try to connect to ROS topic: /executer/stop_stream
+[10:21:40][java.lang.Thread.run:679][STACKSTREAM] Try to connect to ROS topic: /executer/stack_stream
+[10:21:40][java.lang.Thread.run:679][ROSPIPE]    send message to ros.
+[10:21:40][java.lang.Thread.run:679][ROSPIPE]    send message to ros.
+[10:21:40][java.lang.Thread.run:679][DEBUG] Ros command (1) 
+[10:21:40][java.lang.Thread.run:679][DEBUG] Ros command (2) 
+[10:21:40][java.lang.Thread.run:679][ROSPIPE] Arg: rostopic ! echo ! /executer/stop_stream ! 
+[10:21:40][java.lang.Thread.run:679][ROSPIPE] Arg: rostopic ! echo ! /executer/stack_stream ! 
+[10:21:40][windows.designer.BTDesigner.main:90][INFO] Cogniteam BTDesigner 0.2.6.5
+[10:21:40][java.lang.Thread.run:679][ROSPIPE]    listen output stream from ros.
+[10:21:40][java.lang.Thread.run:679][ROSPIPE]    listen output stream from ros.
+[10:21:41][windows.designer.BTDesigner.main:121][DEBUG] BTDesigner loaded
+[10:22:18][java.awt.EventDispatchThread.run:138][DEBUG] Plan has a descriptions attribute = ./plans/TaskDescriptions.xml
+[10:22:18][java.awt.EventDispatchThread.run:138][DEBUG] Task descriptions loaded from ./plans/TaskDescriptions.xml
+[10:22:33][java.awt.EventDispatchThread.run:138][DEBUG] Task descriptions file loaded from ./plans/TaskDescriptions.xml, descriptions count = 48
+[10:23:22][java.awt.EventDispatchThread.run:138][DEBUG] Task descriptions file successfully saved to ./plans/TaskDescriptions.xml
+[10:23:22][java.awt.EventDispatchThread.run:138][DEBUG] description attribute added to plan = descriptions="./plans/TaskDescriptions.xml"
+[10:23:22][java.awt.EventDispatchThread.run:138][DEBUG] description attribute added to plan = descriptions="./plans/TaskDescriptions.xml"
+[10:26:27][java.awt.EventDispatchThread.run:138][DEBUG] Task descriptions file successfully saved to ./plans/TaskDescriptions.xml
+[10:26:27][java.awt.EventDispatchThread.run:138][DEBUG] description attribute added to plan = descriptions="./plans/TaskDescriptions.xml"
+[10:26:27][java.awt.EventDispatchThread.run:138][DEBUG] description attribute added to plan = descriptions="./plans/TaskDescriptions.xml"
 Exception in thread "AWT-EventQueue-0" java.lang.NullPointerException
-	at document.actions.OpenFileAction.actionPerformed(OpenFileAction.java:88)
-	at javax.swing.AbstractButton.fireActionPerformed(AbstractButton.java:2012)
-	at javax.swing.AbstractButton$Handler.actionPerformed(AbstractButton.java:2335)
-	at javax.swing.DefaultButtonModel.fireActionPerformed(DefaultButtonModel.java:404)
-	at javax.swing.DefaultButtonModel.setPressed(DefaultButtonModel.java:259)
-	at javax.swing.plaf.basic.BasicButtonListener.mouseReleased(BasicButtonListener.java:252)
-	at java.awt.AWTEventMulticaster.mouseReleased(AWTEventMulticaster.java:289)
+	at document.Document.onTreeChange(Document.java:1119)
+	at document.DocumentMouseHandler.mouseReleased(DocumentMouseHandler.java:108)
 	at java.awt.Component.processMouseEvent(Component.java:6288)
 	at javax.swing.JComponent.processMouseEvent(JComponent.java:3267)
 	at java.awt.Component.processEvent(Component.java:6053)
@@ -142,31 +78,401 @@ Exception in thread "AWT-EventQueue-0" java.lang.NullPointerException
 	at java.awt.EventDispatchThread.pumpEvents(EventDispatchThread.java:185)
 	at java.awt.EventDispatchThread.pumpEvents(EventDispatchThread.java:177)
 	at java.awt.EventDispatchThread.run(EventDispatchThread.java:138)
-[14:51:42][java.awt.EventDispatchThread.run:138][DEBUG] Plan has a descriptions attribute = ./plans/TaskDescriptions.xml
-[14:51:42][java.awt.EventDispatchThread.run:138][DEBUG] Task descriptions loaded from ./plans/TaskDescriptions.xml
-[14:56:16][java.awt.EventDispatchThread.run:138][ROSACTION] RUN PLAN FILE : plans/comp1.xml
-[14:56:16][java.awt.EventDispatchThread.run:138][ROSACTION] Set active tab id to HuJsBMtgKj
-[14:56:16][java.awt.EventDispatchThread.run:138][ROSEXECUTOR] Run HuJsBMtgKj
-[14:56:16][java.awt.EventDispatchThread.run:138][ROSPIPE]    send message to ros.
-[14:56:16][java.awt.EventDispatchThread.run:138][DEBUG] Ros command (11) 
-[14:56:16][java.awt.EventDispatchThread.run:138][ROSPIPE] Arg: rosservice ! call ! /executer/run ! HuJsBMtgKj ! plans/comp1.xml ! 
-[14:56:16][java.awt.EventDispatchThread.run:138][ROSPIPE]    listen output stream from ros.
-[14:56:16][java.awt.EventDispatchThread.run:138][ROSACTION] GET ACTIVE TAB ID = HuJsBMtgKj
-[14:56:16][java.awt.EventDispatchThread.run:138][ROSEXECUTOR] Resume HuJsBMtgKj
-[14:56:16][java.awt.EventDispatchThread.run:138][ROSPIPE]    send message to ros.
-[14:56:16][java.awt.EventDispatchThread.run:138][DEBUG] Ros command (12) 
-[14:56:16][java.awt.EventDispatchThread.run:138][ROSPIPE] Arg: rosservice ! call ! /executer/resume ! HuJsBMtgKj ! 
-[14:56:16][java.awt.EventDispatchThread.run:138][ROSPIPE]    listen output stream from ros.
-[14:56:19][java.awt.EventDispatchThread.run:138][ROSACTION] RUN PLAN FILE : plans/comp1.xml
-[14:56:19][java.awt.EventDispatchThread.run:138][ROSACTION] Set active tab id to GaHIrnlQpt
-[14:56:19][java.awt.EventDispatchThread.run:138][ROSEXECUTOR] Run GaHIrnlQpt
-[14:56:19][java.awt.EventDispatchThread.run:138][ROSPIPE]    send message to ros.
-[14:56:19][java.awt.EventDispatchThread.run:138][DEBUG] Ros command (13) 
-[14:56:19][java.awt.EventDispatchThread.run:138][ROSPIPE] Arg: rosservice ! call ! /executer/run ! GaHIrnlQpt ! plans/comp1.xml ! 
-[14:56:19][java.awt.EventDispatchThread.run:138][ROSPIPE]    listen output stream from ros.
-[14:56:19][java.awt.EventDispatchThread.run:138][ROSACTION] GET ACTIVE TAB ID = GaHIrnlQpt
-[14:56:19][java.awt.EventDispatchThread.run:138][ROSEXECUTOR] Resume GaHIrnlQpt
-[14:56:19][java.awt.EventDispatchThread.run:138][ROSPIPE]    send message to ros.
-[14:56:19][java.awt.EventDispatchThread.run:138][DEBUG] Ros command (14) 
-[14:56:19][java.awt.EventDispatchThread.run:138][ROSPIPE] Arg: rosservice ! call ! /executer/resume ! GaHIrnlQpt ! 
-[14:56:19][java.awt.EventDispatchThread.run:138][ROSPIPE]    listen output stream from ros.
+Exception in thread "AWT-EventQueue-0" java.lang.NullPointerException
+	at document.Document.onTreeChange(Document.java:1119)
+	at document.DocumentMouseHandler.mouseReleased(DocumentMouseHandler.java:108)
+	at java.awt.Component.processMouseEvent(Component.java:6288)
+	at javax.swing.JComponent.processMouseEvent(JComponent.java:3267)
+	at java.awt.Component.processEvent(Component.java:6053)
+	at java.awt.Container.processEvent(Container.java:2045)
+	at java.awt.Component.dispatchEventImpl(Component.java:4649)
+	at java.awt.Container.dispatchEventImpl(Container.java:2103)
+	at java.awt.Component.dispatchEvent(Component.java:4475)
+	at java.awt.LightweightDispatcher.retargetMouseEvent(Container.java:4633)
+	at java.awt.LightweightDispatcher.processMouseEvent(Container.java:4297)
+	at java.awt.LightweightDispatcher.dispatchEvent(Container.java:4227)
+	at java.awt.Container.dispatchEventImpl(Container.java:2089)
+	at java.awt.Window.dispatchEventImpl(Window.java:2587)
+	at java.awt.Component.dispatchEvent(Component.java:4475)
+	at java.awt.EventQueue.dispatchEventImpl(EventQueue.java:675)
+	at java.awt.EventQueue.access$300(EventQueue.java:96)
+	at java.awt.EventQueue$2.run(EventQueue.java:634)
+	at java.awt.EventQueue$2.run(EventQueue.java:632)
+	at java.security.AccessController.doPrivileged(Native Method)
+	at java.security.AccessControlContext$1.doIntersectionPrivilege(AccessControlContext.java:105)
+	at java.security.AccessControlContext$1.doIntersectionPrivilege(AccessControlContext.java:116)
+	at java.awt.EventQueue$3.run(EventQueue.java:648)
+	at java.awt.EventQueue$3.run(EventQueue.java:646)
+	at java.security.AccessController.doPrivileged(Native Method)
+	at java.security.AccessControlContext$1.doIntersectionPrivilege(AccessControlContext.java:105)
+	at java.awt.EventQueue.dispatchEvent(EventQueue.java:645)
+	at java.awt.EventDispatchThread.pumpOneEventForFilters(EventDispatchThread.java:275)
+	at java.awt.EventDispatchThread.pumpEventsForFilter(EventDispatchThread.java:200)
+	at java.awt.EventDispatchThread.pumpEventsForHierarchy(EventDispatchThread.java:190)
+	at java.awt.EventDispatchThread.pumpEvents(EventDispatchThread.java:185)
+	at java.awt.EventDispatchThread.pumpEvents(EventDispatchThread.java:177)
+	at java.awt.EventDispatchThread.run(EventDispatchThread.java:138)
+Exception in thread "AWT-EventQueue-0" java.lang.NullPointerException
+	at document.Document.onTreeChange(Document.java:1119)
+	at document.DocumentMouseHandler.mouseReleased(DocumentMouseHandler.java:108)
+	at java.awt.Component.processMouseEvent(Component.java:6288)
+	at javax.swing.JComponent.processMouseEvent(JComponent.java:3267)
+	at java.awt.Component.processEvent(Component.java:6053)
+	at java.awt.Container.processEvent(Container.java:2045)
+	at java.awt.Component.dispatchEventImpl(Component.java:4649)
+	at java.awt.Container.dispatchEventImpl(Container.java:2103)
+	at java.awt.Component.dispatchEvent(Component.java:4475)
+	at java.awt.LightweightDispatcher.retargetMouseEvent(Container.java:4633)
+	at java.awt.LightweightDispatcher.processMouseEvent(Container.java:4297)
+	at java.awt.LightweightDispatcher.dispatchEvent(Container.java:4227)
+	at java.awt.Container.dispatchEventImpl(Container.java:2089)
+	at java.awt.Window.dispatchEventImpl(Window.java:2587)
+	at java.awt.Component.dispatchEvent(Component.java:4475)
+	at java.awt.EventQueue.dispatchEventImpl(EventQueue.java:675)
+	at java.awt.EventQueue.access$300(EventQueue.java:96)
+	at java.awt.EventQueue$2.run(EventQueue.java:634)
+	at java.awt.EventQueue$2.run(EventQueue.java:632)
+	at java.security.AccessController.doPrivileged(Native Method)
+	at java.security.AccessControlContext$1.doIntersectionPrivilege(AccessControlContext.java:105)
+	at java.security.AccessControlContext$1.doIntersectionPrivilege(AccessControlContext.java:116)
+	at java.awt.EventQueue$3.run(EventQueue.java:648)
+	at java.awt.EventQueue$3.run(EventQueue.java:646)
+	at java.security.AccessController.doPrivileged(Native Method)
+	at java.security.AccessControlContext$1.doIntersectionPrivilege(AccessControlContext.java:105)
+	at java.awt.EventQueue.dispatchEvent(EventQueue.java:645)
+	at java.awt.EventDispatchThread.pumpOneEventForFilters(EventDispatchThread.java:275)
+	at java.awt.EventDispatchThread.pumpEventsForFilter(EventDispatchThread.java:200)
+	at java.awt.EventDispatchThread.pumpEventsForHierarchy(EventDispatchThread.java:190)
+	at java.awt.EventDispatchThread.pumpEvents(EventDispatchThread.java:185)
+	at java.awt.EventDispatchThread.pumpEvents(EventDispatchThread.java:177)
+	at java.awt.EventDispatchThread.run(EventDispatchThread.java:138)
+[10:30:51][java.awt.EventDispatchThread.run:138][DEBUG] Plan has a descriptions attribute = ./plans/TaskDescriptions.xml
+[10:30:51][java.awt.EventDispatchThread.run:138][DEBUG] Task descriptions loaded from ./plans/TaskDescriptions.xml
+[11:20:04][java.awt.EventDispatchThread.run:138][DEBUG] Task descriptions file successfully saved to ./plans/TaskDescriptions.xml
+[11:20:04][java.awt.EventDispatchThread.run:138][DEBUG] description attribute added to plan = descriptions="./plans/TaskDescriptions.xml"
+[11:20:04][java.awt.EventDispatchThread.run:138][DEBUG] description attribute added to plan = descriptions="./plans/TaskDescriptions.xml"
+[11:20:29][java.awt.EventDispatchThread.run:138][DEBUG] Task descriptions file successfully saved to ./plans/TaskDescriptions.xml
+[11:20:29][java.awt.EventDispatchThread.run:138][DEBUG] description attribute added to plan = descriptions="./plans/TaskDescriptions.xml"
+[11:20:29][java.awt.EventDispatchThread.run:138][DEBUG] description attribute added to plan = descriptions="./plans/TaskDescriptions.xml"
+[12:01:17][java.awt.EventDispatchThread.run:138][DEBUG] Task descriptions file successfully saved to ./plans/TaskDescriptions.xml
+[12:01:17][java.awt.EventDispatchThread.run:138][DEBUG] description attribute added to plan = descriptions="./plans/TaskDescriptions.xml"
+[12:01:17][java.awt.EventDispatchThread.run:138][DEBUG] description attribute added to plan = descriptions="./plans/TaskDescriptions.xml"
+[12:02:19][java.awt.EventDispatchThread.run:138][DEBUG] Task descriptions file successfully saved to ./plans/TaskDescriptions.xml
+[12:02:19][java.awt.EventDispatchThread.run:138][DEBUG] description attribute added to plan = descriptions="./plans/TaskDescriptions.xml"
+[12:02:19][java.awt.EventDispatchThread.run:138][DEBUG] description attribute added to plan = descriptions="./plans/TaskDescriptions.xml"
+[12:03:23][java.awt.EventDispatchThread.run:138][DEBUG] Task descriptions file successfully saved to ./plans/TaskDescriptions.xml
+[12:03:23][java.awt.EventDispatchThread.run:138][DEBUG] description attribute added to plan = descriptions="./plans/TaskDescriptions.xml"
+[12:03:23][java.awt.EventDispatchThread.run:138][DEBUG] description attribute added to plan = descriptions="./plans/TaskDescriptions.xml"
+[12:04:05][java.awt.EventDispatchThread.run:138][DEBUG] Task descriptions file successfully saved to ./plans/TaskDescriptions.xml
+[12:04:05][java.awt.EventDispatchThread.run:138][DEBUG] description attribute added to plan = descriptions="./plans/TaskDescriptions.xml"
+[12:04:05][java.awt.EventDispatchThread.run:138][DEBUG] description attribute added to plan = descriptions="./plans/TaskDescriptions.xml"
+Exception in thread "AWT-EventQueue-0" java.lang.NullPointerException
+	at document.Document.onTreeChange(Document.java:1119)
+	at document.DocumentMouseHandler.mouseReleased(DocumentMouseHandler.java:108)
+	at java.awt.Component.processMouseEvent(Component.java:6288)
+	at javax.swing.JComponent.processMouseEvent(JComponent.java:3267)
+	at java.awt.Component.processEvent(Component.java:6053)
+	at java.awt.Container.processEvent(Container.java:2045)
+	at java.awt.Component.dispatchEventImpl(Component.java:4649)
+	at java.awt.Container.dispatchEventImpl(Container.java:2103)
+	at java.awt.Component.dispatchEvent(Component.java:4475)
+	at java.awt.LightweightDispatcher.retargetMouseEvent(Container.java:4633)
+	at java.awt.LightweightDispatcher.processMouseEvent(Container.java:4297)
+	at java.awt.LightweightDispatcher.dispatchEvent(Container.java:4227)
+	at java.awt.Container.dispatchEventImpl(Container.java:2089)
+	at java.awt.Window.dispatchEventImpl(Window.java:2587)
+	at java.awt.Component.dispatchEvent(Component.java:4475)
+	at java.awt.EventQueue.dispatchEventImpl(EventQueue.java:675)
+	at java.awt.EventQueue.access$300(EventQueue.java:96)
+	at java.awt.EventQueue$2.run(EventQueue.java:634)
+	at java.awt.EventQueue$2.run(EventQueue.java:632)
+	at java.security.AccessController.doPrivileged(Native Method)
+	at java.security.AccessControlContext$1.doIntersectionPrivilege(AccessControlContext.java:105)
+	at java.security.AccessControlContext$1.doIntersectionPrivilege(AccessControlContext.java:116)
+	at java.awt.EventQueue$3.run(EventQueue.java:648)
+	at java.awt.EventQueue$3.run(EventQueue.java:646)
+	at java.security.AccessController.doPrivileged(Native Method)
+	at java.security.AccessControlContext$1.doIntersectionPrivilege(AccessControlContext.java:105)
+	at java.awt.EventQueue.dispatchEvent(EventQueue.java:645)
+	at java.awt.EventDispatchThread.pumpOneEventForFilters(EventDispatchThread.java:275)
+	at java.awt.EventDispatchThread.pumpEventsForFilter(EventDispatchThread.java:200)
+	at java.awt.EventDispatchThread.pumpEventsForHierarchy(EventDispatchThread.java:190)
+	at java.awt.EventDispatchThread.pumpEvents(EventDispatchThread.java:185)
+	at java.awt.EventDispatchThread.pumpEvents(EventDispatchThread.java:177)
+	at java.awt.EventDispatchThread.run(EventDispatchThread.java:138)
+Exception in thread "AWT-EventQueue-0" java.lang.NullPointerException
+	at document.Document.onTreeChange(Document.java:1119)
+	at document.DocumentMouseHandler.mouseReleased(DocumentMouseHandler.java:108)
+	at java.awt.Component.processMouseEvent(Component.java:6288)
+	at javax.swing.JComponent.processMouseEvent(JComponent.java:3267)
+	at java.awt.Component.processEvent(Component.java:6053)
+	at java.awt.Container.processEvent(Container.java:2045)
+	at java.awt.Component.dispatchEventImpl(Component.java:4649)
+	at java.awt.Container.dispatchEventImpl(Container.java:2103)
+	at java.awt.Component.dispatchEvent(Component.java:4475)
+	at java.awt.LightweightDispatcher.retargetMouseEvent(Container.java:4633)
+	at java.awt.LightweightDispatcher.processMouseEvent(Container.java:4297)
+	at java.awt.LightweightDispatcher.dispatchEvent(Container.java:4227)
+	at java.awt.Container.dispatchEventImpl(Container.java:2089)
+	at java.awt.Window.dispatchEventImpl(Window.java:2587)
+	at java.awt.Component.dispatchEvent(Component.java:4475)
+	at java.awt.EventQueue.dispatchEventImpl(EventQueue.java:675)
+	at java.awt.EventQueue.access$300(EventQueue.java:96)
+	at java.awt.EventQueue$2.run(EventQueue.java:634)
+	at java.awt.EventQueue$2.run(EventQueue.java:632)
+	at java.security.AccessController.doPrivileged(Native Method)
+	at java.security.AccessControlContext$1.doIntersectionPrivilege(AccessControlContext.java:105)
+	at java.security.AccessControlContext$1.doIntersectionPrivilege(AccessControlContext.java:116)
+	at java.awt.EventQueue$3.run(EventQueue.java:648)
+	at java.awt.EventQueue$3.run(EventQueue.java:646)
+	at java.security.AccessController.doPrivileged(Native Method)
+	at java.security.AccessControlContext$1.doIntersectionPrivilege(AccessControlContext.java:105)
+	at java.awt.EventQueue.dispatchEvent(EventQueue.java:645)
+	at java.awt.EventDispatchThread.pumpOneEventForFilters(EventDispatchThread.java:275)
+	at java.awt.EventDispatchThread.pumpEventsForFilter(EventDispatchThread.java:200)
+	at java.awt.EventDispatchThread.pumpEventsForHierarchy(EventDispatchThread.java:190)
+	at java.awt.EventDispatchThread.pumpEvents(EventDispatchThread.java:185)
+	at java.awt.EventDispatchThread.pumpEvents(EventDispatchThread.java:177)
+	at java.awt.EventDispatchThread.run(EventDispatchThread.java:138)
+[12:36:27][java.awt.EventDispatchThread.run:138][DEBUG] Task descriptions file successfully saved to ./plans/TaskDescriptions.xml
+[12:36:27][java.awt.EventDispatchThread.run:138][DEBUG] description attribute added to plan = descriptions="./plans/TaskDescriptions.xml"
+[12:36:27][java.awt.EventDispatchThread.run:138][DEBUG] description attribute added to plan = descriptions="./plans/TaskDescriptions.xml"
+[12:41:36][java.awt.EventDispatchThread.run:138][DEBUG] Task descriptions file successfully saved to ./plans/TaskDescriptions.xml
+[12:41:36][java.awt.EventDispatchThread.run:138][DEBUG] description attribute added to plan = descriptions="./plans/TaskDescriptions.xml"
+[12:41:36][java.awt.EventDispatchThread.run:138][DEBUG] description attribute added to plan = descriptions="./plans/TaskDescriptions.xml"
+[12:44:05][java.awt.EventDispatchThread.run:138][DEBUG] Task descriptions file successfully saved to ./plans/TaskDescriptions.xml
+[12:44:05][java.awt.EventDispatchThread.run:138][DEBUG] description attribute added to plan = descriptions="./plans/TaskDescriptions.xml"
+[12:44:05][java.awt.EventDispatchThread.run:138][DEBUG] description attribute added to plan = descriptions="./plans/TaskDescriptions.xml"
+[14:30:59][java.awt.EventDispatchThread.run:138][DEBUG] Plan has a descriptions attribute = ./plans/TaskDescriptions.xml
+[14:30:59][java.awt.EventDispatchThread.run:138][DEBUG] Task descriptions loaded from ./plans/TaskDescriptions.xml
+[14:52:27][java.awt.EventDispatchThread.run:138][DEBUG] Task descriptions file successfully saved to ./plans/TaskDescriptions.xml
+[14:52:27][java.awt.EventDispatchThread.run:138][DEBUG] description attribute added to plan = descriptions="./plans/TaskDescriptions.xml"
+[14:52:27][java.awt.EventDispatchThread.run:138][DEBUG] description attribute added to plan = descriptions="./plans/TaskDescriptions.xml"
+[14:52:34][java.awt.EventDispatchThread.run:138][DEBUG] Plan has a descriptions attribute = ./plans/TaskDescriptions.xml
+[14:52:34][java.awt.EventDispatchThread.run:138][DEBUG] Task descriptions loaded from ./plans/TaskDescriptions.xml
+Exception in thread "AWT-EventQueue-0" java.lang.NullPointerException
+	at document.Document.onTreeChange(Document.java:1119)
+	at document.DocumentMouseHandler.mouseReleased(DocumentMouseHandler.java:108)
+	at java.awt.Component.processMouseEvent(Component.java:6288)
+	at javax.swing.JComponent.processMouseEvent(JComponent.java:3267)
+	at java.awt.Component.processEvent(Component.java:6053)
+	at java.awt.Container.processEvent(Container.java:2045)
+	at java.awt.Component.dispatchEventImpl(Component.java:4649)
+	at java.awt.Container.dispatchEventImpl(Container.java:2103)
+	at java.awt.Component.dispatchEvent(Component.java:4475)
+	at java.awt.LightweightDispatcher.retargetMouseEvent(Container.java:4633)
+	at java.awt.LightweightDispatcher.processMouseEvent(Container.java:4297)
+	at java.awt.LightweightDispatcher.dispatchEvent(Container.java:4227)
+	at java.awt.Container.dispatchEventImpl(Container.java:2089)
+	at java.awt.Window.dispatchEventImpl(Window.java:2587)
+	at java.awt.Component.dispatchEvent(Component.java:4475)
+	at java.awt.EventQueue.dispatchEventImpl(EventQueue.java:675)
+	at java.awt.EventQueue.access$300(EventQueue.java:96)
+	at java.awt.EventQueue$2.run(EventQueue.java:634)
+	at java.awt.EventQueue$2.run(EventQueue.java:632)
+	at java.security.AccessController.doPrivileged(Native Method)
+	at java.security.AccessControlContext$1.doIntersectionPrivilege(AccessControlContext.java:105)
+	at java.security.AccessControlContext$1.doIntersectionPrivilege(AccessControlContext.java:116)
+	at java.awt.EventQueue$3.run(EventQueue.java:648)
+	at java.awt.EventQueue$3.run(EventQueue.java:646)
+	at java.security.AccessController.doPrivileged(Native Method)
+	at java.security.AccessControlContext$1.doIntersectionPrivilege(AccessControlContext.java:105)
+	at java.awt.EventQueue.dispatchEvent(EventQueue.java:645)
+	at java.awt.EventDispatchThread.pumpOneEventForFilters(EventDispatchThread.java:275)
+	at java.awt.EventDispatchThread.pumpEventsForFilter(EventDispatchThread.java:200)
+	at java.awt.EventDispatchThread.pumpEventsForHierarchy(EventDispatchThread.java:190)
+	at java.awt.EventDispatchThread.pumpEvents(EventDispatchThread.java:185)
+	at java.awt.EventDispatchThread.pumpEvents(EventDispatchThread.java:177)
+	at java.awt.EventDispatchThread.run(EventDispatchThread.java:138)
+[15:18:09][java.awt.EventDispatchThread.run:138][DEBUG] Task descriptions file successfully saved to ./plans/TaskDescriptions.xml
+[15:18:09][java.awt.EventDispatchThread.run:138][DEBUG] description attribute added to plan = descriptions="./plans/TaskDescriptions.xml"
+[15:18:09][java.awt.EventDispatchThread.run:138][DEBUG] description attribute added to plan = descriptions="./plans/TaskDescriptions.xml"
+[15:26:18][java.awt.EventDispatchThread.run:138][DEBUG] Plan has a descriptions attribute = ./plans/TaskDescriptions.xml
+[15:26:18][java.awt.EventDispatchThread.run:138][DEBUG] Task descriptions loaded from ./plans/TaskDescriptions.xml
+[15:35:18][java.awt.EventDispatchThread.run:138][DEBUG] Task descriptions file successfully saved to ./plans/TaskDescriptions.xml
+[15:35:18][java.awt.EventDispatchThread.run:138][DEBUG] description attribute added to plan = descriptions="./plans/TaskDescriptions.xml"
+[15:35:18][java.awt.EventDispatchThread.run:138][DEBUG] description attribute added to plan = descriptions="./plans/TaskDescriptions.xml"
+[15:35:59][java.awt.EventDispatchThread.run:138][DEBUG] Task descriptions file successfully saved to ./plans/TaskDescriptions.xml
+[15:35:59][java.awt.EventDispatchThread.run:138][DEBUG] description attribute added to plan = descriptions="./plans/TaskDescriptions.xml"
+[15:36:00][java.awt.EventDispatchThread.run:138][DEBUG] description attribute added to plan = descriptions="./plans/TaskDescriptions.xml"
+Exception in thread "AWT-EventQueue-0" java.lang.NullPointerException
+	at document.Document.onTreeChange(Document.java:1119)
+	at document.DocumentMouseHandler.mouseReleased(DocumentMouseHandler.java:108)
+	at java.awt.Component.processMouseEvent(Component.java:6288)
+	at javax.swing.JComponent.processMouseEvent(JComponent.java:3267)
+	at java.awt.Component.processEvent(Component.java:6053)
+	at java.awt.Container.processEvent(Container.java:2045)
+	at java.awt.Component.dispatchEventImpl(Component.java:4649)
+	at java.awt.Container.dispatchEventImpl(Container.java:2103)
+	at java.awt.Component.dispatchEvent(Component.java:4475)
+	at java.awt.LightweightDispatcher.retargetMouseEvent(Container.java:4633)
+	at java.awt.LightweightDispatcher.processMouseEvent(Container.java:4297)
+	at java.awt.LightweightDispatcher.dispatchEvent(Container.java:4227)
+	at java.awt.Container.dispatchEventImpl(Container.java:2089)
+	at java.awt.Window.dispatchEventImpl(Window.java:2587)
+	at java.awt.Component.dispatchEvent(Component.java:4475)
+	at java.awt.EventQueue.dispatchEventImpl(EventQueue.java:675)
+	at java.awt.EventQueue.access$300(EventQueue.java:96)
+	at java.awt.EventQueue$2.run(EventQueue.java:634)
+	at java.awt.EventQueue$2.run(EventQueue.java:632)
+	at java.security.AccessController.doPrivileged(Native Method)
+	at java.security.AccessControlContext$1.doIntersectionPrivilege(AccessControlContext.java:105)
+	at java.security.AccessControlContext$1.doIntersectionPrivilege(AccessControlContext.java:116)
+	at java.awt.EventQueue$3.run(EventQueue.java:648)
+	at java.awt.EventQueue$3.run(EventQueue.java:646)
+	at java.security.AccessController.doPrivileged(Native Method)
+	at java.security.AccessControlContext$1.doIntersectionPrivilege(AccessControlContext.java:105)
+	at java.awt.EventQueue.dispatchEvent(EventQueue.java:645)
+	at java.awt.EventDispatchThread.pumpOneEventForFilters(EventDispatchThread.java:275)
+	at java.awt.EventDispatchThread.pumpEventsForFilter(EventDispatchThread.java:200)
+	at java.awt.EventDispatchThread.pumpEventsForHierarchy(EventDispatchThread.java:190)
+	at java.awt.EventDispatchThread.pumpEvents(EventDispatchThread.java:185)
+	at java.awt.EventDispatchThread.pumpEvents(EventDispatchThread.java:177)
+	at java.awt.EventDispatchThread.run(EventDispatchThread.java:138)
+Exception in thread "AWT-EventQueue-0" java.lang.NullPointerException
+	at document.Document.onTreeChange(Document.java:1119)
+	at document.DocumentMouseHandler.mouseReleased(DocumentMouseHandler.java:108)
+	at java.awt.Component.processMouseEvent(Component.java:6288)
+	at javax.swing.JComponent.processMouseEvent(JComponent.java:3267)
+	at java.awt.Component.processEvent(Component.java:6053)
+	at java.awt.Container.processEvent(Container.java:2045)
+	at java.awt.Component.dispatchEventImpl(Component.java:4649)
+	at java.awt.Container.dispatchEventImpl(Container.java:2103)
+	at java.awt.Component.dispatchEvent(Component.java:4475)
+	at java.awt.LightweightDispatcher.retargetMouseEvent(Container.java:4633)
+	at java.awt.LightweightDispatcher.processMouseEvent(Container.java:4297)
+	at java.awt.LightweightDispatcher.dispatchEvent(Container.java:4227)
+	at java.awt.Container.dispatchEventImpl(Container.java:2089)
+	at java.awt.Window.dispatchEventImpl(Window.java:2587)
+	at java.awt.Component.dispatchEvent(Component.java:4475)
+	at java.awt.EventQueue.dispatchEventImpl(EventQueue.java:675)
+	at java.awt.EventQueue.access$300(EventQueue.java:96)
+	at java.awt.EventQueue$2.run(EventQueue.java:634)
+	at java.awt.EventQueue$2.run(EventQueue.java:632)
+	at java.security.AccessController.doPrivileged(Native Method)
+	at java.security.AccessControlContext$1.doIntersectionPrivilege(AccessControlContext.java:105)
+	at java.security.AccessControlContext$1.doIntersectionPrivilege(AccessControlContext.java:116)
+	at java.awt.EventQueue$3.run(EventQueue.java:648)
+	at java.awt.EventQueue$3.run(EventQueue.java:646)
+	at java.security.AccessController.doPrivileged(Native Method)
+	at java.security.AccessControlContext$1.doIntersectionPrivilege(AccessControlContext.java:105)
+	at java.awt.EventQueue.dispatchEvent(EventQueue.java:645)
+	at java.awt.EventDispatchThread.pumpOneEventForFilters(EventDispatchThread.java:275)
+	at java.awt.EventDispatchThread.pumpEventsForFilter(EventDispatchThread.java:200)
+	at java.awt.EventDispatchThread.pumpEventsForHierarchy(EventDispatchThread.java:190)
+	at java.awt.EventDispatchThread.pumpEvents(EventDispatchThread.java:185)
+	at java.awt.EventDispatchThread.pumpEvents(EventDispatchThread.java:177)
+	at java.awt.EventDispatchThread.run(EventDispatchThread.java:138)
+Exception in thread "AWT-EventQueue-0" java.lang.NullPointerException
+	at document.Document.onTreeChange(Document.java:1119)
+	at document.DocumentMouseHandler.mouseReleased(DocumentMouseHandler.java:108)
+	at java.awt.Component.processMouseEvent(Component.java:6288)
+	at javax.swing.JComponent.processMouseEvent(JComponent.java:3267)
+	at java.awt.Component.processEvent(Component.java:6053)
+	at java.awt.Container.processEvent(Container.java:2045)
+	at java.awt.Component.dispatchEventImpl(Component.java:4649)
+	at java.awt.Container.dispatchEventImpl(Container.java:2103)
+	at java.awt.Component.dispatchEvent(Component.java:4475)
+	at java.awt.LightweightDispatcher.retargetMouseEvent(Container.java:4633)
+	at java.awt.LightweightDispatcher.processMouseEvent(Container.java:4297)
+	at java.awt.LightweightDispatcher.dispatchEvent(Container.java:4227)
+	at java.awt.Container.dispatchEventImpl(Container.java:2089)
+	at java.awt.Window.dispatchEventImpl(Window.java:2587)
+	at java.awt.Component.dispatchEvent(Component.java:4475)
+	at java.awt.EventQueue.dispatchEventImpl(EventQueue.java:675)
+	at java.awt.EventQueue.access$300(EventQueue.java:96)
+	at java.awt.EventQueue$2.run(EventQueue.java:634)
+	at java.awt.EventQueue$2.run(EventQueue.java:632)
+	at java.security.AccessController.doPrivileged(Native Method)
+	at java.security.AccessControlContext$1.doIntersectionPrivilege(AccessControlContext.java:105)
+	at java.security.AccessControlContext$1.doIntersectionPrivilege(AccessControlContext.java:116)
+	at java.awt.EventQueue$3.run(EventQueue.java:648)
+	at java.awt.EventQueue$3.run(EventQueue.java:646)
+	at java.security.AccessController.doPrivileged(Native Method)
+	at java.security.AccessControlContext$1.doIntersectionPrivilege(AccessControlContext.java:105)
+	at java.awt.EventQueue.dispatchEvent(EventQueue.java:645)
+	at java.awt.EventDispatchThread.pumpOneEventForFilters(EventDispatchThread.java:275)
+	at java.awt.EventDispatchThread.pumpEventsForFilter(EventDispatchThread.java:200)
+	at java.awt.EventDispatchThread.pumpEventsForHierarchy(EventDispatchThread.java:190)
+	at java.awt.EventDispatchThread.pumpEvents(EventDispatchThread.java:185)
+	at java.awt.EventDispatchThread.pumpEvents(EventDispatchThread.java:177)
+	at java.awt.EventDispatchThread.run(EventDispatchThread.java:138)
+Exception in thread "AWT-EventQueue-0" java.lang.NullPointerException
+	at document.Document.onTreeChange(Document.java:1119)
+	at document.DocumentMouseHandler.mouseReleased(DocumentMouseHandler.java:108)
+	at java.awt.Component.processMouseEvent(Component.java:6288)
+	at javax.swing.JComponent.processMouseEvent(JComponent.java:3267)
+	at java.awt.Component.processEvent(Component.java:6053)
+	at java.awt.Container.processEvent(Container.java:2045)
+	at java.awt.Component.dispatchEventImpl(Component.java:4649)
+	at java.awt.Container.dispatchEventImpl(Container.java:2103)
+	at java.awt.Component.dispatchEvent(Component.java:4475)
+	at java.awt.LightweightDispatcher.retargetMouseEvent(Container.java:4633)
+	at java.awt.LightweightDispatcher.processMouseEvent(Container.java:4297)
+	at java.awt.LightweightDispatcher.dispatchEvent(Container.java:4227)
+	at java.awt.Container.dispatchEventImpl(Container.java:2089)
+	at java.awt.Window.dispatchEventImpl(Window.java:2587)
+	at java.awt.Component.dispatchEvent(Component.java:4475)
+	at java.awt.EventQueue.dispatchEventImpl(EventQueue.java:675)
+	at java.awt.EventQueue.access$300(EventQueue.java:96)
+	at java.awt.EventQueue$2.run(EventQueue.java:634)
+	at java.awt.EventQueue$2.run(EventQueue.java:632)
+	at java.security.AccessController.doPrivileged(Native Method)
+	at java.security.AccessControlContext$1.doIntersectionPrivilege(AccessControlContext.java:105)
+	at java.security.AccessControlContext$1.doIntersectionPrivilege(AccessControlContext.java:116)
+	at java.awt.EventQueue$3.run(EventQueue.java:648)
+	at java.awt.EventQueue$3.run(EventQueue.java:646)
+	at java.security.AccessController.doPrivileged(Native Method)
+	at java.security.AccessControlContext$1.doIntersectionPrivilege(AccessControlContext.java:105)
+	at java.awt.EventQueue.dispatchEvent(EventQueue.java:645)
+	at java.awt.EventDispatchThread.pumpOneEventForFilters(EventDispatchThread.java:275)
+	at java.awt.EventDispatchThread.pumpEventsForFilter(EventDispatchThread.java:200)
+	at java.awt.EventDispatchThread.pumpEventsForHierarchy(EventDispatchThread.java:190)
+	at java.awt.EventDispatchThread.pumpEvents(EventDispatchThread.java:185)
+	at java.awt.EventDispatchThread.pumpEvents(EventDispatchThread.java:177)
+	at java.awt.EventDispatchThread.run(EventDispatchThread.java:138)
+Exception in thread "AWT-EventQueue-0" java.lang.NullPointerException
+	at document.Document.onTreeChange(Document.java:1119)
+	at document.DocumentMouseHandler.mouseReleased(DocumentMouseHandler.java:108)
+	at java.awt.Component.processMouseEvent(Component.java:6288)
+	at javax.swing.JComponent.processMouseEvent(JComponent.java:3267)
+	at java.awt.Component.processEvent(Component.java:6053)
+	at java.awt.Container.processEvent(Container.java:2045)
+	at java.awt.Component.dispatchEventImpl(Component.java:4649)
+	at java.awt.Container.dispatchEventImpl(Container.java:2103)
+	at java.awt.Component.dispatchEvent(Component.java:4475)
+	at java.awt.LightweightDispatcher.retargetMouseEvent(Container.java:4633)
+	at java.awt.LightweightDispatcher.processMouseEvent(Container.java:4297)
+	at java.awt.LightweightDispatcher.dispatchEvent(Container.java:4227)
+	at java.awt.Container.dispatchEventImpl(Container.java:2089)
+	at java.awt.Window.dispatchEventImpl(Window.java:2587)
+	at java.awt.Component.dispatchEvent(Component.java:4475)
+	at java.awt.EventQueue.dispatchEventImpl(EventQueue.java:675)
+	at java.awt.EventQueue.access$300(EventQueue.java:96)
+	at java.awt.EventQueue$2.run(EventQueue.java:634)
+	at java.awt.EventQueue$2.run(EventQueue.java:632)
+	at java.security.AccessController.doPrivileged(Native Method)
+	at java.security.AccessControlContext$1.doIntersectionPrivilege(AccessControlContext.java:105)
+	at java.security.AccessControlContext$1.doIntersectionPrivilege(AccessControlContext.java:116)
+	at java.awt.EventQueue$3.run(EventQueue.java:648)
+	at java.awt.EventQueue$3.run(EventQueue.java:646)
+	at java.security.AccessController.doPrivileged(Native Method)
+	at java.security.AccessControlContext$1.doIntersectionPrivilege(AccessControlContext.java:105)
+	at java.awt.EventQueue.dispatchEvent(EventQueue.java:645)
+	at java.awt.EventDispatchThread.pumpOneEventForFilters(EventDispatchThread.java:275)
+	at java.awt.EventDispatchThread.pumpEventsForFilter(EventDispatchThread.java:200)
+	at java.awt.EventDispatchThread.pumpEventsForHierarchy(EventDispatchThread.java:190)
+	at java.awt.EventDispatchThread.pumpEvents(EventDispatchThread.java:185)
+	at java.awt.EventDispatchThread.pumpEvents(EventDispatchThread.java:177)
+	at java.awt.EventDispatchThread.run(EventDispatchThread.java:138)
+[15:47:43][java.awt.EventDispatchThread.run:138][DEBUG] Task descriptions file successfully saved to ./plans/TaskDescriptions.xml
+[15:47:43][java.awt.EventDispatchThread.run:138][DEBUG] description attribute added to plan = descriptions="./plans/TaskDescriptions.xml"
+[15:47:43][java.awt.EventDispatchThread.run:138][DEBUG] description attribute added to plan = descriptions="./plans/TaskDescriptions.xml"
+[15:49:20][java.awt.EventDispatchThread.run:138][DEBUG] Task descriptions file successfully saved to ./plans/TaskDescriptions.xml
+[15:49:20][java.awt.EventDispatchThread.run:138][DEBUG] description attribute added to plan = descriptions="./plans/TaskDescriptions.xml"
+[15:49:20][java.awt.EventDispatchThread.run:138][DEBUG] description attribute added to plan = descriptions="./plans/TaskDescriptions.xml"
+[15:49:31][java.awt.EventDispatchThread.run:138][DEBUG] Task descriptions file successfully saved to ./plans/TaskDescriptions.xml
+[15:49:31][java.awt.EventDispatchThread.run:138][DEBUG] description attribute added to plan = descriptions="./plans/TaskDescriptions.xml"
+[15:49:31][java.awt.EventDispatchThread.run:138][DEBUG] description attribute added to plan = descriptions="./plans/TaskDescriptions.xml"
+[15:49:59][java.awt.EventDispatchThread.run:138][DEBUG] Plan has a descriptions attribute = ./plans/TaskDescriptions.xml
+[15:49:59][java.awt.EventDispatchThread.run:138][DEBUG] Task descriptions loaded from ./plans/TaskDescriptions.xml
