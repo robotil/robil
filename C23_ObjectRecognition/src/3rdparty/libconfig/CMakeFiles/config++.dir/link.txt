@@ -1,2 +1,0 @@
-/usr/bin/ar cr ../../../lib/libconfig++.a  CMakeFiles/config++.dir/grammar.o CMakeFiles/config++.dir/libconfig.o CMakeFiles/config++.dir/libconfigcpp.o CMakeFiles/config++.dir/scanctx.o CMakeFiles/config++.dir/scanner.o CMakeFiles/config++.dir/strbuf.o
-/usr/bin/ranlib ../../../lib/libconfig++.a
