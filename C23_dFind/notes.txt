@@ -1,0 +1,19 @@
+Object recocnition of drill.
+1. Compiling can be done using rosmake in the base directory of the workspace.
+2.Move neck joint by 0.8 so that the drill will be in atlas' field of vision.
+("neck" movement in Traj_data2.yaml)
+3. The three files needed to run the nod are:
+   drill (the executable)
+   te.txt (file holding the model's used to locate)
+   vox.pcd (the model used for now)
+I wasn't able to get my program to run from an outside directory so
+roscd C23_dFind/bin/
+./drill
+and the node should run.
+Stdout should display a 3x3 rotation matrix, a translation vector, and the fitness score of the recognition.
+and a service named perceptionTransform should be created.
+
+********
+
+The recognition isn't perfect yet, turning it on its yaw axis leads to errors (mostly also on the yaw axis)
+ 
