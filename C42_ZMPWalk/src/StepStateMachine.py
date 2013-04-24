@@ -19,7 +19,8 @@ from robot_state import Robot_State
 from zmp_init import init_pose
 from zmp_profiles import *
 import copy
-
+import yaml
+import rospy, math, sys, os
 ###################################################################################
 #--------------------------- Exceptions -------------------------------------------
 ###################################################################################
@@ -53,12 +54,25 @@ class StepState(State):
         self._last_step = 0
         
         # Walking Parameters 
-        self._step_length = 0.02 #0.01  # [m]
+
+        zmp_walking_path = os.path.join(roslib.packages.get_pkg_dir('C42_ZMPWalk'), r"src/parameters/",'ZMP_Walking_Params.yaml')
+        zmp_walking_params_file = file(zmp_walking_path)
+        parameters_file = yaml.load(zmp_walking_params_file)
+
+
+
+
+        load_step_length_params_for = '15cm' 
+
+
+
         self._step_width  = 0.182 #0.182#0.178  # 0.178  # [m]
         self._zmp_width   =  0.178 #0.178 #0.120  #0.02 # #0.168 #when lift foot 0.130, feet on ground 0.110
-        self._step_time   = 0.8 #1   # [sec]
-        self._bend_knees  = 0.04 #0.12 #0.18 #0.04  # [m]     
-        self._step_height = 0.015 #0.035 #0.05 #0.03 #0.05  # [m] 
+       
+        self._step_length = parameters_file['zmp_walking']['walking_parameters'][load_step_length_params_for]['step_length']
+        self._step_time   = parameters_file['zmp_walking']['walking_parameters'][load_step_length_params_for]['step_time']
+        self._bend_knees  = parameters_file['zmp_walking']['walking_parameters'][load_step_length_params_for]['bend_knees']  
+        self._step_height = parameters_file['zmp_walking']['walking_parameters'][load_step_length_params_for]['step_height']
         self._trans_ratio_of_step = 1.0 #0.9 #1.0 #0.8 # units fraction: 0-1.0 ; fraction of step time to be used for transition. 1.0 = all of step time is transition
         self._trans_slope_steepens_factor = 8/self._step_time #2 # 1 transition Sigmoid slope (a)
 
