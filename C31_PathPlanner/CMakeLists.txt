@@ -50,6 +50,8 @@ rosbuild_add_executable(test_planner_transit src/test_planning_with_transit.cpp 
 #---------- SIMULATORS ----------
 rosbuild_add_executable(test_c11_simulator src/test_c11_simulator.cpp)
 
+rosbuild_add_executable(qual src/stub/gpp_stub.cpp)
+
 
 #rosbuild_add_executable(lpp src/lpp.cpp)
 #rosbuild_link_boost(lpp thread)
