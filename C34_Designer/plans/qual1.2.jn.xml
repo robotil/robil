@@ -1,0 +1,37 @@
+<plan descriptions="./plans/TaskDescriptions.xml">
+   <par name="Qualification1"> 
+         <par name="Perception"> 
+               <tsk name="LocalizationTrack" />
+               <tsk name="ObstacleDetection" />
+               <tsk name="PathPlanning" />
+         </par>
+      <dec name="!L!"> 
+            <seq name="Mission"> 
+               <dec name="!L!"> 
+                     <tsk name="PathPlanningFocus(target=Gate)" />
+               </dec>
+               <dec name="L"> 
+                     <seq name="FollowPath"> 
+                           <tsk name="SearchObject(target=Gate)" />
+                        <dec name="!L!"> 
+                              <sel name="SelectWalkType"> 
+                                    <par name="Zmp"> 
+                                       <dec name="F:1"> 
+                                             <tsk name="whileInZmpArea" />
+                                       </dec>
+                                          <tsk name="ZmpWalk" />
+                                    </par>
+                                    <par name="QS"> 
+                                       <dec name="F:1"> 
+                                             <tsk name="whileInQSArea" />
+                                       </dec>
+                                          <tsk name="QuasiStaticWalk" />
+                                    </par>
+                              </sel>
+                        </dec>
+                     </seq>
+               </dec>
+            </seq>
+      </dec>
+   </par>
+</plan>
