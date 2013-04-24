@@ -62,7 +62,7 @@ class StepState(State):
 
 
 
-        load_step_length_params_for = '15cm' 
+        load_step_length_params_for = '2cm' 
 
 
 

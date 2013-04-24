@@ -49,7 +49,7 @@ parameters_file = yaml.load(zmp_walking_params_file)
 
 
       
-load_step_length_params_for = '15cm' 
+load_step_length_params_for = '2cm' 
 
        
 
