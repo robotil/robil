@@ -23,7 +23,7 @@ $rosservice call /perceptionTransform "command: ''"
 
 Wait a few seconds and stdout should display a 3x3 rotation matrix, a translation vector, and a fitness score of the recognition.
 the node will run until there is a successfull recognition (fitness score of less than 0.000037) when it will send the the rotation matrix as a response to the service call.
-As of now we don't have a response if the drill is not in the field of vision and the program will hang untill it is found, I am working on this problem.
+As of now we don't have a response if the drill is not in the field of vision and the program will probably end up with a false positive, I am working on this problem. Meanwhile as long as you keep the drill in the robot's FOV it should work well enough.
 
 ********
 
