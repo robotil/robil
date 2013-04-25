@@ -297,7 +297,7 @@ dFind::dFind (ros::NodeHandle _nh)
   // Load the object templates specified in the object_templates.txt file
  char basePath[1000],templateFiles[1000];
 
-            sprintf(basePath,"%s/bin/%c",ros::package::getPath("C23_dFind").c_str(),'\0');
+            sprintf(basePath,"%s/mod/%c",ros::package::getPath("C23_dFind").c_str(),'\0');
 
             sprintf(templateFiles,"%ste.txt%c",basePath,'\0');
 	    std::cout<<templateFiles<<endl;
