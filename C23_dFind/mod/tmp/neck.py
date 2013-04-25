@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-import roslib; roslib.load_manifest('DRC_odedModels')
+import roslib; roslib.load_manifest('C23_dFind')
 import rospy, yaml, sys
 from osrf_msgs.msg import JointCommands
 from sensor_msgs.msg import JointState
