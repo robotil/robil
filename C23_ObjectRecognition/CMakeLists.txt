@@ -39,6 +39,6 @@ find_package(OpenCV REQUIRED)
 
 rosbuild_add_boost_directories()
 find_package(OpenCV REQUIRED)
-rosbuild_add_executable(C23 src/C23.cpp src/C23_Detector.cpp)
+rosbuild_add_executable(C23 src/C23.cpp src/C23_Detector.cpp src/GeneralDetector.cpp)
 rosbuild_link_boost(C23 thread signals)
 target_link_libraries(C23 ${OpenCV_LIBS} ${PCL_LIBRARIES})
