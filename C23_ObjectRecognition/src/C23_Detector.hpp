@@ -52,7 +52,8 @@ using namespace tf;
 
 typedef enum targets { 
   CAR,
-  GATE
+  GATE,
+  PATH
 } TARGETS;
 
 class C23_Detector{
@@ -71,7 +72,8 @@ private:
 
   	bool detectGate(Mat img, const sensor_msgs::PointCloud2::ConstPtr &cloud);
     void publishMessage(bool isFound);
-
+    bool detectPath(Mat srcImg);
+    
 	ros::NodeHandle nh;
 
 	ros::Publisher objectDetectedPublisher;
