@@ -27,7 +27,7 @@ rosbuild_genmsg()
 
 #rosbuild_add_boost_directories()
 rosbuild_add_executable(PickUp src/PickUp.cpp)
-#rosbuild_add_executable(client src/client.cpp)
+rosbuild_add_executable(client src/client.cpp)
 #common commands for building c++ executables and libraries
 #rosbuild_add_library(${PROJECT_NAME} src/example.cpp)
 #target_link_libraries(${PROJECT_NAME} another_library)
