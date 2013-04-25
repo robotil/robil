@@ -23,6 +23,7 @@ zmp_walking:
         l_mhx_eff_devider: 999999999999999999999.0
         r_mhx_eff_devider: 999999999999999999999.0
         mhx_eff_offset: 0.0
+        kny_eff_devider: 10.0
 
     10cm:
 
@@ -39,23 +40,24 @@ zmp_walking:
         l_mhx_eff_devider: 45.0
         r_mhx_eff_devider: 25.0
         mhx_eff_offset: 23.0
+        kny_eff_devider: 10.0
 
     15cm:
 
         step_length: 0.15
         step_time: 1.3
         bend_knees: 0.05
-        step_height: 0.045
-        PSC:  4700000
+        step_height: 0.047
+        PSC:  8000000
         JSC:
-            uay: 46000
-            kny: 36000
-            lhy: 80000 
+            uay: 56000
+            kny: 46000
+            lhy: 90000 
         lax_eff_devider: 25.0
         l_mhx_eff_devider: 45.0
         r_mhx_eff_devider: 25.0
-        mhx_eff_offset: 23.0
-
+        mhx_eff_offset: 24.0
+        kny_eff_devider: 10.0
     18cm:
 
         step_length: 0.18
@@ -71,6 +73,7 @@ zmp_walking:
         l_mhx_eff_devider: 35.0
         r_mhx_eff_devider: 25.0
         mhx_eff_offset: 23.0
+        kny_eff_devider: 10.0
 
 
   joints:

@@ -35,14 +35,14 @@ atlas_controller:
     l_leg_uhz: {p:  5000.0,   d:   0.0,  i:   0.0,    i_clamp:    0.0 }
     l_leg_mhx: {p:  5500.0,   d:   0.2,  i:  350.0,    i_clamp:   150.0 }
     l_leg_lhy: {p:  7000.0,   d:   1.2,  i:  50.0,    i_clamp:   50.0 }
-    l_leg_kny: {p:  5000.0,   d:   0.4,  i: 500.0,    i_clamp:  150.0 }
+    l_leg_kny: {p:  5500.0,   d:   0.4,  i: 500.0,    i_clamp:  150.0 }
     l_leg_uay: {p:  4000.0,   d:   0.5,  i: 150.0,    i_clamp:   50.0 }
     l_leg_lax: {p:  8500.0,   d:   1.6,  i: 350.0,    i_clamp:   150.0 }
 
     r_leg_uhz: {p:  5000.0,   d:   0.0,  i:   0.0,    i_clamp:    0.0 }
     r_leg_mhx: {p:  5500.0,   d:   0.2,  i:  350.0,    i_clamp:   150.0 }
     r_leg_lhy: {p:  7000.0,   d:   1.2,  i:  50.0,    i_clamp:   50.0 }
-    r_leg_kny: {p:  5000.0,   d:   0.4,  i: 500.0,    i_clamp:  150.0 }
+    r_leg_kny: {p:  5500.0,   d:   0.4,  i: 500.0,    i_clamp:  150.0 }
     r_leg_uay: {p:  4000.0,   d:   0.5,  i: 150.0,    i_clamp:   50.0 }
     r_leg_lax: {p:  8500.0,   d:   1.6,  i: 350.0,    i_clamp:   150.0 }
 

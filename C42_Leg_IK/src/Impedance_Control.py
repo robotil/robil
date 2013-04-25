@@ -613,6 +613,53 @@ class Position_Stiffness_Controller_2:
 
         return pos_command_out 
 
+    def getCMD_i(self, X_0,zmp_ref_y,step_phase ,step_width,zmp_width,step_time,des_l_force_pub,des_r_force_pub,des_lax_torque_pub,des_rax_torque_pub): # X_0 = original position input command
+        
+        # Desired force profile of swing leg:
+
+        B = 100
+        K = self.K_current_m
+        dt = 1/300
+
+        b = [1 ,1/B]
+        a  = -K/B
+
+        a_d = math.exp(a*dt)
+        
+        force_des = self.desired_force(zmp_ref_y,step_phase ,step_width, zmp_width, step_time, des_l_force_pub, des_r_force_pub,des_lax_torque_pub,des_rax_torque_pub)
+
+        force_FB = self.FB_force_filtered # self.FB_force_avg
+       
+        # Check trigger event if event has not yet occured and updates trigger_event accordingly
+        if self.triggered_controller and not(self.trigger_event):
+            self.checkTriggerEvent(force_FB,  X_0 - self.last_X_0)
+
+        # OUTPUT COMMAND:
+        if (self.update_command or self.trigger_event) and ( not self.bypass_in2out): # if update of output command is enabled 
+                     
+            correction_factor = (force_des - force_FB)/K
+            # output cmd saturation (clamp):
+            if correction_factor > self.limit_command_diff: 
+                correction_factor = self.limit_command_diff
+            elif -1*correction_factor > self.limit_command_diff: 
+                correction_factor = -1*self.limit_command_diff
+
+            pos_command_out = X_0 - correction_factor 
+        else:
+            pos_command_out = X_0      
+
+        # rospy.loginfo("PSC2_'%s' method getCMD: bypass_in2out-%s, X_0 = %f, output cmd = %f, force_des = %f, force_avg = %f " %  \
+        #                   (self.name, self.bypass_in2out, X_0, pos_command_out, force_des, self.getAvgForce()))
+
+        # rospy.loginfo("PSC2_'%s' method getCMD: set_point = %f, cmd = %f, cmd correction = %f, force_des = %f, Fb force_avg = %f, N_samples = %f, force_FB = %f"\
+        #             %(self.name, X_0, pos_command_out, correction_factor, force_des, self.FB_force_avg, self.num_of_FB_samples, force_FB ))
+
+        self.reset_sum_flag = True
+        self.last_X_0 = X_0
+        self.last_X_m = pos_command_out
+
+        return pos_command_out 
+
     def desired_force(self,zmp_ref_y,step_phase ,step_width, zmp_width, step_time, des_l_force_pub, des_r_force_pub,des_lax_torque_pub,des_rax_torque_pub):
 
         Mtot = 91.4

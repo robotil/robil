@@ -190,10 +190,11 @@ def get_from_zmp(msg):
     l_mhx_eff_DEVIDER = parameters_file['zmp_walking']['walking_parameters'][load_step_length_params_for]['l_mhx_eff_devider']
     r_mhx_eff_DEVIDER = parameters_file['zmp_walking']['walking_parameters'][load_step_length_params_for]['r_mhx_eff_devider']
     mhx_eff_OFFSET = parameters_file['zmp_walking']['walking_parameters'][load_step_length_params_for]['mhx_eff_offset']
+    kny_eff_DEVIDER = parameters_file['zmp_walking']['walking_parameters'][load_step_length_params_for]['kny_eff_devider']
 
     ## Joint Feed Forward effort:
-    l_leg_kny_eff = 0#-desired_force_L/10.0
-    r_leg_kny_eff = 0#-desired_force_R/10.0
+    l_leg_kny_eff = -desired_force_L/kny_eff_DEVIDER
+    r_leg_kny_eff = -desired_force_R/kny_eff_DEVIDER
 
     l_leg_lax_eff = -desired_force_L/lax_eff_DEVIDER   #-des_t_ax_L/2
     r_leg_lax_eff = -desired_force_R/lax_eff_DEVIDER   #-des_t_ax_R/2
@@ -208,33 +209,33 @@ def get_from_zmp(msg):
     ## Joint position command (to PID):
 
     #left leg:
-  #  if ( msg.step_phase == 4 ): # left leg is swing
-    l_leg_uay = JSC_2_l_leg_uay.getCMD( left_leg_angles[5] ) 
-    l_leg_kny = JSC_2_l_leg_kny.getCMD( left_leg_angles[3] + ns.joints_offset['l_leg_kny'] )
-    l_leg_lhy = JSC_2_l_leg_kny.getCMD( left_leg_angles[1] + ns.joints_offset['l_leg_lhy'] )
-    # else:
-    #     l_leg_uay = left_leg_angles[5] 
-    #     l_leg_kny = left_leg_angles[3] + ns.joints_offset['l_leg_kny']
-    #     l_leg_lhy = left_leg_angles[1] + ns.joints_offset['l_leg_lhy']
+    if ( msg.step_phase == 4 ): # left leg is swing
+          l_leg_uay = JSC_2_l_leg_uay.getCMD( left_leg_angles[5] ) 
+          l_leg_kny = JSC_2_l_leg_kny.getCMD( left_leg_angles[3] + ns.joints_offset['l_leg_kny'] )
+          l_leg_lhy = JSC_2_l_leg_kny.getCMD( left_leg_angles[1] + ns.joints_offset['l_leg_lhy'] )
+    else:
+          l_leg_uay = left_leg_angles[5] 
+          l_leg_kny = left_leg_angles[3] + ns.joints_offset['l_leg_kny']
+          l_leg_lhy = left_leg_angles[1] + ns.joints_offset['l_leg_lhy']
     
     l_leg_lax =  JSC_l_leg_lax.getCMD( left_leg_angles[4] ) 
     l_leg_mhx = left_leg_angles[0]
     
     #right leg:
- #   if ( msg.step_phase == 2 ): # right leg is swing
-    r_leg_uay = JSC_2_r_leg_uay.getCMD( right_leg_angles[5] ) 
-    r_leg_kny = JSC_2_r_leg_kny.getCMD( right_leg_angles[3] + ns.joints_offset['r_leg_kny'] )
-    r_leg_lhy = JSC_2_r_leg_kny.getCMD( right_leg_angles[1] + ns.joints_offset['r_leg_lhy'] )
-    # else:
-    #     r_leg_uay = right_leg_angles[5]
-    #     r_leg_kny = right_leg_angles[3] + ns.joints_offset['r_leg_kny']
-    #     r_leg_lhy = right_leg_angles[1] + ns.joints_offset['r_leg_lhy']
+    if ( msg.step_phase == 2 ): # right leg is swing
+          r_leg_uay = JSC_2_r_leg_uay.getCMD( right_leg_angles[5] ) 
+          r_leg_kny = JSC_2_r_leg_kny.getCMD( right_leg_angles[3] + ns.joints_offset['r_leg_kny'] )
+          r_leg_lhy = JSC_2_r_leg_kny.getCMD( right_leg_angles[1] + ns.joints_offset['r_leg_lhy'] )
+    else:
+          r_leg_uay = right_leg_angles[5]
+          r_leg_kny = right_leg_angles[3] + ns.joints_offset['r_leg_kny']
+          r_leg_lhy = right_leg_angles[1] + ns.joints_offset['r_leg_lhy']
 
     r_leg_lax = JSC_r_leg_lax.getCMD( right_leg_angles[4] ) 
     r_leg_mhx = right_leg_angles[0]  
         
 
-    back_mby =  0.06 
+    back_mby =  0.03 
     back_ubx =  0.0 
     back_lbz =  0.0 
 
@@ -393,12 +394,12 @@ def LEG_IK():
       r_leg_uhz, r_leg_mhx, r_leg_lhy, r_leg_kny, r_leg_uay, r_leg_lax,
       l_arm_usy, l_arm_shx, l_arm_ely, l_arm_elx, l_arm_uwy, l_arm_mwx,
       r_arm_usy, r_arm_shx, r_arm_ely, r_arm_elx, r_arm_uwy, r_arm_mwx]
-    # cur_pos = ns.RL.current_pos()
+    cur_pos = ns.RL.current_pos()
     
- #ns.JC.set_all_pos(cur_pos)
-    T=5
-    dt=0.1
-    cur_pos = [2.438504816382192e-05, 0.0015186156379058957, 9.983908967114985e-06, -0.0010675729718059301, -0.0003740221436601132, 0.06201673671603203, -0.2333149015903473, 0.5181407332420349, -0.27610817551612854, -0.062101610004901886, 0.00035181696875952184, -0.06218484416604042, -0.2332201600074768, 0.51811283826828, -0.2762000858783722, 0.06211360543966293, 0.29983898997306824, -1.303462266921997, 2.0007927417755127, 0.49823325872421265, 0.0003098883025813848, -0.0044272784143686295, 0.29982614517211914, 1.3034454584121704, 2.000779867172241, -0.498238742351532, 0.0003156556049361825, 0.004448802210390568]
+      #ns.JC.set_all_pos(cur_pos)
+    T=1
+    dt=0.002
+    #cur_pos = [2.438504816382192e-05, 0.0015186156379058957, 9.983908967114985e-06, -0.0010675729718059301, -0.0003740221436601132, 0.06201673671603203, -0.2333149015903473, 0.5181407332420349, -0.27610817551612854, -0.062101610004901886, 0.00035181696875952184, -0.06218484416604042, -0.2332201600074768, 0.51811283826828, -0.2762000858783722, 0.06211360543966293, 0.29983898997306824, -1.303462266921997, 2.0007927417755127, 0.49823325872421265, 0.0003098883025813848, -0.0044272784143686295, 0.29982614517211914, 1.3034454584121704, 2.000779867172241, -0.498238742351532, 0.0003156556049361825, 0.004448802210390568]
     ns.JC.send_pos_traj(cur_pos,des_pos,T,dt )
     rospy.sleep(1)
 

@@ -93,8 +93,8 @@ def init_pose():
     yaml_pth = os.path.join(roslib.packages.get_pkg_dir('C42_DRCSim2_tools'),'calibrated_controller_drc2_yuval.yaml')
     JC.set_default_gains_from_yaml(yaml_pth)
     JC.reset_gains()
-    init_pos = RL.current_pos()
-    JC.send_pos_traj(init_pos,des_pos,5,0.1)
+    cur_pos = RL.current_pos()
+    JC.send_pos_traj(cur_pos,des_pos,1,0.002)
 
 if __name__ == '__main__':
     init_pose()
