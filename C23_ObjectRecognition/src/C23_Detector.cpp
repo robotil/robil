@@ -65,7 +65,7 @@ Mat fromSensorMsg(const sensor_msgs::ImageConstPtr& msg)
 
   bool C23_Detector::detect(const string target) {
  //   ROS_INFO(target.c_str());
- namedWindow("Threshed",WINDOW_AUTOSIZE );
+ 
     if(!target.compare("Gate")) {
         _target = GATE;
         
@@ -73,6 +73,10 @@ Mat fromSensorMsg(const sensor_msgs::ImageConstPtr& msg)
     } else if (!target.compare("Car")) {
         _target = CAR;
       ROS_INFO("We are looking for a gate...");
+    }
+    else if (!target.compare("Path")) {
+        _target = PATH;
+      ROS_INFO("We are looking for a path...");
     }
     return true;
   
@@ -90,6 +94,9 @@ Mat fromSensorMsg(const sensor_msgs::ImageConstPtr& msg)
 	        target = "Gate";
 	        break;
      }
+    if(!isFound) {
+      x= - 1;
+    }
     msg.ObjectDetected = isFound ? 1 : 0;
     msg2.x = x;
     msg2.y = y;
@@ -107,7 +114,10 @@ Mat fromSensorMsg(const sensor_msgs::ImageConstPtr& msg)
 		  Mat srcImg = fromSensorMsg(msg);
 		  bool res;
 		  switch (_target) {
-		  
+		    case PATH:
+		      res = detectPath(srcImg);
+		      publishMessage(res);
+		      break;
 		    case CAR:
 		      ROS_INFO("CAR");
 		      break;
@@ -115,15 +125,66 @@ Mat fromSensorMsg(const sensor_msgs::ImageConstPtr& msg)
 	    //    ROS_INFO("GATE");
 	        
 	        res = detectGate(srcImg,cloud);
-	        if(res) {
-	          publishMessage(true);
-	        }
+	        publishMessage(res);
+	        
 	        break;
      }
      srcImg.release();
 			
 	}
-	
+	bool C23_Detector::detectPath(Mat srcImg) {
+	 // IplImage* img = new IplImage(srcImg);
+	  Mat imgHSV, imgThreshed;
+	  cvtColor(srcImg,imgHSV,CV_BGR2HSV);
+	  inRange(imgHSV,Scalar(20,30,30),Scalar(40,255,255),imgThreshed);
+	  namedWindow("TESTING");
+	  imshow("TESTING",imgThreshed);
+	  //waitKey(0);
+	 // imwrite("test12.jpg",imgThreshed);
+	 Mat bw;
+	 vector<vector<cv::Point> > contours;
+	 threshold(imgThreshed,bw,10,255,CV_THRESH_BINARY);
+	 findContours(bw,contours,CV_RETR_LIST,CV_CHAIN_APPROX_SIMPLE);
+	 drawContours(srcImg,contours,-1,CV_RGB(255,0,0),2);
+	 imshow("TESSTING",srcImg);
+	 //waitKey(0);
+   Mat dst,cdst;
+   Canny(bw, dst, 50, 200, 3);
+   cvtColor(dst, cdst, CV_GRAY2BGR);
+   
+
+    //Probabilistic Hough Line Transform
+    vector<Vec4i> lines;
+    HoughLinesP(dst, lines, 5, CV_PI/180, 50, 100, 10 );
+    int max = 0;
+    Vec4i maxVec;
+    if(lines.size() == 0) {
+      return false;
+    }
+    for( size_t i = 0; i < lines.size(); i++ )
+    {
+      Vec4i l = lines[i];
+      cout << l[0] << "," << l[1] << "---" << l[2]  << "," << l[3] << endl;
+      if(l[1] > max || l[3] > max) {
+        max = l[1] > l[3] ? l[1] : l[3];
+        maxVec = l;
+      }
+     // line( cdst, cv::Point(l[0], l[1]), cv::Point(l[2], l[3]), Scalar(0,0,255), 3, CV_AA);
+    }
+    line( cdst, cv::Point(maxVec[0], maxVec[1]), cv::Point(maxVec[2], maxVec[3]), Scalar(0,0,255), 3, CV_AA);
+    imshow("TESTING",cdst);
+    //waitKey(0);
+    if(maxVec[1] < maxVec[3]) {
+      x = maxVec[0];
+      y = maxVec[1];
+    } else {
+      x = maxVec[2];
+      y = maxVec[3];
+    }
+    return true;
+    
+	 
+	}
 	bool C23_Detector::detectGate(Mat srcImg, const sensor_msgs::PointCloud2::ConstPtr &cloud) {
 	  
 	  pcl::PointCloud<pcl::PointXYZ>pclcloud;
