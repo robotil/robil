@@ -16,7 +16,7 @@
 #include <tf/tf.h>
 #include <tf/transform_listener.h>
 #include <pcl/filters/statistical_outlier_removal.h>
-#include<C23_dFind/perceptionTransform.h>#
+#include<C23_dFind/perceptionTransform.h>
 #include <actionlib/server/simple_action_server.h>
 #include <C0_RobilTask/RobilTask.h>
 #include <C0_RobilTask/RobilTaskAction.h>
@@ -255,18 +255,92 @@ public:
  FeatureCloud template_cloud;
   bool perceive(C23_dFind::perceptionTransform::Request &req,C23_dFind::perceptionTransform::Response &res);
 private:
+  float best_view;
+ TemplateAlignment::Result best_alignment;
   void  cloudCallback(const sensor_msgs::PointCloud2::ConstPtr &msg);
 ros::NodeHandle nh;
   // percieve()
 };
-dFind *dtest;
 void dFind::cloudCallback(const sensor_msgs::PointCloud2::ConstPtr &msg){
 	// Load the target cloud PCD file
+
   pcl::fromROSMsg<pcl::PointXYZ>(*msg,*cloud);
   // std::cout<<"lkjsdlkfsdfkjsdf;kjsd\n";
-      
-   
-	  // Save the aligned template for visualization
+         std::cout<<template_cloud.xyz_<<endl;
+	
+	static tf::StampedTransform transform;
+
+ static tf::TransformListener listener;
+	tf::Transform trans;
+		try{
+		  	  ros::Time now =ros::Time::now();
+		   listener.waitForTransform("pelvis","head",now,ros::Duration(3,0));
+		  listener.lookupTransform("pelvis","head",now, transform);
+		}
+		catch (tf::TransformException ex){
+		  //ROS_ERROR("cv_bridge exception: %s", ex.what());
+		  //have a problem that this doesn't work the first time so used continue as a workaround
+		  //  best_alignment.fitness_score=1;
+		  //  continue;
+		}
+	
+	trans.setOrigin(tf::Vector3(transform.getOrigin().getX(),transform.getOrigin().getY(),transform.getOrigin().getZ()));
+		trans.setRotation(tf::Quaternion(transform.getRotation().getX(),transform.getRotation().getY(),transform.getRotation().getZ(),transform.getRotation().getW()));
+		tf::Transform trans3;
+		trans3.setOrigin(tf::Vector3(0.0,-0.002, 0.035 ));
+		trans3.setRotation(tf::Quaternion(-M_PI/2,M_PI,M_PI/2));
+		Eigen::Matrix4f sensorToHead,headTopelvis;
+		pcl_ros::transformAsMatrix(trans3, sensorToHead);
+		pcl_ros::transformAsMatrix(trans, headTopelvis);
+		// transform pointcloud from sensor frame to fixed robot frame
+  // Preprocess the cloud by...
+	  // ...removing distant points
+	  const float depth_limit = 2.5;
+	  pcl::PassThrough<pcl::PointXYZ> pass;
+	  pass.setInputCloud (cloud);
+	  pass.setFilterFieldName ("z");
+	  pass.setFilterLimits (0, depth_limit);
+	  pass.filter (*cloud);
+
+	  // ... and downsampling the point cloud
+	  const float voxel_grid_size = 0.005f;
+	  pcl::VoxelGrid<pcl::PointXYZ> vox_grid;
+	  vox_grid.setInputCloud (cloud);
+	  vox_grid.setLeafSize (voxel_grid_size, voxel_grid_size, voxel_grid_size);
+
+	  pcl::PointCloud<pcl::PointXYZ>::Ptr tempCloud (new pcl::PointCloud<pcl::PointXYZ>);
+	  vox_grid.filter (*tempCloud);
+	  cloud = tempCloud;
+
+		pcl::transformPointCloud(*cloud, *cloud, sensorToHead);
+		pcl::transformPointCloud(*cloud,*cloud, headTopelvis);
+	  // Assign to the target FeatureCloud
+	  FeatureCloud target_cloud;
+	  target_cloud.setInputCloud (cloud);
+
+	  // Set the TemplateAlignment inputs
+	  TemplateAlignment template_align;
+	  for (size_t i = 0; i < object_templates->size(); ++i)
+	  {
+
+	    template_align.addTemplateCloud (object_templates->at(i));
+	  }	std::cout<<"exist\n";
+	  template_align.setTargetCloud (target_cloud);
+
+	
+	  int best_index = template_align.findBestAlignment (best_alignment);
+	  const FeatureCloud &best_template = object_templates->at(best_index);
+
+	  // Print the alignment fitness score (values less than 0.00002 are ideal we use less than 0.000035)
+
+	  printf ("Best fitness score: %f\n", best_alignment.fitness_score);
+	  if(best_alignment.fitness_score<0.00003)
+	    {
+	      rotation = best_alignment.final_transformation.block<3,3>(0, 0);
+	      translation = best_alignment.final_transformation.block<3,1>(0, 3);
+	      best_view=best_alignment.fitness_score;
+	    }
+// Save the aligned template for visualization
 	  //pcl::PointCloud<pcl::PointXYZ> transformed_cloud;
 	  //pcl::transformPointCloud (*best_template.getPointCloud (), transformed_cloud, best_alignment.final_transformation);
 	  //pcl::transformPointCloud(transformed_cloud, transformed_cloud, sensorToHead);
@@ -281,6 +355,7 @@ void dFind::cloudCallback(const sensor_msgs::PointCloud2::ConstPtr &msg){
 dFind::dFind (ros::NodeHandle _nh)
 {
   nh =_nh;
+  best_view=1;
   pcl::PointCloud<pcl::PointXYZ>::Ptr cloudtemp(new pcl::PointCloud<pcl::PointXYZ>);
   cloud=cloudtemp;
   /*if (argc < 2)
@@ -344,7 +419,8 @@ dFind::dFind (ros::NodeHandle _nh)
      if(isPreempt()){
        return TaskResult::Preempted();
    }
-      while(true)sleep(1000);
+      while(true)
+	sleep(1000);
    }
  };
 
@@ -352,80 +428,12 @@ bool dFind::perceive(C23_dFind::perceptionTransform::Request &req,C23_dFind::per
 {
 
   // Find the best template alignment
-	  TemplateAlignment::Result best_alignment;
-  
-  do{  std::cout<<template_cloud.xyz_<<endl;
-	
-	static tf::StampedTransform transform;
-
- static tf::TransformListener listener;
-	tf::Transform trans;
-		try{
-		  	  ros::Time now =ros::Time::now();
-		   listener.waitForTransform("pelvis","head",now,ros::Duration(3,0));
-		  listener.lookupTransform("pelvis","head",now, transform);
-		}
-		catch (tf::TransformException ex){
-		  //ROS_ERROR("cv_bridge exception: %s", ex.what());
-		  //have a problem that this doesn't work the first time so used continue as a workaround
-		  best_alignment.fitness_score=1;
-		  continue;
-		}
-	
-	trans.setOrigin(tf::Vector3(transform.getOrigin().getX(),transform.getOrigin().getY(),transform.getOrigin().getZ()));
-		trans.setRotation(tf::Quaternion(transform.getRotation().getX(),transform.getRotation().getY(),transform.getRotation().getZ(),transform.getRotation().getW()));
-		tf::Transform trans3;
-		trans3.setOrigin(tf::Vector3(0.0,-0.002, 0.035 ));
-		trans3.setRotation(tf::Quaternion(-M_PI/2,M_PI,M_PI/2));
-		Eigen::Matrix4f sensorToHead,headTopelvis;
-		pcl_ros::transformAsMatrix(trans3, sensorToHead);
-		pcl_ros::transformAsMatrix(trans, headTopelvis);
-		// transform pointcloud from sensor frame to fixed robot frame
-  // Preprocess the cloud by...
-	  // ...removing distant points
-	  const float depth_limit = 2.5;
-	  pcl::PassThrough<pcl::PointXYZ> pass;
-	  pass.setInputCloud (cloud);
-	  pass.setFilterFieldName ("z");
-	  pass.setFilterLimits (0, depth_limit);
-	  pass.filter (*cloud);
-
-	  // ... and downsampling the point cloud
-	  const float voxel_grid_size = 0.005f;
-	  pcl::VoxelGrid<pcl::PointXYZ> vox_grid;
-	  vox_grid.setInputCloud (cloud);
-	  vox_grid.setLeafSize (voxel_grid_size, voxel_grid_size, voxel_grid_size);
-
-	  pcl::PointCloud<pcl::PointXYZ>::Ptr tempCloud (new pcl::PointCloud<pcl::PointXYZ>);
-	  vox_grid.filter (*tempCloud);
-	  cloud = tempCloud;
-
-		pcl::transformPointCloud(*cloud, *cloud, sensorToHead);
-		pcl::transformPointCloud(*cloud,*cloud, headTopelvis);
-	  // Assign to the target FeatureCloud
-	  FeatureCloud target_cloud;
-	  target_cloud.setInputCloud (cloud);
-
-	  // Set the TemplateAlignment inputs
-	  TemplateAlignment template_align;
-	  for (size_t i = 0; i < object_templates->size(); ++i)
-	  {
-
-	    template_align.addTemplateCloud (object_templates->at(i));
-	  }	std::cout<<"exist\n";
-	  template_align.setTargetCloud (target_cloud);
-
-	
-	  int best_index = template_align.findBestAlignment (best_alignment);
-	  const FeatureCloud &best_template = object_templates->at(best_index);
-
-	  // Print the alignment fitness score (values less than 0.00002 are ideal we use less than 0.000035)
-
-	  printf ("Best fitness score: %f\n", best_alignment.fitness_score);
+	 
 
 	  // Print the rotation matrix and translation vector
-	  rotation = best_alignment.final_transformation.block<3,3>(0, 0);
-	  translation = best_alignment.final_transformation.block<3,1>(0, 3);
+
+
+	  printf ("best view%f", best_view);
 
 	  printf ("    | %6.3f %6.3f %6.3f | \n", rotation (0,0), rotation (0,1), rotation (0,2));
 	  printf ("R = | %6.3f %6.3f %6.3f | \n", rotation (1,0), rotation (1,1), rotation (1,2));
@@ -433,8 +441,9 @@ bool dFind::perceive(C23_dFind::perceptionTransform::Request &req,C23_dFind::per
 	  printf ("\n");
 	  printf ("t = < %0.3f, %0.3f, %0.3f >\n", translation (0), translation (1), translation (2));
 	  //get a new point cloud and try again
-	  ros::spinOnce();
-  }while(best_alignment.fitness_score>0.000037);	
+	  //ros::spinOnce();
+ 
+//while(best_alignment.fitness_score>0.000037);	
 
 
   res.transMat[0]=rotation(0,0);
@@ -453,8 +462,10 @@ bool dFind::perceive(C23_dFind::perceptionTransform::Request &req,C23_dFind::per
 		res.transMat[13]=0;
 		res.transMat[14]=0;
 		res.transMat[15]=1;
-		return true;
-	  
+		if(best_alignment.fitness_score<0.5)
+		  return true;
+		else 
+		  return false;
 }
 
 int main(int argc, char **argv)
@@ -462,8 +473,8 @@ int main(int argc, char **argv)
 
 ros::NodeHandle nh; 
  dFind d(nh);
- dtest=&d;
+ // dtest=&d;
   dFindServer task1(d);
   
-  return 0;\
+  return 0;
 }
