@@ -1,17 +1,29 @@
 Object recocnition of drill.
 1. Compiling can be done using rosmake in the base directory of the workspace.
 2.Move neck joint by 0.8 so that the drill will be in atlas' field of vision.
-("neck" movement in Traj_data2.yaml)
-3. The three files needed to run the nod are:
+the neck movement is not part of my code but for comfort I added a python and .yaml file to the bin/tmp directory which can be used to move the neck as follows:
+
+roscd C23_dFind/mod/tmp/ 
+
+python neck.py Traj_data2.yaml neck
+
+
+3. The three files needed to run the node are:
    drill (the executable)
    te.txt (file holding the model's used to locate)
    vox.pcd (the model used for now)
-I wasn't able to get my program to run from an outside directory so
-roscd C23_dFind/bin/
-./drill
-and the node should run.
-Stdout should display a 3x3 rotation matrix, a translation vector, and the fitness score of the recognition.
-and a service named perceptionTransform should be created.
+Which can be found in the bin directory.
+
+To run the node use:
+rosrun C23_dFind drill
+
+A service named perceptionTransform should be created.
+Upon calling the perceptionTransform service
+$rosservice call /perceptionTransform "command: ''"
+
+Wait a few seconds and stdout should display a 3x3 rotation matrix, a translation vector, and a fitness score of the recognition.
+the node will run until there is a successfull recognition (fitness score of less than 0.000037) when it will send the the rotation matrix as a response to the service call.
+As of now we don't have a response if the drill is not in the field of vision and the program will hang untill it is found, I am working on this problem.
 
 ********
 
