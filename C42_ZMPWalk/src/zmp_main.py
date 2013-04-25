@@ -95,7 +95,7 @@ class MyTask(RobilTask):
 
         ## RUN TOPICS:
         self._odom_sub = rospy.Subscriber('/ground_truth_odom',Odometry,self._odom_cb)
-        self._path_sub = rospy.Subscriber('/C31PathPlanner',C31_Waypoints,self._path_cb)
+        self._path_sub = rospy.Subscriber('/path',C31_Waypoints,self._path_cb)
 
         self._pub_zmp = rospy.Publisher('zmp_out', walking_trajectory ) #traj)
         self._pub_state = rospy.Publisher('zmp_state',Int32)
@@ -109,13 +109,23 @@ class MyTask(RobilTask):
         self._done = self._ZmpLpp.UpdatePosition(odom.pose.pose.position.x,odom.pose.pose.position.y)
         
     def _path_cb(self,path):
-        
-        rospy.loginfo('got path %s',path)
-        
+        rospy.loginfo('Received path: %s',path)        
         p = []
+        found_first_waypoint = False
         for wp in path.points:
-            p.append(Waypoint(wp.x,wp.y))
+            path_point = Waypoint(wp.x,wp.y)
+            robot_position = self._ZmpLpp.GetPos()
+            rospy.loginfo('Point: %s Robot Point: %s distance = %f' %  (path_point.PrintWaypoint(), robot_position.PrintWaypoint(), path_point.GetDistanceFrom(robot_position) ) )
+            if path_point.GetDistanceFrom(robot_position) >= self._ZmpLpp.GetRadiusLimit() and not(found_first_waypoint):
+                p.append(robot_position)
+                found_first_waypoint = True
+                rospy.loginfo('Appending Point %s to path' %  ( robot_position.PrintWaypoint() ) )
+            if found_first_waypoint:
+                p.append(path_point)
+                rospy.loginfo('Appending Point %s to path' %  ( path_point.PrintWaypoint() ) )
         self._ZmpLpp.SetPath(p)
+        rospy.loginfo('First point of path list: %s', p[0].PrintWaypoint() )
+        rospy.loginfo('Set path: %s', self._ZmpLpp.PrintPathWaypoints() )
         
     
     def _listn_to_orientation_command(self,orientation_command): 

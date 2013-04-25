@@ -2,7 +2,7 @@
 
 from collections import deque
 import math
-#import rospy    # TODO - get rid of all these loginfo when done debugging
+import rospy    # TODO - get rid of all these loginfo when done debugging
 
 ###################################################################################
 # File created by David Dovrat, 2013.
@@ -38,6 +38,10 @@ class Waypoint(object):
         dX = otherWaypoint._fX - self._fX
         dY = otherWaypoint._fY - self._fY
         return math.sqrt(dX*dX+dY*dY)
+
+    def PrintWaypoint(self):
+        strWaypoint = " (x=" + str(self._fX) + ", y=" + str(self._fY) + ")"
+        return strWaypoint   
         
 ###################################################################################
 #---------------------------------- Segment --------------------------------------
@@ -132,7 +136,8 @@ class LocalPathPlanner(object):
         self._Path = deque([])
         self._Position = Waypoint()
         self._CurrentSegment = Segment(self._Position,self._Position)
-        self._PathReady = False 
+        self._PathReady = False
+        self._RadiusFromFirstWaypoint = 0.5 # units [m], find first waypoint in path that outside this Radius from robot    
         
     def SetPath(self,waypointList):
         self._Path = deque(waypointList)
@@ -146,7 +151,16 @@ class LocalPathPlanner(object):
         else:
             self._CurrentSegment.SetSource(self._Path.popleft())
             self._CurrentSegment.SetTarget(self._Path.popleft()) 
-        self._PathReady = True   
+        self._PathReady = True
+
+    def PrintPathWaypoints(self):
+        strPath = ""
+        rospy.loginfo('First point of path deque: %s', self._Path[0].PrintWaypoint() )
+        rospy.loginfo('Second point of path deque: %s', self._Path[1].PrintWaypoint() )
+        for wp in list(self._Path):
+            rospy.loginfo('Printing point %s in path' %  ( wp.PrintWaypoint() ) )
+            strPath = strPath + wp.PrintWaypoint() + "; "
+        return strPath   
         
     def GetPathError(self):
         sagital,lateral = self._CurrentSegment.GetDistanceFrom(self._Position)
@@ -174,6 +188,9 @@ class LocalPathPlanner(object):
                 result = math.fabs(turningRadius*math.tan(theta/2)) # Ask Dave
         #rospy.loginfo('GetCloseEnoughToTargetDistance: %f, theta = %f' %(result,theta))
         return result
+
+    def GetRadiusLimit(self):
+        return self._RadiusFromFirstWaypoint
             
     def UpdatePosition(self,CoordinateX,CoordinateY):
         """
