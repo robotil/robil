@@ -8,15 +8,15 @@
       <dec name="!L!" x="456.4999999999993" y="145.16666666666669"> 
             <seq name="Mission" x="449.72222222222206" y="237.94444444444454" collapsed="false" id="e476250a-7477-4a98-a8c7-bed5aed10672"> 
                   <seq name="UpToCliff" x="365.94444444444383" y="332.9444444444437" collapsed="false" id="63d27bf9-f56a-4c0f-8b32-583e8edd36c6"> 
-                        <tsk name="PathPlanningFocus(target=Qual1P1)" x="195.94444444444446" y="508.4999999999994" test_time="0" test_result="true" id="9fe743dd-3101-4988-8e76-2f01615c6604" />
-                        <tsk name="ZmpWalk" x="381.4999999999993" y="454.05555555555463" test_time="0" test_result="true" id="4675c8a2-4623-4235-b386-920a5c243e82" />
+                        <tsk name="PathPlanningFocus(target=Qual1P1)" x="195.94444444444446" y="508.4999999999994" test_time="0" test_result="true" id="9fe743dd-3101-4988-8e76-2f01615c6603" />
+                        <tsk name="ZmpWalk" x="381.4999999999993" y="454.05555555555463" test_time="0" test_result="true" id="4675c8a2-4623-4235-b386-920a1c243e82" />
                   </seq>
                   <seq name="OverCliff" x="508.16666666666663" y="336.27777777777703" collapsed="false" id="b668d8b3-6787-4d21-a051-17def7419d8b"> 
                         <tsk name="PathPlanningFocus(target=Qual1P2)" x="424.8333333333336" y="511.83333333333286" test_time="0" test_result="true" id="9fe743dd-3101-4988-8e76-2f01615c6604" />
                         <tsk name="QuasiStaticWalk" x="534.833333333333" y="460.72222222222075" test_time="0" test_result="true" id="c9112af6-dbb8-4445-8948-59f96dacf28b" />
                   </seq>
                   <seq name="ToFinish" x="624.8333333333329" y="339.6111111111103" collapsed="false" id="2deef5af-9445-4863-a0c5-4ce0d1a71f4d"> 
-                        <tsk name="PathPlanningFocus(target=Qual1P3)" x="630.3888888888893" y="509.61111111111046" test_time="0" test_result="true" id="9fe743dd-3101-4988-8e76-2f01615c6604" />
+                        <tsk name="PathPlanningFocus(target=Qual1P3)" x="630.3888888888893" y="509.61111111111046" test_time="0" test_result="true" id="9fe743dd-3101-4988-8e76-2f01615c6605" />
                         <tsk name="ZmpWalk" x="725.944444444444" y="464.05555555555406" test_time="0" test_result="true" id="4675c8a2-4623-4235-b386-920a5c243e82" />
                   </seq>
             </seq>
