@@ -186,13 +186,13 @@ void GeneralDetector::detect(Mat img) {
   detector.detect(subImg, keypoints);
   cv::drawKeypoints(subImg, keypoints, output2);
   // imwrite("daniel.jpg",output);
-//  cv::imwrite("sift_result.jpg", output2);
+  cv::imwrite("sift_result.jpg", output2);
   cout << "Best match: " << bestMatch << endl;
   _x = x_;
   _y = y_;
   _width = width;
   _height = height;
-//  imwrite("best.jpg",subImg);
+  imwrite("best.jpg",subImg);
 
   // cout <<"done "<< best_res << endl;
   
