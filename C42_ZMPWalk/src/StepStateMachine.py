@@ -370,6 +370,33 @@ class PreStoppingRightStepState(StepState):
         
     def GetId(self):
         return 7
+#----------------------------------------------------------------------------------
+
+class PreEmergencyStopState(StepState):
+    """
+        The PreEmergencyStopState class is intended to be used with the StepStateMachine class,
+        When the ZMP has to stop immediately this state is a transition state to complete current step
+        (from receiving "EmergencyStop" command) until moving to EmergencyStopState.
+    """
+    def __init__(self,StepStrategy,walkingTrajectory,robotState,dt):
+        StepState.__init__(self,"PreEmergencyStop",StepStrategy,dt)
+        self._WalkingTrajectory = walkingTrajectory
+        self._robotState = robotState
+        
+        self._pre_step = 0
+        self._first_step = 0
+        self._full_step = 1
+        self._last_step = 0
+        
+    def OnEnter(self):
+        pass
+
+    def UpdateStepCounter(self,stepCounter):
+        stepCounter = stepCounter+1
+        return stepCounter
+
+    def GetId(self):
+        return 18
 
 #----------------------------------------------------------------------------------
 
@@ -382,17 +409,8 @@ class EmergencyStopState(StepState):
         StepState.__init__(self,"EmergencyStop",StepStrategy,dt)
         self._WalkingTrajectory = walkingTrajectory
         
-        self._pre_step = 0
-        self._first_step = 0
-        self._full_step = 0
-        self._last_step = 1
-
-        #TODO
-        #self._p_ref_x = 
-        #self._p_ref_y = 
-
     def OnEnter(self):
-        pass
+        rospy.sleep(2) # wait for robot to stabilize
 
     def GetId(self):
         return 15
@@ -737,6 +755,7 @@ class StepStateMachine(StateMachine):
         StateMachine.AddState(self,PreStopRightStepState(self._StepStrategyWalk,walkingTrajectory,robotState,dt))
         StateMachine.AddState(self,RightStepState(self._StepStrategyWalk,walkingTrajectory,robotState,dt))
         StateMachine.AddState(self,LeftStepState(self._StepStrategyWalk,walkingTrajectory,robotState,dt))
+        StateMachine.AddState(self,PreEmergencyStopState(self._StepStrategyWalk,walkingTrajectory,robotState,dt))
         StateMachine.AddState(self,EmergencyStopState(self._StepStrategyWalk,walkingTrajectory,robotState,dt))
         StateMachine.AddState(self,TurnRight_LeftStepState(self._StepStrategyWalk,walkingTrajectory,robotState,dt))
         StateMachine.AddState(self,TurnRight_RightStepState(self._StepStrategyWalk,walkingTrajectory,robotState,dt))
@@ -750,10 +769,10 @@ class StepStateMachine(StateMachine):
         StateMachine.AddTransition(self,"FirstStep",            "Stop",         "PreStoppingFirstStep")
         StateMachine.AddTransition(self,"Left",                 "NextStep",     "Right")
         StateMachine.AddTransition(self,"Left",                 "Stop",         "PreStoppingLeft")
-        StateMachine.AddTransition(self,"Left",                 "EmergencyStop","EmergencyStop")
+        StateMachine.AddTransition(self,"Left",                 "EmergencyStop","PreEmergencyStop")
         StateMachine.AddTransition(self,"Right",                "NextStep",     "Left")
         StateMachine.AddTransition(self,"Right",                "Stop",         "PreStoppingRight")
-        StateMachine.AddTransition(self,"Right",                "EmergencyStop","EmergencyStop")
+        StateMachine.AddTransition(self,"Right",                "EmergencyStop","PreEmergencyStop")
         StateMachine.AddTransition(self,"PreStoppingFirstStep", "NextStep",     "StoppingLeft")
         StateMachine.AddTransition(self,"PreStoppingRight",     "NextStep",     "StoppingLeft")
         StateMachine.AddTransition(self,"PreStoppingLeft",      "NextStep",     "StoppingRight")
@@ -763,6 +782,7 @@ class StepStateMachine(StateMachine):
         StateMachine.AddTransition(self,"PreStopLeft",          "NextStep",     "StopRight")
         StateMachine.AddTransition(self,"StopRight",            "NextStep",     "Idle")
         StateMachine.AddTransition(self,"StopLeft",             "NextStep",     "Idle")
+        StateMachine.AddTransition(self,"PreEmergencyStop",     "NextStep",     "EmergencyStop")
         StateMachine.AddTransition(self,"EmergencyStop",        "NextStep",     "Idle")
         StateMachine.AddTransition(self,"FirstStep",            "TurnRight",     "TurnRightBeginLeft")
         StateMachine.AddTransition(self,"Right",                "TurnRight",     "TurnRightBeginLeft")

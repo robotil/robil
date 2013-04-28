@@ -54,7 +54,7 @@ class MyTask(RobilTask):
         rospy.sleep(1)
         self._listener = tf.TransformListener()
 
-        self._walk = 0
+        self._debug_transition = 0
         self._done = False
 
         # sampling time:
@@ -96,6 +96,7 @@ class MyTask(RobilTask):
         ## RUN TOPICS:
         self._odom_sub = rospy.Subscriber('/ground_truth_odom',Odometry,self._odom_cb)
         self._path_sub = rospy.Subscriber('/path',C31_Waypoints,self._path_cb)
+        self._debug_cmd_sub = rospy.Subscriber('zmp_command',Int32,self._debug_command) # receive Transition cmd for ZMP Step State Machine
 
         self._pub_zmp = rospy.Publisher('zmp_out', walking_trajectory ) #traj)
         self._pub_state = rospy.Publisher('zmp_state',Int32)
@@ -139,7 +140,20 @@ class MyTask(RobilTask):
     # init hip_z_orientation_controller
     def _get_imu(self,msg):  #listen to /atlas/imu/pose/pose/orientation
         self._imu_orientation = msg.orientation
-        
+    
+    def _debug_command(self,zmp_command): # cmd = 0 -> STOP; cmd = 3 -> Emergency STOP
+        self._debug_transition = zmp_command.data
+        rospy.loginfo("DEBUG - recieved zmp_command: walk = %i" % (self._debug_transition) )
+        rospy.loginfo("time:")
+        rospy.loginfo(rospy.get_time())
+        if 3 == self._debug_transition:
+             #self._ZmpStateMachine.EmergencyStop()
+             rospy.loginfo('DEBUG - Trying transition "Emergency STOP" in ZMP Step State Machine')
+        elif 0 == self._debug_transition:
+             self._ZmpStateMachine.Stop()
+             rospy.loginfo('DEBUG - Trying transition "STOP" in ZMP Step State Machine')
+
+
     def task(self, name, uid, parameters):
         print "Start ZmpWalk"
 
@@ -152,18 +166,19 @@ class MyTask(RobilTask):
                 return RTResult_PREEPTED()
             self._interval.sleep()
         
-        self._ZmpStateMachine.SetTurnCmd(turn_cmd = -30.0*math.pi/180) # NEED TO REMOVE - for debug use of turn step
+        # self._ZmpStateMachine.SetTurnCmd(turn_cmd = 0.0*math.pi/180) # NEED TO REMOVE - for debug use of turn step
         self._ZmpStateMachine.Initialize()
+        rospy.sleep(1)
         self._ZmpStateMachine.Start()
 
         while self._ZmpLpp.IsActive():
-            if self.isPreepted():
+            if self.isPreepted() or (3 == self._debug_transition):
                 self._ZmpStateMachine.EmergencyStop()
+            #if completed Emergency stop:
                 self._ZmpLpp.Stop()
                 print "Preempt ZmpWalk: EmergencyStop"
-                self._ZmpStateMachine.EmergencyStop()
                 return RTResult_PREEPTED()
-            self._ZmpStateMachine.SetTurnCmd(turn_cmd = -30.0*math.pi/180)
+            self._ZmpStateMachine.SetTurnCmd(turn_cmd = 0.0*math.pi/180)
             self._ZmpStateMachine.SetDistanceToNextTurn(distance = 1.0)
             self._p_ref_x,self._p_ref_y = self._ZmpStateMachine.UpdatePreview()
             new_step_trigger_x,new_step_trigger_y = self._ZmpStateMachine.GetNewStepTrigger()
