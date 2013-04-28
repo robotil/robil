@@ -123,6 +123,10 @@ class Segment(object):
         
         return math.atan2(u[1],u[0])
 
+    def PrintSegment(self):
+        strSegment = "Source" + self._Source.PrintWaypoint() + "; Target" + self._Target.PrintWaypoint() + "; " 
+        return strSegment
+
 ###################################################################################
 #--------------------------- Local Path Planner -----------------------------------
 ###################################################################################
@@ -154,11 +158,8 @@ class LocalPathPlanner(object):
         self._PathReady = True
 
     def PrintPathWaypoints(self):
-        strPath = ""
-        rospy.loginfo('First point of path deque: %s', self._Path[0].PrintWaypoint() )
-        rospy.loginfo('Second point of path deque: %s', self._Path[1].PrintWaypoint() )
+        strPath = "Current segment - " + self._CurrentSegment.PrintSegment()
         for wp in list(self._Path):
-            rospy.loginfo('Printing point %s in path' %  ( wp.PrintWaypoint() ) )
             strPath = strPath + wp.PrintWaypoint() + "; "
         return strPath   
         

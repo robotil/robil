@@ -109,24 +109,26 @@ class MyTask(RobilTask):
         self._done = self._ZmpLpp.UpdatePosition(odom.pose.pose.position.x,odom.pose.pose.position.y)
         
     def _path_cb(self,path):
+        minimun_spacing = 0.5 # minimum required distatance between waypoints in path. Alert if it is not kept.
         rospy.loginfo('Received path: %s',path)        
         p = []
         found_first_waypoint = False
+        robot_position = self._ZmpLpp.GetPos()
         for wp in path.points:
             path_point = Waypoint(wp.x,wp.y)
-            robot_position = self._ZmpLpp.GetPos()
-            rospy.loginfo('Point: %s Robot Point: %s distance = %f' %  (path_point.PrintWaypoint(), robot_position.PrintWaypoint(), path_point.GetDistanceFrom(robot_position) ) )
+            # Remove from received path waypoints that are with in the RadiusLimit (~0.5m) from the robot and insert robot position as first waypoint in path.
+            # This is done to get a good heading direction with noise on path waypoints.  
             if path_point.GetDistanceFrom(robot_position) >= self._ZmpLpp.GetRadiusLimit() and not(found_first_waypoint):
                 p.append(robot_position)
                 found_first_waypoint = True
-                rospy.loginfo('Appending Point %s to path' %  ( robot_position.PrintWaypoint() ) )
+                previous_wp = copy.copy(robot_position)
             if found_first_waypoint:
+                if minimun_spacing > path_point.GetDistanceFrom(previous_wp):
+                     rospy.loginfo('Path spacing warning: waypoint %s distance from previous waypoint is less than %f meters' % (path_point.PrintWaypoint(), minimun_spacing) )
                 p.append(path_point)
-                rospy.loginfo('Appending Point %s to path' %  ( path_point.PrintWaypoint() ) )
+                previous_wp = copy.copy(path_point)
         self._ZmpLpp.SetPath(p)
-        rospy.loginfo('First point of path list: %s', p[0].PrintWaypoint() )
-        rospy.loginfo('Set path: %s', self._ZmpLpp.PrintPathWaypoints() )
-        
+        rospy.loginfo('Set path: %s', self._ZmpLpp.PrintPathWaypoints() )      
     
     def _listn_to_orientation_command(self,orientation_command): 
         self._Des_Orientation = (orientation_command.data)*math.pi/180.0
