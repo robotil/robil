@@ -7,7 +7,7 @@
 #include <math.h>
 #include <boost/bind.hpp>
 #include <string>
-#include <dFind/perceptionTransform.h>
+#include <C23_dFind/perceptionTransform.h>
 #include <boost/bind/bind.hpp>
 #include <hand_grasp/grasp.h>
 #include <move_hand/pelvis_move_hand.h>
@@ -37,7 +37,7 @@ public:
 	  rosnode = new ros::NodeHandle();
 	  pelvis_move_hand_matrix_cli_ = nh_.serviceClient<move_hand::matrix>("C66_matrix");
 	  pelvis_move_hand_cli_ = nh_.serviceClient<move_hand::pelvis_move_hand>("pelvis_move_hand");
-	  perception_transform_cli_ = nh_.serviceClient<dFind::perceptionTransform>("perceptionTransform");
+	  perception_transform_cli_ = nh_.serviceClient<C23_dFind::perceptionTransform>("perceptionTransform");
 /*		while(!move_hand_cli_.waitForExistence(ros::Duration(0.1))){
 			ROS_INFO("Waiting for the move_hand server");
 		}
@@ -70,7 +70,7 @@ public:
 		hand_grasp::grasp grasp_msg;
 		grasp_msg.strength = 0;
 		pub_hand_grasp_.publish(grasp_msg);
-		dFind::perceptionTransform perception_srv_msg;
+		C23_dFind::perceptionTransform perception_srv_msg;
 		perception_srv_msg.request.command = g;
 		ROS_INFO("requesting transformation from perception");
 		if (perception_transform_cli_.call(perception_srv_msg)){
