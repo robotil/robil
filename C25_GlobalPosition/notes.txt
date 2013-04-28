@@ -1,6 +1,30 @@
+C25 - Global Position using Kalman Filter
+-----------------------------------------
+
 provides the robots position in the simulation and the corrosponding imu data 
 now also provides a global position estimation of detected objects 
 Node, now needs C21 to operate
+Requirement
+===========
+You must have the following packages availabe from git:
+C21
+C25_ekf
+libviso2
+viso2_ros
+
+Running rosmake on this package will rosmake all the others too.
+
+IMPORTANT!!
+===========
+please install the laser pipeline package
+sudo apt-get install ros-fuerte-laser-pipeline
+
+Launch file:
+============
+A launch file was created to ease the use of this, and most of the perception modules.
+running
+$ roslaunch C25_GlobalPosition C25.launch
+will automatically run: C21,C22, activate the laser (spindle)
 
 How to Check:
 ============
@@ -30,8 +54,3 @@ Known Bugs:
 
 Known Limitations:
 =================
-
-
-
-
-
