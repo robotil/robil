@@ -12,6 +12,8 @@ from geometry_msgs.msg import Pose, Point
 from std_msgs.msg import String
 from tf.transformations import quaternion_from_euler, euler_from_quaternion
 
+from BDI_StateMachine import *
+
 import math
 import rospy
 import sys
@@ -28,6 +30,7 @@ class WalkingModeBDI(WalkingMode):
         # Initialize atlas mode and atlas_sim_interface_command publishers        
         self.mode = rospy.Publisher('/atlas/mode', String, None, False, True, None)
         self.asi_command = rospy.Publisher('/atlas/atlas_sim_interface_command', AtlasSimInterfaceCommand, None, False, True, None)
+        self._StateMachine = BDI_StateMachine()
                 
     def Initialize(self):
         # Puts robot into freeze behavior, all joints controlled
@@ -62,13 +65,21 @@ class WalkingModeBDI(WalkingMode):
         # Subscribe to atlas_state and atlas_sim_interface_state topics.
         self.asi_state = rospy.Subscriber('/atlas/atlas_sim_interface_state', AtlasSimInterfaceState, self.asi_state_cb)
         self.atlas_state = rospy.Subscriber('/atlas/atlas_state', AtlasState, self.atlas_state_cb)
-        rospy.sleep(2.0)
+
+        self._StateMachine.GoForward()
+
+        while not rospy.is_shutdown():
+            rospy.spin()
     
     def Stop(self):
         pass
     
     def EmergencyStop(self):
         pass    
+
+###################################################################################
+#--------------------------- CallBacks --------------------------------------------
+###################################################################################
 
     # /atlas/atlas_sim_interface_state callback. Before publishing a walk command, we need
     # the current robot position   
@@ -107,7 +118,7 @@ class WalkingModeBDI(WalkingMode):
             command.walk_params.step_data[i].swing_height = 0.2
 
             # Determine pose of the next step based on the step_index
-            command.walk_params.step_data[i].pose = self.calculate_pose(step_index)
+            self._StateMachine.GetCurrentState().calculate_pose(step_index,command.walk_params.step_data[i].pose,self.robot_position)
         
         # Publish this command every time we have a new state message
         self.asi_command.publish(command)
@@ -118,46 +129,3 @@ class WalkingModeBDI(WalkingMode):
         # If you don't reset to harnessed, then you need to get the current orientation
         roll, pitch, yaw = euler_from_quaternion([state.orientation.x, state.orientation.y, state.orientation.z, state.orientation.w])
         return True
-
-    # This method is used to calculate a pose of step based on the step_index
-    # The step poses just cause the robot to walk in a circle
-    def calculate_pose(self, step_index):
-        # Right foot occurs on even steps, left on odd
-        is_right_foot = step_index % 2
-        is_left_foot = 1 - is_right_foot
-        
-        # There will be 60 steps to a circle, and so our position along the circle is current_step
-        current_step = step_index % 60
-        
-        # yaw angle of robot around circle
-        theta = current_step * math.pi / 30
-           
-        R = 2 # Radius of turn
-        W = 0.3 # Width of stride
-        
-        # Negative for inside foot, positive for outside foot
-        offset_dir = 1 - 2 * is_left_foot
-
-        # Radius from center of circle to foot
-        R_foot = R + offset_dir * W/2
-        
-        # X, Y position of foot
-        X = R_foot * math.sin(theta)
-        Y = (R - R_foot*math.cos(theta))
-        
-        # Calculate orientation quaternion
-        Q = quaternion_from_euler(0, 0, theta)
-        pose = Pose()
-        pose.position.x = self.robot_position.x + X
-        pose.position.y = self.robot_position.y + Y
-        
-        # The z position is observed for static walking, but the foot
-        # will be placed onto the ground if the ground is lower than z
-        pose.position.z = 0
-        
-        pose.orientation.x = Q[0]
-        pose.orientation.y = Q[1]
-        pose.orientation.z = Q[2]
-        pose.orientation.w = Q[3]
-
-        return pose

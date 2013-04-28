@@ -11,6 +11,7 @@
   <depend package="rospy"/>
   <depend package="atlas_msgs"/>
   <depend package="python_orocos_kdl"/>
-
+  <depend package="C0_RobilTask"/>
+  <depend package="C31_PathPlanner"/>
 </package>
 
