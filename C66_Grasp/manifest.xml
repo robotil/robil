@@ -15,7 +15,6 @@
   <depend package="C0_RobilTask"/>
   <depend package="move_hand"/>
   <depend package="hand_grasp"/>
-  <depend package="dFind"/>
   <depend package="osrf_msgs"/>
   <depend package="atlas_msgs"/>
   <depend package="sensor_msgs"/>
