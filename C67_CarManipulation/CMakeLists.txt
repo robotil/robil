@@ -39,6 +39,8 @@ rosbuild_genmsg()
 #uncomment if you have defined services
 #rosbuild_gensrv()
 
+include_directories (src) 
+
 #common commands for building c++ executables and libraries
 #rosbuild_add_library(${PROJECT_NAME} src/example.cpp)
 rosbuild_add_library(Kinematics src/FK.cpp src/IK.cpp src/Path.cpp)
@@ -113,6 +115,24 @@ rosbuild_link_boost(GearHandle_server thread)
 
 rosbuild_add_executable(GearHandle_client src/GearHandle_client.cpp)
 rosbuild_link_boost(GearHandle_client thread)
+
+rosbuild_add_executable(dummy src/DummyTask.cpp)
+rosbuild_link_boost(dummy thread)
+
+rosbuild_add_executable(GripSteeringWheel src/GripSteeringWheel.cpp)
+rosbuild_link_boost(GripSteeringWheel thread)
+
+rosbuild_add_executable(CalibrateWheel src/CalibrateWheel.cpp)
+rosbuild_link_boost(CalibrateWheel thread)
+
+rosbuild_add_executable(PlaceFeetOnPedals src/PlaceFeetOnPedals.cpp)
+rosbuild_link_boost(PlaceFeetOnPedals thread)
+
+rosbuild_add_executable(CalibratePedals src/CalibratePedals.cpp)
+rosbuild_link_boost(CalibratePedals thread)
+
+rosbuild_add_executable(task_tester src/taskTester.cpp)
+rosbuild_link_boost(task_tester thread)
 
 #rosbuild_link_boost(${PROJECT_NAME} thread)
 #rosbuild_add_executable(example examples/example.cpp)
