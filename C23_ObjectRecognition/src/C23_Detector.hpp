@@ -32,7 +32,7 @@
 #include <tf/tf.h>
 #include <tf/transform_listener.h>
 #include <math.h>
-
+#include "GeneralDetector.hpp"
 
 
 
@@ -73,6 +73,7 @@ private:
   	bool detectGate(Mat img, const sensor_msgs::PointCloud2::ConstPtr &cloud);
     void publishMessage(bool isFound);
     bool detectPath(Mat srcImg);
+    bool detectCar(Mat srcImg, const sensor_msgs::PointCloud2::ConstPtr &cloud);
     
 	ros::NodeHandle nh;
 
@@ -91,6 +92,7 @@ private:
 	  message_filters::Synchronizer< MySyncPolicy > sync;
 	  
 	  TARGETS _target;
+	  GeneralDetector _generalDetector;
 };
 
 
