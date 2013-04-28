@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
-from WalkingModeChooserInterface import *
-from WalkingModeBDI import *
+from Abstractions.WalkingModeChooserInterface import *
+from BDI.WalkingModeBDI import *
 
 ###################################################################################
 # File created by David Dovrat, 2013.

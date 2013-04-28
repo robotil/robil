@@ -1,0 +1,16 @@
+<package>
+  <description brief="C42_DynamicLocomotion">
+
+     C42_DynamicLocomotion
+
+  </description>
+  <author>Yuval S. and Dave D.</author>
+  <license>BSD</license>
+  <review status="unreviewed" notes=""/>
+  <url>127.0.0.1</url>
+  <depend package="rospy"/>
+  <depend package="atlas_msgs"/>
+  <depend package="python_orocos_kdl"/>
+
+</package>
+
