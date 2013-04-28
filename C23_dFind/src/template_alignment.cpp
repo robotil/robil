@@ -462,7 +462,7 @@ bool dFind::perceive(C23_dFind::perceptionTransform::Request &req,C23_dFind::per
 		res.transMat[13]=0;
 		res.transMat[14]=0;
 		res.transMat[15]=1;
-		if(best_alignment.fitness_score<0.5)
+		if(best_view<0.5)
 		  return true;
 		else 
 		  return false;
