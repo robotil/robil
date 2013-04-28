@@ -7,6 +7,8 @@
 ###################################################################################
 
 from Abstractions.StateMachine import *
+import math
+from tf.transformations import quaternion_from_euler, euler_from_quaternion
 
 ###################################################################################
 #--------------------------- States -----------------------------------------------
@@ -86,10 +88,10 @@ class BDI_TrunLeft(BDI_State):
         is_left_foot = 1 - is_right_foot
         
         # There will be 60 steps to a circle, and so our position along the circle is current_step
-        current_step = step_index % 60
+        current_step = step_index % 4
         
         # yaw angle of robot around circle
-        theta = current_step * math.pi / 30
+        theta = current_step * math.pi / 450
            
         R = 2 # Radius of turn
         W = 0.3 # Width of stride
@@ -135,10 +137,10 @@ class BDI_TrunRight(BDI_State):
         is_left_foot = 1 - is_right_foot
         
         # There will be 60 steps to a circle, and so our position along the circle is current_step
-        current_step = step_index % 60
+        current_step = step_index % 4
         
         # yaw angle of robot around circle
-        theta = current_step * math.pi / 30
+        theta = current_step * math.pi / 450
            
         R = 2 # Radius of turn
         W = 0.3 # Width of stride
@@ -204,3 +206,11 @@ class BDI_StateMachine(StateMachine):
 
     def GoForward(self):
         StateMachine.PerformTransition(self,"GoForward")
+
+    def TurnRight(self):
+        StateMachine.PerformTransition(self,"TurnRight")
+
+    def TurnLeft(self):
+        StateMachine.PerformTransition(self,"TurnLeft")
+
+

@@ -26,11 +26,13 @@ import sys
 
 class WalkingModeBDI(WalkingMode):
 
-    def __init__(self):
+    def __init__(self,localPathPlanner):
         # Initialize atlas mode and atlas_sim_interface_command publishers        
         self.mode = rospy.Publisher('/atlas/mode', String, None, False, True, None)
         self.asi_command = rospy.Publisher('/atlas/atlas_sim_interface_command', AtlasSimInterfaceCommand, None, False, True, None)
         self._StateMachine = BDI_StateMachine()
+        self._LPP = localPathPlanner
+        self._yaw = 0.0
                 
     def Initialize(self):
         # Puts robot into freeze behavior, all joints controlled
@@ -84,48 +86,65 @@ class WalkingModeBDI(WalkingMode):
     # /atlas/atlas_sim_interface_state callback. Before publishing a walk command, we need
     # the current robot position   
     def asi_state_cb(self, state):
-        try:
-            x = self.robot_position.x
-        except AttributeError:            
-            self.robot_position = Point()
-            self.robot_position.x = state.pos_est.position.x
-            self.robot_position.y = state.pos_est.position.y
-            self.robot_position.z = state.pos_est.position.z  
-        
-        command = AtlasSimInterfaceCommand()
+        if (self._LPP.IsActive()):
+            try:
+                x = self.robot_position.x
+            except AttributeError:            
+                self.robot_position = Point()
+                self.robot_position.x = state.pos_est.position.x
+                self.robot_position.y = state.pos_est.position.y
+                self.robot_position.z = state.pos_est.position.z  
+            
+            command = AtlasSimInterfaceCommand()
 
-        command.behavior = AtlasSimInterfaceCommand.WALK
-        
-        # k_effort is all 0s for full BDI controll of all joints.
-        command.k_effort = [0] * 28
-        
-        # Observe next_step_index_needed to determine when to switch steps.
-        self.step_index = state.behavior_feedback.walk_feedback.next_step_index_needed
-        
-        # A walk behavior command needs to know three additional steps beyond the current step needed to plan
-        # for the best balance
-        for i in range(4):
-            step_index = self.step_index + i
-            is_right_foot = step_index % 2
+            command.behavior = AtlasSimInterfaceCommand.WALK
             
-            command.walk_params.step_data[i].step_index = step_index
-            command.walk_params.step_data[i].foot_index = is_right_foot
+            # k_effort is all 0s for full BDI controll of all joints.
+            command.k_effort = [0] * 28
             
-            # A duration of 0.63s is a good default value
-            command.walk_params.step_data[i].duration = 0.63
-            
-            # As far as I can tell, swing_height has yet to be implemented
-            command.walk_params.step_data[i].swing_height = 0.2
+            # Observe next_step_index_needed to determine when to switch steps.
+            self.step_index = state.behavior_feedback.walk_feedback.next_step_index_needed
 
-            # Determine pose of the next step based on the step_index
-            self._StateMachine.GetCurrentState().calculate_pose(step_index,command.walk_params.step_data[i].pose,self.robot_position)
-        
-        # Publish this command every time we have a new state message
-        self.asi_command.publish(command)
+            self._LPP.UpdatePosition(self.robot_position.x,self.robot_position.y)
+
+            targetYaw = self._LPP.GetTargetYaw()
+            delatYaw = targetYaw - self._yaw
+
+            print(delatYaw)
+            if (delatYaw > 0.025):
+                self._StateMachine.TurnLeft()
+                print("Left")
+            elif (delatYaw < -0.025):
+                self._StateMachine.TurnRight()
+                print("Right")
+            else:
+                self._StateMachine.GoForward()
+            
+            # A walk behavior command needs to know three additional steps beyond the current step needed to plan
+            # for the best balance
+            for i in range(4):
+                step_index = self.step_index + i
+                is_right_foot = step_index % 2
+                
+                command.walk_params.step_data[i].step_index = step_index
+                command.walk_params.step_data[i].foot_index = is_right_foot
+                
+                # A duration of 0.63s is a good default value
+                command.walk_params.step_data[i].duration = 0.63
+                
+                # As far as I can tell, swing_height has yet to be implemented
+                command.walk_params.step_data[i].swing_height = 0.2
+
+                # Determine pose of the next step based on the step_index
+                self._StateMachine.GetCurrentState().calculate_pose(step_index,command.walk_params.step_data[i].pose,self.robot_position)
+            
+            # Publish this command every time we have a new state message
+            self.asi_command.publish(command)
  
     # /atlas/atlas_state callback. This message provides the orientation of the robot from the torso IMU
     # This will be important if you need to transform your step commands from the robot's local frame to world frame
     def atlas_state_cb(self, state):
         # If you don't reset to harnessed, then you need to get the current orientation
         roll, pitch, yaw = euler_from_quaternion([state.orientation.x, state.orientation.y, state.orientation.z, state.orientation.w])
+        self._yaw = yaw
         return True

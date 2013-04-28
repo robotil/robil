@@ -12,9 +12,9 @@ from LocalPathPlanner import *
 
 class DynamicWalker(object):
     
-    def __init__(self,walkingModeChooser):
+    def __init__(self,walkingModeChooser,localPathPlanner):
         self._ModeChooser = walkingModeChooser
-        self._LPP = LocalPathPlanner()
+        self._LPP = localPathPlanner
 
     def Initialize(self):
         self._WalkingMode = self._ModeChooser.GetRecommendedMode()

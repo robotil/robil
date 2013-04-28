@@ -7,6 +7,7 @@ import roslib
 roslib.load_manifest('C42_DynamicLocomotion')
 from C31_PathPlanner.msg import C31_Waypoints
 from RobilTaskPy import *
+from LocalPathPlanner import *
 
 ###################################################################################
 # File created by David Dovrat, 2013.
@@ -18,7 +19,8 @@ class DynamicLocomotion(RobilTask):
     
     def __init__(self,name):
         RobilTask.__init__(self, name)
-        self._DynamicWalker = DynamicWalker(WalkingModeChooser())
+        lpp = LocalPathPlanner()
+        self._DynamicWalker = DynamicWalker(WalkingModeChooser(lpp),lpp)
         self._interval = rospy.Rate(0.3)
         
     def DynamicLocomotionTask(self):

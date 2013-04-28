@@ -11,8 +11,8 @@ from BDI.WalkingModeBDI import *
 
 class WalkingModeChooser(WalkingModeChooserInterface):
 
-    def __init__(self):
-        self._Modes = {'BDI':WalkingModeBDI()}
+    def __init__(self,localPathPlanner):
+        self._Modes = {'BDI':WalkingModeBDI(localPathPlanner)}
         self._CurrentMode = self._Modes['BDI']
         self._Recommended = self._Modes['BDI']
         
