@@ -10,6 +10,8 @@
   <url>http://ros.org/wiki/move_pelvis</url>
   <depend package="roscpp"/>
   <depend package="C0_RobilTask"/>
+  <depend package="atlas_msgs"/>
+  <depend package="tf"/>
   <depend package="geometry_msgs"/>
   <depend package="control_msgs"/>
   <depend package="sensor_msgs"/>
@@ -20,6 +22,7 @@
   <depend package="pr2_controllers_msgs"/>
   <depend package="legs_val_calc"/>
   <depend package="traj_splitter_to_vector"/>
+  <depend package="PoseController"/>
   
   <rosdep name="eigen"/>
 

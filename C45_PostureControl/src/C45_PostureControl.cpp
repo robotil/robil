@@ -19,7 +19,7 @@
 #include <pr2_controllers_msgs/JointControllerState.h>
 #include <control_msgs/FollowJointTrajectoryAction.h>
 #include <actionlib/client/simple_action_client.h>
-#include <C45_PostureControl/back_lbz_poller_service.h>
+//#include <C45_PostureControl/back_lbz_poller_service.h>
 #include <C45_PostureControl/com_error.h>
 #include <std_msgs/Float64.h>
 #include <math.h>
@@ -27,6 +27,7 @@
 #include <string>
 #include <sensor_msgs/JointState.h>
 #include <osrf_msgs/JointCommands.h>
+#include <PoseController/back_movement.h>
 
 class posture_controller{
 private:
@@ -35,69 +36,34 @@ private:
 	actionlib::SimpleActionServer<C0_RobilTask::RobilTaskAction> as_; // NodeHandle instance must be created before this line.
 	C0_RobilTask::RobilTaskFeedback feedback_;
 	C0_RobilTask::RobilTaskResult result_;
-	C45_PostureControl::com_error com_error_srv;
-	ros::ServiceClient COM_error_client;
-	ros::ServiceClient back_lbz_poller_cli_;
 	control_toolbox::Pid back_ubx_stab_pid,back_mby_stab_pid; // PIDs for stability
-	ros::Publisher back_mby_pub,back_ubx_pub;
 	ros::Publisher turn_angle;
 	std::string action_name_;
 	std_msgs::Float64 float64_msg;
-	C45_PostureControl::back_lbz_poller_service back_;
 	ros::Time clock;
-	ros::Subscriber back_lbz_state_sub_;
-	double back_lbz_state_;
-	actionlib::SimpleActionClient<control_msgs::FollowJointTrajectoryAction> traj_client_;
 	std::map <std::string, int> joints;
 	std::vector<double> positions;
 	ros::Publisher pub_joint_commands_;
 	ros::Subscriber joint_states_sub_;
+	ros::ServiceClient backz_cli;
 
 public:
 	posture_controller(std::string name)
-	:as_(nh_, name, false), action_name_(name), traj_client_(nh2_,"atlas_controller/follow_joint_trajectory", true) {
+	:as_(nh_, name, false), action_name_(name){
 
 		rosnode = new ros::NodeHandle();
-		//Read PID from rosparam server for the PID constants
-		double p,i,d;
-		if (ros::param::get("/PID_gains/P", p)){
-
-		}
-		else{
-			ROS_ERROR("/PID_gains/P was not set");
-			return;
-		}
-		if (ros::param::get("/PID_gains/I", i))
-		{
-		}
-		else{
-			ROS_ERROR("/PID_gains/I was not set");
-			return;
-		}
-		if (ros::param::get("/PID_gains/D", d))
-		{
-		}
-		else{
-			ROS_ERROR("/PID_gains/D was not set");
-			return;
-		}
 		/*back_mby_stab_pid.initPid(p,i,d,M_PI,-M_PI);
 		back_ubx_stab_pid.initPid(p,i,d,M_PI,-M_PI);*/
-		COM_error_client = nh_.serviceClient<C45_PostureControl::com_error>("com_error");
-		back_lbz_poller_cli_ = nh_.serviceClient<C45_PostureControl::back_lbz_poller_service>("back_lbz_poller_service");
+		//COM_error_client = nh_.serviceClient<C45_PostureControl::com_error>("com_error");
 		joint_states_sub_ = nh_.subscribe("/atlas/joint_states",100,&posture_controller::joint_states_CB,this);
-		pub_joint_commands_ = rosnode->advertise<osrf_msgs::JointCommands>("/atlas/joint_commands", 1, true);
+		backz_cli = nh2_.serviceClient<PoseController::back_movement>("/PoseController/delta_back_movement");
+
 
 		//Set callback functions
 		as_.registerGoalCallback(boost::bind(&posture_controller::goalCB, this));
 		as_.registerPreemptCallback(boost::bind(&posture_controller::preemptCB, this));
 
-		//back_lbz_state_sub_ = nh_.subscribe("/back_lbz_position_controller/state",100,&posture_controller::back_lbz_state_CB,this);
 
-		//
-		back_mby_pub = nh2_.advertise<std_msgs::Float64>("/back_mby_position_controller/command",1000,true);
-		back_ubx_pub = nh3_.advertise<std_msgs::Float64>("/back_ubx_position_controller/command",1000,true);
-		turn_angle = nh4_.advertise<std_msgs::Float64>("/back_lbz_position_controller/command",true);
 		ROS_INFO("starting");
 		as_.start();
 		ROS_INFO("started");
@@ -115,109 +81,6 @@ public:
 	}
 
 	void goalCB(){
-		int segments = 1000;
-		double total_time = 3;
-
-
-		osrf_msgs::JointCommands jointcommands;
-		jointcommands.name.push_back("atlas::back_lbz");
-		jointcommands.name.push_back("atlas::back_mby");
-		jointcommands.name.push_back("atlas::back_ubx");
-		jointcommands.name.push_back("atlas::neck_ay");
-		jointcommands.name.push_back("atlas::l_leg_uhz");
-		jointcommands.name.push_back("atlas::l_leg_mhx");
-		jointcommands.name.push_back("atlas::l_leg_lhy");
-		jointcommands.name.push_back("atlas::l_leg_kny");
-		jointcommands.name.push_back("atlas::l_leg_uay");
-		jointcommands.name.push_back("atlas::l_leg_lax");
-		jointcommands.name.push_back("atlas::r_leg_uhz");
-		jointcommands.name.push_back("atlas::r_leg_mhx");
-		jointcommands.name.push_back("atlas::r_leg_lhy");
-		jointcommands.name.push_back("atlas::r_leg_kny");
-		jointcommands.name.push_back("atlas::r_leg_uay");
-		jointcommands.name.push_back("atlas::r_leg_lax");
-		jointcommands.name.push_back("atlas::l_arm_usy");
-		jointcommands.name.push_back("atlas::l_arm_shx");
-		jointcommands.name.push_back("atlas::l_arm_ely");
-		jointcommands.name.push_back("atlas::l_arm_elx");
-		jointcommands.name.push_back("atlas::l_arm_uwy");
-		jointcommands.name.push_back("atlas::l_arm_mwx");
-		jointcommands.name.push_back("atlas::r_arm_usy");
-		jointcommands.name.push_back("atlas::r_arm_shx");
-		jointcommands.name.push_back("atlas::r_arm_ely");
-		jointcommands.name.push_back("atlas::r_arm_elx");
-		jointcommands.name.push_back("atlas::r_arm_uwy");
-		jointcommands.name.push_back("atlas::r_arm_mwx");
-
-		/*jointcommands.name.push_back("atlas::l_leg_uhz");
-		jointcommands.name.push_back("atlas::l_leg_mhx");
-		jointcommands.name.push_back("atlas::l_leg_lhy");
-		jointcommands.name.push_back("atlas::l_leg_kny");
-		jointcommands.name.push_back("atlas::l_leg_uay");
-		jointcommands.name.push_back("atlas::l_leg_lax");
-
-		jointcommands.name.push_back("atlas::r_leg_uhz");
-		jointcommands.name.push_back("atlas::r_leg_mhx");
-		jointcommands.name.push_back("atlas::r_leg_lhy");
-		jointcommands.name.push_back("atlas::r_leg_kny");
-		jointcommands.name.push_back("atlas::r_leg_uay");
-		jointcommands.name.push_back("atlas::r_leg_lax");
-
-		jointcommands.name.push_back("atlas::l_arm_usy");
-		jointcommands.name.push_back("atlas::l_arm_shx");
-		jointcommands.name.push_back("atlas::l_arm_ely");
-		jointcommands.name.push_back("atlas::l_arm_elx");
-		jointcommands.name.push_back("atlas::l_arm_uwy");
-		jointcommands.name.push_back("atlas::l_arm_mwx");
-
-		jointcommands.name.push_back("atlas::r_arm_usy");
-		jointcommands.name.push_back("atlas::r_arm_shx");
-		jointcommands.name.push_back("atlas::r_arm_ely");
-		jointcommands.name.push_back("atlas::r_arm_elx");
-		jointcommands.name.push_back("atlas::r_arm_uwy");
-		jointcommands.name.push_back("atlas::r_arm_mwx");
-
-		jointcommands.name.push_back("atlas::neck_ay"  );
-		jointcommands.name.push_back("atlas::back_lbz" );
-		jointcommands.name.push_back("atlas::back_mby" );
-		jointcommands.name.push_back("atlas::back_ubx" );*/
-		unsigned int n = jointcommands.name.size();
-		jointcommands.position.resize(n);
-		jointcommands.velocity.resize(n);
-		jointcommands.effort.resize(n);
-		jointcommands.kp_position.resize(n);
-		jointcommands.ki_position.resize(n);
-		jointcommands.kd_position.resize(n);
-		jointcommands.kp_velocity.resize(n);
-		jointcommands.i_effort_min.resize(n);
-		jointcommands.i_effort_max.resize(n);
-		for (unsigned int i = 0; i < n; i++)
-		{
-			std::vector<std::string> pieces;
-			boost::split(pieces, jointcommands.name[i], boost::is_any_of(":"));
-
-			rosnode->getParam("atlas_controller/gains/" + pieces[2] + "/p",
-					jointcommands.kp_position[i]);
-
-			rosnode->getParam("atlas_controller/gains/" + pieces[2] + "/i",
-					jointcommands.ki_position[i]);
-
-			rosnode->getParam("atlas_controller/gains/" + pieces[2] + "/d",
-					jointcommands.kd_position[i]);
-
-			rosnode->getParam("atlas_controller/gains/" + pieces[2] + "/i_clamp",
-					jointcommands.i_effort_min[i]);
-			jointcommands.i_effort_min[i] = -jointcommands.i_effort_min[i];
-
-			rosnode->getParam("atlas_controller/gains/" + pieces[2] + "/i_clamp",
-					jointcommands.i_effort_max[i]);
-
-			jointcommands.velocity[i]     = 0;
-			jointcommands.effort[i]       = 0;
-			jointcommands.kp_velocity[i]  = 0;
-		}
-
-		//control_msgs::FollowJointTrajectoryGoal goal;
 		//Init variables
 		/*back_mby_stab_pid.reset();
 		 back_ubx_stab_pid.reset();*/
@@ -247,6 +110,25 @@ public:
 		 ROS_INFO("Current time11: %f", ros::Time::now().toSec());*/
 		ROS_INFO("Got goal: direction %f", direction);
 
+		PoseController::back_movement back;
+		double total_time = 1.0;
+		int segments = 50;
+		double velocity = (positions[joints["back_lbz"]] - direction)/total_time;
+		for(int i = 0; i < segments; i++){
+			ros::spinOnce();
+			back.request.back_lbz = velocity/segments;
+			ROS_INFO("velocity #%d: %f", i+1, back.request.back_lbz);
+			ROS_INFO("#%d joint: %f", i+1, positions[joints["back_lbz"]]);
+			ROS_INFO("#%d direction: %f", i+1, direction);
+			if(!backz_cli.call(back)){
+		    	 ROS_ERROR("%s: Preempted", action_name_.c_str());
+		    	 // set the action state to preempted
+		    	 as_.setPreempted();
+		    	 break;
+			}
+			ros::Duration(total_time/segments).sleep();
+		}
+
 	    /*goal.trajectory.joint_names.push_back("back_lbz" );
 		ROS_INFO("Pushed back");
 	    goal.trajectory.points.resize(10);
@@ -265,7 +147,7 @@ public:
 		d.data = direction;
 		turn_angle.publish(d);
 */
-		double start_back_lbz = positions[joints["back_lbz"]];
+		/*double start_back_lbz = positions[joints["back_lbz"]];
 		double part = (direction-positions[joints["back_lbz"]]) / segments;
 		for(int i=0; i<segments; i++){
 			jointcommands.position[joints["l_leg_uhz"]] = positions[joints["l_leg_uhz"]];
@@ -301,7 +183,7 @@ public:
 			//current_dt += traj_vec_srv.response.dt[ind];
 			pub_joint_commands_.publish(jointcommands);
 			ros::Duration((total_time*1.0)/segments).sleep();
-		}
+		}*/
 
 
 
