@@ -2,6 +2,7 @@
 #include <C0_RobilTask/RobilTaskAction.h>
 #include <C0_RobilTask/RobilTask.h>
 #include <move_hand/matrix.h>
+#include <move_hand/move_hand.h>
 #include <actionlib/server/simple_action_server.h>
 #include <actionlib/client/simple_action_client.h>
 #include <math.h>
@@ -17,7 +18,7 @@
 class PickUp{
 private:
 	ros::NodeHandle nh_;
-	ros::ServiceClient pelvis_move_hand_matrix_cli_,perception_transform_cli_,pelvis_move_hand_cli_;
+	ros::ServiceClient pelvis_move_hand_matrix_cli_,perception_transform_cli_,pelvis_move_hand_cli_,move_hand_cli_;
 
 	actionlib::SimpleActionServer<C0_RobilTask::RobilTaskAction> as_; // NodeHandle instance must be created before this line.
 	C0_RobilTask::RobilTaskFeedback feedback_;
@@ -37,6 +38,7 @@ public:
 	  rosnode = new ros::NodeHandle();
 	  pelvis_move_hand_matrix_cli_ = nh_.serviceClient<move_hand::matrix>("C66_matrix");
 	  pelvis_move_hand_cli_ = nh_.serviceClient<move_hand::pelvis_move_hand>("pelvis_move_hand");
+	  move_hand_cli_ = nh_.serviceClient<move_hand::move_hand>("move_hand");
 	  perception_transform_cli_ = nh_.serviceClient<C23_dFind::perceptionTransform>("perceptionTransform");
 /*		while(!move_hand_cli_.waitForExistence(ros::Duration(0.1))){
 			ROS_INFO("Waiting for the move_hand server");
@@ -97,11 +99,17 @@ public:
 		else {
 		  ROS_INFO("ERROR in requesting transformation from perception");
 		  as_.setAborted();
+		return;
 		}
                 ROS_INFO("closing right hand");
                 grasp_msg.strength = 1000;
                 pub_hand_grasp_.publish(grasp_msg);
                 ros::Duration(1.2).sleep();
+
+                move_hand::move_hand move_hand_msg;
+                move_hand_msg.request.PositionDestination_right.z = 0.3;
+                ROS_INFO("lifting");
+                if(move_hand_cli_.call(move_hand_msg)){
                 move_hand::pelvis_move_hand pel_move_msg;
                 pel_move_msg.request.PositionDestination_right.x = 0.684;
                 pel_move_msg.request.PositionDestination_right.y = 0.095;
@@ -110,11 +118,17 @@ public:
                 pel_move_msg.request.AngleDestination_right.y = -0.066;
                 pel_move_msg.request.AngleDestination_right.z = -0.066;
                 ROS_INFO("moving to target");
-                pelvis_move_hand_cli_.call(pel_move_msg);
+                position1();
                 ROS_INFO("dropping object");
                 grasp_msg.strength = 0;
                 pub_hand_grasp_.publish(grasp_msg);
                 ros::Duration(1.2).sleep();
+                }
+                else{
+                	ROS_INFO("Error in move_hand_service");
+	                  as_.setAborted();
+	                  return;
+                }
                 C0_RobilTask::RobilTaskResult _res;
 		_res.success = C0_RobilTask::RobilTask::SUCCESS;
 		as_.setSucceeded(_res);
@@ -269,6 +283,130 @@ for(unsigned int i = 0; i < 101; i++){
                           ros::Duration(0.02).sleep();
 }
 	}
+
+	void position1(){
+			ros::spinOnce();
+	          osrf_msgs::JointCommands jointcommands;
+	          atlas_msgs::AtlasCommand atlas_command;
+	          jointcommands.name.push_back("atlas::back_lbz");
+	                          jointcommands.name.push_back("atlas::back_mby");
+	                          jointcommands.name.push_back("atlas::back_ubx");
+	                          jointcommands.name.push_back("atlas::neck_ay");
+	                          jointcommands.name.push_back("atlas::l_leg_uhz");
+	                          jointcommands.name.push_back("atlas::l_leg_mhx");
+	                          jointcommands.name.push_back("atlas::l_leg_lhy");
+	                          jointcommands.name.push_back("atlas::l_leg_kny");
+	                          jointcommands.name.push_back("atlas::l_leg_uay");
+	                          jointcommands.name.push_back("atlas::l_leg_lax");
+	                          jointcommands.name.push_back("atlas::r_leg_uhz");
+	                          jointcommands.name.push_back("atlas::r_leg_mhx");
+	                          jointcommands.name.push_back("atlas::r_leg_lhy");
+	                          jointcommands.name.push_back("atlas::r_leg_kny");
+	                          jointcommands.name.push_back("atlas::r_leg_uay");
+	                          jointcommands.name.push_back("atlas::r_leg_lax");
+	                          jointcommands.name.push_back("atlas::l_arm_usy");
+	                          jointcommands.name.push_back("atlas::l_arm_shx");
+	                          jointcommands.name.push_back("atlas::l_arm_ely");
+	                          jointcommands.name.push_back("atlas::l_arm_elx");
+	                          jointcommands.name.push_back("atlas::l_arm_uwy");
+	                          jointcommands.name.push_back("atlas::l_arm_mwx");
+	                          jointcommands.name.push_back("atlas::r_arm_usy");
+	                          jointcommands.name.push_back("atlas::r_arm_shx");
+	                          jointcommands.name.push_back("atlas::r_arm_ely");
+	                          jointcommands.name.push_back("atlas::r_arm_elx");
+	                          jointcommands.name.push_back("atlas::r_arm_uwy");
+	                          jointcommands.name.push_back("atlas::r_arm_mwx");
+
+
+	                          unsigned int n = jointcommands.name.size();
+	                          jointcommands.position.resize(n);
+	                          jointcommands.velocity.resize(n);
+	                          jointcommands.effort.resize(n);
+	                          jointcommands.kp_position.resize(n);
+	                          jointcommands.ki_position.resize(n);
+	                          jointcommands.kd_position.resize(n);
+	                          jointcommands.kp_velocity.resize(n);
+	                          jointcommands.i_effort_min.resize(n);
+	                          jointcommands.i_effort_max.resize(n);
+
+	                          atlas_command.position.resize(n);
+	                          atlas_command.velocity.resize(n);
+	                          atlas_command.effort.resize(n);
+	                          atlas_command.kp_position.resize(n);
+	                          atlas_command.ki_position.resize(n);
+	                          atlas_command.kd_position.resize(n);
+	                          atlas_command.kp_velocity.resize(n);
+	                          atlas_command.i_effort_min.resize(n);
+	                          atlas_command.i_effort_max.resize(n);
+	                          atlas_command.k_effort.resize(n);
+	                          for (unsigned int i = 0; i < n; i++)
+	                          {
+	                                  std::vector<std::string> pieces;
+	                                  boost::split(pieces, jointcommands.name[i], boost::is_any_of(":"));
+
+	                                  rosnode->getParam("atlas_controller/gains/" + pieces[2] + "/p",
+	                                                    jointcommands.kp_position[i]);
+	                                  atlas_command.kp_position[i] = jointcommands.kp_position[i];
+	                                  rosnode->getParam("atlas_controller/gains/" + pieces[2] + "/i",
+	                                                    jointcommands.ki_position[i]);
+	                                  atlas_command.ki_position[i] = jointcommands.ki_position[i];
+	                                  rosnode->getParam("atlas_controller/gains/" + pieces[2] + "/d",
+	                                                    jointcommands.kd_position[i]);
+	                                  atlas_command.kd_position[i] = jointcommands.kd_position[i];
+	                                  rosnode->getParam("atlas_controller/gains/" + pieces[2] + "/i_clamp",
+	                                                    jointcommands.i_effort_min[i]);
+	                                  atlas_command.i_effort_min[i] = -jointcommands.i_effort_min[i];
+
+	                                  rosnode->getParam("atlas_controller/gains/" + pieces[2] + "/i_clamp",
+	                                                    jointcommands.i_effort_max[i]);
+	                                  atlas_command.i_effort_max[i] = jointcommands.i_effort_max[i];
+
+	                                  atlas_command.kp_position[i] = jointcommands.kp_position[i];
+	                                  atlas_command.velocity[i]     = 0;
+	                                  atlas_command.effort[i]       = 0;
+	                                  atlas_command.kp_velocity[i]  = 0;
+	                                  atlas_command.k_effort[i] = 255;
+	                          }
+	for(unsigned int i = 0; i < 101; i++){
+	                          atlas_command.position[joints["l_arm_usy"]] = positions[joints["l_arm_usy"]];
+	                          atlas_command.position[joints["l_arm_shx"]] = positions[joints["l_arm_shx"]];
+	                          atlas_command.position[joints["l_arm_ely"]] = positions[joints["l_arm_ely"]];
+	                          atlas_command.position[joints["l_arm_elx"]] = positions[joints["l_arm_elx"]];
+	                          atlas_command.position[joints["l_arm_uwy"]] = positions[joints["l_arm_uwy"]];
+	                          atlas_command.position[joints["l_arm_mwx"]] = positions[joints["l_arm_mwx"]];
+
+	                          atlas_command.position[joints["r_arm_usy"]] = positions[joints["r_arm_usy"]];
+	                          atlas_command.position[joints["r_arm_shx"]] = positions[joints["r_arm_shx"]];
+	                          atlas_command.position[joints["r_arm_ely"]] = positions[joints["r_arm_ely"]];
+	                          atlas_command.position[joints["r_arm_elx"]] = positions[joints["r_arm_elx"]];
+	                          atlas_command.position[joints["r_arm_uwy"]] = positions[joints["r_arm_uwy"]];
+	                          atlas_command.position[joints["r_arm_mwx"]] = positions[joints["r_arm_mwx"]];
+
+
+
+	                          atlas_command.position[joints["l_leg_uhz"]] = positions[joints["l_leg_uhz"]];
+	                          atlas_command.position[joints["l_leg_mhx"]] = positions[joints["l_leg_mhx"]];
+	                          atlas_command.position[joints["l_leg_lhy"]] = positions[joints["l_leg_lhy"]];
+	                          atlas_command.position[joints["l_leg_kny"]] = positions[joints["l_leg_kny"]];
+	                          atlas_command.position[joints["l_leg_uay"]] = positions[joints["l_leg_uay"]];
+	                          atlas_command.position[joints["l_leg_lax"]] = positions[joints["l_leg_lax"]];
+
+	                          atlas_command.position[joints["r_leg_uhz"]] = positions[joints["r_leg_uhz"]];
+	                          atlas_command.position[joints["r_leg_mhx"]] = positions[joints["r_leg_mhx"]];
+	                          atlas_command.position[joints["r_leg_lhy"]] = positions[joints["r_leg_lhy"]];
+	                          atlas_command.position[joints["r_leg_kny"]] = positions[joints["r_leg_kny"]];
+	                          atlas_command.position[joints["r_leg_uay"]] = positions[joints["r_leg_uay"]];
+	                          atlas_command.position[joints["r_leg_lax"]] = positions[joints["r_leg_lax"]];
+
+	                          atlas_command.position[joints["neck_ay"]] = positions[joints["neck_ay"]];
+	                          atlas_command.position[joints["back_lbz"]] = 0.5*(i/100.0);
+	                          atlas_command.position[joints["back_mby"]] = positions[joints["back_mby"]];
+	                          atlas_command.position[joints["back_ubx"]] = positions[joints["back_ubx"]];
+
+	                          pub_joint_commands_.publish(atlas_command);
+	                          ros::Duration(0.02).sleep();
+	}
+		}
 };
 
 int main(int argc, char **argv) {
