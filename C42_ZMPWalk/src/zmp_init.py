@@ -56,7 +56,7 @@ def init_pose():
     # set for: step width - 17.8 , bend knees - 4
 
     back_lbz = 0.0
-    back_mby = 0.03 #0.03#0.08# 0.06
+    back_mby = 0.06 #0.03#0.08# 0.06
     back_ubx = 0
     neck_ay = 0
     l_leg_uhz = 0 

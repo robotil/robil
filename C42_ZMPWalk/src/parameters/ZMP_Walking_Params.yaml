@@ -45,14 +45,14 @@ zmp_walking:
     15cm:
 
         step_length: 0.15
-        step_time: 1.3
-        bend_knees: 0.05
-        step_height: 0.047
-        PSC:  8000000
+        step_time: 1.2
+        bend_knees: 0.045
+        step_height: 0.04
+        PSC:  0.6100000
         JSC:
-            uay: 56000
-            kny: 46000
-            lhy: 90000 
+            uay: 999999866000
+            kny: 99999966000
+            lhy: 999999120000 
         lax_eff_devider: 25.0
         l_mhx_eff_devider: 45.0
         r_mhx_eff_devider: 25.0
