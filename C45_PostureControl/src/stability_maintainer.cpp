@@ -65,7 +65,7 @@ public:
 		/*back_mby_stab_pid.initPid(p,i,d,M_PI,-M_PI);
 		back_ubx_stab_pid.initPid(p,i,d,M_PI,-M_PI);*/
 
-		rosnode = new ros::NodeHandle();
+		//rosnode = new ros::NodeHandle();
 		positions.resize(28);
 		joint_states_sub_ = nh_.subscribe("/atlas/joint_states",100,&stability_maintainer::joint_states_CB,this);
 		force_sub_ = nh_.subscribe(/*"/atlas/force_torque_sensors"*/"/filtered_contacts",100,&stability_maintainer::force_CB,this);
