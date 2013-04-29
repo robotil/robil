@@ -10,3 +10,6 @@ float64 r_arm_ely
 float64 r_arm_elx
 float64 r_arm_uwy
 float64 r_arm_mwx
+---
+int32 success
+
