@@ -66,6 +66,11 @@ public:
 	bool inRange(long x, long y)const;
 	void approximate(const long cx, const long cy, long& x, long& y)const;
 
+	inline void clear(){
+		_w=_h=0;
+		_data = vector<char>();
+	}
+
 private:
 	double approximate(const long cx, const long cy, long& x, long& y, char ctype)const;
 

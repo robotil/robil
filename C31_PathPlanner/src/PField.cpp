@@ -239,13 +239,33 @@ namespace {
 				nearest = i;
 			}
 		}
-		if(nearest == path.size()-1) return nearest;
-		Vec2d A = pos.loc, B = path[nearest], C = path[nearest+1];
+		if(nearest == path.size()-1 && nearest == 0){
+			return nearest;
+		}
+
+		if(nearest == path.size()-1){
+			//cout<<"... nearest == path.size()-1"<<endl;
+			Vec2d A = pos.loc, C = path[nearest], B = path[nearest-1];
+			Vec2d b = B-C, c = C-A, a = B-A;
+			//http://en.wikipedia.org/wiki/Law_of_cosines
+			double G = acos( (B-C).dot(A-C)/(b.len()*c.len()) );
+			//cout<<"... G="<<Vec2d::r2d(G)<<"deg  A="<<A<<" B="<<B<<" C="<<C<<endl;
+			if( G>PI*0.5 ){
+				//cout<<"... ... G="<<Vec2d::r2d(G)<<"deg < PI/2 => nearest = "<<(nearest+1)<<endl;
+				nearest++;
+			}
+
+			return nearest;
+		}
+		Vec2d A = pos.loc, C = path[nearest], B = path[nearest+1];
 		Vec2d b = B-C, c = C-A, a = B-A;
 		//http://en.wikipedia.org/wiki/Law_of_cosines
 		double G = acos( (B-C).dot(A-C)/(b.len()*c.len()) );
-		if( G<PI ) nearest++;
-		return nearest;
+		//cout<<"... G="<<Vec2d::r2d(G)<<"deg  A="<<A<<" B="<<B<<" C="<<C<<endl;
+		if( G<PI*0.5 ){
+			//cout<<"... ... G="<<Vec2d::r2d(G)<<"deg < PI/2 => nearest = "<<(nearest+1)<<endl;
+			nearest++;
+		}
 	}
 }
 
