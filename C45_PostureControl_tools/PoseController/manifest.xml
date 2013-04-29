@@ -16,6 +16,7 @@
   <depend package="std_msgs"/>
   <depend package="actionlib_msgs"/>
   <depend package="osrf_msgs"/>
+  <depend package="C43_LocalBodyCOM"/>
   <depend package="hrl_kinematics"/>
   <depend package="control_toolbox"/>
   <depend package="pr2_controllers_msgs"/>

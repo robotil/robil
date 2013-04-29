@@ -458,6 +458,9 @@ public:
 
 	bool make_step(move_pelvis::move_pelvis::Request &req, move_pelvis::move_pelvis::Response &res){
 		if(!req.LinkToMove.compare("l_leg")){
+			std_srvs::Empty e;
+			reset_posecontroller_cli.call(e);
+
 			tf::StampedTransform l_foot_transform;
 			try {
 				listener.waitForTransform("/l_foot","/pelvis",ros::Time(0),ros::Duration(0.2));
@@ -532,14 +535,15 @@ public:
 				return false;
 			}
 
-			std_srvs::Empty e;
-			reset_posecontroller_cli.call(e);
+
 
 			return true;
 		}else{
 			if(!req.LinkToMove.compare("r_leg")){
 
 
+				std_srvs::Empty e;
+				reset_posecontroller_cli.call(e);
 
 				tf::StampedTransform r_foot_transform;
 				try {
@@ -615,8 +619,6 @@ public:
 					return false;
 				}
 
-				std_srvs::Empty e;
-				reset_posecontroller_cli.call(e);
 
 				return true;
 			}else{

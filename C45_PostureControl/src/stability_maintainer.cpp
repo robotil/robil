@@ -27,7 +27,9 @@
 #include <geometry_msgs/Point.h>
 #include <geometry_msgs/WrenchStamped.h>
 #include <atlas_msgs/ForceTorqueSensors.h>
-#include <hrl_kinematics/TestStability.h>
+//#include <hrl_kinematics/TestStability.h>
+#include <C43_LocalBodyCOM/Kinematics.h>
+#include <C43_LocalBodyCOM/CoM_Array_msg.h>
 #include <PoseController/back_movement.h>
 #include <tf/transform_listener.h>
 #include <pelvis_leg_target/static_leg.h>
@@ -57,7 +59,7 @@ private:
 	//geometry_msgs::Point com;
 	ros::ServiceClient posecontroller_cli, static_leg_cli;
 	tf::TransformListener listener;
-	hrl_kinematics::CoM_Array_msg com;
+	C43_LocalBodyCOM::CoM_Array_msg com;
 
 public:
 	stability_maintainer(std::string name)
@@ -71,7 +73,7 @@ public:
 		force_sub_ = nh_.subscribe(/*"/atlas/force_torque_sensors"*/"/filtered_contacts",100,&stability_maintainer::force_CB,this);
 		imu_sub_ = nh_.subscribe("/atlas/imu",100, &stability_maintainer::imu_CB,this);
 		//pub_joint_commands_ = rosnode->advertise<osrf_msgs::JointCommands>("/atlas/joint_commands", 1, true);
-		pcom_sub_ = nh_.subscribe("/test_stability/CoM", 1, &stability_maintainer::get_com_from_hrl_kinematics, this);
+		pcom_sub_ = nh_.subscribe("/c43_local_body/com", 1, &stability_maintainer::get_com_from_hrl_kinematics, this);
 
 		posecontroller_cli = nh2_.serviceClient<PoseController::back_movement>("/PoseController/back_movement");
 
@@ -118,9 +120,7 @@ public:
 		forcesensors.r_foot = contact->r_foot;
 	}
 
-	void get_com_from_hrl_kinematics(const hrl_kinematics::CoM_Array_msgConstPtr& comArray){
-		//ROS_INFO("# of points: %d", (int) comMarker->points.size());
-
+	void get_com_from_hrl_kinematics(const C43_LocalBodyCOM::CoM_Array_msgConstPtr& comArray){
 		com = *comArray;
 		//this->_CoM.x = com.x();
 		//this->_CoM.y = com.y();
@@ -162,72 +162,6 @@ public:
 			as_.setAborted(_res);
 			ROS_INFO("End time: %f", ros::Time::now().toSec());
 			return;
-		}
-
-		osrf_msgs::JointCommands jointcommands;
-		jointcommands.name.push_back("atlas::back_lbz");
-		jointcommands.name.push_back("atlas::back_mby");
-		jointcommands.name.push_back("atlas::back_ubx");
-		jointcommands.name.push_back("atlas::neck_ay");
-		jointcommands.name.push_back("atlas::l_leg_uhz");
-		jointcommands.name.push_back("atlas::l_leg_mhx");
-		jointcommands.name.push_back("atlas::l_leg_lhy");
-		jointcommands.name.push_back("atlas::l_leg_kny");
-		jointcommands.name.push_back("atlas::l_leg_uay");
-		jointcommands.name.push_back("atlas::l_leg_lax");
-		jointcommands.name.push_back("atlas::r_leg_uhz");
-		jointcommands.name.push_back("atlas::r_leg_mhx");
-		jointcommands.name.push_back("atlas::r_leg_lhy");
-		jointcommands.name.push_back("atlas::r_leg_kny");
-		jointcommands.name.push_back("atlas::r_leg_uay");
-		jointcommands.name.push_back("atlas::r_leg_lax");
-		jointcommands.name.push_back("atlas::l_arm_usy");
-		jointcommands.name.push_back("atlas::l_arm_shx");
-		jointcommands.name.push_back("atlas::l_arm_ely");
-		jointcommands.name.push_back("atlas::l_arm_elx");
-		jointcommands.name.push_back("atlas::l_arm_uwy");
-		jointcommands.name.push_back("atlas::l_arm_mwx");
-		jointcommands.name.push_back("atlas::r_arm_usy");
-		jointcommands.name.push_back("atlas::r_arm_shx");
-		jointcommands.name.push_back("atlas::r_arm_ely");
-		jointcommands.name.push_back("atlas::r_arm_elx");
-		jointcommands.name.push_back("atlas::r_arm_uwy");
-		jointcommands.name.push_back("atlas::r_arm_mwx");
-
-		unsigned int n = jointcommands.name.size();
-		jointcommands.position.resize(n);
-		jointcommands.velocity.resize(n);
-		jointcommands.effort.resize(n);
-		jointcommands.kp_position.resize(n);
-		jointcommands.ki_position.resize(n);
-		jointcommands.kd_position.resize(n);
-		jointcommands.kp_velocity.resize(n);
-		jointcommands.i_effort_min.resize(n);
-		jointcommands.i_effort_max.resize(n);
-		for (unsigned int i = 0; i < n; i++)
-		{
-			std::vector<std::string> pieces;
-			boost::split(pieces, jointcommands.name[i], boost::is_any_of(":"));
-
-			rosnode->getParam("atlas_controller/gains/" + pieces[2] + "/p",
-					jointcommands.kp_position[i]);
-
-			rosnode->getParam("atlas_controller/gains/" + pieces[2] + "/i",
-					jointcommands.ki_position[i]);
-
-			rosnode->getParam("atlas_controller/gains/" + pieces[2] + "/d",
-					jointcommands.kd_position[i]);
-
-			rosnode->getParam("atlas_controller/gains/" + pieces[2] + "/i_clamp",
-					jointcommands.i_effort_min[i]);
-			jointcommands.i_effort_min[i] = -jointcommands.i_effort_min[i];
-
-			rosnode->getParam("atlas_controller/gains/" + pieces[2] + "/i_clamp",
-					jointcommands.i_effort_max[i]);
-
-			jointcommands.velocity[i]     = 0;
-			jointcommands.effort[i]       = 0;
-			jointcommands.kp_velocity[i]  = 0;
 		}
 
 		clock = ros::Time::now();
@@ -274,7 +208,7 @@ public:
 			jointcommands.position[joints["r_arm_elx"]] = positions[joints["r_arm_elx"]];
 			jointcommands.position[joints["r_arm_uwy"]] = positions[joints["r_arm_uwy"]];
 			jointcommands.position[joints["r_arm_mwx"]] = positions[joints["r_arm_mwx"]];*/
-			jointcommands.position[joints["neck_ay"]] = 0;//positions[joints["neck_ay"]];
+			//jointcommands.position[joints["neck_ay"]] = 0;//positions[joints["neck_ay"]];
 
 			double t = ros::Time::now().sec;
 			/*jointcommands.position[joints["back_lbz"]] = 0.01*sin(t);//positions[joints["back_lbz"]];

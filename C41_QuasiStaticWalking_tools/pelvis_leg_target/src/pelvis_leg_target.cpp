@@ -2,40 +2,44 @@
 #include <pelvis_leg_target/pelvis_leg_target.h>
 #include <pelvis_leg_target/static_leg.h>
 #include <tf/transform_listener.h>
+
+#include <C43_LocalBodyCOM/Kinematics.h>
+#include <C43_LocalBodyCOM/CoM_Array_msg.h>
 #include <move_pelvis/move_pelvis.h>
-#include <hrl_kinematics/TestStability.h>
 #include <sensor_msgs/Imu.h>
 
 class move_to_leg{
 private:
 	ros::NodeHandle nh_, nh2_;
 	tf::TransformListener listener;
-	ros::ServiceClient move_pelvis_client;
-	ros::ServiceServer srv_server,static_leg_server;
+	ros::ServiceClient move_pelvis_client, make_step_cli_;
+	ros::ServiceServer srv_server, full_step_server;
 	ros::Subscriber pcom_sub_;
 	std::string static_leg_variable;
-	geometry_msgs::Point com;
+	C43_LocalBodyCOM::CoM_Array_msg com;
 
 	ros::Subscriber imu_sub_;
 	geometry_msgs::Point imu, imu_v;
 
 public:
-	move_to_leg():static_leg_variable("pelvis"){
+	move_to_leg(){
 		move_pelvis_client = nh_.serviceClient<move_pelvis::move_pelvis>("move_pelvis");
-		pcom_sub_ = nh_.subscribe("projected_com", 1, &move_to_leg::get_com_from_hrl_kinematics, this);
+		pcom_sub_ = nh_.subscribe("/c43_local_body/com", 1, &move_to_leg::get_com_from_hrl_kinematics, this);
 		imu_sub_ = nh_.subscribe("/atlas/imu",100, &move_to_leg::imu_CB,this);
 		srv_server = nh_.advertiseService("pelvis_leg_target",&move_to_leg::srv_CB,this);
-		static_leg_server = nh2_.advertiseService("current_static_leg",&move_to_leg::static_leg,this);
+
+		make_step_cli_ = nh_.serviceClient<move_pelvis::move_pelvis>("make_step");
+		full_step_server = nh_.advertiseService("/full_step",&move_to_leg::full_step_CB,this);
 	}
 
 
 	~move_to_leg(){
 	}
 
-	void get_com_from_hrl_kinematics(const visualization_msgs::MarkerConstPtr& comMarker){
+	void get_com_from_hrl_kinematics(const C43_LocalBodyCOM::CoM_Array_msgConstPtr& comArray){
 		//ROS_INFO("# of points: %d", (int) comMarker->points.size());
 
-		com = comMarker->pose.position;
+		com = *comArray;
 		//this->_CoM.x = com.x();
 		//this->_CoM.y = com.y();
 	}
@@ -56,7 +60,7 @@ public:
 		move_pelvis_srv.request.LinkToMove = "pelvis";
 		move_pelvis_srv.request.AngleDestination.x=-imu.x;//QuatToRoll(transform.getRotation());
 		move_pelvis_srv.request.AngleDestination.y=-imu.y;//QuatToPitch(transform.getRotation());
-		move_pelvis_srv.request.AngleDestination.z=QuatToYaw(transform.getRotation());
+		move_pelvis_srv.request.AngleDestination.z=0;//QuatToYaw(transform.getRotation());
 		ROS_INFO("Sending pelvis to relative x,y,z: %f,%f,%f",move_pelvis_srv.request.PositionDestination.x,move_pelvis_srv.request.PositionDestination.y,move_pelvis_srv.request.PositionDestination.z);
 		move_pelvis_client.call(move_pelvis_srv);
 		static_leg_variable = req.leg;
@@ -64,9 +68,95 @@ public:
 		return true;
 	}
 
-	bool static_leg(pelvis_leg_target::static_leg::Request &req,pelvis_leg_target::static_leg::Response &res){
-		res.leg = this->static_leg_variable;
+	bool full_step_CB(move_pelvis::move_pelvis::Request &req,move_pelvis::move_pelvis::Response &res){
+
+		pelvis_leg_target::pelvis_leg_target leg_target;
+		move_pelvis::move_pelvis move_pelvis;
+
+		if(!req.LinkToMove.compare("r_leg")){
+			//Move over to left leg
+			leg_target.request.leg = "l_foot";
+			ROS_INFO("Moving to left leg");
+			if(!this->srv_CB(leg_target.request, leg_target.response)){
+				ROS_ERROR("Could not move to left leg");
+				return false;
+			}
+
+			tf::StampedTransform p2r;
+			try {
+				listener.waitForTransform("/pelvis","/r_foot",ros::Time(0),ros::Duration(0.2));
+				listener.lookupTransform("/pelvis","/r_foot",ros::Time(0),p2r);
+			} catch (tf::TransformException &ex) {
+				ROS_ERROR("%s",ex.what());
+			}
+
+			move_pelvis.request.PositionDestination.x = req.PositionDestination.x;
+			move_pelvis.request.PositionDestination.y = req.PositionDestination.y;
+			move_pelvis.request.PositionDestination.z = req.PositionDestination.z;
+			move_pelvis.request.AngleDestination.x = req.AngleDestination.x;
+			move_pelvis.request.AngleDestination.y = req.AngleDestination.y;
+			move_pelvis.request.AngleDestination.z = req.AngleDestination.z;
+			move_pelvis.request.LinkToMove = "r_leg";
+			ROS_INFO("Moving left right forward");
+			if(!make_step_cli_.call(move_pelvis)){
+				ROS_ERROR("Could not move right leg forward");
+				return false;
+			}
+			//Move over to right leg
+			leg_target.request.leg = "r_foot";
+			ROS_INFO("Moving to right leg");
+			if(!this->srv_CB(leg_target.request, leg_target.response)){
+				ROS_ERROR("Could not move to right leg");
+				return false;
+			}
+		}else{
+			if(!req.LinkToMove.compare("l_leg")){
+
+				//Move over to right leg
+				leg_target.request.leg = "r_foot";
+				ROS_INFO("Moving to right leg");
+				if(!this->srv_CB(leg_target.request, leg_target.response)){
+					ROS_ERROR("Could not move to right leg");
+					return false;
+				}
+
+				tf::StampedTransform p2r;
+				try {
+					listener.waitForTransform("/pelvis","/l_foot",ros::Time(0),ros::Duration(0.2));
+					listener.lookupTransform("/pelvis","/l_foot",ros::Time(0),p2r);
+				} catch (tf::TransformException &ex) {
+					ROS_ERROR("%s",ex.what());
+				}
+
+				move_pelvis.request.PositionDestination.x = req.PositionDestination.x;
+				move_pelvis.request.PositionDestination.y = req.PositionDestination.y;
+				move_pelvis.request.PositionDestination.z = req.PositionDestination.z;
+				move_pelvis.request.AngleDestination.x = req.AngleDestination.x;
+				move_pelvis.request.AngleDestination.y = req.AngleDestination.y;
+				move_pelvis.request.AngleDestination.z = req.AngleDestination.z;
+				move_pelvis.request.LinkToMove = "l_leg";
+				ROS_INFO("Moving left left forward");
+				if(!make_step_cli_.call(move_pelvis)){
+					ROS_ERROR("Could not move left leg forward");
+					return false;
+				}
+				//Move over to left leg
+				leg_target.request.leg = "l_foot";
+				ROS_INFO("Moving to left leg");
+				if(!this->srv_CB(leg_target.request, leg_target.response)){
+					ROS_ERROR("Could not move to left leg");
+					return false;
+				}
+
+
+			}else{
+				ROS_ERROR("Wrong link name");
+				return false;
+			}
+		}
+
 		return true;
+
 	}
 
 	double QuatToRoll(double x, double y, double z, double w){

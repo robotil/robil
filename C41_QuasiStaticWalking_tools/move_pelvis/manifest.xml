@@ -10,6 +10,7 @@
   <url>http://ros.org/wiki/move_pelvis</url>
   <depend package="roscpp"/>
   <depend package="C0_RobilTask"/>
+  <depend package="C43_LocalBodyCOM"/>
   <depend package="atlas_msgs"/>
   <depend package="tf"/>
   <depend package="geometry_msgs"/>
