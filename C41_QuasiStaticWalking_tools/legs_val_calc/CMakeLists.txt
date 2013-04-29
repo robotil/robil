@@ -24,6 +24,7 @@ set(LIBRARY_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/lib)
 #uncomment if you have defined services
 rosbuild_gensrv()
 rosbuild_add_executable(legs_val_calc src/legs_val_calc.cpp)
+#rosbuild_add_executable(each_leg_val_calc src/each_leg_val_calc.cpp)
 #common commands for building c++ executables and libraries
 #rosbuild_add_library(${PROJECT_NAME} src/example.cpp)
 #target_link_libraries(${PROJECT_NAME} another_library)

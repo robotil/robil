@@ -14,13 +14,17 @@
   <depend package="rospy"/>
   <depend package="roslib"/>
   <depend package="std_msgs"/>
+  <depend package="tf"/>
   <depend package="actionlib_msgs"/>
+  <depend package="atlas_msgs"/>
   <depend package="osrf_msgs"/>
   <depend package="hrl_kinematics"/>
   <depend package="control_toolbox"/>
   <depend package="pr2_controllers_msgs"/>
   <depend package="sensor_msgs"/>
   <depend package="control_msgs"/>
+  <depend package="PoseController"/>
+  <depend package="pelvis_leg_target"/>
   
 </package>
 

@@ -66,6 +66,7 @@ public:
 	}
 
 	~run_maintainer(){
+		ac.cancelAllGoals();
 		nh_.shutdown();
 	}
 

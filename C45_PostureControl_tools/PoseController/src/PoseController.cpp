@@ -1,11 +1,14 @@
 #include <ros/ros.h>
 #include <actionlib/client/simple_action_client.h>
+#include <atlas_msgs/AtlasCommand.h>
+#include <atlas_msgs/AtlasState.h>
 #include <C0_RobilTask/RobilTaskAction.h>
 #include <C0_RobilTask/RobilTask.h>
 #include <sensor_msgs/JointState.h>
 #include <osrf_msgs/JointCommands.h>
 #include <std_msgs/Float64.h>
 #include <boost/thread.hpp>
+#include <std_srvs/Empty.h>
 #include <PoseController/back_movement.h>
 #include <PoseController/foot_movement.h>
 #include <PoseController/hand_movement.h>
@@ -16,82 +19,37 @@ private:
 	ros::NodeHandle *rosnode;
 	std::string action_name_;
 	std::map <std::string, int> joints;
-	std::vector<double> joint_positions, wanted_positions;
-	ros::Publisher pub_joint_commands_;
+	std::vector<double> joint_positions, wanted_positions, kp_positions;
+	ros::Publisher pub_atlas_commands_,pub_joint_states_;
 	ros::Subscriber joint_states_sub_;
-	ros::Subscriber hand_service, foot_service, back_service;
+	ros::ServiceServer hand_service, foot_service, back_service, reset_service;
+	ros::ServiceServer delta_hand_service, delta_foot_service, delta_back_service;
+	osrf_msgs::JointCommands jointcommands;
+	atlas_msgs::AtlasCommand atlascommand;
+	bool up;
 public:
-	PoseControllerClass(std::string name):action_name_(name){
+	PoseControllerClass(std::string name):action_name_(name),up(false){
 
 		rosnode = new ros::NodeHandle();
 		wanted_positions.resize(28);
 		joint_positions.resize(28);
-		hand_service = nh_.subscribe("/PoseController/hand_movement", 1000, &PoseControllerClass::hand_movement, this);
-		foot_service = nh_.subscribe("/PoseController/foot_movement", 1000, &PoseControllerClass::foot_movement, this);
-		back_service = nh_.subscribe("/PoseController/back_movement", 1000, &PoseControllerClass::back_movement, this);
+		kp_positions.resize(28);
+		hand_service = nh_.advertiseService("/PoseController/hand_movement", &PoseControllerClass::hand_movement, this);
+		delta_hand_service = nh_.advertiseService("/PoseController/delta_hand_movement", &PoseControllerClass::delta_hand_movement, this);
+		foot_service = nh_.advertiseService("/PoseController/foot_movement", &PoseControllerClass::foot_movement, this);
+		delta_foot_service = nh_.advertiseService("/PoseController/delta_foot_movement", &PoseControllerClass::delta_foot_movement, this);
+		back_service = nh_.advertiseService("/PoseController/back_movement", &PoseControllerClass::back_movement, this);
+		delta_back_service = nh_.advertiseService("/PoseController/delta_back_movement", &PoseControllerClass::delta_back_movement, this);
+		reset_service = nh_.advertiseService("/PoseController/reset_joints", &PoseControllerClass::reset_joints_CB, this);
 
 		joint_states_sub_ = nh_.subscribe("/atlas/joint_states",100,&PoseControllerClass::joint_states_CB,this);
-		pub_joint_commands_ = nh2_.advertise<osrf_msgs::JointCommands>("/atlas/joint_commands", 1, true);
+		pub_atlas_commands_ = nh2_.advertise<atlas_msgs::AtlasCommand>("/atlas/atlas_command", 1, true);
+		pub_joint_states_ = nh2_.advertise<sensor_msgs::JointState>("/PoseController/joint_states", 1, true);
 
-		//this->ControlPose();
-		ROS_INFO("Running pose controller");
-	}
-
-	~PoseControllerClass(){}
-
-	void joint_states_CB(const sensor_msgs::JointStateConstPtr& state){
-		for(unsigned int i=0; i < state->name.size(); i++){
-			joints[state->name[i]] = i;
+		while(!up){
+			ros::spinOnce();
 		}
-		joint_positions = state->position;
-	}
 
-	void hand_movement(const PoseController::hand_movement::ConstPtr &req){
-		ROS_INFO("Got hand movement");
-		wanted_positions[joints["l_arm_usy"]] = joint_positions[joints["l_arm_usy"]] + req->l_arm_usy;
-		wanted_positions[joints["l_arm_shx"]] = joint_positions[joints["l_arm_shx"]] + req->l_arm_shx;
-		wanted_positions[joints["l_arm_ely"]] = joint_positions[joints["l_arm_ely"]] + req->l_arm_ely;
-		wanted_positions[joints["l_arm_elx"]] = joint_positions[joints["l_arm_elx"]] + req->l_arm_elx;
-		wanted_positions[joints["l_arm_uwy"]] = joint_positions[joints["l_arm_uwy"]] + req->l_arm_uwy;
-		wanted_positions[joints["l_arm_mwx"]] = joint_positions[joints["l_arm_mwx"]] + req->l_arm_mwx;
-		wanted_positions[joints["r_arm_usy"]] = joint_positions[joints["r_arm_usy"]] + req->r_arm_usy;
-		wanted_positions[joints["r_arm_shx"]] = joint_positions[joints["r_arm_shx"]] + req->r_arm_shx;
-		wanted_positions[joints["r_arm_ely"]] = joint_positions[joints["r_arm_ely"]] + req->r_arm_ely;
-		wanted_positions[joints["r_arm_elx"]] = joint_positions[joints["r_arm_elx"]] + req->r_arm_elx;
-		wanted_positions[joints["r_arm_uwy"]] = joint_positions[joints["r_arm_uwy"]] + req->r_arm_uwy;
-		wanted_positions[joints["r_arm_mwx"]] = joint_positions[joints["r_arm_mwx"]] + req->r_arm_mwx;
-		this->ControlPose();
-	}
-
-	void foot_movement(const PoseController::foot_movement::ConstPtr &req){
-		ROS_INFO("Got foot movement");
-		wanted_positions[joints["l_leg_uhz"]] = joint_positions[joints["l_leg_uhz"]] + req->l_leg_uhz;
-		wanted_positions[joints["l_leg_mhx"]] = joint_positions[joints["l_leg_mhx"]] + req->l_leg_mhx;
-		wanted_positions[joints["l_leg_lhy"]] = joint_positions[joints["l_leg_lhy"]] + req->l_leg_lhy;
-		wanted_positions[joints["l_leg_kny"]] = joint_positions[joints["l_leg_kny"]] + req->l_leg_kny;
-		wanted_positions[joints["l_leg_uay"]] = joint_positions[joints["l_leg_uay"]] + req->l_leg_uay;
-		wanted_positions[joints["l_leg_lax"]] = joint_positions[joints["l_leg_lax"]] + req->l_leg_lax;
-		wanted_positions[joints["r_leg_uhz"]] = joint_positions[joints["r_leg_uhz"]] + req->r_leg_uhz;
-		wanted_positions[joints["r_leg_mhx"]] = joint_positions[joints["r_leg_mhx"]] + req->r_leg_mhx;
-		wanted_positions[joints["r_leg_lhy"]] = joint_positions[joints["r_leg_lhy"]] + req->r_leg_lhy;
-		wanted_positions[joints["r_leg_kny"]] = joint_positions[joints["r_leg_kny"]] + req->r_leg_kny;
-		wanted_positions[joints["r_leg_uay"]] = joint_positions[joints["r_leg_uay"]] + req->r_leg_uay;
-		wanted_positions[joints["r_leg_lax"]] = joint_positions[joints["r_leg_lax"]] + req->r_leg_lax;
-
-		this->ControlPose();
-	}
-
-	void back_movement(const PoseController::back_movement::ConstPtr &req){
-		ROS_INFO("Got back movement");
-		wanted_positions[joints["back_lbz"]] = joint_positions[joints["back_lbz"]] + req->back_lbz;
-		wanted_positions[joints["back_mby"]] = joint_positions[joints["back_mby"]] + req->back_mby;
-		wanted_positions[joints["back_ubx"]] = joint_positions[joints["back_ubx"]] + req->back_ubx;
-
-		this->ControlPose();
-	}
-
-	void ControlPose(){
-		osrf_msgs::JointCommands jointcommands;
 		jointcommands.name.push_back("atlas::back_lbz");
 		jointcommands.name.push_back("atlas::back_mby");
 		jointcommands.name.push_back("atlas::back_ubx");
@@ -121,102 +79,329 @@ public:
 		jointcommands.name.push_back("atlas::r_arm_uwy");
 		jointcommands.name.push_back("atlas::r_arm_mwx");
 
+
 		unsigned int n = jointcommands.name.size();
-		jointcommands.position.resize(n);
-		jointcommands.velocity.resize(n);
-		jointcommands.effort.resize(n);
-		jointcommands.kp_position.resize(n);
-		jointcommands.ki_position.resize(n);
-		jointcommands.kd_position.resize(n);
-		jointcommands.kp_velocity.resize(n);
-		jointcommands.i_effort_min.resize(n);
-		jointcommands.i_effort_max.resize(n);
+		atlascommand.position.resize(n);
+		atlascommand.velocity.resize(n);
+		atlascommand.effort.resize(n);
+		atlascommand.kp_position.resize(n);
+		atlascommand.ki_position.resize(n);
+		atlascommand.kd_position.resize(n);
+		atlascommand.kp_velocity.resize(n);
+		atlascommand.i_effort_min.resize(n);
+		atlascommand.i_effort_max.resize(n);
+		atlascommand.k_effort.resize(n);
 		for (unsigned int i = 0; i < n; i++)
 		{
 			std::vector<std::string> pieces;
 			boost::split(pieces, jointcommands.name[i], boost::is_any_of(":"));
 
+			double f;
 			rosnode->getParam("atlas_controller/gains/" + pieces[2] + "/p",
-					jointcommands.kp_position[i]);
+					f);
+			atlascommand.kp_position[i] = (float) f;
 
 			rosnode->getParam("atlas_controller/gains/" + pieces[2] + "/i",
-					jointcommands.ki_position[i]);
+					f);
+			atlascommand.ki_position[i] = (float) f;
 
 			rosnode->getParam("atlas_controller/gains/" + pieces[2] + "/d",
-					jointcommands.kd_position[i]);
+					f);
+			atlascommand.kd_position[i] = (float) f;
 
 			rosnode->getParam("atlas_controller/gains/" + pieces[2] + "/i_clamp",
-					jointcommands.i_effort_min[i]);
-			jointcommands.i_effort_min[i] = -jointcommands.i_effort_min[i];
+					f);
+			atlascommand.i_effort_min[i] = (float) f;
+			atlascommand.i_effort_min[i] = -atlascommand.i_effort_min[i];
 
 			rosnode->getParam("atlas_controller/gains/" + pieces[2] + "/i_clamp",
-					jointcommands.i_effort_max[i]);
+					f);
+			atlascommand.i_effort_max[i] = (float) f;
 
-			jointcommands.velocity[i]     = 0;
-			jointcommands.effort[i]       = 0;
-			jointcommands.kp_velocity[i]  = 0;
+			atlascommand.velocity[i]     = 0;
+			atlascommand.effort[i]       = 0;
+			atlascommand.kp_velocity[i]  = 0;
+			atlascommand.k_effort[i] 	 = 255;
+			kp_positions[i] = atlascommand.kp_position[i];
 		}
 
+		std_srvs::Empty e;
+		this->reset_joints_CB(e.request, e.response);
+		this->ControlPose();
+		ROS_INFO("Running pose controller");
+	}
 
-		jointcommands.position[joints["l_leg_uhz"]] = wanted_positions[joints["l_leg_uhz"]];
-		jointcommands.position[joints["l_leg_mhx"]] = wanted_positions[joints["l_leg_mhx"]];
-		jointcommands.position[joints["l_leg_lhy"]] = wanted_positions[joints["l_leg_lhy"]];
-		jointcommands.position[joints["l_leg_kny"]] = wanted_positions[joints["l_leg_kny"]];
-		jointcommands.position[joints["l_leg_uay"]] = wanted_positions[joints["l_leg_uay"]];
-		jointcommands.position[joints["l_leg_lax"]] = wanted_positions[joints["l_leg_lax"]];
-		jointcommands.position[joints["r_leg_uhz"]] = wanted_positions[joints["r_leg_uhz"]];
-		jointcommands.position[joints["r_leg_mhx"]] = wanted_positions[joints["r_leg_mhx"]];
-		jointcommands.position[joints["r_leg_lhy"]] = wanted_positions[joints["r_leg_lhy"]];
-		jointcommands.position[joints["r_leg_kny"]] = wanted_positions[joints["r_leg_kny"]];
-		jointcommands.position[joints["r_leg_uay"]] = wanted_positions[joints["r_leg_uay"]];
-		jointcommands.position[joints["r_leg_lax"]] = wanted_positions[joints["r_leg_lax"]];
-		jointcommands.position[joints["l_arm_usy"]] = wanted_positions[joints["l_arm_usy"]];
-		jointcommands.position[joints["l_arm_shx"]] = wanted_positions[joints["l_arm_shx"]];
-		jointcommands.position[joints["l_arm_ely"]] = wanted_positions[joints["l_arm_ely"]];
-		jointcommands.position[joints["l_arm_elx"]] = wanted_positions[joints["l_arm_elx"]];
-		jointcommands.position[joints["l_arm_uwy"]] = wanted_positions[joints["l_arm_uwy"]];
-		jointcommands.position[joints["l_arm_mwx"]] = wanted_positions[joints["l_arm_mwx"]];
-		jointcommands.position[joints["r_arm_usy"]] = wanted_positions[joints["r_arm_usy"]];
-		jointcommands.position[joints["r_arm_shx"]] = wanted_positions[joints["r_arm_shx"]];
-		jointcommands.position[joints["r_arm_ely"]] = wanted_positions[joints["r_arm_ely"]];
-		jointcommands.position[joints["r_arm_elx"]] = wanted_positions[joints["r_arm_elx"]];
-		jointcommands.position[joints["r_arm_uwy"]] = wanted_positions[joints["r_arm_uwy"]];
-		jointcommands.position[joints["r_arm_mwx"]] = wanted_positions[joints["r_arm_mwx"]];
-		jointcommands.position[joints["neck_ay"]] = wanted_positions[joints["neck_ay"]];
-		jointcommands.position[joints["back_lbz"]] = wanted_positions[joints["back_lbz"]];
-		jointcommands.position[joints["back_mby"]] = wanted_positions[joints["back_mby"]];
-		jointcommands.position[joints["back_ubx"]] = wanted_positions[joints["back_ubx"]];
+	~PoseControllerClass(){}
 
-		wanted_positions[joints["l_leg_uhz"]] = joint_positions[joints["l_leg_uhz"]];
-		wanted_positions[joints["l_leg_mhx"]] = joint_positions[joints["l_leg_mhx"]];
-		wanted_positions[joints["l_leg_lhy"]] = joint_positions[joints["l_leg_lhy"]];
-		wanted_positions[joints["l_leg_kny"]] = joint_positions[joints["l_leg_kny"]];
-		wanted_positions[joints["l_leg_uay"]] = joint_positions[joints["l_leg_uay"]];
-		wanted_positions[joints["l_leg_lax"]] = joint_positions[joints["l_leg_lax"]];
-		wanted_positions[joints["r_leg_uhz"]] = joint_positions[joints["r_leg_uhz"]];
-		wanted_positions[joints["r_leg_mhx"]] = joint_positions[joints["r_leg_mhx"]];
-		wanted_positions[joints["r_leg_lhy"]] = joint_positions[joints["r_leg_lhy"]];
-		wanted_positions[joints["r_leg_kny"]] = joint_positions[joints["r_leg_kny"]];
-		wanted_positions[joints["r_leg_uay"]] = joint_positions[joints["r_leg_uay"]];
-		wanted_positions[joints["r_leg_lax"]] = joint_positions[joints["r_leg_lax"]];
-		wanted_positions[joints["l_arm_usy"]] = joint_positions[joints["l_arm_usy"]];
-		wanted_positions[joints["l_arm_shx"]] = joint_positions[joints["l_arm_shx"]];
-		wanted_positions[joints["l_arm_ely"]] = joint_positions[joints["l_arm_ely"]];
-		wanted_positions[joints["l_arm_elx"]] = joint_positions[joints["l_arm_elx"]];
-		wanted_positions[joints["l_arm_uwy"]] = joint_positions[joints["l_arm_uwy"]];
-		wanted_positions[joints["l_arm_mwx"]] = joint_positions[joints["l_arm_mwx"]];
-		wanted_positions[joints["r_arm_usy"]] = joint_positions[joints["r_arm_usy"]];
-		wanted_positions[joints["r_arm_shx"]] = joint_positions[joints["r_arm_shx"]];
-		wanted_positions[joints["r_arm_ely"]] = joint_positions[joints["r_arm_ely"]];
-		wanted_positions[joints["r_arm_elx"]] = joint_positions[joints["r_arm_elx"]];
-		wanted_positions[joints["r_arm_uwy"]] = joint_positions[joints["r_arm_uwy"]];
-		wanted_positions[joints["r_arm_mwx"]] = joint_positions[joints["r_arm_mwx"]];
-		wanted_positions[joints["neck_ay"]] = joint_positions[joints["neck_ay"]];
-		wanted_positions[joints["back_lbz"]] = joint_positions[joints["back_lbz"]];
-		wanted_positions[joints["back_mby"]] = joint_positions[joints["back_mby"]];
-		wanted_positions[joints["back_ubx"]] = joint_positions[joints["back_ubx"]];
+	void joint_states_CB(const sensor_msgs::JointStateConstPtr& state){
+		for(unsigned int i=0; i < state->name.size(); i++){
+			joints[state->name[i]] = i;
+		}
+		joint_positions = state->position;
+		if(!up) up = true;
+	}
 
-		pub_joint_commands_.publish(jointcommands);
+	bool reset_joints_CB(std_srvs::Empty::Request &req, std_srvs::Empty::Response &res){
+		ROS_INFO("Got reset joints");
+		for(unsigned int i = 0; i < joint_positions.size(); i++){
+			wanted_positions[i] = joint_positions[i];
+		}
+		return true;
+	}
+
+	bool hand_movement(PoseController::hand_movement::Request &req, PoseController::hand_movement::Response &res){
+		//ROS_INFO("Got hand movement");
+		wanted_positions[atlas_msgs::AtlasState::l_arm_usy] = req.l_arm_usy;
+		wanted_positions[atlas_msgs::AtlasState::l_arm_shx] = req.l_arm_shx;
+		wanted_positions[atlas_msgs::AtlasState::l_arm_ely] = req.l_arm_ely;
+		wanted_positions[atlas_msgs::AtlasState::l_arm_elx] = req.l_arm_elx;
+		wanted_positions[atlas_msgs::AtlasState::l_arm_uwy] = req.l_arm_uwy;
+		wanted_positions[atlas_msgs::AtlasState::l_arm_mwx] = req.l_arm_mwx;
+		wanted_positions[atlas_msgs::AtlasState::r_arm_usy] = req.r_arm_usy;
+		wanted_positions[atlas_msgs::AtlasState::r_arm_shx] = req.r_arm_shx;
+		wanted_positions[atlas_msgs::AtlasState::r_arm_ely] = req.r_arm_ely;
+		wanted_positions[atlas_msgs::AtlasState::r_arm_elx] = req.r_arm_elx;
+		wanted_positions[atlas_msgs::AtlasState::r_arm_uwy] = req.r_arm_uwy;
+		wanted_positions[atlas_msgs::AtlasState::r_arm_mwx] = req.r_arm_mwx;
+		return true;
+	}
+
+	bool foot_movement(PoseController::foot_movement::Request &req, PoseController::foot_movement::Response &res){
+		//ROS_INFO("Got foot movement");
+		wanted_positions[atlas_msgs::AtlasState::l_leg_uhz] = req.l_leg_uhz;
+		wanted_positions[atlas_msgs::AtlasState::l_leg_mhx] = req.l_leg_mhx;
+		wanted_positions[atlas_msgs::AtlasState::l_leg_lhy] = req.l_leg_lhy;
+		wanted_positions[atlas_msgs::AtlasState::l_leg_kny] = req.l_leg_kny;
+		wanted_positions[atlas_msgs::AtlasState::l_leg_uay] = req.l_leg_uay;
+		wanted_positions[atlas_msgs::AtlasState::l_leg_lax] = req.l_leg_lax;
+		wanted_positions[atlas_msgs::AtlasState::r_leg_uhz] = req.r_leg_uhz;
+		wanted_positions[atlas_msgs::AtlasState::r_leg_mhx] = req.r_leg_mhx;
+		wanted_positions[atlas_msgs::AtlasState::r_leg_lhy] = req.r_leg_lhy;
+		wanted_positions[atlas_msgs::AtlasState::r_leg_kny] = req.r_leg_kny;
+		wanted_positions[atlas_msgs::AtlasState::r_leg_uay] = req.r_leg_uay;
+		wanted_positions[atlas_msgs::AtlasState::r_leg_lax] = req.r_leg_lax;
+		if(req.l_leg_uhz_kp_position) kp_positions[atlas_msgs::AtlasState::l_leg_uhz] = req.l_leg_uhz_kp_position;
+		if(req.l_leg_mhx_kp_position) kp_positions[atlas_msgs::AtlasState::l_leg_mhx] = req.l_leg_mhx_kp_position;
+		if(req.l_leg_lhy_kp_position) kp_positions[atlas_msgs::AtlasState::l_leg_lhy] = req.l_leg_lhy_kp_position;
+		if(req.l_leg_kny_kp_position) kp_positions[atlas_msgs::AtlasState::l_leg_kny] = req.l_leg_kny_kp_position;
+		if(req.l_leg_uay_kp_position) kp_positions[atlas_msgs::AtlasState::l_leg_uay] = req.l_leg_uay_kp_position;
+		if(req.l_leg_lax_kp_position) kp_positions[atlas_msgs::AtlasState::l_leg_lax] = req.l_leg_lax_kp_position;
+		if(req.r_leg_uhz_kp_position) kp_positions[atlas_msgs::AtlasState::r_leg_uhz] = req.r_leg_uhz_kp_position;
+		if(req.r_leg_mhx_kp_position) kp_positions[atlas_msgs::AtlasState::r_leg_mhx] = req.r_leg_mhx_kp_position;
+		if(req.r_leg_lhy_kp_position) kp_positions[atlas_msgs::AtlasState::r_leg_lhy] = req.r_leg_lhy_kp_position;
+		if(req.r_leg_kny_kp_position) kp_positions[atlas_msgs::AtlasState::r_leg_kny] = req.r_leg_kny_kp_position;
+		if(req.r_leg_uay_kp_position) kp_positions[atlas_msgs::AtlasState::r_leg_uay] = req.r_leg_uay_kp_position;
+		if(req.r_leg_lax_kp_position) kp_positions[atlas_msgs::AtlasState::r_leg_lax] = req.r_leg_lax_kp_position;
+		return true;
+	}
+
+	bool back_movement(PoseController::back_movement::Request &req, PoseController::back_movement::Response &res){
+		//ROS_INFO("Got back movement");
+		if(req.back_lbz != -100) wanted_positions[atlas_msgs::AtlasState::back_lbz] = req.back_lbz;
+		wanted_positions[atlas_msgs::AtlasState::back_mby] = req.back_mby;
+		wanted_positions[atlas_msgs::AtlasState::back_ubx] = req.back_ubx;
+		return true;
+	}
+
+
+	bool delta_hand_movement(PoseController::hand_movement::Request &req, PoseController::hand_movement::Response &res){
+		//ROS_INFO("Got delta hand movement");
+		wanted_positions[atlas_msgs::AtlasState::l_arm_usy] += req.l_arm_usy;
+		wanted_positions[atlas_msgs::AtlasState::l_arm_shx] += req.l_arm_shx;
+		wanted_positions[atlas_msgs::AtlasState::l_arm_ely] += req.l_arm_ely;
+		wanted_positions[atlas_msgs::AtlasState::l_arm_elx] += req.l_arm_elx;
+		wanted_positions[atlas_msgs::AtlasState::l_arm_uwy] += req.l_arm_uwy;
+		wanted_positions[atlas_msgs::AtlasState::l_arm_mwx] += req.l_arm_mwx;
+		wanted_positions[atlas_msgs::AtlasState::r_arm_usy] += req.r_arm_usy;
+		wanted_positions[atlas_msgs::AtlasState::r_arm_shx] += req.r_arm_shx;
+		wanted_positions[atlas_msgs::AtlasState::r_arm_ely] += req.r_arm_ely;
+		wanted_positions[atlas_msgs::AtlasState::r_arm_elx] += req.r_arm_elx;
+		wanted_positions[atlas_msgs::AtlasState::r_arm_uwy] += req.r_arm_uwy;
+		wanted_positions[atlas_msgs::AtlasState::r_arm_mwx] += req.r_arm_mwx;
+		return true;
+	}
+
+	bool delta_foot_movement(PoseController::foot_movement::Request &req, PoseController::foot_movement::Response &res){
+		//ROS_INFO("Got delta foot movement");
+		wanted_positions[atlas_msgs::AtlasState::l_leg_uhz] += req.l_leg_uhz;
+		wanted_positions[atlas_msgs::AtlasState::l_leg_mhx] += req.l_leg_mhx;
+		wanted_positions[atlas_msgs::AtlasState::l_leg_lhy] += req.l_leg_lhy;
+		wanted_positions[atlas_msgs::AtlasState::l_leg_kny] += req.l_leg_kny;
+		wanted_positions[atlas_msgs::AtlasState::l_leg_uay] += req.l_leg_uay;
+		wanted_positions[atlas_msgs::AtlasState::l_leg_lax] += req.l_leg_lax;
+		wanted_positions[atlas_msgs::AtlasState::r_leg_uhz] += req.r_leg_uhz;
+		wanted_positions[atlas_msgs::AtlasState::r_leg_mhx] += req.r_leg_mhx;
+		wanted_positions[atlas_msgs::AtlasState::r_leg_lhy] += req.r_leg_lhy;
+		wanted_positions[atlas_msgs::AtlasState::r_leg_kny] += req.r_leg_kny;
+		wanted_positions[atlas_msgs::AtlasState::r_leg_uay] += req.r_leg_uay;
+		wanted_positions[atlas_msgs::AtlasState::r_leg_lax] += req.r_leg_lax;
+		if(req.l_leg_uhz_kp_position) kp_positions[atlas_msgs::AtlasState::l_leg_uhz] = req.l_leg_uhz_kp_position;
+		if(req.l_leg_mhx_kp_position) kp_positions[atlas_msgs::AtlasState::l_leg_mhx] = req.l_leg_mhx_kp_position;
+		if(req.l_leg_lhy_kp_position) kp_positions[atlas_msgs::AtlasState::l_leg_lhy] = req.l_leg_lhy_kp_position;
+		if(req.l_leg_kny_kp_position) kp_positions[atlas_msgs::AtlasState::l_leg_kny] = req.l_leg_kny_kp_position;
+		if(req.l_leg_uay_kp_position) kp_positions[atlas_msgs::AtlasState::l_leg_uay] = req.l_leg_uay_kp_position;
+		if(req.l_leg_lax_kp_position) kp_positions[atlas_msgs::AtlasState::l_leg_lax] = req.l_leg_lax_kp_position;
+		if(req.r_leg_uhz_kp_position) kp_positions[atlas_msgs::AtlasState::r_leg_uhz] = req.r_leg_uhz_kp_position;
+		if(req.r_leg_mhx_kp_position) kp_positions[atlas_msgs::AtlasState::r_leg_mhx] = req.r_leg_mhx_kp_position;
+		if(req.r_leg_lhy_kp_position) kp_positions[atlas_msgs::AtlasState::r_leg_lhy] = req.r_leg_lhy_kp_position;
+		if(req.r_leg_kny_kp_position) kp_positions[atlas_msgs::AtlasState::r_leg_kny] = req.r_leg_kny_kp_position;
+		if(req.r_leg_uay_kp_position) kp_positions[atlas_msgs::AtlasState::r_leg_uay] = req.r_leg_uay_kp_position;
+		if(req.r_leg_lax_kp_position) kp_positions[atlas_msgs::AtlasState::r_leg_lax] = req.r_leg_lax_kp_position;
+		return true;
+	}
+
+	bool delta_back_movement(PoseController::back_movement::Request &req, PoseController::back_movement::Response &res){
+		ROS_INFO("Got delta back movement %f", req.back_lbz);
+		if(req.back_lbz != -100) wanted_positions[atlas_msgs::AtlasState::back_lbz] += req.back_lbz;
+		wanted_positions[atlas_msgs::AtlasState::back_mby] += req.back_mby;
+		wanted_positions[atlas_msgs::AtlasState::back_ubx] += req.back_ubx;
+		return true;
+	}
+	void ControlPose(){
+
+		/*jointcommands.kp_position[atlas_msgs::AtlasState::l_leg_uhz] = 5000;
+		jointcommands.ki_position[atlas_msgs::AtlasState::l_leg_uhz] = 0;
+		jointcommands.kd_position[atlas_msgs::AtlasState::l_leg_uhz] = 0;
+		jointcommands.i_effort_min[atlas_msgs::AtlasState::l_leg_uhz] = -30;
+		jointcommands.i_effort_max[atlas_msgs::AtlasState::l_leg_uhz] = 30;
+		jointcommands.kp_position[atlas_msgs::AtlasState::l_leg_mhx] = 5000;
+		jointcommands.ki_position[atlas_msgs::AtlasState::l_leg_mhx] = 150;
+		jointcommands.kd_position[atlas_msgs::AtlasState::l_leg_mhx] = 0;
+		jointcommands.i_effort_min[atlas_msgs::AtlasState::l_leg_mhx] = -50;
+		jointcommands.i_effort_max[atlas_msgs::AtlasState::l_leg_mhx] = 50;
+		jointcommands.kp_position[atlas_msgs::AtlasState::l_leg_uhz] = 5000;
+		jointcommands.ki_position[atlas_msgs::AtlasState::l_leg_uhz] = 0;
+		jointcommands.kd_position[atlas_msgs::AtlasState::l_leg_uhz] = 50;
+		jointcommands.i_effort_min[atlas_msgs::AtlasState::l_leg_uhz] = -50;
+		jointcommands.i_effort_max[atlas_msgs::AtlasState::l_leg_uhz] = 50;
+		jointcommands.kp_position[atlas_msgs::AtlasState::l_leg_kny] = 6000;
+		jointcommands.ki_position[atlas_msgs::AtlasState::l_leg_kny] = 500;
+		jointcommands.kd_position[atlas_msgs::AtlasState::l_leg_kny] = 50;
+		jointcommands.i_effort_min[atlas_msgs::AtlasState::l_leg_kny] = 150;
+		jointcommands.i_effort_max[atlas_msgs::AtlasState::l_leg_kny] = -150;
+		/*jointcommands.kp_position[atlas_msgs::AtlasState::l_leg_uay] = 5000;
+		jointcommands.ki_position[atlas_msgs::AtlasState::l_leg_uay] = 500;
+		jointcommands.kd_position[atlas_msgs::AtlasState::l_leg_uay] = 10;
+		jointcommands.i_effort_min[atlas_msgs::AtlasState::l_leg_uay] = -150;
+		jointcommands.i_effort_max[atlas_msgs::AtlasState::l_leg_uay] = 150;
+		jointcommands.kp_position[atlas_msgs::AtlasState::l_leg_lax] = 8000;
+		jointcommands.ki_position[atlas_msgs::AtlasState::l_leg_lax] = 500;
+		jointcommands.kd_position[atlas_msgs::AtlasState::l_leg_lax] = 1.5;
+		jointcommands.i_effort_min[atlas_msgs::AtlasState::l_leg_lax] = -50;
+		jointcommands.i_effort_max[atlas_msgs::AtlasState::l_leg_lax] = 50;
+		jointcommands.kp_position[atlas_msgs::AtlasState::r_leg_uhz] = 5000;
+		jointcommands.ki_position[atlas_msgs::AtlasState::r_leg_uhz] = 0;
+		jointcommands.kd_position[atlas_msgs::AtlasState::r_leg_uhz] = 0;
+		jointcommands.i_effort_min[atlas_msgs::AtlasState::r_leg_uhz] = -30;
+		jointcommands.i_effort_max[atlas_msgs::AtlasState::r_leg_uhz] = 30;
+		jointcommands.kp_position[atlas_msgs::AtlasState::r_leg_mhx] = 5000;
+		jointcommands.ki_position[atlas_msgs::AtlasState::r_leg_mhx] = 150;
+		jointcommands.kd_position[atlas_msgs::AtlasState::r_leg_mhx] = 0;
+		jointcommands.i_effort_min[atlas_msgs::AtlasState::r_leg_mhx] = -50;
+		jointcommands.i_effort_max[atlas_msgs::AtlasState::r_leg_mhx] = 50;
+		jointcommands.kp_position[atlas_msgs::AtlasState::r_leg_uhz] = 5000;
+		jointcommands.ki_position[atlas_msgs::AtlasState::r_leg_uhz] = 0;
+		jointcommands.kd_position[atlas_msgs::AtlasState::r_leg_uhz] = 50;
+		jointcommands.i_effort_min[atlas_msgs::AtlasState::r_leg_uhz] = -50;
+		jointcommands.i_effort_max[atlas_msgs::AtlasState::r_leg_uhz] = 50;
+		jointcommands.kp_position[atlas_msgs::AtlasState::r_leg_kny] = 6000;
+		jointcommands.ki_position[atlas_msgs::AtlasState::r_leg_kny] = 500;
+		jointcommands.kd_position[atlas_msgs::AtlasState::r_leg_kny] = 50;
+		jointcommands.i_effort_min[atlas_msgs::AtlasState::r_leg_kny] = -150;
+		jointcommands.i_effort_max[atlas_msgs::AtlasState::r_leg_kny] = 150;
+		jointcommands.kp_position[atlas_msgs::AtlasState::r_leg_uay] = 5000;
+		jointcommands.ki_position[atlas_msgs::AtlasState::r_leg_uay] = 500;
+		jointcommands.kd_position[atlas_msgs::AtlasState::r_leg_uay] = 10;
+		jointcommands.i_effort_min[atlas_msgs::AtlasState::r_leg_uay] = -150;
+		jointcommands.i_effort_max[atlas_msgs::AtlasState::r_leg_uay] = 150;
+		jointcommands.kp_position[atlas_msgs::AtlasState::r_leg_lax] = 8000;
+		jointcommands.ki_position[atlas_msgs::AtlasState::r_leg_lax] = 500;
+		jointcommands.kd_position[atlas_msgs::AtlasState::r_leg_lax] = 1.5;
+		jointcommands.i_effort_min[atlas_msgs::AtlasState::r_leg_lax] = -50;
+		jointcommands.i_effort_max[atlas_msgs::AtlasState::r_leg_lax] = 50;*/
+
+		double dt = 0.005;
+		while(nh2_.ok()){
+			ros::spinOnce();
+			atlascommand.position[atlas_msgs::AtlasState::l_leg_uhz] = wanted_positions[atlas_msgs::AtlasState::l_leg_uhz];
+			atlascommand.kp_position[atlas_msgs::AtlasState::l_leg_uhz] = kp_positions[atlas_msgs::AtlasState::l_leg_uhz];
+			atlascommand.position[atlas_msgs::AtlasState::l_leg_mhx] = wanted_positions[atlas_msgs::AtlasState::l_leg_mhx];
+			atlascommand.kp_position[atlas_msgs::AtlasState::l_leg_mhx] = kp_positions[atlas_msgs::AtlasState::l_leg_mhx];
+			atlascommand.position[atlas_msgs::AtlasState::l_leg_lhy] = wanted_positions[atlas_msgs::AtlasState::l_leg_lhy];
+			atlascommand.kp_position[atlas_msgs::AtlasState::l_leg_lhy] = kp_positions[atlas_msgs::AtlasState::l_leg_lhy];
+			atlascommand.position[atlas_msgs::AtlasState::l_leg_kny] = wanted_positions[atlas_msgs::AtlasState::l_leg_kny];
+			atlascommand.kp_position[atlas_msgs::AtlasState::l_leg_kny] = kp_positions[atlas_msgs::AtlasState::l_leg_kny];
+			atlascommand.position[atlas_msgs::AtlasState::l_leg_uay] = wanted_positions[atlas_msgs::AtlasState::l_leg_uay];
+			atlascommand.kp_position[atlas_msgs::AtlasState::l_leg_uay] = kp_positions[atlas_msgs::AtlasState::l_leg_uay];
+			atlascommand.position[atlas_msgs::AtlasState::l_leg_lax] = wanted_positions[atlas_msgs::AtlasState::l_leg_lax];
+			atlascommand.kp_position[atlas_msgs::AtlasState::l_leg_lax] = kp_positions[atlas_msgs::AtlasState::l_leg_lax];
+			atlascommand.position[atlas_msgs::AtlasState::r_leg_uhz] = wanted_positions[atlas_msgs::AtlasState::r_leg_uhz];
+			atlascommand.kp_position[atlas_msgs::AtlasState::r_leg_uhz] = kp_positions[atlas_msgs::AtlasState::r_leg_uhz];
+			atlascommand.position[atlas_msgs::AtlasState::r_leg_mhx] = wanted_positions[atlas_msgs::AtlasState::r_leg_mhx];
+			atlascommand.kp_position[atlas_msgs::AtlasState::r_leg_mhx] = kp_positions[atlas_msgs::AtlasState::r_leg_mhx];
+			atlascommand.position[atlas_msgs::AtlasState::r_leg_lhy] = wanted_positions[atlas_msgs::AtlasState::r_leg_lhy];
+			atlascommand.kp_position[atlas_msgs::AtlasState::r_leg_lhy] = kp_positions[atlas_msgs::AtlasState::r_leg_lhy];
+			atlascommand.position[atlas_msgs::AtlasState::r_leg_kny] = wanted_positions[atlas_msgs::AtlasState::r_leg_kny];
+			atlascommand.kp_position[atlas_msgs::AtlasState::r_leg_kny] = kp_positions[atlas_msgs::AtlasState::r_leg_kny];
+			atlascommand.position[atlas_msgs::AtlasState::r_leg_uay] = wanted_positions[atlas_msgs::AtlasState::r_leg_uay];
+			atlascommand.kp_position[atlas_msgs::AtlasState::r_leg_uay] = kp_positions[atlas_msgs::AtlasState::r_leg_uay];
+			atlascommand.position[atlas_msgs::AtlasState::r_leg_lax] = wanted_positions[atlas_msgs::AtlasState::r_leg_lax];
+			atlascommand.kp_position[atlas_msgs::AtlasState::r_leg_lax] = kp_positions[atlas_msgs::AtlasState::r_leg_lax];
+
+
+
+
+
+
+
+			atlascommand.position[atlas_msgs::AtlasState::l_arm_usy] = wanted_positions[atlas_msgs::AtlasState::l_arm_usy];
+			atlascommand.position[atlas_msgs::AtlasState::l_arm_shx] = wanted_positions[atlas_msgs::AtlasState::l_arm_shx];
+			atlascommand.position[atlas_msgs::AtlasState::l_arm_ely] = wanted_positions[atlas_msgs::AtlasState::l_arm_ely];
+			atlascommand.position[atlas_msgs::AtlasState::l_arm_elx] = wanted_positions[atlas_msgs::AtlasState::l_arm_elx];
+			atlascommand.position[atlas_msgs::AtlasState::l_arm_uwy] = wanted_positions[atlas_msgs::AtlasState::l_arm_uwy];
+			atlascommand.position[atlas_msgs::AtlasState::l_arm_mwx] = wanted_positions[atlas_msgs::AtlasState::l_arm_mwx];
+			atlascommand.position[atlas_msgs::AtlasState::r_arm_usy] = wanted_positions[atlas_msgs::AtlasState::r_arm_usy];
+			atlascommand.position[atlas_msgs::AtlasState::r_arm_shx] = wanted_positions[atlas_msgs::AtlasState::r_arm_shx];
+			atlascommand.position[atlas_msgs::AtlasState::r_arm_ely] = wanted_positions[atlas_msgs::AtlasState::r_arm_ely];
+			atlascommand.position[atlas_msgs::AtlasState::r_arm_elx] = wanted_positions[atlas_msgs::AtlasState::r_arm_elx];
+			atlascommand.position[atlas_msgs::AtlasState::r_arm_uwy] = wanted_positions[atlas_msgs::AtlasState::r_arm_uwy];
+			atlascommand.position[atlas_msgs::AtlasState::r_arm_mwx] = wanted_positions[atlas_msgs::AtlasState::r_arm_mwx];
+
+
+
+
+
+
+			atlascommand.position[atlas_msgs::AtlasState::neck_ay] = joint_positions[atlas_msgs::AtlasState::neck_ay];
+
+
+
+
+
+			atlascommand.position[atlas_msgs::AtlasState::back_lbz] = wanted_positions[atlas_msgs::AtlasState::back_lbz];
+			atlascommand.kp_position[atlas_msgs::AtlasState::back_lbz] = 1000;
+			atlascommand.ki_position[atlas_msgs::AtlasState::back_lbz] = 10;
+			atlascommand.kd_position[atlas_msgs::AtlasState::back_lbz] = 100;
+			atlascommand.position[atlas_msgs::AtlasState::back_mby] = wanted_positions[atlas_msgs::AtlasState::back_mby];
+			atlascommand.kp_position[atlas_msgs::AtlasState::back_mby] = 1000;
+			atlascommand.ki_position[atlas_msgs::AtlasState::back_mby] = 10;
+			atlascommand.kd_position[atlas_msgs::AtlasState::back_mby] = 100;
+			atlascommand.position[atlas_msgs::AtlasState::back_ubx] = wanted_positions[atlas_msgs::AtlasState::back_ubx];
+			atlascommand.kp_position[atlas_msgs::AtlasState::back_ubx] = 1000;
+			atlascommand.ki_position[atlas_msgs::AtlasState::back_ubx] = 10;
+			atlascommand.kd_position[atlas_msgs::AtlasState::back_ubx] = 50;
+
+			pub_atlas_commands_.publish(atlascommand);
+
+
+
+
+			sensor_msgs::JointState jointstates;
+			jointstates.position.resize(28);
+			jointstates.position = atlascommand.position;
+			pub_joint_states_.publish(jointstates);
+			ros::Duration(dt).sleep();
+		}
 	}
 };
 

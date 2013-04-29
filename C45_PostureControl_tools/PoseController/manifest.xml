@@ -20,6 +20,7 @@
   <depend package="control_toolbox"/>
   <depend package="pr2_controllers_msgs"/>
   <depend package="sensor_msgs"/>
+  <depend package="atlas_msgs"/>
   <depend package="control_msgs"/>
 
 </package>

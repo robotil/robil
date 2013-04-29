@@ -149,7 +149,7 @@ public:
 		end = ros::Time::now() - t1;
 
 		ROS_INFO("Time took for goal: %d", end.sec);
-
+/*
 		state = ac.getState();
 		if(state == actionlib::SimpleClientGoalState::ACTIVE){
 			ROS_INFO("Goal canceled. Status: %s", state.toString().c_str());
@@ -159,7 +159,7 @@ public:
 		else{
 			ROS_INFO("All Goals canceled. Status: %s", state.toString().c_str());
 			ac.cancelAllGoals();
-		}
+		}*/
 	}
 
 	~turn_in_place(){

@@ -2,8 +2,8 @@ C45 – Posture Control
 ---------------------------------
 Prerequisites:
 1) Depends on HRL_Kinematics package. Installation instructions: http://www.robil.org/trac_robil/wiki/InstallUbuntuLog#insthrl
-2) Simulation ran using:
-roslaunch atlas_utils atlas_sandia_hands.launch
+2) C42_DRCSim2ools must be running:
+rosrun C42_DRCSim2ools foot_contact_filter.py
 
 To run:
 1) Launch:
