@@ -83,7 +83,7 @@ class AtlasWalk():
             command.walk_params.step_data[i].swing_height = 0.2
 
             # Determine pose of the next step based on the step_index
-            command.walk_params.step_queue[i].pose = self.calculate_pose(step_index)
+            command.walk_params.step_data[i].pose = self.calculate_pose(step_index)
         
         # Publish this command every time we have a new state message
         self.asi_command.publish(command)

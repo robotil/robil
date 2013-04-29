@@ -13,10 +13,13 @@ from std_msgs.msg import String
 from tf.transformations import quaternion_from_euler, euler_from_quaternion
 
 from BDI_StateMachine import *
+from BDI_Odometer import *
 
 import math
 import rospy
 import sys
+
+from nav_msgs.msg import Odometry
 
 ###################################################################################
 # File created by David Dovrat, 2013.
@@ -30,9 +33,9 @@ class WalkingModeBDI(WalkingMode):
         # Initialize atlas mode and atlas_sim_interface_command publishers        
         self.mode = rospy.Publisher('/atlas/mode', String, None, False, True, None)
         self.asi_command = rospy.Publisher('/atlas/atlas_sim_interface_command', AtlasSimInterfaceCommand, None, False, True, None)
-        self._StateMachine = BDI_StateMachine()
+        self._Odometer = BDI_Odometer()
+        self._StateMachine = BDI_StateMachine(self._Odometer)
         self._LPP = localPathPlanner
-        self._yaw = 0.0
                 
     def Initialize(self):
         # Puts robot into freeze behavior, all joints controlled
@@ -59,6 +62,8 @@ class WalkingModeBDI(WalkingMode):
         # Initialize some variables before starting.
         self.step_index = 0
         self.is_swaying = False
+
+        self._odom_sub = rospy.Subscriber('/ground_truth_odom',Odometry,self._odom_cb)
     
     def StartWalking(self):
         return 0.3
@@ -66,7 +71,6 @@ class WalkingModeBDI(WalkingMode):
     def Walk(self):
         # Subscribe to atlas_state and atlas_sim_interface_state topics.
         self.asi_state = rospy.Subscriber('/atlas/atlas_sim_interface_state', AtlasSimInterfaceState, self.asi_state_cb)
-        self.atlas_state = rospy.Subscriber('/atlas/atlas_state', AtlasState, self.atlas_state_cb)
 
         self._StateMachine.GoForward()
 
@@ -96,27 +100,20 @@ class WalkingModeBDI(WalkingMode):
                 self.robot_position.z = state.pos_est.position.z  
             
             targetYaw = self._LPP.GetTargetYaw()
-            delatYaw = targetYaw - self._yaw
-            sinYaw = math.sin(delatYaw)
+            delatYaw = targetYaw - self._Odometer.GetYaw()
 
             self._LPP.UpdatePosition(self.robot_position.x,self.robot_position.y)
-            # print(sinYaw)
-            # if (sinYaw > 0.5):
-            #     self._StateMachine.TurnLeft()
-            #     print("Left")
-            # elif (sinYaw < -0.5):
-            #     self._StateMachine.TurnRight()
-            #     print("Right")
-            # elif (math.fabs(sinYaw) < 0.1):
-            #     self._StateMachine.GoForward()
+            if (delatYaw > 0.6):
+                self._StateMachine.TurnLeft()
+            elif (delatYaw < -0.6):
+                self._StateMachine.TurnRight()
+            elif (math.fabs(delatYaw) < 0.1):
+                self._StateMachine.GoForward()
 
-            command = self._StateMachine.Step(self.robot_position,state.behavior_feedback.walk_feedback.next_step_index_needed)
-            self.asi_command.publish(command)
+            command = self._StateMachine.Step(state.behavior_feedback.walk_feedback.next_step_index_needed)
+            if (0 !=command):
+                self.asi_command.publish(command)
  
-    # /atlas/atlas_state callback. This message provides the orientation of the robot from the torso IMU
-    # This will be important if you need to transform your step commands from the robot's local frame to world frame
-    def atlas_state_cb(self, state):
-        # If you don't reset to harnessed, then you need to get the current orientation
-        roll, pitch, yaw = euler_from_quaternion([state.orientation.x, state.orientation.y, state.orientation.z, state.orientation.w])
-        self._yaw = yaw
-        return True
+    def _odom_cb(self,odom):
+        self._LPP.UpdatePosition(odom.pose.pose.position.x,odom.pose.pose.position.y)
+        #print(odom.pose.pose.position.x)

@@ -24,8 +24,11 @@ class BDI_StepState(State):
     def SetStrategy(self,strategy):
         self._Strategy = strategy
 
-    def GetAtlasSimInterfaceCommand(self,index,robot_position):
-        return self._Strategy.GetAtlasSimInterfaceCommand(index,robot_position)
+    def GetAtlasSimInterfaceCommand(self,index):
+        return self._Strategy.GetAtlasSimInterfaceCommand(index)
+
+    def GetStepSize(self):
+        return 0.0,0.0,0.0
 
 class BDI_StepLeft(BDI_StepState):
     """
@@ -34,6 +37,10 @@ class BDI_StepLeft(BDI_StepState):
     def __init__(self):
         BDI_StepState.__init__(self,"Left")
 
+    def GetStepSize(self):
+        x,y,alpha = self._Strategy.GetStepSize()
+        return x,y,alpha
+
 
 class BDI_StepRight(BDI_StepState):
     """
@@ -41,6 +48,10 @@ class BDI_StepRight(BDI_StepState):
     """
     def __init__(self):
         BDI_StepState.__init__(self,"Right")
+
+    def GetStepSize(self):
+        x,y,alpha = self._Strategy.GetStepSize()
+        return x,-y,alpha
 
 
 ###################################################################################
@@ -64,8 +75,8 @@ class BDI_StepStateMachine(StateMachine):
     def Step(self):
         StateMachine.PerformTransition(self,"Step")
 
-    def GetCommand(self,robot_position,index):
-        return StateMachine.GetCurrentState(self).GetAtlasSimInterfaceCommand(index,robot_position)
+    def GetCommand(self,index):
+        return StateMachine.GetCurrentState(self).GetAtlasSimInterfaceCommand(index)
 
     def SetStrategy(self,LeftStrategy,RightStrategy):
         state,transition_exists = StateMachine.GetStateAtTransition(self,"Left","Step")
@@ -78,4 +89,7 @@ class BDI_StepStateMachine(StateMachine):
             state.SetStrategy(LeftStrategy)
         else:
             raise StateMachineError("BDI_StepStateMachine::SetStrategy: Could not find step")
+
+    def GetStepSize(self):
+        return StateMachine.GetCurrentState(self).GetStepSize()
 
