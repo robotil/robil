@@ -24,12 +24,15 @@ class BDI_StepState(State):
     def SetStrategy(self,strategy):
         self._Strategy = strategy
 
+    def GetAtlasSimInterfaceCommand(self,index,robot_position):
+        return self._Strategy.GetAtlasSimInterfaceCommand(index,robot_position)
+
 class BDI_StepLeft(BDI_StepState):
     """
         The BDI_Idle class is intended to be used when not walking
     """
     def __init__(self):
-        BDI_State.__init__(self,"Left")
+        BDI_StepState.__init__(self,"Left")
 
 
 class BDI_StepRight(BDI_StepState):
@@ -37,7 +40,7 @@ class BDI_StepRight(BDI_StepState):
         The BDI_Idle class is intended to be used when not walking
     """
     def __init__(self):
-        BDI_State.__init__(self,"Right")
+        BDI_StepState.__init__(self,"Right")
 
 
 ###################################################################################
@@ -61,7 +64,18 @@ class BDI_StepStateMachine(StateMachine):
     def Step(self):
         StateMachine.PerformTransition(self,"Step")
 
+    def GetCommand(self,robot_position,index):
+        return StateMachine.GetCurrentState(self).GetAtlasSimInterfaceCommand(index,robot_position)
+
     def SetStrategy(self,LeftStrategy,RightStrategy):
-        StateMAchine.GetStateAtTransition(self,"Left","Step").SetStrategy(RightStrategy)
-        StateMAchine.GetStateAtTransition(self,"Right","Step").SetStrategy(LeftStrategy)
+        state,transition_exists = StateMachine.GetStateAtTransition(self,"Left","Step")
+        if (transition_exists):
+            state.SetStrategy(RightStrategy)
+        else:
+            raise StateMachineError("BDI_StepStateMachine::SetStrategy: Could not find step")
+        state,transition_exists = StateMachine.GetStateAtTransition(self,"Right","Step")
+        if (transition_exists):
+            state.SetStrategy(LeftStrategy)
+        else:
+            raise StateMachineError("BDI_StepStateMachine::SetStrategy: Could not find step")
 

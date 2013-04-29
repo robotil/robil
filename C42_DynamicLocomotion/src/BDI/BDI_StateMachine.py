@@ -11,6 +11,8 @@ import math
 from tf.transformations import quaternion_from_euler, euler_from_quaternion
 from BDI_StepStateMachine import *
 
+from atlas_msgs.msg import AtlasCommand, AtlasSimInterfaceCommand, AtlasSimInterfaceState, AtlasState, AtlasBehaviorStepData
+
 ###################################################################################
 #--------------------------- Strategies -------------------------------------------
 ###################################################################################
@@ -21,64 +23,86 @@ class BDI_Strategy(object):
     def __init__(self):
         self._k_effort = [0] * 28
 
-class BDI_StrategyIdleLeft(BDI_Strategy):
-    """
-    """
-    def __init__(self):
-        pass
+        self._command = AtlasSimInterfaceCommand()
+        self._command.behavior = AtlasSimInterfaceCommand.WALK
 
-class BDI_StrategyIdleRight(BDI_Strategy):
-    """
-    """
-    def __init__(self):
-        pass
+        for i in range(4):
+            step_index = i
+            self._command.walk_params.step_data[i].step_index = step_index
 
-    def GetAtlasSimInterfaceCommand(self):
-        command = AtlasSimInterfaceCommand()
+            self._command.walk_params.step_data[i].foot_index = step_index%2
+            
+            # A duration of 0.63s is a good default value
+            self._command.walk_params.step_data[i].duration = 0.63
+            
+            # As far as I can tell, swing_height has yet to be implemented
+            self._command.walk_params.step_data[i].swing_height = 0.2
 
-        command.behavior = AtlasSimInterfaceCommand.WALK
-        
-        # k_effort is all 0s for full BDI controll of all joints.
-        command.k_effort = self._k_effort
-        
-        # Observe next_step_index_needed to determine when to switch steps.
-        self.step_index = state.behavior_feedback.walk_feedback.next_step_index_needed
+            # Determine pose of the next step based on the step_index
+            # Right foot occurs on even steps, left on odd
+            self._command.walk_params.step_data[i].pose.position.x = 0
+            # Step 0.15m to either side of center, alternating with feet
+            self._command.walk_params.step_data[i].pose.position.y = 0.15 if (step_index%2==0) else -0.15
+            
+            # The z position is observed for static walking, but the foot
+            # will be placed onto the ground if the ground is lower than z
+            self._command.walk_params.step_data[i].pose.position.z = 0.0
+            
+            # Point those feet straight ahead
+            self._command.walk_params.step_data[i].pose.orientation.x = 0.0
+            self._command.walk_params.step_data[i].pose.orientation.y = 0.0
+            self._command.walk_params.step_data[i].pose.orientation.z = 0.0
+            self._command.walk_params.step_data[i].pose.orientation.w = 1.0
 
-        self._LPP.UpdatePosition(self.robot_position.x,self.robot_position.y)
-
-        targetYaw = self._LPP.GetTargetYaw()
-        delatYaw = targetYaw - self._yaw
-
-        print(delatYaw)
-        if (delatYaw > 0.025):
-            self._StateMachine.TurnLeft()
-            print("Left")
-        elif (delatYaw < -0.025):
-            self._StateMachine.TurnRight()
-            print("Right")
-        else:
-            self._StateMachine.GoForward()
-        
+    def GetAtlasSimInterfaceCommand(self,index,robot_position):       
         # A walk behavior command needs to know three additional steps beyond the current step needed to plan
         # for the best balance
         for i in range(4):
-            step_index = self.step_index + i
+            step_index = index + i
             is_right_foot = step_index % 2
             
-            command.walk_params.step_data[i].step_index = step_index
-            command.walk_params.step_data[i].foot_index = is_right_foot
-            
-            # A duration of 0.63s is a good default value
-            command.walk_params.step_data[i].duration = 0.63
-            
-            # As far as I can tell, swing_height has yet to be implemented
-            command.walk_params.step_data[i].swing_height = 0.2
+            self._command.walk_params.step_data[i].step_index = step_index
+            self._command.walk_params.step_data[i].foot_index = step_index%2
 
             # Determine pose of the next step based on the step_index
-            self._StateMachine.GetCurrentState().calculate_pose(step_index,command.walk_params.step_data[i].pose,self.robot_position)
-        
-        # Publish this command every time we have a new state message
-        self.asi_command.publish(command)
+            # Right foot occurs on even steps, left on odd
+            self._command.walk_params.step_data[i].pose.position.x = robot_position.x
+            # Step 0.15m to either side of center, alternating with feet
+            self._command.walk_params.step_data[i].pose.position.y = 0.15 if (step_index%2==0) else -0.15
+
+        return self._command
+
+class BDI_StrategyIdle(BDI_Strategy):
+    """
+    """
+    def __init__(self):
+        BDI_Strategy.__init__(self)
+        self._command.behavior = AtlasSimInterfaceCommand.STAND
+
+class BDI_StrategyForward(BDI_Strategy):
+    """
+    """
+    def __init__(self):
+        BDI_Strategy.__init__(self)
+
+    def GetAtlasSimInterfaceCommand(self,index,robot_position):       
+        # A walk behavior command needs to know three additional steps beyond the current step needed to plan
+        # for the best balance
+        print(robot_position.x)
+        for i in range(4):
+            step_index = index + i
+            is_right_foot = step_index % 2
+            
+            self._command.walk_params.step_data[i].step_index = step_index
+            self._command.walk_params.step_data[i].foot_index = step_index%2
+
+            # Determine pose of the next step based on the step_index
+            # Right foot occurs on even steps, left on odd
+            self._command.walk_params.step_data[i].pose.position.x = robot_position.x + 0.4*step_index
+            # Step 0.15m to either side of center, alternating with feet
+            self._command.walk_params.step_data[i].pose.position.y = 0.1 if (step_index%2==0) else -0.1
+        return self._command
+
 
 ###################################################################################
 #--------------------------- States -----------------------------------------------
@@ -90,6 +114,7 @@ class BDI_State(State):
     """    
     def __init__(self,strStateName):
     	State.__init__(self,strStateName)
+        self._Strategy = BDI_StrategyIdle()
 
 class BDI_Idle(BDI_State):
     """
@@ -99,21 +124,8 @@ class BDI_Idle(BDI_State):
         BDI_State.__init__(self,"Idle")
 
     def calculate_pose(self, step_index,pose,robot_position):
-        i = step_index
-        # Right foot occurs on even steps, left on odd
-        pose.position.x = robot_position.x
-        # Step 0.15m to either side of center, alternating with feet
-        pose.position.y = 0.15 if (i%2==0) else -0.15
-        
-        # The z position is observed for static walking, but the foot
-        # will be placed onto the ground if the ground is lower than z
-        pose.position.z = 0.0
-        
-        # Point those feet straight ahead
-        pose.orientation.x = 0.0
-        pose.orientation.y = 0.0
-        pose.orientation.z = 0.0
-        pose.orientation.w = 1.0
+
+
 
         return pose
 
@@ -123,25 +135,6 @@ class BDI_Forward(BDI_State):
     """
     def __init__(self):
     	BDI_State.__init__(self,"Forward")
-
-    def calculate_pose(self, step_index,pose,robot_position):
-        i = step_index
-        # Right foot occurs on even steps, left on odd
-        pose.position.x = robot_position.x + 0.3*i
-        # Step 0.15m to either side of center, alternating with feet
-        pose.position.y = 0.15 if (i%2==0) else -0.15
-        
-        # The z position is observed for static walking, but the foot
-        # will be placed onto the ground if the ground is lower than z
-        pose.position.z = 0.0
-        
-        # Point those feet straight ahead
-        pose.orientation.x = 0.0
-        pose.orientation.y = 0.0
-        pose.orientation.z = 0.0
-        pose.orientation.w = 1.0
-
-        return pose
 
 class BDI_TrunLeft(BDI_State):
     """
@@ -252,7 +245,12 @@ class BDI_StateMachine(StateMachine):
     
     def __init__(self):
         StateMachine.__init__(self,BDI_Idle())
+        self._StrategyIdle = BDI_StrategyIdle()
+        self._StrategyForward = BDI_StrategyForward()
         self._StepStateMachine = BDI_StepStateMachine()
+        self._StepStateMachine.SetStrategy(self._StrategyIdle,self._StrategyIdle)
+        self._index = 0
+
         # Add states
         StateMachine.AddState(self,BDI_Forward())
         StateMachine.AddState(self,BDI_TrunLeft())
@@ -274,11 +272,19 @@ class BDI_StateMachine(StateMachine):
 
     def GoForward(self):
         StateMachine.PerformTransition(self,"GoForward")
+        self._StepStateMachine.SetStrategy(self._StrategyForward,self._StrategyForward)
 
     def TurnRight(self):
         StateMachine.PerformTransition(self,"TurnRight")
+        self._StepStateMachine.SetStrategy(self._StrategyIdle,self._StrategyIdle)
 
     def TurnLeft(self):
         StateMachine.PerformTransition(self,"TurnLeft")
+        self._StepStateMachine.SetStrategy(self._StrategyIdle,self._StrategyIdle)
+
+    def Step(self,robot_position,nextindex):
+        if (nextindex>self._index):
+            self._StepStateMachine.Step()
+        return self._StepStateMachine.GetCommand(robot_position,nextindex)
 
 

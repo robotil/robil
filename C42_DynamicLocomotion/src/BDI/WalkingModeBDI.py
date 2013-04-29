@@ -95,50 +95,22 @@ class WalkingModeBDI(WalkingMode):
                 self.robot_position.y = state.pos_est.position.y
                 self.robot_position.z = state.pos_est.position.z  
             
-            command = AtlasSimInterfaceCommand()
-
-            command.behavior = AtlasSimInterfaceCommand.WALK
-            
-            # k_effort is all 0s for full BDI controll of all joints.
-            command.k_effort = [0] * 28
-            
-            # Observe next_step_index_needed to determine when to switch steps.
-            self.step_index = state.behavior_feedback.walk_feedback.next_step_index_needed
-
-            self._LPP.UpdatePosition(self.robot_position.x,self.robot_position.y)
-
             targetYaw = self._LPP.GetTargetYaw()
             delatYaw = targetYaw - self._yaw
+            sinYaw = math.sin(delatYaw)
 
-            print(delatYaw)
-            if (delatYaw > 0.025):
-                self._StateMachine.TurnLeft()
-                print("Left")
-            elif (delatYaw < -0.025):
-                self._StateMachine.TurnRight()
-                print("Right")
-            else:
-                self._StateMachine.GoForward()
-            
-            # A walk behavior command needs to know three additional steps beyond the current step needed to plan
-            # for the best balance
-            for i in range(4):
-                step_index = self.step_index + i
-                is_right_foot = step_index % 2
-                
-                command.walk_params.step_data[i].step_index = step_index
-                command.walk_params.step_data[i].foot_index = is_right_foot
-                
-                # A duration of 0.63s is a good default value
-                command.walk_params.step_data[i].duration = 0.63
-                
-                # As far as I can tell, swing_height has yet to be implemented
-                command.walk_params.step_data[i].swing_height = 0.2
+            self._LPP.UpdatePosition(self.robot_position.x,self.robot_position.y)
+            # print(sinYaw)
+            # if (sinYaw > 0.5):
+            #     self._StateMachine.TurnLeft()
+            #     print("Left")
+            # elif (sinYaw < -0.5):
+            #     self._StateMachine.TurnRight()
+            #     print("Right")
+            # elif (math.fabs(sinYaw) < 0.1):
+            #     self._StateMachine.GoForward()
 
-                # Determine pose of the next step based on the step_index
-                self._StateMachine.GetCurrentState().calculate_pose(step_index,command.walk_params.step_data[i].pose,self.robot_position)
-            
-            # Publish this command every time we have a new state message
+            command = self._StateMachine.Step(self.robot_position,state.behavior_feedback.walk_feedback.next_step_index_needed)
             self.asi_command.publish(command)
  
     # /atlas/atlas_state callback. This message provides the orientation of the robot from the torso IMU
