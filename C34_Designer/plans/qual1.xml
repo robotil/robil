@@ -1,0 +1,17 @@
+<plan descriptions="./plans/TaskDescriptions.xml">
+   <par name="Qualification1" x="345.1666666666665" y="79.16666666666667" collapsed="false" id="63f81135-edae-4bc9-9ef3-9f12d8ba2c6b"> 
+         <par name="Perception" x="247.9882712033452" y="211.32331126008938" collapsed="false" id="50ae34a1-b4f6-42b9-a59e-23a1de45eaca"> 
+               <tsk name="LocalizationTrack" x="79.98827120334485" y="252.32331126008944" test_time="0" test_result="true" id="b680e465-1580-4fcd-964d-4ac78748b7d3" />
+               <tsk name="ObstacleDetection" x="158.9882712033452" y="323.3233112600894" test_time="0" test_result="true" id="56806741-11f0-45f8-992b-3a81f261bd49" />
+               <tsk name="PathPlanning" x="268.1666666666665" y="378.1666666666667" test_time="0" test_result="true" id="ba002ca8-1e88-428f-8aa5-35bb48c5e955" />
+         </par>
+      <dec name="!L!" x="483.1666666666665" y="165.16666666666669"> 
+            <seq name="Mission" x="474.1666666666665" y="230.16666666666669" collapsed="false" id="e476250a-7477-4a98-a8c7-bed5aed10672"> 
+                  <tsk name="SearchObject(target=Gate)" x="380.1666666666665" y="382.1666666666667" test_time="0" test_result="true" id="eed1e49e-5d5f-4b86-ada4-2fdb2f40115b" />
+               <dec name="!L!" x="542.6111111111104" y="324.05555555555554"> 
+                     <tsk name="PathPlanningFocus(target=Gate)" x="475.9444444444441" y="427.38888888889" test_time="0" test_result="true" id="00748747-7df4-4e8b-a4c5-a616b11ede6a" />
+               </dec>
+            </seq>
+      </dec>
+   </par>
+</plan>

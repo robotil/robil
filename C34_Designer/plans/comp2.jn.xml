@@ -1,0 +1,129 @@
+<plan descriptions="./plans/TaskDescriptions.xml">
+   <seq name="event2"> 
+         <par name="@1"> 
+               <par name="Perception"> 
+                     <tsk name="LocalizationTrack" />
+                     <tsk name="ObstacleDetection" />
+                     <tsk name="PathPlanning" />
+               </par>
+               <par name="MissionProgress"> 
+                     <tsk name="Monitor(target=LiveLock)" />
+                  <dec name="!L!"> 
+                        <seq name="Mission"> 
+                              <tsk name="StandUp" />
+                              <par name="@3"> 
+                                    <tsk name="Monitor(target=Falling)" />
+                                 <dec name="!L!"> 
+                                       <seq name="SearchObjectAndGo"> 
+                                          <dec name="!L!"> 
+                                                <par name="SearchObjectWithStabilization"> 
+                                                      <seq name="Stabilization"> 
+                                                            <tsk name="Monitor(target=Stable)" />
+                                                            <tsk name="PostureControl(pose=stabilization)" />
+                                                      </seq>
+                                                      <sel name="OperatorObjectValidation"> 
+                                                            <tsk name="SearchObject(target=Gate)" />
+                                                            <par name="OperatorCheckPoint"> 
+                                                               <dec name="L"> 
+                                                                     <seq name="Stabilization"> 
+                                                                           <tsk name="Monitor(target=Stable)" />
+                                                                           <tsk name="PostureControl(pose=stabilization)" />
+                                                                     </seq>
+                                                               </dec>
+                                                               <dec name="T"> 
+                                                                     <par name="TimeControl"> 
+                                                                           <seq name="OperatorRequest"> 
+                                                                                 <tsk name="PushHMI(data=panoramic_image)" />
+                                                                                 <tsk name="PushHMI(data=occupancy_grid)" />
+                                                                                 <tsk name="PushHMI(data=path)" />
+                                                                                 <tsk name="HMIResponce" />
+                                                                           </seq>
+                                                                           <tsk name="Monitor(target=Timeout)" />
+                                                                     </par>
+                                                               </dec>
+                                                            </par>
+                                                      </sel>
+                                                </par>
+                                          </dec>
+                                             <par name="TrackObjectAndGoToIt"> 
+                                                   <tsk name="TrackObject(target=Gate)" />
+                                                   <seq name="SearchPathAndGo"> 
+                                                         <par name="OperatorCheckPoint"> 
+                                                            <dec name="L"> 
+                                                                  <seq name="Stabilization"> 
+                                                                        <tsk name="Monitor(target=Stable)" />
+                                                                        <tsk name="PostureControl(pose=stabilization)" />
+                                                                  </seq>
+                                                            </dec>
+                                                            <dec name="T"> 
+                                                                  <par name="TimeControl"> 
+                                                                        <seq name="OperatorRequest"> 
+                                                                              <tsk name="PushHMI(data=panoramic_image)" />
+                                                                              <tsk name="PushHMI(data=occupancy_grid)" />
+                                                                              <tsk name="PushHMI(data=path)" />
+                                                                              <tsk name="HMIResponce" />
+                                                                        </seq>
+                                                                        <tsk name="Monitor(target=Timeout)" />
+                                                                  </par>
+                                                            </dec>
+                                                         </par>
+                                                         <tsk name="PathPlanningFocus(target=Gate)" />
+                                                         <tsk name="TurnTo(target=Gate)" />
+                                                      <dec name="!L!"> 
+                                                            <swi name="Move"> 
+                                                                  <par name="AdvanceByWalkingAlongPath"> 
+                                                                     <dec name="!L!"> 
+                                                                           <sel name="PathFollow"> 
+                                                                                 <par name="Zmp"> 
+                                                                                       <tsk name="whileInZmpArea" />
+                                                                                       <tsk name="ZmpWalk" />
+                                                                                 </par>
+                                                                                 <par name="QS"> 
+                                                                                       <tsk name="whileInQSArea" />
+                                                                                       <tsk name="QuasiStaticWalk" />
+                                                                                 </par>
+                                                                           </sel>
+                                                                     </dec>
+                                                                        <par name="Exceptions"> 
+                                                                           <dec name="F:1"> 
+                                                                                 <tsk name="untilOperatorIntervention" />
+                                                                           </dec>
+                                                                           <dec name="F:1"> 
+                                                                                 <tsk name="whileSolution" />
+                                                                           </dec>
+                                                                        </par>
+                                                                  </par>
+                                                               <jnt x="1163.8553342082746" y="523.6675252851717"> 
+                                                                     <seq name="NoSolution"> 
+                                                                           <par name="OperatorControlPoint"> 
+                                                                              <dec name="L"> 
+                                                                                    <seq name="Stabilization"> 
+                                                                                          <tsk name="Monitor(target=Stable)" />
+                                                                                          <tsk name="PostureControl(pose=stabilization)" />
+                                                                                    </seq>
+                                                                              </dec>
+                                                                              <dec name="T"> 
+                                                                                    <par name="TimeControl"> 
+                                                                                          <seq name="OperatorRequest"> 
+                                                                                                <tsk name="PushHMI(data=panoramic_image)" />
+                                                                                                <tsk name="HMIResponce" />
+                                                                                          </seq>
+                                                                                          <tsk name="Monitor(target=Timeout)" />
+                                                                                    </par>
+                                                                              </dec>
+                                                                           </par>
+                                                                     </seq>
+                                                               </jnt>
+                                                            </swi>
+                                                      </dec>
+                                                   </seq>
+                                             </par>
+                                       </seq>
+                                 </dec>
+                              </par>
+                        </seq>
+                  </dec>
+               </par>
+         </par>
+   </seq>
+</plan>
