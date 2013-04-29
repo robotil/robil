@@ -372,14 +372,14 @@ class PreStoppingRightStepState(StepState):
         return 7
 #----------------------------------------------------------------------------------
 
-class PreEmergencyStopState(StepState):
+class EmergencyStopState(StepState):
     """
-        The PreEmergencyStopState class is intended to be used with the StepStateMachine class,
+        The EmergencyStopState class is intended to be used with the StepStateMachine class,
         When the ZMP has to stop immediately this state is a transition state to complete current step
-        (from receiving "EmergencyStop" command) until moving to EmergencyStopState.
+        (from receiving "EmergencyStop" command). When step is completed we hult movement (stop sending movement commands).
     """
     def __init__(self,StepStrategy,walkingTrajectory,robotState,dt):
-        StepState.__init__(self,"PreEmergencyStop",StepStrategy,dt)
+        StepState.__init__(self,"EmergencyStop",StepStrategy,dt)
         self._WalkingTrajectory = walkingTrajectory
         self._robotState = robotState
         
@@ -391,30 +391,16 @@ class PreEmergencyStopState(StepState):
     def OnEnter(self):
         pass
 
+    def OnExit(self):
+        rospy.sleep(2) # wait for robot to stabilize
+
     def UpdateStepCounter(self,stepCounter):
         stepCounter = stepCounter+1
         return stepCounter
 
     def GetId(self):
-        return 18
-
-#----------------------------------------------------------------------------------
-
-class EmergencyStopState(StepState):
-    """
-        The EmergencyStopState class is intended to be used with the StepStateMachine class,
-        When the ZMP has to stop immediately
-    """
-    def __init__(self,StepStrategy,walkingTrajectory,robotState,dt):
-        StepState.__init__(self,"EmergencyStop",StepStrategy,dt)
-        self._WalkingTrajectory = walkingTrajectory
-        
-    def OnEnter(self):
-        rospy.sleep(2) # wait for robot to stabilize
-
-    def GetId(self):
         return 15
-    
+
 #----------------------------------------------------------------------------------
 
 class StoppingLeftStepState(StepState):
@@ -755,7 +741,7 @@ class StepStateMachine(StateMachine):
         StateMachine.AddState(self,PreStopRightStepState(self._StepStrategyWalk,walkingTrajectory,robotState,dt))
         StateMachine.AddState(self,RightStepState(self._StepStrategyWalk,walkingTrajectory,robotState,dt))
         StateMachine.AddState(self,LeftStepState(self._StepStrategyWalk,walkingTrajectory,robotState,dt))
-        StateMachine.AddState(self,PreEmergencyStopState(self._StepStrategyWalk,walkingTrajectory,robotState,dt))
+        #StateMachine.AddState(self,PreEmergencyStopState(self._StepStrategyWalk,walkingTrajectory,robotState,dt))
         StateMachine.AddState(self,EmergencyStopState(self._StepStrategyWalk,walkingTrajectory,robotState,dt))
         StateMachine.AddState(self,TurnRight_LeftStepState(self._StepStrategyWalk,walkingTrajectory,robotState,dt))
         StateMachine.AddState(self,TurnRight_RightStepState(self._StepStrategyWalk,walkingTrajectory,robotState,dt))
@@ -769,10 +755,8 @@ class StepStateMachine(StateMachine):
         StateMachine.AddTransition(self,"FirstStep",            "Stop",         "PreStoppingFirstStep")
         StateMachine.AddTransition(self,"Left",                 "NextStep",     "Right")
         StateMachine.AddTransition(self,"Left",                 "Stop",         "PreStoppingLeft")
-        StateMachine.AddTransition(self,"Left",                 "EmergencyStop","PreEmergencyStop")
         StateMachine.AddTransition(self,"Right",                "NextStep",     "Left")
         StateMachine.AddTransition(self,"Right",                "Stop",         "PreStoppingRight")
-        StateMachine.AddTransition(self,"Right",                "EmergencyStop","PreEmergencyStop")
         StateMachine.AddTransition(self,"PreStoppingFirstStep", "NextStep",     "StoppingLeft")
         StateMachine.AddTransition(self,"PreStoppingRight",     "NextStep",     "StoppingLeft")
         StateMachine.AddTransition(self,"PreStoppingLeft",      "NextStep",     "StoppingRight")
@@ -782,7 +766,6 @@ class StepStateMachine(StateMachine):
         StateMachine.AddTransition(self,"PreStopLeft",          "NextStep",     "StopRight")
         StateMachine.AddTransition(self,"StopRight",            "NextStep",     "Idle")
         StateMachine.AddTransition(self,"StopLeft",             "NextStep",     "Idle")
-        StateMachine.AddTransition(self,"PreEmergencyStop",     "NextStep",     "EmergencyStop")
         StateMachine.AddTransition(self,"EmergencyStop",        "NextStep",     "Idle")
         StateMachine.AddTransition(self,"FirstStep",            "TurnRight",     "TurnRightBeginLeft")
         StateMachine.AddTransition(self,"Right",                "TurnRight",     "TurnRightBeginLeft")
@@ -804,8 +787,11 @@ class StepStateMachine(StateMachine):
         # Preview of State Machine:
         self._StatePreviewBuffer = deque([]) # contains a list of BufferData class, infomation needed from _CurrentState to _PreviewState: Transitions, step times,...
         self._PreviewState = StateMachine.GetCurrentState(self) # the state at which the preview is 
+        self._EmergencyStopFinished = False
 
-    def Initialize(self):
+    def Initialize(self):        
+        self._ZMP_Preview_BufferX.init_values()
+        self._ZMP_Preview_BufferY.init_values()
         self.init_values()
         self._CurrentState.OnExit()
         self._CurrentState = self._States["Initializing"]
@@ -848,7 +834,9 @@ class StepStateMachine(StateMachine):
         StateMachine.PerformTransition(self,"Stop")
 
     def EmergencyStop(self):
-        StateMachine.PerformTransition(self,"EmergencyStop")
+        #StateMachine.PerformTransition(self,"EmergencyStop")
+        self._CurrentState = self._States["EmergencyStop"] # transition from all states
+        self._CurrentState.OnEnter()
             
     def CalculateFootSwingTrajectory(self):
         StateMachine.GetCurrentState(self).CalculateFootSwingTrajectory(1.0/self._UpdateRateHz,self._counter)
@@ -864,34 +852,27 @@ class StepStateMachine(StateMachine):
             rospy.loginfo("time:")
             rospy.loginfo(rospy.get_time())
 
-            self._StatePreviewBuffer.popleft() # remove data of last step (that was just completed)
-            self._PromotePreviewState( self._GetPreviewTransition() ) # load preview of new step. Updates: turn variables, _PreviewState, preview with ZMP profile and _StatePreviewBuffer  
-            self._PerformWalkTransition( self._StatePreviewBuffer[0].GetNextTransition() ) # update _CurrentState from oldest preview data
-            # # TODO: Transition need to be received from StepStatePreviewBuffer
-            # # End of step -> State Transitions:
-            # if self._DecideToTurn():
-            #     if self._ExecutedTurnCmd > 0:
-            #         self.TurnLeft()
-            #     else:
-            #         self.TurnRight()
-            # else:
-            #     self.NextStep()
-            #self.NextStep()
-            #p_ref_x,p_ref_y,loaded_new_step_trigger_x,loaded_new_step_trigger_y = StateMachine.GetCurrentState(self).UpdatePreview()
-            p_ref_x,loaded_new_step_trigger_x = self._ZMP_Preview_BufferX.update_Preview()
-            p_ref_y,loaded_new_step_trigger_y = self._ZMP_Preview_BufferY.update_Preview()
-            #rospy.loginfo("StepStateMachine UpdatePreview: _counter = %f, p_ref_x[0] = %f, p_ref_y[0] = %f" % (self._counter, p_ref_x[0], p_ref_y[0]) )                   
-        else:
-            #p_ref_x,p_ref_y,loaded_new_step_trigger_x,loaded_new_step_trigger_y = StateMachine.GetCurrentState(self).UpdatePreview()
-            p_ref_x,loaded_new_step_trigger_x = self._ZMP_Preview_BufferX.update_Preview()
-            p_ref_y,loaded_new_step_trigger_y = self._ZMP_Preview_BufferY.update_Preview()
-            # if (StateMachine.GetCurrentState(self).GetStepTime() <= (self._counter+2)*1.0/self._UpdateRateHz):
-            #     rospy.loginfo("StepStateMachine UpdatePreview: _counter = %f, p_ref_x[0] = %f, p_ref_y[0] = %f" % (self._counter, p_ref_x[0], p_ref_y[0]) )
+            if "EmergencyStop" == StateMachine.GetCurrentState(self).Name:
+                self._EmergencyStopFinished = True
+                self.NextStep()
+            else:
+                self._StatePreviewBuffer.popleft() # remove data of last step (that was just completed)
+                self._PromotePreviewState( self._GetPreviewTransition() ) # load preview of new step. Updates: turn variables, _PreviewState, preview with ZMP profile and _StatePreviewBuffer  
+                self._PerformWalkTransition( self._StatePreviewBuffer[0].GetNextTransition() ) # update _CurrentState from oldest preview data
+                 
+        #p_ref_x,p_ref_y,loaded_new_step_trigger_x,loaded_new_step_trigger_y = StateMachine.GetCurrentState(self).UpdatePreview()
+        p_ref_x,loaded_new_step_trigger_x = self._ZMP_Preview_BufferX.update_Preview()
+        p_ref_y,loaded_new_step_trigger_y = self._ZMP_Preview_BufferY.update_Preview()
+        # if (StateMachine.GetCurrentState(self).GetStepTime() <= (self._counter+2)*1.0/self._UpdateRateHz):
+        #     rospy.loginfo("StepStateMachine UpdatePreview: _counter = %f, p_ref_x[0] = %f, p_ref_y[0] = %f" % (self._counter, p_ref_x[0], p_ref_y[0]) )
         self._counter = self._counter+1
         return p_ref_x,p_ref_y
     
     def GetStateId(self):
         return StateMachine.GetCurrentState(self).GetId()
+
+    def CompletedEmergencyStop(self):
+        return self._EmergencyStopFinished
 
     def SetTurnCmd(self, turn_cmd):
         self._TurnCmdInput = turn_cmd

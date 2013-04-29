@@ -483,30 +483,16 @@ Stop (15)</panel_attributes>
   <element>
     <type>com.umlet.element.Relation</type>
     <coordinates>
-      <x>896</x>
-      <y>368</y>
-      <w>136</w>
-      <h>74</h>
+      <x>992</x>
+      <y>416</y>
+      <w>108</w>
+      <h>120</h>
     </coordinates>
     <panel_attributes>lt=&lt;-
 Emergency
 Stop
 </panel_attributes>
-    <additional_attributes>120;40;24;40</additional_attributes>
-  </element>
-  <element>
-    <type>com.umlet.element.Relation</type>
-    <coordinates>
-      <x>688</x>
-      <y>312</y>
-      <w>376</w>
-      <h>96</h>
-    </coordinates>
-    <panel_attributes>lt=&lt;-
-Emergency
-Stop
-</panel_attributes>
-    <additional_attributes>360;80;360;40;24;40;24;80</additional_attributes>
+    <additional_attributes>56;104;56;24</additional_attributes>
   </element>
   <element>
     <type>com.umlet.element.Relation</type>
@@ -667,26 +653,12 @@ TurnRight</panel_attributes>
   <element>
     <type>com.umlet.element.custom.State</type>
     <coordinates>
-      <x>1016</x>
-      <y>392</y>
+      <x>1008</x>
+      <y>376</y>
       <w>88</w>
-      <h>40</h>
+      <h>64</h>
     </coordinates>
-    <panel_attributes>Pre-Emergency
-Stop (18)</panel_attributes>
+    <panel_attributes>ALL STATES</panel_attributes>
     <additional_attributes/>
-  </element>
-  <element>
-    <type>com.umlet.element.Relation</type>
-    <coordinates>
-      <x>992</x>
-      <y>408</y>
-      <w>100</w>
-      <h>128</h>
-    </coordinates>
-    <panel_attributes>lt=&lt;-
-NextState
-</panel_attributes>
-    <additional_attributes>56;112;56;24</additional_attributes>
   </element>
 </diagram>

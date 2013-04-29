@@ -50,13 +50,10 @@ class MyTask(RobilTask):
         RobilTask.__init__(self, name)
 
         self._Des_Orientation = 0#-math.pi/2
+        self.init_values()
 
         rospy.sleep(1)
         self._listener = tf.TransformListener()
-
-        self._debug_transition = 0
-        self._done = False
-
         # sampling time:
         self._rate = 100  # [Hz]
         self._dt = 1.0/self._rate # [sec] # sample time (was named time_step)
@@ -104,7 +101,10 @@ class MyTask(RobilTask):
         self._sub_orientation_command = rospy.Subscriber('orientation_command' , Float64 , self._listn_to_orientation_command)
 
         self._imu_ori_z_sub = rospy.Subscriber('/atlas/imu', Imu, self._get_imu)  #Odometry, get_imu) 
-
+    
+    def init_values(self):
+        self._debug_transition = 0
+        self._done = False
         
     def _odom_cb(self,odom):
         self._done = self._ZmpLpp.UpdatePosition(odom.pose.pose.position.x,odom.pose.pose.position.y)
@@ -156,7 +156,10 @@ class MyTask(RobilTask):
 
     def task(self, name, uid, parameters):
         print "Start ZmpWalk"
-
+        ## Initialize values:
+        self.init_values()
+        self._Sagital_x_Preview_Controller.init_values()
+        self._Lateral_y_Preview_Controller.init_values()
         self._ZmpLpp.Stop()
 
         while not self._ZmpLpp.IsActive():
@@ -172,15 +175,18 @@ class MyTask(RobilTask):
         self._ZmpStateMachine.Start()
 
         while self._ZmpLpp.IsActive():
+            # Emergency Stop Command:
             if self.isPreepted() or (3 == self._debug_transition):
                 self._ZmpStateMachine.EmergencyStop()
-            #if completed Emergency stop:
-                self._ZmpLpp.Stop()
-                print "Preempt ZmpWalk: EmergencyStop"
-                return RTResult_PREEPTED()
+            
             self._ZmpStateMachine.SetTurnCmd(turn_cmd = 0.0*math.pi/180)
             self._ZmpStateMachine.SetDistanceToNextTurn(distance = 1.0)
             self._p_ref_x,self._p_ref_y = self._ZmpStateMachine.UpdatePreview()
+            # Complete Emergency Stop:
+            if self._ZmpStateMachine.CompletedEmergencyStop():
+                self._ZmpLpp.Stop()
+                print "Preempt ZmpWalk: EmergencyStop"
+                return RTResult_PREEPTED()
             new_step_trigger_x,new_step_trigger_y = self._ZmpStateMachine.GetNewStepTrigger()
             [COMx, COMx_dot, p_pre_con_x] = self._Sagital_x_Preview_Controller.getCOM_ref( self._p_ref_x,new_step_trigger_x )
             [COMy, COMy_dot, p_pre_con_y] = self._Lateral_y_Preview_Controller.getCOM_ref( self._p_ref_y,new_step_trigger_y )
