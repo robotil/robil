@@ -289,12 +289,11 @@ Stop
     <coordinates>
       <x>736</x>
       <y>544</y>
-      <w>140</w>
-      <h>74</h>
+      <w>126</w>
+      <h>56</h>
     </coordinates>
     <panel_attributes>lt=&lt;-
- 
-NextState
+Stop
 </panel_attributes>
     <additional_attributes>24;40;96;40;96;24</additional_attributes>
   </element>
@@ -443,15 +442,15 @@ TurnRight</panel_attributes>
   <element>
     <type>com.umlet.element.Relation</type>
     <coordinates>
-      <x>776</x>
+      <x>792</x>
       <y>464</y>
-      <w>100</w>
+      <w>70</w>
       <h>80</h>
     </coordinates>
     <panel_attributes>lt=&lt;-
-NextState
+Stop
 </panel_attributes>
-    <additional_attributes>56;64;56;24</additional_attributes>
+    <additional_attributes>40;64;40;24</additional_attributes>
   </element>
   <element>
     <type>com.umlet.element.custom.State</type>
@@ -486,7 +485,7 @@ NextState
       <h>56</h>
     </coordinates>
     <panel_attributes>lt=&lt;-
-NextState
+Stop
 </panel_attributes>
     <additional_attributes>24;40;248;40</additional_attributes>
   </element>
