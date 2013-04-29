@@ -243,133 +243,133 @@ class FirstStepState(StepState):
     def GetId(self):
         return 3
     
-#----------------------------------------------------------------------------------
+# #----------------------------------------------------------------------------------
 
-class PreStoppingFirstStepState(StepState):
-    """
-        The StoppingFirstStepState class is intended to be used with the StepStateMachine class,
-        When the ZMP starts walking but has to stop at the same time
-    """
-    def __init__(self,StepStrategy,walkingTrajectory,robotState,dt):
-        StepState.__init__(self,"PreStoppingFirstStep",StepStrategy,dt)
-        self._WalkingTrajectory = walkingTrajectory
+# class PreStoppingFirstStepState(StepState):
+#     """
+#         The StoppingFirstStepState class is intended to be used with the StepStateMachine class,
+#         When the ZMP starts walking but has to stop at the same time
+#     """
+#     def __init__(self,StepStrategy,walkingTrajectory,robotState,dt):
+#         StepState.__init__(self,"PreStoppingFirstStep",StepStrategy,dt)
+#         self._WalkingTrajectory = walkingTrajectory
         
-        self._pre_step = 0
-        self._first_step = 1
-        self._full_step = 0
-        self._last_step = 1
+#         self._pre_step = 0
+#         self._first_step = 1
+#         self._full_step = 0
+#         self._last_step = 1
 
-    def OnEnter(self):
-        pass
+#     def OnEnter(self):
+#         pass
         
-    def GetId(self):
-        return 14
+#     def GetId(self):
+#         return 14
 
-#----------------------------------------------------------------------------------
+# #----------------------------------------------------------------------------------
 
-class StopLeftStepState(StepState):
-    """
-        The StopLeftStepState class is intended to be used with the StepStateMachine class,
-        When the ZMP stops walking on a left step
-    """
-    def __init__(self,StepStrategy,walkingTrajectory,robotState,dt):
-        StepState.__init__(self,"StopLeft",StepStrategy,dt)
+# class StopLeftStepState(StepState):
+#     """
+#         The StopLeftStepState class is intended to be used with the StepStateMachine class,
+#         When the ZMP stops walking on a left step
+#     """
+#     def __init__(self,StepStrategy,walkingTrajectory,robotState,dt):
+#         StepState.__init__(self,"StopLeft",StepStrategy,dt)
 
-        self._WalkingTrajectory = walkingTrajectory
-        self._robotState = robotState
+#         self._WalkingTrajectory = walkingTrajectory
+#         self._robotState = robotState
         
-        self._pre_step = 0
-        self._first_step = 0
-        self._full_step = 0
-        self._last_step = 1
+#         self._pre_step = 0
+#         self._first_step = 0
+#         self._full_step = 0
+#         self._last_step = 1
 
-        # const template:
-        self._p_ref_const_zero = Constant_Template(0, self._step_time, dt)
-        # Stop walking profile:
-        self._p_ref_x = Stop_sagital_x(0, self._step_length, self._trans_ratio_of_step, self._trans_slope_steepens_factor, self._step_time, dt)
-        self._p_ref_y = Stop_lateral_y_from_left_foot(0, self._step_width, self._trans_ratio_of_step, self._trans_slope_steepens_factor, self._step_time, dt)
+#         # const template:
+#         self._p_ref_const_zero = Constant_Template(0, self._step_time, dt)
+#         # Stop walking profile:
+#         self._p_ref_x = Stop_sagital_x(0, self._step_length, self._trans_ratio_of_step, self._trans_slope_steepens_factor, self._step_time, dt)
+#         self._p_ref_y = Stop_lateral_y_from_left_foot(0, self._step_width, self._trans_ratio_of_step, self._trans_slope_steepens_factor, self._step_time, dt)
 
 
-    def OnEnter(self):
-        rospy.loginfo("Starting STOP LEFT step, time:")
-        rospy.loginfo(rospy.get_time())
+#     def OnEnter(self):
+#         rospy.loginfo("Starting STOP LEFT step, time:")
+#         rospy.loginfo(rospy.get_time())
 
-        self._robotState.Set_step_phase(value = 3)
+#         self._robotState.Set_step_phase(value = 3)
 
-        #self._Strategy.LoadNewStep(self._p_ref_x_stop, self._p_ref_const_zero, self._p_ref_y_stop, self._p_ref_const_zero)
+#         #self._Strategy.LoadNewStep(self._p_ref_x_stop, self._p_ref_const_zero, self._p_ref_y_stop, self._p_ref_const_zero)
         
-    def GetId(self):
-        return 13
+#     def GetId(self):
+#         return 13
 
-#----------------------------------------------------------------------------------
+# #----------------------------------------------------------------------------------
 
-class StopRightStepState(StepState):
-    """
-        The StopRightStepState class is intended to be used with the StepStateMachine class,
-        When the ZMP stops walking on a right step
-    """
-    def __init__(self,StepStrategy,walkingTrajectory,robotState,dt):
-        StepState.__init__(self,"StopRight",StepStrategy,dt)
+# class StopRightStepState(StepState):
+#     """
+#         The StopRightStepState class is intended to be used with the StepStateMachine class,
+#         When the ZMP stops walking on a right step
+#     """
+#     def __init__(self,StepStrategy,walkingTrajectory,robotState,dt):
+#         StepState.__init__(self,"StopRight",StepStrategy,dt)
 
-        self._WalkingTrajectory = walkingTrajectory
-        self._robotState = robotState
+#         self._WalkingTrajectory = walkingTrajectory
+#         self._robotState = robotState
         
-        self._pre_step = 0
-        self._first_step = 0
-        self._full_step = 0
-        self._last_step = 1
+#         self._pre_step = 0
+#         self._first_step = 0
+#         self._full_step = 0
+#         self._last_step = 1
 
-        # const template:
-        self._p_ref_const_zero = Constant_Template(0, self._step_time, dt)
-        # Stop walking profile:
-        self._p_ref_x = Stop_sagital_x(0, self._step_length, self._trans_ratio_of_step, self._trans_slope_steepens_factor, self._step_time, dt)
-        self._p_ref_y = Stop_lateral_y_from_right_foot(0, self._step_width, self._trans_ratio_of_step, self._trans_slope_steepens_factor, self._step_time, dt)
+#         # const template:
+#         self._p_ref_const_zero = Constant_Template(0, self._step_time, dt)
+#         # Stop walking profile:
+#         self._p_ref_x = Stop_sagital_x(0, self._step_length, self._trans_ratio_of_step, self._trans_slope_steepens_factor, self._step_time, dt)
+#         self._p_ref_y = Stop_lateral_y_from_right_foot(0, self._step_width, self._trans_ratio_of_step, self._trans_slope_steepens_factor, self._step_time, dt)
 
 
-    def OnEnter(self):
-        rospy.loginfo("Starting STOP RIGHT step, time:")
-        rospy.loginfo(rospy.get_time())
+#     def OnEnter(self):
+#         rospy.loginfo("Starting STOP RIGHT step, time:")
+#         rospy.loginfo(rospy.get_time())
 
-        self._robotState.Set_step_phase(value = 1)
+#         self._robotState.Set_step_phase(value = 1)
 
-        #self._Strategy.LoadNewStep(self._p_ref_x_stop, self._p_ref_const_zero, self._p_ref_y_stop, self._p_ref_const_zero)
+#         #self._Strategy.LoadNewStep(self._p_ref_x_stop, self._p_ref_const_zero, self._p_ref_y_stop, self._p_ref_const_zero)
         
-    def GetId(self):
-        return 12    
+#     def GetId(self):
+#         return 12    
 
-#----------------------------------------------------------------------------------
+# #----------------------------------------------------------------------------------
 
-class PreStoppingLeftStepState(StepState):
-    """
-        The StoppingLeftStepState class is intended to be used with the StepStateMachine class,
-        When the ZMP has to stop while taking a left step
-    """
-    def __init__(self,StepStrategy,walkingTrajectory,robotState,dt):
-        StepState.__init__(self,"PreStoppingLeft",StepStrategy,dt)
-        self._WalkingTrajectory = walkingTrajectory
+# class PreStoppingLeftStepState(StepState):
+#     """
+#         The StoppingLeftStepState class is intended to be used with the StepStateMachine class,
+#         When the ZMP has to stop while taking a left step
+#     """
+#     def __init__(self,StepStrategy,walkingTrajectory,robotState,dt):
+#         StepState.__init__(self,"PreStoppingLeft",StepStrategy,dt)
+#         self._WalkingTrajectory = walkingTrajectory
 
-    def OnEnter(self):
-        pass
+#     def OnEnter(self):
+#         pass
 
-    def GetId(self):
-        return 6
+#     def GetId(self):
+#         return 6
     
-#----------------------------------------------------------------------------------
+# #----------------------------------------------------------------------------------
 
-class PreStoppingRightStepState(StepState):
-    """
-        The StoppingRightStepState class is intended to be used with the StepStateMachine class,
-        When the ZMP has to stop while taking a right step
-    """
-    def __init__(self,StepStrategy,walkingTrajectory,robotState,dt):
-        StepState.__init__(self,"PreStoppingRight",StepStrategy,dt)
-        self._WalkingTrajectory = walkingTrajectory
+# class PreStoppingRightStepState(StepState):
+#     """
+#         The StoppingRightStepState class is intended to be used with the StepStateMachine class,
+#         When the ZMP has to stop while taking a right step
+#     """
+#     def __init__(self,StepStrategy,walkingTrajectory,robotState,dt):
+#         StepState.__init__(self,"PreStoppingRight",StepStrategy,dt)
+#         self._WalkingTrajectory = walkingTrajectory
         
-    def OnEnter(self):
-        pass
+#     def OnEnter(self):
+#         pass
         
-    def GetId(self):
-        return 7
+#     def GetId(self):
+#         return 7
 #----------------------------------------------------------------------------------
 
 class EmergencyStopState(StepState):
@@ -399,51 +399,57 @@ class EmergencyStopState(StepState):
         return stepCounter
 
     def GetId(self):
-        return 15
-
+        return 8
 #----------------------------------------------------------------------------------
 
-class StoppingLeftStepState(StepState):
+class PreStopStepState(StepState):
     """
-        The StoppingLeftStepState class is intended to be used with the StepStateMachine class,
-        When the ZMP has to stop while taking a left step
+        The PreStopStepState class is intended to be used with the StepStateMachine class.
+        When the ZMP has to stop this state is when the first preview of stop step is loaded.
+        Robot completes stopping when CurrentState completes this state. 
     """
     def __init__(self,StepStrategy,walkingTrajectory,robotState,dt):
-        StepState.__init__(self,"StoppingLeft",StepStrategy,dt)
-
+        StepState.__init__(self,"PreStop",StepStrategy,dt)
         self._WalkingTrajectory = walkingTrajectory
         self._robotState = robotState
         
         self._pre_step = 0
         self._first_step = 0
-        self._full_step = 1
-        self._last_step = 0
+        self._full_step = 0
+        self._last_step = 1
 
-      # Stop walking profile:
-        self._p_ref_x = Stop_sagital_x(0, self._step_length, self._trans_ratio_of_step, self._trans_slope_steepens_factor, self._step_time, dt)
-        self._p_ref_y = Stop_lateral_y_from_left_foot(0, self._step_width, self._trans_ratio_of_step, self._trans_slope_steepens_factor, self._step_time, dt)
-
+        # const template:
+        p_ref_const_zero = Constant_Template(0, self._step_time, dt) # constant zero template
+        # Stop walking profile:
+        self._p_ref_x = p_ref_const_zero
+        self._p_ref_y = p_ref_const_zero
 
     def OnEnter(self):
-        rospy.loginfo("Starting STOP LEFT step, time:")
+        rospy.loginfo("Pre-Stop state. Stopping time:")
         rospy.loginfo(rospy.get_time())
 
-        self._robotState.Set_step_phase(value = 3)
-        #self._Strategy.LoadNewStep(self._p_ref_x_forward_step, r_[self._p_ref_x_forward_step, self._p_ref_x_stop], self._p_ref_y_step_right,r_[self._p_ref_y_step_left, self._p_ref_y_stop])
+        self._robotState.Iterate_step_phase()
+        # state is starting a new step:
+        self._NewStep_trigger_X = True
+        self._NewStep_trigger_Y = True
+
+    def UpdateStepCounter(self,stepCounter):
+        stepCounter = stepCounter+1
+        return stepCounter
 
     def GetId(self):
         return 9
-    
+
 #----------------------------------------------------------------------------------
 
-class PreStopLeftStepState(StepState):
+class LastStepState(StepState):
     """
-        The PreStopLeftStepState class is intended to be used with the StepStateMachine class,
-        When the ZMP has to stop
+        The LastStepState class is intended to be used with the StepStateMachine class.
+        When the ZMP has to stop this state is when the second preview of stop step is loaded.
+        This state is for previewState ONLY. 
     """
     def __init__(self,StepStrategy,walkingTrajectory,robotState,dt):
-        StepState.__init__(self,"PreStopLeft",StepStrategy,dt)
-
+        StepState.__init__(self,"LastStep",StepStrategy,dt)
         self._WalkingTrajectory = walkingTrajectory
         self._robotState = robotState
         
@@ -453,65 +459,36 @@ class PreStopLeftStepState(StepState):
         self._last_step = 1
 
         # const template:
-        self._p_ref_const_zero = Constant_Template(0, self._step_time, dt)
+        p_ref_const_zero = Constant_Template(0, self._step_time, dt) # constant zero template
         # Stop walking profile:
-        self._p_ref_x = Stop_sagital_x(0, self._step_length, self._trans_ratio_of_step, self._trans_slope_steepens_factor, self._step_time, dt)
-        self._p_ref_y = Stop_lateral_y_from_right_foot(0, self._step_width, self._trans_ratio_of_step, self._trans_slope_steepens_factor, self._step_time, dt)
-
-
-    def OnEnter(self):
-        rospy.loginfo("continue STOP LEFT step, time:")
-        rospy.loginfo(rospy.get_time())
-
-        self._robotState.Set_step_phase(value = 3)
-        #self._Strategy.LoadNewStep(self._p_ref_x_forward_step, r_[self._p_ref_x_stop, self._p_ref_const_zero], self._p_ref_y_step_right,r_[self._p_ref_y_stop, self._p_ref_const_zero])
-
-    def GetId(self):
-        return 10
-    
-#----------------------------------------------------------------------------------
-
-class StoppingRightStepState(StepState):
-    """
-        The StoppingRightStepState class is intended to be used with the StepStateMachine class,
-        When the ZMP has to stop while taking a right step
-    """
-    def __init__(self,StepStrategy,walkingTrajectory,robotState,dt):
-        StepState.__init__(self,"StoppingRight",StepStrategy,dt)
-
-        self._WalkingTrajectory = walkingTrajectory
-        self._robotState = robotState
-        
-        self._pre_step = 0
-        self._first_step = 0
-        self._full_step = 1
-        self._last_step = 0
-
-      # Stop walking profile:
-        self._p_ref_x = Stop_sagital_x(0, self._step_length, self._trans_ratio_of_step, self._trans_slope_steepens_factor, self._step_time, dt)
-        self._p_ref_y = Stop_lateral_y_from_right_foot(0, self._step_width, self._trans_ratio_of_step, self._trans_slope_steepens_factor, self._step_time, dt)
-
+        self._p_ref_x = p_ref_const_zero
+        self._p_ref_y = p_ref_const_zero
 
     def OnEnter(self):
-        rospy.loginfo("Starting STOP Right step, time:")
+        rospy.loginfo("Last Step state!!! OPS... not supposed to be here!!!!!!!!!!!! time:")
         rospy.loginfo(rospy.get_time())
 
-        self._robotState.Set_step_phase(value = 1)
-        #self._Strategy.LoadNewStep(self._p_ref_x_forward_step, r_[self._p_ref_x_forward_step, self._p_ref_x_stop], self._p_ref_y_step_left,r_[self._p_ref_y_step_right, self._p_ref_y_stop])
+        self._robotState.Iterate_step_phase()
+        # state is starting a new step:
+        self._NewStep_trigger_X = True
+        self._NewStep_trigger_Y = True
+
+    def UpdateStepCounter(self,stepCounter):
+        stepCounter = stepCounter+1
+        return stepCounter
 
     def GetId(self):
-        return 8
-    
+        return 9    
 #----------------------------------------------------------------------------------
 
-class PreStopRightStepState(StepState):
+class StoppingStepState(StepState):
     """
-        The PreStopRightStepState class is intended to be used with the StepStateMachine class,
-        When the ZMP has to stop
+        The StoppingStepState class is intended to be used with the StepStateMachine class.
+        When the ZMP has to stop this state is when the second preview of stop step is loaded.
+        This state is for previewState ONLY.
     """
     def __init__(self,StepStrategy,walkingTrajectory,robotState,dt):
-        StepState.__init__(self,"PreStopRight",StepStrategy,dt)
-
+        StepState.__init__(self,"Stopping",StepStrategy,dt)
         self._WalkingTrajectory = walkingTrajectory
         self._robotState = robotState
         
@@ -521,21 +498,94 @@ class PreStopRightStepState(StepState):
         self._last_step = 1
 
         # const template:
-        self._p_ref_const_zero = Constant_Template(0, self._step_time, dt)
+        p_ref_const_zero = Constant_Template(0, self._step_time, dt) # constant zero template
         # Stop walking profile:
-        self._p_ref_x = Stop_sagital_x(0, self._step_length, self._trans_ratio_of_step, self._trans_slope_steepens_factor, self._step_time, dt)
-        self._p_ref_y = Stop_lateral_y_from_left_foot(0, self._step_width, self._trans_ratio_of_step, self._trans_slope_steepens_factor, self._step_time, dt)
-
+        self._p_ref_x = p_ref_const_zero
+        self._p_ref_y = p_ref_const_zero
 
     def OnEnter(self):
-        rospy.loginfo("continue STOP RIGHT step, time:")
+        rospy.loginfo("STOPPING state!!! OPS... not supposed to be here!!!!!!!!!!!! time:")
         rospy.loginfo(rospy.get_time())
 
-        self._robotState.Set_step_phase(value = 1)
-        #self._Strategy.LoadNewStep(self._p_ref_x_forward_step, r_[self._p_ref_x_stop, self._p_ref_const_zero], self._p_ref_y_step_left,r_[self._p_ref_y_stop, self._p_ref_const_zero])
+        self._robotState.Iterate_step_phase()
+        # state is starting a new step:
+        self._NewStep_trigger_X = True
+        self._NewStep_trigger_Y = True
+
+    def UpdateStepCounter(self,stepCounter):
+        stepCounter = stepCounter+1
+        return stepCounter
 
     def GetId(self):
         return 11
+    
+#----------------------------------------------------------------------------------
+
+# class StoppingRightStepState(StepState):
+#     """
+#         The StoppingRightStepState class is intended to be used with the StepStateMachine class,
+#         When the ZMP has to stop while taking a right step
+#     """
+#     def __init__(self,StepStrategy,walkingTrajectory,robotState,dt):
+#         StepState.__init__(self,"StoppingRight",StepStrategy,dt)
+
+#         self._WalkingTrajectory = walkingTrajectory
+#         self._robotState = robotState
+        
+#         self._pre_step = 0
+#         self._first_step = 0
+#         self._full_step = 1
+#         self._last_step = 0
+
+#       # Stop walking profile:
+#         self._p_ref_x = Stop_sagital_x(0, self._step_length, self._trans_ratio_of_step, self._trans_slope_steepens_factor, self._step_time, dt)
+#         self._p_ref_y = Stop_lateral_y_from_right_foot(0, self._step_width, self._trans_ratio_of_step, self._trans_slope_steepens_factor, self._step_time, dt)
+
+
+#     def OnEnter(self):
+#         rospy.loginfo("Starting STOP Right step, time:")
+#         rospy.loginfo(rospy.get_time())
+
+#         self._robotState.Set_step_phase(value = 1)
+#         #self._Strategy.LoadNewStep(self._p_ref_x_forward_step, r_[self._p_ref_x_forward_step, self._p_ref_x_stop], self._p_ref_y_step_left,r_[self._p_ref_y_step_right, self._p_ref_y_stop])
+
+#     def GetId(self):
+#         return 8
+    
+# #----------------------------------------------------------------------------------
+
+# class PreStopRightStepState(StepState):
+#     """
+#         The PreStopRightStepState class is intended to be used with the StepStateMachine class,
+#         When the ZMP has to stop
+#     """
+#     def __init__(self,StepStrategy,walkingTrajectory,robotState,dt):
+#         StepState.__init__(self,"PreStopRight",StepStrategy,dt)
+
+#         self._WalkingTrajectory = walkingTrajectory
+#         self._robotState = robotState
+        
+#         self._pre_step = 0
+#         self._first_step = 0
+#         self._full_step = 0
+#         self._last_step = 1
+
+#         # const template:
+#         self._p_ref_const_zero = Constant_Template(0, self._step_time, dt)
+#         # Stop walking profile:
+#         self._p_ref_x = Stop_sagital_x(0, self._step_length, self._trans_ratio_of_step, self._trans_slope_steepens_factor, self._step_time, dt)
+#         self._p_ref_y = Stop_lateral_y_from_left_foot(0, self._step_width, self._trans_ratio_of_step, self._trans_slope_steepens_factor, self._step_time, dt)
+
+
+#     def OnEnter(self):
+#         rospy.loginfo("continue STOP RIGHT step, time:")
+#         rospy.loginfo(rospy.get_time())
+
+#         self._robotState.Set_step_phase(value = 1)
+#         #self._Strategy.LoadNewStep(self._p_ref_x_forward_step, r_[self._p_ref_x_stop, self._p_ref_const_zero], self._p_ref_y_step_left,r_[self._p_ref_y_stop, self._p_ref_const_zero])
+
+#     def GetId(self):
+#         return 11
     
 #----------------------------------------------------------------------------------
 
@@ -638,7 +688,7 @@ class TurnRight_LeftStepState(StepState):
         return stepCounter
    
     def GetId(self):
-        return 16
+        return 6
 
     def GetZmpProfilesXY(self):
         self._p_ref_x,self._p_ref_y = Turn_second_half_of_step(0, self._step_length, self._zmp_width, self._trans_ratio_of_step, self._trans_slope_steepens_factor, self._step_time, self._dt, self._turn_angle)
@@ -677,7 +727,7 @@ class TurnRight_RightStepState(StepState):
         return stepCounter
    
     def GetId(self):
-        return 17
+        return 7
 
 ###################################################################################
 #------------------------------ Preview -------------------------------------------
@@ -730,15 +780,16 @@ class StepStateMachine(StateMachine):
         StateMachine.AddState(self,FailureStepState(self._StepStrategyNone,dt))
         StateMachine.AddState(self,PreStepState(self._StepStrategyWalk,robotState,dt))
         StateMachine.AddState(self,FirstStepState(self._StepStrategyWalk,dt))
-        StateMachine.AddState(self,PreStoppingFirstStepState(self._StepStrategyWalk,walkingTrajectory,robotState,dt))
-        StateMachine.AddState(self,PreStoppingLeftStepState(self._StepStrategyWalk,walkingTrajectory,robotState,dt))
-        StateMachine.AddState(self,PreStoppingRightStepState(self._StepStrategyWalk,walkingTrajectory,robotState,dt))
-        StateMachine.AddState(self,StoppingLeftStepState(self._StepStrategyWalk,walkingTrajectory,robotState,dt))
-        StateMachine.AddState(self,StoppingRightStepState(self._StepStrategyWalk,walkingTrajectory,robotState,dt))
-        StateMachine.AddState(self,StopLeftStepState(self._StepStrategyWalk,walkingTrajectory,robotState,dt))
-        StateMachine.AddState(self,StopRightStepState(self._StepStrategyWalk,walkingTrajectory,robotState,dt))
-        StateMachine.AddState(self,PreStopLeftStepState(self._StepStrategyWalk,walkingTrajectory,robotState,dt))
-        StateMachine.AddState(self,PreStopRightStepState(self._StepStrategyWalk,walkingTrajectory,robotState,dt))
+        StateMachine.AddState(self,PreStopStepState(self._StepStrategyWalk,walkingTrajectory,robotState,dt))
+        StateMachine.AddState(self,LastStepState(self._StepStrategyWalk,walkingTrajectory,robotState,dt))
+        #StateMachine.AddState(self,PreStoppingLeftStepState(self._StepStrategyWalk,walkingTrajectory,robotState,dt))
+        #StateMachine.AddState(self,PreStoppingRightStepState(self._StepStrategyWalk,walkingTrajectory,robotState,dt))
+        StateMachine.AddState(self,StoppingStepState(self._StepStrategyWalk,walkingTrajectory,robotState,dt))
+        #StateMachine.AddState(self,StoppingRightStepState(self._StepStrategyWalk,walkingTrajectory,robotState,dt))
+        #StateMachine.AddState(self,StopLeftStepState(self._StepStrategyWalk,walkingTrajectory,robotState,dt))
+        #StateMachine.AddState(self,StopRightStepState(self._StepStrategyWalk,walkingTrajectory,robotState,dt))
+        #StateMachine.AddState(self,PreStopLeftStepState(self._StepStrategyWalk,walkingTrajectory,robotState,dt))
+        #StateMachine.AddState(self,PreStopRightStepState(self._StepStrategyWalk,walkingTrajectory,robotState,dt))
         StateMachine.AddState(self,RightStepState(self._StepStrategyWalk,walkingTrajectory,robotState,dt))
         StateMachine.AddState(self,LeftStepState(self._StepStrategyWalk,walkingTrajectory,robotState,dt))
         #StateMachine.AddState(self,PreEmergencyStopState(self._StepStrategyWalk,walkingTrajectory,robotState,dt))
@@ -752,20 +803,22 @@ class StepStateMachine(StateMachine):
         #StateMachine.AddTransition(self,"Failing",              "Stop",         "Idle")
         StateMachine.AddTransition(self,"PreStep",              "NextStep",     "FirstStep")
         StateMachine.AddTransition(self,"FirstStep",            "NextStep",     "Left")
-        StateMachine.AddTransition(self,"FirstStep",            "Stop",         "PreStoppingFirstStep")
+        #StateMachine.AddTransition(self,"FirstStep",            "Stop",         "PreStop")
         StateMachine.AddTransition(self,"Left",                 "NextStep",     "Right")
-        StateMachine.AddTransition(self,"Left",                 "Stop",         "PreStoppingLeft")
+        StateMachine.AddTransition(self,"Left",                 "Stop",         "PreStop")
         StateMachine.AddTransition(self,"Right",                "NextStep",     "Left")
-        StateMachine.AddTransition(self,"Right",                "Stop",         "PreStoppingRight")
-        StateMachine.AddTransition(self,"PreStoppingFirstStep", "NextStep",     "StoppingLeft")
-        StateMachine.AddTransition(self,"PreStoppingRight",     "NextStep",     "StoppingLeft")
-        StateMachine.AddTransition(self,"PreStoppingLeft",      "NextStep",     "StoppingRight")
-        StateMachine.AddTransition(self,"StoppingLeft",         "NextStep",     "PreStopRight")
-        StateMachine.AddTransition(self,"StoppingRight",        "NextStep",     "PreStopLeft")
-        StateMachine.AddTransition(self,"PreStopRight",         "NextStep",     "StopLeft")
-        StateMachine.AddTransition(self,"PreStopLeft",          "NextStep",     "StopRight")
-        StateMachine.AddTransition(self,"StopRight",            "NextStep",     "Idle")
-        StateMachine.AddTransition(self,"StopLeft",             "NextStep",     "Idle")
+        StateMachine.AddTransition(self,"Right",                "Stop",         "PreStop")
+        #StateMachine.AddTransition(self,"PreStoppingFirstStep", "NextStep",     "StoppingLeft")
+        #StateMachine.AddTransition(self,"PreStoppingRight",     "NextStep",     "StoppingLeft")
+        #StateMachine.AddTransition(self,"PreStoppingLeft",      "NextStep",     "StoppingRight")
+        #StateMachine.AddTransition(self,"StoppingLeft",         "NextStep",     "PreStopRight")
+        #StateMachine.AddTransition(self,"StoppingRight",        "NextStep",     "PreStopLeft")
+        StateMachine.AddTransition(self,"PreStop",              "NextStep",     "LastStep")
+        StateMachine.AddTransition(self,"PreStop",              "Stopped",      "Idle")
+        StateMachine.AddTransition(self,"LastStep",             "NextStep",     "Stopping")
+        #StateMachine.AddTransition(self,"PreStopLeft",          "NextStep",     "StopRight")
+        #StateMachine.AddTransition(self,"StopRight",            "NextStep",     "Idle")
+        StateMachine.AddTransition(self,"Stopping",             "NextStep",     "Idle")
         StateMachine.AddTransition(self,"EmergencyStop",        "NextStep",     "Idle")
         StateMachine.AddTransition(self,"FirstStep",            "TurnRight",     "TurnRightBeginLeft")
         StateMachine.AddTransition(self,"Right",                "TurnRight",     "TurnRightBeginLeft")
@@ -788,6 +841,8 @@ class StepStateMachine(StateMachine):
         self._StatePreviewBuffer = deque([]) # contains a list of BufferData class, infomation needed from _CurrentState to _PreviewState: Transitions, step times,...
         self._PreviewState = StateMachine.GetCurrentState(self) # the state at which the preview is 
         self._EmergencyStopFinished = False
+        self._ReceivedStopCmd = False
+        self._Walking = True
 
     def Initialize(self):        
         self._ZMP_Preview_BufferX.init_values()
@@ -830,13 +885,20 @@ class StepStateMachine(StateMachine):
         StateMachine.PerformTransition(self,transition)
         self._counter = 0
 
-    def Stop(self):
-        StateMachine.PerformTransition(self,"Stop")
-
     def EmergencyStop(self):
         #StateMachine.PerformTransition(self,"EmergencyStop")
         self._CurrentState = self._States["EmergencyStop"] # transition from all states
         self._CurrentState.OnEnter()
+
+    def StopCmd(self): # "Stop" transition will be entered into _PreviewState at the end of current 
+        self._ReceivedStopCmd = True
+
+    # def Stop(self):
+    #     StateMachine.PerformTransition(self,"Stop")
+    #     self._counter = 0
+
+    def Stopped(self):
+        StateMachine.PerformTransition(self,"Stopped")
             
     def CalculateFootSwingTrajectory(self):
         StateMachine.GetCurrentState(self).CalculateFootSwingTrajectory(1.0/self._UpdateRateHz,self._counter)
@@ -855,6 +917,9 @@ class StepStateMachine(StateMachine):
             if "EmergencyStop" == StateMachine.GetCurrentState(self).Name:
                 self._EmergencyStopFinished = True
                 self.NextStep()
+            elif "PreStop" == StateMachine.GetCurrentState(self).Name:
+                self._Walking = False
+                self.Stopped()
             else:
                 self._StatePreviewBuffer.popleft() # remove data of last step (that was just completed)
                 self._PromotePreviewState( self._GetPreviewTransition() ) # load preview of new step. Updates: turn variables, _PreviewState, preview with ZMP profile and _StatePreviewBuffer  
@@ -873,6 +938,9 @@ class StepStateMachine(StateMachine):
 
     def CompletedEmergencyStop(self):
         return self._EmergencyStopFinished
+
+    def Walking(self):
+        return self._Walking
 
     def SetTurnCmd(self, turn_cmd):
         self._TurnCmdInput = turn_cmd
@@ -927,7 +995,9 @@ class StepStateMachine(StateMachine):
           Function return transition string of turn direction or "NextStep" transition according to 
           the need to turn and if transition is viable from _PreviewState.
         """
-        if self._DecideToTurn():
+        if self._ReceivedStopCmd:
+            transition = "Stop"
+        elif self._DecideToTurn():
             turn_dir = self.GetTurnDirection() # returns: "TurnRight" or "TurnLeft"
             rospy.loginfo("StepStateMachine _GetPreviewTransition: turn_dir =  %s" % ( turn_dir ))
             state,transition_exists = StateMachine.GetStateAtTransition(self,self._PreviewState.Name,turn_dir)

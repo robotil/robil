@@ -150,7 +150,7 @@ class MyTask(RobilTask):
              #self._ZmpStateMachine.EmergencyStop()
              rospy.loginfo('DEBUG - Trying transition "Emergency STOP" in ZMP Step State Machine')
         elif 0 == self._debug_transition:
-             self._ZmpStateMachine.Stop()
+             self._ZmpStateMachine.StopCmd()
              rospy.loginfo('DEBUG - Trying transition "STOP" in ZMP Step State Machine')
 
 
@@ -174,7 +174,7 @@ class MyTask(RobilTask):
         rospy.sleep(1)
         self._ZmpStateMachine.Start()
 
-        while self._ZmpLpp.IsActive():
+        while self._ZmpLpp.IsActive() and self._ZmpStateMachine.Walking():
             # Emergency Stop Command:
             if self.isPreepted() or (3 == self._debug_transition):
                 self._ZmpStateMachine.EmergencyStop()
@@ -204,7 +204,7 @@ class MyTask(RobilTask):
 
             self._interval.sleep()
 
-        self._ZmpStateMachine.EmergencyStop() #        self._ZmpStateMachine.Stop()
+        self._ZmpStateMachine.EmergencyStop() #        self._ZmpStateMachine.StopCmd()
 
         print "Finish ZmpWalk"
         return RTResult_SUCCESSED("Finished in Success")

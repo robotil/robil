@@ -125,6 +125,12 @@ class Robot_State:
             self.__step_phase = copy.copy(value)
         return()
 
+    def Iterate_step_phase(self):
+        if 4 == self.__step_phase:
+            self.__step_phase = 1
+        else:
+            self.__step_phase = self.__step_phase + 1
+
     # External auxiliary method:
     def Get_foot_coord_params(self,step_width,step_length):
     # Retrieves parameters that are depended on the coordinate system that we are using (right or left foot).
