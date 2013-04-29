@@ -97,6 +97,7 @@ public:
 		else {
 		  ROS_INFO("ERROR in requesting transformation from perception");
 		  as_.setAborted();
+		return;
 		}
                 ROS_INFO("closing right hand");
                 grasp_msg.strength = 1000;
