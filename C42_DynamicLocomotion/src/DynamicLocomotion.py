@@ -21,30 +21,43 @@ class DynamicLocomotion(RobilTask):
         RobilTask.__init__(self, name)
         lpp = LocalPathPlanner()
         self._DynamicWalker = DynamicWalker(WalkingModeChooser(lpp),lpp)
-        self._interval = rospy.Rate(0.3)
+        self._interval = rospy.Rate(2)
         
     def DynamicLocomotionTask(self):
         
         self._DynamicWalker.Initialize()
+
         self._DynamicWalker.Start()
-        self.WaitForPath()
+
+        if (False == self.WaitForPath()):
+            return RTResult_PREEPTED()
+
         self._DynamicWalker.Walk()
-        # if self._DynamicWalker.Walk():
-        #     self._DynamicWalker.Stop()
-        #     return RTResult_SUCCESSED("Finished in Success")
-        # else:
-        #     return RTResult_PREEPTED()
+
+        while not self._DynamicWalker.IsDone():
+            # if self.isPreepted():
+            #     self._DynamicWalker.EmergencyStop()
+            #     return RTResult_PREEPTED()
+            self._interval.sleep()
+
+        self._DynamicWalker.Stop()
+
+        print("SUCCESS!!")
+
+        return RTResult_SUCCESSED("Finished in Success")
 
     def WaitForPath(self):
         self._DynamicWalker._LPP.Stop()
         self._path_sub = rospy.Subscriber('/C31PathPlanner',C31_Waypoints,self._path_cb)
 
-        while not self._DynamicWalker._LPP.IsActive():
+        while not self._DynamicWalker.IsReady():
             # if self.isPreepted():
             #     self._DynamicWalker.Stop()
-            #     print "Preempt ZmpWalk: Preempted before path was received"
-            #     return RTResult_PREEPTED()
+            #     print "Preempt Walker: Preempted before path was received"
+            #     return False
             self._interval.sleep()
+        return True
+
 
 ###################################################################################
 #--------------------------- CallBacks -----------------------------------------------
@@ -70,3 +83,5 @@ if __name__ == '__main__':
     mode = rospy.Publisher('/atlas/mode', String, None, False, True, None)
     mode.publish("harnessed")
     node.DynamicLocomotionTask()
+    rospy.spin()
+    print "C42_DynamicLocomotion node Closed"

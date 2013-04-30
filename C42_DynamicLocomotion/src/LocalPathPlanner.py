@@ -163,7 +163,7 @@ class LocalPathPlanner(object):
         theta = 0.0
         if(0 == len(self._Path)):
             # Last segment
-            result = 0.2
+            result = 0.8
         else:
             NextSegment = Segment(self._CurrentSegment.GetTarget(),self._Path[0])
             theta = NextSegment.GetYaw()-self._CurrentSegment.GetYaw()

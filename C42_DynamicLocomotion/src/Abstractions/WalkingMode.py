@@ -25,3 +25,6 @@ class WalkingMode(object):
     
     def EmergencyStop(self):
         pass    
+
+    def IsDone(self):
+        return False

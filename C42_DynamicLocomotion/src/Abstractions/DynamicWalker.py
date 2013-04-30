@@ -16,6 +16,8 @@ class DynamicWalker(object):
         self._ModeChooser = walkingModeChooser
         self._LPP = localPathPlanner
 
+
+    # Commands:
     def Initialize(self):
         self._WalkingMode = self._ModeChooser.GetRecommendedMode()
         self._WalkingMode.Initialize()
@@ -33,6 +35,14 @@ class DynamicWalker(object):
 
     def SetPath(self,Path):
         self._LPP.SetPath(Path)
+
+
+    # Status:
+    def IsDone(self):
+        return self._WalkingMode.IsDone()
+
+    def IsReady(self):
+        return self._LPP.IsActive()
 
 
 
