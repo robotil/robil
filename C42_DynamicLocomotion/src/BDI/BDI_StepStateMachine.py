@@ -7,8 +7,6 @@
 ###################################################################################
 
 from Abstractions.StateMachine import *
-import math
-from tf.transformations import quaternion_from_euler, euler_from_quaternion
 
 ###################################################################################
 #--------------------------- States -----------------------------------------------
@@ -27,9 +25,6 @@ class BDI_StepState(State):
     def GetAtlasSimInterfaceCommand(self,index):
         return self._Strategy.GetAtlasSimInterfaceCommand(index)
 
-    def GetStepSize(self):
-        return 0.0,0.0,0.0
-
 class BDI_StepLeft(BDI_StepState):
     """
         The BDI_Idle class is intended to be used when not walking
@@ -37,10 +32,8 @@ class BDI_StepLeft(BDI_StepState):
     def __init__(self):
         BDI_StepState.__init__(self,"Left")
 
-    def GetStepSize(self):
-        x,y,alpha = self._Strategy.GetStepSize()
-        return x,y,alpha
-
+    def OnExit(self):
+        self._Strategy.StepDone(False)
 
 class BDI_StepRight(BDI_StepState):
     """
@@ -49,9 +42,8 @@ class BDI_StepRight(BDI_StepState):
     def __init__(self):
         BDI_StepState.__init__(self,"Right")
 
-    def GetStepSize(self):
-        x,y,alpha = self._Strategy.GetStepSize()
-        return x,-y,alpha
+    def OnExit(self):
+        self._Strategy.StepDone(True)
 
 
 ###################################################################################
@@ -89,7 +81,4 @@ class BDI_StepStateMachine(StateMachine):
             state.SetStrategy(LeftStrategy)
         else:
             raise StateMachineError("BDI_StepStateMachine::SetStrategy: Could not find step")
-
-    def GetStepSize(self):
-        return StateMachine.GetCurrentState(self).GetStepSize()
 

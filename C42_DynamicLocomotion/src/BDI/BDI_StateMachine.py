@@ -82,8 +82,8 @@ class BDI_Strategy(object):
 
         return self._command
 
-    def GetStepSize(self):
-        return self._StepLength,self._StepWidth,self._alpha
+    def StepDone(self,bIsRight):
+        pass
 
 class BDI_StrategyIdle(BDI_Strategy):
     """
@@ -103,6 +103,7 @@ class BDI_StrategyForward(BDI_Strategy):
     def GetAtlasSimInterfaceCommand(self,index):       
         # A walk behavior command needs to know three additional steps beyond the current step needed to plan
         # for the best balance
+        print("step forward")  
         for i in range(4):
             step_index = index + i
             is_right_foot = step_index % 2
@@ -112,12 +113,28 @@ class BDI_StrategyForward(BDI_Strategy):
 
             x = self._StepLength*(i+1)
             y = self._StepWidth if (step_index%2==0) else -self._StepWidth
+            print(x,y)
             x,y = self._Odometer.GetInGlobalCoordinates(x,y)
+            print(x,y)
             self._command.walk_params.step_data[i].pose.position.x = x
             # Step 0.15m to either side of center, alternating with feet
             self._command.walk_params.step_data[i].pose.position.y = y
 
+            # Calculate orientation quaternion
+            Q = quaternion_from_euler(0, 0, self._Odometer.GetYaw())
+
+            self._command.walk_params.step_data[i].pose.orientation.x = Q[0]
+            self._command.walk_params.step_data[i].pose.orientation.y = Q[1]
+            self._command.walk_params.step_data[i].pose.orientation.z = Q[2]
+            self._command.walk_params.step_data[i].pose.orientation.w = Q[3]
+
+            #print(self._command)
+
         return self._command
+
+    def StepDone(self,bIsRight):
+        x = self._StepLength
+        self._Odometer.AddLocalPosition(x,0)
 
 class BDI_StrategyLeft(BDI_Strategy):
     """
@@ -132,10 +149,10 @@ class BDI_StrategyLeft(BDI_Strategy):
         self._InnerRadius = self._TurnRadius - self._StepWidth
         self._OuterRadius = self._TurnRadius + self._StepWidth
         #self._alpha = self._StepLength/self._TurnRadius
-        self._alpha = math.acos(1-self._StepLength/(2*self._TurnRadius))
+        self._alpha = math.acos(1-self._StepLength**2/(2*self._TurnRadius**2))
 
     def GetAtlasSimInterfaceCommand(self,index): 
-        print("stepLeft")      
+        #print("step Left ",self._Odometer.GetYaw())
         for i in range(4):
             step_index = index + i
             is_right_foot = step_index % 2
@@ -145,17 +162,17 @@ class BDI_StrategyLeft(BDI_Strategy):
 
             # a left step is in the inner circle
             r = self._InnerRadius if (step_index%2==0) else self._OuterRadius
+            R = self._InnerRadius if (step_index%2==1) else self._OuterRadius
 
             theta = self._alpha*(i+1)
-            print(theta)
+            #print(theta)
 
             # (Translate(dot)Rotate(dot)Translate)
             x = r*math.sin(theta)
-            y = self._TurnRadius - r*math.cos(theta)
+            y = R - r*math.cos(theta)
 
-            print(x,y)
+            #print(x,y)
             x,y = self._Odometer.GetInGlobalCoordinates(x,y)
-            print(x,y)
             self._command.walk_params.step_data[i].pose.position.x = x
             self._command.walk_params.step_data[i].pose.position.y = y
 
@@ -169,6 +186,20 @@ class BDI_StrategyLeft(BDI_Strategy):
 
         return self._command
 
+    def StepDone(self,bIsRight):
+        if (bIsRight):
+            r = self._OuterRadius
+            R = self._InnerRadius
+        else:
+            r = self._InnerRadius
+            R = self._OuterRadius
+
+        # (Translate(dot)Rotate(dot)Translate)
+        x = r*math.sin(self._alpha)
+        y = R - r*math.cos(self._alpha)
+        self._Odometer.AddLocalPosition(x,y)
+        self._Odometer.AddYaw(self._alpha)
+
 class BDI_StrategyRight(BDI_Strategy):
     """
     """
@@ -181,9 +212,10 @@ class BDI_StrategyRight(BDI_Strategy):
 
         self._InnerRadius = self._TurnRadius - self._StepWidth
         self._OuterRadius = self._TurnRadius + self._StepWidth
-        self._alpha = -self._StepLength/self._TurnRadius
+        #self._alpha = self._StepLength/self._TurnRadius
+        self._alpha = -math.acos(1-self._StepLength**2/(2*self._TurnRadius**2))
 
-    def GetAtlasSimInterfaceCommand(self,index):       
+    def GetAtlasSimInterfaceCommand(self,index): 
         for i in range(4):
             step_index = index + i
             is_right_foot = step_index % 2
@@ -191,23 +223,22 @@ class BDI_StrategyRight(BDI_Strategy):
             self._command.walk_params.step_data[i].step_index = step_index
             self._command.walk_params.step_data[i].foot_index = step_index%2
 
-            # a left step is in the inner circle
-            r = self._InnerRadius if (step_index%2==0) else self._OuterRadius
+            # a left step is in the outer circle
+            r = self._InnerRadius if (step_index%2==1) else self._OuterRadius
+            R = self._InnerRadius if (step_index%2==0) else self._OuterRadius
 
-            r = r
-            R = -self._TurnRadius
-            theta = self._alpha*i
+            theta = self._alpha*(i+1)
 
-            # (Translate(dot)Rotate(dot)Translate)
-            x = R*math.sin(theta)
-            y = R*math.cos(theta) + r
+            x = r*math.sin(-theta)
+            y = r*math.cos(theta) - R
+
+            #print(x,y)
             x,y = self._Odometer.GetInGlobalCoordinates(x,y)
             self._command.walk_params.step_data[i].pose.position.x = x
-            # Step 0.15m to either side of center, alternating with feet
             self._command.walk_params.step_data[i].pose.position.y = y
 
             # Calculate orientation quaternion
-            Q = quaternion_from_euler(0, 0, theta)
+            Q = quaternion_from_euler(0, 0, self._Odometer.GetYaw()+theta)
 
             self._command.walk_params.step_data[i].pose.orientation.x = Q[0]
             self._command.walk_params.step_data[i].pose.orientation.y = Q[1]
@@ -215,6 +246,20 @@ class BDI_StrategyRight(BDI_Strategy):
             self._command.walk_params.step_data[i].pose.orientation.w = Q[3]
 
         return self._command
+
+    def StepDone(self,bIsRight):
+        if (bIsRight):
+            r = self._OuterRadius
+            R = self._InnerRadius
+        else:
+            r = self._InnerRadius
+            R = self._OuterRadius
+
+        # (Translate(dot)Rotate(dot)Translate)
+        x = r*math.sin(-self._alpha)
+        y = r*math.cos(self._alpha) - R
+        self._Odometer.AddLocalPosition(x,y)
+        self._Odometer.AddYaw(self._alpha)
 
 
 ###################################################################################
@@ -311,11 +356,8 @@ class BDI_StateMachine(StateMachine):
         result = 0 
         if (nextindex>self._index):
             self._index += 1
-            x,y,alpha = self._StepStateMachine.GetStepSize()
-            self._Odometer.AddYaw(alpha)
-            self._Odometer.AddLocalPosition(x,0)
             self._StepStateMachine.Step()
-            result = self._StepStateMachine.GetCommand(nextindex)
+            result = self._StepStateMachine.GetCommand(self._index)
         return result
 
 
