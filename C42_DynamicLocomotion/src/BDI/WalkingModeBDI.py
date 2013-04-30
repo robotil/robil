@@ -91,18 +91,20 @@ class WalkingModeBDI(WalkingMode):
     # the current robot position   
     def asi_state_cb(self, state):
         if (self._LPP.IsActive()):
+            #print(state)
+            # This weird little piece of code is supposed to initialize the odometer
             try:
                 x = self.robot_position.x
             except AttributeError:            
                 self.robot_position = Point()
                 self.robot_position.x = state.pos_est.position.x
                 self.robot_position.y = state.pos_est.position.y
-                self.robot_position.z = state.pos_est.position.z  
+                self.robot_position.z = state.pos_est.position.z
+                self._Odometer.SetPosition(state.pos_est.position.x,state.pos_est.position.y)  
             
             targetYaw = self._LPP.GetTargetYaw()
             delatYaw = targetYaw - self._Odometer.GetYaw()
 
-            self._LPP.UpdatePosition(self.robot_position.x,self.robot_position.y)
             if (delatYaw > 0.6):
                 self._StateMachine.TurnLeft()
             elif (delatYaw < -0.6):
@@ -116,4 +118,6 @@ class WalkingModeBDI(WalkingMode):
  
     def _odom_cb(self,odom):
         self._LPP.UpdatePosition(odom.pose.pose.position.x,odom.pose.pose.position.y)
+        #self._Odometer.SetPosition(odom.pose.pose.position.x,odom.pose.pose.position.y)
+
         #print(odom.pose.pose.position.x)

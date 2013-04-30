@@ -14,12 +14,16 @@ class BDI_Odometer(object):
         self._Y = 0.0
         self._Yaw = 0.0
 
+    def SetPosition(self,x,y):
+        self._X = x
+        self._Y = y
+
     def GetGlobalPosition(self):
         return self._X,self._Y
 
     def GetInGlobalCoordinates(self,LocalX,LocalY):
-        x = self._X + LocalX*math.cos(self._Yaw) + LocalY*math.sin(self._Yaw)
-        y = self._Y + LocalY*math.cos(self._Yaw) - LocalX*math.sin(self._Yaw)
+        x = self._X + LocalX*math.cos(-self._Yaw) + LocalY*math.sin(-self._Yaw)
+        y = self._Y + LocalY*math.cos(-self._Yaw) - LocalX*math.sin(-self._Yaw)
         return x,y
 
     def AddGlobalPosition(self,x,y):
@@ -27,8 +31,8 @@ class BDI_Odometer(object):
         self._Y += y
 
     def AddLocalPosition(self,x,y):
-        self._X += x*math.cos(self._Yaw) + y*math.sin(self._Yaw)
-        self._Y += y*math.cos(self._Yaw) - x*math.sin(self._Yaw)
+        self._X += x*math.cos(-self._Yaw) + y*math.sin(-self._Yaw)
+        self._Y += y*math.cos(-self._Yaw) - x*math.sin(-self._Yaw)
 
     def AddYaw(self,yaw):
         self._Yaw += yaw
