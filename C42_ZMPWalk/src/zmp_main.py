@@ -53,7 +53,7 @@ class MyTask(RobilTask):
         self._Des_Orientation = 0#-math.pi/2
         self.init_values()
 
-        rospy.sleep(1)
+        rospy.sleep(2)
         self._listener = tf.TransformListener()
         # sampling time:
         zmp_walking_path = os.path.join(roslib.packages.get_pkg_dir('C42_ZMPWalk'), r"src/parameters/",'ZMP_Walking_Params.yaml')
@@ -109,6 +109,7 @@ class MyTask(RobilTask):
     def init_values(self):
         self._debug_transition = 0
         self._done = False
+        self._robot_not_stable = True
         
     def _odom_cb(self,odom):
         self._done = self._ZmpLpp.UpdatePosition(odom.pose.pose.position.x,odom.pose.pose.position.y)
@@ -196,7 +197,6 @@ class MyTask(RobilTask):
             [COMy, COMy_dot, p_pre_con_y] = self._Lateral_y_Preview_Controller.getCOM_ref( self._p_ref_y,new_step_trigger_y )
             self._ZmpStateMachine.ResetNewStepTrigger()
 
-
             self._rs.getRobot_State(listener = self._listener)
             self._ZmpStateMachine.CalculateFootSwingTrajectory()
             #requiredYaw = self._Des_Orientation # ZmpLpp.GetTargetYaw()
@@ -207,6 +207,10 @@ class MyTask(RobilTask):
             self._pub_error.publish(self._ZmpLpp.GetPathError())
 
             self._interval.sleep()
+
+            if self._robot_not_stable:
+                rospy.sleep(5)
+                self._robot_not_stable = False
 
         self._ZmpStateMachine.EmergencyStop() #        self._ZmpStateMachine.StopCmd()
 

@@ -45,7 +45,7 @@ zmp_walking:
     15cm:
 
         step_length: 0.15
-        step_time: 1.2
+        step_time: 1.4
         bend_knees: 0.045
         step_height: 0.04
         PSC:  0.6100000
