@@ -1,6 +1,7 @@
 #include "ros/ros.h"
 #include "ros/package.h"
 #include "std_msgs/String.h"
+#include "C11_TCPServer.h"
 #include "C11_Agent/C11.h"
 //#include "C11_Agent/obstacle_map.h"
 //#include "C11_Agent/object_map.h"
@@ -17,6 +18,8 @@
 #include "C11_PushServer.hpp"
 #include "C11_HMIResponseServer.hpp"
 #include "C11_UntilOperatorIntervention.hpp"
+#include "C11_Agent_Node.h"
+#include "C11Main.h"
 //#include "TaskProxyConnectionByActionLib.h"
 #include "C34_Executer/run.h"
 #include "C34_Executer/stop.h"
@@ -25,6 +28,7 @@
 #include "C31_PathPlanner/C31_Waypoints.h"
 #include <sstream>
 #include <stdlib.h>
+#include <QApplication>
 
 ros::NodeHandle* pn;
 ros::Subscriber status_subscriber;
@@ -32,6 +36,7 @@ std::string tree_id_str;
 ros::ServiceClient c34StopClient;
 ros::ServiceClient c11ExecutionStatusChangeClient;
 ros::Publisher path_update_pub;
+CTcpServer* pCTcpServer;
 
 
 //bool PathPlan(C11_Agent::C11::Request& req,
@@ -207,51 +212,57 @@ bool PathUpdate(C10_Common::path_update::Request& req,
 int main(int argc, char **argv)
 {
 
-	tree_id_str="";
-  ros::init(argc, argv, "C11_Agent");
+//	tree_id_str="";
+//  ros::init(argc, argv, "C11_Agent");
 
 
 
-  ros::NodeHandle n;
-  pn = &n;
+//  ros::NodeHandle n;
+//  pn = &n;
 
-   
-//   ros::Publisher stt_pub = n.advertise<C11_Agent::C34C11_STT>("c11_stt", 1000);
+  C11Main m(argc, argv);
 
-     path_update_pub = n.advertise<C31_PathPlanner::C31_Waypoints>("c11_path_update",10000);
+  QApplication app(argc, argv);
+  pCTcpServer = new CTcpServer(QString("172.23.1.130"),45671);
+  m.SetTcp(pCTcpServer);
+ // C11Node.SetTcp(pCTcpServer);
 
-//   ros::ServiceServer service = n.advertiseService("PathPlan", PathPlan);
-   ros::ServiceServer service_MissionSelection = n.advertiseService("MissionSelection", MissionSelection);
-   ros::ServiceServer service_PauseMission = n.advertiseService("PauseMission", PauseMission);
-   ros::ServiceServer service_ResumeSelection = n.advertiseService("ResumeMission", ResumeMission);
-   ros::ServiceServer service_PathUpdate = n.advertiseService("PathUpdate", PathUpdate);
-//   ros::ServiceServer service_AskForImage = n.advertiseService("AskForImage", AskForImage);
 
-   ros::Rate loop_rate(10);
+//     path_update_pub = n.advertise<C31_PathPlanner::C31_Waypoints>("c11_path_update",10000);
+//
+//   ros::ServiceServer service_MissionSelection = n.advertiseService("MissionSelection", MissionSelection);
+//   ros::ServiceServer service_PauseMission = n.advertiseService("PauseMission", PauseMission);
+//   ros::ServiceServer service_ResumeSelection = n.advertiseService("ResumeMission", ResumeMission);
+//   ros::ServiceServer service_PathUpdate = n.advertiseService("PathUpdate", PathUpdate);
+
+//   ros::Rate loop_rate(10);
 
    ROS_INFO("C11_Agent started!\n");
 
-   PushHMIServer pushS;
-   HMIResponseServer HMIResS;
+//   PushHMIServer pushS(pCTcpServer);
+//   HMIResponseServer HMIResS;
  
 
-  while (ros::ok())
-  {
+//  while (ros::ok())
+//  {
+//
+//
+//  //C11_Agent::C34C11_STT  stt1;
+//
+//// ROS_INFO("The status is  = %d",  1);
+//
+//
+//   // stt_pub.publish(stt1);
+//
+//    ros::spinOnce();
+//
+//    loop_rate.sleep();
+//
+//  }
 
 
-  //C11_Agent::C34C11_STT  stt1;
-
-// ROS_INFO("The status is  = %d",  1);
- 
-
-   // stt_pub.publish(stt1);
-
-    ros::spinOnce();
-
-    loop_rate.sleep();
-
-  }
-
+  app.exec();
+  delete pCTcpServer;
 return 0;
 
 

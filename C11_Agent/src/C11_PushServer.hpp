@@ -16,9 +16,17 @@
 #include "C10_Common/push_img.h"
 #include "C10_Common/push_occupancy_grid.h"
 #include "C10_Common/push_path.h"
+//#include "C11_TCPServer.h"
+#include <QImage>
 
 using namespace std;
 using namespace C0_RobilTask;
+
+class IPushHMIInterface
+{
+public:
+  virtual void PushImage(QImage img) = 0;
+};
 
 class PushHMIServer:public RobilTask{
 
@@ -27,8 +35,19 @@ public:
 	PushHMIServer(string name = "/PushHMI"):
     	RobilTask(name)
     {
-
+	  pIPushHMIInterface = NULL;
+	  IsWaitForRelease = false;
     }
+
+	void SetPushHMIInterface(IPushHMIInterface *ipushHMIInterface)
+	{
+	  pIPushHMIInterface = ipushHMIInterface;
+	}
+
+	void SetReleased()
+	{
+	  IsWaitForRelease = false;
+	}
 
 	TaskResult panoramic_image_task()
 	{
@@ -44,24 +63,48 @@ public:
 		}
 		ROS_INFO("C11_Agent: panoramic_image received!\n");
 
-		ros::ServiceClient c11Client = _node.serviceClient<C10_Common::push_img>("C11/push_img");
 
-		C10_Common::push_img srv11;
+		cout<<"Size of vector: "<<srv21.response.res.data.size()<<"\n";
+		cout<<"Width: "<<srv21.response.res.width<<"\n";
+		cout<<"Height: "<<srv21.response.res.height<<"\n";
+		cout<<"Step: "<<srv21.response.res.step<<"\n";
+		QImage img(srv21.response.res.data.data(),srv21.response.res.width,srv21.response.res.height,QImage::Format_RGB888);
+//		if(!img.save("stam.jpg"))
+//		  {
+//		    ROS_INFO("Can't save the image!\n");
+//		  }
+		if(pIPushHMIInterface != NULL)
+		  {
+		    IsWaitForRelease = true;
+		    pIPushHMIInterface->PushImage(img);
+		    while(IsWaitForRelease)
+		      {
+		        sleep(100);
+		      }
+		  }
+//		sleep(3000);
+//		char* buff = new char(sizeof(srv21.response.res));
+//		cout<<"Size of image: "<<sizeof(img)<<"\n";
+//		pCTcpServer->SendImage(img);
 
-		srv11.request.IMG = srv21.response.res;
+//		ros::ServiceClient c11Client = _node.serviceClient<C10_Common::push_img>("C11/push_img");
 
-		if (!c11Client.call(srv11))
-		{
-			ROS_ERROR("couldn't get a C11 reply, exiting\n");
-			return TaskResult::FAULT();
+//		C10_Common::push_img srv11;
 
-		}
+//		srv11.request.IMG = srv21.response.res;
+
+//		if (!c11Client.call(srv11))
+//		{
+//			ROS_ERROR("couldn't get a C11 reply, exiting\n");
+//			return TaskResult::FAULT();
+
+//		}
 		ROS_INFO("C11_Agent: panoramic_image sent!\n");
 
-		 if (srv11.response.ACK.mes != 1) {
-			ROS_ERROR("C11 ack is fault, exiting\n");
-			return TaskResult::FAULT();
-		 }
+//		 if (srv11.response.ACK.mes != 1) {
+//			ROS_ERROR("C11 ack is fault, exiting\n");
+//			return TaskResult::FAULT();
+//		 }
 		 ROS_INFO("C11_Agent: panoramic_image_task end!\n");
 
 		 return TaskResult::SUCCESS ();
@@ -200,6 +243,11 @@ public:
     	}
     	return TaskResult::FAULT();
     }
+
+private:
+ //   CTcpServer* pCTcpServer;
+    IPushHMIInterface *pIPushHMIInterface;
+    bool IsWaitForRelease;
 };
 
 

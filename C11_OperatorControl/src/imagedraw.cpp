@@ -30,6 +30,9 @@ ImageDraw::ImageDraw(int argc, char** argv, QWidget *parent, Qt::WFlags flags)
 	connect(WaitTimer,SIGNAL(timeout()),this,SLOT(SltOnWaitTimeout()));
 	connect(ui.mapWidget,SIGNAL(SigOperatorAction()),this,SLOT(SltOperatorAction()));
 	C11node.init();
+	pCTcpConnection = new CTcpConnection(QString("172.23.1.130"),45671);
+
+	connect(pCTcpConnection,SIGNAL(SigOnImgReceived(QImage)),this,SLOT(SltOnNewImg(QImage)));
 
 //	QString fileName = QFileDialog::getOpenFileName(this,
 //	     tr("Open Image"), "", tr("Image Files (*.png *.jpg *.bmp)"));
@@ -45,6 +48,11 @@ ImageDraw::~ImageDraw()
     {
       delete WaitTimer;
       WaitTimer = NULL;
+    }
+  if(pCTcpConnection != NULL)
+    {
+      delete pCTcpConnection;
+      pCTcpConnection = NULL;
     }
 }
 
