@@ -118,7 +118,7 @@ class WalkingModeBDI(WalkingMode):
             self._StateMachine.TurnLeft()
         elif (delatYaw < -0.6):
             self._StateMachine.TurnRight()
-        elif (math.fabs(delatYaw) < 0.1):
+        elif (math.fabs(delatYaw) < 0.2):
             self._StateMachine.GoForward()
 
         if (not self._LPP.IsActive()):
@@ -136,6 +136,7 @@ class WalkingModeBDI(WalkingMode):
  
     def _odom_cb(self,odom):
         self._LPP.UpdatePosition(odom.pose.pose.position.x,odom.pose.pose.position.y)
+        self._StateMachine.SetPathError(self._LPP.GetPathError())
         #self._Odometer.SetPosition(odom.pose.pose.position.x,odom.pose.pose.position.y)
 
         #print(odom.pose.pose.position.x)

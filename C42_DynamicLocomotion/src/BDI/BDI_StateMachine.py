@@ -128,12 +128,39 @@ class BDI_StrategyForward(BDI_Strategy):
     def __init__(self,odometer):
         BDI_Strategy.__init__(self,odometer)
         self._StepLength = 0.3
-        self._StepWidth = 0.10
+        self._StepWidth = 0.15
+        self._ErrorCorrection = 0.05
+        self._ErrorCorrected = 0.0
+        self._MinimalCorrection = 0.02
 
     def GetAtlasSimInterfaceCommand(self,index):       
-        # A walk behavior command needs to know three additional steps beyond the current step needed to plan
-        # for the best balance
         print("step forward")  
+        # Correct Lateral Error
+        self._ErrorCorrected = 0
+        # Correct only when needed
+        if (math.fabs(self._Error) > self._MinimalCorrection):
+            # # Correct only with outer foot
+            # if (self._Error > 0):
+            #     # We are to the left
+            #     if (index%2==0):
+            #         # Left foot is the next step, correct to the right
+            #         if(math.fabs(self._Error) < self._ErrorCorrection):
+            #             self._ErrorCorrected = -self._Error
+            #         else:
+            #             self._ErrorCorrected = -self._ErrorCorrection                   
+            # else:
+            #     # We are to the right
+            #     if (index%2==1):
+            #         # Right foot is the next step, correct to the right
+            #         if(math.fabs(self._Error) < self._ErrorCorrection):
+            #             self._ErrorCorrected = -self._Error
+            #         else:
+            #             self._ErrorCorrected = self._ErrorCorrection    
+            if(math.fabs(self._Error) < self._ErrorCorrection):
+                self._ErrorCorrected = -self._Error
+            else:
+                self._ErrorCorrected = -self._ErrorCorrection*(self._Error/math.fabs(self._Error)) 
+
         for i in range(4):
             step_index = index + i
             is_right_foot = step_index % 2
@@ -142,8 +169,10 @@ class BDI_StrategyForward(BDI_Strategy):
             self._command.walk_params.step_data[i].foot_index = step_index%2
 
             x = self._StepLength*(i+1)
-            y = self._StepWidth if (step_index%2==0) else -self._StepWidth
-            #print(x,y)
+            y = self._StepWidth if (step_index%2==0) else -self._StepWidth\
+
+            y += self._ErrorCorrected*(i+1)
+
             x,y = self._Odometer.GetInGlobalCoordinates(x,y)
             #print(x,y)
             self._command.walk_params.step_data[i].pose.position.x = x
@@ -164,7 +193,11 @@ class BDI_StrategyForward(BDI_Strategy):
 
     def StepDone(self,bIsRight):
         x = self._StepLength
-        self._Odometer.AddLocalPosition(x,0)
+        print("Correction",self._ErrorCorrected)
+        self._Odometer.AddLocalPosition(x,self._ErrorCorrected)
+
+    def SetPathError(self,pathError):
+        self._Error = pathError
 
 class BDI_StrategyLeft(BDI_Strategy):
     """
@@ -333,6 +366,34 @@ class BDI_TrunRight(BDI_State):
     def __init__(self):
     	BDI_State.__init__(self,"Turn_Right")
 
+class BDI_TransitionRight(BDI_State):
+    """
+        The BDI_Idle class is intended to be used when not walking
+    """
+    def __init__(self):
+        BDI_State.__init__(self,"Trans_Right")
+
+class BDI_TransitionLeft(BDI_State):
+    """
+        The BDI_Idle class is intended to be used when not walking
+    """
+    def __init__(self):
+        BDI_State.__init__(self,"Trans_Left")
+
+class BDI_TransitionForward(BDI_State):
+    """
+        The BDI_Idle class is intended to be used when not walking
+    """
+    def __init__(self):
+        BDI_State.__init__(self,"Trans_Forward")
+
+class BDI_TransitionStop(BDI_State):
+    """
+        The BDI_Idle class is intended to be used when not walking
+    """
+    def __init__(self):
+        BDI_State.__init__(self,"Trans_Stop")
+
 ###################################################################################
 #--------------------------- State Machine ----------------------------------------
 ###################################################################################
@@ -352,46 +413,68 @@ class BDI_StateMachine(StateMachine):
         self._StepStateMachine = BDI_StepStateMachine()
         self._StepStateMachine.SetStrategy(self._StrategyIdle,self._StrategyIdle)
         self._index = 0
+        self._PathError = 0.0
+        self._NextStrategy = self._StrategyIdle
 
         # Add states
         StateMachine.AddState(self,BDI_Forward())
         StateMachine.AddState(self,BDI_TrunLeft())
         StateMachine.AddState(self,BDI_TrunRight())
+        StateMachine.AddState(self,BDI_TransitionRight())
+        StateMachine.AddState(self,BDI_TransitionLeft())
+        StateMachine.AddState(self,BDI_TransitionForward())
+        StateMachine.AddState(self,BDI_TransitionStop())
+
         
         # Add transitions
-        StateMachine.AddTransition(self,"Idle",         "TurnRight",        "Turn_Right")
-        StateMachine.AddTransition(self,"Idle",         "GoForward",        "Forward")
-        StateMachine.AddTransition(self,"Idle",         "TurnLeft",         "Turn_Left")
-        StateMachine.AddTransition(self,"Forward",      "Stop",         	"Idle")
-        StateMachine.AddTransition(self,"Forward",      "TurnRight",     	"Turn_Right")
-        StateMachine.AddTransition(self,"Forward",      "TurnLeft",         "Turn_Left")
-        StateMachine.AddTransition(self,"Turn Right",   "Stop",         	"Idle")
-        StateMachine.AddTransition(self,"Turn Right",   "GoForward",        "Forward")
-        StateMachine.AddTransition(self,"Turn Right",   "TurnLeft",         "Forward")
-        StateMachine.AddTransition(self,"Turn_Left",    "Stop",         	"Idle")
-        StateMachine.AddTransition(self,"Turn_Left",    "GoForward",        "Forward")
-        StateMachine.AddTransition(self,"Turn_Left",    "TurnRight",        "Forward")
+        StateMachine.AddTransition(self,"Idle",         "TurnRight",        "Trans_Right")
+        StateMachine.AddTransition(self,"Idle",         "GoForward",        "Trans_Forward")
+        StateMachine.AddTransition(self,"Idle",         "TurnLeft",         "Trans_Left")
+        StateMachine.AddTransition(self,"Forward",      "Stop",         	"Trans_Stop")
+        StateMachine.AddTransition(self,"Forward",      "TurnRight",     	"Trans_Right")
+        StateMachine.AddTransition(self,"Forward",      "TurnLeft",         "Trans_Left")
+        StateMachine.AddTransition(self,"Turn Right",   "Stop",         	"Trans_Stop")
+        StateMachine.AddTransition(self,"Turn Right",   "GoForward",        "Trans_Forward")
+        StateMachine.AddTransition(self,"Turn Right",   "TurnLeft",         "Trans_Forward")
+        StateMachine.AddTransition(self,"Turn_Left",    "Stop",         	"Trans_Stop")
+        StateMachine.AddTransition(self,"Turn_Left",    "GoForward",        "Trans_Forward")
+        StateMachine.AddTransition(self,"Turn_Left",    "TurnRight",        "Trans_Forward")
+        StateMachine.AddTransition(self,"Trans_Stop",   "NextStep",         "Idle")
+        StateMachine.AddTransition(self,"Trans_Right",  "NextStep",         "Turn_Right")
+        StateMachine.AddTransition(self,"Trans_Left",   "NextStep",         "Turn_Left")
+        StateMachine.AddTransition(self,"Trans_Forward","NextStep",         "Forward")
 
     def GoForward(self):
-        StateMachine.PerformTransition(self,"GoForward")
-        self._StepStateMachine.SetStrategy(self._StrategyForward,self._StrategyForward)
+        if (StateMachine.PerformTransition(self,"GoForward")):
+            self._NextStrategy = self._StrategyForward
 
     def TurnRight(self):
-        StateMachine.PerformTransition(self,"TurnRight")
-        self._StepStateMachine.SetStrategy(self._StrategyRight,self._StrategyRight)
+        if (StateMachine.PerformTransition(self,"TurnRight")):
+            self._NextStrategy = self._StrategyRight
 
     def TurnLeft(self):
-        StateMachine.PerformTransition(self,"TurnLeft")
-        self._StepStateMachine.SetStrategy(self._StrategyLeft,self._StrategyLeft)
+        if (StateMachine.PerformTransition(self,"TurnLeft")):
+            self._NextStrategy = self._StrategyLeft
 
     def Stop(self):
-        StateMachine.PerformTransition(self,"Stop")
-        self._StepStateMachine.SetStrategy(self._StrategyIdle,self._StrategyIdle)
+        if (StateMachine.PerformTransition(self,"Stop")):
+            self._NextStrategy = self._StrategyIdle
 
     def Step(self,nextindex):
         result = 0 
         if (nextindex>self._index):
             self._index += 1
             self._StepStateMachine.Step()
+            self.NextStep()
+            self._StrategyForward.SetPathError(self._PathError)
+            print("Error: ",self._PathError)
             result = self._StepStateMachine.GetCommand(self._index)
         return result
+
+    def SetPathError(self,pathError):
+        self._PathError = pathError
+
+    def NextStep(self):
+        if(StateMachine.PerformTransition(self,"NextStep")):
+            self._StepStateMachine.SetStrategy(self._NextStrategy,self._NextStrategy)
+
