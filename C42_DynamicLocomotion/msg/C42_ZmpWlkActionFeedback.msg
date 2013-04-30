@@ -2,4 +2,4 @@
 
 Header header
 actionlib_msgs/GoalStatus status
-C65_CloseValveFeedback feedback
+C42_ZmpWlkFeedback feedback

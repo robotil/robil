@@ -2,4 +2,4 @@
 
 Header header
 actionlib_msgs/GoalStatus status
-StandUpResult result
+C42_CpgWlkFeedback feedback

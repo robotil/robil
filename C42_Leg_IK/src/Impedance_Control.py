@@ -21,7 +21,7 @@
 ###############################################################################
 
 import roslib; roslib.load_manifest('C42_Leg_IK')
-import rospy
+import rospy , math
 
 #################################################################################
 #                     Joint_Stiffness_Controller                                #
@@ -254,235 +254,308 @@ class Joint_Stiffness_Controller_2:
 #################################################################################
 
 
-class Position_Stiffness_Controller:
-    'This controller modifies a position command to achieve the desired stiffness of the system using force feedback'
-    # Class parameters:
-    minimum_update_period = 0.02 #0.05 #units [sec]; minimal time to average feedback below this value OUTPUT command 
-                                 #             will not be modified    
-    limit_command_diff = 0.1 # # units [meters]
-    command_resolution = 0.002 #0.0001 # Command will change with steps greater than command_resolution
-                                       # Should be greater than steady state noise (PID error) 
+# class Position_Stiffness_Controller:
+#     'This controller modifies a position command to achieve the desired stiffness of the system using force feedback'
+#     # Class parameters:
+#     minimum_update_period = 0.002 #0.05 #units [sec]; minimal time to average feedback below this value OUTPUT command 
+#                                  #             will not be modified    
+#     limit_command_diff = 0.1 # # units [meters]
+#     command_resolution = 0.002 #0.0001 # Command will change with steps greater than command_resolution
+#                                        # Should be greater than steady state noise (PID error) 
 
-    def __init__(self, name, stiffness, triggered_controller, bypass_input2output):
-        self.name = name
-        self.K_current_m = stiffness # parameter to tune
-        #self.B_m = damping   # parameter to tune
-        self.triggered_controller = triggered_controller
-        self.update_command = not(triggered_controller) # flag to enable update of controller output command when trigger is disabled
-        self.bypass_in2out = bypass_input2output
-        # self.last_update_stamp = rospy.Time()
-        self.avg_start_time = rospy.Time()
-        # parameters:
-        self.num_of_samples = 0
-        self.reset_avg_flag = True
-        # Desired State (INPUT):
-        self.last_X_0 = 0
-        #last_Xdot_0 = 0
+#     def __init__(self, name, stiffness, triggered_controller, bypass_input2output):
+#         self.name = name
+#         self.K_current_m = stiffness # parameter to tune
+#         #self.B_m = damping   # parameter to tune
+#         self.triggered_controller = triggered_controller
+#         self.update_command = not(triggered_controller) # flag to enable update of controller output command when trigger is disabled
+#         self.bypass_in2out = bypass_input2output
+#         # self.last_update_stamp = rospy.Time()
+#         self.avg_start_time = rospy.Time()
+#         # parameters:
+#         self.num_of_samples = 0
+#         self.reset_avg_flag = True
+#         # Desired State (INPUT):
+#         self.last_X_0 = 0
+#         self.last_correction_factor = 0
+#         #last_Xdot_0 = 0
 
-        # Model State :
-        self.last_X_m = 0  # OUTPUT command   
-        #last_Xdot_m = 0
-        #last_model_stamp = rospy.Time() # time to use for integration
-
-
-        # Feedback: Interaction Force
-        self.last_Fint = 0  
-        self.Fint_sum = 0
-
-        # Triggered Controller:
-        self.trigger_event = False
-        self.trigger_value = 200 # units [Nm] under this value the trigger will be set 
-
-        self.is_swing = 0
-
-    def UpdateForce(self, force):
-        self.num_of_samples += 1
-        self.last_Fint = force
-        self.Fint_sum += force
-
-        #self.last_update_stamp = time_stamp
-        if self.reset_avg_flag:
-            self.avg_start_time = rospy.get_rostime() #time_stamp
-            self.reset_avg_flag = False
+#         # Model State :
+#         self.last_X_m = 0  # OUTPUT command   
+#         #last_Xdot_m = 0
+#         #last_model_stamp = rospy.Time() # time to use for integration
 
 
-    def ResetSum(self):
-        self.num_of_samples = 0
-        self.Fint_sum = 0
-        self.reset_avg_flag = True
+#         # Feedback: Interaction Force
+#         self.last_Fint = 0  
+#         self.Fint_sum = 0
 
-    def getAvgForce(self):
-        if self.num_of_samples != 0:
-            return (self.Fint_sum/self.num_of_samples)
-        else:
-            return (self.last_Fint) # (0)
+#         # Triggered Controller:
+#         self.trigger_event = False
+#         self.trigger_value = 200 # units [Nm] under this value the trigger will be set 
 
-    def ResetTrigger(self):
-        self.trigger_event = False 
+#         self.is_swing = 0
 
-    def SetTrigger(self):
-        self.trigger_event = True    
+#     def UpdateForce(self, force):
+#         self.num_of_samples += 1
+#         self.last_Fint = force
+#         self.Fint_sum += force
 
-    def checkTriggerEvent(self, force, input_cmd_delta):
-        if (self.trigger_value >= force) and (force > 0) or (input_cmd_delta > 0):
-            self.SetTrigger()
-            rospy.loginfo( "PSC_'%s' method checkTriggerEvent: force = %f, input_cmd_delta = %f" %  \
-                          (self.name,force, input_cmd_delta) )
-        else:
-            self.ResetTrigger()
+#         #self.last_update_stamp = time_stamp
+#         if self.reset_avg_flag:
+#             self.avg_start_time = rospy.get_rostime() #time_stamp
+#             self.reset_avg_flag = False
 
-    def ByPassON(self):
-        self.bypass_in2out = True 
 
-    def ByPassOFF(self):
-        self.bypass_in2out = False
+#     def ResetSum(self):
+#         self.num_of_samples = 0
+#         self.Fint_sum = 0
+#         self.reset_avg_flag = True
 
-    def ByPassStatus(self):
-        return (self.bypass_in2out) 
+#     def getAvgForce(self):
+#         if self.num_of_samples != 0:
+#             return (self.Fint_sum/self.num_of_samples)
+#         else:
+#             return (self.last_Fint) # (0)
 
-    def getCMD(self, X_0,zmp_ref_y,step_phase ,step_width,zmp_width,step_time,des_l_force_pub,des_r_force_pub): # X_0 = original position input command
+#     def ResetTrigger(self):
+#         self.trigger_event = False 
+
+#     def SetTrigger(self):
+#         self.trigger_event = True    
+
+#     def checkTriggerEvent(self, force, input_cmd_delta):
+#         if (self.trigger_value >= force) and (force > 0) or (input_cmd_delta > 0):
+#             self.SetTrigger()
+#             rospy.loginfo( "PSC_'%s' method checkTriggerEvent: force = %f, input_cmd_delta = %f" %  \
+#                           (self.name,force, input_cmd_delta) )
+#         else:
+#             self.ResetTrigger()
+
+#     def ByPassON(self):
+#         self.bypass_in2out = True 
+
+#     def ByPassOFF(self):
+#         self.bypass_in2out = False
+
+#     def ByPassStatus(self):
+#         return (self.bypass_in2out) 
+
+#     def getCMD(self, X_0,zmp_ref_y,step_phase ,step_width,zmp_width,step_time,dt,des_l_force_pub,des_r_force_pub,des_lax_torque_pub,des_rax_torque_pub): # X_0 = original position input command
        
 
-        [desired_force_L , desired_force_R]  = self.desired_force(zmp_ref_y,step_phase ,step_width,zmp_width,step_time)
+#         [desired_force_L , desired_force_R ,des_t_ax_L ,des_t_ax_R]  = self.desired_force(zmp_ref_y,step_phase ,step_width,zmp_width,step_time,dt)
 
-        des_l_force_pub.publish( desired_force_L )
-        des_r_force_pub.publish( desired_force_R )
+#         des_l_force_pub.publish( desired_force_L )
+#         des_r_force_pub.publish( desired_force_R )
+#         des_lax_torque_pub.publish( des_t_ax_L )
+#         des_rax_torque_pub.publish( des_t_ax_R )
 
 
 
+#         if (step_phase == 1) or (step_phase == 2) : # left leg is stance
+#            force_des = desired_force_R
+#         if (step_phase == 3) or (step_phase == 4) : # right leg is stance
+#            force_des = desired_force_L
 
-        if (step_phase == 1) or (step_phase == 2) : # left leg is stance
-           force_des = desired_force_R
-        if (step_phase == 3) or (step_phase == 4) : # right leg is stance
-           force_des = desired_force_L
+#         current_time = rospy.get_rostime().to_sec() #self.last_update_stamp.to_sec()
 
-        current_time = rospy.get_rostime().to_sec() #self.last_update_stamp.to_sec()
+#         time_from_avg_start = current_time - self.avg_start_time.to_sec()
+#         #rospy.loginfo("Stiffness C = '%s' method getCMD: time from starting to avg = %f " %(self.name,time_from_avg_start))
 
-        time_from_avg_start = current_time - self.avg_start_time.to_sec()
-        #rospy.loginfo("Stiffness C = '%s' method getCMD: time from starting to avg = %f " %(self.name,time_from_avg_start))
+#         # if feedback had enough time to update generate new output command with feedback 
+#         # else use previous command with feedback adding to it change of input command (same as using current input command with old feedback)
+#         if (time_from_avg_start >= self.minimum_update_period) and (self.Fint_sum != 0):
 
-        # if feedback had enough time to update generate new output command with feedback 
-        # else use previous command with feedback adding to it change of input command (same as using current input command with old feedback)
-        if (time_from_avg_start >= self.minimum_update_period) and (self.Fint_sum != 0):
+#             force_avg = self.getAvgForce() # Assumption that force will be able to get update in minimum_update_period=0.05[sec] 
+#                                            # does not work all the time. Added to if statement to check Fint_sum value.
+#                                            # Problem may have occured because rxplot of contact force was open!!! 
 
-            force_avg = self.getAvgForce() # Assumption that force will be able to get update in minimum_update_period=0.05[sec] 
-                                           # does not work all the time. Added to if statement to check Fint_sum value.
-                                           # Problem may have occured because rxplot of contact force was open!!! 
-
-            # rospy.loginfo("PSC_'%s' method getCMD: update interval = %f, force samples = %d, force_avg = %f" %  \
-            #               (self.name,time_from_avg_start,self.num_of_samples,force_avg))
+#             # rospy.loginfo("PSC_'%s' method getCMD: update interval = %f, force samples = %d, force_avg = %f" %  \
+#             #               (self.name,time_from_avg_start,self.num_of_samples,force_avg))
             
-            # Check trigger event if event has not yet occured and updates trigger_event accordingly
-            if self.triggered_controller and not(self.trigger_event):
-                self.checkTriggerEvent(force_avg,  X_0 - self.last_X_0)
+#             # Check trigger event if event has not yet occured and updates trigger_event accordingly
+#             if self.triggered_controller and not(self.trigger_event):
+#                 self.checkTriggerEvent(force_avg,  X_0 - self.last_X_0)
 
-         #   if X_0 > self.last_X_0: # if lifting swing foot we don't want any force on the swing leg 
-         #       force_des = 0
-       #     else:
-        #        force_des = force_desired
+#          #   if X_0 > self.last_X_0: # if lifting swing foot we don't want any force on the swing leg 
+#          #       force_des = 0
+#        #     else:
+#         #        force_des = force_desired
 
-            # OUTPUT COMMAND:
-            if (self.update_command or self.trigger_event) and ( not self.bypass_in2out): # if update of output command is enabled 
+#             # OUTPUT COMMAND:
+#             if (self.update_command or self.trigger_event) and ( not self.bypass_in2out): # if update of output command is enabled 
                      
-                correction_factor = (force_des - force_avg)/self.K_current_m
-                # output cmd saturation (clamp):
-                if correction_factor > self.limit_command_diff: 
-                    correction_factor = self.limit_command_diff
-                elif -1*correction_factor > self.limit_command_diff: 
-                    correction_factor = -1*self.limit_command_diff
+#                 correction_factor = (force_des - force_avg)/self.K_current_m
+#                 # output cmd saturation (clamp):
+#                 if correction_factor > self.limit_command_diff: 
+#                     correction_factor = self.limit_command_diff
+#                 elif -1*correction_factor > self.limit_command_diff: 
+#                     correction_factor = -1*self.limit_command_diff
 
-                pos_command_out = X_0 - correction_factor 
-            else:
-                pos_command_out = X_0
+#                 pos_command_out = X_0 - correction_factor 
+#             else:
+#                 pos_command_out = X_0
 
-            # handle feedback filter:
-            self.ResetSum()
-            # self.avg_start_time = rospy.get_rostime() # it's not enough to ResetSum() because getCMD might be called again before Update
+#             # handle feedback filter:
+#             self.ResetSum()
+#             # self.avg_start_time = rospy.get_rostime() # it's not enough to ResetSum() because getCMD might be called again before Update
 
-        else:
-            input_command_delta_update = X_0 - self.last_X_0 
-            pos_command_out = self.last_X_m + input_command_delta_update          
+#         else:
+#             input_command_delta_update = X_0 - self.last_X_0 
+#             pos_command_out = self.last_X_m + input_command_delta_update          
 
-        self.last_X_m = pos_command_out
-        self.last_X_0 = X_0
-        # rospy.loginfo("PSC_'%s' method getCMD: bypass_in2out-%s, X_0 = %f, output cmd = %f, force_des = %f, force_avg = %f " %  \
-        #                   (self.name, self.bypass_in2out, X_0, pos_command_out, force_des, self.getAvgForce()))
+#         self.last_X_m = pos_command_out
+#         self.last_X_0 = X_0
+#         # rospy.loginfo("PSC_'%s' method getCMD: bypass_in2out-%s, X_0 = %f, output cmd = %f, force_des = %f, force_avg = %f " %  \
+#         #                   (self.name, self.bypass_in2out, X_0, pos_command_out, force_des, self.getAvgForce()))
 
-        return ( pos_command_out, desired_force_L , desired_force_R )
+#         return ( pos_command_out, desired_force_L , desired_force_R ,des_t_ax_L ,des_t_ax_R)
 
-    def desired_force(self,zmp_ref_y,step_phase ,step_width,zmp_width,step_time):
-
-        Mtot = 91.4
-        g = 9.81
-        Mass_tr = 0.05*Mtot
-        ZMP_tr = 0.1*zmp_width
-        alpha_min = 0.1
-        dt = 0.01
-
-        foot_length = 0.0825+0.1775
-        foot_height = 0.05
-        foot_width = 0.124
-
-        foot_x = foot_length
-        foot_y = foot_width/3
-
-        left_foot_y = step_width/2 - foot_y/2
-        left_foot_x = foot_x
-        left_zmp_tr = zmp_width/2 - ZMP_tr/2
-
-        right_foot_y = -step_width/2 + foot_y/2
-        right_foot_x = foot_x
-        right_zmp_tr = -zmp_width/2 + ZMP_tr/2
+#     def getCMD_i(self, X_0,zmp_ref_y,step_phase ,step_width,zmp_width,step_time,dt,des_l_force_pub,des_r_force_pub,des_lax_torque_pub,des_rax_torque_pub): # X_0 = original position input command
         
-     #   alpha = 0.5
+#         # Desired force profile of swing leg:
 
-
-        pl = zmp_ref_y - left_foot_y
-        pr = zmp_ref_y - right_foot_y
+#         b_m = 1400**(-5)#10**(-11)
+#         K_m = 10**8    #self.K_current_m
+         
+#         a  = -K_m/b_m
+#         b  = -1/b_m
+    
+#         A = math.exp(a*dt)
+#         B = ((math.exp(a*dt)-1)/a)*b
         
-
-        if (zmp_ref_y - left_foot_y > 0) or (zmp_ref_y -left_zmp_tr > 0):
-            alpha = alpha_min 
-        elif  (right_foot_y - zmp_ref_y  > 0) or (right_zmp_tr-zmp_ref_y  > 0):
-            alpha = 1-alpha_min
-        else:
-            alpha = max(min(abs(-pl)/abs(pl-pr),1-alpha_min),alpha_min);
         
+#         [desired_force_L , desired_force_R ,des_t_ax_L ,des_t_ax_R]  = self.desired_force(zmp_ref_y,step_phase ,step_width,zmp_width,step_time,dt)
 
-        # #Detect when swinging and set alpha to ZERO (in phase 2) or ONE (in phase 4)
-        if (step_phase== 2) & (self.is_swing < round(step_time/3/dt)) :  #phase 2: left is stance
+#         des_l_force_pub.publish( desired_force_L )
+#         des_r_force_pub.publish( desired_force_R )
+#         des_lax_torque_pub.publish( des_t_ax_L )
+#         des_rax_torque_pub.publish( des_t_ax_R )
 
-             alpha = 0
-             self.is_swing = self.is_swing + 1
-     
-        if (step_phase== 4) and (self.is_swing < round(step_time/3/dt)):   #phase 2: left is stance
+                                                             
+                                                              
+#         if (step_phase == 1) or (step_phase == 2) : # left leg is stance
+#            force_des = desired_force_R
+#         if (step_phase == 3) or (step_phase == 4) : # right leg is stance
+#            force_des = desired_force_L
 
-             alpha =1
-             self.is_swing = self.is_swing + 1
+#         current_time = rospy.get_rostime().to_sec() #self.last_update_stamp.to_sec()
+#         time_from_avg_start = current_time - self.avg_start_time.to_sec()
+  
+#         if (time_from_avg_start >= self.minimum_update_period) and (self.Fint_sum != 0):
 
-        if (step_phase== 1) or (step_phase== 3):
-            self.is_swing = 0
+#             force_avg = self.getAvgForce() # Assumption that force will be able to get update in minimum_update_period=0.05[sec] 
+#                                            # does not work all the time. Added to if statement to check Fint_sum value.
+#                                            # Problem may have occured because rxplot of contact force was open!!! 
 
-        f_R =  alpha*Mtot*g
-        f_L =  (1-alpha)*Mtot*g
-
-          
- #       pl = zmp_ref_y - left_foot_y
- #       pr = zmp_ref_y - right_foot_y
-        
- #       if (zmp_ref_y - left_foot_y > 0) or (zmp_ref_y -left_zmp_tr > 0) :
- #           alpha =0
- #       elif  (right_foot_y - zmp_ref_y > 0) or (right_zmp_tr - zmp_ref_y > 0) :
- #           alpha=1
-  #      else:
-  #          alpha = abs(-pl)/abs(pl-pr)
-        
+#             # rospy.loginfo("PSC_'%s' method getCMD: update interval = %f, force samples = %d, force_avg = %f" %  \
+#             #               (self.name,time_from_avg_start,self.num_of_samples,force_avg))
             
- #       f_R =  alpha*Mtot*g
-  #      f_L =  (1-alpha)*Mtot*g
+#             # Check trigger event if event has not yet occured and updates trigger_event accordingly
+#             if self.triggered_controller and not(self.trigger_event):
+#                 self.checkTriggerEvent(force_avg,  X_0 - self.last_X_0)
+
+#          #   if X_0 > self.last_X_0: # if lifting swing foot we don't want any force on the swing leg 
+#          #       force_des = 0
+#        #     else:
+#         #        force_des = force_desired
+
+#             # OUTPUT COMMAND:
+#             if (self.update_command or self.trigger_event) and ( not self.bypass_in2out): # if update of output command is enabled 
+#                  u = force_avg-force_des   
+#                  correction_factor = A*self.last_correction_factor+B*u
+#                 # output cmd saturation (clamp):
+#                  if correction_factor > self.limit_command_diff: 
+#                     correction_factor = self.limit_command_diff
+#                  elif -1*correction_factor > self.limit_command_diff: 
+#                     correction_factor = -1*self.limit_command_diff
+
+#                  pos_command_out = X_0 - correction_factor 
+#                  self.last_correction_factor = correction_factor
+#             else:
+#                 pos_command_out = X_0
+
+#             # handle feedback filter:
+#             self.ResetSum()
+#             # self.avg_start_time = rospy.get_rostime() # it's not enough to ResetSum() because getCMD might be called again before Update
+
+#         else:
+#             input_command_delta_update = X_0 - self.last_X_0 
+#             pos_command_out = self.last_X_m + input_command_delta_update          
+
+#         self.last_X_m = pos_command_out
+#         self.last_X_0 = X_0
+        
+        
+
+#         # rospy.loginfo("PSC_'%s' method getCMD: bypass_in2out-%s, X_0 = %f, output cmd = %f, force_des = %f, force_avg = %f " %  \
+#         #                   (self.name, self.bypass_in2out, X_0, pos_command_out, force_des, self.getAvgForce()))
+
+#         return ( pos_command_out, desired_force_L , desired_force_R ,des_t_ax_L ,des_t_ax_R)
+
+#     def desired_force(self,zmp_ref_y,step_phase ,step_width,zmp_width,step_time,dt):
+
+#         Mtot = 91.4
+#         g = 9.81
+#         Mass_tr = 0.05*Mtot
+#         ZMP_tr = 0.1*zmp_width
+#         alpha_min = 0.1
 
 
-        return ([f_L , f_R])
+#         foot_length = 0.0825+0.1775
+#         foot_height = 0.05
+#         foot_width = 0.124
+
+#         foot_x = foot_length
+#         foot_y = foot_width/3
+
+#         left_foot_y = step_width/2 - foot_y/2
+#         left_foot_x = foot_x
+#         left_zmp_tr = zmp_width/2 - ZMP_tr/2
+
+#         right_foot_y = -step_width/2 + foot_y/2
+#         right_foot_x = foot_x
+#         right_zmp_tr = -zmp_width/2 + ZMP_tr/2
+        
+#      #   alpha = 0.5
+
+
+#         pl = zmp_ref_y - left_foot_y
+#         pr = zmp_ref_y - right_foot_y
+        
+
+#         if (zmp_ref_y - left_foot_y > 0) or (zmp_ref_y -left_zmp_tr > 0):
+#             alpha = alpha_min 
+#         elif  (right_foot_y - zmp_ref_y  > 0) or (right_zmp_tr-zmp_ref_y  > 0):
+#             alpha = 1-alpha_min
+#         else:
+#             alpha = max(min(abs(-pl)/abs(pl-pr),1-alpha_min),alpha_min);
+        
+
+#         # #Detect when swinging and set alpha to ZERO (in phase 2) or ONE (in phase 4)
+#         if (step_phase== 2) & (self.is_swing < round(step_time/3/dt)) :  #phase 2: left is stance
+
+#              alpha = 0
+#              self.is_swing = self.is_swing + 1
+     
+#         if (step_phase== 4) and (self.is_swing < round(step_time/3/dt)):   #phase 2: left is stance
+
+#              alpha =1
+#              self.is_swing = self.is_swing + 1
+
+#         if (step_phase== 1) or (step_phase== 3):
+#             self.is_swing = 0
+
+#         f_R =  alpha*Mtot*g
+#         f_L =  (1-alpha)*Mtot*g
+
+#         t_ax_R = (-step_width/2-zmp_ref_y)*f_R
+#         t_ax_L = ( step_width/2-zmp_ref_y)*f_L
+
+
+
+#         return ([f_L , f_R , t_ax_L , t_ax_R])
 
 
 #################################################################################
@@ -518,7 +591,7 @@ class Position_Stiffness_Controller_2:
         self.last_X_m = 0  # OUTPUT command   
         #last_Xdot_m = 0
         #last_model_stamp = rospy.Time() # time to use for integration
-
+        self.last_correction_factor = 0
         # FeedBack data:
         self.FB_force_avg = 0.0
         self.FB_force_sum = 0.0
@@ -586,10 +659,10 @@ class Position_Stiffness_Controller_2:
     def ByPassStatus(self):
         return (self.bypass_in2out) 
 
-    def getCMD(self, X_0,zmp_ref_y,step_phase ,step_width,zmp_width,step_time,des_l_force_pub,des_r_force_pub): # X_0 = original position input command
+    def getCMD(self, X_0,zmp_ref_y,step_phase ,step_width,zmp_width,step_time,dt,des_l_force_pub,des_r_force_pub,des_lax_torque_pub,des_rax_torque_pub): # X_0 = original position input command
         
         # Desired force profile of swing leg:
-        force_des = self.desired_force(zmp_ref_y,step_phase ,step_width, zmp_width, step_time, des_l_force_pub, des_r_force_pub)
+        force_des = self.desired_force(zmp_ref_y,step_phase ,step_width, zmp_width, step_time, des_l_force_pub, des_r_force_pub,des_lax_torque_pub,des_rax_torque_pub)
 
         force_FB = self.FB_force_filtered # self.FB_force_avg
        
@@ -623,14 +696,78 @@ class Position_Stiffness_Controller_2:
 
         return pos_command_out 
 
-    def desired_force(self,zmp_ref_y,step_phase ,step_width, zmp_width, step_time, des_l_force_pub, des_r_force_pub):
+    def getCMD_i(self, X_0,zmp_ref_y,step_phase ,step_width,zmp_width,step_time,dt,des_l_force_pub,des_r_force_pub,des_lax_torque_pub,des_rax_torque_pub):# X_0 = original position input command
+
+        # Desired force profile of swing leg:
+
+        b_m = 100#10**(-11)
+        K_m = 10**8    #self.K_current_m
+         
+        a  = -K_m/b_m
+        b  = -1/b_m
+    
+        A = math.exp(a*dt)
+        B = ((math.exp(a*dt)-1)/a)*b
+
+        
+        [desired_force_L , desired_force_R ,des_t_ax_L ,des_t_ax_R]  = self.desired_force(zmp_ref_y,step_phase ,step_width,zmp_width,step_time,dt)
+
+        des_l_force_pub.publish( desired_force_L )
+        des_r_force_pub.publish( desired_force_R )
+        des_lax_torque_pub.publish( des_t_ax_L )
+        des_rax_torque_pub.publish( des_t_ax_R )
+
+                                                             
+                                                              
+        if (step_phase == 1) or (step_phase == 2) : # left leg is stance
+           force_des = desired_force_R
+        if (step_phase == 3) or (step_phase == 4) : # right leg is stance
+           force_des = desired_force_L
+
+        force_FB = self.FB_force_filtered # self.FB_force_avg
+       
+
+        u = force_FB - force_des
+
+        # Check trigger event if event has not yet occured and updates trigger_event accordingly
+        if self.triggered_controller and not(self.trigger_event):
+            self.checkTriggerEvent(force_FB,  X_0 - self.last_X_0)
+
+        # OUTPUT COMMAND:
+        if (self.update_command or self.trigger_event) and ( not self.bypass_in2out): # if update of output command is enabled 
+                     
+            correction_factor = A*self.last_correction_factor+B*u
+            # output cmd saturation (clamp):
+            if correction_factor > self.limit_command_diff: 
+                correction_factor = self.limit_command_diff
+            elif -1*correction_factor > self.limit_command_diff: 
+                correction_factor = -1*self.limit_command_diff
+
+            pos_command_out = X_0 - correction_factor 
+        else:
+            pos_command_out = X_0      
+
+        # rospy.loginfo("PSC2_'%s' method getCMD: bypass_in2out-%s, X_0 = %f, output cmd = %f, force_des = %f, force_avg = %f " %  \
+        #                   (self.name, self.bypass_in2out, X_0, pos_command_out, force_des, self.getAvgForce()))
+
+        # rospy.loginfo("PSC2_'%s' method getCMD: set_point = %f, cmd = %f, cmd correction = %f, force_des = %f, Fb force_avg = %f, N_samples = %f, force_FB = %f"\
+        #             %(self.name, X_0, pos_command_out, correction_factor, force_des, self.FB_force_avg, self.num_of_FB_samples, force_FB ))
+
+        self.reset_sum_flag = True
+        self.last_correction_factor = correction_factor
+        self.last_X_0 = X_0
+        self.last_X_m = pos_command_out
+
+        return ( pos_command_out, desired_force_L , desired_force_R ,des_t_ax_L ,des_t_ax_R)
+
+    def desired_force(self,zmp_ref_y,step_phase ,step_width,zmp_width,step_time,dt):
 
         Mtot = 91.4
         g = 9.81
         Mass_tr = 0.05*Mtot
         ZMP_tr = 0.1*zmp_width
         alpha_min = 0.1
-        dt = 0.01
+
 
         foot_length = 0.0825+0.1775
         foot_height = 0.05
@@ -679,27 +816,9 @@ class Position_Stiffness_Controller_2:
         f_R =  alpha*Mtot*g
         f_L =  (1-alpha)*Mtot*g
 
-          
- #       pl = zmp_ref_y - left_foot_y
- #       pr = zmp_ref_y - right_foot_y
-        
- #       if (zmp_ref_y - left_foot_y > 0) or (zmp_ref_y -left_zmp_tr > 0) :
- #           alpha =0
- #       elif  (right_foot_y - zmp_ref_y > 0) or (right_zmp_tr - zmp_ref_y > 0) :
- #           alpha=1
-  #      else:
-  #          alpha = abs(-pl)/abs(pl-pr)
-        
-            
- #       f_R =  alpha*Mtot*g
-  #      f_L =  (1-alpha)*Mtot*g
+        t_ax_R = (-step_width/2-zmp_ref_y)*f_R
+        t_ax_L = ( step_width/2-zmp_ref_y)*f_L
 
-        des_l_force_pub.publish( f_L )
-        des_r_force_pub.publish( f_R )
 
-        if (step_phase == 1) or (step_phase == 2) : # left leg is stance
-           force_des_swing_leg = f_R
-        if (step_phase == 3) or (step_phase == 4) : # right leg is stance
-           force_des_swing_leg = f_L
 
-        return (force_des_swing_leg)
+        return ([f_L , f_R , t_ax_L , t_ax_R])

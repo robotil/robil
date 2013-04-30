@@ -38,7 +38,7 @@ class Robot_State:
         self.stance_hip = Position()
         self.swing_foot = Pos_and_Ori()
         self.swing_hip = Position()
-        self.pelvis_m = Orientation()
+        self.pelvis_m = Pos_and_Ori() #Orientation()
         self.com_m = Position()
         self.swing_foot_at_start_of_step_phase = Pos_and_Ori()
 
@@ -52,11 +52,12 @@ class Robot_State:
         self.stance_hip_filtered = pl.zeros((3)) #Position()
         self.swing_foot_filtered = pl.zeros((6)) #Pos_and_Ori()
         self.swing_hip_filtered = pl.zeros((3)) #Position()
-        self.pelvis_m_filtered = pl.zeros((3)) #Orientation()
+        self.pelvis_m_filtered = pl.zeros((6)) #Orientation()
         self.com_m_filtered = pl.zeros((3)) #Position()
 
         self.com_0_from_l_foot = pl.zeros((3)) #Position()
 
+        self._step_length = 0.0
         self.__step_phase = 1 # Double-Support left leg in front
         self.init_Change_step_phase()
 
@@ -125,20 +126,36 @@ class Robot_State:
             self.__step_phase = copy.copy(value)
         return()
 
+    def Iterate_step_phase(self):
+        if 4 == self.__step_phase:
+            self.__step_phase = 1
+        else:
+            self.__step_phase = self.__step_phase + 1
+
     # External auxiliary method:
-    def Get_foot_coord_params(self):
+    def Get_foot_coord_params(self,step_width,step_length):
     # Retrieves parameters that are depended on the coordinate system that we are using (right or left foot).
     # Which coordinate system we are using is determined by the current step phase:
         if ( self.__step_phase == 1 ) or ( self.__step_phase == 2 ):
             # stance = left, swing = right
             res_stance_hip_0 = self.l_stance_hip_0.copy() # left stance hip initial position (before starting to walk) in left foot coord. system
+            res_stance_hip_0[1] = (self.swing_hip_dy - step_width)/2 # update y coord
+            res_pelvis_pos_0 = self.l_pelvis_pos_0.copy() 
+            res_pelvis_pos_0[1] = -step_width/2
             res_swing_y_sign = -1.0 # relative direction of swing leg from current coord system 
         elif ( self.__step_phase == 3 ) or ( self.__step_phase == 4 ): 
             # stance = right, swing = left
             res_stance_hip_0 = self.r_stance_hip_0.copy() # right stance hip initial position (before starting to walk) in right foot coord. system
+            res_stance_hip_0[1] = (step_width - self.swing_hip_dy)/2 # update y coord
+            res_pelvis_pos_0 = self.r_pelvis_pos_0.copy() 
+            res_pelvis_pos_0[1] = step_width/2
             res_swing_y_sign = 1.0 # relative direction of swing leg from current coord system
         
+        #if self._first_step: # feet start alined in the x coord
+
+        res_stance_hip_0[0] = res_stance_hip_0[0] - self._previous_step_length/2 # self.change_in_foot_coordinates[0]/2
         res_swing_hip_dy = self.swing_hip_dy*res_swing_y_sign # swing hip relative position to stance hip
+        self._step_length = step_length
         return(self.array2Pos( res_stance_hip_0 ), res_swing_y_sign, res_swing_hip_dy )
 
     # Class internal auxiliary method:
@@ -151,16 +168,17 @@ class Robot_State:
         self.previous_com_m_filtered = self.com_m_filtered.copy()
         ## init buffer of robot state if changing feet (changing refrence coordinate system)
         # TODO: may want to update buffer from previous step phase after doing the necessary transform
-        if (self.__step_phase == 1) or (self.__step_phase == 3):
+        if (self.__step_phase == 1) or (self.__step_phase == 3): # Changes that occur at begining of new step
             self.stance_hip_arr = pl.zeros((Robot_State.sample_buffer_size,3)) #Position()
             self.swing_foot_arr = pl.zeros((Robot_State.sample_buffer_size,6)) #Pos_and_Ori()
             self.swing_hip_arr = pl.zeros((Robot_State.sample_buffer_size,3)) #Position()
-            self.pelvis_m_arr = pl.zeros((Robot_State.sample_buffer_size,3)) #Orientation()
+            self.pelvis_m_arr = pl.zeros((Robot_State.sample_buffer_size,6)) #Orientation()
             self.com_m_arr = pl.zeros((Robot_State.sample_buffer_size,3)) #Position()
 
             self.num_of_samples_in_buffer = 0
             #self.buffer_full = False
             self.change_in_foot_coordinates = self.previous_swing_foot_filtered[0:3].copy()
+            self._previous_step_length = copy.copy(self._step_length)
 
         if self.__step_phase == 1:
             self.com_0_from_foot = self.com_0_from_l_foot
@@ -173,7 +191,7 @@ class Robot_State:
         self.stance_hip_sum = pl.zeros((3)) #Position()
         self.swing_foot_sum = pl.zeros((6)) #Pos_and_Ori()
         self.swing_hip_sum = pl.zeros((3)) #Position()
-        self.pelvis_m_sum = pl.zeros((3)) #Orientation()
+        self.pelvis_m_sum = pl.zeros((6)) #Orientation()
         self.com_m_sum = pl.zeros((3)) #Position()
 
         self.count_start_samples = 0
@@ -195,7 +213,7 @@ class Robot_State:
         stance_hip_new = pl.array([ tran[0][0], tran[0][1], tran[0][2] ])
         swing_foot_new = pl.array([ tran[4][0], tran[4][1], tran[4][2], rot[4][0], rot[4][1], rot[4][2] ])
         swing_hip_new = pl.array([ tran[3][0], tran[3][1], tran[3][2] ])
-        pelvis_m_new = pl.array([ rot[2][0], rot[2][1], rot[2][2] ])
+        pelvis_m_new = pl.array([ tran[2][0], tran[2][1], tran[2][2], rot[2][0], rot[2][1], rot[2][2] ])
         com_m_new = pl.array([ tran[1][0], tran[1][1], tran[1][2] ])
         
         ## Check if step phase changed and update robot state accordingly:
@@ -263,7 +281,7 @@ class Robot_State:
         self.stance_hip = self.array2Pos( self.stance_hip_arr[-1,:] ) # last sampled value
         self.swing_foot = self.array2Pos_Ori( self.swing_foot_filtered )
         self.swing_hip = self.array2Pos( self.swing_hip_arr[-1,:] ) #_arr[-1,:] ) # last sampled value
-        self.pelvis_m = self.array2Ori( self.pelvis_m_filtered )
+        self.pelvis_m = self.array2Ori( self.pelvis_m_filtered[3:6] ) # future change to self.array2Pos_Ori( self.pelvis_m_filtered ) 
         self.com_m = self.array2Pos( self.com_m_arr[-1,:] ) # last sampled value 
         self.com_m.y =  self.com_m_arr[-1,1] - self.com_0_from_foot[1] #+ self.change_in_foot_coordinates[1]
         self.swing_foot_at_start_of_step_phase = self.array2Pos_Ori( self.swing_foot_start )
@@ -344,8 +362,11 @@ class Robot_State:
 
         self.com_0_from_r_foot = self.com_m_filtered.copy() #copy.deepcopy( self.com_m_arr )
         self.r_stance_hip_0 = self.stance_hip_filtered.copy() #copy.deepcopy( self.stance_hip_arr ) 
+        self.r_pelvis_pos_0 = self.pelvis_m_filtered[0:3].copy()
         delta_between_hips = self.stance_hip_filtered - self.swing_hip_filtered
         self.rf_swing_hip_dy = pl.sqrt( pl.dot( delta_between_hips,delta_between_hips ) ) # distance between hips in right leg frame
+        delta_between_feet = self.swing_foot_filtered[0:3].copy()
+        rf_step_width = pl.sqrt( pl.dot( delta_between_feet,delta_between_feet ) )  # distance between feet in right leg coord. frame
 
         # Wait 1 second used for printing
         rospy.sleep(1)
@@ -363,6 +384,7 @@ class Robot_State:
         rospy.sleep(1)
         
         self.l_stance_hip_0 = self.stance_hip_filtered.copy() #copy.deepcopy( self.stance_hip_arr )
+        self.l_pelvis_pos_0 = self.pelvis_m_filtered[0:3].copy()
         self.com_0_from_l_foot = self.com_m_filtered.copy()
         # com_0_from_l_foot = self.com_m_arr.copy() #copy.deepcopy( self.com_m_arr )
         # rs_from_l_foot_swing_foot = self.swing_foot_arr.copy() #copy.deepcopy( self.swing_foot_arr )
@@ -371,17 +393,31 @@ class Robot_State:
 
         delta_between_hips = self.stance_hip_filtered - self.swing_hip_filtered
         self.lf_swing_hip_dy = pl.sqrt( pl.dot( delta_between_hips,delta_between_hips ) )  # distance between hips in left leg coord. frame
+        delta_between_feet = self.swing_foot_filtered[0:3].copy()
+        lf_step_width = pl.sqrt( pl.dot( delta_between_feet,delta_between_feet ) )  # distance between feet in left leg coord. frame
 
         # TODO: in order to get better readings one should repeat the lines above a few times while init position function and average the readings  
 
+        self.swing_hip_dy = (self.lf_swing_hip_dy + self.rf_swing_hip_dy)/2
+        step_width = (lf_step_width + rf_step_width)/2
+
         # constraint: we want hips height (z) and advance (x) to be the same
+        self._step_length = 0.0
+        self._previous_step_length = 0.0
         hip_height = 0.7999 - bend_knees #(self.l_stance_hip_0.z + self.r_stance_hip_0.z)/2
-        hip_sagital = 0.05 #0.05 #-0.02 # (self.l_stance_hip_0.x + self.r_stance_hip_0.x)/2 # x position relative to foot
+        hip_sagital = 0.08 #0.05 #-0.02 # (self.l_stance_hip_0.x + self.r_stance_hip_0.x)/2 # x position relative to foot
         self.l_stance_hip_0[2] = hip_height; self.r_stance_hip_0[2] = hip_height; # update z coord.
         self.l_stance_hip_0[0] = hip_sagital; self.r_stance_hip_0[0] = hip_sagital; # update x coord.
+        self.l_stance_hip_0[1] = (self.swing_hip_dy - step_width)/2 # update y coord
+        self.r_stance_hip_0[1] = (step_width - self.swing_hip_dy)/2 # update y coord
 
-        self.swing_hip_dy = (self.lf_swing_hip_dy + self.rf_swing_hip_dy)/2
-
+        pelvis_height = 0.85 - bend_knees 
+        pelvis_sagital = 0.05
+        self.l_pelvis_pos_0[2] = hip_height; self.r_pelvis_pos_0[2] = hip_height; # update z coord.
+        self.l_pelvis_pos_0[0] = hip_sagital; self.r_pelvis_pos_0[0] = hip_sagital; # update x coord.
+        self.l_pelvis_pos_0[1] = -step_width/2 # update y coord
+        self.r_pelvis_pos_0[1] = step_width/2 # update y coord
+        
         # self.com2l_stance_hip = Position(); self.com2r_stance_hip = Position(); 
         # self.com2l_stance_hip.x = com_0_from_l_foot.x - self.l_stance_hip_0.x # to be used when using measured com. we get the relative postion of the left stance hip
         # self.com2l_stance_hip.y = com_0_from_l_foot.y - self.l_stance_hip_0.y
@@ -392,8 +428,8 @@ class Robot_State:
         # use with measured com  e.g: com_m_arr - com2_stance_hip + com_ref = stance hip in the foot coordinate system to be used by IK
         # use with out e.g: stance_hip_0 + com_ref = stance hip in the foot coordinate system to be used by IK
 
-        rospy.loginfo("Robot State static_init: lf_swing_hip_dy = %f l_stance_hip_0 - x = %f, y = %f, z = %f; rf_swing_hip_dy = %f r_stance_hip_0 - x = %f, y = %f, z = %f" \
-               % (self.lf_swing_hip_dy, float(self.l_stance_hip_0[0]), float(self.l_stance_hip_0[1]), float(self.l_stance_hip_0[2]), self.rf_swing_hip_dy, float(self.r_stance_hip_0[0]), float(self.r_stance_hip_0[1]), float(self.r_stance_hip_0[2])) )
+        rospy.loginfo("Robot State static_init: step_width = %f, lf_swing_hip_dy = %f, l_stance_hip_0 - x = %f, y = %f, z = %f; rf_swing_hip_dy = %f r_stance_hip_0 - x = %f, y = %f, z = %f" \
+               % (step_width, self.lf_swing_hip_dy, float(self.l_stance_hip_0[0]), float(self.l_stance_hip_0[1]), float(self.l_stance_hip_0[2]), self.rf_swing_hip_dy, float(self.r_stance_hip_0[0]), float(self.r_stance_hip_0[1]), float(self.r_stance_hip_0[2])) )
 
 
         # self.swing_foot_arr = rs_from_l_foot_swing_foot
