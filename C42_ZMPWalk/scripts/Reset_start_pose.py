@@ -13,7 +13,6 @@
 ####                                                                             ##
 ###################################################################################     
 
-
 import roslib; roslib.load_manifest('C42_ZMPWalk')
 from drc2_tools import *
 import os

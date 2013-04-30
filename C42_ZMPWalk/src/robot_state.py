@@ -57,6 +57,7 @@ class Robot_State:
 
         self.com_0_from_l_foot = pl.zeros((3)) #Position()
 
+        self._step_length = 0.0
         self.__step_phase = 1 # Double-Support left leg in front
         self.init_Change_step_phase()
 
@@ -150,9 +151,11 @@ class Robot_State:
             res_pelvis_pos_0[1] = step_width/2
             res_swing_y_sign = 1.0 # relative direction of swing leg from current coord system
         
+        #if self._first_step: # feet start alined in the x coord
+
         res_stance_hip_0[0] = res_stance_hip_0[0] - self._previous_step_length/2 # self.change_in_foot_coordinates[0]/2
         res_swing_hip_dy = self.swing_hip_dy*res_swing_y_sign # swing hip relative position to stance hip
-        self._previous_step_length = step_length
+        self._step_length = step_length
         return(self.array2Pos( res_stance_hip_0 ), res_swing_y_sign, res_swing_hip_dy )
 
     # Class internal auxiliary method:
@@ -165,7 +168,7 @@ class Robot_State:
         self.previous_com_m_filtered = self.com_m_filtered.copy()
         ## init buffer of robot state if changing feet (changing refrence coordinate system)
         # TODO: may want to update buffer from previous step phase after doing the necessary transform
-        if (self.__step_phase == 1) or (self.__step_phase == 3):
+        if (self.__step_phase == 1) or (self.__step_phase == 3): # Changes that occur at begining of new step
             self.stance_hip_arr = pl.zeros((Robot_State.sample_buffer_size,3)) #Position()
             self.swing_foot_arr = pl.zeros((Robot_State.sample_buffer_size,6)) #Pos_and_Ori()
             self.swing_hip_arr = pl.zeros((Robot_State.sample_buffer_size,3)) #Position()
@@ -175,6 +178,7 @@ class Robot_State:
             self.num_of_samples_in_buffer = 0
             #self.buffer_full = False
             self.change_in_foot_coordinates = self.previous_swing_foot_filtered[0:3].copy()
+            self._previous_step_length = copy.copy(self._step_length)
 
         if self.__step_phase == 1:
             self.com_0_from_foot = self.com_0_from_l_foot
@@ -398,6 +402,7 @@ class Robot_State:
         step_width = (lf_step_width + rf_step_width)/2
 
         # constraint: we want hips height (z) and advance (x) to be the same
+        self._step_length = 0.0
         self._previous_step_length = 0.0
         hip_height = 0.7999 - bend_knees #(self.l_stance_hip_0.z + self.r_stance_hip_0.z)/2
         hip_sagital = 0.08 #0.05 #-0.02 # (self.l_stance_hip_0.x + self.r_stance_hip_0.x)/2 # x position relative to foot
