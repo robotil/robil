@@ -1,0 +1,29 @@
+list size = 23
+#text
+enableLinkConnection
+#text
+path_to_images
+#text
+path_to_lookup
+#text
+executer_service
+#text
+path_to_plans
+#text
+enableTaskIdRegeneration
+#text
+test_result
+#text
+path_to_address
+#text
+path_to_plans_on_executer
+Error: unknown field in BTDesigner.xml
+#text
+path_to_description
+#text
+test_time
+#text
+Arg: rostopic!echo!/executer/stack_stream!
+ROS COMMUNICATION CRITICAL ERROR: on listening to /executer/stack_stream
+WARNING: Designer can not connect to Executer ROS node. You can continue edit and testing plans, but you can't run them.
+........ For correct this problem try launch Designer by ROS command : $ roslaunch C34_Designer start.launch

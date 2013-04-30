@@ -6,6 +6,15 @@ To run:
 2) Launch:
 roslaunch C66_Grasp C66_Grasp.launch
 
+3) roscd position0
+
+4) python traj_yaml.py Traj_data.yaml move_hand_0
+
+5) now run pick up in the tree;
+
+
+
+
 for manual use:
 
 3) rosservice call /pelvis_move_hand "PositionDestination_left:
