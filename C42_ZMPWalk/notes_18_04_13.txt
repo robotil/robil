@@ -1,0 +1,36 @@
+Updates:
+1. Changed task name from C42_ZMPwalk to ZmpWalk.
+2. Task waits to receive path after it is called (wont do nothing until path is received).
+3. Added reset of states at beginning of task so task can be recalled without reactivating node.
+  
+USING ZMP WALK:
+
+Robot waits for start,then goes to path planner and asks for the path, takes points from path and walks alongside a segment of two points.
+
+To test ZMP walk:
+
+1. run zmp_main.py: 
+   roslaunch C42_ZMPWalk zmp_walk.launch
+
+2. run task using C0 task_tester:
+   rosrun C0_RobilTask task_tester ZmpWalk
+
+3. run C31_clone to emulate the C31PathPlanner (publish a path message): 
+   rosrun C42_ZMPWalk scripts/C31_Clone.py
+ 
+
+
+RUNNING STUB:
+
+Robot waits for start,then goes to path planner and asks for the path, takes points from path and makes teleportation between points. 
+
+To test stub:
+
+1. run ZMP_stub.py: 
+   rosrun C42_ZMPWalk ZMP_stub.py
+
+2. run C31_clone to emulate the C31PathPlanner (publish a path message): 
+   rosrun C42_ZMPWalk scripts/C31_Clone.py
+
+3. execute using C0 task_tester: 
+   rosrun C0_RobilTask task_tester FollowPath

@@ -34,11 +34,14 @@ class ZMP_Preview_Buffer:
     'Preview Buffer - Synchronizes and buffer the ZMP profile templates to produce the current (updated) ZMP refernce to the preview controller '
     
     def __init__(self, name, preview_sample_size, max_step_samples, precede_time_samples ):
-        self._name = name
+        self._name = name        
         self._preview_size = ceil (preview_sample_size)   # Number of samples in preview 
-        self._buffer_size = ceil (preview_sample_size + max_step_samples)                           
-        self._buffer = zeros(preview_sample_size + max_step_samples) # init buffer
-        self._precede_time_samples = ceil (precede_time_samples) # number of samples to bring forward the step profile
+        self._buffer_size = ceil (preview_sample_size + max_step_samples)
+        self._precede_time_samples = ceil (precede_time_samples) # number of samples to bring forward the step profile                           
+        self.init_values()
+
+    def init_values(self):
+        self._buffer = zeros(self._buffer_size) # init buffer        
         self._start_index = 0 # points to the current position in the buffer where the preview starts. We increment start_index on each time cycle
         self._data_end = 0 # start_index to where the data in the buffer ends (from where new data can be written into the buffer)   
         self._end_of_step_preview = self._preview_size
@@ -47,6 +50,7 @@ class ZMP_Preview_Buffer:
     # Handling Buffer Stack:
     def clearBuffer(self):
         self._buffer = zeros(self._buffer_size) # clear buffer
+        self._start_index = 0
         self._data_end = 0
 
     def pushData(self,new_data):
@@ -58,6 +62,7 @@ class ZMP_Preview_Buffer:
         else:  # load part of new data according to the available space
             self._buffer[self._data_end : self._buffer_size] = new_data[0 : self._buffer_size - self._data_end]
             self._data_end = self._buffer_size
+            rospy.loginfo("ZMP_Preview_Buffer %s: unable to load all data because buffer is full. Buffer size = data_end = %f" % (self._name, self._data_end) )
 
     def buffer_Is_notFull(self):
         if self._data_end < self._buffer_size:  # if the is available space in buffer
@@ -72,7 +77,6 @@ class ZMP_Preview_Buffer:
         #  them selves until filling the required space in the buffer.
         # is handled by off_set <-- !!!Attention!!! continuity should be kept from new_step to 
         #        following_steps_cycle and between begining and end of following_steps_cycle      
-        self._start_index = 0
         step_length = len(new_step)
         self._end_of_step_preview = step_length+self._preview_size
 
@@ -92,20 +96,48 @@ class ZMP_Preview_Buffer:
 
         return
 
+    def load_PreviewStep(self, new_preview_step): 
+        # Loads new preview of (future) step into end of buffer according to the following steps:
+        # 1) Shifts preview of previous step (last_preview) to begining of buffer. (last preview becomes current step to be excuted)
+        # 2) Load buffer with new_preview_step after last_preview.
+        
+
+        #end_index = self._start_index + self._preview_size 
+        #last_preview = self._buffer[self._start_index : end_index]
+        last_preview = self._buffer[self._start_index : self._data_end]
+
+        self.clearBuffer() # clear buffer
+        self.pushData( last_preview )
+        following_preview = new_preview_step[self._precede_time_samples :] # new_preview_step with (lead) time shift
+        off_set = self._buffer[self._data_end-1] - 2*following_preview[0] + following_preview[1]# we add off_set to following_preview to insure continuity
+        self.pushData( following_preview + off_set )
+        rospy.loginfo("ZMP_Preview_Buffer %s: start_index = %f, data_end = %f" % (self._name, self._start_index, self._data_end) )
+
+        self._NewStep_trigger = True
+
+        return
+
     def update_Preview(self): 
         # return current step sequence preview and increment preview (one time cycle)
         end_index = self._start_index + self._preview_size
-        if end_index > self._end_of_step_preview: # make sure not to exceed steps preview
+        #rospy.loginfo("ZMP_Preview_Buffer %s: update_Preview - start_index = %f, end_index = %f " % (self._name, self._start_index, end_index) )
+        # ## To use with load_NewStep
+        # if end_index > self._end_of_step_preview: # make sure not to exceed steps preview
+        #     # may want to do some thing alse in this case like: preview = zeros(self._preview_size) ???
+        #     end_index = self._end_of_step_preview # freeze preview (preview is not updated, stays on end_of_step_preview values)
+        #     self._start_index = self._end_of_step_preview - self._preview_size
+        ## To use with load_PreviewStep
+        if end_index > self._data_end: # make sure not to exceed end of preview data
             # may want to do some thing alse in this case like: preview = zeros(self._preview_size) ???
-            end_index = self._end_of_step_preview # freeze preview (preview is not updated, stays on end_of_step_preview values)
-            self._start_index = self._end_of_step_preview - self._preview_size
+            end_index = self._data_end # freeze preview (preview is not updated, stays on end of data)
+            self._start_index = self._data_end - self._preview_size
         if end_index > self._buffer_size: # make sure not exceed buffer size
             end_index = self._buffer_size # freeze preview (preview is not updated, stays on end of buffer values)
             self._start_index = self._buffer_size - self._preview_size
 
         preview = self._buffer[self._start_index : end_index]
-        # if self._start_index > 675:
-        #     rospy.loginfo("ZMP_Preview_Buffer %s: start_index = %f, end_index = %f " % (self._name, self._start_index, end_index ) )
+        # if 5 > self._start_index or 115 < self._start_index:
+        #     rospy.loginfo("ZMP_Preview_Buffer %s: start_index = %f, end_index = %f, start value = %f " % (self._name, self._start_index, end_index,self._buffer[self._start_index] ) )
 
         if self._start_index >= 1 : # On the second update of preview (after one loop iteration) the trigger of loading a new step is returned to false
             self._NewStep_trigger = False
@@ -113,3 +145,8 @@ class ZMP_Preview_Buffer:
         self._start_index += 1
 
         return preview,self._NewStep_trigger
+
+    def Debug_PlotBuffer(self):
+        plot(self._buffer,'g--', self._buffer[0:self._data_end],'r-', self._buffer[self._start_index:self._data_end],'b--') #plot(p_ref_y,'b-')
+        grid(True)
+        show()

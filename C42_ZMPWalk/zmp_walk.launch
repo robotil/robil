@@ -1,7 +1,7 @@
 <launch>
 
   <!-- fall_detection_node  -->
-  <node pkg="C42_ZMPWalk" type="atlasfalldetection.py" name="C42_ZMP_fall_detection_Node" />
+  <!-- <node pkg="C42_ZMPWalk" type="atlasfalldetection.py" name="C42_ZMP_fall_detection_Node" /> -->
   
   <!-- Start CoM publisher node -->
   <node pkg="C43_LocalBodyCOM" type="computeCOM" name="c43_local_body"/>

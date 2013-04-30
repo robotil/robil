@@ -1,5 +1,4 @@
 #! /usr/bin/env python
-import roslib; roslib.load_manifest('AtlasFallDetection')
 import roslib; roslib.load_manifest('C42_ZMPWalk')
 import math, rospy, os, rosparam
 import tf
