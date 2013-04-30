@@ -42,3 +42,4 @@ float64 	step_height
 float64 	zmp_width
 float64 	step_time
 float64 	bend_knees
+

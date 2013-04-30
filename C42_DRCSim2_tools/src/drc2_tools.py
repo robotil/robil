@@ -2,19 +2,19 @@
 import roslib; roslib.load_manifest('C42_DRCSim2_tools')
 import math, rospy, os, rosparam
 import tf
+from atlas_msgs.msg import AtlasState, AtlasCommand
 from sensor_msgs.msg import JointState
-from osrf_msgs.msg import JointCommands
+from sensor_msgs.msg import Imu
 from nav_msgs.msg import Odometry
+from geometry_msgs.msg import Vector3, Quaternion, Wrench
 from numpy import zeros, array, linspace, arange
 import numpy as np
 from math import ceil
 import yaml
 from copy import copy
 
-
-
-class JointCommands_msg_handler(object):
-    # A class for composing and sending osrf JointCommands messages
+class AtlasCommand_msg_handler(object):
+    # A class for composing and sending AtlasCommand messages
     #
     # osrf empty message: 
     #        string[] name  - names of the joints to control (need to contain *all* atlas joints in order to work)
@@ -69,16 +69,18 @@ class JointCommands_msg_handler(object):
 
     def __init__(self):
 
-        self.Joint_dict = {JointCommands_msg_handler.atlasJointNames[i]:i for i in xrange(len(JointCommands_msg_handler.atlasJointNames))}
+        self.Joint_dict = {AtlasCommand_msg_handler.atlasJointNames[i]:i for i in xrange(len(AtlasCommand_msg_handler.atlasJointNames))}
         self.inv_dict = dict(zip(self.Joint_dict.values(), self.Joint_dict.keys()))
 
         if rospy.get_name() == '/unnamed':
-            rospy.init_node('JointCommands_msg_handler',anonymous=True)
-        self._compub = rospy.Publisher('/atlas/joint_commands', JointCommands)
-        self._command = JointCommands()
-        self._command.name = list(self.atlasJointNames)
+            rospy.init_node('AtlasCommand_msg_handler',anonymous=True)
+        self._ac_pub = rospy.Publisher('atlas/atlas_command', AtlasCommand)
+        self._command = AtlasCommand()
+        self._joint_names = list(self.atlasJointNames)
+        self._command.k_effort = [255] * len(self._joint_names)
         self.set_default_gains_from_param()
         self.reset_command()
+        
 
     def set_default_gains_from_yaml(self,yaml_path):
         yaml_file = file(yaml_path)
@@ -90,7 +92,7 @@ class JointCommands_msg_handler(object):
         self._default_gains = self._default_gains['gains']
 
     def reset_command(self):
-        n = len(self._command.name)
+        n = len(self._joint_names)
         self._command.position     = zeros(n)
         self._command.velocity     = zeros(n)
         self._command.effort       = zeros(n)
@@ -104,12 +106,12 @@ class JointCommands_msg_handler(object):
 
     def reset_gains(self,joints = 'ALL'):
         if joints == 'ALL':
-            n = len(self._command.name)
+            n = len(self._joint_names)
             lst = range(n)
         else:
             lst = list([joints])
         for i in lst:
-          name = self._command.name[i]
+          name = self._joint_names[i]
           self._command.kp_position[i]  = self._default_gains[name[7::]]['p']
           self._command.kd_position[i]  = self._default_gains[name[7::]]['d']
           self._command.ki_position[i]  = self._default_gains[name[7::]]['i']
@@ -124,9 +126,20 @@ class JointCommands_msg_handler(object):
         else:
             raise TypeError
             return
-        name = self._command.name[joint_num]
+        name = self._joint_names[joint_num]
         self._command.position[joint_num] = float(pos)
-        self.reset_gains(joint_num)
+        # self.reset_gains(joint_num)
+
+    def set_vel(self,joint, vel):
+        if type(joint) == int:
+            joint_num = int(joint)
+        elif type(joint) == str:
+            joint_num = self.Joint_dict['atlas::'+joint]
+        else:
+            raise TypeError
+            return
+        name = self._joint_names[joint_num]
+        self._command.velocity[joint_num] = float(vel)
 
     def set_eff(self,joint,eff,null_gains = True):
         if type(joint) == int:
@@ -138,7 +151,7 @@ class JointCommands_msg_handler(object):
             return
         self._command.effort[joint_num] = float(eff)
         if null_gains:
-            self.set_gains(joint_num,0.0,0.0,0.0,set_default = False)
+            self.set_gains(joint_num,0.0,0.0,0.0,0.0,set_default = False)
 
     def set_mixed(self,joint,eff,pos):
         if type(joint) == int:
@@ -151,7 +164,7 @@ class JointCommands_msg_handler(object):
         self._command.effort[joint_num] = float(eff)
         self._command.position[joint_num] = float(pos)
 
-    def set_gains(self,joint,p,i,d,set_default = True):
+    def set_gains(self,joint,p,i,d,i_clamp,set_default = True):
         if type(joint) == int:
             joint_num = joint
             joint_name = self.inv_dict[joint_num][7::]
@@ -166,14 +179,21 @@ class JointCommands_msg_handler(object):
             self._default_gains[joint_name]['p'] = p
             self._default_gains[joint_name]['i'] = i
             self._default_gains[joint_name]['d'] = d
+            self._default_gains[joint_name]['i_clamp'] = d
         #
         self._command.kp_position[joint_num]  = p
         self._command.ki_position[joint_num]  = i
         self._command.kd_position[joint_num]  = d
+        self._command.i_effort_max[joint_num] = i_clamp
+        self._command.i_effort_min[joint_num] = -i_clamp
+
+    def set_command(self,joint,p,i,d,i_clamp,pos,eff,vel,default = False):
+        self.set_mixed(joint,eff,pos)
+        self.set_gains(joint,p,i,d,i_clamp,set_default = default)
 
     def print_command(self):
-        for k in xrange(len(self._command.name)):
-            print 'name: ', self._command.name[k]
+        for k in xrange(len(self._joint_names)):
+            print 'name: ', self._joint_names[k]
             print 'command: pos:', self._command.position[k], 'eff:', self._command.effort[k]
             print 'p: ', self._command.kp_position[k]
             print 'i: ', self._command.ki_position[k]
@@ -181,18 +201,20 @@ class JointCommands_msg_handler(object):
 
     def send_command(self):
         self._command.header.stamp = rospy.Time.now()
-        self._compub.publish(self._command)
+        self._ac_pub.publish(self._command)
+
     def get_command(self):
-        return self._command
+        com = copy(self._command)
+        return com
 
     def set_all_pos(self,pos_vec):
-        if len(pos_vec) == len(self._command.name):
+        if len(pos_vec) == len(self._joint_names):
             self._command.position = list(pos_vec)
         else:
             print 'position command legth doest fit'
 
     def send_pos_traj(self,pos1,pos2,T,dt):
-        if len(pos1) == len(pos2) == len(self._command.name):
+        if len(pos1) == len(pos2) == len(self._joint_names):
             N = ceil(T/dt)
             pos1 = array(pos1)
             pos2 = array(pos2)
@@ -203,7 +225,9 @@ class JointCommands_msg_handler(object):
               rospy.sleep(dt)
         else:
             print 'position command legth doest fit'
-
+#####################################################
+#####################################################33
+####################################################33
 
 class robot_listner(object):
     def __init__(self, enable_tf_Listener = False):
