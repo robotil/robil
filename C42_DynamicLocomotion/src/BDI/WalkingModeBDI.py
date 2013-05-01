@@ -73,8 +73,7 @@ class WalkingModeBDI(WalkingMode):
     def Walk(self):
         # Subscribe to atlas_state and atlas_sim_interface_state topics.
         self.asi_state = rospy.Subscriber('/atlas/atlas_sim_interface_state', AtlasSimInterfaceState, self.asi_state_cb)
-        self._StateMachine.GoForward()
-    
+            
     def Stop(self):
         self._StateMachine.Stop()
     
@@ -101,7 +100,7 @@ class WalkingModeBDI(WalkingMode):
     def asi_state_cb(self, state):
         #if (self._LPP.IsActive()):
             #print(state)
-        # This weird little piece of code is supposed to initialize the odometer
+        # This weird little piece of code is supposed to initialize the odometer and state machine
         try:
             x = self.robot_position.x
         except AttributeError:            
@@ -110,6 +109,8 @@ class WalkingModeBDI(WalkingMode):
             self.robot_position.y = state.pos_est.position.y
             self.robot_position.z = state.pos_est.position.z
             self._Odometer.SetPosition(state.pos_est.position.x,state.pos_est.position.y)  
+            self._StateMachine.Initialize()
+            self._StateMachine.GoForward()
         
         targetYaw = self._LPP.GetTargetYaw()
         delatYaw = targetYaw - self._Odometer.GetYaw()
@@ -118,7 +119,7 @@ class WalkingModeBDI(WalkingMode):
             self._StateMachine.TurnLeft()
         elif (delatYaw < -0.6):
             self._StateMachine.TurnRight()
-        elif (math.fabs(delatYaw) < 0.2):
+        elif (math.fabs(delatYaw) < 0.4):
             self._StateMachine.GoForward()
 
         if (not self._LPP.IsActive()):

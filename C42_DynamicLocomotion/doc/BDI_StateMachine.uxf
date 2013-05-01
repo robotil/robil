@@ -53,14 +53,14 @@ Stop
     <type>com.umlet.element.Relation</type>
     <coordinates>
       <x>360</x>
-      <y>288</y>
-      <w>320</w>
-      <h>88</h>
+      <y>320</y>
+      <w>152</w>
+      <h>56</h>
     </coordinates>
     <panel_attributes>lt=&lt;-
 GoForward
 </panel_attributes>
-    <additional_attributes>304;64;104;40;24;72</additional_attributes>
+    <additional_attributes>136;40;24;40</additional_attributes>
   </element>
   <element>
     <type>com.umlet.element.custom.State</type>
@@ -72,19 +72,6 @@ GoForward
     </coordinates>
     <panel_attributes>Forward</panel_attributes>
     <additional_attributes/>
-  </element>
-  <element>
-    <type>com.umlet.element.Relation</type>
-    <coordinates>
-      <x>512</x>
-      <y>272</y>
-      <w>100</w>
-      <h>96</h>
-    </coordinates>
-    <panel_attributes>lt=&lt;-
-TurnRight
-</panel_attributes>
-    <additional_attributes>48;24;56;80</additional_attributes>
   </element>
   <element>
     <type>com.umlet.element.custom.State</type>
@@ -102,13 +89,13 @@ TurnRight
     <coordinates>
       <x>304</x>
       <y>360</y>
-      <w>200</w>
+      <w>352</w>
       <h>112</h>
     </coordinates>
     <panel_attributes>lt=&lt;-
 TurnLeft
 </panel_attributes>
-    <additional_attributes>184;80;48;96;48;24</additional_attributes>
+    <additional_attributes>336;96;48;96;48;24</additional_attributes>
   </element>
   <element>
     <type>com.umlet.element.custom.State</type>
@@ -126,40 +113,27 @@ TurnLeft
     <coordinates>
       <x>296</x>
       <y>192</y>
-      <w>272</w>
+      <w>392</w>
       <h>176</h>
     </coordinates>
     <panel_attributes>lt=&lt;-
 TurnRight
 </panel_attributes>
-    <additional_attributes>256;80;56;40;56;160</additional_attributes>
+    <additional_attributes>376;40;56;40;56;160</additional_attributes>
   </element>
   <element>
     <type>com.umlet.element.Relation</type>
     <coordinates>
-      <x>496</x>
-      <y>360</y>
-      <w>94</w>
-      <h>72</h>
-    </coordinates>
-    <panel_attributes>lt=&lt;-
-TurnLeft
-</panel_attributes>
-    <additional_attributes>48;56;48;24</additional_attributes>
-  </element>
-  <element>
-    <type>com.umlet.element.Relation</type>
-    <coordinates>
-      <x>440</x>
-      <y>352</y>
-      <w>72</w>
-      <h>64</h>
+      <x>360</x>
+      <y>336</y>
+      <w>152</w>
+      <h>56</h>
     </coordinates>
     <panel_attributes>lt=&lt;-
 Stop
 
 </panel_attributes>
-    <additional_attributes>24;48;56;24</additional_attributes>
+    <additional_attributes>24;40;136;40</additional_attributes>
   </element>
   <element>
     <type>com.umlet.element.Relation</type>
@@ -177,31 +151,31 @@ Stop
   <element>
     <type>com.umlet.element.Relation</type>
     <coordinates>
-      <x>656</x>
+      <x>544</x>
       <y>224</y>
-      <w>108</w>
-      <h>136</h>
+      <w>200</w>
+      <h>144</h>
     </coordinates>
     <panel_attributes>lt=&lt;-
 GoForward,
 TurnLeft
 
 </panel_attributes>
-    <additional_attributes>40;120;72;24</additional_attributes>
+    <additional_attributes>24;128;184;24</additional_attributes>
   </element>
   <element>
     <type>com.umlet.element.Relation</type>
     <coordinates>
-      <x>648</x>
-      <y>352</y>
-      <w>108</w>
-      <h>104</h>
+      <x>544</x>
+      <y>360</y>
+      <w>160</w>
+      <h>96</h>
     </coordinates>
     <panel_attributes>lt=&lt;-
 GoForward,
 TurnRight
 </panel_attributes>
-    <additional_attributes>80;24;40;88</additional_attributes>
+    <additional_attributes>24;24;144;80</additional_attributes>
   </element>
   <element>
     <type>com.umlet.element.custom.FinalState</type>
@@ -275,101 +249,5 @@ Step</panel_attributes>
 Next
 Step</panel_attributes>
     <additional_attributes>24;24;24;96;176;96;176;24</additional_attributes>
-  </element>
-  <element>
-    <type>com.umlet.element.custom.State</type>
-    <coordinates>
-      <x>552</x>
-      <y>264</y>
-      <w>80</w>
-      <h>32</h>
-    </coordinates>
-    <panel_attributes>Turning Right</panel_attributes>
-    <additional_attributes/>
-  </element>
-  <element>
-    <type>com.umlet.element.Relation</type>
-    <coordinates>
-      <x>576</x>
-      <y>216</y>
-      <w>120</w>
-      <h>74</h>
-    </coordinates>
-    <panel_attributes>lt=&lt;-
-Next
-Step</panel_attributes>
-    <additional_attributes>104;32;24;48</additional_attributes>
-  </element>
-  <element>
-    <type>com.umlet.element.custom.State</type>
-    <coordinates>
-      <x>664</x>
-      <y>344</y>
-      <w>104</w>
-      <h>32</h>
-    </coordinates>
-    <panel_attributes>Turning Forward</panel_attributes>
-    <additional_attributes/>
-  </element>
-  <element>
-    <type>com.umlet.element.Relation</type>
-    <coordinates>
-      <x>552</x>
-      <y>328</y>
-      <w>128</w>
-      <h>66</h>
-    </coordinates>
-    <panel_attributes>lt=&lt;-
-Next
-Step</panel_attributes>
-    <additional_attributes>24;40;112;32</additional_attributes>
-  </element>
-  <element>
-    <type>com.umlet.element.custom.State</type>
-    <coordinates>
-      <x>488</x>
-      <y>416</y>
-      <w>80</w>
-      <h>32</h>
-    </coordinates>
-    <panel_attributes>Turning Left</panel_attributes>
-    <additional_attributes/>
-  </element>
-  <element>
-    <type>com.umlet.element.Relation</type>
-    <coordinates>
-      <x>544</x>
-      <y>400</y>
-      <w>112</w>
-      <h>74</h>
-    </coordinates>
-    <panel_attributes>lt=&lt;-
-Next
-Step</panel_attributes>
-    <additional_attributes>96;48;24;32</additional_attributes>
-  </element>
-  <element>
-    <type>com.umlet.element.custom.State</type>
-    <coordinates>
-      <x>400</x>
-      <y>400</y>
-      <w>72</w>
-      <h>32</h>
-    </coordinates>
-    <panel_attributes>Stopping</panel_attributes>
-    <additional_attributes/>
-  </element>
-  <element>
-    <type>com.umlet.element.Relation</type>
-    <coordinates>
-      <x>344</x>
-      <y>360</y>
-      <w>72</w>
-      <h>74</h>
-    </coordinates>
-    <panel_attributes>lt=&lt;-
-Next
-Step</panel_attributes>
-    <additional_attributes>24;24;56;56</additional_attributes>
   </element>
 </diagram>
