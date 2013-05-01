@@ -27,14 +27,12 @@ class ZMP_Preview_Controller:
 
     def __init__(self, name, parameters_folder_name, COM ):
         self.name = name
+        self._initCOM = COM
         # rospy.loginfo("ZMP_Preview_Controller: init %s controller" % (self.name) )
         # rospy.sleep(1)
 
-        # assumption: we start movement from a static position => COM = ZMP point
-        self.x = array([COM , 0.0 , 0.0])[:,newaxis]                              
-        self.p = COM # initial_ZMP_point
-        self.sum_e = 0 # sum of ZMP error
-
+        self.init_values()
+        
         self._COM_at_step_begining = copy.copy(self.x[0]) # accumulated COM until begining of step. Used to return relative COM for each step that starts from zero.   
 
         # Load Controller Parameters
@@ -61,6 +59,12 @@ class ZMP_Preview_Controller:
         #     rospy.loginfo("Gd coefficient in place %i) %.8f" % (i, self.Gd[i]) )
         # # Wait 1 second
         # rospy.sleep(1)
+
+    def init_values(self):
+        # assumption: we start movement from a static position => COM = ZMP point
+        self.x = array([self._initCOM , 0.0 , 0.0])[:,newaxis]                              
+        self.p = self._initCOM # initial_ZMP_point
+        self.sum_e = 0.0 # sum of ZMP error
 
 
     def getBufferSize(self):

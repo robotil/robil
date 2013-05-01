@@ -1,10 +1,10 @@
 #!/usr/bin/env python
 
+import roslib;roslib.load_manifest('C42_DynamicLocomotion')
+import rospy
 from Abstractions.DynamicWalker import *
 from WalkingModeChooser import *
 import rospy
-import roslib
-roslib.load_manifest('C42_DynamicLocomotion')
 from C31_PathPlanner.msg import C31_Waypoints
 from RobilTaskPy import *
 from LocalPathPlanner import *

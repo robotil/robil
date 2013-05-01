@@ -34,11 +34,14 @@ class ZMP_Preview_Buffer:
     'Preview Buffer - Synchronizes and buffer the ZMP profile templates to produce the current (updated) ZMP refernce to the preview controller '
     
     def __init__(self, name, preview_sample_size, max_step_samples, precede_time_samples ):
-        self._name = name
+        self._name = name        
         self._preview_size = ceil (preview_sample_size)   # Number of samples in preview 
-        self._buffer_size = ceil (preview_sample_size + max_step_samples)                           
-        self._buffer = zeros(preview_sample_size + max_step_samples) # init buffer
-        self._precede_time_samples = ceil (precede_time_samples) # number of samples to bring forward the step profile
+        self._buffer_size = ceil (preview_sample_size + max_step_samples)
+        self._precede_time_samples = ceil (precede_time_samples) # number of samples to bring forward the step profile                           
+        self.init_values()
+
+    def init_values(self):
+        self._buffer = zeros(self._buffer_size) # init buffer        
         self._start_index = 0 # points to the current position in the buffer where the preview starts. We increment start_index on each time cycle
         self._data_end = 0 # start_index to where the data in the buffer ends (from where new data can be written into the buffer)   
         self._end_of_step_preview = self._preview_size
