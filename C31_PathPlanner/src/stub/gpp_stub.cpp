@@ -63,6 +63,15 @@ int main_for_qual1_1and2(int argc, char** argv){
 int main(int argc, char** argv){
 	for(int i=0;i<argc;i++){
 		string a(argv[i]);
+		if(a=="-h" || a=="--help"){
+			std::cout<<"Run qualification stub tasks"<<std::endl;
+			std::cout<<"Syntax: "<<argv[0]<<" PARAMS"<<std::endl;
+			std::cout<<"PARAMS: "<<std::endl;
+			std::cout<<"        "<<"qual1.1"<<"  : "<<"for qualification 1.1 ( PathPlanning and PathPlanningFocus )"<<std::endl;
+			std::cout<<"        "<<"qual1.1"<<"  : "<<"for qualification 1.2 ( whileQS, whileZmp, searchObject )"<<std::endl;
+			std::cout<<"        "<<"qual1.all"<<": "<<"for all"<<std::endl;
+			return 0;
+		}
 		if(a=="qual1.1") return main_for_qual1_1(argc, argv);
 		if(a=="qual1.2") return main_for_qual1_2(argc, argv);
 		if(a=="qual1.all") return main_for_qual1_1and2(argc, argv);

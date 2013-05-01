@@ -296,12 +296,6 @@ data=path - C11 it retrieves the path and sends it back to the operator</algorit
         <effects/>
         <algorithm/>
     </task>
-    <task name="TestPedals">
-        <conditions/>
-        <constraints/>
-        <effects/>
-        <algorithm>C51 - move foot to pedals</algorithm>
-    </task>
     <task name="TrackObject">
         <conditions/>
         <constraints/>
@@ -316,6 +310,12 @@ Params:
         <constraints/>
         <effects/>
         <algorithm>C66 returns if there is no more an object in one of the hands</algorithm>
+    </task>
+    <task name="TestPedals">
+        <conditions/>
+        <constraints/>
+        <effects/>
+        <algorithm>C51 - move foot to pedals</algorithm>
     </task>
     <task name="IsZmpGood">
         <conditions/>
@@ -379,6 +379,12 @@ Params:
 Parameters:
   target - target object
      Gate - nearest and unvisited gate</algorithm>
+    </task>
+    <task name="Wait">
+        <conditions/>
+        <constraints/>
+        <effects/>
+        <algorithm/>
     </task>
     <task name="untilOperatorIntervention">
         <conditions/>
