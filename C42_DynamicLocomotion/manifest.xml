@@ -9,6 +9,7 @@
   <review status="unreviewed" notes=""/>
   <url>127.0.0.1</url>
   <depend package="rospy"/>
+  <depend package="std_msgs"/>
   <depend package="atlas_msgs"/>
   <depend package="python_orocos_kdl"/>
   <depend package="C0_RobilTask"/>

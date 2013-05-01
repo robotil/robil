@@ -4,10 +4,10 @@ import roslib;roslib.load_manifest('C42_DynamicLocomotion')
 import rospy
 from Abstractions.DynamicWalker import *
 from WalkingModeChooser import *
-import rospy
 from C31_PathPlanner.msg import C31_Waypoints
 from RobilTaskPy import *
 from LocalPathPlanner import *
+import actionlib
 
 ###################################################################################
 # File created by David Dovrat, 2013.
@@ -23,7 +23,7 @@ class DynamicLocomotion(RobilTask):
         self._DynamicWalker = DynamicWalker(WalkingModeChooser(lpp),lpp)
         self._interval = rospy.Rate(2)
         
-    def DynamicLocomotionTask(self):
+    def task(self, name, uid, parameters):
         
         self._DynamicWalker.Initialize()
 
@@ -48,7 +48,7 @@ class DynamicLocomotion(RobilTask):
 
     def WaitForPath(self):
         self._DynamicWalker._LPP.Stop()
-        self._path_sub = rospy.Subscriber('/C31PathPlanner',C31_Waypoints,self._path_cb)
+        self._path_sub = rospy.Subscriber('/path',C31_Waypoints,self._path_cb)
 
         while not self._DynamicWalker.IsReady():
             # if self.isPreepted():
@@ -82,6 +82,6 @@ if __name__ == '__main__':
     # Harness robot, with gravity off
     mode = rospy.Publisher('/atlas/mode', String, None, False, True, None)
     mode.publish("harnessed")
-    node.DynamicLocomotionTask()
+    #node.task()
     rospy.spin()
     print "C42_DynamicLocomotion node Closed"

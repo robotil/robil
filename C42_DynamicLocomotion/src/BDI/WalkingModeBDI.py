@@ -50,13 +50,13 @@ class WalkingModeBDI(WalkingMode):
         stand_prep = AtlasSimInterfaceCommand(None,AtlasSimInterfaceCommand.STAND_PREP, None, None, None, None, k_effort)
         self.asi_command.publish(stand_prep)
 
-        rospy.sleep(2.0)
+        #rospy.sleep(2.0)
         self.mode.publish("nominal")
         
         # Put robot into stand position
         stand = AtlasSimInterfaceCommand(None,AtlasSimInterfaceCommand.STAND, None, None, None, None, k_effort)
                 
-        rospy.sleep(0.3)
+        #rospy.sleep(0.3)
         
         self.asi_command.publish(stand)
         
@@ -104,7 +104,7 @@ class WalkingModeBDI(WalkingMode):
         # This weird little piece of code is supposed to initialize the odometer
         try:
             x = self.robot_position.x
-        except AttributeError:            
+        except AttributeError:
             self.robot_position = Point()
             self.robot_position.x = state.pos_est.position.x
             self.robot_position.y = state.pos_est.position.y
