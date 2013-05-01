@@ -18,7 +18,7 @@ class WalkingMode(object):
         return self._rate
     
     def Walk(self):
-        return true
+        return True
     
     def Stop(self):
         pass

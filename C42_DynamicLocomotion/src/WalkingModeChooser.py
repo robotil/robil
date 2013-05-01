@@ -17,7 +17,7 @@ class WalkingModeChooser(WalkingModeChooserInterface):
         self._Recommended = self._Modes['BDI']
         
     def IsCurrentModeAppropriate(self):
-        return true;
+        return True;
     
     def GetRecommendedMode(self):
         return self._Recommended
