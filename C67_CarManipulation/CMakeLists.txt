@@ -131,6 +131,12 @@ rosbuild_link_boost(PlaceFeetOnPedals thread)
 rosbuild_add_executable(CalibratePedals src/CalibratePedals.cpp)
 rosbuild_link_boost(CalibratePedals thread)
 
+rosbuild_add_executable(GripHandBrake src/GripHandBrake.cpp)
+rosbuild_link_boost(GripHandBrake thread)
+
+rosbuild_add_executable(GripGearStick src/GripGearStick.cpp)
+rosbuild_link_boost(GripGearStick thread)
+
 rosbuild_add_executable(task_tester src/taskTester.cpp)
 rosbuild_link_boost(task_tester thread)
 

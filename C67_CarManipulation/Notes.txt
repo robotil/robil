@@ -5,19 +5,8 @@ How to Check:
 run the node with the DRC simulation
 ------------------------------------------------------------------------------
 
-to test one of the 6 action servers, use 6 client nodes.
-
-for example:
-to test SteeringWheel_Server:
-
-run server:
-rosrun C67_CarManipulation SteeringWheel_server
-
-run client:
-rosrun C67_CarManipulation SteeringWheel_client
-
--------------------------------------------------------------------------------
-to test one of the following action servers: GripSteeringWheel, CalibrateWheel, PlaceFeetOnPedals, CalibratePedals
+to test one of the following action servers: GripSteeringWheel, CalibrateWheel, PlaceFeetOnPedals, CalibratePedals,
+GripHandBrake, GripGearStick.
 use the taskTester.cpp (by Dan)
 
 for GripSteeringWheel use:(in this example wait for 1 second use target angle of 1.5 [rad])
@@ -36,6 +25,17 @@ for CalibratePedals use:
 rosrun C67_CarManipulation CalibratePedals 
 rosrun C67_CarManipulation task_tester CalibratePedals 1
 
+for GripHandBrake use:(in this example wait for 1 second use target operation 1(1-Release, 2-Engage))
+rosrun C67_CarManipulation GripHandBrake 
+rosrun C67_CarManipulation task_tester GripHandBrake 1 args="operation=1"
+
+for GripGearStick use:(in this example wait for 1 second use target operation 3(1-Drive, 2-Park, 3-Reverse))
+rosrun C67_CarManipulation GripGearStick 
+rosrun C67_CarManipulation task_tester GripGearStick 1 args="operation=3"
+
+you can run all the servers (i.e. GripSteeringWheel, CalibrateWheel...), by 
+roslaunch C67_CarManipulation C67_servers.launch
+but then you don't see the servers prints.
 
 -------------------------------------------------------------------------------
 
