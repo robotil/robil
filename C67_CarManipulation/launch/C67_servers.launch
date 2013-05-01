@@ -2,23 +2,23 @@
 <!-- Launch the atlas & vehicle & fire hose world-->
 <!--include file="$(find atlas_utils)/launch/atlas_drc_vehicle_fire_hose.launch" /-->
 
-<!-- Start Steering Wheel server -->
-<node name="SteeringWheel_server" pkg="C67_CarManipulation" type="SteeringWheel_server" />
+<!-- Start GripSteeringWheel server -->
+<node name="GripSteeringWheel" pkg="C67_CarManipulation" type="GripSteeringWheel" />
 
-<!-- Start Ignition server -->
-<node name="Ignition_server" pkg="C67_CarManipulation" type="Ignition_server" />
+<!-- Start CalibrateWheel server -->
+<node name="CalibrateWheel" pkg="C67_CarManipulation" type="CalibrateWheel" />
 
-<!-- Start Hand Brake server -->
-<node name="HandBrake_server" pkg="C67_CarManipulation" type="HandBrake_server" />
+<!-- Start PlaceFeetOnPedals server -->
+<node name="PlaceFeetOnPedals" pkg="C67_CarManipulation" type="PlaceFeetOnPedals" />
 
-<!-- Start Gear Handle server -->
-<node name="GearHandle_server" pkg="C67_CarManipulation" type="GearHandle_server" />
+<!-- Start CalibratePedals server -->
+<node name="CalibratePedals" pkg="C67_CarManipulation" type="CalibratePedals" />
 
-<!-- Start Gas Pedal server -->
-<node name="GasPedal_server" pkg="C67_CarManipulation" type="GasPedal_server" />
+<!-- Start GripHandBrake server -->
+<node name="GripHandBrake" pkg="C67_CarManipulation" type="GripHandBrake" />
 
-<!-- Start Brake Pedal server -->
-<node name="BrakePedal_server" pkg="C67_CarManipulation" type="BrakePedal_server" />
+<!-- Start GripGearStick server -->
+<node name="GripGearStick" pkg="C67_CarManipulation" type="GripGearStick" />
 
 
 </launch>
