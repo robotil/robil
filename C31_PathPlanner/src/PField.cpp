@@ -219,7 +219,7 @@ namespace {
 			#endif
 		}
 		#if DISPLAY_INFO_FROM_SEARCHIP == 1
-				cout<<"finished: "<<(i<path.size())<<", "<<(fabs(vwp.x)<=viewRS)<<", "<<(vwp.y>-0.5)<<(vwp.y<=viewRF)<<endl;
+				cout<<"finished: "<<(i<path.size())<<", "<<(fabs(vwp.x)<=viewRS)<<", "<<(vwp.y>-0.5)<<", "<<(vwp.y<=viewRF)<<endl;
 		#endif
 		
 		repulsors = frontiers(repulsors_tmp, pos.loc);
@@ -266,6 +266,7 @@ namespace {
 			//cout<<"... ... G="<<Vec2d::r2d(G)<<"deg < PI/2 => nearest = "<<(nearest+1)<<endl;
 			nearest++;
 		}
+		return nearest;
 	}
 }
 
@@ -285,7 +286,7 @@ PField::Points PField::simulate(const SmoothingParameters& params) const{
 	opath_points = addPointsToPath(opath_points, 1);
 
 	#if DISPLAY_ORIGINAL_EXTENDED_PATH == 1
-		cout<<"originaly extended path "<<endl;
+		cout<<"originally extended path "<<endl;
 		for(size_t i=0;i<opath_points.size();i++){
 			cout<<opath_points[i].x<<"\t"<<opath_points[i].y<<endl;
 		}
