@@ -170,7 +170,7 @@ class MyTask(RobilTask):
         while not self._ZmpLpp.IsActive():
             if self.isPreepted():
                 self._ZmpLpp.Stop()
-                print "Preempt ZmpWalk: Preemted before path was received"
+                print "Preempt ZmpWalk: Preempted before path was received"
                 return RTResult_PREEPTED()
             self._interval.sleep()
         
