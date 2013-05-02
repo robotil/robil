@@ -1,0 +1,6 @@
+<launch>
+	 <include file="$(find viso2_ros)/launch/odometry.launch" />
+	<!-- Run the viso2_ros package -->
+	<include file="$(find C25_ekf)/robot_pose_ekf.launch" />
+	<include file="$(find C25_GlobalPosition)/launch/C25_aux.launch" />
+</launch>

@@ -1,0 +1,14 @@
+<plan descriptions="./plans/TaskDescriptions.xml">
+   <seq name="Mission" x="476.5" y="78.5" collapsed="false" id="760c06d7-1341-4d2f-8d62-7458cdbc1707"> 
+         <seq name="@4" x="495.5" y="211.5" collapsed="false" id="a292a7a3-4a54-48d7-ab9f-a838e2a77703"> 
+               <tsk name="InitDrive" x="302.5" y="388.5" test_time="0" test_result="true" id="2370a5da-ec2a-495f-8210-e638e8008614" />
+               <sel name="@5" x="529.5" y="309.5" collapsed="false" id="1b1ba360-5842-4b33-a15c-42f922b2cb8b"> 
+                     <tsk name="WayPointsDriving" x="441.5" y="394.5" test_time="0" test_result="true" id="36cf85e0-0d95-423a-842d-5711e521d77f" />
+                  <dec name="F:1" x="582.5" y="340.5"> 
+                        <tsk name="FinishDrive" x="692.5" y="399.5" test_time="0" test_result="true" id="ad29efff-6594-4e1d-be2c-ec06deb65979" />
+                  </dec>
+               </sel>
+               <tsk name="FinishDrive" x="692.5" y="399.5" test_time="0" test_result="true" id="ad29efff-6594-4e1d-be2c-ec06deb65979" />
+         </seq>
+   </seq>
+</plan>

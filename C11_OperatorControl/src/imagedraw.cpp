@@ -15,15 +15,20 @@ ImageDraw::ImageDraw(int argc, char** argv, QWidget *parent, Qt::WFlags flags)
 	ui.mainToolBar->hide();
 	ui.menuBar->hide();
 	ui.statusBar->hide();
+	ui.btnCreate->setEnabled(false);
 
 	ImageAreaCount = 0;
 	IsUpdateCurrentImg = false;
+	ERunStatus = STOPPED_ENUM;
+
+	WaitTimer = new QTimer(this);
 
 	connect(this,SIGNAL(SigOnNewImg(QImage)),this,SLOT(SltOnNewImg(QImage)),Qt::QueuedConnection);
 	connect(ui.btnPlayPause,SIGNAL(clicked(bool)),this,SLOT(SltOnPlayPauseClick(bool)));
 	connect(ui.btnCreate,SIGNAL(clicked(bool)),this,SLOT(SltOnCreateClick(bool)));
 	connect(ui.btnPath,SIGNAL(clicked(bool)),this,SLOT(SltOnPathClick(bool)));
-
+	connect(WaitTimer,SIGNAL(timeout()),this,SLOT(SltOnWaitTimeout()));
+	connect(ui.mapWidget,SIGNAL(SigOperatorAction()),this,SLOT(SltOperatorAction()));
 	C11node.init();
 
 //	QString fileName = QFileDialog::getOpenFileName(this,
@@ -36,7 +41,11 @@ ImageDraw::ImageDraw(int argc, char** argv, QWidget *parent, Qt::WFlags flags)
 
 ImageDraw::~ImageDraw()
 {
-
+  if(WaitTimer!=NULL)
+    {
+      delete WaitTimer;
+      WaitTimer = NULL;
+    }
 }
 
 void ImageDraw::CreateNewImageArea(QString imageName)
@@ -120,6 +129,59 @@ void ImageDraw::OnOccupancyGridReceived(int grid[100][100], StructPoint robotPos
 void ImageDraw::OnPathReceived(std::vector<StructPoint> points)
 {
 	ui.mapWidget->AddPath(points);
+}
+
+void ImageDraw::OnHMIResponseReceived()
+{
+              ui.btnPlayPause->setChecked(false);
+              ERunStatus = PAUSED_ENUM;
+              ui.btnCreate->setEnabled(true);
+              ui.mapWidget->SetEditable(true);
+              WaitTimer->setSingleShot(true);
+              WaitTimer->start(10000);
+}
+
+void ImageDraw::SltOnWaitTimeout()
+{
+  std::cout << "SltOnWaitTimeout" << std::endl;
+  OnWaitResponseFinished();
+  C11node.Resume();
+}
+
+void ImageDraw::OnWaitResponseFinished()
+{
+              ui.btnPlayPause->setChecked(true);
+              ERunStatus = RUNNING_ENUM;
+              ui.btnCreate->setEnabled(false);
+              SltOnCreateClick(false);
+              ui.mapWidget->SetEditable(false);
+}
+
+void ImageDraw::OnExecutionStatusUpdate(int status)
+{
+        if(0 == status)
+          {
+            ui.btnPlayPause->setChecked(true);
+            ERunStatus = RUNNING_ENUM;
+            ui.btnCreate->setEnabled(false);
+            SltOnCreateClick(false);
+            ui.mapWidget->SetEditable(false);
+          }
+        else if (1 == status)
+          {
+            ui.btnPlayPause->setChecked(false);
+            ERunStatus = PAUSED_ENUM;
+            ui.btnCreate->setEnabled(true);
+            ui.mapWidget->SetEditable(true);
+          }
+        else if( 2 == status)
+          {
+            ui.btnPlayPause->setChecked(false);
+            ERunStatus = STOPPED_ENUM;
+            ui.btnCreate->setEnabled(false);
+            SltOnCreateClick(false);
+            ui.mapWidget->SetEditable(false);
+          }
 }
 
 void ImageDraw::SltOnNewImg(QImage image)
@@ -211,25 +273,52 @@ void ImageDraw::SltOnPlayPauseClick(bool checked)
 {
 	if(checked)
 	{
-		QString curMission = ui.cmbMissions->currentText();
-		if(!curMission.isEmpty())
-		{
-			int index=0;
-			if(curMission == "Task1")
-			{
-				index = 0;
-			}
-			else if(curMission == "Task2")
-			{
-				index = 1;
-			}
-			else if(curMission == "Task3")
-			{
-				index = 2;
-			}
-			C11node.LoadMission(index);
-		}
+	        if(ERunStatus==STOPPED_ENUM)
+                {
+	            QString curMission = ui.cmbMissions->currentText();
+
+                  if(!curMission.isEmpty())
+                  {
+                          int index=0;
+                          if(curMission == "Task1")
+                          {
+                                  index = 0;
+                          }
+                          else if(curMission == "Task2")
+                          {
+                                  index = 1;
+                          }
+                          else if(curMission == "Task3")
+                          {
+                                  index = 2;
+                          }
+                          C11node.LoadMission(index);
+                          ERunStatus = RUNNING_ENUM;
+                          ui.btnCreate->setEnabled(false);
+                          SltOnCreateClick(false);
+                          ui.mapWidget->SetEditable(false);
+                  }
+                }
+	        else
+                {
+	            std::vector<StructPoint> points = ui.mapWidget->GetUpdatedRoute();
+	            if(!points.empty())
+	              {
+	                C11node.SendPathUpdate(points);
+	              }
+	            C11node.Resume();
+	            ERunStatus = RUNNING_ENUM;
+	            ui.btnCreate->setEnabled(false);
+	            SltOnCreateClick(false);
+                }
 	}
+	else
+        {
+	    C11node.Pause();
+	    ERunStatus = PAUSED_ENUM;
+	    ui.btnCreate->setEnabled(true);
+	    ui.mapWidget->SetEditable(true);
+        }
 }
 
 void ImageDraw::SltOnCreateClick(bool checked)
@@ -240,13 +329,17 @@ void ImageDraw::SltOnCreateClick(bool checked)
 		ui.btnNoGo->setEnabled(true);
 		ui.btnDoor->setEnabled(true);
 		ui.btnCarInt->setEnabled(true);
+		ui.btnRotate->setEnabled(true);
+		ui.btnSteps->setEnabled(true);
 	}
 	else
 	{
-		ui.btnPath->setEnabled(true);
-		ui.btnNoGo->setEnabled(true);
-		ui.btnDoor->setEnabled(true);
-		ui.btnCarInt->setEnabled(true);
+		ui.btnPath->setEnabled(false);
+		ui.btnNoGo->setEnabled(false);
+		ui.btnDoor->setEnabled(false);
+		ui.btnCarInt->setEnabled(false);
+		ui.btnRotate->setEnabled(false);
+		ui.btnSteps->setEnabled(false);
 	}
 }
 
@@ -256,4 +349,13 @@ void ImageDraw::SltOnPathClick(bool checked)
 	{
 		ui.mapWidget->setMode(E_PATH_MODE);
 	}
+}
+
+
+void ImageDraw::SltOperatorAction()
+{
+        if(WaitTimer->isActive())
+          {
+            WaitTimer->stop();
+          }
 }

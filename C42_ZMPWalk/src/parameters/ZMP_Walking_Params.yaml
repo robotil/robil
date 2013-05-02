@@ -1,0 +1,137 @@
+
+
+
+
+zmp_walking:
+  type: " "
+  walking_parameters:
+    rate: 300
+
+
+    2cm:
+
+        step_length: 0.02
+        step_time: 1.1
+        bend_knees: 0.035
+        step_height: 0.028
+        PSC: 10000000
+        JSC:
+            uay: 999999999999999999999.0
+            kny: 999999999999999999999.0
+            lhy: 999999999999999999999.0
+        lax_eff_devider: 999999999999999999999.0
+        l_mhx_eff_devider: 999999999999999999999.0
+        r_mhx_eff_devider: 999999999999999999999.0
+        mhx_eff_offset: 0.0
+        kny_eff_devider: 10.0
+
+    10cm:
+
+        step_length: 0.1
+        step_time: 1.2
+        bend_knees: 0.045
+        step_height: 0.035
+        PSC: 5500000
+        JSC:
+            uay: 46000
+            kny: 36000
+            lhy: 80000
+        lax_eff_devider: 25.0
+        l_mhx_eff_devider: 45.0
+        r_mhx_eff_devider: 25.0
+        mhx_eff_offset: 23.0
+        kny_eff_devider: 10.0
+
+    15cm:
+
+        step_length: 0.15
+        step_time: 1.4
+        bend_knees: 0.045
+        step_height: 0.04
+        PSC:  0.6100000
+        JSC:
+            uay: 999999866000
+            kny: 99999966000
+            lhy: 999999120000 
+        lax_eff_devider: 25.0
+        l_mhx_eff_devider: 45.0
+        r_mhx_eff_devider: 25.0
+        mhx_eff_offset: 24.0
+        kny_eff_devider: 10.0
+    18cm:
+
+        step_length: 0.18
+        step_time: 1.5
+        bend_knees: 0.055
+        step_height: 0.045
+        PSC: 4900000
+        JSC:
+            uay: 76000
+            kny: 56000
+            lhy: 180000
+        lax_eff_devider: 15.0
+        l_mhx_eff_devider: 35.0
+        r_mhx_eff_devider: 25.0
+        mhx_eff_offset: 23.0
+        kny_eff_devider: 10.0
+
+
+  joints:
+    - l_leg_uhz
+    - l_leg_mhx
+    - l_leg_lhy
+    - l_leg_kny
+    - l_leg_uay
+    - l_leg_lax
+    - r_leg_uhz
+    - r_leg_mhx
+    - r_leg_lhy
+    - r_leg_kny
+    - r_leg_uay
+    - r_leg_lax
+    - l_arm_usy
+    - l_arm_shx
+    - l_arm_ely
+    - l_arm_elx
+    - l_arm_uwy
+    - l_arm_mwx
+    - r_arm_usy
+    - r_arm_shx
+    - r_arm_ely
+    - r_arm_elx
+    - r_arm_uwy
+    - r_arm_mwx
+    - neck_ay
+    - back_lbz
+    - back_mby
+    - back_ubx
+  IK_zero_pose:
+    l_leg_uhz:  0.0
+    l_leg_mhx:  0.0
+    l_leg_lhy: -0.13
+    l_leg_kny:  0.13
+    l_leg_uay:  0.0
+    l_leg_lax:  0.0
+    r_leg_uhz:  0.0
+    r_leg_mhx:  0.0
+    r_leg_lhy: -0.13
+    r_leg_kny:  0.13
+    r_leg_uay:  0.0
+    r_leg_lax:  0.0
+    l_arm_usy:  0.0
+    l_arm_shx:  0.0
+    l_arm_ely:  0.0
+    l_arm_elx:  0.0
+    l_arm_uwy:  0.0
+    l_arm_mwx:  0.0
+    r_arm_usy:  0.0
+    r_arm_shx:  0.0
+    r_arm_ely:  0.0
+    r_arm_elx:  0.0
+    r_arm_uwy:  0.0
+    r_arm_mwx:  0.0
+    neck_ay:    0.0
+    back_lbz:   0.0
+    back_mby:   0.0
+    back_ubx:   0.0
+ 

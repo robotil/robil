@@ -36,18 +36,18 @@ public class OSValidator {
 
 	}
 
-	public static void main(String[] args) {
-		if (isWindows()) {
-			Log.d("This is Windows");
-		} else if (isMac()) {
-			Log.d("This is Mac");
-		} else if (isUnix()) {
-			Log.d("This is Unix or Linux");
-		} else if (isSolaris()) {
-			Log.d("This is Solaris");
-		} else {
-			Log.d("Your OS is not support!!");
-		}
-	}
+//	public static void main(String[] args) {
+//		if (isWindows()) {
+//			Log.d("This is Windows");
+//		} else if (isMac()) {
+//			Log.d("This is Mac");
+//		} else if (isUnix()) {
+//			Log.d("This is Unix or Linux");
+//		} else if (isSolaris()) {
+//			Log.d("This is Solaris");
+//		} else {
+//			Log.d("Your OS is not support!!");
+//		}
+//	}
 
 }

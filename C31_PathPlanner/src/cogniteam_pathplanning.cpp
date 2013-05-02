@@ -16,38 +16,32 @@
 
 #include "cogniteam_pathplanning.h"
 
-#define PRINT_AS_VECTORS 1
-
-// #define SET_PARAMETERS(pf_params)\
-// 	pf_params.viewRadiusForward = 5;\
-// 	pf_params.viewRadiusSide = 2;\
-// 	pf_params.stepRate=0.6;\
-// 	pf_params.inertia=pow(1/pf_params.viewRadiusForward*0.5,2);\
-// 	pf_params.distanceBetweenPoints = 2;\
-// 	pf_params.maxAngleWhileReducing = Vec2d::d2r(10);
-#define SET_PARAMETERS(pf_params)\
-	pf_params.viewRadiusForward = 15;\
-	pf_params.viewRadiusSide = 4;\
-	pf_params.stepRate=0.3;\
-	pf_params.inertia=pow(1/pf_params.viewRadiusForward*0.5,2);\
-	pf_params.distanceBetweenPoints = 2;\
-	pf_params.maxAngleWhileReducing = Vec2d::d2r(10);
+#include "cogniteam_pathplanner_parameters.h"
 
 using namespace std;
 
 // -------------------------- MAP ---------------------------------------------
-
-Map::Map(int w, int h):_w(w),_h(h){
+int Map::map_id_counter = 0;
+Map::Map(int w, int h):map_id(map_id_counter++), _w(w),_h(h){
 	_data.resize(_w*_h);
 	for(size_t i=0;i<_data.size();i++) _data[i]=ST_UNCHARTED;
 }
-Map::Map(int w, int h, char* cmap):_w(w),_h(h){
+Map::Map(int w, int h, char* cmap):map_id(map_id_counter++), _w(w),_h(h){
 	_data.resize(_w*_h);
 	for(size_t i=0;i<_data.size();i++) _data[i]=cmap[i];
 }
-Map::Map(const Map& map):_w(map._w),_h(map._h){
+Map::Map(const Map& map):map_id(map_id_counter++), _w(map._w),_h(map._h){
 	_data.resize(_w*_h);
 	for(size_t i=0;i<_data.size();i++) _data[i]=map._data[i];
+}
+
+const Map& Map::operator=(const Map& other){
+	_w = other._w; _h = other._h;
+	if(_data.size()!=other._data.size()){
+		_data.resize(_w*_h);
+	}
+	for(size_t i=0;i<_data.size();i++) _data[i]=other._data[i];
+	return *this;
 }
 
 ostream& operator<<(ostream& out, const Map& m){
@@ -332,7 +326,7 @@ vector<QTNode::XY> QTPath::extractPoints(size_t sx, size_t sy, size_t gx, size_t
 	if(path.size()>0){
 		QTNode::XY p = {sx,sy};
 		points.push_back(p);
-		if(path.size()>2){
+		if(path.size()>=2){
 			const QTNode* prev = path[0];
 			for(size_t i=1;i<path.size()-1;i++) {
 				vector<QTNode::XY> corr = prev->getCorridor(path[i]);
@@ -430,333 +424,41 @@ Map MapEditor::replace(const Map& source, const char from, const char to)const{
 }
 
 Map MapEditor::coloring(const Map& source, size_t x, size_t y, const char av, const char bl)const{
+	//ALLOCATE MEMORY FOR COLORED MAP AND FOR VISITED/UNVISITED FLAGES
 	Map visited(source.w(), source.h());
 	Map res(source.w(), source.h());
-	//cout<<": "<<(int)source(x,y)<<": "<<(int)av<<": "<<(int)bl<<endl;
+	//START COLORING PROCESS
 	coloring(source, x, y, source(x,y), av, bl, visited, res);
+	//COLOR ALL UNVISITED CELLS IN RESULT MAP AS BLOCKED
 	for( size_t y=0; y<source.h(); y++){for( size_t x=0; x<source.w(); x++){
 		if(visited(x,y)==Map::ST_UNCHARTED) res(x,y)=bl;
 	}}
 	return res;
 }
 void MapEditor::coloring(const Map& source, size_t x, size_t y, const char c, const char av, const char bl, Map& visited, Map& res)const{
+	//IF CURRENT CELL IS VISITED RETURN
 	if(visited(x,y)==Map::ST_BLOCKED) return;
+	//IF CURRETN CELL IS UNVISITED => SELECT IT AS VISITED
 	visited(x,y) = Map::ST_BLOCKED;
+	//IF CURRENT CELL HAS RIGHT COLOR (COLOR OF FIRST CELL, LIKELY AVALIABLE) DO
 	if(c == source(x,y)){
+		//IN RESULT MAP COLOR THE CELL AS AVALIABLE
 		res(x,y)=av;
-		if(x>0)coloring(source, x-1, y, c, av, bl, visited, res);
-		if(x<source.w()-1)coloring(source, x+1, y, c, av, bl, visited, res);
-		if(y>0)coloring(source, x, y-1, c, av, bl, visited, res);
-		if(y<source.h()-1)coloring(source, x, y+1, c, av, bl, visited, res);
+		//CONTINUE SPREAD TO ALL CONRNERS OF THE EARTH
+		if(x>0)				coloring(source, x-1, y, c, av, bl, visited, res);
+		if(x<source.w()-1)	coloring(source, x+1, y, c, av, bl, visited, res);
+		if(y>0)				coloring(source, x, y-1, c, av, bl, visited, res);
+		if(y<source.h()-1)	coloring(source, x, y+1, c, av, bl, visited, res);
 	}
-	else res(x,y)=bl;
+	//IF CURRENT CELL HAS NOT RIGHT COLOR (COLOR OF FIRST CELL, LIKELY AVALIABLE) DO
+	else{
+		//IN RESULT MAP COLOR THE CELL AS BLOCKED
+		res(x,y)=bl;
+	}
 }
 
 // -------------------------------------------------------------------------------
 
-int cogniteam_pathplanning_test_map_inflation(int argc, char** argv) {
-	cout << "START" << endl; // prints PP
-
-// 	char cmap[]={
-// 			0,0,0,0,0, 0,0,0,0,0, 0,0,0,0,0, 0,0,0,0,0, 0,
-// 			0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-// 			0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-// 			0,0,0,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-// 			0,0,0,0,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-// 
-// 			0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-// 			0,0,0,0,0,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-// 			0,0,0,0,0,0,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,
-// 			0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-// 			0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-// 
-// 			0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,1,1,
-// 			0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,0,1,1,1,1,1,
-// 			0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,
-// 			0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,0,0,0,
-// 			0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-// 
-// 			0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
-// 	};
-	char cmap1[]={
-			0,0,0,0,0, 0,0,0,0,0, 0,0,0,0,0, 0,0,0,0,0, 0,
-			0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-			0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-			0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-			0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-
-			0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-			0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-			0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,
-			0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-			0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-
-			0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-			0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-			0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-			0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-			0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-
-			0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
-	};
-	size_t w=21,h=16;
-	Map map(w, h, cmap1);
-	cout<<"map"<<endl<<map<<endl;
-
-	Inflator i(3, Map::ST_BLOCKED);
-	MapEditor e;
-	cout<<"inflated:"<<endl<<e.coloring(i.inflate(map), 11,7, 0,1)<<endl;
-
-	return 0;
-}
-
-
-#include <cstdlib>
-#include <cstdio>
-#include "MapFileReader.hpp"
-int cogniteam_pathplanning_test(int argc, char** argv) {
-	cout << "START" << endl; // prints PP
-
-	char cmap_1[]={
-		2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,
-		2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,
-		2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,0,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,
-		2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,1,2,2,2,2,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,
-		2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,1,1,1,1,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,
-		2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,
-		2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,
-		2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,
-		2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,
-		2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,1,1,2,2,2,2,2,2,2,2,2,2,2,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,
-		2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,
-		2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,
-		2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,
-		2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,
-		2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,
-		2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,
-		2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,
-		2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,1,0,2,2,2,2,2,2,2,2,2,
-		2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,0,0,2,2,2,0,0,0,0,2,2,2,2,2,2,2,2,
-		2,2,2,2,2,2,2,2,2,2,2,2,2,2,1,1,1,0,2,2,2,2,2,2,2,2,2,2,2,2,2,0,0,2,2,1,1,1,1,1,2,2,2,2,2,2,2,2,
-		2,2,2,2,2,2,2,2,2,2,2,2,1,1,1,1,1,1,1,2,1,1,1,1,2,2,0,2,1,1,1,1,0,1,1,1,1,1,1,1,1,1,2,2,2,2,2,2,
-		2,2,2,2,2,2,2,2,2,2,2,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,2,2,2,2,2,
-		2,2,2,2,2,2,2,2,2,2,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,2,2,2,2,
-		2,2,2,2,2,2,2,2,2,2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2,2,2,2,
-		2,2,2,2,2,2,2,2,2,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,2,2,2,
-		2,2,2,2,2,2,2,2,2,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,2,2,
-		2,2,2,2,2,2,2,2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2,
-		2,2,2,2,2,2,2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-		2,2,2,2,2,2,2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-		2,2,2,2,2,2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-		2,2,2,2,2,2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-		2,2,2,2,2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-		2,2,2,2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-		2,2,2,2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-		2,2,2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-		2,2,2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-		2,2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-		2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-		2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-		0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-		0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-		0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-		0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-		0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-		0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-		0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-		0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-		0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
-	};
-
-
-	clock_t start_time = clock();
-	
-	char* cmap = cmap_1;
-	size_t w=48,h=48;
-	
-	
-	vector<char> map_from_file;
-	if(argc>5){
-		cout<<"map from file: "<<argv[5]<<endl;
-		map_from_file = map_file_reader::readMap(argv[5], w, h);
-		cmap = map_from_file.data();
-	}
-	
-	
-	Map map(w, h, cmap);
-	cout<<"map source"<<endl<<map<<endl;
-	
-	long _sx=atoi(argv[1]), _sy=atoi(argv[2]);
-	long _ex=atoi(argv[3]), _ey=atoi(argv[4]);
-	long _rr=atoi(argv[6]);
-	
-	#define START_P _sx,_sy 
-	#define END_P   _ex,_ey
-	
-	#define POINTS START_P, END_P
-	
-	printf("Robot radius : %i celles \n", _rr);
-	printf("Plan path : from %i,%i to %i,%i \n", POINTS);
-	
-	if(map.inRange(END_P)==false){
-		map.approximate(START_P, END_P);
-	}
-	
-#if PRINT_AS_VECTORS == 1
-	cout<<"\nPRINT MAP - STR"<<endl;
-	for(size_t yy=0;yy<map.h();yy++){
-		for(size_t xx=0;xx<map.w();xx++){
-			if(map(xx,yy)==Map::ST_BLOCKED){
-				cout<<xx<<'\t'<<yy<<endl;
-			}
-		}	
-	}
-	cout<<"PRINT MAP - END\n"<<endl;
-#endif
-	
-	clock_t time_inflator = clock();
-	
-	Inflator i( _rr , Map::ST_BLOCKED);
-	MapEditor e;
-	
-	map = 
-	e.coloring( 
-		e.replace(
-			i.inflate(map), 
-			Map::ST_UNCHARTED, Map::ST_AVAILABLE), 
-		START_P, Map::ST_AVAILABLE,Map::ST_BLOCKED
-	);
-	
-	map = MapEditor().replace(map, Map::ST_UNCHARTED,Map::ST_AVAILABLE);
-	
-	time_inflator = clock()-time_inflator;
-	
-	Map input_map = map;
-
-	clock_t time_qt = clock();
-	
-	QTNode qt(0,w-1, 0, h-1, map);
-	qt.folding();
-	
-	time_qt = clock() - time_qt;
-	
-	cout<<"QT:"<<endl<<qt<<endl;
-
-#define PRINT_NODE(X,Y){\
-	const QTNode* node = qt.findEmpty(X,Y);\
-	if(node){\
-		cout<<"FOUND:  "<<X<<":"<<Y<<endl;\
-		cout<<"FE: "<<endl<<(*node);\
-		QTNode::BORDER bord = node->getBorder();\
-		for(size_t i=0;i<bord.size();i++) cout<<bord[i].x<<","<<bord[i].y<<"  "; cout<<endl;\
-		QTNode::NEIGHBORS nei = node->getNeighbors();\
-		cout<<"NEIGHBORS: "<<nei.size()<<endl;\
-		for(QTNode::NEIGHBORS::const_iterator i=nei.begin();i!=nei.end();i++) cout<<(**i);\
-	}else{\
-		cout<<"NOT FOUND : "<<X<<":"<<Y<<endl;\
-	}cout<<"-------"<<endl;}
-
-	PRINT_NODE(19,13)
-	PRINT_NODE(20,14)
-	PRINT_NODE(20,15)
-	PRINT_NODE(5,5)
-	
-
-#if PRINT_AS_VECTORS == 1
-	cout<<"\nPRINT INFLATED MAP - STR"<<endl;
-	for(size_t yy=0;yy<map.h();yy++){
-		for(size_t xx=0;xx<map.w();xx++){
-			if(map(xx,yy)==Map::ST_BLOCKED){
-				cout<<xx<<'\t'<<yy<<endl;
-			}
-		}	
-	}
-	cout<<"PRINT INFLATED - END\n"<<endl;
-#endif
-
-	AStar a_star;
-	size_t sx(2),sy(13),gx(15),gy(3);
-	
-	clock_t time_astar = clock();
-	
-	AStar::Path path = a_star.search(POINTS , &qt);
-	
-	time_astar = clock() - time_astar;
-
-	cout<<"A* ("<<sx<<","<<sy<<":"<<gx<<","<<gy<<") result : path length = "<<path.size()<<endl;
-	cout<<"path (by nodes): "<<endl;
-	for(size_t i=0; i<path.size();i++){
-		cout<<*(path[i]);
-		map(path[i]->getCenterX(), path[i]->getCenterY())='@';
-	}
-	cout << "------------"<< endl;
-	Path res_path;
-	
-	clock_t time_ep = clock();
-	
-	vector<QTNode::XY> points = QTPath(path).extractPoints(POINTS);
-	
-	time_ep = clock() - time_ep; time_astar+=time_ep;
-	
-	cout<<"path by points: ";
-	for( size_t i=0;i<points.size(); i++){
-		cout<<"("<<points[i].x<<","<<points[i].y<<") ";
-		map(points[i].x, points[i].y)='+';
-		res_path.push_back(Waypoint(points[i].x,points[i].y));
-	}
-#if PRINT_AS_VECTORS == 1
-	cout<<"\nPRINT PATH AFTER A* - STR"<<endl;
-	for( size_t i=0;i<points.size(); i++){
-		cout<<points[i].x<<'\t'<<points[i].y<<endl;
-	}
-	cout<<"PRINT PATH AFTER A* - END\n"<<endl;
-#endif
-
-	cout<<endl;
-	cout<<"map with path"<<endl<<map<<endl;
-	
-	PField pf(input_map, res_path);
-	PField::SmoothingParameters pf_params;
-	SET_PARAMETERS(pf_params)
-	
-	clock_t time_smoothing = clock();
-	
-	PField::Points smoothed_points= pf.smooth(pf_params);
-	
-	time_smoothing = clock() - time_smoothing;
-	
-	Path smoothed = pf.smoothWaypoints(pf_params);
-	
-	cout<<"smoothed path: ";
-	for( size_t i=0;i<smoothed.size(); i++){
-		cout<<"("<<smoothed[i].x<<","<<smoothed[i].y<<") ";
-		map(smoothed[i].x, smoothed[i].y)='o';
-	}
-	
-	cout<<endl;
-	cout<<"map with smoothed path"<<endl<<map<<endl;
-	
-	start_time = clock()-start_time;
-	
-#if PRINT_AS_VECTORS == 1
-	cout<<"\nPRINT PATH AFTER PFIELD - STR"<<endl;
-	for( size_t i=0;i<smoothed_points.size(); i++){
-		cout<<smoothed_points[i].x<<'\t'<<smoothed_points[i].y<<endl;
-	}
-	cout<<"PRINT PATH AFTER PFIELD - END\n"<<endl;
-#endif
-//#define STR_TIME(x) ((double)x)/(double)CLOCKS_PER_SEC/1000.0<<" msec"
-#define STR_TIME(x) x<<" clocks"
-// 	cout<<"TIMES:"<<endl;
-// 	cout<<"   total : "<<STR_TIME(start_time)<<endl;
-// 	cout<<"   inflation : "<<STR_TIME(time_inflator)<<endl;
-// 	cout<<"   quad tree : "<<STR_TIME(time_qt)<<endl;
-// 	cout<<"   A* : "<<STR_TIME(time_astar)<<endl;
-// 	cout<<"   smoothing : "<<STR_TIME(time_smoothing)<<endl;
-	
-	cout << endl << "END" << endl; // prints PP
-	return 0;
-}
 
 namespace {
 
@@ -764,7 +466,7 @@ namespace {
 		Pair(const Waypoint& ss, const Waypoint& ee):s(ss.x,ss.y),g(ee.x,ee.y){}
 		Pair(const TransitWaypoint& ss, const TransitWaypoint& ee):s(ss.x,ss.y),g(ee.x,ee.y){}
 		Pair(const Waypoint& ss, const TransitWaypoint& ee):s(ss.x,ss.y),g(ee.x,ee.y){}
-		Pair(const TransitWaypoint& ee, const Waypoint& ss):s(ss.x,ss.y),g(ee.x,ee.y){}
+		Pair(const TransitWaypoint& ss, const Waypoint& ee):s(ss.x,ss.y),g(ee.x,ee.y){}
 	};
 
 }
@@ -786,20 +488,20 @@ PField::Points searchPath(const Map& source_map, const Waypoint& start, const Wa
 	
 	Inflator i( rr , Map::ST_BLOCKED);
 	MapEditor e;
-	
-// 	Map map =  i.inflate(source_map);
-	
-// 	Map map =  
-// 		e.replace(
-// 			i.inflate(source_map), 
-// 			Map::ST_UNCHARTED, Map::ST_AVAILABLE)
-// 	;
+
+	Map inflated_map = e.replace(
+			i.inflate(source_map),
+			Map::ST_UNCHARTED, Map::ST_AVAILABLE
+		);
+
+	if( inflated_map(start.x, start.y)==Map::ST_BLOCKED || inflated_map(finish.x, finish.y)==Map::ST_BLOCKED ){
+		cout<<"searchPath: "<<"some of interesting points are not available (after inflation)"<<endl;
+		return PField::Points();
+	}
 
 	Map map = 
 		e.coloring( 
-			e.replace(
-				i.inflate(source_map), 
-				Map::ST_UNCHARTED, Map::ST_AVAILABLE), 
+			inflated_map,
 			start.x, start.y, Map::ST_AVAILABLE,Map::ST_BLOCKED
 		);
 	
@@ -859,3 +561,99 @@ PField::Points searchPath(const Map& source_map, const Waypoint& start, const Wa
 	
 	return smoothed_path;
 }
+
+PField::Points searchPath_transitAccurate(const Map& source_map, const Waypoint& start, const Waypoint& finish, const Constraints& constraints){
+	using namespace std;
+
+	//TODO: PROCESS CONSTRAINTS PATH BEFORE INFLATION
+
+	if( source_map(start.x, start.y)==Map::ST_BLOCKED || source_map(finish.x, finish.y)==Map::ST_BLOCKED ){
+		cout<<"searchPath: "<<"some of interesting points are not available (before inflation)"<<endl;
+		return PField::Points();
+	}
+
+	size_t rr = constraints.dimentions.radius;
+	if( rr<constraints.dimentions.radius) rr++;
+
+	Inflator i( rr , Map::ST_BLOCKED);
+	MapEditor e;
+
+	Map inflated_map = e.replace(
+			i.inflate(source_map),
+			Map::ST_UNCHARTED, Map::ST_AVAILABLE
+		);
+
+	if( inflated_map(start.x, start.y)==Map::ST_BLOCKED || inflated_map(finish.x, finish.y)==Map::ST_BLOCKED ){
+		cout<<"searchPath: "<<"some of interesting points are not available (after inflation)"<<endl;
+		return PField::Points();
+	}
+
+	Map map =
+		e.coloring(
+			inflated_map,
+			start.x, start.y, Map::ST_AVAILABLE,Map::ST_BLOCKED
+		);
+
+	QTNode qt(0,map.w()-1, 0, map.h()-1, map);
+	qt.folding();
+
+	// CHECK IF ALL INTERESTING POINTS (start, stop and transits) ARE AVAILABLE
+
+	if( !qt.findEmpty(start.x, start.y) || !qt.findEmpty(finish.x, finish.y) ){
+		cout<<"searchPath: "<<"some of interesting points are not available"<<endl;
+		return PField::Points();
+	}
+	if(constraints.transits.size()!=0){
+		for( size_t i=0 ; i<constraints.transits.size(); i++ ){
+			if( !qt.findEmpty(constraints.transits[i].x, constraints.transits[i].y) ){
+				cout<<"searchPath: "<<"some of transit points are not available"<<endl;
+				return PField::Points();
+			}
+		}
+	}
+
+	// CREATE SEGMENTS
+
+	vector<Pair> segments;
+	if(constraints.transits.size()==0){
+		segments.push_back(Pair(start, finish));
+	}else{
+		size_t i=0;
+		segments.push_back(Pair(start, constraints.transits[i]));
+		for(; i<constraints.transits.size()-1; i++)
+			segments.push_back(Pair(constraints.transits[i], constraints.transits[i+1]));
+		segments.push_back(Pair(constraints.transits[i], finish));
+	}
+
+	// CREATE PATH
+
+	PField::Points g_smoothed_path;
+	AStar a_star;
+	for( size_t i=0; i<segments.size(); i++){
+		Path path;
+		#define SEGMENT segments[i].s.x, segments[i].s.y,  segments[i].g.x,segments[i].g.y
+		AStar::Path qt_path = a_star.search( SEGMENT , &qt);
+		vector<QTNode::XY> points;
+		if( qt_path.size()>0 ) points = QTPath(qt_path).extractPoints( SEGMENT );
+		for( size_t p=0; p<points.size(); p++ ){
+			path.push_back(Waypoint(points[p].x,points[p].y));
+		}
+		#undef SEGMENT
+
+		PField::SmoothingParameters pf_params;
+		SET_PARAMETERS(pf_params)
+
+		PField pf(map, path);
+		PField::Points smoothed_path = pf.smooth(pf_params);
+
+		for( size_t i=0;i<smoothed_path.size(); i++){
+			g_smoothed_path.push_back(smoothed_path[i]);
+		}
+
+	}
+
+	return g_smoothed_path;
+}
+
+#include "cogniteam_pathplanning_tests.cpp"
+

@@ -430,6 +430,7 @@ class node:
 
     def getRandomProb(self, index):
         x = random.random()
+        #print "getRandomProb", self.getAttrib("name"),self.getProbAtIndex(index)
         p = float(self.getProbAtIndex(index))
         if p==None:
             return None
@@ -538,6 +539,9 @@ class node:
                     return (float(self.probTable[index][0])/float(self.probTable[index][1]))
                 return 0
         return None
+        
+        
+        
     #node- run func 
     def run(self, index):
         a = None
@@ -614,7 +618,13 @@ class node:
         else:
             return float('Inf')
 
-
+    def getSDSuccTime(self, index):
+        if self.getDistSuccByIndex(index) != None:
+            return self.getDistSuccByIndex(index).SDTime()
+        else:
+            return float(0)
+            
+            
  #table is the name of the table needed- attribute
     def _createDistTable(self,table):
         string = self.getAttrib(str(table))

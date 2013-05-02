@@ -90,15 +90,15 @@ namespace C0_RobilTask{
 			_result.description = description;
 			if(success <= 0)
 			{
-				ROS_INFO("%s: Succeeded", _name.c_str());
+				ROS_INFO("%s: Succeeded. %s", _name.c_str(), description.c_str());
 				if(success == PLAN){
-					ROS_INFO("%s: New plan", _name.c_str());
+					ROS_INFO("%s: New plan. %s", _name.c_str(), description.c_str());
 					_result.plan = plan;
 				}
 				GOAL_SUCCESS
 			}else{
 				if(AbortForUnsuccess){
-					ROS_INFO("%s: Aborted", _name.c_str());
+					ROS_INFO("%s: Aborted. %s", _name.c_str(), description.c_str());
 					GOAL_ABORT
 				}else{
 					ROS_INFO("%s: Preempted", _name.c_str());

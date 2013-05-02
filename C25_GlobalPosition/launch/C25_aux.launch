@@ -1,0 +1,8 @@
+<launch>
+	<node pkg="C25_GlobalPosition" type="C25" name="C25" output="screen"/>
+
+	<!-- C21 - on! -->
+	<include  file="$(find C21_VisionAndLidar)/launch/C21.launch" />
+	<!-- Start C22 -->
+	<node name="C22" pkg="C22_GroundRecognitionAndMapping" type="C22" />
+</launch>

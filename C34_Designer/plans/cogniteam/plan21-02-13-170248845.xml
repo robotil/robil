@@ -1,0 +1,10 @@
+<plan descriptions="./plans/TaskDescriptions.xml">
+   <seq name="START" x="331.4999999999998" y="-3.5000000000001066" collapsed="false" id="90d17048-0164-49ee-bde8-d8cda8bf33f0"> 
+      <dec name="L" x="348.4999999999998" y="34.49999999999989"> 
+            <par name="Mission" x="334.4999999999998" y="105.49999999999989" collapsed="false" id="9b3d807b-3731-4c7c-b1c4-d954bfa31a88"> 
+                  <tsk name="T1" x="315.4999999999998" y="263.4999999999999" test_time="0" test_result="true" id="2a92a8b7-fdf1-4899-bc7d-86e78ffe362d" />
+                  <tsk name="T1" x="366.4999999999998" y="215.4999999999999" test_time="0" test_result="true" id="8905658f-bbb2-40cd-8e13-5d663a5092d0" />
+            </par>
+      </dec>
+   </seq>
+</plan>

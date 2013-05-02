@@ -35,6 +35,8 @@ CMapMain::CMapMain(QWidget *parent, Qt::WFlags flags)
 	Moving = false;
 	LineMoving = false;
 	ArcMoving = false;
+	IsEditable = false;
+	IsPathChanged = false;
 	PixPressed.i = 0;
 	PixPressed.j = 0;
 	for(int i=0; i<100; i++)
@@ -85,6 +87,8 @@ CMapMain::CMapMain(int arr[100][100],QWidget *parent, Qt::WFlags flags)
 		Drawing = false;
 		Moving = false;
 		LineMoving = false;
+		IsEditable = false;
+		IsPathChanged = false;
 		PixPressed.i = 0;
 		PixPressed.j = 0;
 		for(int i=0; i<100; i++)
@@ -133,6 +137,86 @@ CMapMain::~CMapMain()
 ModeDraw CMapMain::getMode()
 {
 	return mode;
+}
+QVector<QPointF> CMapMain::getRoutePath()
+{
+	QVector<QPointF> vecPoints;
+
+	if(routePath!=NULL)
+	{
+		vecPoints = routePath->getRoutePoints();
+	}
+	else
+	{
+		if(routePathReady!=NULL)
+		{
+			vecPoints = routePathReady->getRoutePoints();
+		}
+	}
+	
+	return vecPoints;
+}
+QVector<QPointF> CMapMain::getRoute(ModeDraw route)
+{
+	QVector<QPointF> vecPoints;
+
+	switch(route)
+	{
+	case E_READY_POLYGON_MODE:
+		{
+			if(routePolygonReady!=NULL)
+			{
+				vecPoints = routePolygonReady->getRoutePoints();	
+			}
+			break;
+		}
+	case E_READY_PATH_MODE:
+		{
+			if(routePathReady!=NULL)
+			{
+				vecPoints = routePathReady->getRoutePoints();
+			}
+			break;
+		}
+		case E_READY_STEPS_MODE:
+		{
+			if(routeStepsReady!=NULL)
+			{
+				vecPoints = routeStepsReady->getRoutePoints();
+			}
+			break;
+		}
+		case E_PATH_MODE:
+		{
+			if(routePath!=NULL)
+			{
+				vecPoints = routePath->getRoutePoints();
+			}
+			break;
+		}
+	case E_STEPS_MODE:
+		{
+			if(routeSteps!=NULL)
+			{
+				vecPoints = routeSteps->getRoutePoints();
+			}
+			break;
+		}
+	case E_POLYGON_MODE:
+		{
+			if(routePolygon!=NULL)
+			{
+				vecPoints = routePolygon->getRoutePoints();
+			}
+			break;
+		}
+	default:
+		{
+			
+			break;
+		}
+	} 
+	return vecPoints;
 }
 void CMapMain::setMode(ModeDraw m)
 {
@@ -272,10 +356,12 @@ void CMapMain::setMode(ModeDraw m,QVector<QPointF> vecPoints)
                       {
                         deleteReadyPath();
                       }
-                    if(routePath != NULL)
+                      if(routePath != NULL)
                       {
                         deletePath();
                       }
+                        IsPathChanged = true;
+                        emit SigOperatorAction();
 			routePath = new CRouteItem(ui.graphicsView->scene());
 			ui.graphicsView->scene()->addItem(routePath);
 			break;
@@ -336,8 +422,8 @@ void CMapMain::UpdateGrid(int grid[100][100], StructPoint robotPos, int xOffset,
 //                    std::cout<<"newPoint.x="<<newPoint.x<<" newPoint.y="<<newPoint.y<<"\n";
                     if(newPoint.x>=0 && newPoint.x<=99 && newPoint.y>=0 && newPoint.y<=99)
                     {
-                        PixColor[newPoint.x][newPoint.y] = grid[i][j];
-                        pPixItem[newPoint.x][newPoint.y]->SetColor(grid[i][j]);
+                        PixColor[newPoint.x][99-newPoint.y] = grid[i][j];
+                        pPixItem[newPoint.x][99-newPoint.y]->SetColor(grid[i][j]);
                         //std::cout<<"Bingo!\n";
                     }
                 }
@@ -377,7 +463,6 @@ bool CMapMain::eventFilter(QObject *o, QEvent* e)
 	{
 		case QEvent::GraphicsSceneMouseDoubleClick:
 		{
-			QGraphicsSceneMouseEvent* event = static_cast<QGraphicsSceneMouseEvent*>(e);
 			stopDrawing();
 			return true;
 			break;
@@ -386,10 +471,12 @@ bool CMapMain::eventFilter(QObject *o, QEvent* e)
 		{
 			QGraphicsSceneMouseEvent* event = static_cast<QGraphicsSceneMouseEvent*>(e);
 			PressPoint = event->scenePos();
-
-			if((Moving==false)||(LineMoving==false))
+			if(IsEditable)
 			{
-				drawing();
+				if((Moving==false)||(LineMoving==false))
+				{
+					drawing();
+				}
 			}
 			return true;
 
@@ -397,7 +484,6 @@ bool CMapMain::eventFilter(QObject *o, QEvent* e)
 		}
 		case QEvent::GraphicsSceneMouseRelease:
 		{
-			QGraphicsSceneMouseEvent* event = static_cast<QGraphicsSceneMouseEvent*>(e);
 			releasePoint();
 			return true;
 			break;
@@ -438,6 +524,11 @@ void CMapMain::MovePoint(QPointF p)
 	if((mode == E_NULL_MODE)&&(Moving == true))
 	{
 		routeSelected->MovePointTo(p);
+		if(routeSelected == routePathReady)
+		{
+			IsPathChanged = true;
+			emit SigOperatorAction();
+		}
 	}
 	else
 	{
@@ -454,6 +545,11 @@ void CMapMain::MoveLine(QPointF p)
 	if((mode == E_NULL_MODE)&&(LineMoving == true))
 	{	
 		routeSelected->MoveLineTo(p);
+		if(routeSelected == routePathReady)
+		{
+			IsPathChanged = true;
+			emit SigOperatorAction();
+		}
 	}
 }
 void CMapMain::drawing()
@@ -572,7 +668,6 @@ void CMapMain::selectPoint()
 											if(!b)
 											{
 												b = checkSelectedArc();
-												int y=0;
 											}
 										}
 									}
@@ -640,6 +735,8 @@ void CMapMain::releasePoint()
 						routeSelected->ReleasePoint();
 					break;
 				}
+			default:
+			      break;
 			}
 		}
 		Moving = false;
@@ -651,6 +748,9 @@ void CMapMain::releasePoint()
 void CMapMain::AddPath(std::vector<StructPoint> points)
 {
 	setMode(E_READY_PATH_MODE);
+	LastReceivedRoute = points;
+	LastUpdatedRoute.clear();
+	IsPathChanged = false;
 	std::cout<<"Path size: "<<points.size()<<"\n";
 	for(int i=0; i<points.size(); i++)
 	{
@@ -672,10 +772,21 @@ QPointF CMapMain::PointToPix(StructPoint point)
 {
 	QPointF GPoint;
 //	GPoint.setX(50+((point.x - CornerPos.y)*32) - CornerPos.y*32 + 12.5*32);
-	GPoint.setX(50+((point.y - RobotPos.y)*(-32)) + 400);
-	GPoint.setY(930-((point.x - RobotPos.x)*32) - 160);
+	GPoint.setX(50+((RobotPos.x - point.x)*(32)) + 400);
+	GPoint.setY(930-((point.y - RobotPos.y)*32) - 160);
 	std::cout<<"PointX: "<<GPoint.x()<<" PointY: "<<GPoint.y()<<"\n";
 	return GPoint;
+}
+
+StructPoint CMapMain::PixToPoint(QPointF pix)
+{
+        std::cout<<"pixX: "<<pix.x()<<" pixY: "<<pix.y()<<"\n";
+	StructPoint point;
+	point.x = RobotPos.x - ((pix.x() - 400 - 50)/(32));
+	point.y = RobotPos.y + ((pix.y() + 160 - 930)/(32));
+	point.y *= -1;
+	std::cout<<"WorldPosX: "<<point.x<<" WorldPosY: "<<point.y<<"\n";
+	return point;
 }
 
 void CMapMain::CalculateCornerPos()
@@ -695,4 +806,57 @@ StructIntPoint CMapMain::CalculateGridPoint(StructIntPoint pointFromRos)
   gridPoint.y = (pointFromRos.y-RobotGridPos.y)*sin(WorldToRobotOrientation) + (pointFromRos.x-RobotGridPos.x)*cos(WorldToRobotOrientation) + 50;
 //  std::cout<<"PointX="<<pointFromRos.x<<" PointY="<<pointFromRos.y<<" gridPoint.x = "<<gridPoint.x<<" gridPoint.y = "<<gridPoint.y<<" Orientation = "<<WorldToRobotOrientation<<"\n";
   return gridPoint;
+}
+
+void CMapMain::SetEditable(bool value)
+{
+	IsEditable = value;
+}
+
+std::vector<StructPoint> CMapMain::GetUpdatedRoute()
+{
+        std::cout<<"GetUpdatedRoute \n";
+        if(IsPathChanged)
+        {
+                QVector<QPointF> vec = getRoutePath();
+                StructPoint p;
+                for(int i=0; i<vec.size(); i++)
+                {
+                        p = PixToPoint(vec[i]);
+                        if(!IsPointInPath(p))
+                        {
+                                LastUpdatedRoute.push_back(p);
+                        }
+                }
+                if(!LastUpdatedRoute.empty())
+                {
+                        std::cout<<"LastUpdatedRoute not empty \n";
+                }
+        }
+        return LastUpdatedRoute;
+}
+
+bool CMapMain::IsPointsEqual(StructPoint p1, StructPoint p2)
+{
+	if((p1.x-p2.x)>0.1||(p1.x-p2.x)<-0.1)
+	{
+		return false;
+	}
+	if((p1.y-p2.y)>0.1||(p1.y-p2.y)<-0.1)
+	{
+		return false;
+	}
+	return true;
+}
+
+bool CMapMain::IsPointInPath(StructPoint p1)
+{
+	for(int i=0; i<LastReceivedRoute.size(); i++)
+	{
+		if(IsPointsEqual(p1,LastReceivedRoute[i]))
+		{
+			return true;
+		}
+	}
+	return false;
 }

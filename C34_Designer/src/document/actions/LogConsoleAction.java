@@ -3,7 +3,8 @@ package document.actions;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
-import document.LogConsoleWindow;
+import windows.LogConsoleWindow;
+
 
 public class LogConsoleAction implements ActionListener {
 

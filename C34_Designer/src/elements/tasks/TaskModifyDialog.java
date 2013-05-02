@@ -1,6 +1,8 @@
 package elements.tasks;
 
+import java.awt.BorderLayout;
 import java.awt.Dimension;
+import java.awt.FlowLayout;
 import java.awt.Insets;
 import java.awt.KeyEventDispatcher;
 import java.awt.KeyboardFocusManager;
@@ -8,6 +10,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
+import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
 import java.util.Vector;
@@ -91,7 +94,7 @@ class ModifyDialog extends JDialog {
 		this.txtTaskDescAlgoritm = new JTextArea();
 		// txtTaskDescAlgoritm.setAutoscrolls(true);
 		this.txtTaskDescScroll = new JScrollPane(this.txtTaskDescAlgoritm);
-
+		
 		this.chkCollapse = new JCheckBox("Collapse");
 		this.chkCollapse.setSelected(_task.getProperty().collapsed);
 
@@ -252,7 +255,7 @@ class ModifyDialog extends JDialog {
 				.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
 		this.txtTaskDescAlgoritm.setLineWrap(true);
 		// txtTaskDescAlgoritm.setBorder(BorderFactory.createLineBorder(Color.DARK_GRAY));
-
+		
 		this.chkCollapse.setBounds(5, 200, 100, 30);
 
 		close.setBounds(10, 340, 80, 30);
@@ -265,25 +268,11 @@ class ModifyDialog extends JDialog {
 		setLocationRelativeTo(null);
 		// setSize(300, 230);
 		setSize(550, 400);
-		
-		addWindowListener(new WindowListener() {
-			@Override
-			public void windowOpened(WindowEvent arg0) {}
-			@Override
-			public void windowIconified(WindowEvent arg0) {}
-			@Override
-			public void windowDeiconified(WindowEvent arg0) {}
-			@Override
-			public void windowDeactivated(WindowEvent arg0) {}
-			@Override
-			public void windowClosing(WindowEvent arg0) {}
-			@Override
+		addWindowListener(new WindowAdapter() {
 			public void windowClosed(WindowEvent arg0) {
 				if (_task.getDocument() != null)
 					_task.getDocument().repaint();
 			}
-			@Override
-			public void windowActivated(WindowEvent arg0) {}
 		});
 	}
 }
