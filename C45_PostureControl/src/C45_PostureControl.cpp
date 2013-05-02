@@ -86,6 +86,7 @@ public:
 		 back_ubx_stab_pid.reset();*/
 		ros::spinOnce();
 		clock = ros::Time::now();
+
 		ROS_INFO("Start time: %f", ros::Time::now().toSec());
 		/*ROS_INFO("Current ok: %d", (nh_.ok())?1:0);
 		 ROS_INFO("Current isactive: %d", as_.isActive());*/
@@ -106,17 +107,18 @@ public:
 				}
 			}
 		}
+
+		ROS_INFO("%s goal: direction %f", action_name_.c_str(), direction);
 		//ROS_INFO("Current maintainPosture: %d", turn_to);
 		/*ROS_INFO("Current isactive: %d", as_.isActive());
 		 ROS_INFO("Current time11: %f", ros::Time::now().toSec());*/
-		ROS_INFO("Got goal: direction %f", direction);
 
 		PoseController::back_movement back;
 		double total_time = 1.0;
 		int segments = 50;
-		ROS_INFO("Got back_lbz %f", positions[joints["back_lbz"]]);
+		//ROS_INFO("Got back_lbz %f", positions[joints["back_lbz"]]);
 		double velocity = (direction - positions[joints["back_lbz"]])/total_time;
-		ROS_INFO("velocity %f", velocity);
+		//ROS_INFO("velocity %f", velocity);
 		for(int i = 0; i < segments; i++){
 			ros::spinOnce();
 			back.request.back_lbz = velocity/segments;
