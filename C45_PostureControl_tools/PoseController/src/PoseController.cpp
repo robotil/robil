@@ -393,7 +393,7 @@ public:
 
 
 
-			atlascommand.position[atlas_msgs::AtlasState::neck_ay] = joint_positions[atlas_msgs::AtlasState::neck_ay];
+			atlascommand.position[atlas_msgs::AtlasState::neck_ay] = wanted_positions[atlas_msgs::AtlasState::neck_ay];
 
 
 
