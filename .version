@@ -1,4 +1,4 @@
-V0.0.0.164
+V0.0.0.165
 ===========================================================
 C0_RobilTask     		0.5
 C0_Scripts     		        0.19
@@ -27,8 +27,8 @@ C42_ZMPWalk     		0.6
 C43_LocalBodyCOM     		0.1
 C43_LocalBodyCOM_tools     	0.1
 C43_LocalBodyPVA     		0.2
-C45_PostureControl     		0.8
-C45_PostureControl_tools     	0.1
+C45_PostureControl     		0.9
+C45_PostureControl_tools     	0.2
 C46_MountVehicle     		0.6
 C47_DismountVehicle     	0.3
 C48_StandUp     		0.5
