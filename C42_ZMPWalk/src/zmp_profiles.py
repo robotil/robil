@@ -215,6 +215,51 @@ def  Start_sagital_x(ZMP_start_pos, step_length, trans_ratio_of_step, trans_slop
 
     return (p_ref_x)
 
+## Start_sagital_x was divided into two single steps: Pre_Step_sagital_x and First_Step_sagital_x
+def  Pre_Step_sagital_x(ZMP_start_pos, step_length, trans_ratio_of_step, trans_slope_steepens_factor, step_time, sample_time):
+    samples_in_step = ceil (step_time / sample_time)
+    samples_in_transition = floor (trans_ratio_of_step * samples_in_step)
+    samples_in_start_step_trans = floor (samples_in_transition/2)
+    samples_in_end_step_trans = samples_in_transition - samples_in_start_step_trans
+    samples_in_step_without_trans = samples_in_step - samples_in_transition
+    # One step sequence is divided into the following sampling order:
+    # 1) samples_in_start_step_trans
+    # 2) samples_in_step_without_trans
+    # 3) samples_in_end_step_trans
+    # total number of samples = samples_in_step
+
+    # step 1 : stand in place, see Start_lateral_y (step 1)
+    #p_ref0_0x = zeros( samples_in_start_step_trans + samples_in_step_without_trans )
+    p_ref0_0x = ZMP_start_pos*ones( samples_in_step )
+    
+    p_ref_x = p_ref0_0x 
+
+    return (p_ref_x)
+
+def  First_Step_sagital_x(ZMP_start_pos, step_length, trans_ratio_of_step, trans_slope_steepens_factor, step_time, sample_time):
+    samples_in_step = ceil (step_time / sample_time)
+    samples_in_transition = floor (trans_ratio_of_step * samples_in_step)
+    samples_in_start_step_trans = floor (samples_in_transition/2)
+    samples_in_end_step_trans = samples_in_transition - samples_in_start_step_trans
+    samples_in_step_without_trans = samples_in_step - samples_in_transition
+    # One step sequence is divided into the following sampling order:
+    # 1) samples_in_start_step_trans
+    # 2) samples_in_step_without_trans
+    # 3) samples_in_end_step_trans
+    # total number of samples = samples_in_step
+
+    # step 2 until last transition of step2 : stand in place, see Start_lateral_y (step 1)
+    #p_ref0_0x = zeros( samples_in_start_step_trans + samples_in_step_without_trans )
+    p_ref0_0x = ZMP_start_pos*ones( samples_in_start_step_trans + samples_in_step_without_trans )
+    
+    # step 2 end: transition
+    #half_trans_x = ZMP_start_pos + transitionSigmoid_firstHalf(step_length/2 - ZMP_start_pos, trans_slope_steepens_factor, samples_in_end_step_trans, sample_time)
+    half_trans_x = transition_Min_jerk_firstHalf( ZMP_start_pos, step_length/2, samples_in_end_step_trans, samples_in_transition)
+
+    p_ref_x = r_[ p_ref0_0x , half_trans_x ]
+
+    return (p_ref_x)
+
 def  Step_forward_x(ZMP_start_pos, step_length, trans_ratio_of_step, trans_slope_steepens_factor, step_time, sample_time):
     samples_in_step = ceil (step_time / sample_time)
     samples_in_transition = floor (trans_ratio_of_step * samples_in_step)
@@ -311,6 +356,65 @@ def  Start_lateral_y_weight_to_left_foot(ZMP_start_pos, step_width, trans_ratio_
     half_trans_y = transition_Min_jerk_firstHalf(0,step_width/2, samples_in_end_step_trans, samples_in_transition)
 
     p_ref_y = r_[ p_ref0_0y , trans_y_small_step, p_ref1y, step_width/2 - half_trans_y]
+
+    return (p_ref_y)
+
+## Start_lateral_y_weight_to_left_foot was divided into two single steps: Pre_Step_lateral_y and First_Step_lateral_y
+def  Pre_Step_lateral_y(ZMP_start_pos, step_width, trans_ratio_of_step, trans_slope_steepens_factor, step_time, sample_time):
+    # tuning parameters:
+    #trans_slope_steepens_factor = 1 # slop factor of transition, bigger values give a steeper slop
+
+    samples_in_step = ceil (step_time / sample_time)
+    samples_in_transition = floor (trans_ratio_of_step * samples_in_step)
+    samples_in_start_step_trans = floor (samples_in_transition/2)
+    samples_in_end_step_trans = samples_in_transition - samples_in_start_step_trans
+    samples_in_step_without_trans = samples_in_step - samples_in_transition
+    # One step sequence is divided into the following sampling order:
+    # 1) samples_in_start_step_trans 
+    # 2) samples_in_step_without_trans
+    # 3) samples_in_end_step_trans
+    # total number of samples = samples_in_step
+
+    # step 1 : stand in place (we want to minimize the transient effect of the preview)
+    # can be skiped in the future by inserting the appropriate initial conditions to the preview controller 
+    #p_ref0_0y = (step_width/2)*ones( samples_in_start_step_trans + samples_in_step_without_trans )
+    p_ref0_0y = ZMP_start_pos*ones( samples_in_start_step_trans + samples_in_step_without_trans )
+    #p_ref0_0y = ZMP_start_pos*ones( samples_in_step )      
+
+    # step 1 end: transition
+    half_trans_y = transition_Min_jerk_firstHalf( ZMP_start_pos, step_width/4.0, samples_in_start_step_trans, samples_in_transition)
+    
+    p_ref_y = r_[ p_ref0_0y , half_trans_y ]
+
+    return (p_ref_y)
+
+def  First_Step_lateral_y(ZMP_start_pos, step_width, trans_ratio_of_step, trans_slope_steepens_factor, step_time, sample_time):
+    # tuning parameters:
+    #trans_slope_steepens_factor = 1 # slop factor of transition, bigger values give a steeper slop
+
+    samples_in_step = ceil (step_time / sample_time)
+    samples_in_transition = floor (trans_ratio_of_step * samples_in_step)
+    samples_in_start_step_trans = floor (samples_in_transition/2)
+    samples_in_end_step_trans = samples_in_transition - samples_in_start_step_trans
+    samples_in_step_without_trans = samples_in_step - samples_in_transition
+    # One step sequence is divided into the following sampling order:
+    # 1) samples_in_start_step_trans 
+    # 2) samples_in_step_without_trans
+    # 3) samples_in_end_step_trans
+    # total number of samples = samples_in_step
+
+    # step 2 begin : transition
+    half_trans_y_begin = transition_Min_jerk_secondHalf( step_width/4.0, step_width/2.0, samples_in_start_step_trans, samples_in_transition)
+    #half_trans_y_begin = transition_Min_jerk_secondHalf( ZMP_start_pos, step_width/2.0, samples_in_start_step_trans, samples_in_transition)
+    
+    # step 2 middle: with out transitions
+    p_ref1y = step_width/2.0*ones( samples_in_step_without_trans )
+
+    # step 2 end: transition
+    # half_trans_y = transitionSigmoid_firstHalf(step_width/2, trans_slope_steepens_factor, samples_in_end_step_trans, sample_time)
+    half_trans_y = transition_Min_jerk_firstHalf(0,step_width/2, samples_in_end_step_trans, samples_in_transition)
+
+    p_ref_y = r_[ half_trans_y_begin, p_ref1y, step_width/2 - half_trans_y]
 
     return (p_ref_y)
 
@@ -439,4 +543,93 @@ def  Stop_lateral_y_from_right_foot(ZMP_start_pos, step_width, trans_ratio_of_st
 
     return (p_ref_y)
 
+#######################################################
+#                                                     #
+#              Turn profiles  (x,y)                   #
+#                                                     #
+#######################################################
 
+
+# angle thetta is with respect to the x axes
+#if turn to left thetta is positive
+#if turn to right thetta is negative
+def  Turn_second_half_of_step(ZMP_start_pos, step_length, step_width, trans_ratio_of_step, trans_slope_steepens_factor, step_time, sample_time,thetta):
+    ## First Step of a two step turn sequence, rotates the second half of the ZMP step profile by angle thetta. 
+
+    p_ref_x_forward_step = Step_forward_x(ZMP_start_pos, step_length, trans_ratio_of_step, trans_slope_steepens_factor, step_time, sample_time)
+    if 0.0 >= thetta: # TURNING RIGHT - right foot is stance (coord. system is relative to right foot)
+        p_ref_y_side_step = Step_onto_right_foot(ZMP_start_pos, step_width, trans_ratio_of_step, trans_slope_steepens_factor, step_time, sample_time)
+    else: # TURNING LEFT - left foot is stance (coord. system is relative to letf foot)
+        p_ref_y_side_step = Step_onto_left_foot(ZMP_start_pos, step_width, trans_ratio_of_step, trans_slope_steepens_factor, step_time, sample_time)
+
+    Rz_thetta = array([[cos(thetta), -sin(thetta)],
+                       [sin(thetta),  cos(thetta)]])  
+                             
+    
+    samples_first_half = floor(p_ref_x_forward_step.size/2)
+    samples_second_half = p_ref_x_forward_step.size - samples_first_half
+    turn_start_pos_x = p_ref_x_forward_step[samples_first_half]
+    turn_start_pos_y = p_ref_y_side_step[samples_first_half]
+
+    p_ref1x = p_ref_x_forward_step[0:samples_first_half]
+    p_ref1y = p_ref_y_side_step[0:samples_first_half]
+
+    p_ref_turnx = p_ref_x_forward_step[samples_first_half:]-turn_start_pos_x*ones( samples_second_half )
+    p_ref_turny = p_ref_y_side_step[samples_first_half:]-turn_start_pos_y*ones( samples_second_half )
+
+    p_turn_all= array([p_ref_turnx,p_ref_turny])
+
+    turn_poz =   array([turn_start_pos_x*ones( samples_second_half ),
+                        turn_start_pos_y*ones( samples_second_half )])
+
+    p_turn = dot(Rz_thetta,p_turn_all) + turn_poz
+    # print(samples)
+    # print(turn_start_pos_x)
+    # print(turn_start_pos_y)
+    p_turn_x = r_[ p_ref1x , p_turn[0] ]
+    p_turn_y = r_[ p_ref1y , p_turn[1] ]
+    
+    return p_turn_x,p_turn_y
+   
+# # DON'T NEED TO ROTATE SECOND STEP (because stance foot is rotating)
+# def  Turn_first_half_of_step(ZMP_start_pos, step_length, step_width, trans_ratio_of_step, trans_slope_steepens_factor, step_time, sample_time,thetta):
+# """
+#     Second Step of a two step turn sequence, rotates the first half of the ZMP step profile by angle thetta. 
+# """
+#     p_ref_x_forward_step = Step_forward_x(ZMP_start_pos, step_length, trans_ratio_of_step, trans_slope_steepens_factor, step_time, sample_time)
+#     if 0.0 >= thetta: # TURNING RIGHT - left foot is stance (coord. system is relative to letf foot)
+#         p_ref_y_side_step = Step_onto_left_foot(ZMP_start_pos, step_width, trans_ratio_of_step, trans_slope_steepens_factor, step_time, sample_time)
+#     else: #TURNING LEFT - right foot is stance (coord. system is relative to right foot)
+#         p_ref_y_side_step = Step_onto_right_foot(ZMP_start_pos, step_width, trans_ratio_of_step, trans_slope_steepens_factor, step_time, sample_time)
+
+#     Rz_thetta = array([[cos(thetta), -sin(thetta)],
+#                        [sin(thetta),  cos(thetta)]])  
+                             
+    
+#     samples = floor(p_ref_x_forward_step.size/2)
+#     # samples = p_ref_x.size/2
+#     turn_start_pos_x = p_ref_x_forward_step[samples]
+#     turn_start_pos_y = p_ref_y_side_step[samples]
+
+    
+#     p_ref1x = p_ref_x_forward_step[samples:]
+#     p_ref1y = p_ref_y_side_step[samples:]
+
+#     p_ref_turnx = p_ref_x_forward_step[0:samples]-turn_start_pos_x*ones(samples)
+#     p_ref_turny = p_ref_y_side_step[0:samples]-turn_start_pos_y*ones(samples)
+
+#     p_turn_all= array([p_ref_turnx,p_ref_turny])
+
+#     turn_poz =   array([turn_start_pos_x*ones( samples ),
+#                         turn_start_pos_y*ones( samples )])
+
+#     p_turn = dot(Rz_thetta,p_turn_all) + turn_poz
+#     print(samples)
+#     print(turn_start_pos_x)
+#     print(turn_start_pos_y)
+#     p_turn_x = r_[ p_turn[0],p_ref1x]
+#     p_turn_y = r_[ p_turn[1],p_ref1y]
+#     res = [p_turn_x,p_turn_y]
+    
+
+#     return (res)

@@ -1,5 +1,81 @@
+
+
+
+
 zmp_walking:
   type: " "
+  walking_parameters:
+    rate: 300
+
+
+    2cm:
+
+        step_length: 0.02
+        step_time: 1.1
+        bend_knees: 0.035
+        step_height: 0.028
+        PSC: 10000000
+        JSC:
+            uay: 999999999999999999999.0
+            kny: 999999999999999999999.0
+            lhy: 999999999999999999999.0
+        lax_eff_devider: 999999999999999999999.0
+        l_mhx_eff_devider: 999999999999999999999.0
+        r_mhx_eff_devider: 999999999999999999999.0
+        mhx_eff_offset: 0.0
+        kny_eff_devider: 10.0
+
+    10cm:
+
+        step_length: 0.1
+        step_time: 1.2
+        bend_knees: 0.045
+        step_height: 0.035
+        PSC: 5500000
+        JSC:
+            uay: 46000
+            kny: 36000
+            lhy: 80000
+        lax_eff_devider: 25.0
+        l_mhx_eff_devider: 45.0
+        r_mhx_eff_devider: 25.0
+        mhx_eff_offset: 23.0
+        kny_eff_devider: 10.0
+
+    15cm:
+
+        step_length: 0.15
+        step_time: 1.4
+        bend_knees: 0.045
+        step_height: 0.04
+        PSC:  0.6100000
+        JSC:
+            uay: 999999866000
+            kny: 99999966000
+            lhy: 999999120000 
+        lax_eff_devider: 25.0
+        l_mhx_eff_devider: 45.0
+        r_mhx_eff_devider: 25.0
+        mhx_eff_offset: 24.0
+        kny_eff_devider: 10.0
+    18cm:
+
+        step_length: 0.18
+        step_time: 1.5
+        bend_knees: 0.055
+        step_height: 0.045
+        PSC: 4900000
+        JSC:
+            uay: 76000
+            kny: 56000
+            lhy: 180000
+        lax_eff_devider: 15.0
+        l_mhx_eff_devider: 35.0
+        r_mhx_eff_devider: 25.0
+        mhx_eff_offset: 23.0
+        kny_eff_devider: 10.0
+
+
   joints:
     - l_leg_uhz
     - l_leg_mhx

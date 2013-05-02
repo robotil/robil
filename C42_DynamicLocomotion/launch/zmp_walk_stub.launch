@@ -1,9 +1,0 @@
-<launch>
-
-
- 
- <!-- zmp_node  -->
-  <node pkg="C42_DynamicLocomotion" type="ZMPWalkServer_stub.py" name="zmp_server" />
-  
-
-</launch>
