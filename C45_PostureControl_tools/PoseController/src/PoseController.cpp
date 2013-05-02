@@ -11,6 +11,7 @@
 #include <PoseController/back_movement.h>
 #include <PoseController/foot_movement.h>
 #include <PoseController/hand_movement.h>
+#include <PoseController/neck_movement.h>
 
 class PoseControllerClass{
 private:
@@ -21,8 +22,8 @@ private:
 	std::vector<double> joint_positions, wanted_positions, kp_positions;
 	ros::Publisher pub_atlas_commands_,pub_joint_states_;
 	ros::Subscriber joint_states_sub_;
-	ros::ServiceServer hand_service, foot_service, back_service, reset_service;
-	ros::ServiceServer delta_hand_service, delta_foot_service, delta_back_service;
+	ros::ServiceServer hand_service, foot_service, back_service, neck_service, reset_service;
+	ros::ServiceServer delta_hand_service, delta_foot_service, delta_back_service, delta_neck_service;
 	osrf_msgs::JointCommands jointcommands;
 	atlas_msgs::AtlasCommand atlascommand;
 	bool up;
@@ -33,12 +34,19 @@ public:
 		wanted_positions.resize(28);
 		joint_positions.resize(28);
 		kp_positions.resize(28);
+
 		hand_service = nh_.advertiseService("/PoseController/hand_movement", &PoseControllerClass::hand_movement, this);
 		delta_hand_service = nh_.advertiseService("/PoseController/delta_hand_movement", &PoseControllerClass::delta_hand_movement, this);
+
 		foot_service = nh_.advertiseService("/PoseController/foot_movement", &PoseControllerClass::foot_movement, this);
 		delta_foot_service = nh_.advertiseService("/PoseController/delta_foot_movement", &PoseControllerClass::delta_foot_movement, this);
+
 		back_service = nh_.advertiseService("/PoseController/back_movement", &PoseControllerClass::back_movement, this);
 		delta_back_service = nh_.advertiseService("/PoseController/delta_back_movement", &PoseControllerClass::delta_back_movement, this);
+
+		neck_service = nh_.advertiseService("/PoseController/neck_movement", &PoseControllerClass::neck_movement, this);
+		delta_neck_service = nh_.advertiseService("/PoseController/delta_neck_movement", &PoseControllerClass::delta_neck_movement, this);
+
 		reset_service = nh_.advertiseService("/PoseController/reset_joints", &PoseControllerClass::reset_joints_CB, this);
 
 		joint_states_sub_ = nh_.subscribe("/atlas/joint_states",100,&PoseControllerClass::joint_states_CB,this);
@@ -47,6 +55,7 @@ public:
 
 		while(!up){
 			ros::spinOnce();
+			ros::Duration(0.05).sleep();
 		}
 
 		jointcommands.name.push_back("atlas::back_lbz");
@@ -202,6 +211,13 @@ public:
 		return true;
 	}
 
+	bool neck_movement(PoseController::neck_movement::Request &req, PoseController::neck_movement::Response &res){
+		//ROS_INFO("Got neck movement");
+		wanted_positions[atlas_msgs::AtlasState::neck_ay] = req.neck_ay;
+		return true;
+	}
+
+
 
 	bool delta_hand_movement(PoseController::hand_movement::Request &req, PoseController::hand_movement::Response &res){
 		//ROS_INFO("Got delta hand movement");
@@ -254,6 +270,12 @@ public:
 		if(req.back_lbz != -100) wanted_positions[atlas_msgs::AtlasState::back_lbz] += req.back_lbz;
 		wanted_positions[atlas_msgs::AtlasState::back_mby] += req.back_mby;
 		wanted_positions[atlas_msgs::AtlasState::back_ubx] += req.back_ubx;
+		return true;
+	}
+
+	bool delta_neck_movement(PoseController::neck_movement::Request &req, PoseController::neck_movement::Response &res){
+		//ROS_INFO("Got neck movement");
+		wanted_positions[atlas_msgs::AtlasState::neck_ay] += req.neck_ay;
 		return true;
 	}
 	void ControlPose(){
