@@ -163,7 +163,7 @@ class LocalPathPlanner(object):
         theta = 0.0
         if(0 == len(self._Path)):
             # Last segment
-            result = 0.8
+            result = 0.2
         else:
             NextSegment = Segment(self._CurrentSegment.GetTarget(),self._Path[0])
             theta = NextSegment.GetYaw()-self._CurrentSegment.GetYaw()
@@ -205,6 +205,10 @@ class LocalPathPlanner(object):
 
     def IsActive(self):
         return self._PathReady
+
+    def GetTargetDistance(self):
+        return self._CurrentSegment.GetTarget().GetDistanceFrom(self._Position) - self.GetCloseEnoughToTargetDistance()
+
 
 ###################################################################################
 # a little testing script

@@ -36,7 +36,7 @@ class WalkingModeBDI(WalkingMode):
         self._Odometer = BDI_Odometer()
         self._StateMachine = BDI_StateMachine(self._Odometer)
         self._LPP = localPathPlanner
-                
+
     def Initialize(self):
         self._bDone = False
         # Puts robot into freeze behavior, all joints controlled
@@ -63,8 +63,6 @@ class WalkingModeBDI(WalkingMode):
         # Initialize some variables before starting.
         self.step_index = 0
         self.is_swaying = False
-
-        self._odom_sub = rospy.Subscriber('/ground_truth_odom',Odometry,self._odom_cb)
     
     def StartWalking(self):
         self._bDone = False
@@ -73,7 +71,7 @@ class WalkingModeBDI(WalkingMode):
     def Walk(self):
         # Subscribe to atlas_state and atlas_sim_interface_state topics.
         self.asi_state = rospy.Subscriber('/atlas/atlas_sim_interface_state', AtlasSimInterfaceState, self.asi_state_cb)
-            
+    
     def Stop(self):
         self._StateMachine.Stop()
     
@@ -100,7 +98,7 @@ class WalkingModeBDI(WalkingMode):
     def asi_state_cb(self, state):
         #if (self._LPP.IsActive()):
             #print(state)
-        # This weird little piece of code is supposed to initialize the odometer and state machine
+        # This weird little piece of code is supposed to initialize the odometer
         try:
             x = self.robot_position.x
         except AttributeError:            
@@ -108,19 +106,24 @@ class WalkingModeBDI(WalkingMode):
             self.robot_position.x = state.pos_est.position.x
             self.robot_position.y = state.pos_est.position.y
             self.robot_position.z = state.pos_est.position.z
-            self._Odometer.SetPosition(state.pos_est.position.x,state.pos_est.position.y)  
+            self._Odometer.SetPosition(state.pos_est.position.x,state.pos_est.position.y)
             self._StateMachine.Initialize()
-            self._StateMachine.GoForward()
         
+        x,y = self._Odometer.GetGlobalPosition()
+        self._LPP.UpdatePosition(x,y)
+        self._StateMachine.SetPathError(self._LPP.GetPathError())
+
         targetYaw = self._LPP.GetTargetYaw()
         delatYaw = targetYaw - self._Odometer.GetYaw()
 
-        if (delatYaw > 0.6):
-            self._StateMachine.TurnLeft()
-        elif (delatYaw < -0.6):
-            self._StateMachine.TurnRight()
-        elif (math.fabs(delatYaw) < 0.4):
-            self._StateMachine.GoForward()
+        if (math.sin(delatYaw) > 0.6):
+            print("Sin(Delta)",math.sin(delatYaw), "Left")
+            self._StateMachine.TurnLeft(targetYaw)
+        elif (math.sin(delatYaw) < -0.6):
+            print("Sin(Delta)",math.sin(delatYaw), "Right")
+            self._StateMachine.TurnRight(targetYaw)
+        else:
+            self._StateMachine.GoForward(self._LPP.GetTargetDistance())
 
         if (not self._LPP.IsActive()):
             self._StateMachine.Stop()
@@ -135,9 +138,3 @@ class WalkingModeBDI(WalkingMode):
         if (0 !=command):
             self.asi_command.publish(command)
  
-    def _odom_cb(self,odom):
-        self._LPP.UpdatePosition(odom.pose.pose.position.x,odom.pose.pose.position.y)
-        self._StateMachine.SetPathError(self._LPP.GetPathError())
-        #self._Odometer.SetPosition(odom.pose.pose.position.x,odom.pose.pose.position.y)
-
-        #print(odom.pose.pose.position.x)

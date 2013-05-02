@@ -70,16 +70,19 @@ class BDI_StateMachine(StateMachine):
         StateMachine.AddTransition(self,"Turn_Left",    "GoForward",        "Forward")
         StateMachine.AddTransition(self,"Turn_Left",    "TurnRight",        "Forward")
 
-    def GoForward(self):
+    def GoForward(self,targetDistance):
         if (StateMachine.PerformTransition(self,"GoForward")):
+            self._StrategyRight.SetTarget(targetDistance)
             print("GoForward")
 
-    def TurnRight(self):
+    def TurnRight(self,targetYaw):
         if (StateMachine.PerformTransition(self,"TurnRight")):
+            self._StrategyRight.SetTarget(targetYaw)
             print("TurnRight")
 
-    def TurnLeft(self):
+    def TurnLeft(self,targetYaw):
         if (StateMachine.PerformTransition(self,"TurnLeft")):
+            self._StrategyRight.SetTarget(targetYaw)
             print("TurnLeft")
 
     def Stop(self):
