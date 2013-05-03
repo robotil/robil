@@ -34,17 +34,33 @@ MapSquare::~MapSquare(){
 	//delete square_Planes;
 }
 
+bool MapSquare::hasTop(double top){
+	for(unsigned int i=0; i<square_Planes->size();i++){
+			  if(square_Planes->at(i)->representing_point.z>top)
+				  return true;
+	}
+	return false;
+}
+
 bool MapSquare::hasPlane(MPlane* other){
 	  for(unsigned int i=0; i<square_Planes->size();i++){
-		  if(square_Planes->at(i)->isEqualTo(other))
+		  if(square_Planes->at(i)->representing_point.z<other->representing_point.z)
 			  return true;
 	  }
 	  return false;
 }
 
+MPlane* MapSquare::getTop(double top){
+  for(unsigned int i=0; i<square_Planes->size();i++){
+		  if(square_Planes->at(i)->representing_point.z==top)
+			  return square_Planes->at(i);
+	  }
+	  return 0;
+}
+
 MPlane* MapSquare::getPlane(MPlane* other){
 	  for(unsigned int i=0; i<square_Planes->size();i++){
-		  if(square_Planes->at(i)->isEqualTo(other))
+		  if(square_Planes->at(i)->representing_point.z==other->representing_point.z)
 			  return square_Planes->at(i);
 	  }
 	  return 0;
