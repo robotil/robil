@@ -13,7 +13,7 @@
 #include <pcl/ModelCoefficients.h>
 #include <pcl/point_types.h>
 #include "MPlane.h"
-enum status{AVAILABLE,BLOCKED,UNCHARTED};		//AVAILABLE = 0,BLOCKED = 1,UNCHARTED = 2
+enum status{AVAILABLE,BLOCKED,UNCHARTED,ATLAS};		//AVAILABLE = 0,BLOCKED = 1,UNCHARTED = 2
 
 class MapSquare {
 public:
@@ -27,6 +27,8 @@ public:
 	void setRatable();
 	void clearSq();
 	bool hasPlane(MPlane* other);
+	bool hasTop(double top);
+	MPlane *getTop(double top);
 	MPlane* getPlane(MPlane* other);
 	std::string toString();
 };
