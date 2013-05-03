@@ -20,8 +20,6 @@
   <depend package="pcl_ros"/>
   <depend package="laser_geometry"/>
   <depend package="pcl"/>
-  <depend package="nav_msgs"/>
-    <depend package="geometry_msgs"/>
 </package>
 
 
