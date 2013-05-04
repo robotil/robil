@@ -96,45 +96,42 @@ class WalkingModeBDI(WalkingMode):
     # /atlas/atlas_sim_interface_state callback. Before publishing a walk command, we need
     # the current robot position   
     def asi_state_cb(self, state):
-        #if (self._LPP.IsActive()):
-            #print(state)
-        # This weird little piece of code is supposed to initialize the odometer
-        try:
-            x = self.robot_position.x
-        except AttributeError:            
-            self.robot_position = Point()
-            self.robot_position.x = state.pos_est.position.x
-            self.robot_position.y = state.pos_est.position.y
-            self.robot_position.z = state.pos_est.position.z
-            self._Odometer.SetPosition(state.pos_est.position.x,state.pos_est.position.y)
-            self._StateMachine.Initialize()
-        
-        x,y = self._Odometer.GetGlobalPosition()
-        self._LPP.UpdatePosition(x,y)
-        self._StateMachine.SetPathError(self._LPP.GetPathError())
+        if (not self._bDone):
+	  #if (self._LPP.IsActive()):
+	      #print(state)
+	  # This weird little piece of code is supposed to initialize the odometer
+	  try:
+	      x = self.robot_position.x
+	  except AttributeError:            
+	      self.robot_position = Point()
+	      self.robot_position.x = state.pos_est.position.x
+	      self.robot_position.y = state.pos_est.position.y
+	      self.robot_position.z = state.pos_est.position.z
+	      self._Odometer.SetPosition(state.pos_est.position.x,state.pos_est.position.y)
+	      self._StateMachine.Initialize()
+	      self._StateMachine.GoForward()
+	  
+	  if (self._LPP.IsActive()):
+	      x,y = self._Odometer.GetGlobalPosition()
+	      self._LPP.UpdatePosition(x,y)
+	      self._StateMachine.SetPathError(self._LPP.GetPathError())
+      
+	      targetYaw = self._LPP.GetTargetYaw()
+	      delatYaw = targetYaw - self._Odometer.GetYaw()
+      
+	      if (math.sin(delatYaw) > 0.6):
+		  #print("Sin(Delta)",math.sin(delatYaw), "Left")
+		  self._StateMachine.TurnLeft(targetYaw)
+	      elif (math.sin(delatYaw) < -0.6):
+		  #print("Sin(Delta)",math.sin(delatYaw), "Right")
+		  self._StateMachine.TurnRight(targetYaw)
+	  else:
+	      self._StateMachine.Stop()
+	      
+	  self._bDone = self._StateMachine.IsDone()
 
-        targetYaw = self._LPP.GetTargetYaw()
-        delatYaw = targetYaw - self._Odometer.GetYaw()
-
-        if (math.sin(delatYaw) > 0.6):
-            print("Sin(Delta)",math.sin(delatYaw), "Left")
-            self._StateMachine.TurnLeft(targetYaw)
-        elif (math.sin(delatYaw) < -0.6):
-            print("Sin(Delta)",math.sin(delatYaw), "Right")
-            self._StateMachine.TurnRight(targetYaw)
-        else:
-            self._StateMachine.GoForward(self._LPP.GetTargetDistance())
-
-        if (not self._LPP.IsActive()):
-            self._StateMachine.Stop()
-
-        command = 0
-        try:
-            command = self._StateMachine.Step(state.behavior_feedback.walk_feedback.next_step_index_needed)
-        except BDI_Strategy_Exception as exception:
-            if ("Done" == exception.Message):
-                self._bDone = True
-        
-        if (0 !=command):
-            self.asi_command.publish(command)
+	  command = self._StateMachine.Step(state.behavior_feedback.walk_feedback.next_step_index_needed)
+	  
+	  if (0 !=command):
+	      self.asi_command.publish(command)
  

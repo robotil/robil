@@ -38,11 +38,15 @@ class BDI_Strategy(object):
         self._alpha = 0.0
         self._Duration = 0.63
         self._SwingHeight  = 0.2
+        
+        self._counterTarget = 0
+        self._counter = 0
 
     def Initialize(self):
         self._counter = 0
 
     def GetStepData(self,index):
+        self._counter += 1
         command = AtlasSimInterfaceCommand()
         
         stepData = command.walk_params.step_data[0]
@@ -55,6 +59,20 @@ class BDI_Strategy(object):
         stepData.pose.position.z = 0.0
 
         return stepData
+    
+    def SetTarget(self,targetYaw):
+        delatYaw = targetYaw - self._Odometer.GetYaw()
+        # get the angle in +-pi
+        delatYaw = math.asin(math.sin(delatYaw))
+        print("SetTarget: alpha ",self._alpha,"targetYaw ",targetYaw,"delatYaw ",delatYaw)
+        if (math.fabs(self._alpha) > 0.01):
+            self._counterTarget = math.fabs(delatYaw)/math.fabs(self._alpha)
+        else:
+            self._counterTarget = 1
+        print("SetTarget: CounterTarget",self._counterTarget)
+            
+    def IsDone(self):
+        return (self._counterTarget<self._counter)        
 
 class BDI_StrategyIdle(BDI_Strategy):
     """
@@ -64,6 +82,8 @@ class BDI_StrategyIdle(BDI_Strategy):
         self._counter = 0
         self._StepLength = 0.0
         self._StepWidth = 0.15
+        
+        self._counterTarget = 5
 
     def GetStepData(self,index):
         stepData = BDI_Strategy.GetStepData(self,index)
@@ -81,11 +101,6 @@ class BDI_StrategyIdle(BDI_Strategy):
         stepData.pose.orientation.w = Q[3]
 
         return stepData
-
-    def StepDone(self,bIsRight):
-        if(self._counter > 2):
-            raise BDI_Strategy_Exception("Done")
-        self._counter += 1
 
 class BDI_StrategyForward(BDI_Strategy):
     """
@@ -128,6 +143,10 @@ class BDI_StrategyForward(BDI_Strategy):
     def SetPathError(self,pathError):
         self._Error = pathError
 
+    def IsDone(self):
+        # Forward does not finish alone, it is either preempted to turn or to stop
+        return False 
+    
 class BDI_StrategyLeft(BDI_Strategy):
     """
     """

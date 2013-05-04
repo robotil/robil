@@ -31,7 +31,7 @@ class DynamicLocomotion(RobilTask):
 
         if (False == self.WaitForPath()):
             return RTResult_PREEPTED()
-
+        
         self._DynamicWalker.Walk()
 
         while not self._DynamicWalker.IsDone():
