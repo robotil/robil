@@ -153,7 +153,7 @@ class BDI_StrategyLeft(BDI_Strategy):
     def __init__(self,odometer):
         BDI_Strategy.__init__(self,odometer)
 
-        self._TurnRadius = 3.25
+        self._TurnRadius = 1.5
 
         self._InnerRadius = self._TurnRadius - self._StepWidth
         self._OuterRadius = self._TurnRadius + self._StepWidth
@@ -192,7 +192,7 @@ class BDI_StrategyRight(BDI_Strategy):
     def __init__(self,odometer):
         BDI_Strategy.__init__(self,odometer)
 
-        self._TurnRadius = 3.25
+        self._TurnRadius = 1.5
 
         self._InnerRadius = self._TurnRadius - self._StepWidth
         self._OuterRadius = self._TurnRadius + self._StepWidth

@@ -159,7 +159,7 @@ class LocalPathPlanner(object):
         return self._CurrentSegment.GetYaw()
 
     def GetCloseEnoughToTargetDistance(self):
-        turningRadius = 3.25
+        turningRadius = 1.5
         theta = 0.0
         if(0 == len(self._Path)):
             # Last segment

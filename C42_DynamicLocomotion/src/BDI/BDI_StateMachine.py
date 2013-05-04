@@ -58,6 +58,7 @@ class BDI_StateMachine(StateMachine):
         StateMachine.AddState(self,BDI_State("Forward",self._StrategyForward))
         StateMachine.AddState(self,BDI_State("Turn_Left",self._StrategyLeft))
         StateMachine.AddState(self,BDI_State("Turn_Right",self._StrategyRight))
+        StateMachine.AddState(self,BDI_State("Idle",self._StrategyIdle))
         
         # Add transitions
         StateMachine.AddTransition(self,"Stop",         "TurnRight",        "Turn_Right")
@@ -67,11 +68,12 @@ class BDI_StateMachine(StateMachine):
         StateMachine.AddTransition(self,"Forward",      "TurnRight",     	"Turn_Right")
         StateMachine.AddTransition(self,"Forward",      "TurnLeft",         "Turn_Left")
         StateMachine.AddTransition(self,"Turn_Right",   "Stop",         	"Stop")
-        StateMachine.AddTransition(self,"Turn_Right",   "Done",             "Forward")
+        StateMachine.AddTransition(self,"Turn_Right",   "Done",             "Idle")
         StateMachine.AddTransition(self,"Turn_Right",   "TurnLeft",         "Forward")
         StateMachine.AddTransition(self,"Turn_Left",    "Stop",         	"Stop")
-        StateMachine.AddTransition(self,"Turn_Left",    "Done",             "Forward")
+        StateMachine.AddTransition(self,"Turn_Left",    "Done",             "Idle")
         StateMachine.AddTransition(self,"Turn_Left",    "TurnRight",        "Forward")
+        StateMachine.AddTransition(self,"Idle",         "Done",        	"Forward")
 
     def GoForward(self):
         if (StateMachine.PerformTransition(self,"GoForward")):
@@ -100,7 +102,7 @@ class BDI_StateMachine(StateMachine):
             command = self.GetCommand()
             if(StateMachine.GetCurrentState(self).IsDone()):
                 # The only state that can be done, but doesnt have a "Done" transition is "Stop"
-                print("Done")
+                print("BDI State Done: ",StateMachine.GetCurrentState(self).Name)
                 if (not StateMachine.PerformTransition(self,"Done")):
                     self._Done = True
                     print("BDI Done:: State: ",StateMachine.GetCurrentState(self).Name)
