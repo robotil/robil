@@ -181,8 +181,9 @@ public:
 		while(nh2_.ok()){
 			ros::spinOnce();
 			if(as_.isPreemptRequested()){
-				ROS_ERROR("%s: Preempted", action_name_.c_str());
+				ROS_ERROR("%s: Preempted 53453", action_name_.c_str());
 				as_.setAborted();
+				break;
 			}
 			/*jointcommands.position[joints["l_leg_uhz"]] = positions[joints["l_leg_uhz"]];
 			jointcommands.position[joints["l_leg_mhx"]] = positions[joints["l_leg_mhx"]];
@@ -337,7 +338,7 @@ public:
 
 	void preemptCB()
 	{
-		ROS_ERROR("%s: Preempted", action_name_.c_str());
+		ROS_ERROR("%s: Preempted 43214", action_name_.c_str());
 		//as_.setPreempted();
 		as_.setAborted();
 	}

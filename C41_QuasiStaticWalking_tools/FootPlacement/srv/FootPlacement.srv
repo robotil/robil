@@ -1,0 +1,8 @@
+int32 foot
+int32 LEFT=0
+int32 RIGHT=1
+float64 dirX
+float64 dirY
+int32 useC22
+---
+FootPlacement/Pos[] positions

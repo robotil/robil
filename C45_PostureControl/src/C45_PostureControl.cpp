@@ -84,6 +84,7 @@ public:
 		//Init variables
 		/*back_mby_stab_pid.reset();
 		 back_ubx_stab_pid.reset();*/
+		ros::spinOnce();
 		clock = ros::Time::now();
 		ROS_INFO("Start time: %f", ros::Time::now().toSec());
 		/*ROS_INFO("Current ok: %d", (nh_.ok())?1:0);
@@ -113,17 +114,19 @@ public:
 		PoseController::back_movement back;
 		double total_time = 1.0;
 		int segments = 50;
-		double velocity = (positions[joints["back_lbz"]] - direction)/total_time;
+		ROS_INFO("Got back_lbz %f", positions[joints["back_lbz"]]);
+		double velocity = (direction - positions[joints["back_lbz"]])/total_time;
+		ROS_INFO("velocity %f", velocity);
 		for(int i = 0; i < segments; i++){
 			ros::spinOnce();
 			back.request.back_lbz = velocity/segments;
-			ROS_INFO("velocity #%d: %f", i+1, back.request.back_lbz);
-			ROS_INFO("#%d joint: %f", i+1, positions[joints["back_lbz"]]);
-			ROS_INFO("#%d direction: %f", i+1, direction);
+			//ROS_INFO("velocity #%d: %f", i+1, back.request.back_lbz);
+			//ROS_INFO("#%d joint: %f", i+1, positions[joints["back_lbz"]]);
+			//ROS_INFO("#%d direction: %f", i+1, direction);
 			if(!backz_cli.call(back)){
-		    	 ROS_ERROR("%s: Preempted", action_name_.c_str());
+		    	 ROS_ERROR("%s: aborted", action_name_.c_str());
 		    	 // set the action state to preempted
-		    	 as_.setPreempted();
+		    	 as_.setAborted();
 		    	 break;
 			}
 			ros::Duration(total_time/segments).sleep();

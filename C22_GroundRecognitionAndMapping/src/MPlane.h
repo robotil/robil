@@ -19,7 +19,7 @@ public:
 	  MPlane();
 	  int rating;
 	  bool ratable;
-	  MPlane(pcl::PointXYZ point, pcl::ModelCoefficients::Ptr c_);
+	  MPlane(pcl::PointXYZ point);
 	  virtual ~MPlane();
 	  void addRating();
 	  void setRatable();
