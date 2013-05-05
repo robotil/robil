@@ -1,5 +1,4 @@
-<?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<diagram program="umlet" version="11.4">
+<?xml version="1.0" encoding="UTF-8"?><diagram program="umlet" version="11.3">
   <zoom_level>8</zoom_level>
   <element>
     <type>com.umlet.element.custom.FinalState</type>
@@ -131,7 +130,7 @@ TurnRight
       <h>56</h>
     </coordinates>
     <panel_attributes>lt=&lt;-
-Done
+Stop
 
 </panel_attributes>
     <additional_attributes>24;40;136;40</additional_attributes>
@@ -250,5 +249,18 @@ Done
 Done
 </panel_attributes>
     <additional_attributes>24;40;152;40</additional_attributes>
+  </element>
+  <element>
+    <type>com.umlet.element.Relation</type>
+    <coordinates>
+      <x>112</x>
+      <y>320</y>
+      <w>712</w>
+      <h>456</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;-
+Stop
+</panel_attributes>
+    <additional_attributes>120;40;24;160;48;432;696;440;696;24;584;24</additional_attributes>
   </element>
 </diagram>

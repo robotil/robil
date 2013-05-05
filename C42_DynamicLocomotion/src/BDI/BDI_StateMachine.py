@@ -74,6 +74,7 @@ class BDI_StateMachine(StateMachine):
         StateMachine.AddTransition(self,"Turn_Left",    "Done",             "Idle")
         StateMachine.AddTransition(self,"Turn_Left",    "TurnRight",        "Forward")
         StateMachine.AddTransition(self,"Idle",         "Done",        	"Forward")
+        StateMachine.AddTransition(self,"Idle",         "Stop",         "Stop")
 
     def GoForward(self):
         if (StateMachine.PerformTransition(self,"GoForward")):

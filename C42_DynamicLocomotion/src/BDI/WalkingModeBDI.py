@@ -8,9 +8,10 @@ from sensor_msgs.msg import Imu
 import PyKDL
 from tf_conversions import posemath
 from atlas_msgs.msg import AtlasSimInterfaceCommand, AtlasSimInterfaceState, AtlasState
-from geometry_msgs.msg import Pose, Point
 from std_msgs.msg import String
 from tf.transformations import quaternion_from_euler, euler_from_quaternion
+
+from sensor_msgs.msg import Imu
 
 from BDI_Odometer import *
 from BDI_WalkingModeStateMachine import *
@@ -39,6 +40,7 @@ class WalkingModeBDI(WalkingMode):
         self._odom_sub = rospy.Subscriber('/ground_truth_odom',Odometry,self._odom_cb)
         self._bDone = False
         self.asi_state = rospy.Subscriber('/atlas/atlas_sim_interface_state', AtlasSimInterfaceState, self.asi_state_cb)
+        self._atlas_imu_sub = rospy.Subscriber('/atlas/imu', Imu, self._get_imu)
         rospy.sleep(0.3)
 
     def Initialize(self):
@@ -74,7 +76,8 @@ class WalkingModeBDI(WalkingMode):
         return 0.3
     
     def Walk(self):
-      self._StateMachine.Walk()
+      self._yaw = 0
+      self._StateMachine.Walk(self._yaw)
     
     def Stop(self):
       self._StateMachine.Stop()
@@ -111,3 +114,6 @@ class WalkingModeBDI(WalkingMode):
         self._LPP.UpdatePosition(odom.pose.pose.position.x,odom.pose.pose.position.y)
         #self._odom_position = odom.pose.pose
  
+    def _get_imu(self,msg):  #listen to /atlas/imu/pose/pose/orientation
+        roll, pitch, self._yaw = euler_from_quaternion([msg.orientation.x, msg.orientation.y, msg.orientation.z, msg.orientation.w])
+

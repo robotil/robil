@@ -48,7 +48,7 @@ class DynamicLocomotion(RobilTask):
         rospy.loginfo("DynamicLocomotion, task: %s" % ("Starting to walk") )
         while not self._DynamicWalker.IsDone():
             if self.isPreepted() or (3 == self._debug_cmd):
-                self._DynamicWalker.EmergencyStop()
+                self._DynamicWalker.Stop()
                 return RTResult_PREEPTED()
             self._interval.sleep()
 
@@ -66,7 +66,7 @@ class DynamicLocomotion(RobilTask):
             if self.isPreepted():
                 self._DynamicWalker.Stop()
                 print "Preempt Walker: Preempted before path was received"
-                return False
+                return RTResult_PREEPTED()
             self._interval.sleep()
         return True
 

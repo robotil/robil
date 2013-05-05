@@ -48,12 +48,15 @@ class BDI_WalkingModeStateMachine(StateMachine):
         StateMachine.AddTransition(self,"Wait",         "Go",        "Walking")
         StateMachine.AddTransition(self,"Walking",      "Finished",        "Done")
         StateMachine.AddTransition(self,"Done",       "Stop",        "Idle")
+        StateMachine.AddTransition(self,"Wait",       "Stop",        "Idle")
+        StateMachine.AddTransition(self,"Walking",       "Stop",        "Idle")
 
     def Initialize(self,step_index_for_reset):
         self._BDI_StateMachine.Initialize(step_index_for_reset)
 
-    def Walk(self):
+    def Walk(self,yaw):
         StateMachine.PerformTransition(self,"Walk")
+        self._Odometer.SetYaw(yaw)
 
     def Stop(self):
         if(StateMachine.PerformTransition(self,"Stop")):
