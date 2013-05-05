@@ -38,7 +38,7 @@ class BDI_State(State):
 
 class BDI_StateMachine(StateMachine):
     """
-        The StepStateMachine class is a finite state machine that handles the stepping logic for the ZMP module
+        The BDI_StateMachine class is a finite state machine that handles the stepping logic for the BDI module
     """
     
     def __init__(self,odometer):
