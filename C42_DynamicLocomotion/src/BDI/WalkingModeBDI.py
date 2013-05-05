@@ -74,6 +74,7 @@ class WalkingModeBDI(WalkingMode):
     def Walk(self):
         # Subscribe to atlas_state and atlas_sim_interface_state topics.
         self.asi_state = rospy.Subscriber('/atlas/atlas_sim_interface_state', AtlasSimInterfaceState, self.asi_state_cb)
+        rospy.sleep(0.3)
     
     def Stop(self):
         self._StateMachine.Stop()
