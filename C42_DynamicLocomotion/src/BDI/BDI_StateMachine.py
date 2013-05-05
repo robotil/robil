@@ -121,8 +121,9 @@ class BDI_StateMachine(StateMachine):
             command.walk_params.step_data[i] = self._StepQueue.Peek(i)
         return command
 
-    def Initialize(self):
+    def Initialize(self,index):
         self._Done = False
+        self._index = index
         self._StepQueue.Initialize(self._StrategyIdle.GetStepData(1),self._StrategyIdle.GetStepData(2),self._StrategyIdle.GetStepData(3),self._StrategyIdle.GetStepData(4))
         
     def IsDone(self):
