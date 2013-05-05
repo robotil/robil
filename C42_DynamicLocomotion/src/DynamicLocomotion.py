@@ -103,8 +103,8 @@ if __name__ == '__main__':
     rospy.init_node('DynamicLocomotion')
     node = DynamicLocomotion("DynamicLocomotion")
     # Harness robot, with gravity off
-    mode = rospy.Publisher('/atlas/mode', String, None, False, True, None)
-    mode.publish("harnessed")
+    #mode = rospy.Publisher('/atlas/mode', String, None, False, True, None)
+    #mode.publish("harnessed")
     #node.task()
     rospy.spin()
     print "C42_DynamicLocomotion node Closed"

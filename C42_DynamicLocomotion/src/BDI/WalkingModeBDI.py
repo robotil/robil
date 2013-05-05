@@ -32,7 +32,6 @@ class WalkingModeBDI(WalkingMode):
     def __init__(self,localPathPlanner):
         self.step_index_for_reset = 0
         # Initialize atlas mode and atlas_sim_interface_command publishers        
-        self.mode = rospy.Publisher('/atlas/mode', String, None, False, True, None)
         self.asi_command = rospy.Publisher('/atlas/atlas_sim_interface_command', AtlasSimInterfaceCommand, None, False, True, None)
         self._Odometer = BDI_Odometer()
         self._StateMachine = BDI_StateMachine(self._Odometer)
@@ -42,19 +41,19 @@ class WalkingModeBDI(WalkingMode):
 
     def Initialize(self):
         self._bDone = False
-        # Puts robot into freeze behavior, all joints controlled
-        # Put the robot into a known state
+        # # Puts robot into freeze behavior, all joints controlled
+        # # Put the robot into a known state
         k_effort = [0] * 28
-        freeze = AtlasSimInterfaceCommand(None,AtlasSimInterfaceCommand.FREEZE, None, None, None, None, k_effort )
-        self.asi_command.publish(freeze)
+        # freeze = AtlasSimInterfaceCommand(None,AtlasSimInterfaceCommand.FREEZE, None, None, None, None, k_effort )
+        # self.asi_command.publish(freeze)
         
-        # Puts robot into stand_prep behavior, a joint configuration suitable
-        # to go into stand mode
-        stand_prep = AtlasSimInterfaceCommand(None,AtlasSimInterfaceCommand.STAND_PREP, None, None, None, None, k_effort)
-        self.asi_command.publish(stand_prep)
+        # # Puts robot into stand_prep behavior, a joint configuration suitable
+        # # to go into stand mode
+        # stand_prep = AtlasSimInterfaceCommand(None,AtlasSimInterfaceCommand.STAND_PREP, None, None, None, None, k_effort)
+        # self.asi_command.publish(stand_prep)
 
-        rospy.sleep(2.0)
-        self.mode.publish("nominal")
+        # rospy.sleep(2.0)
+        # self.mode.publish("nominal")
         
         # Put robot into stand position
         stand = AtlasSimInterfaceCommand(None,AtlasSimInterfaceCommand.STAND, None, None, None, None, k_effort)
