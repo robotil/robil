@@ -1,0 +1,13 @@
+#goal definition
+string name
+string uid
+string parameters
+---
+#result definition
+int32 success
+string description
+string plan
+---
+#feedback
+float32 complete
+
