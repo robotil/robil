@@ -2,6 +2,7 @@
 #include <C0_RobilTask/RobilTaskAction.h>
 #include <C0_RobilTask/RobilTask.h>
 #include <C31_PathPlanner/C31_GetPath.h>
+#include <C31_PathPlanner/C31_Waypoints.h>
 #include <move_pelvis/move_pelvis.h>
 #include <pelvis_leg_target/pelvis_leg_target.h>
 #include <actionlib/server/simple_action_server.h>
@@ -16,12 +17,15 @@
 #include <sensor_msgs/Imu.h>
 #include <osrf_msgs/JointCommands.h>
 #include <tf/transform_listener.h>
+#include <FootPlacement/FootPlacement.h>
+
+
 
 class QuasiStaticWalking{
 private:
 	ros::NodeHandle nh_, nh2_, nh3_, nh4_;
 	ros::NodeHandle* rosnode;
-	ros::ServiceClient move_pelvis_cli_, pelvis_leg_target_cli_, getPath_cli_, walk_legs_cli_, step_down_cli_, make_step_cli_;
+	ros::ServiceClient move_pelvis_cli_, pelvis_leg_target_cli_, getPath_cli_, walk_legs_cli_, step_down_cli_, make_step_cli_, foot_placement_cli_;
 	actionlib::SimpleActionServer<C0_RobilTask::RobilTaskAction> as_; // NodeHandle instance must be created before this line.
 	C0_RobilTask::RobilTaskFeedback feedback_;
 	C0_RobilTask::RobilTaskResult result_;
@@ -35,6 +39,18 @@ private:
 	tf::TransformListener listener;
 
 public:
+	enum LegEnum{
+		RIGHT,
+		LEFT
+	};
+
+	struct Walk	{
+		LegEnum leg;
+		double start_pelvis_yaw;
+		geometry_msgs::Point position;
+		geometry_msgs::Point orientation;
+		double end_pelvis_yaw;
+	};
 	QuasiStaticWalking(std::string name)
 	:as_(nh_, name, false), action_name_(name){
 
@@ -42,7 +58,8 @@ public:
 		walk_legs_cli_ = nh_.serviceClient<move_pelvis::move_pelvis>("walk_legs");
 		step_down_cli_ = nh_.serviceClient<std_srvs::Empty>("step_down");
 		pelvis_leg_target_cli_ = nh_.serviceClient<pelvis_leg_target::pelvis_leg_target>("pelvis_leg_target");
-		//getPath_cli_ = nh_.serviceClient<C31_PathPlanner::C31_GetPath>("/C31_GlobalPathPlanner/getPath");
+		//foot_placement_cli_ = nh_.serviceClient<FootPlacement::FootPlacement>("foot_placement");
+		//getPath_cli_ = nh_.serviceClient<C31_PathPlanner::C31_GetPath>("/getPath");
 		imu_sub_ = nh_.subscribe("/atlas/imu",100,&QuasiStaticWalking::imu_CB,this);
 
 		while(!move_pelvis_cli_.waitForExistence(ros::Duration(0.1))){
@@ -61,9 +78,13 @@ public:
 			ROS_INFO("Waiting for the pelvis_leg_target server");
 		}
 
+		/*while(!foot_placement_cli_.waitForExistence(ros::Duration(0.1))){
+			ROS_INFO("Waiting for the foot_placement server");
+		}*/
+
 		make_step_cli_ = nh_.serviceClient<move_pelvis::move_pelvis>("make_step");
 		/*while(!getPath_cli_.waitForExistence(ros::Duration(0.1))){
-			ROS_INFO("Waiting for the /C31_GlobalPathPlanner/getPath server");
+			ROS_INFO("Waiting for the /getPath server");
 		}*/
 
 		//Set callback functions
@@ -94,18 +115,12 @@ public:
 
 	void goalCB(){
 
+/*
 		clock = ros::Time::now();
 		ROS_INFO("Start time: %f", ros::Time::now().toSec());
 
 		std::string g = as_.acceptNewGoal()->parameters;
-/*
-		C31_PathPlanner::C31_GetPath getpath;
-		if(!getPath_cli_.call(getpath)){
-			C0_RobilTask::RobilTaskResult _res;
-			_res.success = C0_RobilTask::RobilTask::FAULT;
-			as_.setSucceeded(_res);
-			return;
-		}*/
+
 
 		//TODO: turn to waypoint
 
@@ -128,181 +143,285 @@ public:
 			return;
 		}
 
-
-
-
-		double step = 0.30;
-
-
-
-		//Move over to right leg
-		leg_target.request.leg = "r_foot";
-		ROS_INFO("Moving to left leg");
+		//Move over to static leg
+		leg_target.request.leg = "l_foot";
+		ROS_INFO("Moving to %s leg", leg_target.request.leg.c_str());
 		if(!pelvis_leg_target_cli_.call(leg_target)){
-			ROS_ERROR("Could not move to right leg");
+			ROS_ERROR("Could not move to %s leg", leg_target.request.leg.c_str());
 			C0_RobilTask::RobilTaskResult _res;
 			_res.success = C0_RobilTask::RobilTask::FAULT;
 			as_.setSucceeded(_res);
 			return;
 		}
 
-		tf::StampedTransform p2l;
-		try {
-			listener.waitForTransform("/pelvis","/l_foot",ros::Time(0),ros::Duration(0.2));
-			listener.lookupTransform("/pelvis","/l_foot",ros::Time(0),p2l);
-		} catch (tf::TransformException &ex) {
-			ROS_ERROR("%s",ex.what());
-		}
 
-		move_pelvis.request.PositionDestination.x = p2l.getOrigin().x() + step/2;
-		move_pelvis.request.PositionDestination.y = p2l.getOrigin().y();
-		move_pelvis.request.PositionDestination.z = p2l.getOrigin().z();
-		move_pelvis.request.AngleDestination.x = QuatToRoll(p2l.getRotation());
-		move_pelvis.request.AngleDestination.y = QuatToPitch(p2l.getRotation());;
-		move_pelvis.request.AngleDestination.z = QuatToYaw(p2l.getRotation());
-		move_pelvis.request.LinkToMove = "l_leg";
-		ROS_INFO("Moving left left forward");
-		if(!make_step_cli_.call(move_pelvis)){
-			ROS_ERROR("Could not move left leg forward");
+		while(ros::ok()){
+			ROS_INFO("Next step");
+
+			ROS_INFO("Getting next step");
+			C31_PathPlanner::C31_GetPath path;
+
+			if(!getPath_cli_.call(path)){
+				C0_RobilTask::RobilTaskResult _res;
+				_res.success = C0_RobilTask::RobilTask::FAULT;
+				as_.setAborted(_res);
+				ROS_INFO("End time: %f", ros::Time::now().toSec());
+				return;
+			}
+
+			FootPlacement::FootPlacement possible_coords;
+			FootPlacement::Pos pos;
+
+			possible_coords.request.dirX = path.response.path.points[0].x;
+			possible_coords.request.dirY = path.response.path.points[0].y;
+			possible_coords.request.foot = (leg_target.request.leg == "r_foot") ? possible_coords.request.LEFT : possible_coords.request.RIGHT;
+			possible_coords.request.useC22 = 0;
+
+			if (!foot_placement_cli_.call(possible_coords)) {
+
+				ROS_INFO("Can't contact foot_placement");
+				C0_RobilTask::RobilTaskResult _res;
+				_res.success = C0_RobilTask::RobilTask::FAULT;
+				as_.setAborted(_res);
+				ROS_INFO("End time: %f", ros::Time::now().toSec());
+				return;
+			}
+			for(unsigned int i = 0; i < possible_coords.response.positions.size(); i++){
+				if(sqrt(
+						pow(possible_coords.response.positions[i].point.x, 2)
+						+ pow(possible_coords.response.positions[i].point.y, 2)
+					) < 0.18){
+					pos = possible_coords.response.positions[0];
+				}
+			}
+			if(pos.cost == 0.0){
+				ROS_INFO("Can't find suitable step");
+				C0_RobilTask::RobilTaskResult _res;
+				_res.success = C0_RobilTask::RobilTask::FAULT;
+				as_.setAborted(_res);
+				ROS_INFO("End time: %f", ros::Time::now().toSec());
+				return;
+			}
+
+			tf::StampedTransform transform;
+			try {
+				listener.waitForTransform("/pelvis",(leg_target.request.leg == "l_foot") ? "r_foot" : "l_foot",ros::Time(0),ros::Duration(0.2));
+				listener.lookupTransform("/pelvis",(leg_target.request.leg == "l_foot") ? "r_foot" : "l_foot",ros::Time(0),transform);
+			} catch (tf::TransformException &ex) {
+				ROS_ERROR("%s",ex.what());
+			}
+
+			//Change pelvis orientation
+			move_pelvis.request.PositionDestination.x = 0;
+			move_pelvis.request.PositionDestination.y = 0;
+			move_pelvis.request.PositionDestination.z = 0;
+			move_pelvis.request.AngleDestination.x = 0;
+			move_pelvis.request.AngleDestination.y = 0;
+			move_pelvis.request.AngleDestination.z = 0;
+			move_pelvis.request.LinkToMove = "pelvis";
+			ROS_INFO("Changing pelvis yaw orientation");
+			if(!move_pelvis_cli_.call(move_pelvis)){
+				ROS_ERROR("Could not move change pelvis yaw orientation");
+				C0_RobilTask::RobilTaskResult _res;
+				_res.success = C0_RobilTask::RobilTask::FAULT;
+				as_.setSucceeded(_res);
+				return;
+			}
+
+			//Move leg forward
+			move_pelvis.request.PositionDestination.x = pos.point.x;
+			move_pelvis.request.PositionDestination.y = pos.point.y;
+			move_pelvis.request.PositionDestination.z = pos.point.z;
+			move_pelvis.request.AngleDestination.x = 0;
+			move_pelvis.request.AngleDestination.y = 0;
+			move_pelvis.request.AngleDestination.z = (leg_target.request.leg == "l_foot") ? -0.3 : 0.3;
+			move_pelvis.request.LinkToMove = (leg_target.request.leg == "l_foot") ? "r_leg" : "l_leg";
+			ROS_INFO("Moving %s forward", move_pelvis.request.LinkToMove.c_str());
+			if(!make_step_cli_.call(move_pelvis)){
+				ROS_ERROR("Could not move %s forward", move_pelvis.request.LinkToMove.c_str());
+				C0_RobilTask::RobilTaskResult _res;
+				_res.success = C0_RobilTask::RobilTask::FAULT;
+				as_.setSucceeded(_res);
+				return;
+			}
+
+			//Move over to dynamic leg
+			leg_target.request.leg = (leg_target.request.leg == "l_foot") ? "r_foot" : "l_foot";
+			ROS_INFO("Moving to %s leg", leg_target.request.leg.c_str());
+			if(!pelvis_leg_target_cli_.call(leg_target)){
+				ROS_ERROR("Could not move to %s leg", leg_target.request.leg.c_str());
+				C0_RobilTask::RobilTaskResult _res;
+				_res.success = C0_RobilTask::RobilTask::FAULT;
+				as_.setSucceeded(_res);
+				return;
+			}
+
+			//Change pelvis orientation
+			move_pelvis.request.PositionDestination.x = 0;
+			move_pelvis.request.PositionDestination.y = 0;
+			move_pelvis.request.PositionDestination.z = 0;
+			move_pelvis.request.AngleDestination.x = 0;
+			move_pelvis.request.AngleDestination.y = 0;
+			move_pelvis.request.AngleDestination.z = 0;
+			move_pelvis.request.LinkToMove = "pelvis";
+			ROS_INFO("Changing pelvis yaw orientation");
+			if(!move_pelvis_cli_.call(move_pelvis)){
+				ROS_ERROR("Could not move change pelvis yaw orientation");
+				C0_RobilTask::RobilTaskResult _res;
+				_res.success = C0_RobilTask::RobilTask::FAULT;
+				as_.setSucceeded(_res);
+				return;
+			}
+
+
+
+
+
+
+
+		}
+*/
+
+
+
+		std::vector<Walk> steps;
+		Walk step;
+		step.start_pelvis_yaw = 0.0;
+		step.leg = RIGHT;
+		step.position.x = 0.20;
+		step.position.y = -0.268;
+		step.position.z = -0.779;
+		step.orientation.x = 0;
+		step.orientation.y = 0;
+		step.orientation.z = -0.8;
+		step.end_pelvis_yaw = 0;
+		steps.push_back(step);
+
+		step.start_pelvis_yaw = -0.0;
+		step.leg = LEFT;
+		step.position.x = 0.18;
+		step.position.y = 0.268;
+		step.position.z = -0.779;
+		step.orientation.x = 0;
+		step.orientation.y = 0;
+		step.orientation.z = 0.8;
+		step.end_pelvis_yaw = -0.0;
+		steps.push_back(step);
+
+
+
+		clock = ros::Time::now();
+		ROS_INFO("Start time: %f", ros::Time::now().toSec());
+
+		std::string g = as_.acceptNewGoal()->parameters;
+
+		//TODO: turn to waypoint
+
+		pelvis_leg_target::pelvis_leg_target leg_target;
+		move_pelvis::move_pelvis move_pelvis;
+
+		move_pelvis.request.PositionDestination.x = 0;
+		move_pelvis.request.PositionDestination.y = -0.0;
+		move_pelvis.request.PositionDestination.z = -0.05;
+		move_pelvis.request.AngleDestination.x = 0.0;
+		move_pelvis.request.AngleDestination.y = 0.0;
+		move_pelvis.request.AngleDestination.z = 0.0;
+		move_pelvis.request.LinkToMove = "pelvis";
+		ROS_INFO("Lowering pelvis");
+		if(!move_pelvis_cli_.call(move_pelvis)){
+			ROS_ERROR("Could not lower pelvis");
 			C0_RobilTask::RobilTaskResult _res;
 			_res.success = C0_RobilTask::RobilTask::FAULT;
 			as_.setSucceeded(_res);
 			return;
 		}
 
-		while(1){
-
-
-			if (as_.isPreemptRequested() || !ros::ok())
-			{
-				ROS_ERROR("%s: Preempted", action_name_.c_str());
-				// set the action state to preempted
-				as_.setPreempted();
-			}
-
-
-			//Move over to left leg
-			leg_target.request.leg = "l_foot";
-			ROS_INFO("Moving to left leg");
-			if(!pelvis_leg_target_cli_.call(leg_target)){
-				ROS_ERROR("Could not move to left leg");
-				C0_RobilTask::RobilTaskResult _res;
-				_res.success = C0_RobilTask::RobilTask::FAULT;
-				as_.setSucceeded(_res);
-				return;
-			}
-
-			tf::StampedTransform p2r;
-			try {
-				listener.waitForTransform("/pelvis","/r_foot",ros::Time(0),ros::Duration(0.2));
-				listener.lookupTransform("/pelvis","/r_foot",ros::Time(0),p2r);
-			} catch (tf::TransformException &ex) {
-				ROS_ERROR("%s",ex.what());
-			}
-
-			move_pelvis.request.PositionDestination.x = p2r.getOrigin().x() + step;
-			move_pelvis.request.PositionDestination.y = p2r.getOrigin().y();
-			move_pelvis.request.PositionDestination.z = p2r.getOrigin().z();
-			move_pelvis.request.AngleDestination.x = QuatToRoll(p2r.getRotation());
-			move_pelvis.request.AngleDestination.y = QuatToPitch(p2r.getRotation());;
-			move_pelvis.request.AngleDestination.z = QuatToYaw(p2r.getRotation());
-			move_pelvis.request.LinkToMove = "r_leg";
-			ROS_INFO("Moving left right forward");
-			if(!make_step_cli_.call(move_pelvis)){
-				ROS_ERROR("Could not move right leg forward");
-				C0_RobilTask::RobilTaskResult _res;
-				_res.success = C0_RobilTask::RobilTask::FAULT;
-				as_.setSucceeded(_res);
-				return;
-			}
-
-			//ros::Duration(1.0).sleep();
-
-			//Move over to right leg
-			leg_target.request.leg = "r_foot";
-			ROS_INFO("Moving to left leg");
-			if(!pelvis_leg_target_cli_.call(leg_target)){
-				ROS_ERROR("Could not move to right leg");
-				C0_RobilTask::RobilTaskResult _res;
-				_res.success = C0_RobilTask::RobilTask::FAULT;
-				as_.setSucceeded(_res);
-				return;
-			}
-
-			try {
-				listener.waitForTransform("/pelvis","/l_foot",ros::Time(0),ros::Duration(0.2));
-				listener.lookupTransform("/pelvis","/l_foot",ros::Time(0),p2l);
-			} catch (tf::TransformException &ex) {
-				ROS_ERROR("%s",ex.what());
-			}
-
-			move_pelvis.request.PositionDestination.x = p2l.getOrigin().x() + step;
-			move_pelvis.request.PositionDestination.y = p2l.getOrigin().y();
-			move_pelvis.request.PositionDestination.z = p2l.getOrigin().z();
-			move_pelvis.request.AngleDestination.x = QuatToRoll(p2l.getRotation());
-			move_pelvis.request.AngleDestination.y = QuatToPitch(p2l.getRotation());;
-			move_pelvis.request.AngleDestination.z = QuatToYaw(p2l.getRotation());
-			move_pelvis.request.LinkToMove = "l_leg";
-			ROS_INFO("Moving left left forward");
-			if(!make_step_cli_.call(move_pelvis)){
-				ROS_ERROR("Could not move left leg forward");
-				C0_RobilTask::RobilTaskResult _res;
-				_res.success = C0_RobilTask::RobilTask::FAULT;
-				as_.setSucceeded(_res);
-				return;
-			}
-
-
-
-
-
-
-
-
-
-
-			/*move_pelvis.request.PositionDestination.x = -0.1;
-			move_pelvis.request.PositionDestination.y = -0.0;
-			move_pelvis.request.PositionDestination.z = 0.05;
-			move_pelvis.request.AngleDestination.x = 0.0;
-			move_pelvis.request.AngleDestination.y = 0.0;
-			move_pelvis.request.AngleDestination.z = 0.0;
-			move_pelvis.request.LinkToMove = "r_leg";
-			ROS_INFO("Moving right leg forward");
-			if(!move_pelvis_cli_.call(move_pelvis)){
-				ROS_ERROR("Could not move right leg forward");
-				C0_RobilTask::RobilTaskResult _res;
-				_res.success = C0_RobilTask::RobilTask::FAULT;
-				as_.setSucceeded(_res);
-				return;
-			}*/
-/*
-			leg_target.request.leg = "l_foot";
-			ROS_INFO("Moving to left leg");
-			if(!pelvis_leg_target_cli_.call(leg_target)){
-				ROS_ERROR("Could not move to left leg");
-				C0_RobilTask::RobilTaskResult _res;
-				_res.success = C0_RobilTask::RobilTask::FAULT;
-				as_.setSucceeded(_res);
-				return;
-			}
-
-			move_pelvis.request.PositionDestination.x = -0.15;
-			move_pelvis.request.PositionDestination.y = -0.0;
-			move_pelvis.request.PositionDestination.z = 0.10;
-			move_pelvis.request.AngleDestination.x = 0.0;
-			move_pelvis.request.AngleDestination.y = 0.0;
-			move_pelvis.request.AngleDestination.z = 0.0;
-			move_pelvis.request.LinkToMove = "r_leg";
-			ROS_INFO("Moving right leg forward");
-			if(!move_pelvis_cli_.call(move_pelvis)){
-				ROS_ERROR("Could not move left leg forward");
-				C0_RobilTask::RobilTaskResult _res;
-				_res.success = C0_RobilTask::RobilTask::FAULT;
-				as_.setSucceeded(_res);
-				return;
-			}*/
+		//Move over to static leg
+		leg_target.request.leg = (steps[0].leg == RIGHT) ? "l_foot" : "r_foot";
+		ROS_INFO("Moving to %s leg", leg_target.request.leg.c_str());
+		if(!pelvis_leg_target_cli_.call(leg_target)){
+			ROS_ERROR("Could not move to %s leg", leg_target.request.leg.c_str());
+			C0_RobilTask::RobilTaskResult _res;
+			_res.success = C0_RobilTask::RobilTask::FAULT;
+			as_.setSucceeded(_res);
+			return;
 		}
+
+
+		for(unsigned int i = 0; i < steps.size(); i++){
+			ROS_INFO("Running iteration #%d", i+1);
+
+			//Change pelvis orientation
+			move_pelvis.request.PositionDestination.x = 0;
+			move_pelvis.request.PositionDestination.y = 0;
+			move_pelvis.request.PositionDestination.z = 0;
+			move_pelvis.request.AngleDestination.x = 0;
+			move_pelvis.request.AngleDestination.y = 0;
+			move_pelvis.request.AngleDestination.z = steps[i].start_pelvis_yaw;
+			move_pelvis.request.LinkToMove = "pelvis";
+			ROS_INFO("Changing pelvis yaw orientation");
+			if(!move_pelvis_cli_.call(move_pelvis)){
+				ROS_ERROR("Could not move change pelvis yaw orientation");
+				C0_RobilTask::RobilTaskResult _res;
+				_res.success = C0_RobilTask::RobilTask::FAULT;
+				as_.setSucceeded(_res);
+				return;
+			}
+
+			//Move leg forward
+			move_pelvis.request.PositionDestination.x = steps[i].position.x;
+			move_pelvis.request.PositionDestination.y = steps[i].position.y;
+			move_pelvis.request.PositionDestination.z = steps[i].position.z;
+			move_pelvis.request.AngleDestination.x = steps[i].orientation.x;
+			move_pelvis.request.AngleDestination.y = steps[i].orientation.y;
+			move_pelvis.request.AngleDestination.z = steps[i].orientation.z;
+			move_pelvis.request.LinkToMove = (steps[i].leg == LEFT) ? "l_leg" : "r_leg";
+			ROS_INFO("Moving %s forward", move_pelvis.request.LinkToMove.c_str());
+			if(!make_step_cli_.call(move_pelvis)){
+				ROS_ERROR("Could not move %s forward", move_pelvis.request.LinkToMove.c_str());
+				C0_RobilTask::RobilTaskResult _res;
+				_res.success = C0_RobilTask::RobilTask::FAULT;
+				as_.setSucceeded(_res);
+				return;
+			}
+
+			//Move over to dynamic leg
+			leg_target.request.leg = (steps[i].leg == LEFT) ? "l_foot" : "r_foot";
+			ROS_INFO("Moving to %s leg", leg_target.request.leg.c_str());
+			if(!pelvis_leg_target_cli_.call(leg_target)){
+				ROS_ERROR("Could not move to %s leg", leg_target.request.leg.c_str());
+				C0_RobilTask::RobilTaskResult _res;
+				_res.success = C0_RobilTask::RobilTask::FAULT;
+				as_.setSucceeded(_res);
+				return;
+			}
+
+			//Change pelvis orientation
+			move_pelvis.request.PositionDestination.x = 0;
+			move_pelvis.request.PositionDestination.y = 0;
+			move_pelvis.request.PositionDestination.z = 0;
+			move_pelvis.request.AngleDestination.x = 0;
+			move_pelvis.request.AngleDestination.y = 0;
+			move_pelvis.request.AngleDestination.z = steps[i].end_pelvis_yaw;
+			move_pelvis.request.LinkToMove = "pelvis";
+			ROS_INFO("Changing pelvis yaw orientation");
+			if(!move_pelvis_cli_.call(move_pelvis)){
+				ROS_ERROR("Could not move change pelvis yaw orientation");
+				C0_RobilTask::RobilTaskResult _res;
+				_res.success = C0_RobilTask::RobilTask::FAULT;
+				as_.setSucceeded(_res);
+				return;
+			}
+
+
+
+
+
+
+
+		}
+
+
 
 
 

@@ -18,6 +18,7 @@
 #include <string>
 #include <map>
 #include <cmath>
+#include <C43_LocalBodyCOM/Kinematics.h>
 
 class walk_legs_service{
 

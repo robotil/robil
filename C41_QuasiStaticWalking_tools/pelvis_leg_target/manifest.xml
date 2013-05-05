@@ -12,7 +12,7 @@
   <depend package="C43_LocalBodyCOM"/>
   <depend package="tf"/>
   <depend package="move_pelvis"/>
-  <depend package="hrl_kinematics"/>
+  
 
 </package>
 

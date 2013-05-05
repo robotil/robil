@@ -1,5 +1,6 @@
 #include "ros/ros.h"
 #include "transformations.h"
+#include <C43_LocalBodyCOM/Kinematics.h>
 #include "traj_splitter_to_vector/trajectory_vector.h"
 #include "move_pelvis/move_pelvis.h"
 #include <geometry_msgs/Vector3.h>
@@ -31,7 +32,7 @@ protected:
 	double q0_l,q1_l,q2_l,q3_l,q4_l,q5_l;
 	double q0_r,q1_r,q2_r,q3_r,q4_r,q5_r;
 	std::map <std::string, int> joints;
-	std::vector<double> positions, posecontroller_positions;;
+	std::vector<double> positions, posecontroller_positions;
 	ros::Publisher pub_joint_commands_;
 	geometry_msgs::Point imu;
 	ros::ServiceClient posecontroller_cli;
