@@ -269,6 +269,8 @@ public:
 			double distl = sqrt(pow(com.x[1],2)+pow(com.y[1],2));
 			double distr = sqrt(pow(com.x[2],2)+pow(com.y[2],2));
 
+
+			ROS_INFO("distr: %f distl: %f", distr, distl);
 			double force_distance = forcesensors.r_foot.force.z - forcesensors.l_foot.force.z;
 			if(force_distance < -0.8*(forcesensors.l_foot.force.z+forcesensors.r_foot.force.z)){
 				optimal_com.x = (distl * com.x[1])
@@ -288,6 +290,8 @@ public:
 												/((distl+distr));
 				}
 			}
+
+			ROS_INFO("fr: %f fl: %f", forcesensors.r_foot.force.z, forcesensors.l_foot.force.z);
 
 			/*optimal_com.x = (distr * com.x[2] * forcesensors.r_foot.force.z + distl * com.x[1] * forcesensors.l_foot.force.z)
 							/((distl+distr)*(forcesensors.l_foot.force.z+forcesensors.r_foot.force.z));

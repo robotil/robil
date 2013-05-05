@@ -1,11 +1,9 @@
 #include <ros/ros.h>
-#include <actionlib/client/simple_action_client.h>
 #include <atlas_msgs/AtlasCommand.h>
 #include <atlas_msgs/AtlasState.h>
 #include <sensor_msgs/JointState.h>
 #include <osrf_msgs/JointCommands.h>
 #include <std_msgs/Float64.h>
-#include <boost/thread.hpp>
 #include <boost/algorithm/string.hpp>
 #include <std_srvs/Empty.h>
 #include <PoseController/back_movement.h>
