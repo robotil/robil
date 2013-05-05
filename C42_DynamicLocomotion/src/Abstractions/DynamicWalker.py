@@ -26,6 +26,7 @@ class DynamicWalker(object):
         pass
     
     def Walk(self):
+        self._WalkingMode.StartWalking()
         self._WalkingMode.Walk()
         return True
     
