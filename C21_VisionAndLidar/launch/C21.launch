@@ -1,4 +1,4 @@
 <launch>
-  <node name="C21" pkg="C21_VisionAndLidar" type="C21" output="screen"/>
-	<node name="foo" pkg="C21_VisionAndLidar" type="Spindel_bash.sh" />
+  <node name="C21" pkg="C21_VisionAndLidar" type="C21"/>
+<node name="foo" pkg="C21_VisionAndLidar" type="Spindel_bash.sh" />
 </launch>

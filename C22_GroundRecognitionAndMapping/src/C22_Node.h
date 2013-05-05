@@ -32,9 +32,12 @@
 #include <message_filters/synchronizer.h>
 #include <message_filters/time_synchronizer.h>
 #include <message_filters/sync_policies/approximate_time.h>
+#include <ros/callback_queue.h>
 class C22_Node{
 private:
   ros::NodeHandle nh_;
+  ros::NodeHandle nh2_;
+
   typedef message_filters::sync_policies::ApproximateTime<
 		  C21_VisionAndLidar::C21_C22, nav_msgs::Odometry
     > MySyncPolicy;
@@ -48,6 +51,7 @@ private:
   boost::shared_ptr<pcl::visualization::PCLVisualizer> viewer;
   geometry_msgs::Point robotPos;
   geometry_msgs::Point robotOri;
+  ros::Publisher C22_pub;
 public:
 
 	/**

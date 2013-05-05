@@ -1,17 +1,19 @@
-V0.0.0.164
+V0.0.0.168
 ===========================================================
 C0_RobilTask     		0.5
 C0_Scripts     		        0.19
 C10_Common                      0.5
 C11_Agent     			0.14
 C11_OperatorControl     	0.17
-C21_VisionAndLidar     		0.9
-C22_GroundRecognitionAndMapping     0.9
+C21_VisionAndLidar     		0.10
+C22_GroundRecognitionAndMapping     0.10
+C22_CompactGroundRecognitionAndMapping     0.1
 C23_ObjectRecognition     	0.18
 C23_dFind     			0.5
 C24_ObstacleDetection     	0.6
 C25_GlobalPosition     		0.7
 C25_ekf     			0.1
+C25_AtlasFell  			0.1
 C31_PathPlanner     		0.14
 C34_BTExecuter     		0.8
 C34_Designer     		0.31
@@ -19,7 +21,7 @@ C34_Executer     		0.8
 C35_Monitoring     		0.10
 C41_BodyControl     		0.1
 C41_QuasiStaticWalking     	0.6
-C41_QuasiStaticWalking_tools     0.6
+C41_QuasiStaticWalking_tools     0.7
 C42_DRCSim2_tools     		0.1
 C42_DynamicLocomotion     	0.5
 C42_Leg_IK     			0.3
@@ -27,8 +29,8 @@ C42_ZMPWalk     		0.6
 C43_LocalBodyCOM     		0.1
 C43_LocalBodyCOM_tools     	0.1
 C43_LocalBodyPVA     		0.2
-C45_PostureControl     		0.8
-C45_PostureControl_tools     	0.1
+C45_PostureControl     		0.9
+C45_PostureControl_tools     	0.2
 C46_MountVehicle     		0.6
 C47_DismountVehicle     	0.3
 C48_StandUp     		0.5
