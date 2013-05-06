@@ -2,7 +2,7 @@
 
 from collections import deque
 import math
-#import rospy    # TODO - get rid of all these loginfo when done debugging
+import rospy    # TODO - get rid of all these loginfo when done debugging
 
 ###################################################################################
 # File created by David Dovrat, 2013.
@@ -38,6 +38,18 @@ class Waypoint(object):
         dX = otherWaypoint._fX - self._fX
         dY = otherWaypoint._fY - self._fY
         return math.sqrt(dX*dX+dY*dY)
+
+    def AddWapoint(self,otherWaypoint):
+        res = Waypoint()
+        res._fX = self._fX + otherWaypoint._fX
+        res._fY = self._fY + otherWaypoint._fY
+        return res
+
+    def SubWapoint(self,otherWaypoint):
+        res = Waypoint()
+        res._fX = self._fX - otherWaypoint._fX
+        res._fY = self._fY - otherWaypoint._fY
+        return res
         
 ###################################################################################
 #---------------------------------- Segment --------------------------------------
@@ -132,7 +144,8 @@ class LocalPathPlanner(object):
         self._Path = deque([])
         self._Position = Waypoint()
         self._CurrentSegment = Segment(self._Position,self._Position)
-        self._PathReady = False 
+        self._PathReady = False
+        self._Preview_Distance = 1.7 # [meters], should be updated according to distance of number of step ahead 
         
     def SetPath(self,waypointList):
         self._Path = deque(waypointList)
@@ -159,11 +172,11 @@ class LocalPathPlanner(object):
         return self._CurrentSegment.GetYaw()
 
     def GetCloseEnoughToTargetDistance(self):
-        turningRadius = 3.25
+        turningRadius = 1.5
         theta = 0.0
         if(0 == len(self._Path)):
             # Last segment
-            result = 0.8
+            result = 0.2
         else:
             NextSegment = Segment(self._CurrentSegment.GetTarget(),self._Path[0])
             theta = NextSegment.GetYaw()-self._CurrentSegment.GetYaw()
@@ -174,6 +187,9 @@ class LocalPathPlanner(object):
                 result = math.fabs(turningRadius*math.tan(theta/2)) # Ask Dave
         #rospy.loginfo('GetCloseEnoughToTargetDistance: %f, theta = %f' %(result,theta))
         return result
+
+    def GetCloseEnoughToTargetDistanceWithPreview(self):
+        return self.GetCloseEnoughToTargetDistance() + self._Preview_Distance
             
     def UpdatePosition(self,CoordinateX,CoordinateY):
         """
@@ -186,13 +202,14 @@ class LocalPathPlanner(object):
             sagital,lateral = self._CurrentSegment.GetDistanceFrom(self._Position)
             distanceFromTarget = self._CurrentSegment.GetTarget().GetDistanceFrom(self._Position)
             #rospy.loginfo('UpdatePosition: distanceFromTarget = %f' %(distanceFromTarget))
-            if ((sagital>0.0)or(distanceFromTarget < self.GetCloseEnoughToTargetDistance())):
+            if ((sagital>0.0)or(distanceFromTarget < self.GetCloseEnoughToTargetDistanceWithPreview())):
+                rospy.loginfo('UpdatePosition: distanceFromTarget = %f' %(distanceFromTarget))
                 if(len(self._Path)==0):
                     bStop = True
                     self._PathReady = False
                     #rospy.loginfo('UpdatePosition: Stopping')
                 else:
-                    #rospy.loginfo('UpdatePosition: Path next point before pop (x,y) = (%f,%f)' %(self._Path[0].GetX(),self._Path[0].GetY()))
+                    rospy.loginfo('UpdatePosition: Path next point before pop (x,y) = (%f,%f)' %(self._Path[0].GetX(),self._Path[0].GetY()))
                     self._CurrentSegment.SetSource(self._CurrentSegment.GetTarget())
                     self._CurrentSegment.SetTarget(self._Path.popleft())
                 #rospy.loginfo('UpdatePosition:  New Segment: Size = %s' %(self._CurrentSegment._Source.GetDistanceFrom(self._CurrentSegment._Target) ) )
@@ -205,6 +222,10 @@ class LocalPathPlanner(object):
 
     def IsActive(self):
         return self._PathReady
+
+    def GetTargetDistance(self):
+        return self._CurrentSegment.GetTarget().GetDistanceFrom(self._Position) - self.GetCloseEnoughToTargetDistance()
+
 
 ###################################################################################
 # a little testing script

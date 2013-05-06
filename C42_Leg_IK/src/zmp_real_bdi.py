@@ -90,9 +90,9 @@ def get_foot_contact(msg):
     nr.force_x = buf[0].r_foot.force.x
     nr.force_y = buf[0].r_foot.force.y
     nr.force_z = buf[0].r_foot.force.z 
-    nr.t_x = buf[0].r_foot.torque.x
+    nr.t_x =  buf[0].r_foot.torque.x
     nr.t_y = -buf[0].r_foot.torque.y
-    nr.t_z = buf[0].r_foot.torque.z
+    nr.t_z =  buf[0].r_foot.torque.z
 
 
     nl.force_x = buf[0].l_foot.force.x
@@ -150,7 +150,7 @@ def zmp_calculation(listener):
             # frames to transform: 
             get_frame = 'l_foot' # DRC (from tf) names # 'r_lleg' add for debug links length
 
-  rospy.loginfo(base_frame)     
+  #rospy.loginfo(base_frame)     
   (ns.translation,ns.rotation) = listener.lookupTransform(base_frame, get_frame, rospy.Time(0))  #  rospy.Time(0) to use latest availble transform 
         
   
@@ -187,9 +187,9 @@ def zmp_calculation(listener):
   # errx =  zmp_x - msg.zmp_ref.x
 
 
-  rospy.loginfo(ns.zmpy_l)
-  rospy.loginfo(zmp_y)
-  rospy.loginfo(ns.zmpy_r)
+  #rospy.loginfo(ns.zmpy_l)
+  #rospy.loginfo(zmp_y)
+  #rospy.loginfo(ns.zmpy_r)
   nsw.out.zmpx_r = ns.zmpx_r
   nsw.out.zmpy_r = ns.zmpy_r
   nsw.out.zmpx_l = ns.zmpx_l
