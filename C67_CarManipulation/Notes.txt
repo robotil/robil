@@ -47,6 +47,7 @@ right hand(x y z R P Y sec points_Number):
 rosrun C67_CarManipulation rPath 0.499917 -0.625275 0.391767 -1.536377 0.400938 -0.019710 2 100
 rosrun C67_CarManipulation rPath 0.440300 -0.209759 0.245574 -1.863805 0.361662 0.810374 2 100
 left hand:
+rosrun C67_CarManipulation lPath 0.028 0.437 -0.277 -2.816 1.366 1.687 2 100
 rosrun C67_CarManipulation lPath 0.499917 0.625275 0.391767 1.536377 0.400938 0.019710 2 100
 rosrun C67_CarManipulation lPath 0.440300 0.209759 0.245574 1.863805 0.361662 -0.810374 2 100
 
