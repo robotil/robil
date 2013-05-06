@@ -42,7 +42,7 @@ from RobilTaskPy import *
 from threading import Lock
 from nav_msgs.msg import Odometry
 #from geometry_msgs.msg import Twist, Vector3
-from C31_PathPlanner.msg import C31_Waypoints  
+from C31_PathPlanner.msg import C31_Waypoints
 
 class MyTask(RobilTask):
 
