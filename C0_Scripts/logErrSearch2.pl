@@ -17,11 +17,12 @@ open FILE, "<./log2.txt";
 my @line = <FILE>;
 for (@line) {
     $strNum++;
-
+#===================================
     next if ($_ =~ /$except1/ | 
              $_ =~ /$except2/ | 
              $_ =~ /$except3/ | 
              $_ =~ /$except4/);  
+#====================================
 
     if ($_ =~ /$find/) {
         $errCount++;
