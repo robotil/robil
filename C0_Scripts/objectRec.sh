@@ -12,6 +12,7 @@ echo "Done "
 echo $C23_PID  >> $PKILL
 #echo $C22_PID $C31_PID $C34_PID >> $PKILL
 
+
 echo $ROBIL
 rosservice call executer/run O $ROBIL/C34_Designer/plans/trackObject.xml
 rosservice call executer/resume O
