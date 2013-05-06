@@ -8,6 +8,8 @@ using namespace std;
 CTcpConnection::CTcpConnection(QString ipAddress,int port)
 {
   IsSendingImage = false;
+  IsSendingGrid = false;
+  pITcpConnectionInterface = NULL;
   ImgSize = 0;
   IpAddress = new  QHostAddress(ipAddress);
   pConnection = new QTcpSocket(this);
@@ -31,6 +33,11 @@ CTcpConnection::~CTcpConnection()
     {
       delete IpAddress;
     }
+}
+
+void CTcpConnection::SetSubscriber(ITcpConnectionInterface* pitcpConnectionInterface)
+{
+  pITcpConnectionInterface = pitcpConnectionInterface;
 }
 
 void CTcpConnection::SltReadyRead()
@@ -72,6 +79,45 @@ void CTcpConnection::SltReadyRead()
            emit SigOnImgReceived(img);
            }
         }
+      else if(IsSendingGrid)
+        {
+          if(bufSize < ImgSize)
+            {
+              std::cout<<"TCP: Size not big enough!\n";
+              std::cout<<"TCP: expected = " << ImgSize << " received = " << bufSize << "\n";
+              return;
+            }
+            else
+            {
+                IsSendingGrid = false;
+            }
+            if(!IsSendingGrid)
+              {
+                StructGridData grid;
+                in >> grid.RobotPos.x;
+                in >> grid.RobotPos.y;
+                in >> grid.RobolOrientation;
+                in >> grid.XOffset;
+                in >> grid.YOffset;
+                for(int i=0; i<100; i++)
+                {
+                  for(int j=0; j<100;j++)
+                  {
+                      in>>(int &)(grid.Grid[i][j]);
+                  }
+                }
+                std::cout<<"TCP: Grid receive completed!\n";
+                std::cout<<"Robot pos: "<<grid.RobotPos.x<<","<<grid.RobotPos.y<<"\n";
+                std::cout<<"Robot orientation: "<<grid.RobolOrientation<<"\n";
+                std::cout<<"xOffset: "<<grid.XOffset<<"\n";
+                std::cout<<"yOffset: "<<grid.YOffset<<"\n";
+ //               emit SigOnGridReceived(grid.Grid,grid.RobotPos, grid.XOffset, grid.YOffset, grid.RobolOrientation);
+                if(pITcpConnectionInterface != NULL)
+                  {
+                    pITcpConnectionInterface->OnOccupancyGridReceived(grid.Grid,grid.RobotPos, grid.XOffset, grid.YOffset, grid.RobolOrientation);
+                  }
+              }
+        }
       else
       { if (pConnection->bytesAvailable() < (int)sizeof(short))
         {
@@ -105,33 +151,12 @@ void CTcpConnection::SltReadyRead()
             IsSendingImage = true;
             ImgSize = dataSize;
             std::cout<<"TCP: image coming!\n";
-  //          std::cout<<"TCP: image coming size = " << ImgSize << "\n";
-  //         bufSize = pConnection->bytesAvailable();
-  //          if(bufSize < dataSize)
-  //            {
-  //              return;
-  //            }
-  //         if(!pConnection->waitForReadyRead())
-  //           {
-  //
-  //
-  //           }
-//           bufSize = pConnection->bytesAvailable();
-//           if (pConnection->bytesAvailable() < (int)sizeof(int))
-//             {
-//               return;
-//             }
-//           in >> ImgSize;
-//           std::cout<<"TCP: image coming size = " << ImgSize << "\n";
-//           IsSendingImage = true;
-  //          QImage img;
-  //          in >> img;
-  //          if(!img.save("received.jpg"))
-  //            {
-  //              std::cout<<"TCP: can't save the image!\n";
-  //              return;
-  //            }
-  //          std::cout<<"TCP: image saved!\n";
+          }
+        else if(2 == msgId)
+          {
+            IsSendingGrid = true;
+            ImgSize = dataSize;
+            std::cout<<"TCP: grid coming!\n";
           }
       }
     }

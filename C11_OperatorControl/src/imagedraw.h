@@ -11,7 +11,7 @@
 #include "tcpConnection.h"
 #include "ui_imagedraw.h"
 
-class ImageDraw : public QMainWindow, public IC11_Node_Subscriber
+class ImageDraw : public QMainWindow, public IC11_Node_Subscriber, public ITcpConnectionInterface
 {
 	Q_OBJECT
 
@@ -25,6 +25,7 @@ public slots:
 	void SltOnPathClick(bool);
 	void SltOperatorAction();
 	void SltOnWaitTimeout();
+	void SltOnGridReceived(int grid[100][100],StructPoint robotPos,int xOffset,int yOffset,double orient);
 
 signals:
 	void SigOnNewImg(QImage img);

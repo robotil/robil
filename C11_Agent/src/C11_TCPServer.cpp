@@ -1,7 +1,6 @@
 #include <QTcpServer>
 #include <QTcpSocket>
 #include <QHostAddress>
-#include "C11_structs.h"
 #include "C11_TCPServer.h"
 
 CTcpServer::CTcpServer(QString ipAddress,int port, QObject *parent)
@@ -100,7 +99,8 @@ void CTcpServer::SendImage(QImage img)
                }
               StructHeader header;
               header.MessageID = 1;
-              header.Counter = 0;
+              header.Counter = Counter;
+              Counter++;
 //              StructImage msg;
 //              QByteArray block;
 //              msg.Header.MessageID = 1;
@@ -136,4 +136,31 @@ void CTcpServer::SendImage(QImage img)
               pClientConnection->flush();
               pClientConnection->waitForBytesWritten();
               std::cout<<"TCP: Image sent\n";
+}
+
+void CTcpServer::SendGrid(StructGridData grid)
+{
+  std::cout<<"TCP: SendGrid\n";
+  if(NULL == pClientConnection)
+  {
+    std::cout<<"TCP: No connection\n";
+    return;
+  }
+  StructHeader header;
+  header.MessageID = 2;
+  header.DataSize = sizeof(StructGridData);
+  header.Counter = Counter;
+  Counter++;
+  std::cout<<"TCP: Counter++\n";
+  QByteArray block;
+  QDataStream out(&block, QIODevice::WriteOnly);
+  out.setByteOrder(QDataStream::LittleEndian);
+  out << header;
+  std::cout<<"TCP: out << header";
+  out << grid;
+  std::cout<<"TCP: out << grid";
+  pClientConnection->write(block);
+  pClientConnection->flush();
+  pClientConnection->waitForBytesWritten();
+  std::cout<<"TCP: Grid sent\n";
 }

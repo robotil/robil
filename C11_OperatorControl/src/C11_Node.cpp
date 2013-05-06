@@ -183,7 +183,7 @@ bool C11_Node::push_occupancy_grid_proccess(C10_Common::push_occupancy_grid::Req
 	StructPoint robotPos;
 	robotPos.x = req.OGD.robotPos.x;
 	robotPos.y = req.OGD.robotPos.y;
-	pIC11_Node_Subscriber->OnOccupancyGridReceived(grid,robotPos,req.OGD.xOffset,req.OGD.yOffset,req.OGD.robotOri.z);
+//	pIC11_Node_Subscriber->OnOccupancyGridReceived(grid,robotPos,req.OGD.xOffset,req.OGD.yOffset,req.OGD.robotOri.z);
 
 	return true;
 }

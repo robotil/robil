@@ -3,6 +3,7 @@
 
 #include <QObject>
 #include <QImage>
+#include "C11_structs.h"
 
 class QTcpServer;
 class QTcpSocket;
@@ -25,6 +26,7 @@ public:
         ~CTcpServer();
 
         void SendImage(QImage img);
+        void SendGrid(StructGridData grid);
         void SendHello();
 
 private:

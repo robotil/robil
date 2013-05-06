@@ -19,6 +19,7 @@ class IAgentInterface
 {
 public:
   virtual void PushImage(QImage img) = 0;
+  virtual void PushGrid(StructGridData grid) = 0;
 };
 
 class C11_Agent_Node : public QThread, public IPushHMIInterface
@@ -48,6 +49,7 @@ public:
   void SetReleased();
 
   virtual void PushImage(QImage img);
+  virtual void PushGrid(StructGridData grid);
 
 private:
   ros::NodeHandle *nh_;

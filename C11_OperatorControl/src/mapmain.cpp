@@ -399,6 +399,12 @@ void CMapMain::UpdateGrid(int grid[100][100], StructPoint robotPos, int xOffset,
         StructIntPoint newPoint;
         int i,j;
         WorldToRobotOrientation = (90.0f/RAD2DEG + orient);
+        std::cout<<"\n";
+        for(j=0; j<100; j++)
+          {
+            std::cout<<grid[50][j]<<" ";
+          }
+        std::cout<<"\n";
 //        WorldToRobotOrientation = 90.0f/RAD2DEG;
 	for(i=0; i<100; i++)
 	{

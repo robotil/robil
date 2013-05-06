@@ -227,6 +227,11 @@ void C11_Agent_Node::PushImage(QImage img)
   pIAgentInterface->PushImage(img);
 }
 
+void C11_Agent_Node::PushGrid(StructGridData grid)
+{
+  pIAgentInterface->PushGrid(grid);
+}
+
 void C11_Agent_Node::SetReleased()
 {
   IsWaitForRelease = false;

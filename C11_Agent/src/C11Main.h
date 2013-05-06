@@ -11,9 +11,11 @@ class C11Main: public QObject, public IAgentInterface
 
   Q_SIGNALS:
           void SigOnImageSend(QImage img);
+          void SigOnGridSend(StructGridData grid);
 
   public Q_SLOTS:
     void SltOnImageSend(QImage img);
+    void SltOnGridSend(StructGridData grid);
 
 public:
   C11Main(int argc, char **argv);
@@ -22,6 +24,7 @@ public:
   void SetTcp(CTcpServer* ptcpServer);
 
   virtual void PushImage(QImage img);
+  virtual void PushGrid(StructGridData grid);
 
 private:
   C11_Agent_Node* pC11Node;

@@ -33,6 +33,9 @@ ImageDraw::ImageDraw(int argc, char** argv, QWidget *parent, Qt::WFlags flags)
 	pCTcpConnection = new CTcpConnection(QString("172.23.1.130"),45671);
 
 	connect(pCTcpConnection,SIGNAL(SigOnImgReceived(QImage)),this,SLOT(SltOnNewImg(QImage)));
+	connect(pCTcpConnection,SIGNAL(SigOnGridReceived(int[100][100],StructPoint,int,int,double)),this,SLOT(SltOnGridReceived(int[100][100],StructPoint,int,int,double)));
+
+	pCTcpConnection->SetSubscriber(this);
 
 //	QString fileName = QFileDialog::getOpenFileName(this,
 //	     tr("Open Image"), "", tr("Image Files (*.png *.jpg *.bmp)"));
@@ -127,6 +130,11 @@ void ImageDraw::OnImgReceived(std::string fileName)
 	QString qfileName = QString::fromStdString(fileName);
 	myImage.load(qfileName);
 	emit SigOnNewImg(myImage);
+}
+
+void ImageDraw::SltOnGridReceived(int grid[100][100],StructPoint robotPos,int xOffset,int yOffset,double orient)
+{
+  OnOccupancyGridReceived(grid,robotPos,xOffset,yOffset,orient);
 }
 
 void ImageDraw::OnOccupancyGridReceived(int grid[100][100], StructPoint robotPos, int xOffset, int yOffset, double orient)
