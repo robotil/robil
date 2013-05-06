@@ -1,8 +1,8 @@
 #include "FootPlacementService.h"
 
 // fake function for C22 service
-bool FakeC22(C22_GroundRecognitionAndMapping::C22::Request &req,
-		C22_GroundRecognitionAndMapping::C22::Response &res) {
+bool FakeC22(C22_CompactGroundRecognitionAndMapping::C22::Request &req,
+		C22_CompactGroundRecognitionAndMapping::C22::Response &res) {
 
 	// initiating the map matrix
 	res.drivingPath.row.resize(SIZE);
@@ -23,7 +23,7 @@ bool FakeC22(C22_GroundRecognitionAndMapping::C22::Request &req,
 		{
 			for (int j = 0; j < SIZE; j++)
 			{
-				C22_GroundRecognitionAndMapping::C22_PLANE_TYPE *plane;
+				C22_CompactGroundRecognitionAndMapping::C22_PLANE_TYPE *plane;
 				res.drivingPath.row[i].column[j].planes.resize(1);
 				plane = &(res.drivingPath.row[i].column[j].planes[0]);
 

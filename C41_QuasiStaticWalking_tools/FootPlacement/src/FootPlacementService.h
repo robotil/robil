@@ -3,7 +3,7 @@
 
 #include "ros/ros.h"
 #include "geometry_msgs/Point.h"
-#include "C22_GroundRecognitionAndMapping/C22.h"
+#include "C22_CompactGroundRecognitionAndMapping/C22.h"
 #include "FootPlacement/FootPlacement.h"
 #include "tf/transform_listener.h"
 
@@ -24,7 +24,7 @@ private:
 	ros::NodeHandle nh;
 	ros::ServiceClient mapClient;
 	ros::ServiceServer footServer;
-	C22_GroundRecognitionAndMapping::C22 mapService;
+	C22_CompactGroundRecognitionAndMapping::C22 mapService;
 
 	//callback function when service is requested
 	bool callback(FootPlacement::FootPlacement::Request &req,
@@ -35,7 +35,7 @@ private:
 
 	//calculate point in the place i,j on plane
 	geometry_msgs::Point calcPoint(const int &i, const int &j,
-			const C22_GroundRecognitionAndMapping::C22_PLANE_TYPE &plane,
+			const C22_CompactGroundRecognitionAndMapping::C22_PLANE_TYPE &plane,
 			const geometry_msgs::Point &robotPos,
 			const geometry_msgs::Point &robotOri);
 
@@ -60,7 +60,7 @@ private:
 			std::vector<FootPlacement::Pos>& positions,
 			const int &useC22,
 			const int &leg,
-			const C22_GroundRecognitionAndMapping::C22C0_PATH& path,
+			const C22_CompactGroundRecognitionAndMapping::C22C0_PATH& path,
 			const geometry_msgs::Point& robotLeftLegPos,
 			const geometry_msgs::Point& robotRightLegPos,
 			const double &dirX, const double &dirY,

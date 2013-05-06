@@ -8,7 +8,7 @@ int FootPlacementService::possible(int i, int j)
 }
 
 geometry_msgs::Point FootPlacementService::calcPoint(const int &i, const int &j,
-		const C22_GroundRecognitionAndMapping::C22_PLANE_TYPE &plane,
+		const C22_CompactGroundRecognitionAndMapping::C22_PLANE_TYPE &plane,
 		const geometry_msgs::Point &robotPos, const geometry_msgs::Point &robotOri)
 {
 	geometry_msgs::Point point,xStep,yStep;
@@ -72,7 +72,7 @@ void FootPlacementService::calcFootMatrix(
 		std::vector<FootPlacement::Pos>& positions,
 		const int &useC22,
 		const int &leg,
-		const C22_GroundRecognitionAndMapping::C22C0_PATH& path,
+		const C22_CompactGroundRecognitionAndMapping::C22C0_PATH& path,
 		const geometry_msgs::Point& robotLeftLegPos,
 		const geometry_msgs::Point& robotRightLegPos,
 		const double &dirX, const double &dirY,
@@ -99,7 +99,7 @@ void FootPlacementService::calcFootMatrix(
 				int len=path.row[0].column[0].planes.size();
 				double minCost=std::numeric_limits<double>::infinity();
 				geometry_msgs::Point minCostPoint;
-				C22_GroundRecognitionAndMapping::C22_PLANE_TYPE minCostPlane;
+				C22_CompactGroundRecognitionAndMapping::C22_PLANE_TYPE minCostPlane;
 
 
 				if(0==len)
@@ -109,7 +109,7 @@ void FootPlacementService::calcFootMatrix(
 
 				for(int k=0; k<len; k++)
 				{
-					C22_GroundRecognitionAndMapping::C22_PLANE_TYPE plane=
+					C22_CompactGroundRecognitionAndMapping::C22_PLANE_TYPE plane=
 							path.row[i].column[j].planes[k];
 
 					geometry_msgs::Point repPoint = calcPoint(i,j,plane,
@@ -166,7 +166,7 @@ void FootPlacementService::calcFootMatrix(
 			else
 			{
 
-				C22_GroundRecognitionAndMapping::C22_PLANE_TYPE plane;
+				C22_CompactGroundRecognitionAndMapping::C22_PLANE_TYPE plane;
 				plane.x=0;
 				plane.y=0;
 				plane.z=1;
