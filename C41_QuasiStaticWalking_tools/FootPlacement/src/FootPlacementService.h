@@ -8,7 +8,8 @@
 #include "tf/transform_listener.h"
 
 #define SQUARE_SIZE 0.25
-#define SIZE 39
+#define SIZE 19
+#define C22_SIZE 100
 
 #define SLOPE_WEIGHT 0
 #define DISTANCE_WEIGHT 5
@@ -32,6 +33,9 @@ private:
 
 	//kinamtic possibility
 	int possible(int i, int j);
+
+	void createMatrix25(int map[SIZE][SIZE],
+		const C22_CompactGroundRecognitionAndMapping::C22C0_PATH& path);
 
 	//calculate point in the place i,j on plane
 	geometry_msgs::Point calcPoint(const int &i, const int &j,
