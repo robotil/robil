@@ -65,7 +65,7 @@ class StandUpServer(RobilTask):
 		# flex into fetal position
 		self.doPose(AU = -0.3, AP = 1.7, EB = 1.5, DF = 2.1, KB = 2, HF = 2, PF = 0.8, dt = time/1.5)
 		# place body weight on feet only
-		self.doPose(AU = -0.8, AP = 1.4, EB = 0, DF = 2.6, KB = 2.8, HF = 2.2, PF = 1.2, dt = time)
+		self.doPose(AU = -0.8, AP = 1.4, EB = 0, DF = 2.6, KB = 2.8, HF = 2.2, PF = 1.1, dt = time)
 		rospy.sleep(1)
 		# straighten step #1
 		self.doPose(AU = -0.8, AP = 1.1, EB = 0, DF = 2.6, KB = 2.8, HF = 2, PF = 0.9, dt = time)
@@ -73,6 +73,7 @@ class StandUpServer(RobilTask):
 		self.doPose(AU = -0.4, AP = 0.15, EB = 0, DF = 0.12, KB = 0.38, HF = 0.35, PF = 0, dt = 3*time)
 		# get back to standing up position
 		self.doPose(AU = 0, AP = 0, EB = 0, DF = 0.02, KB = 0.04, HF = 0.02, PF = 0, dt = 1.5)
+		#self.doPose(AU = 0, AP = 0, EB = 0, DF = 0.02, KB = 0.04, HF = 0.02, PF = 0, WZ=-1, WD=0, dt = 1.5)
 
 	def doPose(self, AU, AP, EB, DF, KB, HF, PF, dt):
 		# AU - Arms up, AP - Arms push, EB = Elbow bend
