@@ -15,14 +15,15 @@ my $except4 = "C66_Grasp";
 
 open FILE, "<./log2.txt";
 my @line = <FILE>;
+
+print "Temporary!!! Exceptions of 4 files!!!\n";
+
 for (@line) {
     $strNum++;
-#===================================
     next if ($_ =~ /$except1/ | 
              $_ =~ /$except2/ | 
              $_ =~ /$except3/ | 
              $_ =~ /$except4/);  
-#====================================
 
     if ($_ =~ /$find/) {
         $errCount++;
