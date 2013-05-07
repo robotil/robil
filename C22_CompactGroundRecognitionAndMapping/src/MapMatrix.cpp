@@ -97,8 +97,8 @@ bool MapMatrix::inMatrixRange(pcl::PointXYZ p){
 }
 
 
-void MapMatrix::updateMapRelationToWorld(float x,float y){
-	boost::mutex::scoped_lock l(mutex);
+void MapMatrix::updateMapRelationToRobot(float movmentX,float movmentY,float yaw){
+/*	boost::mutex::scoped_lock l(mutex);
 	//calculate the map offsets according to the robot's global position and update bound
 	int newOffsetX=xOffset;
 	int newOffsetY=yOffset;
@@ -123,6 +123,7 @@ void MapMatrix::updateMapRelationToWorld(float x,float y){
 	moveMapVerticaly(((int)newOffsetX-xOffset)*(1/SIZEOFSQUARE));
 	yOffset=newOffsetY;
 	xOffset=newOffsetX;
+	*/
 }
 
 void MapMatrix::moveMapHarisontaly(int times){
@@ -177,12 +178,13 @@ void MapMatrix::computeMMatrix(pcl::PointCloud<pcl::PointXYZ>::Ptr map_cloud,geo
 	//pcl::ModelCoefficients c;
 	for (unsigned int i=0;i<NUMOFSQUARES;i++){
 		for (unsigned int j=0;j<NUMOFSQUARES;j++){
-			if (data->at(i)->at(j)->scansLeft-- ==0 ){
+			data->at(i)->at(j)->square_status=UNCHARTED;
+			/*if (data->at(i)->at(j)->scansLeft-- ==0 ){
 				data->at(i)->at(j)->square_status=UNCHARTED;
 				data->at(i)->at(j)->scansLeft=MAXSCANS;
-			}
+			}*/
 		}
-	}	
+	}
 	
 
 	for (unsigned int i=0; i< map_cloud->points.size();i++){
