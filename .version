@@ -1,4 +1,4 @@
-V0.0.0.170
+V0.0.0.171
 ===========================================================
 C0_RobilTask     		0.5
 C0_Scripts     		        0.20
@@ -21,7 +21,7 @@ C34_Executer     		0.8
 C35_Monitoring     		0.10
 C41_BodyControl     		0.1
 C41_QuasiStaticWalking     	0.6
-C41_QuasiStaticWalking_tools    0.7
+C41_QuasiStaticWalking_tools    0.8
 C42_DRCSim2_tools     		0.2
 C42_DynamicLocomotion     	0.6
 C42_Leg_IK     			0.3
@@ -33,7 +33,7 @@ C45_PostureControl     		0.9
 C45_PostureControl_tools     	0.2
 C46_MountVehicle     		0.6
 C47_DismountVehicle     	0.3
-C48_StandUp     		0.5
+C48_StandUp     		0.6
 C51_CarOperation     		0.9
 C65_CloseValve     		0.1
 C66_Grasp     			0.5
