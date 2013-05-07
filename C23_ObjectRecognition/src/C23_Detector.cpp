@@ -75,10 +75,12 @@ Mat fromSensorMsg(const sensor_msgs::ImageConstPtr& msg)
         _generalDetector.initialize("carEntry");
         _target = CAR;
       ROS_INFO("We are looking for a Car...");
-    }
-    else if (!target.compare("Path")) {
+    } else if (!target.compare("Path")) {
         _target = PATH;
       ROS_INFO("We are looking for a path...");
+    } else if (!target.compare("Picture")) {
+        _target = PICTURE;
+      ROS_INFO("We are taking a picture ... say cheese ...");
     }
     return true;
   
@@ -128,17 +130,19 @@ Mat fromSensorMsg(const sensor_msgs::ImageConstPtr& msg)
 		      res = detectCar(srcImg,cloud);
 		      publishMessage(res);
 		      break;
-	      case GATE:
-	       ROS_INFO("GATE");
-	        
-	        res = detectGate(srcImg,cloud);
-	        publishMessage(res);
-	        
-	        break;
+	            case GATE:
+	             ROS_INFO("GATE");
+		
+		     res = detectGate(srcImg,cloud);
+		     publishMessage(res);
+	             break;
+	           case PICTURE:
+                     imwrite("picture.jpg",srcImg);
+                     _target=NONE;
      }
      srcImg.release();
 			
-	}
+}
 	bool C23_Detector::detectCar(Mat srcImg, const sensor_msgs::PointCloud2::ConstPtr &cloud) {
     pcl::PointCloud<pcl::PointXYZ>pclcloud;
 		pcl::fromROSMsg<pcl::PointXYZ>(*cloud,pclcloud);

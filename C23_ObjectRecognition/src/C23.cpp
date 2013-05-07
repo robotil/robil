@@ -21,7 +21,7 @@ int main(int argc, char **argv)
   C23_Detector detector(argv[1],argv[2],argv[3]);
   C23_SearchObject searchObjectTask(&detector);
   C23_TrackObject trackObjectTask(&detector);
- 
+  C23_TakePicture takePictureTask(&detector);
   ros::spin();
 
   return 0;

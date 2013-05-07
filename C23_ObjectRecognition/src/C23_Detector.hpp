@@ -53,7 +53,9 @@ using namespace tf;
 typedef enum targets { 
   CAR,
   GATE,
-  PATH
+  PATH,
+  PICTURE,
+  NONE
 } TARGETS;
 
 class C23_Detector{
