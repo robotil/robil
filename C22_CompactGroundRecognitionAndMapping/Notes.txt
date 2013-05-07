@@ -1,0 +1,23 @@
+provides a 2d map where each cell represents a 5cmX5cm square
+The map now spreads on 5 meters forward from the robot.
+
+There are no planes due to us switching to use the laser, instead of using the point cloud.
+
+You may use the launch file included. This will operate the C22_Compact... node and will also cause the spindel to turn at a rate of 1.
+
+
+==========================
+IMPORTANT!!!!!!!!!!!!!!!!!<----------------------------------
+==========================
+
+The service assumes that you are and have been standing still for at least 8 seconds.
+you may use 
+$ rosrun C22_CompactGroundRecognitionAndMapping C22_test 
+in order to see the output.
+--------------------------
+
+
+
+
+
+

@@ -15,7 +15,10 @@
   <depend package="osrf_msgs"/>
   <depend package="roslib"/>
   <depend package="actionlib"/>
+  <depend package="actionlib_msgs"/>
+  <depend package="C0_RobilTask"/>
 
+  
 </package>
 
 

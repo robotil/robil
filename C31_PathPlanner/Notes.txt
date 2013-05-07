@@ -1,12 +1,21 @@
 provides path (way points list) planned on 2d map gotten from C22_GroundRecognitionAndMapping module
 it contains 
-  tasks : PathPlanning and PathPlanningFocus
-  services : planPath and getPath
+	tasks : PathPlanning and PathPlanningFocus and whileSolution
+	advertise service /getPath <C31_PathPlanner::C31_GetPath>
+	advertise topic /path <C31_PathPlanner::C31_Waypoints>
+	advertise topic /path/exceptions <C31_PathPlanner::C31_Exception>
+	subscribe to service /C22 <C22_GroundRecognitionAndMapping::C22>
+	subscribe to topic /C22_pub <C22_GroundRecognitionAndMapping::C22C0_PATH>
+	subscribe to topic /C23/object_deminsions <C23_ObjectRecognition::C23C0_ODIM>
+	subscribe to topic /c11_path_update <C31_PathPlanner/C31_Waypoints>
+
 
 How to Check:
 ============
 
-rosrun C31_PathPlanning gpp
+in terminal1 : rosrun C31_PathPlanning gpp
+in terminal2 : rosrun C0_RobilTask task_tester PathPlanning time=-1
+in terminal3 : rosrun C0_RobilTask task_tester PathPlanningFocus time=-1 args=PARAMETERS
 
 How to Test:
 ===========
@@ -15,29 +24,14 @@ Algorithm test:
   cd tests
   ./testing
 
-Service test:
-  PREP:
-	download record_points4_2013-01-14-14-22-01.bag from http://www.robil.org/trac_robil/attachment/wiki/C31_PathPlanner
-	rosrun C22_GroundRecognitionAndMapping C22
-	rosbag play record_points4_2013-01-14-14-22-01.bag
-	rosrun C34_Executer executer
-	create files:
-		/tmp/pln   : <plan><seq name="S"><tsk name="PathPlanning" id="IDPP" /></seq></plan>
-		/tmp/pln1  : <plan><seq name="S"><tsk name="PathPlanningFocus(x=-3,y=4)" id="IDPPF" /></seq></plan>
-	rosrun C31_PathPlanner gpp
-	rosservice call /executer/run T1 /tmp/pln; rosservice call /executer/resume T1;
-	rosservice call /executer/run T2 /tmp/pln1; rosservice call /executer/resume T2;
-  TEST:
-	( ft=$(tempfile); rosservice call /C31_GlobalPathPlanner/getPath &> $ft; roscd C31_PathPlanner; diff tests/test_service_result.txt $ft &> $ft.diff && echo "PASS" || (echo "ERROR: log file is $ft.log"; cat -n $ft &> $ft.log; cat $ft.diff &>> $ft.log) ; rm $ft $ft.diff )
-
 Known Bugs:
 ==========
-PF smoothing does not finished
+grid with heights information does not supported yet.
 
 
 Known Limitations:
 =================
-
+smoothing works good for maps with dimentions less then 500x500
 
 
 

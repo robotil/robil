@@ -31,7 +31,7 @@
 #include "std_msgs/Empty.h"
 #include <tf/tf.h>
 #include <tf/transform_listener.h>
-
+#include <laser_geometry/laser_geometry.h>
 namespace enc=sensor_msgs::image_encodings;
 
 /**
@@ -53,8 +53,9 @@ public:
 		//more on filters and how to use them can be found on http://www.ros.org/wiki/message_filters
 		left_image_sub_( it_, left_camera, 1 ),
 		right_image_sub_( it_, right_camera, 1 ),
-		pointcloud(nh_,"/multisense_sl/camera/points2",1),
-		sync( MySyncPolicy( 10 ), left_image_sub_, right_image_sub_ ,pointcloud)
+		laser(nh_,"/multisense_sl/laser/scan",1),
+		//pointcloud(nh_,"/multisense_sl/camera/points2",1),
+		sync( MySyncPolicy( 10 ), left_image_sub_, right_image_sub_ ,laser)
 	  {
 		leftpub = it_.advertise("C21/left_camera/image", 1);
 		rightpub = it_.advertise("C21/right_camera/image", 1);
@@ -147,19 +148,35 @@ public:
 	   * @param left_msg ROS mesage with image data from the left camera topic
 	   * @param right_msg ROS mesage with image data from the right camera topic
 	   */
-	  void callback(const sensor_msgs::ImageConstPtr& left_msg,const sensor_msgs::ImageConstPtr& right_msg,const sensor_msgs::PointCloud2::ConstPtr &cloud){
-		tf::StampedTransform transform;
+	  void callback(const sensor_msgs::ImageConstPtr& left_msg,const sensor_msgs::ImageConstPtr& right_msg,const sensor_msgs::LaserScan::ConstPtr &scan_in){
+		  tf::StampedTransform transform;
+		  sensor_msgs::PointCloud2 cloud;
 		try{
 		  listener.lookupTransform("/pelvis","/head",
 								   ros::Time(0), transform);
+		  projector_.transformLaserScanToPointCloud("/pelvis",*scan_in,
+		          cloud,listener_);
 		}
 		catch (tf::TransformException ex){
 		   return;
 		}
+
+
+
+		pcl::PointCloud<pcl::PointXYZ> temp;
+		pcl::fromROSMsg<pcl::PointXYZ>(cloud,temp);
+		pcl::PointCloud<pcl::PointXYZ> cloud2;
+		for(int i=0;i<temp.points.size();i++){
+			if(scan_in->ranges.at(i)<29)
+				cloud2.points.push_back(temp.points.at(i));
+		}
+		sensor_msgs::PointCloud2 cloud3;
+		pcl::toROSMsg(cloud2,cloud3);
+
 		C21_VisionAndLidar::C21_C22 msg;
-		msg.header=cloud->header;
+		msg.header=scan_in->header;
 		msg.image=*left_msg;
-		msg.cloud=*cloud;
+		msg.cloud=cloud3;
 		tf::Vector3 orig=transform.getOrigin();
 		tf::Quaternion rot=transform.getRotation();
 		msg.pose.position.x=orig.getX();
@@ -194,10 +211,10 @@ public:
 		left->image.copyTo(leftImage);
 		right->image.copyTo(rightImage);
 		_panMutex->unlock();
-		pcl::PointCloud<pcl::PointXYZ> out;
-		pcl::fromROSMsg(*cloud,out);
+		//pcl::PointCloud<pcl::PointXYZ> out;
+		//pcl::fromROSMsg(cloud,out);
 		_cloudMutex->lock();
-		my_answer.swap(out);
+		my_answer.swap(cloud2);
 		//pcl::io::savePCDFile("cloud.pcd",out,true);
 		_cloudMutex->unlock();
 		//std::cout<<" position x:"<<msg.pose.position.x<<" y:"<<msg.pose.position.y<<" z:"<<msg.pose.position.z<<"\n";
@@ -211,6 +228,8 @@ private:
   bool request;
   boost::mutex * _panMutex;
   boost::mutex * _cloudMutex;
+  laser_geometry::LaserProjection projector_;
+  tf::TransformListener listener_;
   typedef image_transport::SubscriberFilter ImageSubscriber;
   pcl::PointCloud<pcl::PointXYZ> my_answer;
   cv::Mat leftImage;
@@ -222,6 +241,7 @@ private:
   ros::Publisher c22pub;
   image_transport::Publisher smallPanoramicPublisher;
   message_filters::Subscriber<sensor_msgs::PointCloud2> pointcloud;
+  message_filters::Subscriber<sensor_msgs::LaserScan> laser;
   tf::TransformListener listener;
   ros::ServiceServer pcl_service;
 
@@ -230,7 +250,7 @@ private:
   ros::ServiceServer pic_service;
 
   typedef message_filters::sync_policies::ApproximateTime<
-    sensor_msgs::Image, sensor_msgs::Image,sensor_msgs::PointCloud2
+    sensor_msgs::Image, sensor_msgs::Image,sensor_msgs::LaserScan
   > MySyncPolicy;
   message_filters::Synchronizer< MySyncPolicy > sync;
 };
@@ -238,7 +258,7 @@ private:
 int main(int argc, char **argv)
 {
   ros::init(argc, argv, "C21_VisionAndLidar");
-  C21_Node my_node("/multisense_sl/camera/left/image_raw","/multisense_sl/camera/right/image_raw");
+  C21_Node my_node("/multisense_sl/camera/left/image_color","/multisense_sl/camera/right/image_color");
   while(ros::ok()){
 	  ros::spin();
   }

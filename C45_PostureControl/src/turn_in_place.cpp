@@ -51,7 +51,7 @@ public:
 
 		/*actionlib::SimpleClientGoalState state1 = ac.getState();
 		ROS_INFO("Status: %s", state1.toString().c_str());*/
-		ac.cancelAllGoals();
+		//ac.cancelAllGoals();
 		ros::Time t1 = ros::Time::now();
 		ac.sendGoal(goal_to_maintain/*, boost::bind(&turn_in_place::doneCB, this, _1, _2),
 				boost::bind(&turn_in_place::activeCB, this), boost::bind(&turn_in_place::feedbackCB, this, _1)*/);
@@ -149,7 +149,7 @@ public:
 		end = ros::Time::now() - t1;
 
 		ROS_INFO("Time took for goal: %d", end.sec);
-
+/*
 		state = ac.getState();
 		if(state == actionlib::SimpleClientGoalState::ACTIVE){
 			ROS_INFO("Goal canceled. Status: %s", state.toString().c_str());
@@ -159,7 +159,7 @@ public:
 		else{
 			ROS_INFO("All Goals canceled. Status: %s", state.toString().c_str());
 			ac.cancelAllGoals();
-		}
+		}*/
 	}
 
 	~turn_in_place(){

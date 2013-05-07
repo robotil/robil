@@ -1,10 +1,27 @@
 C41 – QuasiStaticWalking:
 -------------------------------------------
 Prerequisites:
-1) Center of Mass must be lowered before running. Let the robot descend after launching the module.
-2) /C31_GlobalPathPlanner/getPath must be running
+1) /C31_GlobalPathPlanner/getPath must be running
+2) C45_PostureControl must be running
+3) C43_LocalBodyCOM must be running
+rosrun C43_LocalBodyCOM computeCOM
 
 To run:
 2) Launch:
 roslaunch C41_QuasiStaticWalking C41_QuasiStaticWalking.launch
-2) Call action QuasiStaticWalking with no parameters.
+2) Calling action QuasiStaticWalking with no parameters. Makes the robot walk forward purposelessly.
+	Available services:
+	a) 	/make_step
+		Input: XYZRPY of the destination of the dynamic leg in pelvis coordinate system. LinkToMove is 'l_leg' or 'r_leg' 
+	
+	b) 	/pelvis_leg_target 
+		Input: The destination leg to move the pelvis over that leg. accepts 'r_foot' or 'l_foot'
+	
+	c) /move_pelvis
+		Input: XYZRPY coordinations in pelvis coordinate system. LinkToMove is 'pelvis'
+		
+	d) /walk_legs
+		Input: XYZRPY of the destination of the dynamic leg in its own coordinate system. LinkToMove is 'l_leg' or 'r_leg' 
+	
+	e) /step_down
+		Input: none. Lowers dynamic leg until touchdown.

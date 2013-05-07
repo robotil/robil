@@ -2,7 +2,7 @@
 
 from collections import deque
 import math
-#import rospy    # TODO - get rid of all these loginfo when done debugging
+import rospy    # TODO - get rid of all these loginfo when done debugging
 
 ###################################################################################
 # File created by David Dovrat, 2013.
@@ -38,6 +38,10 @@ class Waypoint(object):
         dX = otherWaypoint._fX - self._fX
         dY = otherWaypoint._fY - self._fY
         return math.sqrt(dX*dX+dY*dY)
+
+    def PrintWaypoint(self):
+        strWaypoint = " (x=" + str(self._fX) + ", y=" + str(self._fY) + ")"
+        return strWaypoint   
         
 ###################################################################################
 #---------------------------------- Segment --------------------------------------
@@ -119,6 +123,10 @@ class Segment(object):
         
         return math.atan2(u[1],u[0])
 
+    def PrintSegment(self):
+        strSegment = "Source" + self._Source.PrintWaypoint() + "; Target" + self._Target.PrintWaypoint() + "; " 
+        return strSegment
+
 ###################################################################################
 #--------------------------- Local Path Planner -----------------------------------
 ###################################################################################
@@ -131,7 +139,9 @@ class LocalPathPlanner(object):
     def __init__(self):
         self._Path = deque([])
         self._Position = Waypoint()
-        self._CurrentSegment = Segment(self._Position,self._Position) 
+        self._CurrentSegment = Segment(self._Position,self._Position)
+        self._PathReady = False
+        self._RadiusFromFirstWaypoint = 0.5 # units [m], find first waypoint in path that outside this Radius from robot    
         
     def SetPath(self,waypointList):
         self._Path = deque(waypointList)
@@ -144,7 +154,14 @@ class LocalPathPlanner(object):
                 self._CurrentSegment.SetTarget(self._Path.popleft())
         else:
             self._CurrentSegment.SetSource(self._Path.popleft())
-            self._CurrentSegment.SetTarget(self._Path.popleft())    
+            self._CurrentSegment.SetTarget(self._Path.popleft()) 
+        self._PathReady = True
+
+    def PrintPathWaypoints(self):
+        strPath = "Current segment - " + self._CurrentSegment.PrintSegment()
+        for wp in list(self._Path):
+            strPath = strPath + wp.PrintWaypoint() + "; "
+        return strPath   
         
     def GetPathError(self):
         sagital,lateral = self._CurrentSegment.GetDistanceFrom(self._Position)
@@ -157,7 +174,7 @@ class LocalPathPlanner(object):
         return self._CurrentSegment.GetYaw()
 
     def GetCloseEnoughToTargetDistance(self):
-        turningRadius = 3.25
+        turningRadius = 2.0 #3.25
         theta = 0.0
         if(0 == len(self._Path)):
             # Last segment
@@ -172,6 +189,9 @@ class LocalPathPlanner(object):
                 result = math.fabs(turningRadius*math.tan(theta/2)) # Ask Dave
         #rospy.loginfo('GetCloseEnoughToTargetDistance: %f, theta = %f' %(result,theta))
         return result
+
+    def GetRadiusLimit(self):
+        return self._RadiusFromFirstWaypoint
             
     def UpdatePosition(self,CoordinateX,CoordinateY):
         """
@@ -180,21 +200,29 @@ class LocalPathPlanner(object):
         self._Position.SetX(CoordinateX)
         self._Position.SetY(CoordinateY)
         bStop = False
-        sagital,lateral = self._CurrentSegment.GetDistanceFrom(self._Position)
-        distanceFromTarget = self._CurrentSegment.GetTarget().GetDistanceFrom(self._Position)
-        #rospy.loginfo('UpdatePosition: distanceFromTarget = %f' %(distanceFromTarget))
-        if ((sagital>0.0)or(distanceFromTarget < self.GetCloseEnoughToTargetDistance())):
-            if(len(self._Path)==0):
-                bStop = True
-                #rospy.loginfo('UpdatePosition: Stopping')
-            else:
-                #rospy.loginfo('UpdatePosition: Path next point before pop (x,y) = (%f,%f)' %(self._Path[0].GetX(),self._Path[0].GetY()))
-                self._CurrentSegment.SetSource(self._CurrentSegment.GetTarget())
-                self._CurrentSegment.SetTarget(self._Path.popleft())
-            #rospy.loginfo('UpdatePosition:  New Segment: Size = %s' %(self._CurrentSegment._Source.GetDistanceFrom(self._CurrentSegment._Target) ) )
+        if self.IsActive():
+            sagital,lateral = self._CurrentSegment.GetDistanceFrom(self._Position)
+            distanceFromTarget = self._CurrentSegment.GetTarget().GetDistanceFrom(self._Position)
+            #rospy.loginfo('UpdatePosition: distanceFromTarget = %f' %(distanceFromTarget))
+            if ((sagital>0.0)or(distanceFromTarget < self.GetCloseEnoughToTargetDistance())):
+                if(len(self._Path)==0):
+                    bStop = True
+                    self._PathReady = False
+                    #rospy.loginfo('UpdatePosition: Stopping')
+                else:
+                    #rospy.loginfo('UpdatePosition: Path next point before pop (x,y) = (%f,%f)' %(self._Path[0].GetX(),self._Path[0].GetY()))
+                    self._CurrentSegment.SetSource(self._CurrentSegment.GetTarget())
+                    self._CurrentSegment.SetTarget(self._Path.popleft())
+                #rospy.loginfo('UpdatePosition:  New Segment: Size = %s' %(self._CurrentSegment._Source.GetDistanceFrom(self._CurrentSegment._Target) ) )
+        else:
+            bStop = True
         return bStop
         
-  
+    def Stop(self):
+        self._PathReady = False 
+
+    def IsActive(self):
+        return self._PathReady
 
 ###################################################################################
 # a little testing script

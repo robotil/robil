@@ -1,0 +1,203 @@
+   1	LocalizationTrack                                 	C25 tracks robot position in 3D environment, fails when it's no longer possible to do so (not when localization is bad)
+   2	ObstacleDetection                                 	C24 detects obstacles in 3D, fails when it's no longer possible to detect objects 
+   3	Monitor(target=LiveLock)                          	Wait for specified target event
+   target=Falling: C35 returns when robot has fallen
+   target=LiveLock: C35 returns if a live lock is found
+   target=Stable: 35 returns when the robot is not stable
+   target=Timeout: C35 returns if the subtree execution is taking too long
+   4	PathPlanning                                      	C31 calculates paths on occupancy grids, fails when it's no longer possible to do so
+   5	StandUp                                           	C47 scripted motion
+   6	Monitor(target=Falling)                           	Wait for specified target event
+   target=Falling: C35 returns when robot has fallen
+   target=LiveLock: C35 returns if a live lock is found
+   target=Stable: 35 returns when the robot is not stable
+   target=Timeout: C35 returns if the subtree execution is taking too long
+   7	SearchObject(target=CarEntry)                     	C24 Actually moves the robot until the object is visible
+Parameters:
+  target - target object
+     Gate - nearest and unvisited gate
+   8	TrackObject(target=CarEntry)                      	C23 Tracks object A position withing the image, fails if there is no longer a method to predict it
+Params:
+   target - target object
+      Gate - selected by SearchObject task.
+   9	PathPlanningFocus(target=CarEntry)                	C31 Path planner should set the planning for target A
+  10	TurnTo(target=CarEntry)                           	C41 it gets the locations of A from the perception services and turns towards it
+
+parameters:
+target=Doorway
+selfPosition=internal,external
+  11	Monitor(target=Stable)                            	Wait for specified target event
+   target=Falling: C35 returns when robot has fallen
+   target=LiveLock: C35 returns if a live lock is found
+   target=Stable: 35 returns when the robot is not stable
+   target=Timeout: C35 returns if the subtree execution is taking too long
+  12	PostureControl(pose=stabilization)                	C45 given a pose it executes it 
+Params:
+   stabilization - prevent falling
+
+  13	PushHMI(data=panoramic_image)                     	data=occupancy_grid - C11 it retrieves the occupancy grid and sends it back to the operator
+data=panoramic_image - C11 it retrieves the panoramic image and sends it back to the operator
+data=path - C11 it retrieves the path and sends it back to the operator
+  14	PushHMI(data=occupancy_grid)                      	data=occupancy_grid - C11 it retrieves the occupancy grid and sends it back to the operator
+data=panoramic_image - C11 it retrieves the panoramic image and sends it back to the operator
+data=path - C11 it retrieves the path and sends it back to the operator
+  15	PushHMI(data=path)                                	data=occupancy_grid - C11 it retrieves the occupancy grid and sends it back to the operator
+data=panoramic_image - C11 it retrieves the panoramic image and sends it back to the operator
+data=path - C11 it retrieves the path and sends it back to the operator
+  16	HMIResponce                                       	C11 receives data from OCU (TCP/UDP/ROS whatever chosen) and updates the relevant tasks
+  17	Monitor(target=Timeout)                           	Wait for specified target event
+   target=Falling: C35 returns when robot has fallen
+   target=LiveLock: C35 returns if a live lock is found
+   target=Stable: 35 returns when the robot is not stable
+   target=Timeout: C35 returns if the subtree execution is taking too long
+  18	FollowPath                                        	ZMP Walk: C42 retrieves a path from the path planner and moves the robot along that path
+  19	whilePlaceToThreadIn                              	
+  20	untilSpeedAveregeIsLowerThen(kmh=?)               	
+  21	untilOperatorIntervention                         	C11: Task-Condition, that return when Operator needs intervation
+  22	whileSolution                                     	31: Task-Condition of PathPlanner, that return  when no path planned
+  23	PlanDetour                                        	
+  24	Stop                                              	C47 scripted motion
+  25	Monitor(target=Stable)                            	Wait for specified target event
+   target=Falling: C35 returns when robot has fallen
+   target=LiveLock: C35 returns if a live lock is found
+   target=Stable: 35 returns when the robot is not stable
+   target=Timeout: C35 returns if the subtree execution is taking too long
+  26	PostureControl(pose=stabilization)                	C45 given a pose it executes it 
+Params:
+   stabilization - prevent falling
+
+  27	PushHMI(data=panoramic_image)                     	data=occupancy_grid - C11 it retrieves the occupancy grid and sends it back to the operator
+data=panoramic_image - C11 it retrieves the panoramic image and sends it back to the operator
+data=path - C11 it retrieves the path and sends it back to the operator
+  28	HMIResponce                                       	C11 receives data from OCU (TCP/UDP/ROS whatever chosen) and updates the relevant tasks
+  29	Monitor(target=Timeout)                           	Wait for specified target event
+   target=Falling: C35 returns when robot has fallen
+   target=LiveLock: C35 returns if a live lock is found
+   target=Stable: 35 returns when the robot is not stable
+   target=Timeout: C35 returns if the subtree execution is taking too long
+  30	QuasiStaticWalk                                   	
+  31	SearchObject(target=Doorway,selfPosition=external)	C24 Actually moves the robot until the object is visible
+Parameters:
+  target - target object
+     Gate - nearest and unvisited gate
+  32	SearchObject(target=Pedals)                       	C24 Actually moves the robot until the object is visible
+Parameters:
+  target - target object
+     Gate - nearest and unvisited gate
+  33	SearchObject(target=Wheel)                        	C24 Actually moves the robot until the object is visible
+Parameters:
+  target - target object
+     Gate - nearest and unvisited gate
+  34	SearchObject(target=Seat)                         	C24 Actually moves the robot until the object is visible
+Parameters:
+  target - target object
+     Gate - nearest and unvisited gate
+  35	SearchObject(target=Bar)                          	C24 Actually moves the robot until the object is visible
+Parameters:
+  target - target object
+     Gate - nearest and unvisited gate
+  36	Monitor(target=Stable)                            	Wait for specified target event
+   target=Falling: C35 returns when robot has fallen
+   target=LiveLock: C35 returns if a live lock is found
+   target=Stable: 35 returns when the robot is not stable
+   target=Timeout: C35 returns if the subtree execution is taking too long
+  37	PostureControl(pose=stabilization)                	C45 given a pose it executes it 
+Params:
+   stabilization - prevent falling
+
+  38	PushHMI(data=cabin_image)                         	data=occupancy_grid - C11 it retrieves the occupancy grid and sends it back to the operator
+data=panoramic_image - C11 it retrieves the panoramic image and sends it back to the operator
+data=path - C11 it retrieves the path and sends it back to the operator
+  39	PushHMI(data= cabin_parametrics)                  	data=occupancy_grid - C11 it retrieves the occupancy grid and sends it back to the operator
+data=panoramic_image - C11 it retrieves the panoramic image and sends it back to the operator
+data=path - C11 it retrieves the path and sends it back to the operator
+  40	HMIResponce                                       	C11 receives data from OCU (TCP/UDP/ROS whatever chosen) and updates the relevant tasks
+  41	Monitor(target=Timeout)                           	Wait for specified target event
+   target=Falling: C35 returns when robot has fallen
+   target=LiveLock: C35 returns if a live lock is found
+   target=Stable: 35 returns when the robot is not stable
+   target=Timeout: C35 returns if the subtree execution is taking too long
+  42	MountVehicle(param=Mount)                         	C46 - mounts the robot onto the car from a given posture (yet to be defined)
+  43	MechanismForStandingUp                            	
+  44	SearchObject(target=Wheel)                        	C24 Actually moves the robot until the object is visible
+Parameters:
+  target - target object
+     Gate - nearest and unvisited gate
+  45	SearchObject(target=HandbrakeBrake)               	C24 Actually moves the robot until the object is visible
+Parameters:
+  target - target object
+     Gate - nearest and unvisited gate
+  46	PushHMI(data=inSideCabin_image)                   	data=occupancy_grid - C11 it retrieves the occupancy grid and sends it back to the operator
+data=panoramic_image - C11 it retrieves the panoramic image and sends it back to the operator
+data=path - C11 it retrieves the path and sends it back to the operator
+  47	PushHMI(data= InSideCabin_parametrics)            	data=occupancy_grid - C11 it retrieves the occupancy grid and sends it back to the operator
+data=panoramic_image - C11 it retrieves the panoramic image and sends it back to the operator
+data=path - C11 it retrieves the path and sends it back to the operator
+  48	HMIResponce                                       	C11 receives data from OCU (TCP/UDP/ROS whatever chosen) and updates the relevant tasks
+  49	Monitor(target=Timeout)                           	Wait for specified target event
+   target=Falling: C35 returns when robot has fallen
+   target=LiveLock: C35 returns if a live lock is found
+   target=Stable: 35 returns when the robot is not stable
+   target=Timeout: C35 returns if the subtree execution is taking too long
+  50	GripSteeringWheel                                 	C52 - Robot is sitting in vehicle, grip wheel
+  51	CalibrateWheel                                    	
+  52	PlaceFeetOnPedals                                 	C52 - move the foots to be on the pedals
+  53	CalibratePedals                                   	
+  54	GripHandBrake                                     	
+  55	GripGearStick                                     	
+  56	PathPlanning                                      	C31 calculates paths on occupancy grids, fails when it's no longer possible to do so
+  57	PathPlanningFocus(target=FORWARD)                 	C31 Path planner should set the planning for target A
+  58	Monitor(target=Stable)                            	Wait for specified target event
+   target=Falling: C35 returns when robot has fallen
+   target=LiveLock: C35 returns if a live lock is found
+   target=Stable: 35 returns when the robot is not stable
+   target=Timeout: C35 returns if the subtree execution is taking too long
+  59	PostureControl(pose=stabilization)                	C45 given a pose it executes it 
+Params:
+   stabilization - prevent falling
+
+  60	PushHMI(data=panoramic_image)                     	data=occupancy_grid - C11 it retrieves the occupancy grid and sends it back to the operator
+data=panoramic_image - C11 it retrieves the panoramic image and sends it back to the operator
+data=path - C11 it retrieves the path and sends it back to the operator
+  61	PushHMI(data= occupancy_grid)                     	data=occupancy_grid - C11 it retrieves the occupancy grid and sends it back to the operator
+data=panoramic_image - C11 it retrieves the panoramic image and sends it back to the operator
+data=path - C11 it retrieves the path and sends it back to the operator
+  62	PushHMI(data= path)                               	data=occupancy_grid - C11 it retrieves the occupancy grid and sends it back to the operator
+data=panoramic_image - C11 it retrieves the panoramic image and sends it back to the operator
+data=path - C11 it retrieves the path and sends it back to the operator
+  63	PushHMI(data= vehicle_parametrics)                	data=occupancy_grid - C11 it retrieves the occupancy grid and sends it back to the operator
+data=panoramic_image - C11 it retrieves the panoramic image and sends it back to the operator
+data=path - C11 it retrieves the path and sends it back to the operator
+  64	HMIResponce                                       	C11 receives data from OCU (TCP/UDP/ROS whatever chosen) and updates the relevant tasks
+  65	Monitor(target=Timeout)                           	Wait for specified target event
+   target=Falling: C35 returns when robot has fallen
+   target=LiveLock: C35 returns if a live lock is found
+   target=Stable: 35 returns when the robot is not stable
+   target=Timeout: C35 returns if the subtree execution is taking too long
+  66	InitDrive                                         	C52 - test that the shift is neutral/forward (preconditions of WayPointsDriving), and that the driving can begin
+  67	WayPointsDriving                                  	C51 - way point driver, asks path from C31 and drives according to it
+  68	FinishDrive                                       	C52 - finish the driving rutine
+  69	Monitor(target=Stable)                            	Wait for specified target event
+   target=Falling: C35 returns when robot has fallen
+   target=LiveLock: C35 returns if a live lock is found
+   target=Stable: 35 returns when the robot is not stable
+   target=Timeout: C35 returns if the subtree execution is taking too long
+  70	PostureControl(pose=stabilization)                	C45 given a pose it executes it 
+Params:
+   stabilization - prevent falling
+
+  71	PushHMI(data=door_image)                          	data=occupancy_grid - C11 it retrieves the occupancy grid and sends it back to the operator
+data=panoramic_image - C11 it retrieves the panoramic image and sends it back to the operator
+data=path - C11 it retrieves the path and sends it back to the operator
+  72	PushHMI(data=door_parameters)                     	data=occupancy_grid - C11 it retrieves the occupancy grid and sends it back to the operator
+data=panoramic_image - C11 it retrieves the panoramic image and sends it back to the operator
+data=path - C11 it retrieves the path and sends it back to the operator
+  73	HMIResponce                                       	C11 receives data from OCU (TCP/UDP/ROS whatever chosen) and updates the relevant tasks
+  74	Monitor(target=Timeout)                           	Wait for specified target event
+   target=Falling: C35 returns when robot has fallen
+   target=LiveLock: C35 returns if a live lock is found
+   target=Stable: 35 returns when the robot is not stable
+   target=Timeout: C35 returns if the subtree execution is taking too long
+  75	DismountVechicle(param=Dismount)                  	C47
+  76	MechanismForStandingUp                            	
+  77	RobotGoesSomewhere                                	

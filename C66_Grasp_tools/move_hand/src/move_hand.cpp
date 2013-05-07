@@ -15,18 +15,19 @@
 #include <string>
 #include <map>
 #include "move_hand/pelvis_move_hand.h"
+#include "move_hand/matrix.h"
 #include <Eigen/Dense>
 #include <tf/transform_listener.h>
+#include <atlas_msgs/AtlasCommand.h>
 
 class move_hand_service{
 
 protected:
-	ros::NodeHandle nh_, nh2_,nh3_;
+	ros::NodeHandle nh_, nh2_,nh3_,nh4_;
 	ros::NodeHandle* rosnode;
-	ros::ServiceServer move_hand_srv_,pelvis_move_hand_srv_;
+	ros::ServiceServer move_hand_srv_,pelvis_move_hand_srv_,C66_matrix_srv_;
 	ros::ServiceClient traj_vector_cli_;
 	ros::ServiceClient arms_val_calc_cli_;
-	ros::Publisher traj_action_pub_;
 	ros::Subscriber joint_states_sub_;
 	double q0_l,q1_l,q2_l,q3_l,q4_l,q5_l;
 	double q0_r,q1_r,q2_r,q3_r,q4_r,q5_r;
@@ -93,7 +94,7 @@ public:
 		/*while(!traj_client_.waitForServer(ros::Duration(1.0))){
 			ROS_INFO("Waiting for the joint_trajectory_action server");
 		}*/
-		pub_joint_commands_ = rosnode->advertise<osrf_msgs::JointCommands>("/atlas/joint_commands", 1, true);
+		pub_joint_commands_ = rosnode->advertise<atlas_msgs::AtlasCommand>("/atlas/atlas_command", 1, true);
 
 		move_hand_srv_ = nh_.advertiseService("move_hand", &move_hand_service::gen_traj, this);
 		ROS_INFO("running move hand service");
@@ -101,9 +102,11 @@ public:
 		pelvis_move_hand_srv_ = nh3_.advertiseService("pelvis_move_hand",&move_hand_service::pelvis_move_hand_CB,this);
 		ROS_INFO("running pelvis move hand service");
 
+		C66_matrix_srv_ = nh4_.advertiseService("C66_matrix",&move_hand_service::matrix_in,this);
+
 	}
 	~move_hand_service(){
-		//delete traj_client_;
+		delete rosnode;
 	}
 	void joint_states_CB(const sensor_msgs::JointStateConstPtr& state){
 		for(unsigned int i=0; i < state->name.size(); i++){
@@ -129,6 +132,7 @@ public:
 		traj_splitter_to_vector::trajectory_vector traj_vec_right_srv;
 		//control_msgs::FollowJointTrajectoryGoal goal;
 		osrf_msgs::JointCommands jointcommands;
+		atlas_msgs::AtlasCommand atlas_command;
 		//ROS_INFO("Received request to move %s to (%f,%f,%f)", req.LinkToMove.c_str(), req.PositionDestination.x, req.PositionDestination.y, req.PositionDestination.z);
 		traj_vec_left_srv.request.Position = req.PositionDestination_left;
 		traj_vec_left_srv.request.Angle = req.AngleDestination_left;
@@ -174,6 +178,7 @@ public:
 		jointcommands.name.push_back("atlas::r_arm_uwy");
 		jointcommands.name.push_back("atlas::r_arm_mwx");
 
+
 		unsigned int n = jointcommands.name.size();
 		jointcommands.position.resize(n);
 		jointcommands.velocity.resize(n);
@@ -184,30 +189,44 @@ public:
 		jointcommands.kp_velocity.resize(n);
 		jointcommands.i_effort_min.resize(n);
 		jointcommands.i_effort_max.resize(n);
+
+		atlas_command.position.resize(n);
+		atlas_command.velocity.resize(n);
+		atlas_command.effort.resize(n);
+		atlas_command.kp_position.resize(n);
+		atlas_command.ki_position.resize(n);
+		atlas_command.kd_position.resize(n);
+		atlas_command.kp_velocity.resize(n);
+		atlas_command.i_effort_min.resize(n);
+		atlas_command.i_effort_max.resize(n);
+		atlas_command.k_effort.resize(n);
 		for (unsigned int i = 0; i < n; i++)
 		{
 			std::vector<std::string> pieces;
 			boost::split(pieces, jointcommands.name[i], boost::is_any_of(":"));
 
 			rosnode->getParam("atlas_controller/gains/" + pieces[2] + "/p",
-					jointcommands.kp_position[i]);
-
+			                  jointcommands.kp_position[i]);
+			atlas_command.kp_position[i] = jointcommands.kp_position[i];
 			rosnode->getParam("atlas_controller/gains/" + pieces[2] + "/i",
-					jointcommands.ki_position[i]);
-
+			                  jointcommands.ki_position[i]);
+			atlas_command.ki_position[i] = jointcommands.ki_position[i];
 			rosnode->getParam("atlas_controller/gains/" + pieces[2] + "/d",
-					jointcommands.kd_position[i]);
+			                  jointcommands.kd_position[i]);
+			atlas_command.kd_position[i] = jointcommands.kd_position[i];
+			rosnode->getParam("atlas_controller/gains/" + pieces[2] + "/i_clamp",
+			                  jointcommands.i_effort_min[i]);
+			atlas_command.i_effort_min[i] = -jointcommands.i_effort_min[i];
 
 			rosnode->getParam("atlas_controller/gains/" + pieces[2] + "/i_clamp",
-					jointcommands.i_effort_min[i]);
-			jointcommands.i_effort_min[i] = -jointcommands.i_effort_min[i];
+			                  jointcommands.i_effort_max[i]);
+			atlas_command.i_effort_max[i] = jointcommands.i_effort_max[i];
 
-			rosnode->getParam("atlas_controller/gains/" + pieces[2] + "/i_clamp",
-					jointcommands.i_effort_max[i]);
-
-			jointcommands.velocity[i]     = 0;
-			jointcommands.effort[i]       = 0;
-			jointcommands.kp_velocity[i]  = 0;
+			atlas_command.kp_position[i] = jointcommands.kp_position[i];
+			atlas_command.velocity[i]     = 0;
+			atlas_command.effort[i]       = 0;
+			atlas_command.kp_velocity[i]  = 0;
+			atlas_command.k_effort[i] = 255;
 		}
 
 		if(traj_vector_cli_.call(traj_vec_left_srv)&&traj_vector_cli_.call(traj_vec_right_srv)){
@@ -228,7 +247,7 @@ public:
 
 			//ROS_INFO("Response from trajectory vector service: Position size %d", (int) traj_vec_srv.response.PositionArray.size());
 			//ROS_INFO("Response from trajectory vector service: Angle size %d", (int) traj_vec_srv.response.AngleArray.size());
-			double current_dt = 0;
+			//double current_dt = 0;
 			if (traj_vec_left_srv.response.PositionArray.size() != traj_vec_right_srv.response.PositionArray.size()) return false;
 			for(unsigned int ind = 0; ind < traj_vec_left_srv.response.PositionArray.size(); ind++){
 				arms_val_calc::arms_val_calc v_left,v_right;
@@ -251,66 +270,66 @@ public:
 
 				if(arms_val_calc_cli_.call(v_left)&&arms_val_calc_cli_.call(v_right)){
 
-							jointcommands.position[joints["l_arm_usy"]] = p0_l + v_left.response.q_left_dot[0]*traj_vec_left_srv.response.dt[ind];
-							jointcommands.velocity[joints["l_arm_usy"]] = v_left.response.q_left_dot[0];
-							p0_l = jointcommands.position[joints["l_arm_usy"]];
-							jointcommands.position[joints["l_arm_shx"]] = p1_l + v_left.response.q_left_dot[1]*traj_vec_left_srv.response.dt[ind];
-							jointcommands.velocity[joints["l_arm_shx"]] = v_left.response.q_left_dot[1];
-							p1_l = jointcommands.position[joints["l_arm_shx"]];
-							jointcommands.position[joints["l_arm_ely"]] = p2_l + v_left.response.q_left_dot[2]*traj_vec_left_srv.response.dt[ind];
-							jointcommands.velocity[joints["l_arm_ely"]] = v_left.response.q_left_dot[2];
-							p2_l = jointcommands.position[joints["l_arm_ely"]];
-							jointcommands.position[joints["l_arm_elx"]] = p3_l + v_left.response.q_left_dot[3]*traj_vec_left_srv.response.dt[ind];
-							jointcommands.velocity[joints["l_arm_elx"]] = v_left.response.q_left_dot[3];
-							p3_l = jointcommands.position[joints["l_arm_elx"]];
-							jointcommands.position[joints["l_arm_uwy"]] = p4_l + v_left.response.q_left_dot[4]*traj_vec_left_srv.response.dt[ind];
-							jointcommands.velocity[joints["l_arm_uwy"]] = v_left.response.q_left_dot[4];
-							p4_l = jointcommands.position[joints["l_arm_uwy"]];
-							jointcommands.position[joints["l_arm_mwx"]] = p5_l + v_left.response.q_left_dot[5]*traj_vec_left_srv.response.dt[ind];
-							jointcommands.velocity[joints["l_arm_mwx"]] = v_left.response.q_left_dot[5];
-							p5_l = jointcommands.position[joints["l_arm_mwx"]];
+							atlas_command.position[joints["l_arm_usy"]] = p0_l + v_left.response.q_left_dot[0]*traj_vec_left_srv.response.dt[ind];
+							atlas_command.velocity[joints["l_arm_usy"]] = v_left.response.q_left_dot[0];
+							p0_l = atlas_command.position[joints["l_arm_usy"]];
+							atlas_command.position[joints["l_arm_shx"]] = p1_l + v_left.response.q_left_dot[1]*traj_vec_left_srv.response.dt[ind];
+							atlas_command.velocity[joints["l_arm_shx"]] = v_left.response.q_left_dot[1];
+							p1_l = atlas_command.position[joints["l_arm_shx"]];
+							atlas_command.position[joints["l_arm_ely"]] = p2_l + v_left.response.q_left_dot[2]*traj_vec_left_srv.response.dt[ind];
+							atlas_command.velocity[joints["l_arm_ely"]] = v_left.response.q_left_dot[2];
+							p2_l = atlas_command.position[joints["l_arm_ely"]];
+							atlas_command.position[joints["l_arm_elx"]] = p3_l + v_left.response.q_left_dot[3]*traj_vec_left_srv.response.dt[ind];
+							atlas_command.velocity[joints["l_arm_elx"]] = v_left.response.q_left_dot[3];
+							p3_l = atlas_command.position[joints["l_arm_elx"]];
+							atlas_command.position[joints["l_arm_uwy"]] = p4_l + v_left.response.q_left_dot[4]*traj_vec_left_srv.response.dt[ind];
+							atlas_command.velocity[joints["l_arm_uwy"]] = v_left.response.q_left_dot[4];
+							p4_l = atlas_command.position[joints["l_arm_uwy"]];
+							atlas_command.position[joints["l_arm_mwx"]] = p5_l + v_left.response.q_left_dot[5]*traj_vec_left_srv.response.dt[ind];
+							atlas_command.velocity[joints["l_arm_mwx"]] = v_left.response.q_left_dot[5];
+							p5_l = atlas_command.position[joints["l_arm_mwx"]];
 
 
-								jointcommands.position[joints["r_arm_usy"]] = p0_r + v_right.response.q_right_dot[0]*traj_vec_right_srv.response.dt[ind];
-								//jointcommands.velocity[joints["r_arm_usy"]] = v_right.response.q_right_dot[0];
-								p0_r = jointcommands.position[joints["r_arm_usy"]];
-								jointcommands.position[joints["r_arm_shx"]] = p1_r + v_right.response.q_right_dot[1]*traj_vec_right_srv.response.dt[ind];
-								//jointcommands.velocity[joints["r_arm_shx"]] = v_right.response.q_right_dot[1];
-								p1_r = jointcommands.position[joints["r_arm_shx"]];
-								jointcommands.position[joints["r_arm_ely"]] = p2_r + v_right.response.q_right_dot[2]*traj_vec_right_srv.response.dt[ind];
-								//jointcommands.velocity[joints["r_arm_ely"]] = v_right.response.q_right_dot[2];
-								p2_r = jointcommands.position[joints["r_arm_ely"]];
-								jointcommands.position[joints["r_arm_elx"]] = p3_r + v_right.response.q_right_dot[3]*traj_vec_right_srv.response.dt[ind];
-								//jointcommands.velocity[joints["r_arm_elx"]] = v_right.response.q_right_dot[3];
-								p3_r = jointcommands.position[joints["r_arm_elx"]];
-								jointcommands.position[joints["r_arm_uwy"]] = p4_r + v_right.response.q_right_dot[4]*traj_vec_right_srv.response.dt[ind];
-								//jointcommands.velocity[joints["r_arm_uwy"]] = v_right.response.q_right_dot[4];
-								p4_r = jointcommands.position[joints["r_arm_uwy"]];
-								jointcommands.position[joints["r_arm_mwx"]] = p5_r + v_right.response.q_right_dot[5]*traj_vec_right_srv.response.dt[ind];
-								//jointcommands.velocity[joints["r_arm_mwx"]] = v_right.response.q_right_dot[5];
-								p5_r = jointcommands.position[joints["r_arm_mwx"]];
+								atlas_command.position[joints["r_arm_usy"]] = p0_r + v_right.response.q_right_dot[0]*traj_vec_right_srv.response.dt[ind];
+								//atlas_command.velocity[joints["r_arm_usy"]] = v_right.response.q_right_dot[0];
+								p0_r = atlas_command.position[joints["r_arm_usy"]];
+								atlas_command.position[joints["r_arm_shx"]] = p1_r + v_right.response.q_right_dot[1]*traj_vec_right_srv.response.dt[ind];
+								//atlas_command.velocity[joints["r_arm_shx"]] = v_right.response.q_right_dot[1];
+								p1_r = atlas_command.position[joints["r_arm_shx"]];
+								atlas_command.position[joints["r_arm_ely"]] = p2_r + v_right.response.q_right_dot[2]*traj_vec_right_srv.response.dt[ind];
+								//atlas_command.velocity[joints["r_arm_ely"]] = v_right.response.q_right_dot[2];
+								p2_r = atlas_command.position[joints["r_arm_ely"]];
+								atlas_command.position[joints["r_arm_elx"]] = p3_r + v_right.response.q_right_dot[3]*traj_vec_right_srv.response.dt[ind];
+								//atlas_command.velocity[joints["r_arm_elx"]] = v_right.response.q_right_dot[3];
+								p3_r = atlas_command.position[joints["r_arm_elx"]];
+								atlas_command.position[joints["r_arm_uwy"]] = p4_r + v_right.response.q_right_dot[4]*traj_vec_right_srv.response.dt[ind];
+								//atlas_command.velocity[joints["r_arm_uwy"]] = v_right.response.q_right_dot[4];
+								p4_r = atlas_command.position[joints["r_arm_uwy"]];
+								atlas_command.position[joints["r_arm_mwx"]] = p5_r + v_right.response.q_right_dot[5]*traj_vec_right_srv.response.dt[ind];
+								//atlas_command.velocity[joints["r_arm_mwx"]] = v_right.response.q_right_dot[5];
+								p5_r = atlas_command.position[joints["r_arm_mwx"]];
 
-					jointcommands.position[joints["l_leg_uhz"]] = positions[joints["l_leg_uhz"]];
-					jointcommands.position[joints["l_leg_mhx"]] = positions[joints["l_leg_mhx"]];
-					jointcommands.position[joints["l_leg_lhy"]] = positions[joints["l_leg_lhy"]];
-					jointcommands.position[joints["l_leg_kny"]] = positions[joints["l_leg_kny"]];
-					jointcommands.position[joints["l_leg_uay"]] = positions[joints["l_leg_uay"]];
-					jointcommands.position[joints["l_leg_lax"]] = positions[joints["l_leg_lax"]];
+					atlas_command.position[joints["l_leg_uhz"]] = positions[joints["l_leg_uhz"]];
+					atlas_command.position[joints["l_leg_mhx"]] = positions[joints["l_leg_mhx"]];
+					atlas_command.position[joints["l_leg_lhy"]] = positions[joints["l_leg_lhy"]];
+					atlas_command.position[joints["l_leg_kny"]] = positions[joints["l_leg_kny"]];
+					atlas_command.position[joints["l_leg_uay"]] = positions[joints["l_leg_uay"]];
+					atlas_command.position[joints["l_leg_lax"]] = positions[joints["l_leg_lax"]];
 
-					jointcommands.position[joints["r_leg_uhz"]] = positions[joints["r_leg_uhz"]];
-					jointcommands.position[joints["r_leg_mhx"]] = positions[joints["r_leg_mhx"]];
-					jointcommands.position[joints["r_leg_lhy"]] = positions[joints["r_leg_lhy"]];
-					jointcommands.position[joints["r_leg_kny"]] = positions[joints["r_leg_kny"]];
-					jointcommands.position[joints["r_leg_uay"]] = positions[joints["r_leg_uay"]];
-					jointcommands.position[joints["r_leg_lax"]] = positions[joints["r_leg_lax"]];
+					atlas_command.position[joints["r_leg_uhz"]] = positions[joints["r_leg_uhz"]];
+					atlas_command.position[joints["r_leg_mhx"]] = positions[joints["r_leg_mhx"]];
+					atlas_command.position[joints["r_leg_lhy"]] = positions[joints["r_leg_lhy"]];
+					atlas_command.position[joints["r_leg_kny"]] = positions[joints["r_leg_kny"]];
+					atlas_command.position[joints["r_leg_uay"]] = positions[joints["r_leg_uay"]];
+					atlas_command.position[joints["r_leg_lax"]] = positions[joints["r_leg_lax"]];
 
-					jointcommands.position[joints["neck_ay"]] = positions[joints["neck_ay"]];
-					jointcommands.position[joints["back_lbz"]] = positions[joints["back_lbz"]];
-					jointcommands.position[joints["back_mby"]] = positions[joints["back_mby"]];
-					jointcommands.position[joints["back_ubx"]] = positions[joints["back_ubx"]];
+					atlas_command.position[joints["neck_ay"]] = positions[joints["neck_ay"]];
+					atlas_command.position[joints["back_lbz"]] = positions[joints["back_lbz"]];
+					atlas_command.position[joints["back_mby"]] = positions[joints["back_mby"]];
+					atlas_command.position[joints["back_ubx"]] = positions[joints["back_ubx"]];
 
 					// To be reached 1+ind second after the start of the trajectory
-					pub_joint_commands_.publish(jointcommands);
+					pub_joint_commands_.publish(atlas_command);
 					ros::Duration(traj_vec_left_srv.response.dt[ind]).sleep();
 				}else{
 					ROS_ERROR("Could not reach gen arms velocity vector server");
@@ -466,6 +485,107 @@ public:
                   ROS_INFO("move_hand service not up");
                   return false;
 	}
+
+	bool matrix_in(move_hand::matrixRequest &req,move_hand::matrixResponse &res){
+	  Eigen::Matrix4f in_mat;
+	  in_mat << req.matrix[0], req.matrix[1], req.matrix[2], req.matrix[3],
+	            req.matrix[4], req.matrix[5], req.matrix[6], req.matrix[7],
+	            req.matrix[8], req.matrix[9], req.matrix[10],req.matrix[11],
+	            req.matrix[12],req.matrix[13],req.matrix[14],req.matrix[15];
+
+
+	  Eigen::Matrix4f TF1,TF2;
+	            TF1(0,0)=0.956958030337725;
+	            TF1(0,1)=0.187313741592912;
+	            TF1(0,2)=-0.221686468650221;
+	            TF1(0,3)=0.555000000000000;
+	            TF1(1,0)=0.226085162286393;
+	            TF1(1,1)=0.132946235442734;
+	            TF1(1,2)=0.974105103609595;
+	            TF1(1,3)=-0.289000000000000;
+	            TF1(2,0)= 0.181980294444418;
+	            TF1(2,1)=-0.982297722533646;
+	            TF1(2,2)=-0.044433734247019;
+	            TF1(2,3)=0.136000000000000;
+	            TF1(3,0)=0;
+	            TF1(3,1)=0;
+	            TF1(3,2)=0;
+	            TF1(3,3)=1;
+
+                    TF2(0,0)=0.956958030337725;
+                    TF2(0,1)=0.187313741592912;
+                    TF2(0,2)=-0.221686468650221;
+                    TF2(0,3)=0.505000000000000;
+                    TF2(1,0)=0.226085162286393;
+                    TF2(1,1)=0.132946235442734;
+                    TF2(1,2)=0.974105103609595;
+                    TF2(1,3)=-0.339000000000000;
+                    TF2(2,0)= 0.181980294444418;
+                    TF2(2,1)=-0.982297722533646;
+                    TF2(2,2)=-0.044433734247019;
+                    TF2(2,3)=0.136000000000000;
+                    TF2(3,0)=0;
+                    TF2(3,1)=0;
+                    TF2(3,2)=0;
+                    TF2(3,3)=1;
+
+	            Eigen::Matrix4f mat,mat2;
+	            mat=in_mat*TF1;
+	            double x= mat(0,3);
+	            double y= mat(1,3);
+	            double z= mat(2,3);
+	            double roll    =(std::atan2((double)mat(2,1),(double)mat(2,2)));
+	            double pitch = (std::atan2((double)-mat(2,0),std::sqrt(std::pow((double)mat(2,1),2) +std::pow((double)mat(2,2),2) )));
+	            double yaw   = (std::atan2((double)mat(1,0),(double)mat(0,0)));
+
+	            mat2=in_mat*TF2;
+                    double x2= mat2(0,3);
+                    double y2= mat2(1,3);
+                    double z2= mat2(2,3);
+                    double roll2    =(std::atan2((double)mat2(2,1),(double)mat2(2,2)));
+                    double pitch2 = (std::atan2((double)-mat2(2,0),std::sqrt(std::pow((double)mat2(2,1),2) +std::pow((double)mat2(2,2),2) )));
+                    double yaw2   = (std::atan2((double)mat2(1,0),(double)mat2(0,0)));
+
+	            std::cout<<"x:"<<x<<"\n";
+	            std::cout<<"y:"<<y<<"\n";
+	            std::cout<<"z:"<<z<<"\n";
+	            std::cout<<"roll:"<<roll<<"\n";
+	            std::cout<<"pitch:"<<pitch<<"\n";
+	            std::cout<<"yaw:"<<yaw<<"\n";
+
+	            move_hand::pelvis_move_hand move_msg,move_msg2;
+
+	                move_msg.request.PositionDestination_right.x =  x;
+	                move_msg.request.PositionDestination_right.y =  y;
+	                move_msg.request.PositionDestination_right.z =  z;
+	                move_msg.request.AngleDestination_right.x = roll;
+	                move_msg.request.AngleDestination_right.y = pitch;
+	                move_msg.request.AngleDestination_right.z = yaw;
+
+                        move_msg2.request.PositionDestination_right.x =  x2;
+                        move_msg2.request.PositionDestination_right.y =  y2;
+                        move_msg2.request.PositionDestination_right.z =  z2;
+                        move_msg2.request.AngleDestination_right.x = roll2;
+                        move_msg2.request.AngleDestination_right.y = pitch2;
+                        move_msg2.request.AngleDestination_right.z = yaw2;
+
+                        if (!pelvis_move_hand_CB(move_msg2.request,move_msg2.response)){
+                        ROS_INFO("error in pelvis_move_hand service");
+                        return false;
+                        }
+
+                        ros::spinOnce();
+
+
+          if (pelvis_move_hand_CB(move_msg.request,move_msg.response))
+          {
+            res.success = move_msg.response.success;
+            return true;
+          }
+          ROS_INFO("error in pelvis_move_hand service");
+          return false;
+	}
+
 };
 int main(int argc, char **argv)
 {

@@ -1,0 +1,43 @@
+Updates:
+1. Updated to DRCSim version 2.5.
+2. Changed Subscriber to path topic from '/C31PathPlanner' to '/path'.
+3. When path is received the waypoints are taken from the first waypoint which distance is greater than 0.5 meters from the robots position.
+   Robots current position is taken as first waypoint.
+4. Corrected and checked task isPreepted() function that performs an emergency stop (freezes after completing current step).
+   
+USING ZMP WALK:
+
+Robot waits for start,then goes to path planner and asks for the path, takes points from path and walks alongside a segment of two points.
+
+To test ZMP walk:
+
+1. run zmp_main.py: 
+   $ roslaunch C42_ZMPWalk zmp_walk.launch
+
+2. run task using C0 task_tester:
+   $ rosrun C0_RobilTask task_tester ZmpWalk
+
+3. run C31_clone to emulate the C31PathPlanner (publish a path message): 
+   $ rosrun C42_ZMPWalk scripts/C31_Clone.py
+
+4. reset robot at initial position:
+   $ rosrun C42_ZMPWalk scripts/Reset_start_pose.py
+   If doesn't work can try a more direct approach (need to specify the exact directory):
+   $ python .../Robil/C42_ZMPWalk/scripts/Reset_start_pose.py
+ 
+
+
+RUNNING STUB (not checked for this release) :
+
+Robot waits for start,then goes to path planner and asks for the path, takes points from path and makes teleportation between points. 
+
+To test stub:
+
+1. run ZMP_stub.py: 
+   $ rosrun C42_ZMPWalk ZMP_stub.py
+
+2. run C31_clone to emulate the C31PathPlanner (publish a path message): 
+   $ rosrun C42_ZMPWalk scripts/C31_Clone.py
+
+3. execute using C0 task_tester: 
+   $ rosrun C0_RobilTask task_tester FollowPath

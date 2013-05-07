@@ -1,0 +1,22 @@
+Updates:
+Ready for Qual integration:
+1. Can complete successfully the qual1 path up to stepping stones and from end of stepping stones to finish line.
+2. Can be preempted and relaunched. (minor issue when preempted on turn and relaunched) 
+
+USING DYNAMIC WALK:
+
+Robot waits for start,then goes to path planner and asks for the path, takes points from path and walks alongside a segment of two points.
+
+To test Dynamic Walker:
+
+1. run DynamicLocomotion.py: 
+   $ rosrun C42_DynamicLocomotion DynamicLocomotion.py
+
+2. run task using C0 task_tester:
+   $ rosrun C0_RobilTask task_tester DynamicLocomotion
+
+3. run C31_clone to emulate the C31PathPlanner (publish a path message): 
+   rosrun C42_ZMPWalk scripts/C31_Clone.py
+ 
+4. reset robot at initial position:
+   rosrun C42_DynamicLocomotion scripts/Reset_start_pose.py

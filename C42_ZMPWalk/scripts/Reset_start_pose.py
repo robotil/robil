@@ -12,17 +12,14 @@
 ####                                                                             ##
 ###################################################################################     
 
-
-import roslib
-roslib.load_manifest('C42_ZMPWalk')
+import roslib; roslib.load_manifest('C42_ZMPWalk')
 from drc2_tools import *
-import roslib
 import os
 import rospy
 from std_srvs.srv import Empty
 
 def init_pose():
-    JC = JointCommands_msg_handler()
+    JC = AtlasCommand_msg_handler()
     RL = robot_listner()
 
     # # Off-set values for IK
@@ -85,3 +82,4 @@ def init_pose():
 
 if __name__ == '__main__':
     init_pose()
+

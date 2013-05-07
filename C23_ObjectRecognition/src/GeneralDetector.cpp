@@ -193,7 +193,7 @@ void GeneralDetector::detect(Mat img) {
   _width = width;
   _height = height;
   imwrite("best.jpg",subImg);
-
+  
   // cout <<"done "<< best_res << endl;
   
 }
