@@ -27,17 +27,30 @@ void FootPlacementService::createMatrix25(int map[SIZE][SIZE],
 				map[i/5][(j-3)/5]=1;
 		}
 	}
+
+	/*
+	for (int i=0; i<SIZE; i++)
+		{
+			for(int j=0; j<SIZE; j++)
+			{
+				printf("%d ",map[i][j]);
+			}
+			printf("\n");
+		}
+		printf("\n");
+	*/
 }
 
 geometry_msgs::Point FootPlacementService::calcPoint(const int &i, const int &j,
 		const C22_CompactGroundRecognitionAndMapping::C22_PLANE_TYPE &plane,
 		const geometry_msgs::Point &robotPos, const geometry_msgs::Point &robotOri)
 {
+	static int flag=1;
 	geometry_msgs::Point point,xStep,yStep;
 	xStep.z=yStep.z=0;
 
-	yStep.x = SQUARE_SIZE* cos( robotOri.z);
-	yStep.y = SQUARE_SIZE* sin( robotOri.z);
+	yStep.x = SQUARE_SIZE* sin( robotOri.z);
+	yStep.y = SQUARE_SIZE* cos( robotOri.z);
 
 
 	/*
@@ -48,7 +61,15 @@ geometry_msgs::Point FootPlacementService::calcPoint(const int &i, const int &j,
 	//xstep is 90deg clockwise from ystep
 	xStep.x= yStep.y;
 	xStep.y = -yStep.x;
+	/*	
+	if(flag)
+	{
+		printf("x: %lf %lf\ny: %lf %lf\n", xStep.x,xStep.y, yStep.x, yStep.y);
+		flag=0;
+	}	
 
+	*/
+	
 	point.x = robotPos.x+ (j-SIZE/2)*xStep.x+(i)*yStep.x;
 	point.y=robotPos.y+(j-SIZE/2)*xStep.y+(i)*yStep.y;
 	point.z=-(plane.x*point.x+plane.y*point.y+plane.d)/plane.z;
@@ -112,6 +133,8 @@ void FootPlacementService::calcFootMatrix(
 
 	const geometry_msgs::Point robotLegPos = (LEFT==leg)? robotLeftLegPos:robotRightLegPos;
 	FootPlacementService::createMatrix25(map,path);
+
+	//printf("ori: %lf\n" , robotOri.z);
 
 	for (int i=0; i<SIZE; i++)
 	{
@@ -225,8 +248,9 @@ void FootPlacementService::calcFootMatrix(
 				pos.point.y = repPoint.y-robotPos.y;
 				pos.point.z = repPoint.z-robotPos.z;
 				pos.cost = cost;
+				std::vector<FootPlacement::Pos>::iterator p;
 
-				for(std::vector<FootPlacement::Pos>::iterator p=positions.begin(); p!=positions.end(); p++)
+				for(p=positions.begin(); p!=positions.end(); p++)
 				{
 					if(p->cost > cost)
 					{
@@ -236,7 +260,7 @@ void FootPlacementService::calcFootMatrix(
 				}
 
 
-				if(positions.empty())
+				if(positions.end()==p)
 				{
 					positions.push_back(pos);
 				}
