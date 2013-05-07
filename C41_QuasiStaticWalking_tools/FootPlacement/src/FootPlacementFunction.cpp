@@ -2,13 +2,35 @@
 
 int FootPlacementService::possible(int i, int j)
 {
-	if(i==SIZE/2 && j==SIZE/2)
+	if(0==i && SIZE/2==j)
 		return 0;
 	return 1;
 }
 
+void FootPlacementService::createMatrix25(int map[SIZE][SIZE],
+		const C22_CompactGroundRecognitionAndMapping::C22C0_PATH& path)
+{
+
+	for (int i=0; i<SIZE; i++)
+	{
+		for(int j=0; j<SIZE; j++)
+		{
+			map[i][j]=0;
+		}
+	}
+
+	for (int i=0; i<C22_SIZE-5; i++)
+	{
+		for(int j=3; j<C22_SIZE-2; j++)
+		{
+			if(1==path.row[i].column[j].status)
+				map[i/5][(j-3)/5]=1;
+		}
+	}
+}
+
 geometry_msgs::Point FootPlacementService::calcPoint(const int &i, const int &j,
-		const C22_GroundRecognitionAndMapping::C22_PLANE_TYPE &plane,
+		const C22_CompactGroundRecognitionAndMapping::C22_PLANE_TYPE &plane,
 		const geometry_msgs::Point &robotPos, const geometry_msgs::Point &robotOri)
 {
 	geometry_msgs::Point point,xStep,yStep;
@@ -27,8 +49,8 @@ geometry_msgs::Point FootPlacementService::calcPoint(const int &i, const int &j,
 	xStep.x= yStep.y;
 	xStep.y = -yStep.x;
 
-	point.x = robotPos.x+ (j-SIZE/2)*xStep.x+(SIZE/2-i)*yStep.x;
-	point.y=robotPos.y+(j-SIZE/2)*xStep.y+(SIZE/2-i)*yStep.y;
+	point.x = robotPos.x+ (j-SIZE/2)*xStep.x+(i)*yStep.x;
+	point.y=robotPos.y+(j-SIZE/2)*xStep.y+(i)*yStep.y;
 	point.z=-(plane.x*point.x+plane.y*point.y+plane.d)/plane.z;
 	return point;
 }
@@ -72,7 +94,7 @@ void FootPlacementService::calcFootMatrix(
 		std::vector<FootPlacement::Pos>& positions,
 		const int &useC22,
 		const int &leg,
-		const C22_GroundRecognitionAndMapping::C22C0_PATH& path,
+		const C22_CompactGroundRecognitionAndMapping::C22C0_PATH& path,
 		const geometry_msgs::Point& robotLeftLegPos,
 		const geometry_msgs::Point& robotRightLegPos,
 		const double &dirX, const double &dirY,
@@ -81,16 +103,21 @@ void FootPlacementService::calcFootMatrix(
 		const double &heightWeight,
 		const double &directionWeight)
 {
+
+	int map[SIZE][SIZE];
+
+
 	const geometry_msgs::Point &robotPos = path.robotPos;
 	const geometry_msgs::Point &robotOri = path.robotOri;
 
 	const geometry_msgs::Point robotLegPos = (LEFT==leg)? robotLeftLegPos:robotRightLegPos;
+	FootPlacementService::createMatrix25(map,path);
 
 	for (int i=0; i<SIZE; i++)
 	{
 		for (int j=0; j<SIZE; j++)
 		{
-			if(!this->possible(i,j))
+			if(1==map[i][j] || !this->possible(i,j))
 			{
 				continue ;
 			}
@@ -99,7 +126,7 @@ void FootPlacementService::calcFootMatrix(
 				int len=path.row[0].column[0].planes.size();
 				double minCost=std::numeric_limits<double>::infinity();
 				geometry_msgs::Point minCostPoint;
-				C22_GroundRecognitionAndMapping::C22_PLANE_TYPE minCostPlane;
+				C22_CompactGroundRecognitionAndMapping::C22_PLANE_TYPE minCostPlane;
 
 
 				if(0==len)
@@ -109,7 +136,7 @@ void FootPlacementService::calcFootMatrix(
 
 				for(int k=0; k<len; k++)
 				{
-					C22_GroundRecognitionAndMapping::C22_PLANE_TYPE plane=
+					C22_CompactGroundRecognitionAndMapping::C22_PLANE_TYPE plane=
 							path.row[i].column[j].planes[k];
 
 					geometry_msgs::Point repPoint = calcPoint(i,j,plane,
@@ -165,12 +192,12 @@ void FootPlacementService::calcFootMatrix(
 
 			else
 			{
-
-				C22_GroundRecognitionAndMapping::C22_PLANE_TYPE plane;
+				C22_CompactGroundRecognitionAndMapping::C22_PLANE_TYPE plane;
 				plane.x=0;
 				plane.y=0;
 				plane.z=1;
 				plane.d=-robotLegPos.z;
+
 
 				geometry_msgs::Point repPoint = calcPoint(i,j,plane,
 						robotPos,robotOri);

@@ -11,7 +11,7 @@
   <depend package="roscpp"/>
   <depend package="geometry_msgs"/>
   <depend package="tf"/>
-  <depend package="C22_GroundRecognitionAndMapping"/>
+  <depend package="C22_CompactGroundRecognitionAndMapping"/>
 
 </package>
 
