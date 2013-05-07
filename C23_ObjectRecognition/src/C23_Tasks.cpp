@@ -40,13 +40,13 @@ public:
 		bool res;
 		while (!isPreempt()) {
       res = _detector->detect(target);
-      if (res) {
-
-		  } else {
-
-		  }
+      if (_detector->x != -1) {
+          return TaskResult(SUCCESS, "OK");
+			} else {
+          return TaskResult(FAULT, "Object isn't detected");
+			}
 		}
-		return TaskResult(SUCCESS, "OK");
+	  return TaskResult(SUCCESS, "OK");
 	}
 
 private:
