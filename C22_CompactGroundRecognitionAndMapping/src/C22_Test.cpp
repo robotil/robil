@@ -36,7 +36,7 @@ int main(int argc, char **argv)
 		  	}
 		  	for (int i=srv.response.drivingPath.row.size();i>0;i--){
 		  		std::cout<<std::setw(2)<<std::setfill('0')<<i<<" ";
-		  		for (unsigned int j=0;j<srv.response.drivingPath.row.size();j++){
+		  		for (unsigned int j=srv.response.drivingPath.row.size()-1;j>0;j--){
 		  			if (srv.response.drivingPath.row.at(i-1).column.at(j).status==0)
 		  				std::cout << "A  ";
 		  				else if (srv.response.drivingPath.row.at(i-1).column.at(j).status==1)
