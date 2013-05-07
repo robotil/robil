@@ -7,6 +7,7 @@ import C25_AtlasFell.msg
 def Fell_client():
     # Creates the SimpleActionClient, passing the type of the action
     # (FibonacciAction) to the constructor.
+    rospy.loginfo('C25_AtlasFell client Online!')
     client = actionlib.SimpleActionClient('Fell', C25_AtlasFell.msg.FallenAction)
 
     # Waits until the action server has started up and started
