@@ -54,7 +54,7 @@ Mat fromSensorMsg(const sensor_msgs::ImageConstPtr& msg)
 	C23_Detector::C23_Detector(const char* left_cam, const char* right_cam, const char* pointc):
 	it_(nh),
 	left_image_sub_( it_, left_cam, 1 ),
-	pointcloud(nh,right_cam,1),
+	pointcloud(nh,pointc,1),
 	sync( MySyncPolicy( 10 ), left_image_sub_,pointcloud)
 	{
 		sync.registerCallback( boost::bind( &C23_Detector::callback, this, _1, _2 ) ); //Specifying what to do with the data
@@ -70,8 +70,7 @@ Mat fromSensorMsg(const sensor_msgs::ImageConstPtr& msg)
  
     if(!target.compare("Gate")) {
         _target = GATE;
-        
-      ROS_INFO("We are looking for a gate...");
+     //  ROS_INFO("We are looking for a gate...");
     } else if (!target.compare("Car")) {
         _generalDetector.initialize("carEntry");
         _target = CAR;
@@ -85,6 +84,7 @@ Mat fromSensorMsg(const sensor_msgs::ImageConstPtr& msg)
   
   }
   void C23_Detector::publishMessage(bool isFound) {
+ //   ROS_INFO("Publishing message..");
     C23_ObjectRecognition::C23C0_OD msg;
     C23_ObjectRecognition::C23C0_ODIM msg2;
     string target;
@@ -107,6 +107,7 @@ Mat fromSensorMsg(const sensor_msgs::ImageConstPtr& msg)
     msg2.height = height;
     msg2.Object = target;
     msg.Object = target;
+  //  ROS_INFO("Publishing message..");
     objectDeminsionsPublisher.publish(msg2);
     objectDetectedPublisher.publish(msg);
 
@@ -114,6 +115,7 @@ Mat fromSensorMsg(const sensor_msgs::ImageConstPtr& msg)
   }
 	void C23_Detector::callback(const sensor_msgs::ImageConstPtr& msg,const sensor_msgs::PointCloud2::ConstPtr &cloud)
 	{
+//	  ROS_INFO("Receiving image..");
 		  Mat srcImg = fromSensorMsg(msg);
 		  bool res;
 		  switch (_target) {
@@ -127,7 +129,7 @@ Mat fromSensorMsg(const sensor_msgs::ImageConstPtr& msg)
 		      publishMessage(res);
 		      break;
 	      case GATE:
-	    //    ROS_INFO("GATE");
+	       ROS_INFO("GATE");
 	        
 	        res = detectGate(srcImg,cloud);
 	        publishMessage(res);
@@ -177,8 +179,8 @@ Mat fromSensorMsg(const sensor_msgs::ImageConstPtr& msg)
 	    
 	    cout << "Best point: " << sqrt(minPoint.x*minPoint.x+minPoint.y*minPoint.y+minPoint.z*minPoint.z*10000) << endl;
 	    circle( srcImg, Point2f(minImagePoint.x,minImagePoint.y), 5, 60, -1, 8, 0 );
-	    imshow("Testing",srcImg);
-	    waitKey(0);
+	   // imshow("Testing",srcImg);
+	  //  waitKey(0);
 	    
 	    //Expand a bounding box to fit the car
 	   /* int x1,y1;
@@ -236,8 +238,8 @@ Mat fromSensorMsg(const sensor_msgs::ImageConstPtr& msg)
 	  Mat imgHSV, imgThreshed;
 	  cvtColor(srcImg,imgHSV,CV_BGR2HSV);
 	  inRange(imgHSV,Scalar(20,30,30),Scalar(40,255,255),imgThreshed);
-	  namedWindow("TESTING");
-	  imshow("TESTING",imgThreshed);
+	//  namedWindow("TESTING");
+	 // imshow("TESTING",imgThreshed);
 	  //waitKey(0);
 	 // imwrite("test12.jpg",imgThreshed);
 	 Mat bw;
@@ -271,7 +273,7 @@ Mat fromSensorMsg(const sensor_msgs::ImageConstPtr& msg)
      // line( cdst, cv::Point(l[0], l[1]), cv::Point(l[2], l[3]), Scalar(0,0,255), 3, CV_AA);
     }
     line( cdst, cv::Point(maxVec[0], maxVec[1]), cv::Point(maxVec[2], maxVec[3]), Scalar(0,0,255), 3, CV_AA);
-    imshow("TESTING",cdst);
+   // imshow("TESTING",cdst);
     //waitKey(0);
     if(maxVec[1] < maxVec[3]) {
       x = maxVec[0];
@@ -498,8 +500,8 @@ Mat fromSensorMsg(const sensor_msgs::ImageConstPtr& msg)
 	    }
             cout << "Detected right" << endl;
             circle( srcImg, Point2f(x,y), 16, Scalar(0,255,255), -1, 8, 0 );
-             imshow("Testing" , srcImg);
-             waitKey(0);
+       //      imshow("Testing" , srcImg);
+          //   waitKey(0);
             return mcM[biggstM].x < mcR[biggstR].x ? true : false;
           
           } else {
@@ -526,8 +528,8 @@ Mat fromSensorMsg(const sensor_msgs::ImageConstPtr& msg)
 	    }
              cout << "Detected left" << endl;
              circle( srcImg, Point2f(x,y), 16, Scalar(0,255,255), -1, 8, 0 );
-            imshow("Testing" , srcImg);
-            waitKey(0);
+         //   imshow("Testing" , srcImg);
+         //   waitKey(0);
             return mcM[biggstM].x > mcL[biggstL].x ? true : false;
 
           }
