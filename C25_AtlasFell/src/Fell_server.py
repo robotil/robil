@@ -58,7 +58,7 @@ class Fell(object):
             
             
             #----------end of while-----------------#
-        rospy.loginfo('Exitting C25_AtlasFell module!!!')
+        rospy.loginfo('Exiting C25_AtlasFell module!!!')
         self._as.set_succeeded(self._result)
         #----------------hand brake released --------------------------#
 
