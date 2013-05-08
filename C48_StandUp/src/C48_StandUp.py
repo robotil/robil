@@ -14,15 +14,16 @@ class StandUpServer(RobilTask):
 		print "Start standing up"
 		# setting up a controller for sending commands
 		self._controller = Controller()
+		roll, pitch, yaw = self._controller.getRPY()
 		# keep trying until robot stands up
-#		while self._controller.getPose().z < 0.8:
-		yaw, pitch, roll = self._controller.getYPR()
-		# in case it fell on its back roll down
-		while pitch < -1:
-			self.rollDown()
-			yaw, pitch, roll = self._controller.getYPR()
-		# stand up
-		self.standUp()
+		while pitch > 1.4 or pitch < -1.4:
+			# in case it fell on its back roll down
+			while pitch < -1:
+				self.rollDown()
+				roll, pitch, yaw = self._controller.getRPY()
+			# stand up
+			self.standUp()
+			roll, pitch, yaw = self._controller.getRPY()
 
 		# task succeeded
 		return RTResult_SUCCESSED("Finished in Success")
