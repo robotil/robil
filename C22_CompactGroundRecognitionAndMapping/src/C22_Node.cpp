@@ -46,6 +46,8 @@
 #include <boost/thread/mutex.hpp>
 #include <pcl/filters/passthrough.h>
  #include <pcl/visualization/cloud_viewer.h>
+#include <pcl/keypoints/uniform_sampling.h>
+#include <pcl/filters/extract_indices.h>
 /**
  * this class represent the C22_Node,
  * it subscribe to the drc multisense topic and provide the Eagle eye mapping
@@ -167,17 +169,27 @@ void C22_Node::callback(const C21_VisionAndLidar::C21_C22::ConstPtr& pclMsg,cons
 
 	 pcl::transformPointCloud(*cloudRecord, *cloud_filtered, recordToRobot);
 	 pcl::transformPointCloud(*cloud_filtered, *cloud_filtered, sensorToFrame);
-	 if(cloud_filtered->points.size()>40000){
-		 pcl::PointCloud<pcl::PointXYZ>empty;
+	 if(cloud_filtered->points.size()>60000){
+		 /*pcl::PointCloud<pcl::PointXYZ>empty;
 		 pcl::PointCloud<pcl::PointXYZ>::Ptr em(empty.makeShared());
-		 cloudRecord.swap(em);
-	 }else{
-	 pcl::StatisticalOutlierRemoval<pcl::PointXYZ> sor;
-	  sor.setInputCloud (cloudRecord);
-	  sor.setMeanK (10);
-	  sor.setStddevMulThresh (1.0);
-	  sor.filter (*cloudRecord);
+		 cloudRecord.swap(em);*/
+		  pcl::PointCloud<int> sampled_indices;
+		  pcl::UniformSampling<pcl::PointXYZ> uniform_sampling;
+		  uniform_sampling.setInputCloud (cloudRecord);
+		  uniform_sampling.setRadiusSearch (0.01);
+		  uniform_sampling.compute (sampled_indices);
+		  //pcl::copyPointCloud (*scene, sampled_indices.points, *scene_keypoints);
+		  std::cout << "Scene total points: " << cloudRecord->points.size() ;
+		  pcl::copyPointCloud (*cloudRecord, sampled_indices.points, *cloudRecord);
+		  std::cout<< "; Selected Keypoints: " << cloudRecord->points.size() << std::endl;
+		  pcl::StatisticalOutlierRemoval<pcl::PointXYZ> sor;
+		  sor.setInputCloud (cloudRecord);
+		  sor.setMeanK (10);
+		  sor.setStddevMulThresh (1.0);
+		  sor.filter (*cloudRecord);
+
 	 }
+
 	_myMatrix->computeMMatrix(cloud_filtered,robotPos);
 	  pcl::PassThrough<pcl::PointXYZ> pass;
 	  pass.setInputCloud (cloudRecord);
