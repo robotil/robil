@@ -339,7 +339,7 @@ public:
 		pcl::fromROSMsg<pcl::PointXYZ>(cloud,temp);
 		pcl::PointCloud<pcl::PointXYZ> cloud2;
 		for(int i=0;i<temp.points.size();i++){
-			if(scan_in->ranges.at(i)<29)
+			if(scan_in->ranges.at(i)<29 && scan_in->ranges.at(i)>0.5)
 				cloud2.points.push_back(temp.points.at(i));
 		}
 		sensor_msgs::PointCloud2 cloud3;
