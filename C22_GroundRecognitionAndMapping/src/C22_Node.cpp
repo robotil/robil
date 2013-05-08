@@ -96,6 +96,7 @@ bool C22_Node::proccess(C22_GroundRecognitionAndMapping::C22::Request  &req,
 		res.drivingPath.row.at(i).column.resize(_myMatrix->data->at(i)->size());
 		for(unsigned int j=0;j<_myMatrix->data->at(i)->size();j++){
 			res.drivingPath.row.at(i).column.at(j).status=_myMatrix->data->at(i)->at(j)->square_status;
+			res.drivingPath.row.at(i).column.at(j).height=_myMatrix->data->at(i)->at(j)->height;
 			res.drivingPath.row.at(i).column.at(j).planes.resize(_myMatrix->data->at(i)->at(j)->square_Planes->size());
 			for(unsigned int k=0;k<_myMatrix->data->at(i)->at(j)->square_Planes->size();k++){
 				res.drivingPath.row.at(i).column.at(j).planes.at(k).x=_myMatrix->data->at(i)->at(j)->square_Planes->at(k)->coefficient_x;
@@ -224,6 +225,7 @@ void C22_Node::callback(const C21_VisionAndLidar::C21_C22::ConstPtr& pclMsg,cons
 			  		outMsg.row.at(i).column.resize(_myMatrix->data->at(i)->size());
 			  		for(unsigned int j=0;j<_myMatrix->data->at(i)->size();j++){
 			  			outMsg.row.at(i).column.at(j).status=_myMatrix->data->at(i)->at(j)->square_status;
+			  			outMsg.row.at(i).column.at(j).height=_myMatrix->data->at(i)->at(j)->height;
 			  			outMsg.row.at(i).column.at(j).planes.resize(_myMatrix->data->at(i)->at(j)->square_Planes->size());
 			  			for(unsigned int k=0;k<_myMatrix->data->at(i)->at(j)->square_Planes->size();k++){
 			  				outMsg.row.at(i).column.at(j).planes.at(k).x=_myMatrix->data->at(i)->at(j)->square_Planes->at(k)->coefficient_x;
