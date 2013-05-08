@@ -51,6 +51,7 @@ private:
   boost::shared_ptr<pcl::visualization::PCLVisualizer> viewer;
   geometry_msgs::Point robotPos;
   geometry_msgs::Point robotOri;
+  pcl::PointCloud<pcl::PointXYZ>::Ptr cloudRecord;
   ros::Publisher C22_pub;
 public:
 
