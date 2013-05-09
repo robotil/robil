@@ -480,7 +480,7 @@ public:
 			//Raise left leg
 			move.request.PositionDestination.x = 0;
 			move.request.PositionDestination.y = -0.0;
-			move.request.PositionDestination.z = 0.05;
+			move.request.PositionDestination.z = 0.02;
 			move.request.AngleDestination.x = 0.0;
 			move.request.AngleDestination.y = 0.0;
 			move.request.AngleDestination.z = 0.0;
@@ -509,19 +509,33 @@ public:
 			}
 
 			//Fix orientation
-			tf::StampedTransform l_foot_to_r;
+			/*tf::StampedTransform l_foot_to_r;
 			try {
 				listener.waitForTransform("/l_foot","/r_foot",ros::Time(0),ros::Duration(0.2));
 				listener.lookupTransform("/l_foot","/r_foot",ros::Time(0),l_foot_to_r);
 			} catch (tf::TransformException &ex) {
 				ROS_ERROR("%s",ex.what());
+			}*/
+
+			//tf::StampedTransform l_foot_transform;
+			try {
+				listener.waitForTransform("/pelvis","/l_foot",ros::Time(0),ros::Duration(0.2));
+				listener.lookupTransform("/pelvis","/l_foot",ros::Time(0),l_foot_transform);
+			} catch (tf::TransformException &ex) {
+				ROS_ERROR("%s",ex.what());
 			}
+
+			XYZRPY tranform1 = VectorTranformation(	l_foot_transform.getOrigin().x(), l_foot_transform.getOrigin().y(), l_foot_transform.getOrigin().z(),
+													QuatToRoll(l_foot_transform.getRotation()), QuatToPitch(l_foot_transform.getRotation()), QuatToYaw(l_foot_transform.getRotation()),
+													0, 0, 0,
+													imu.x, imu.y, imu.z);
+
 
 			move.request.PositionDestination.x = 0;
 			move.request.PositionDestination.y = -0.0;
 			move.request.PositionDestination.z = 0;
-			move.request.AngleDestination.x = QuatToRoll(l_foot_to_r.getRotation());
-			move.request.AngleDestination.y = QuatToPitch(l_foot_to_r.getRotation());
+			move.request.AngleDestination.x = -tranform1.roll;
+			move.request.AngleDestination.y = -tranform1.pitch;
 			move.request.AngleDestination.z = 0;//QuatToYaw(l_foot_to_r.getRotation());
 			move.request.LinkToMove = "l_leg";
 			ROS_INFO("Moving left leg forward");
@@ -565,7 +579,7 @@ public:
 				//Raise left leg
 				move.request.PositionDestination.x = 0;
 				move.request.PositionDestination.y = -0.0;
-				move.request.PositionDestination.z = 0.05;
+				move.request.PositionDestination.z = 0.02;
 				move.request.AngleDestination.x = 0.0;
 				move.request.AngleDestination.y = 0.0;
 				move.request.AngleDestination.z = 0.0;
@@ -594,18 +608,33 @@ public:
 				}
 
 				//Fix orientation
-				tf::StampedTransform r_foot_to_l;
+				/*tf::StampedTransform r_foot_to_l;
 				try {
 					listener.waitForTransform("/r_foot","/l_foot",ros::Time(0),ros::Duration(0.2));
 					listener.lookupTransform("/r_foot","/l_foot",ros::Time(0),r_foot_to_l);
 				} catch (tf::TransformException &ex) {
 					ROS_ERROR("%s",ex.what());
+				}*/
+
+				//tf::StampedTransform r_foot_transform;
+				try {
+					listener.waitForTransform("/pelvis","/r_foot",ros::Time(0),ros::Duration(0.2));
+					listener.lookupTransform("/pelvis","/r_foot",ros::Time(0),r_foot_transform);
+				} catch (tf::TransformException &ex) {
+					ROS_ERROR("%s",ex.what());
 				}
+
+				XYZRPY tranform1 = VectorTranformation(	r_foot_transform.getOrigin().x(), r_foot_transform.getOrigin().y(), r_foot_transform.getOrigin().z(),
+														QuatToRoll(r_foot_transform.getRotation()), QuatToPitch(r_foot_transform.getRotation()), QuatToYaw(r_foot_transform.getRotation()),
+														0, 0, 0,
+														imu.x, imu.y, imu.z);
+
+
 				move.request.PositionDestination.x = 0;
 				move.request.PositionDestination.y = -0.0;
 				move.request.PositionDestination.z = 0;
-				move.request.AngleDestination.x = QuatToRoll(r_foot_to_l.getRotation());
-				move.request.AngleDestination.y = QuatToPitch(r_foot_to_l.getRotation());
+				move.request.AngleDestination.x = -tranform1.roll;
+				move.request.AngleDestination.y = -tranform1.pitch;
 				move.request.AngleDestination.z = 0;//QuatToYaw(l_foot_to_r.getRotation());
 				move.request.LinkToMove = "r_leg";
 				ROS_INFO("Moving left right forward");

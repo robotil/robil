@@ -27,7 +27,7 @@ class QuasiStaticWalking{
 private:
 	ros::NodeHandle nh_, nh2_, nh3_, nh4_;
 	ros::NodeHandle* rosnode;
-	ros::ServiceClient move_pelvis_cli_, pelvis_leg_target_cli_, walk_legs_cli_, step_down_cli_, make_step_cli_, foot_placement_cli_, start_posecontroller_cli_, stop_posecontroller_cli_;
+	ros::ServiceClient move_pelvis_cli_, pelvis_leg_target_cli_, walk_legs_cli_, step_down_cli_, make_step_cli_, foot_placement_cli_, start_posecontroller_cli_, stop_posecontroller_cli_, reset_cli_;
 	actionlib::SimpleActionServer<C0_RobilTask::RobilTaskAction> as_; // NodeHandle instance must be created before this line.
 	C0_RobilTask::RobilTaskFeedback feedback_;
 	C0_RobilTask::RobilTaskResult result_;
@@ -71,6 +71,7 @@ public:
 
 		start_posecontroller_cli_ = nh_.serviceClient<std_srvs::Empty>("/PoseController/start");
 		stop_posecontroller_cli_ = nh_.serviceClient<std_srvs::Empty>("/PoseController/stop");
+		reset_cli_ = nh_.serviceClient<std_srvs::Empty>("/PoseController/reset_joints");
 
 		imu_sub_ = nh_.subscribe("/atlas/imu",100,&QuasiStaticWalking::imu_CB,this);
 		path_sub_ = nh_.subscribe("/path",100,&QuasiStaticWalking::path_CB,this);
@@ -314,22 +315,22 @@ public:
 		//Steps in world PoV
 		std::vector<Walk> steps;
 		Walk step;
-		step.start_pelvis_yaw = 0.0;
+		step.start_pelvis_yaw = -0.5;
 		step.leg = RIGHT;
-		step.position.x = 18.240;
-		step.position.y = 8.207;
-		step.position.z = 1.08;
+		step.position.x = 18.050;
+		step.position.y = 8.407;
+		step.position.z = 1.10;
 		step.orientation.x = 0;
 		step.orientation.y = 0;
-		step.orientation.z = 0;
+		step.orientation.z = -0.8;
 		step.PoV_is_world = true;
 		steps.push_back(step);
 
 		step.start_pelvis_yaw = 0.0;
 		step.leg = LEFT;
-		step.position.x = 18.335;
+		step.position.x = 18.385;
 		step.position.y = 8.557;
-		step.position.z = 1.08;
+		step.position.z = 1.10;
 		step.orientation.x = 0;
 		step.orientation.y = 0;
 		step.orientation.z = 0;
@@ -338,14 +339,81 @@ public:
 
 		step.start_pelvis_yaw = 0.0;
 		step.leg = RIGHT;
-		step.position.x = 18.535;
-		step.position.y = 8.107;
-		step.position.z = 1.08;
+		step.position.x = 18.525;
+		step.position.y = 8.357;
+		step.position.z = 1.10;
+		step.orientation.x = 0;
+		step.orientation.y = 0;
+		step.orientation.z = -0.8;
+		step.PoV_is_world = true;
+		steps.push_back(step);
+
+		step.start_pelvis_yaw = 0.0;
+		step.leg = LEFT;
+		step.position.x = 18.705;
+		step.position.y = 8.357;
+		step.position.z = 1.10;
 		step.orientation.x = 0;
 		step.orientation.y = 0;
 		step.orientation.z = 0;
 		step.PoV_is_world = true;
 		steps.push_back(step);
+
+		step.start_pelvis_yaw = 0.0;
+		step.leg = RIGHT;
+		step.position.x = 18.935;
+		step.position.y = 8.177;
+		step.position.z = 1.10;
+		step.orientation.x = 0;
+		step.orientation.y = 0;
+		step.orientation.z = -0.8;
+		step.PoV_is_world = true;
+		steps.push_back(step);
+
+		step.start_pelvis_yaw = 0.0;
+		step.leg = LEFT;
+		step.position.x = 19.155;
+		step.position.y = 8.157;
+		step.position.z = 1.10;
+		step.orientation.x = 0;
+		step.orientation.y = 0;
+		step.orientation.z = 0;
+		step.PoV_is_world = true;
+		steps.push_back(step);
+
+		step.start_pelvis_yaw = 0.0;
+		step.leg = RIGHT;
+		step.position.x = 19.305;
+		step.position.y = 7.907;
+		step.position.z = 1.10;
+		step.orientation.x = 0;
+		step.orientation.y = 0;
+		step.orientation.z = -0.8;
+		step.PoV_is_world = true;
+		steps.push_back(step);
+
+		step.start_pelvis_yaw = 0.0;
+		step.leg = LEFT;
+		step.position.x = 19.555;
+		step.position.y = 8.157;
+		step.position.z = 1.10;
+		step.orientation.x = 0;
+		step.orientation.y = 0;
+		step.orientation.z = 0;
+		step.PoV_is_world = true;
+		steps.push_back(step);
+
+		step.start_pelvis_yaw = 0.0;
+		step.leg = RIGHT;
+		step.position.x = 19.555;
+		step.position.y = 7.907;
+		step.position.z = 1.10;
+		step.orientation.x = 0;
+		step.orientation.y = 0;
+		step.orientation.z = 0.0;
+		step.PoV_is_world = true;
+		steps.push_back(step);
+
 /*
 		step.start_pelvis_yaw = -0.0;
 		step.leg = LEFT;
@@ -419,6 +487,7 @@ public:
 
 
 			if(steps[i].PoV_is_world){
+				ros::spinOnce();
 				ROS_INFO("odo: XYZ %f %f %f", ground_truth_odometery.pose.pose.position.x, ground_truth_odometery.pose.pose.position.y, ground_truth_odometery.pose.pose.position.z);
 
 				XYZRPY tran = VectorTransposeTranformation(	steps[i].position.x, steps[i].position.y, steps[i].position.z,
@@ -475,12 +544,33 @@ public:
 				return;
 			}
 
+			/*stop_posecontroller_cli_.call(e);
+			ros::Duration(0.5).sleep();
+			reset_cli_.call(e);
+			start_posecontroller_cli_.call(e);*/
 
 
 
 
 
 
+
+		}
+
+		move_pelvis.request.PositionDestination.x = 0;
+		move_pelvis.request.PositionDestination.y = -0.0;
+		move_pelvis.request.PositionDestination.z = +0.05;
+		move_pelvis.request.AngleDestination.x = 0.0;
+		move_pelvis.request.AngleDestination.y = 0.0;
+		move_pelvis.request.AngleDestination.z = 0.0;
+		move_pelvis.request.LinkToMove = "pelvis";
+		ROS_INFO("Lowering pelvis");
+		if(!move_pelvis_cli_.call(move_pelvis)){
+			ROS_ERROR("Could not lower pelvis");
+			C0_RobilTask::RobilTaskResult _res;
+			_res.success = C0_RobilTask::RobilTask::FAULT;
+			as_.setSucceeded(_res);
+			return;
 		}
 
 
