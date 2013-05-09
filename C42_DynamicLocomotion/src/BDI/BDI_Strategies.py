@@ -112,6 +112,7 @@ class BDI_StrategyForward(BDI_Strategy):
         self._ErrorCorrection = self._StepWidth
         self._ErrorCorrected = 0.0
         self._MinimalCorrection = 0.02
+        self._Error = 0.0
 
     def GetStepData(self,index):
         stepData = BDI_Strategy.GetStepData(self,index)
