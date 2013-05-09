@@ -113,7 +113,7 @@ public:
 
 	void imu_CB(const sensor_msgs::Imu::ConstPtr& imu){
 		yaw_from_imu = atan2((2*(imu->orientation.w*imu->orientation.z + imu->orientation.y*imu->orientation.x)),
-								(1-2*(pow(imu->orientation.y,2)+pow(imu->orientation.z,2))));
+				(1-2*(pow(imu->orientation.y,2)+pow(imu->orientation.z,2))));
 		return;
 	}
 
@@ -140,7 +140,7 @@ public:
 	void goalCB(){
 
 		start_posecontroller_cli_.call(e);
-/*
+		/*
 		clock = ros::Time::now();
 		ROS_INFO("Start time: %f", ros::Time::now().toSec());
 
@@ -308,17 +308,20 @@ public:
 
 
 		}
-*/
+		 */
 
 
 
 		//Steps in world PoV
 		std::vector<Walk> steps;
 		Walk step;
+
+
+		//We're heading for trouble
 		step.start_pelvis_yaw = -0.5;
 		step.leg = RIGHT;
-		step.position.x = 18.050;
-		step.position.y = 8.407;
+		step.position.x = 16.870;
+		step.position.y = 7.967;
 		step.position.z = 1.10;
 		step.orientation.x = 0;
 		step.orientation.y = 0;
@@ -328,7 +331,123 @@ public:
 
 		step.start_pelvis_yaw = 0.0;
 		step.leg = LEFT;
-		step.position.x = 18.385;
+		step.position.x = 17.220;
+		step.position.y = 8.137;
+		step.position.z = 1.10;
+		step.orientation.x = 0;
+		step.orientation.y = 0;
+		step.orientation.z = 0;
+		step.PoV_is_world = true;
+		steps.push_back(step);
+
+		//1st gap under control
+		step.start_pelvis_yaw = 0.0;
+		step.leg = RIGHT;
+		step.position.x = 17.35;
+		step.position.y = 8.0;
+		step.position.z = 1.10;
+		step.orientation.x = 0;
+		step.orientation.y = 0;
+		step.orientation.z = -0.4;
+		step.PoV_is_world = true;
+		steps.push_back(step);
+
+		//step 2
+		step.start_pelvis_yaw = 0.5;
+		step.leg = LEFT;
+		step.position.x = (17.35 + 0.15);
+		step.position.y = ( 8.0  + 0.18);
+		step.position.z = 1.1;
+		step.orientation.x = 0;
+		step.orientation.y = 0;
+		step.orientation.z = 0;
+		step.PoV_is_world = true;
+		steps.push_back(step);
+
+		//step 3
+		step.start_pelvis_yaw = 0.0;
+		step.leg = RIGHT;
+		step.position.x = (17.5  );
+		step.position.y = ( 8.07);
+		step.position.z = 1.1;
+		step.orientation.x = 0;
+		step.orientation.y = 0;
+		step.orientation.z = 0.0;
+		step.PoV_is_world = true;
+		steps.push_back(step);
+		//step 4
+		step.start_pelvis_yaw = 0.0;
+		step.leg = LEFT;
+		step.position.x = (17.71);
+		step.position.y = ( 8.31);
+		step.position.z = 1.1;
+		step.orientation.x = 0;
+		step.orientation.y = 0;
+		step.orientation.z = 0.0;
+		step.PoV_is_world = true;
+		steps.push_back(step);
+		//step 5
+		step.start_pelvis_yaw = 0.0;
+		step.leg = RIGHT;
+		step.position.x = ( 17.5 );
+		step.position.y = ( 8.16 );
+		step.position.z = 1.08;
+		step.orientation.x = 0;
+		step.orientation.y = 0;
+		step.orientation.z = -0.8;
+		step.PoV_is_world = true;
+		steps.push_back(step);
+		//step 6
+		step.start_pelvis_yaw = 0.0;
+		step.leg = LEFT;
+		step.position.x = ( 17.69 );
+		step.position.y = (  8.41  );
+		step.position.z = 1.1;
+		step.orientation.x = 0;
+		step.orientation.y = 0;
+		step.orientation.z = 0.6;
+		step.PoV_is_world = true;
+		steps.push_back(step);
+		//step 7
+		step.start_pelvis_yaw = 0.0;
+		step.leg = RIGHT;
+		step.position.x = (17.96);
+		step.position.y = ( 8.35);
+		step.position.z = 1.13;
+		step.orientation.x = 0;
+		step.orientation.y = 0;
+		step.orientation.z = 0.0;
+		step.PoV_is_world = true;
+		steps.push_back(step);
+		//step 8
+		step.start_pelvis_yaw = 0.0;
+		step.leg = LEFT;
+		step.position.x = (18.03);
+		step.position.y = ( 8.6);
+		step.position.z = 1.13;
+		step.orientation.x = 0;
+		step.orientation.y = 0;
+		step.orientation.z = 0.0;
+		step.PoV_is_world = true;
+		steps.push_back(step);
+
+
+
+		//End of second cube
+		step.start_pelvis_yaw = -0.5;
+		step.leg = RIGHT;
+		step.position.x = 18.000;
+		step.position.y = 8.457;
+		step.position.z = 1.10;
+		step.orientation.x = 0;
+		step.orientation.y = 0;
+		step.orientation.z = -0.8;
+		step.PoV_is_world = true;
+		steps.push_back(step);
+
+		step.start_pelvis_yaw = 0.0;
+		step.leg = LEFT;
+		step.position.x = 18.405;
 		step.position.y = 8.557;
 		step.position.z = 1.10;
 		step.orientation.x = 0;
@@ -337,6 +456,7 @@ public:
 		step.PoV_is_world = true;
 		steps.push_back(step);
 
+		//Phew! Past the big gap
 		step.start_pelvis_yaw = 0.0;
 		step.leg = RIGHT;
 		step.position.x = 18.525;
@@ -350,15 +470,16 @@ public:
 
 		step.start_pelvis_yaw = 0.0;
 		step.leg = LEFT;
-		step.position.x = 18.705;
-		step.position.y = 8.357;
+		step.position.x = 18.755;
+		step.position.y = 8.407;
 		step.position.z = 1.10;
 		step.orientation.x = 0;
 		step.orientation.y = 0;
-		step.orientation.z = 0;
+		step.orientation.z = 0.4;
 		step.PoV_is_world = true;
 		steps.push_back(step);
 
+		//On to the last cube!
 		step.start_pelvis_yaw = 0.0;
 		step.leg = RIGHT;
 		step.position.x = 18.935;
@@ -381,7 +502,7 @@ public:
 		step.PoV_is_world = true;
 		steps.push_back(step);
 
-		step.start_pelvis_yaw = 0.0;
+		step.start_pelvis_yaw = -0.5;
 		step.leg = RIGHT;
 		step.position.x = 19.305;
 		step.position.y = 7.907;
@@ -392,9 +513,10 @@ public:
 		step.PoV_is_world = true;
 		steps.push_back(step);
 
+		//Stepping on safe ground!
 		step.start_pelvis_yaw = 0.0;
 		step.leg = LEFT;
-		step.position.x = 19.555;
+		step.position.x = 19.605;
 		step.position.y = 8.157;
 		step.position.z = 1.10;
 		step.orientation.x = 0;
@@ -405,8 +527,8 @@ public:
 
 		step.start_pelvis_yaw = 0.0;
 		step.leg = RIGHT;
-		step.position.x = 19.555;
-		step.position.y = 7.907;
+		step.position.x = 19.655;
+		step.position.y = 7.947;
 		step.position.z = 1.10;
 		step.orientation.x = 0;
 		step.orientation.y = 0;
@@ -414,16 +536,27 @@ public:
 		step.PoV_is_world = true;
 		steps.push_back(step);
 
-/*
-		step.start_pelvis_yaw = -0.0;
+		step.start_pelvis_yaw = 0.5;
 		step.leg = LEFT;
-		step.position.x = 0.18;
-		step.position.y = 0.268;
-		step.position.z = -0.779;
+		step.position.x = 19.755;
+		step.position.y = 8.157;
+		step.position.z = 1.10;
 		step.orientation.x = 0;
 		step.orientation.y = 0;
-		step.orientation.z = 0.8;
-		steps.push_back(step);*/
+		step.orientation.z = 0;
+		step.PoV_is_world = true;
+		steps.push_back(step);
+
+		step.start_pelvis_yaw = 0.0;
+		step.leg = RIGHT;
+		step.position.x = 19.755;
+		step.position.y = 7.947;
+		step.position.z = 1.10;
+		step.orientation.x = 0;
+		step.orientation.y = 0;
+		step.orientation.z = 0.0;
+		step.PoV_is_world = true;
+		steps.push_back(step);
 
 
 
@@ -491,9 +624,9 @@ public:
 				ROS_INFO("odo: XYZ %f %f %f", ground_truth_odometery.pose.pose.position.x, ground_truth_odometery.pose.pose.position.y, ground_truth_odometery.pose.pose.position.z);
 
 				XYZRPY tran = VectorTransposeTranformation(	steps[i].position.x, steps[i].position.y, steps[i].position.z,
-													steps[i].orientation.x, steps[i].orientation.y, steps[i].orientation.z,
-													ground_truth_odometery.pose.pose.position.x, ground_truth_odometery.pose.pose.position.y, ground_truth_odometery.pose.pose.position.z,
-													QuatToRoll(ground_truth_odometery.pose.pose.orientation), QuatToPitch(ground_truth_odometery.pose.pose.orientation), QuatToYaw(ground_truth_odometery.pose.pose.orientation));
+						steps[i].orientation.x, steps[i].orientation.y, steps[i].orientation.z,
+						ground_truth_odometery.pose.pose.position.x, ground_truth_odometery.pose.pose.position.y, ground_truth_odometery.pose.pose.position.z,
+						QuatToRoll(ground_truth_odometery.pose.pose.orientation), QuatToPitch(ground_truth_odometery.pose.pose.orientation), QuatToYaw(ground_truth_odometery.pose.pose.orientation));
 
 				ROS_INFO("transform: XYZ %f %f %f, RPY %f %f %f", tran.x, tran.y, tran.z, tran.roll, tran.pitch, tran.yaw);
 
@@ -556,13 +689,13 @@ public:
 
 
 		}
-
+		/*
 		move_pelvis.request.PositionDestination.x = 0;
 		move_pelvis.request.PositionDestination.y = -0.0;
-		move_pelvis.request.PositionDestination.z = +0.05;
+		move_pelvis.request.PositionDestination.z = 0.0;
 		move_pelvis.request.AngleDestination.x = 0.0;
 		move_pelvis.request.AngleDestination.y = 0.0;
-		move_pelvis.request.AngleDestination.z = 0.0;
+		move_pelvis.request.AngleDestination.z = 0.5;
 		move_pelvis.request.LinkToMove = "pelvis";
 		ROS_INFO("Lowering pelvis");
 		if(!move_pelvis_cli_.call(move_pelvis)){
@@ -571,7 +704,7 @@ public:
 			_res.success = C0_RobilTask::RobilTask::FAULT;
 			as_.setSucceeded(_res);
 			return;
-		}
+		}*/
 
 
 
