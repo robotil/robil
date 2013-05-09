@@ -5,7 +5,8 @@ import rospy
 import tf
 from atlas_msgs.msg import AtlasCommand
 from sensor_msgs.msg import JointState
-from nav_msgs.msg import Odometry
+from sensor_msgs.msg import Imu
+from tf.transformations import euler_from_quaternion
 from numpy import zeros, array, linspace
 from math import ceil
 
@@ -31,9 +32,8 @@ class Controller:
 			0, 0, 0, 10, 0, 0,
 			3, 10, 2, 3, 0.1, 0.2,
 			3, 10, 2, 3, 0.1, 0.2]
-		# joint states and odometry subsribers
+		# joint states subscriber
 		self._currentJointState = JointState()
-		self._currentOdometry = Odometry()
 
 		# initialize command
 		self._command = AtlasCommand()
@@ -58,7 +58,7 @@ class Controller:
 			self._command.i_effort_min[i] = -self._command.i_effort_max[i]
 
 		rospy.Subscriber("/atlas/joint_states", JointState, self._jointStatesCallback)
-		rospy.Subscriber("/ground_truth_odom", Odometry, self._OdometryCallback)
+		rospy.Subscriber("/atlas/imu", Imu, self._OrientationCallback)
 		self._pub = rospy.Publisher('/atlas/atlas_command', AtlasCommand)
 		rospy.sleep(0.5)
 
@@ -66,9 +66,9 @@ class Controller:
 	def _jointStatesCallback(self, msg):
 		self._currentJointState = msg
 
-	# update odometry
-	def _OdometryCallback(self, msg):
-		self._currentOdometry = msg
+	# update orientation
+	def _OrientationCallback(self, msg):
+		self._currentOrientation = msg
 
 	# publish a command
 	def publish(self, position, dt):
@@ -82,11 +82,7 @@ class Controller:
 			self._pub.publish(self._command)
 			rospy.sleep(dt / float(n))
 
-	# get the odometry position
-	def getPose(self):
-		return self._currentOdometry.pose.pose.position
-
-	def getYPR(self):
-		quat = self._currentOdometry.pose.pose.orientation
+	def getRPY(self):
+		quat = self._currentOrientation.orientation
 		(r, p, y) = tf.transformations.euler_from_quaternion([quat.x, quat.y, quat.z, quat.w])
-		return (y, p, r)
+		return (r, p, y)

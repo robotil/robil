@@ -19,61 +19,65 @@
 #include <ros/subscribe_options.h>
 #include <boost/thread.hpp>
 #include <boost/algorithm/string.hpp>
-#include <sensor_msgs/JointState.h>
-#include <osrf_msgs/JointCommands.h>
+#include <atlas_msgs/AtlasState.h>
+#include <atlas_msgs/AtlasCommand.h>
 #include "std_msgs/String.h"
 #include <sstream>
 #include <iostream>
 #include <string>
+#include <vector>
 #include <boost/lexical_cast.hpp>
 #include "FK.h"
 #include "IK.h"
 #include "Path.h"
 
-ros::Publisher pub_joint_commands_;
-double state[28] = {0};
-osrf_msgs::JointCommands jointcommands;
+ros::Publisher pubAtlasCommand;
+atlas_msgs::AtlasCommand ac;
+atlas_msgs::AtlasState as;
+boost::mutex mutex;
+ros::Time t0;
+const unsigned int numJoints = 28;
+
+
 int	 callback_called = 0;
 RPY argTarget;
 bool use_arg = false;
 bool callBackRun = false;
 
-void SetJointStates(const sensor_msgs::JointState::ConstPtr &_js)
+void SetAtlasState(const atlas_msgs::AtlasState::ConstPtr &_as)
 {
 	static ros::Time startTime = ros::Time::now();
-	// for testing round trip time
-	jointcommands.header.stamp = _js->header.stamp;
+	t0 = startTime;
 
-	// assign sinusoidal joint angle targets
-	for (unsigned int i = 0; i < jointcommands.name.size(); i++)
-		//jointcommands.position[i] = _js->position[i];
-		state[i] = _js->position[i];
-		
+	// lock to copy incoming AtlasState
+	{
+		boost::mutex::scoped_lock lock(mutex);
+		as = *_as;
+	}
 	
+	ac.header.stamp = as.header.stamp;
+
 	if (callBackRun == false)
 	{
 		callBackRun = true;
 		// set cout presentation	
 		std::cout.precision(6);
 		std::cout.setf (std::ios::fixed , std::ios::floatfield ); 
-
 		// print current state
 		std::cout << "Current Position:\n";
-		IkSolution IkCurrent = IkSolution(_js->position[q4l],_js->position[q5l],
-			_js->position[q6l],	_js->position[q7l], _js->position[q8l], _js->position[q9l]);
+		IkSolution IkCurrent = IkSolution(as.position[q4l],as.position[q5l],
+			as.position[q6l],	as.position[q7l], as.position[q8l], as.position[q9l]);
 		IkCurrent.Print();	
-		RPY lCurrent = lPose(_js->position[q1], _js->position[q2],_js->position[q3],IkCurrent);
-		lCurrent.Print();
+		RPY rCurrent = lPose(as.position[q1], as.position[q2],as.position[q3],IkCurrent);
+		rCurrent.Print();
+	}
 
-		// print target
-//		if (use_arg)
-//		{
-//			std::cout << "Target:\n";
-//			argTarget.Print();
-//		}
-	}	
-	
+
+  // uncomment to simulate state filtering
+  // usleep(1000);
 }
+
+
 
 int main(int argc, char** argv)
 {
@@ -84,8 +88,6 @@ int main(int argc, char** argv)
 
 	if (argc == 5)
 	{
-		int		intGet;
-		double 	dubGet;
 
 		angleNum = boost::lexical_cast<int>(argv[1]);
 		angleVal = boost::lexical_cast<double>(argv[2]);
@@ -95,7 +97,7 @@ int main(int argc, char** argv)
 		if ((angleNum >= 4)&&(angleNum <= 9)) use_arg = true;
 	}
    
-  ros::init(argc, argv, "pub_joint_command_lhand");
+  ros::init(argc, argv, "pub_joint_command_rhand");
 
   ros::NodeHandle* rosnode = new ros::NodeHandle();
 
@@ -108,95 +110,31 @@ int main(int argc, char** argv)
       wait = false;
   }
 
-  // must match those inside AtlasPlugin
-  jointcommands.name.push_back("atlas::back_lbz");
-  jointcommands.name.push_back("atlas::back_mby");
-  jointcommands.name.push_back("atlas::back_ubx");
-  jointcommands.name.push_back("atlas::neck_ay");
-  jointcommands.name.push_back("atlas::l_leg_uhz");
-  jointcommands.name.push_back("atlas::l_leg_mhx");
-  jointcommands.name.push_back("atlas::l_leg_lhy");
-  jointcommands.name.push_back("atlas::l_leg_kny");
-  jointcommands.name.push_back("atlas::l_leg_uay");
-  jointcommands.name.push_back("atlas::l_leg_lax");
-  jointcommands.name.push_back("atlas::r_leg_uhz");
-  jointcommands.name.push_back("atlas::r_leg_mhx");
-  jointcommands.name.push_back("atlas::r_leg_lhy");
-  jointcommands.name.push_back("atlas::r_leg_kny");
-  jointcommands.name.push_back("atlas::r_leg_uay");
-  jointcommands.name.push_back("atlas::r_leg_lax");
-  jointcommands.name.push_back("atlas::l_arm_usy");
-  jointcommands.name.push_back("atlas::l_arm_shx");
-  jointcommands.name.push_back("atlas::l_arm_ely");
-  jointcommands.name.push_back("atlas::l_arm_elx");
-  jointcommands.name.push_back("atlas::l_arm_uwy");
-  jointcommands.name.push_back("atlas::l_arm_mwx");
-  jointcommands.name.push_back("atlas::r_arm_usy");
-  jointcommands.name.push_back("atlas::r_arm_shx");
-  jointcommands.name.push_back("atlas::r_arm_ely");
-  jointcommands.name.push_back("atlas::r_arm_elx");
-  jointcommands.name.push_back("atlas::r_arm_uwy");
-  jointcommands.name.push_back("atlas::r_arm_mwx");
-
-  unsigned int n = jointcommands.name.size();
-  jointcommands.position.resize(n);
-  jointcommands.velocity.resize(n);
-  jointcommands.effort.resize(n);
-  jointcommands.kp_position.resize(n);
-  jointcommands.ki_position.resize(n);
-  jointcommands.kd_position.resize(n);
-  jointcommands.kp_velocity.resize(n);
-  jointcommands.i_effort_min.resize(n);
-  jointcommands.i_effort_max.resize(n);
-
-  for (unsigned int i = 0; i < n; i++)
-  {
-    std::vector<std::string> pieces;
-    boost::split(pieces, jointcommands.name[i], boost::is_any_of(":"));
-
-    rosnode->getParam("atlas_controller/gains/" + pieces[2] + "/p",
-      jointcommands.kp_position[i]);
-
-    rosnode->getParam("atlas_controller/gains/" + pieces[2] + "/i",
-      jointcommands.ki_position[i]);
-
-    rosnode->getParam("atlas_controller/gains/" + pieces[2] + "/d",
-      jointcommands.kd_position[i]);
-
-    rosnode->getParam("atlas_controller/gains/" + pieces[2] + "/i_clamp",
-      jointcommands.i_effort_min[i]);
-    jointcommands.i_effort_min[i] = -jointcommands.i_effort_min[i];
-
-    rosnode->getParam("atlas_controller/gains/" + pieces[2] + "/i_clamp",
-      jointcommands.i_effort_max[i]);
-
-    jointcommands.velocity[i]     = 0;
-    jointcommands.effort[i]       = 0;
-    jointcommands.kp_velocity[i]  = 0;
-  }
+  unsigned int n = numJoints;
+  ac.position.resize(n);
+  ac.k_effort.resize(n);
+  ac.velocity.resize(n);
+  ac.effort.resize(n);
+  ac.kp_position.resize(n);
+  ac.ki_position.resize(n);
+  ac.kd_position.resize(n);
+  ac.kp_velocity.resize(n);
+  ac.i_effort_min.resize(n);
+  ac.i_effort_max.resize(n);
 
   // ros topic subscribtions
-  ros::SubscribeOptions jointStatesSo =
-    ros::SubscribeOptions::create<sensor_msgs::JointState>(
-    "/atlas/joint_states", 1, SetJointStates,
-    ros::VoidPtr(), rosnode->getCallbackQueue());
+  ros::SubscribeOptions atlasStateSo =
+	ros::SubscribeOptions::create <atlas_msgs::AtlasState> (
+	"/atlas/atlas_state", 100, SetAtlasState,
+	ros::VoidPtr(), rosnode->getCallbackQueue());
 
-  // Because TCP causes bursty communication with high jitter,
-  // declare a preference on UDP connections for receiving
-  // joint states, which we want to get at a high rate.
-  // Note that we'll still accept TCP connections for this topic
-  // (e.g., from rospy nodes, which don't support UDP);
-  // we just prefer UDP.
-  jointStatesSo.transport_hints = ros::TransportHints().unreliable();
 
-  ros::Subscriber subJointStates = rosnode->subscribe(jointStatesSo);
-  // ros::Subscriber subJointStates =
-  //   rosnode->subscribe("/atlas/joint_states", 1000, SetJointStates);
+  atlasStateSo.transport_hints = ros::TransportHints().reliable().tcpNoDelay(true);
+  ros::Subscriber subAtlasState = rosnode->subscribe(atlasStateSo);
 
-  pub_joint_commands_ =
-    rosnode->advertise<osrf_msgs::JointCommands>(
-    "/atlas/joint_commands", 1, true);
-	
+  // ros topic publisher
+    pubAtlasCommand = rosnode->advertise<atlas_msgs::AtlasCommand>(
+      "/atlas/atlas_command", 100, true);
 	
 	while (ros::ok())
 	{
@@ -209,11 +147,26 @@ int main(int argc, char** argv)
 		}*/
 		if (callBackRun)
 		{
-			// check if no arguments			
-			if (!use_arg) break;			
+
+			// check if no arguments
+			if (!use_arg) break;
+
+			for (unsigned int i = 0; i < n; i++)
+			{
+				ac.kp_position[i] = as.kp_position[i];
+				ac.ki_position[i] = as.ki_position[i];
+				ac.kd_position[i] = as.kd_position[i];
+				ac.i_effort_min[i] = as.i_effort_min[i];
+				ac.i_effort_max[i] = as.i_effort_max[i];
+
+				ac.velocity[i] = 0;
+				ac.effort[i] = 0;
+				ac.kp_velocity[i] = 0;
+
+			}
 						
-			IkSolution IkCurrent = IkSolution(state[q4l], state[q5l], state[q6l], state[q7l],
-				state[q8l], state[q9l]);
+			IkSolution IkCurrent = IkSolution(as.position[q4l], as.position[q5l], as.position[q6l], as.position[q7l],
+				as.position[q8l], as.position[q9l]);
 			IkSolution IkNext;
 
 			switch (angleNum)
@@ -223,8 +176,8 @@ int main(int argc, char** argv)
 				angleVal = (angleVal < q4lMin? q4lMin: angleVal);
 				std::cout<< "angle q4: " << angleVal << " Limits("<< q4lMin << ", "<<
 						q4lMax << ")\n";
-				IkNext = IkSolution(angleVal, state[q5l], state[q6l], state[q7l],
-						state[q8l], state[q9l]);
+				IkNext = IkSolution(angleVal, as.position[q5l], as.position[q6l], as.position[q7l],
+						as.position[q8l], as.position[q9l]);
 				break;
 
 			case 5:
@@ -232,8 +185,8 @@ int main(int argc, char** argv)
 				angleVal = (angleVal < q5lMin? q5lMin: angleVal);
 				std::cout<< "angle q5: " << angleVal << " Limits("<< q5lMin << ", "<<
 						q5lMax << ")\n";
-				IkNext = IkSolution(state[q4l], angleVal, state[q6l], state[q7l],
-						state[q8l], state[q9l]);
+				IkNext = IkSolution(as.position[q4l], angleVal, as.position[q6l], as.position[q7l],
+						as.position[q8l], as.position[q9l]);
 				break;
 
 			case 6:
@@ -241,8 +194,8 @@ int main(int argc, char** argv)
 				angleVal = (angleVal < q6lMin? q6lMin: angleVal);
 				std::cout<< "angle q6: " << angleVal << " Limits("<< q6lMin << ", "<<
 						q6lMax << ")\n";
-				IkNext = IkSolution(state[q4l], state[q5l], angleVal, state[q7l],
-						state[q8l], state[q9l]);
+				IkNext = IkSolution(as.position[q4l], as.position[q5l], angleVal, as.position[q7l],
+						as.position[q8l], as.position[q9l]);
 				break;
 
 			case 7:
@@ -250,8 +203,8 @@ int main(int argc, char** argv)
 				angleVal = (angleVal < q7lMin? q7lMin: angleVal);
 				std::cout<< "angle q7: " << angleVal << " Limits("<< q7lMin << ", "<<
 						q7lMax << ")\n";
-				IkNext = IkSolution(state[q4l], state[q5l], state[q6l], angleVal,
-						state[q8l], state[q9l]);
+				IkNext = IkSolution(as.position[q4l], as.position[q5l], as.position[q6l], angleVal,
+						as.position[q8l], as.position[q9l]);
 				break;
 
 			case 8:
@@ -259,8 +212,8 @@ int main(int argc, char** argv)
 				angleVal = (angleVal < q8lMin? q8lMin: angleVal);
 				std::cout<< "angle q8: " << angleVal << " Limits("<< q8lMin << ", "<<
 						q8lMax << ")\n";
-				IkNext = IkSolution(state[q4l], state[q5l], state[q6l], state[q7l],
-						angleVal, state[q9l]);
+				IkNext = IkSolution(as.position[q4l], as.position[q5l], as.position[q6l], as.position[q7l],
+						angleVal, as.position[q9l]);
 				break;
 
 			case 9:
@@ -268,49 +221,56 @@ int main(int argc, char** argv)
 				angleVal = (angleVal < q9lMin? q9lMin: angleVal);
 				std::cout<< "angle q9: " << angleVal << " Limits("<< q9lMin << ", "<<
 						q9lMax << ")\n";
-				IkNext = IkSolution(state[q4l], state[q5l], state[q6l], state[q7l],
-						state[q8l], angleVal);
+				IkNext = IkSolution(as.position[q4l], as.position[q5l], as.position[q6l], as.position[q7l],
+						as.position[q8l], angleVal);
 				break;
 			}
 
 			IkNext.Print();
-			RPY r = lPose(state[q1], state[q2], state[q3], IkNext);
+			RPY r = lPose(as.position[q1], as.position[q2], as.position[q3], IkNext);
 			r.Print();
 			
 			
 			pPathPoints points = pPathPoints(IkCurrent, IkNext, pointsNum);
-			
-//			for (unsigned int j=0; j<jointcommands.name.size(); j++)
-//				{
-//					//jointcommands.position[j] = state[j];
-//					std::cout << state[j] << " ";
-//				}			
+
+			ac.k_effort[q4l]  = 255;
+			ac.k_effort[q5l]  = 255;
+			ac.k_effort[q6l]  = 255;
+			ac.k_effort[q7l]  = 255;
+			ac.k_effort[q8l]  = 255;
+			ac.k_effort[q9l]  = 255;
+			ac.k_effort[q4r]  = 255;
+			ac.k_effort[q5r]  = 255;
+			ac.k_effort[q6r]  = 255;
+			ac.k_effort[q7r]  = 255;
+			ac.k_effort[q8r]  = 255;
+			ac.k_effort[q9r]  = 255;
 			
 			for (int i=0; i<N; i++)
 			{
 				// ros::spinOnce();
 				// assign current joint angles 
-				for (unsigned int j=0; j<jointcommands.name.size(); j++)
+				for (unsigned int j=0; j<numJoints; j++)
 				{
-					jointcommands.position[j] = state[j];
+					ac.position[j] = as.position[j];
 					//std::cout << state[j] << " ";
 				}
-				
-				jointcommands.position[q4l] = points.pArray[i]._q4;
-				jointcommands.position[q5l] = points.pArray[i]._q5;
-				jointcommands.position[q6l] = points.pArray[i]._q6;
-				jointcommands.position[q7l] = points.pArray[i]._q7;
-				jointcommands.position[q8l] = points.pArray[i]._q8;
-				jointcommands.position[q9l] = points.pArray[i]._q9;
+				ac.position[q4l] = points.pArray[i]._q4;
+				ac.position[q5l] = points.pArray[i]._q5;
+				ac.position[q6l] = points.pArray[i]._q6;
+				ac.position[q7l] = points.pArray[i]._q7;
+				ac.position[q8l] = points.pArray[i]._q8;
+				ac.position[q9l] = points.pArray[i]._q9;
 				
 				//ROS_INFO("");
 				//std::cout << i <<": ";				
 				//points.Array[i].Print();
 				
-				pub_joint_commands_.publish(jointcommands);					
+				pubAtlasCommand.publish(ac);
 					
 				ros::Duration(seconds/pointsNum).sleep();
 			}
+
 			break;
 		}
 		ros::Duration(0.1).sleep();
