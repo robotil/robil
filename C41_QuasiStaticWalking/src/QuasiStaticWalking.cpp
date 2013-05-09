@@ -316,9 +316,31 @@ public:
 		Walk step;
 		step.start_pelvis_yaw = 0.0;
 		step.leg = RIGHT;
-		step.position.x = 0.51;
-		step.position.y = -0.13;
-		step.position.z = -1.078;
+		step.position.x = 18.240;
+		step.position.y = 8.207;
+		step.position.z = 1.3;
+		step.orientation.x = 0;
+		step.orientation.y = 0;
+		step.orientation.z = 0;
+		step.PoV_is_world = true;
+		steps.push_back(step);
+
+		step.start_pelvis_yaw = 0.0;
+		step.leg = LEFT;
+		step.position.x = 18.355;
+		step.position.y = 8.557;
+		step.position.z = 0.95;
+		step.orientation.x = 0;
+		step.orientation.y = 0;
+		step.orientation.z = 0;
+		step.PoV_is_world = true;
+		steps.push_back(step);
+
+		step.start_pelvis_yaw = 0.0;
+		step.leg = RIGHT;
+		step.position.x = 18.535;
+		step.position.y = 8.107;
+		step.position.z = 0.95;
 		step.orientation.x = 0;
 		step.orientation.y = 0;
 		step.orientation.z = 0;
@@ -401,19 +423,19 @@ public:
 
 				XYZRPY tran = VectorTranformation(	steps[i].position.x, steps[i].position.y, steps[i].position.z,
 													steps[i].orientation.x, steps[i].orientation.y, steps[i].orientation.z,
-													ground_truth_odometery.pose.pose.position.x, ground_truth_odometery.pose.pose.position.y, ground_truth_odometery.pose.pose.position.z,
-													QuatToRoll(ground_truth_odometery.pose.pose.orientation), QuatToPitch(ground_truth_odometery.pose.pose.orientation), QuatToYaw(ground_truth_odometery.pose.pose.orientation));
+													-ground_truth_odometery.pose.pose.position.x, -ground_truth_odometery.pose.pose.position.y, -ground_truth_odometery.pose.pose.position.z,
+													-QuatToRoll(ground_truth_odometery.pose.pose.orientation), -QuatToPitch(ground_truth_odometery.pose.pose.orientation), -QuatToYaw(ground_truth_odometery.pose.pose.orientation));
 
 				ROS_INFO("transform: XYZ %f %f %f, RPY %f %f %f", tran.x, tran.y, tran.z, tran.roll, tran.pitch, tran.yaw);
 
 
 				//Move leg forward
-				move_pelvis.request.PositionDestination.x = -tran.x;
-				move_pelvis.request.PositionDestination.y = -tran.y;
-				move_pelvis.request.PositionDestination.z = -tran.z;
-				move_pelvis.request.AngleDestination.x = -tran.roll;
-				move_pelvis.request.AngleDestination.y = -tran.pitch;
-				move_pelvis.request.AngleDestination.z = -tran.yaw;
+				move_pelvis.request.PositionDestination.x = tran.x;
+				move_pelvis.request.PositionDestination.y = tran.y;
+				move_pelvis.request.PositionDestination.z = tran.z;
+				move_pelvis.request.AngleDestination.x = tran.roll;
+				move_pelvis.request.AngleDestination.y = tran.pitch;
+				move_pelvis.request.AngleDestination.z = tran.yaw;
 				move_pelvis.request.LinkToMove = (steps[i].leg == LEFT) ? "l_leg" : "r_leg";
 				ROS_INFO("Moving %s forward", move_pelvis.request.LinkToMove.c_str());
 				if(!make_step_cli_.call(move_pelvis)){
