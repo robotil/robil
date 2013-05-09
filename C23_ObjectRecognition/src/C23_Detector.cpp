@@ -183,8 +183,8 @@ Mat fromSensorMsg(const sensor_msgs::ImageConstPtr& msg)
 	    
 	    cout << "Best point: " << sqrt(minPoint.x*minPoint.x+minPoint.y*minPoint.y+minPoint.z*minPoint.z*10000) << endl;
 	    circle( srcImg, Point2f(minImagePoint.x,minImagePoint.y), 5, 60, -1, 8, 0 );
-	   // imshow("Testing",srcImg);
-	  //  waitKey(0);
+	    imshow("Testing",srcImg);
+	    waitKey(0);
 	    
 	    //Expand a bounding box to fit the car
 	   /* int x1,y1;
