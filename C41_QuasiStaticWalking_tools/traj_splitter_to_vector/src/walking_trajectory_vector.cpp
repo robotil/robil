@@ -62,9 +62,9 @@ public:
 			res.AngleArray[i].x = 0;
 			res.AngleArray[i].y = 0;
 			res.AngleArray[i].z = 0;
-			ROS_INFO("x of i %d: %f", i, x);
+			/*ROS_INFO("x of i %d: %f", i, x);
 			ROS_INFO("zdot of i %d: %16.10Lf", i, z);
-			ROS_INFO("xdot of i %d: %16.10f", i, xdot);
+			ROS_INFO("xdot of i %d: %16.10f", i, xdot);*/
 		}
 
 
@@ -87,9 +87,9 @@ public:
 			res.AngleArray[i].x = 0;
 			res.AngleArray[i].y = 0;
 			res.AngleArray[i].z = 0;
-			ROS_INFO("x of i %d: %f", i, x);
+			/*ROS_INFO("x of i %d: %f", i, x);
 			ROS_INFO("zdot of i %d: %16.10Lf", i, z);
-			ROS_INFO("xdot of i %d: %16.10f", i, xdot);
+			ROS_INFO("xdot of i %d: %16.10f", i, xdot);*/
 		}
 
 		//Part 3
@@ -105,9 +105,9 @@ public:
 			//double root = ((pow(u,2))*pow(V,2)*x*(2*u-x));
 			//long double z = -xdot*(pow(V,2)*(u-x))/(sqrt(root));
 			long double z = (pow(M_E,(1-pow(u,2)/(4*u*x-4*pow(x,2))))*pow(u,2)*V*(u-2*x))/(4*pow(u-x,2)*pow(x,2))*xdot;
-			ROS_INFO("x of i %d: %f", i, x);
+			/*ROS_INFO("x of i %d: %f", i, x);
 			ROS_INFO("zdot of i %d: %16.10Lf", i, z);
-			ROS_INFO("xdot of i %d: %16.10f", i, xdot);
+			ROS_INFO("xdot of i %d: %16.10f", i, xdot);*/
 			res.PositionArray[i].y = 0;
 			res.PositionArray[i].z = (i==segments_number-1) ? 0 : -z;
 			res.AngleArray[i].x = 0;

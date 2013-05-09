@@ -1,7 +1,7 @@
 C41 – QuasiStaticWalking:
 -------------------------------------------
 Prerequisites:
-1) /C31_GlobalPathPlanner/getPath must be running
+1) it will use /path topic one day
 2) C45_PostureControl must be running
 3) C43_LocalBodyCOM must be running
 rosrun C43_LocalBodyCOM computeCOM

@@ -52,9 +52,11 @@ public:
 			//res.PositionArray[i].x = (16.0/3)*(req.Position.x/pow(T, 2))*t;
 			double x = (8.0/3)*(req.Position.x/pow(T,2))*pow(t,2);
 			double y = (8.0/3)*(req.Position.y/pow(T,2))*pow(t,2);
-			double V = req.Position.z;
-			double u = sqrt(pow(req.Position.x,2)+pow(req.Position.y,2));
-			double h = sqrt(pow(x,2)+pow(y,2));
+
+			//double V = req.Position.z;
+			//double u = sqrt(pow(req.Position.x,2)+pow(req.Position.y,2));
+			//double h = sqrt(pow(x,2)+pow(y,2));
+
 			//double z = V*pow(M_E, 1-pow(u,2)/(4*u*h-4*pow(h,2)));
 			double z = (8.0/3)*(req.Position.z/pow(T,2))*pow(t,2);
 			//double xdot = res.PositionArray[i].x;
@@ -70,9 +72,9 @@ public:
 			/*ROS_INFO("x of i %d: %f", i, x);
 			ROS_INFO("zdot of i %d: %16.10Lf", i, z);
 			ROS_INFO("xdot of i %d: %16.10f", i, xdot);*/
-			ROS_INFO("X: %f" ,x);
-			ROS_INFO("Y: %f" ,y);
-			ROS_INFO("Z(%d): %f" ,i+1, z);
+			//ROS_INFO("X: %f" ,x);
+			//ROS_INFO("Y: %f" ,y);
+			//ROS_INFO("Z(%d): %f" ,i+1, z);
 		}
 
 
@@ -86,9 +88,11 @@ public:
 			double x = (4.0/3)*(req.Position.x/T)*(t-T/4.0) + req.Position.x/6.0;
 			double y = (4.0/3)*(req.Position.y/T)*(t-T/4.0) + req.Position.y/6.0;
 			double z = (4.0/3)*(req.Position.z/T)*(t-T/4.0) + req.Position.z/6.0;
-			double V = req.Position.z;
-			double u = sqrt(pow(req.Position.x,2)+pow(req.Position.y,2));
-			double h = sqrt(pow(x,2)+pow(y,2));
+
+			//double V = req.Position.z;
+			//double u = sqrt(pow(req.Position.x,2)+pow(req.Position.y,2));
+			//double h = sqrt(pow(x,2)+pow(y,2));
+
 			//double z = V*pow(M_E, 1-pow(u,2)/(4*u*h-4*pow(h,2)));
 			//double xdot = res.PositionArray[i].x;
 			//long double root = ((pow(u,2))*pow(V,2)*x*(2*u-x));
@@ -109,9 +113,9 @@ public:
 			/*ROS_INFO("x of i %d: %f", i, x);
 			ROS_INFO("zdot of i %d: %16.10Lf", i, z);
 			ROS_INFO("xdot of i %d: %16.10f", i, xdot);*/
-			ROS_INFO("X: %f" ,x);
+			/*ROS_INFO("X: %f" ,x);
 			ROS_INFO("Y: %f" ,y);
-			ROS_INFO("Z(%d): %f" ,i+1, z);
+			ROS_INFO("Z(%d): %f" ,i+1, z);*/
 		}
 
 		//Part 3
@@ -123,9 +127,11 @@ public:
 			double x = (-2.5 + (5.0/6.0))*req.Position.x + (16.0/3.0)*(req.Position.x/T)*t - (8.0/3.0)*(req.Position.x/pow(T,2))*pow(t,2);
 			double y = (-2.5 + (5.0/6.0))*req.Position.y + (16.0/3.0)*(req.Position.y/T)*t - (8.0/3.0)*(req.Position.y/pow(T,2))*pow(t,2);
 			double z = (-2.5 + (5.0/6.0))*req.Position.z + (16.0/3.0)*(req.Position.z/T)*t - (8.0/3.0)*(req.Position.z/pow(T,2))*pow(t,2);
-			double V = req.Position.z;
-			double u = sqrt(pow(req.Position.x,2)+pow(req.Position.y,2));
-			double h = sqrt(pow(x,2)+pow(y,2));
+
+			//double V = req.Position.z;
+			//double u = sqrt(pow(req.Position.x,2)+pow(req.Position.y,2));
+			//double h = sqrt(pow(x,2)+pow(y,2));
+
 			//double z = V*pow(M_E, 1-pow(u,2)/(4*u*h-4*pow(h,2)));
 			//double xdot = res.PositionArray[i].x;
 			//long double root = ((pow(u,2))*pow(V,2)*x*(2*u-x));
@@ -148,9 +154,9 @@ public:
 			res.AngleArray[i].x = 0;
 			res.AngleArray[i].y = 0;
 			res.AngleArray[i].z = 0;*/
-			ROS_INFO("X: %f" ,x);
+			/*ROS_INFO("X: %f" ,x);
 			ROS_INFO("Y: %f" ,y);
-			ROS_INFO("Z(%d): %f" ,i+1, res.PositionArray[i].z);
+			ROS_INFO("Z(%d): %f" ,i+1, res.PositionArray[i].z);*/
 		}
 		return true;
 	}
