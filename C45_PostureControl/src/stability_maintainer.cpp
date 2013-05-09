@@ -320,8 +320,8 @@ public:
 			}*/
 
 			PoseController::back_movement move;
-			move.request.back_mby = 0.0*-imu.y + 0.0*imu_v.y + CoM_P*optimal_com.x;// + CoM_D*dleg_com_x;
-			move.request.back_ubx = 0.0*-imu.x + 0.0*imu_v.x - 0.3*CoM_P*optimal_com.y;// - CoM_D*dleg_com_y ;
+			move.request.back_mby = 1.0*-imu.y + 0.0*imu_v.y + 0.0*CoM_P*optimal_com.x;// + CoM_D*dleg_com_x;
+			move.request.back_ubx = 1.0*-imu.x + 0.0*imu_v.x - 0.0*0.3*CoM_P*optimal_com.y;// - CoM_D*dleg_com_y ;
 			move.request.back_lbz = -100;
 			oldx = leg_com_x;
 			oldy = leg_com_y;

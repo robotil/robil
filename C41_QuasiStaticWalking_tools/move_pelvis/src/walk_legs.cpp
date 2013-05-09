@@ -493,6 +493,21 @@ public:
 
 			//ros::Duration(2.0).sleep();
 
+
+			//Move left leg forward
+			move.request.PositionDestination.x = tranform.x;
+			move.request.PositionDestination.y = tranform.y;
+			move.request.PositionDestination.z = tranform.z;
+			move.request.AngleDestination.x = tranform.roll;
+			move.request.AngleDestination.y = tranform.pitch;
+			move.request.AngleDestination.z = tranform.yaw;
+			move.request.LinkToMove = "l_leg";
+			ROS_INFO("Moving left leg forward");
+			if(!this->gen_traj(move.request, move.response)){
+				ROS_ERROR("Could not move left leg forward");
+				return false;
+			}
+
 			//Fix orientation
 			tf::StampedTransform l_foot_to_r;
 			try {
@@ -508,20 +523,6 @@ public:
 			move.request.AngleDestination.x = QuatToRoll(l_foot_to_r.getRotation());
 			move.request.AngleDestination.y = QuatToPitch(l_foot_to_r.getRotation());
 			move.request.AngleDestination.z = 0;//QuatToYaw(l_foot_to_r.getRotation());
-			move.request.LinkToMove = "l_leg";
-			ROS_INFO("Moving left leg forward");
-			if(!this->gen_traj(move.request, move.response)){
-				ROS_ERROR("Could not move left leg forward");
-				return false;
-			}
-
-			//Move left leg forward
-			move.request.PositionDestination.x = tranform.x;
-			move.request.PositionDestination.y = tranform.y;
-			move.request.PositionDestination.z = tranform.z;
-			move.request.AngleDestination.x = tranform.roll;
-			move.request.AngleDestination.y = tranform.pitch;
-			move.request.AngleDestination.z = tranform.yaw;
 			move.request.LinkToMove = "l_leg";
 			ROS_INFO("Moving left leg forward");
 			if(!this->gen_traj(move.request, move.response)){
@@ -577,27 +578,6 @@ public:
 
 				//ros::Duration(2.0).sleep();
 
-				//Fix orientation
-				tf::StampedTransform r_foot_to_l;
-				try {
-					listener.waitForTransform("/r_foot","/l_foot",ros::Time(0),ros::Duration(0.2));
-					listener.lookupTransform("/r_foot","/l_foot",ros::Time(0),r_foot_to_l);
-				} catch (tf::TransformException &ex) {
-					ROS_ERROR("%s",ex.what());
-				}
-
-				move.request.PositionDestination.x = 0;
-				move.request.PositionDestination.y = -0.0;
-				move.request.PositionDestination.z = 0;
-				move.request.AngleDestination.x = QuatToRoll(r_foot_to_l.getRotation());
-				move.request.AngleDestination.y = QuatToPitch(r_foot_to_l.getRotation());
-				move.request.AngleDestination.z = 0;//QuatToYaw(l_foot_to_r.getRotation());
-				move.request.LinkToMove = "r_leg";
-				ROS_INFO("Moving left right forward");
-				if(!this->gen_traj(move.request, move.response)){
-					ROS_ERROR("Could not move right leg forward");
-					return false;
-				}
 
 				//Move left leg forward
 				move.request.PositionDestination.x = tranform.x;
@@ -606,6 +586,27 @@ public:
 				move.request.AngleDestination.x = tranform.roll;
 				move.request.AngleDestination.y = tranform.pitch;
 				move.request.AngleDestination.z = tranform.yaw;
+				move.request.LinkToMove = "r_leg";
+				ROS_INFO("Moving left right forward");
+				if(!this->gen_traj(move.request, move.response)){
+					ROS_ERROR("Could not move right leg forward");
+					return false;
+				}
+
+				//Fix orientation
+				tf::StampedTransform r_foot_to_l;
+				try {
+					listener.waitForTransform("/r_foot","/l_foot",ros::Time(0),ros::Duration(0.2));
+					listener.lookupTransform("/r_foot","/l_foot",ros::Time(0),r_foot_to_l);
+				} catch (tf::TransformException &ex) {
+					ROS_ERROR("%s",ex.what());
+				}
+				move.request.PositionDestination.x = 0;
+				move.request.PositionDestination.y = -0.0;
+				move.request.PositionDestination.z = 0;
+				move.request.AngleDestination.x = QuatToRoll(r_foot_to_l.getRotation());
+				move.request.AngleDestination.y = QuatToPitch(r_foot_to_l.getRotation());
+				move.request.AngleDestination.z = 0;//QuatToYaw(l_foot_to_r.getRotation());
 				move.request.LinkToMove = "r_leg";
 				ROS_INFO("Moving left right forward");
 				if(!this->gen_traj(move.request, move.response)){
