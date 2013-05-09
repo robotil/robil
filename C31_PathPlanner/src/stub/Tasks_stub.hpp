@@ -236,6 +236,7 @@ public:
 				p.push_back(Vec2d(13.36, 8.089));
 				p.push_back(Vec2d(14.56, 8.12));
 				p.push_back(Vec2d(16.26, 8.12));
+				p.push_back(Vec2d(16.70, 8.00));
 
 				copyToPath(p);
 			}
