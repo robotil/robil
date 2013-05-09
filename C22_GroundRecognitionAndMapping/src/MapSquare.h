@@ -19,6 +19,7 @@ class MapSquare {
 public:
 	int rating;
 	bool ratable;
+	float height;
 	status square_status;
 	std::vector<MPlane*> *square_Planes;
 	MapSquare();

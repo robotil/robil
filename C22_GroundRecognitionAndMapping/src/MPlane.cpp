@@ -24,6 +24,9 @@ MPlane::MPlane(pcl::PointXYZ point):representing_point(point){
 	//coefficient_y=c_->values.at(1);
 	//coefficient_z=c_->values.at(2);
 	//coefficient_d=c_->values.at(3);
+	representing_point.x=point.x;
+	representing_point.y=point.y;
+	representing_point.z=point.z;
 }
 
 MPlane::~MPlane(){
