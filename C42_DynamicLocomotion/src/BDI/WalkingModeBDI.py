@@ -43,6 +43,7 @@ class WalkingModeBDI(WalkingMode):
         self._Odometer = BDI_Odometer()
         ##############################
         self._StrategyForward = BDI_StrategyForward(self._Odometer)
+        self._stepDataInit = BDI_Strategy(self._Odometer)
         self._StepQueue = StepQueue()
         self._SteppingStonesQueue = PathQueue()
         self._SteppingStonesPath = [] 
@@ -116,11 +117,13 @@ class WalkingModeBDI(WalkingMode):
     # /atlas/atlas_sim_interface_state callback. Before publishing a walk command, we need
     # the current robot position   
     def asi_state_cb(self, state):
-        if (14.8 < self._LPP.GetPos().GetX()) and (self._LPP.GetPos().GetX() < 20):
+        if (16.0 < self._LPP.GetPos().GetX()) and (self._LPP.GetPos().GetX() < 20):
             if (True == self._setStep):
                 self.step_index = state.behavior_feedback.walk_feedback.next_step_index_needed -1
-                self._StepQueue.Initialize(self.initSteppingStoneStepData(self.step_index+1, state))
-                self.GetSteppingStoneStepPlan(stste)
+                step1,step2,step3,step4 = self.initSteppingStoneStepData(self.step_index, state)
+                self._StepQueue.Initialize(step1,step2,step3,step4)
+                self.GetSteppingStoneStepPlan(state)
+                print("asi_state_cb:: SteppingStonesQueue length: ",self._SteppingStonesQueue.Length() )
                 self._setStep = False
             command = self.SteppingStoneCommand(state);
             #print(command)
@@ -155,6 +158,7 @@ class WalkingModeBDI(WalkingMode):
             command = self.GetCommand()
             # Instead of generating new steps, just pop a predefined queue
             stepData = self._StepQueue.Push(self._SteppingStonesQueue.Pop())
+            print("SteppingStoneCommand:: SteppingStonesQueue length: ",self._SteppingStonesQueue.Length() )
             print("SteppingStoneCommand:: index: ",self.step_index)
         return command
 
@@ -234,11 +238,13 @@ class WalkingModeBDI(WalkingMode):
 
         # corrections to step 3 and 4: y position foot width corection +  ?alinement with stones?
         step_width = 0.25 # [meters] 
+        stepData3.step_index = step_index + 2
         stepData3.foot_index = stepData3.step_index%2
+        stepData4.step_index = step_index + 3
         if 0 == stepData3.foot_index: # Left foot
-            stepData3.pose.position.y = stepData2.pose.position + step_width 
+            stepData3.pose.position.y = stepData2.pose.position.y + step_width 
         else: # Right foot
-            stepData3.pose.position.y = stepData2.pose.position - step_width
+            stepData3.pose.position.y = stepData2.pose.position.y - step_width
         # stepData3.pose.orientation.x = 0.0
         # stepData3.pose.orientation.y = 0.0
         # stepData3.pose.orientation.z = 0.0
@@ -248,7 +254,7 @@ class WalkingModeBDI(WalkingMode):
         stepDataNew.step_index = stepData3.step_index + 2 # using stepData3 to have the correct foot y position
         stepDataNew.foot_index = stepDataNew.step_index%2
 
-        self._SteppingStonesQueue.Append([stepData2,stepData3,stepData4,stepDataNew])
+        self._SteppingStonesQueue.Append([stepDataNew])
 
         return stepData1,stepData2,stepData3,stepData4
 
@@ -266,16 +272,22 @@ class WalkingModeBDI(WalkingMode):
         deltaYaw = 0.0
         deltaFootPlacement = FootPlacement(deltaX,deltaY,deltaYaw)
         # feet positions for step data = self._SteppingStonesPath + deltaFootPlacement
-        index = self._StepQueue.Peek(4).step_index + 1
+        index = self._SteppingStonesQueue.Peek(0).step_index + 1
         for i in range(len(self._SteppingStonesPath)):
             # need to calc. step_index and foot_index for step data
-            stepData = BDI_Strategy.GetStepData(self,index + i)
+            stepData = self._stepDataInit.GetStepData(index + i) #self._StrategyForward
             stepData.pose.position.x = self._SteppingStonesPath[i].GetX() + deltaX
             stepData.pose.position.y = self._SteppingStonesPath[i].GetY() + deltaY
             step_yaw = self._SteppingStonesPath[i].GetYaw() + deltaYaw
-            #need to convert step_yaw
-            self._SteppingStonesQueue.Append(stepData)
+            # Calculate orientation quaternion
+            Q = quaternion_from_euler(0, 0, step_yaw)
+            stepData.pose.orientation.x = Q[0]
+            stepData.pose.orientation.y = Q[1]
+            stepData.pose.orientation.z = Q[2]
+            stepData.pose.orientation.w = Q[3]
+            print("GetSteppingStoneStepPlan:: step Data: ",stepData)
+            self._SteppingStonesQueue.Append([stepData])
 
 
 def deg2r(deg):
-    return (deg*math.pi()/180)
+    return (deg*math.pi/180.0)

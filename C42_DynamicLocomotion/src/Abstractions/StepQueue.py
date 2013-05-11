@@ -34,7 +34,7 @@ class PathQueue(object):
     	for i in range(len(steps)):
     		self._Queue.append(steps[i])
 
-    def Pop(self,step):
+    def Pop(self):
     	return self._Queue.popleft()
 
     def Push(self,step):
@@ -44,4 +44,6 @@ class PathQueue(object):
     def Peek(self,i):
     	return self._Queue[i]
 
+    def Length(self):
+        return len(self._Queue)
     
