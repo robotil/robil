@@ -117,7 +117,7 @@ class WalkingModeBDI(WalkingMode):
     # /atlas/atlas_sim_interface_state callback. Before publishing a walk command, we need
     # the current robot position   
     def asi_state_cb(self, state):
-        if (16.0 < self._LPP.GetPos().GetX()) and (self._LPP.GetPos().GetX() < 20):
+        if (16.2 < self._LPP.GetPos().GetX()) and (self._LPP.GetPos().GetX() < 20):
             if (True == self._setStep):
                 self.step_index = state.behavior_feedback.walk_feedback.next_step_index_needed -1
                 step1,step2,step3,step4 = self.initSteppingStoneStepData(self.step_index, state)
@@ -250,21 +250,20 @@ class WalkingModeBDI(WalkingMode):
         # stepData3.pose.orientation.z = 0.0
         # stepData3.pose.orientation.w = 1.0
 
-        stepDataNew = copy.deepcopy(stepData4)
-        stepDataNew.step_index = stepData3.step_index + 2 # using stepData3 to have the correct foot y position
-        stepDataNew.foot_index = stepDataNew.step_index%2
-
-        self._SteppingStonesQueue.Append([stepDataNew])
-
         return stepData1,stepData2,stepData3,stepData4
 
     def GetSteppingStoneStepPlan(self,state):
         # foot placement path:       
         path_start_foot_index = 1 # start stepping of SteppingStonesPath with Right foot 
         #Stepping stones centers in world cord. [FootPlacement(16.7,8.0,0.0),FootPlacement(17.4,8.0,0.0),FootPlacement(17.9,8.5,0.0),FootPlacement(18.6,8.5,0.0),FootPlacement(19.1,8.0,0.0),FootPlacement(20.0,8.0,0.0)]
-        self._SteppingStonesPath = [FootPlacement(16.8,7.87,0.0),FootPlacement(16.9,8.13,0.0),FootPlacement(17.2,7.87,0.0),FootPlacement(17.4,8.13,deg2r(45.0)),\
-            FootPlacement(17.4,7.87,deg2r(45.0)),FootPlacement(17.7,8.5,0.0),FootPlacement(17.7,8.3,0.0),FootPlacement(17.85,8.65,0.0),FootPlacement(18.3,8.35,0.0),\
-            FootPlacement(18.6,8.5,0.0),FootPlacement(19.1,8.0,0.0),FootPlacement(20.0,8.0,0.0)]
+        self._SteppingStonesPath = [FootPlacement(16.9,7.87,0.0),FootPlacement(16.9,8.13,0.0),FootPlacement(17.3,7.87,0.0),FootPlacement(17.3,8.13,0.0),\
+            FootPlacement(17.5,7.87,deg2r(30.0)),FootPlacement(17.5,8.13,deg2r(45.0)),FootPlacement(17.6,8.0,deg2r(45.0)),\
+            FootPlacement(17.8,8.55,0.0),FootPlacement(17.8,8.35,0.0),FootPlacement(17.85,8.65,0.0),FootPlacement(18.0,8.35,0.0),FootPlacement(18.1,8.6,0.0),\
+            FootPlacement(18.5,8.35,0.0),FootPlacement(18.5,8.6,0.0),FootPlacement(18.7,8.35,deg2r(-30.0)),FootPlacement(18.7,8.5,deg2r(-30.0)),\
+            FootPlacement(19.0,8.0,deg2r(-30.0)),FootPlacement(19.0,8.17,0.0),FootPlacement(19.25,7.87,0.0),FootPlacement(19.25,8.13,0.0),\
+            FootPlacement(19.65,7.87,0.0),FootPlacement(19.65,8.13,0.0),FootPlacement(19.9,7.87,0.0),FootPlacement(19.9,8.13,0.0),FootPlacement(20.0,7.87,0.0),FootPlacement(20.0,8.13,0.0),\
+            FootPlacement(20.0,7.87,0.0),FootPlacement(20.0,8.13,0.0),FootPlacement(20.0,7.87,0.0),FootPlacement(20.0,8.13,0.0),FootPlacement(20.0,7.87,0.0),FootPlacement(20.0,8.13,0.0),\
+            FootPlacement(20.0,7.87,0.0),FootPlacement(20.0,8.13,0.0),FootPlacement(20.0,7.87,0.0),FootPlacement(20.0,8.13,0.0),FootPlacement(20.0,7.87,0.0),FootPlacement(20.0,8.13,0.0)]
         ## building SteppingStonesQueue:
         # difference between BDI est position and LPP position (world cord.)
         deltaX = state.pos_est.position.x - self._LPP.GetPos().GetX()
@@ -272,7 +271,25 @@ class WalkingModeBDI(WalkingMode):
         deltaYaw = 0.0
         deltaFootPlacement = FootPlacement(deltaX,deltaY,deltaYaw)
         # feet positions for step data = self._SteppingStonesPath + deltaFootPlacement
-        index = self._SteppingStonesQueue.Peek(0).step_index + 1
+
+        index = self._StepQueue.Peek(3).step_index  # + 1
+        # step in place:
+        # stepData1 = copy.deepcopy(self._StepQueue.Peek(2)) # using stepData3 to have the correct foot y position
+        # stepData1.step_index = index
+        # stepData1.foot_index = stepData1.step_index%2
+        # index += 1
+        # stepData2 = copy.deepcopy(self._StepQueue.Peek(3)) # using stepData3 to have the correct foot y position
+        # stepData2.step_index = index 
+        # stepData2.foot_index = stepData2.step_index%2
+        # self._SteppingStonesQueue.Append([stepData1, stepData2])
+        if index%2 == path_start_foot_index:
+            index += 1
+            stepData3 = copy.deepcopy(self._StepQueue.Peek(2)) # using stepData3 to have the correct foot y position
+            stepData3.step_index = index
+            stepData3.foot_index = stepData3.step_index%2
+            self._SteppingStonesQueue.Append([stepData3])
+
+        index += 1
         for i in range(len(self._SteppingStonesPath)):
             # need to calc. step_index and foot_index for step data
             stepData = self._stepDataInit.GetStepData(index + i) #self._StrategyForward
