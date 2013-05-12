@@ -40,6 +40,7 @@
 #include <std_msgs/Float64.h>
 #include "tf/message_filter.h"
 #include <geometry_msgs/Pose.h>
+#include <nav_msgs/Odometry.h>
 namespace enc=sensor_msgs::image_encodings;
 
 
@@ -65,20 +66,21 @@ public:
 		//more on filters and how to use them can be found on http://www.ros.org/wiki/message_filters
 		left_image_sub_( it_, left_camera, 1 ),
 		right_image_sub_( it_, right_camera, 1 ),
-		pointcloud(nh_,"/multisense_sl/camera/points2",1),
+		//pointcloud(nh_,"/multisense_sl/camera/points2",1),
 		laser_sub_(nh_, "/multisense_sl/laser/scan", 10),
 		laser_notifier_(laser_sub_,listener_, "pelvis", 10),
 		sync( MySyncPolicy( 10 ), left_image_sub_, right_image_sub_ ,pointcloud)
 	  {
 		leftpub = it_.advertise("C21/left_camera/image", 1);
 		rightpub = it_.advertise("C21/right_camera/image", 1);
-		c22Cloudpub= nh_.advertise<C21_VisionAndLidar::C21_C22>("C21/C22Cloud", 1);
-		c22Lidarpub= nh_.advertise<C21_VisionAndLidar::C21_C22>("C21/C22Lidar", 1);
+		c22Cloudpub= nh_.advertise<sensor_msgs::PointCloud2>("C21/C22Cloud", 1);
+		c22Lidarpub= nh_.advertise<sensor_msgs::PointCloud2>("C21/C22Lidar", 1);
 		c22Cloudsub= nh_.subscribe("/multisense_sl/camera/points2", 1, &C21_Node::cloudCallback, this);
 		laser_notifier_.registerCallback(
 		      boost::bind(&C21_Node:: LidarCallback, this, _1));
 		    laser_notifier_.setTolerance(ros::Duration(0.01));
-		c25Sub=nh_.subscribe("/robot_pose_ekf/odom", 1,&C21_Node::C25Callback, this);
+		//c25Sub=nh_.subscribe("/robot_pose_ekf/odom", 1,&C21_Node::C25Callback, this);
+		ground_truth_sub= nh_.subscribe("ground_truth_odom", 1, &C21_Node::poseCallback, this);
 		//set compression data to png
 		sync.registerCallback( boost::bind( &C21_Node::HMIcallback, this, _1, _2,_3 ) );  //Specifying what to do with the data
 		_panMutex=new boost::mutex();
@@ -105,11 +107,11 @@ public:
 		  trans2.setOrigin(tf::Vector3(c25msg.position.x,c25msg.position.y,c25msg.position.z));
 		  trans2.setRotation(tf::Quaternion(c25msg.orientation.x,c25msg.orientation.y,c25msg.orientation.z,c25msg.orientation.w));
 		  _posMutex->unlock();
-		  tf::Transform trans;
+		  /*tf::Transform trans;
 		  	 	 trans.setOrigin(tf::Vector3(0.0,-0.002, 0.035 ));
 		  	 	 trans.setRotation(tf::Quaternion(-1.57,3.14,1.57));
-		  Eigen::Matrix4f sensorToHead,pelvisToWorld;
-		  pcl_ros::transformAsMatrix(trans, sensorToHead);
+		  */Eigen::Matrix4f sensorToHead,pelvisToWorld;
+		  //pcl_ros::transformAsMatrix(trans, sensorToHead);
 		  pcl_ros::transformAsMatrix(trans2, pelvisToWorld);
 
 
@@ -128,12 +130,13 @@ public:
 				   pcl::PointXYZ p=detectionCloud.at(i,j);
 				   if(p.x!=p.x)
 					   continue;
-				   t.points.push_back(p);
+				   if(p.x>0.3 && p.y>0.3)
+					   t.points.push_back(p);
 			   }
 		   }
 
 		   _detectionMutex->unlock();
-		   pcl::transformPointCloud(t, t, sensorToHead);
+		   //pcl::transformPointCloud(t, t, sensorToHead);
 		   pcl::transformPointCloud(t, t, pelvisToWorld);
 		   for(int i=0;i<t.points.size();i++){
 			   if(t.points.at(i).x!=t.points.at(i).x)
@@ -217,7 +220,15 @@ public:
 		  return true;
 	  }
 
+
 	  void C25Callback(const geometry_msgs::PoseWithCovarianceStamped::ConstPtr &msg){
+		  _posMutex->lock();
+		  c25msg.position=msg->pose.pose.position;
+		  c25msg.orientation=msg->pose.pose.orientation;
+		  _posMutex->unlock();
+	  }
+
+	  void poseCallback(const nav_msgs::Odometry::ConstPtr &msg){
 		  _posMutex->lock();
 		  c25msg.position=msg->pose.pose.position;
 		  c25msg.orientation=msg->pose.pose.orientation;
@@ -233,29 +244,24 @@ public:
 	  		catch (tf::TransformException ex){
 	  		   return;
 	  		}
-	  		C21_VisionAndLidar::C21_C22 msg;
-	  		msg.header=cloud->header;
-	  		msg.cloud=*cloud;
-	  		tf::Vector3 orig=transform.getOrigin();
-	  		tf::Quaternion rot=transform.getRotation();
-	  		msg.pose.position.x=orig.getX();
-	  		msg.pose.position.y=orig.getY();
-	  		msg.pose.position.z=orig.getZ();
-	  		msg.pose.orientation.x=rot.getX();
-	  		msg.pose.orientation.y=rot.getY();
-	  		msg.pose.orientation.z=rot.getZ();
-	  		msg.pose.orientation.w=rot.getW();
-	  		c22Cloudpub.publish(msg);
 	  		pcl::PointCloud<pcl::PointXYZ> out;
+	  		pcl::fromROSMsg(*cloud,out);
+			Eigen::Matrix4f sensorTopelvis;
+			pcl_ros::transformAsMatrix(transform, sensorTopelvis);
+			pcl::transformPointCloud(out, out, sensorTopelvis);
+	  		sensor_msgs::PointCloud2 msg;
+	  		pcl::toROSMsg(out,msg);
+	  		c22Cloudpub.publish(msg);
+	  		/*pcl::PointCloud<pcl::PointXYZ> out;
 	  		pcl::fromROSMsg(*cloud,out);
 			tf::Transform trans;
 			trans.setOrigin(orig);
-			trans.setRotation(rot);
-			Eigen::Matrix4f sensorTopelvis,pelvisToWorld;
-			pcl_ros::transformAsMatrix(trans, sensorTopelvis);
+			trans.setRotation(rot);*/
+			/*Eigen::Matrix4f sensorTopelvis,pelvisToWorld;
+			pcl_ros::transformAsMatrix(trans, sensorTopelvis);*/
 			_detectionMutex->lock();
-			pcl::transformPointCloud(out, detectionCloud, sensorTopelvis);
-			//detectionCloud.swap(out);
+			//pcl::transformPointCloud(out, detectionCloud, sensorTopelvis);
+			detectionCloud.swap(out);
 			_detectionMutex->unlock();
 	  	  }
 
@@ -345,10 +351,11 @@ public:
 		sensor_msgs::PointCloud2 cloud3;
 		pcl::toROSMsg(cloud2,cloud3);
 
-		C21_VisionAndLidar::C21_C22 msg;
-		msg.header=scan_in->header;
-		msg.cloud=cloud3;
-		tf::Vector3 orig=transform.getOrigin();
+		//C21_VisionAndLidar::C21_C22 msg;
+		cloud3.header=scan_in->header;
+		cloud3.header.frame_id="/pelvis";
+		//msg.cloud=cloud3;
+		/*tf::Vector3 orig=transform.getOrigin();
 		tf::Quaternion rot=transform.getRotation();
 		msg.pose.position.x=orig.getX();
 		msg.pose.position.y=orig.getY();
@@ -356,8 +363,8 @@ public:
 		msg.pose.orientation.x=rot.getX();
 		msg.pose.orientation.y=rot.getY();
 		msg.pose.orientation.z=rot.getZ();
-		msg.pose.orientation.w=rot.getW();
-		c22Lidarpub.publish(msg);
+		msg.pose.orientation.w=rot.getW();*/
+		c22Lidarpub.publish(cloud3);
 		_detectionMutex->lock();
 		//detectionCloud+=cloud2;
 		_detectionMutex->unlock();
@@ -419,6 +426,7 @@ private:
   ros::Publisher c22Cloudpub;
   ros::Publisher c22Lidarpub;
   ros::Subscriber c22Cloudsub;
+  ros::Subscriber ground_truth_sub;
   message_filters::Subscriber<sensor_msgs::LaserScan> laser_sub_;
   tf::MessageFilter<sensor_msgs::LaserScan> laser_notifier_;
   ros::Subscriber c25Sub;

@@ -16,9 +16,20 @@
 #include "C10_Common/push_img.h"
 #include "C10_Common/push_occupancy_grid.h"
 #include "C10_Common/push_path.h"
+#include "C11_structs.h"
+//#include "C11_TCPServer.h"
+#include <QImage>
 
 using namespace std;
 using namespace C0_RobilTask;
+
+class IPushHMIInterface
+{
+public:
+  virtual void PushImage(QImage img) = 0;
+  virtual void PushGrid(StructGridData grid) = 0;
+  virtual void PushPath(vector<StructPoint> path) = 0;
+};
 
 class PushHMIServer:public RobilTask{
 
@@ -27,8 +38,19 @@ public:
 	PushHMIServer(string name = "/PushHMI"):
     	RobilTask(name)
     {
-
+	  pIPushHMIInterface = NULL;
+	  IsWaitForRelease = false;
     }
+
+	void SetPushHMIInterface(IPushHMIInterface *ipushHMIInterface)
+	{
+	  pIPushHMIInterface = ipushHMIInterface;
+	}
+
+	void SetReleased()
+	{
+	  IsWaitForRelease = false;
+	}
 
 	TaskResult panoramic_image_task()
 	{
@@ -44,24 +66,25 @@ public:
 		}
 		ROS_INFO("C11_Agent: panoramic_image received!\n");
 
-		ros::ServiceClient c11Client = _node.serviceClient<C10_Common::push_img>("C11/push_img");
 
-		C10_Common::push_img srv11;
-
-		srv11.request.IMG = srv21.response.res;
-
-		if (!c11Client.call(srv11))
-		{
-			ROS_ERROR("couldn't get a C11 reply, exiting\n");
-			return TaskResult::FAULT();
-
-		}
+		cout<<"Size of vector: "<<srv21.response.res.data.size()<<"\n";
+		cout<<"Width: "<<srv21.response.res.width<<"\n";
+		cout<<"Height: "<<srv21.response.res.height<<"\n";
+		cout<<"Step: "<<srv21.response.res.step<<"\n";
+		QImage img(srv21.response.res.data.data(),srv21.response.res.width,srv21.response.res.height,QImage::Format_RGB888);
+//
+		if(pIPushHMIInterface != NULL)
+		  {
+		    IsWaitForRelease = true;
+		    pIPushHMIInterface->PushImage(img);
+		    while(IsWaitForRelease)
+		      {
+		        sleep(100);
+		      }
+		  }
 		ROS_INFO("C11_Agent: panoramic_image sent!\n");
 
-		 if (srv11.response.ACK.mes != 1) {
-			ROS_ERROR("C11 ack is fault, exiting\n");
-			return TaskResult::FAULT();
-		 }
+
 		 ROS_INFO("C11_Agent: panoramic_image_task end!\n");
 
 		 return TaskResult::SUCCESS ();
@@ -80,24 +103,48 @@ public:
 
 		ROS_INFO("C11_Agent: occupancy_grid received!\n");
 
-		ros::ServiceClient c11Client = _node.serviceClient<C10_Common::push_occupancy_grid>("C11/push_occupancy_grid");
+		StructGridData grid;
+		grid.RobotPos.x = srv22.response.drivingPath.robotPos.x;
+		grid.RobotPos.y = srv22.response.drivingPath.robotPos.y;
+		grid.RobolOrientation = srv22.response.drivingPath.robotOri.z;
+		grid.XOffset = srv22.response.drivingPath.xOffset;
+		grid.YOffset = srv22.response.drivingPath.yOffset;
+		for(int i=0; i<100; i++)
+		        {
+		                for(int j=0; j<100;j++)
+		                {
+		                        grid.Grid[i][j] = srv22.response.drivingPath.row[i].column[j].status;
+		                }
+		        }
 
-		C10_Common::push_occupancy_grid srv11;
+		if(pIPushHMIInterface != NULL)
+		  {
+		    IsWaitForRelease = true;
+		    pIPushHMIInterface->PushGrid(grid);
+		    while(IsWaitForRelease)
+                     {
+                       sleep(100);
+                     }
+		  }
 
-		srv11.request.OGD = srv22.response.drivingPath;
-		if (!c11Client.call(srv11))
-		{
-			ROS_ERROR("couldn't get a C11 reply, exiting\n");
-			return TaskResult::FAULT();
-
-		}
+//		ros::ServiceClient c11Client = _node.serviceClient<C10_Common::push_occupancy_grid>("C11/push_occupancy_grid");
+//
+//		C10_Common::push_occupancy_grid srv11;
+//
+//		srv11.request.OGD = srv22.response.drivingPath;
+//		if (!c11Client.call(srv11))
+//		{
+//			ROS_ERROR("couldn't get a C11 reply, exiting\n");
+//			return TaskResult::FAULT();
+//
+//		}
 
 		ROS_INFO("C11_Agent: occupancy_grid sent!\n");
 
-		 if (srv11.response.ACK.mes != 1) {
-			ROS_ERROR("C11 ack is fault, exiting\n");
-			return TaskResult::FAULT();
-		 }
+//		 if (srv11.response.ACK.mes != 1) {
+//			ROS_ERROR("C11 ack is fault, exiting\n");
+//			return TaskResult::FAULT();
+//		 }
 
 		ROS_INFO("C11_Agent: occupancy_grid_task end!\n");
 		return TaskResult::SUCCESS ();
@@ -117,24 +164,41 @@ public:
 		ROS_INFO("C11_Agent: path received!\n");
 		cout<<srv31.response.path<<"\n";
 
-		ros::ServiceClient c11Client = _node.serviceClient<C10_Common::push_path>("C11/push_path");
-
-		C10_Common::push_path srv11;
-
-		srv11.request.PTH = srv31.response.path;
-		if (!c11Client.call(srv11))
-		{
-			ROS_ERROR("couldn't get a C11 reply, exiting\n");
-			return TaskResult::FAULT();
-
-		}
+//		ros::ServiceClient c11Client = _node.serviceClient<C10_Common::push_path>("C11/push_path");
+//
+//		C10_Common::push_path srv11;
+//
+//		srv11.request.PTH = srv31.response.path;
+//		if (!c11Client.call(srv11))
+//		{
+//			ROS_ERROR("couldn't get a C11 reply, exiting\n");
+//			return TaskResult::FAULT();
+//
+//		}
+		vector<StructPoint> path;
+		for(int i=0; i<srv31.response.path.points.size(); i++)
+                {
+                        StructPoint point;
+                        point.x = srv31.response.path.points[i].x;
+                        point.y = srv31.response.path.points[i].y;
+                        path.push_back(point);
+                }
+		if(pIPushHMIInterface != NULL)
+                {
+                  IsWaitForRelease = true;
+                  pIPushHMIInterface->PushPath(path);
+                  while(IsWaitForRelease)
+                    {
+                      sleep(100);
+                    }
+                }
 
 		ROS_INFO("C11_Agent: path sent!\n");
 
-		if (srv11.response.ACK.mes != 1) {
-			ROS_ERROR("C11 ack is fault, exiting\n");
-			return TaskResult::FAULT();
-		 }
+//		if (srv11.response.ACK.mes != 1) {
+//			ROS_ERROR("C11 ack is fault, exiting\n");
+//			return TaskResult::FAULT();
+//		 }
 
 		ROS_INFO("C11_Agent: path_task end!\n");
 		return TaskResult::SUCCESS ();
@@ -200,6 +264,11 @@ public:
     	}
     	return TaskResult::FAULT();
     }
+
+private:
+ //   CTcpServer* pCTcpServer;
+    IPushHMIInterface *pIPushHMIInterface;
+    bool IsWaitForRelease;
 };
 
 

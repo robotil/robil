@@ -2,13 +2,14 @@
 #include <QFileDialog>
 #include <QDateTime>
 #include <QGraphicsTextItem>
+#include <QFile>
 //#include "cnode.h"
 //#include "figure.h"
 #include "imagedraw.h"
 
 ImageDraw::ImageDraw(int argc, char** argv, QWidget *parent, Qt::WFlags flags)
 	: QMainWindow(parent, flags)
-        , C11node(argc,argv,this)
+//        , C11node(argc,argv,this)
 {
 	ui.setupUi(this);
 
@@ -29,7 +30,27 @@ ImageDraw::ImageDraw(int argc, char** argv, QWidget *parent, Qt::WFlags flags)
 	connect(ui.btnPath,SIGNAL(clicked(bool)),this,SLOT(SltOnPathClick(bool)));
 	connect(WaitTimer,SIGNAL(timeout()),this,SLOT(SltOnWaitTimeout()));
 	connect(ui.mapWidget,SIGNAL(SigOperatorAction()),this,SLOT(SltOperatorAction()));
-	C11node.init();
+//	C11node.init();
+
+	QFile file("C11Config.txt");
+	if (!file.open(QIODevice::ReadOnly | QIODevice::Text))
+	  {
+	    std::cout << "Can't open config file!!! Restart the application" << std::endl;
+	  }
+
+	else
+	  {
+	    QTextStream in(&file);
+            QString line = in.readLine();
+//	    pCTcpConnection = new CTcpConnection(QString("172.23.1.130"),45671);
+            pCTcpConnection = new CTcpConnection(line,45671);
+
+
+            connect(pCTcpConnection,SIGNAL(SigOnImgReceived(QImage)),this,SLOT(SltOnNewImg(QImage)));
+            connect(pCTcpConnection,SIGNAL(SigOnGridReceived(int[100][100],StructPoint,int,int,double)),this,SLOT(SltOnGridReceived(int[100][100],StructPoint,int,int,double)));
+
+            pCTcpConnection->SetSubscriber(this);
+	  }
 
 //	QString fileName = QFileDialog::getOpenFileName(this,
 //	     tr("Open Image"), "", tr("Image Files (*.png *.jpg *.bmp)"));
@@ -45,6 +66,11 @@ ImageDraw::~ImageDraw()
     {
       delete WaitTimer;
       WaitTimer = NULL;
+    }
+  if(pCTcpConnection != NULL)
+    {
+      delete pCTcpConnection;
+      pCTcpConnection = NULL;
     }
 }
 
@@ -121,6 +147,11 @@ void ImageDraw::OnImgReceived(std::string fileName)
 	emit SigOnNewImg(myImage);
 }
 
+void ImageDraw::SltOnGridReceived(int grid[100][100],StructPoint robotPos,int xOffset,int yOffset,double orient)
+{
+  OnOccupancyGridReceived(grid,robotPos,xOffset,yOffset,orient);
+}
+
 void ImageDraw::OnOccupancyGridReceived(int grid[100][100], StructPoint robotPos, int xOffset, int yOffset, double orient)
 {
 	ui.mapWidget->UpdateGrid(grid,robotPos,xOffset,yOffset,orient);
@@ -145,7 +176,8 @@ void ImageDraw::SltOnWaitTimeout()
 {
   std::cout << "SltOnWaitTimeout" << std::endl;
   OnWaitResponseFinished();
-  C11node.Resume();
+//  C11node.Resume();
+  pCTcpConnection->Resume();
 }
 
 void ImageDraw::OnWaitResponseFinished()
@@ -292,7 +324,8 @@ void ImageDraw::SltOnPlayPauseClick(bool checked)
                           {
                                   index = 2;
                           }
-                          C11node.LoadMission(index);
+                          //C11node.LoadMission(index);
+                          pCTcpConnection->LoadMission(index);
                           ERunStatus = RUNNING_ENUM;
                           ui.btnCreate->setEnabled(false);
                           SltOnCreateClick(false);
@@ -304,9 +337,11 @@ void ImageDraw::SltOnPlayPauseClick(bool checked)
 	            std::vector<StructPoint> points = ui.mapWidget->GetUpdatedRoute();
 	            if(!points.empty())
 	              {
-	                C11node.SendPathUpdate(points);
+	                //C11node.SendPathUpdate(points);
+	                pCTcpConnection->SendPathUpdate(points);
 	              }
-	            C11node.Resume();
+//	            C11node.Resume();
+	            pCTcpConnection->Resume();
 	            ERunStatus = RUNNING_ENUM;
 	            ui.btnCreate->setEnabled(false);
 	            SltOnCreateClick(false);
@@ -314,7 +349,8 @@ void ImageDraw::SltOnPlayPauseClick(bool checked)
 	}
 	else
         {
-	    C11node.Pause();
+	    //C11node.Pause();
+	    pCTcpConnection->Pause();
 	    ERunStatus = PAUSED_ENUM;
 	    ui.btnCreate->setEnabled(true);
 	    ui.mapWidget->SetEditable(true);

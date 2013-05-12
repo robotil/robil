@@ -93,11 +93,11 @@ class AtlasWalk():
     def static(self, state):
         
         # When the robot status_flags are 1 (SWAYING), you can publish the next step command.
-        if (state.step_feedback.status_flags == 1 and not self.is_swaying):
+        if (state.behavior_feedback.step_feedback.status_flags == 1 and not self.is_swaying):
             self.step_index += 1
             self.is_swaying = True
             print("Step " + str(self.step_index))
-        elif (state.step_feedback.status_flags == 2):
+        elif (state.behavior_feedback.step_feedback.status_flags == 2):
             self.is_swaying = False
         
         is_right_foot = self.step_index % 2
@@ -124,6 +124,7 @@ class AtlasWalk():
         command.step_params.desired_step.pose = self.calculate_pose(self.step_index)
         
         # Publish a new step command every time a state message is received
+        print(command)
         self.asi_command.publish(command)
         
     # This method is used to calculate a pose of step based on the step_index

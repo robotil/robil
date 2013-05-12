@@ -10,35 +10,69 @@
 using namespace std;
 using namespace C0_RobilTask;
 
+class IHMIResponseInterface
+{
+public:
+  virtual void HMIResponse() = 0;
+};
+
 class HMIResponseServer:public RobilTask{
 
 public:
 	HMIResponseServer(string name = "/HMIResponse"):
     	RobilTask(name)
     {
-
+	  pIHMIResponseInterface = NULL;
+	  IsWaitForResponse = false;
     }
 
-	TaskResult task(const string& name, const string& uid, Arguments& args){
+	TaskResult task(const string& name, const string& uid, Arguments& args)
+	{
 
 	    	ROS_INFO("C11_Agent: HMIResponse called!\n");
 	    	if(!args.empty())
 	    	{
 	    		ROS_INFO("%s: %s\n","data",args["data"].data());
 	    	}
-	    	ros::ServiceClient c11Client = _node.serviceClient<C10_Common::HMIResponse>("C11/HMIResponse");
-
-	    	C10_Common::HMIResponse srv11;
-
-	    	if (!c11Client.call(srv11))
-			{
-				ROS_ERROR("couldn't get a C11 reply, exiting\n");
-				return TaskResult::FAULT();
-			}
+//	    	ros::ServiceClient c11Client = _node.serviceClient<C10_Common::HMIResponse>("C11/HMIResponse");
+//
+//	    	C10_Common::HMIResponse srv11;
+//
+//	    	if (!c11Client.call(srv11))
+//			{
+//				ROS_ERROR("couldn't get a C11 reply, exiting\n");
+//				return TaskResult::FAULT();
+//			}
+	    	if(pIHMIResponseInterface != NULL)
+	    	  {
+	    	    IsWaitForResponse = true;
+	    	    pIHMIResponseInterface->HMIResponse();
+	    	    while(IsWaitForResponse)
+                    {
+                      sleep(100);
+                    }
+	    	  }
+	    	else
+	    	  {
+	    	    return TaskResult::FAULT();
+	    	  }
 	    	ROS_INFO("C11_Agent: HMIResponse sent!\n");
 
 	    	return TaskResult::SUCCESS();
 	    }
+
+	void SetHMIResponseInterface(IHMIResponseInterface* pihmiResponseInterface)
+	{
+	  pIHMIResponseInterface = pihmiResponseInterface;
+	}
+	void ResponseReceived()
+	{
+	  IsWaitForResponse = false;
+	}
+
+private:
+	IHMIResponseInterface* pIHMIResponseInterface;
+	bool IsWaitForResponse;
 
 };
 
