@@ -6,6 +6,9 @@ ros-fuerte-qt-ros
 ros-fuerte-qt-gui-core
 You may install them using: sudo apt-get install
 
+CONFIGURATION:
+The IP address of machine running the HMI should be updated on C11_OperatorControl/bin/C11Config.txt
+
 //CHECK INSTRUCTIONS:
 1. Run Gazibo simulator - roslaunch atlas_utils atlas.launch
 2. Run perception modules - C0_Scripts/perception.sh
