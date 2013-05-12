@@ -502,10 +502,10 @@ public:
 		step.PoV_is_world = true;
 		steps.push_back(step);
 
-		step.start_pelvis_yaw = -0.5;
+		step.start_pelvis_yaw = 0.0;
 		step.leg = RIGHT;
 		step.position.x = 19.305;
-		step.position.y = 7.907;
+		step.position.y = 8.007;
 		step.position.z = 1.10;
 		step.orientation.x = 0;
 		step.orientation.y = 0;
@@ -528,7 +528,7 @@ public:
 		step.start_pelvis_yaw = 0.0;
 		step.leg = RIGHT;
 		step.position.x = 19.655;
-		step.position.y = 7.947;
+		step.position.y = 7.957;
 		step.position.z = 1.10;
 		step.orientation.x = 0;
 		step.orientation.y = 0;
@@ -547,10 +547,10 @@ public:
 		step.PoV_is_world = true;
 		steps.push_back(step);
 
-		step.start_pelvis_yaw = 0.0;
+		step.start_pelvis_yaw = -0.3;
 		step.leg = RIGHT;
 		step.position.x = 19.755;
-		step.position.y = 7.947;
+		step.position.y = 7.957;
 		step.position.z = 1.10;
 		step.orientation.x = 0;
 		step.orientation.y = 0;
