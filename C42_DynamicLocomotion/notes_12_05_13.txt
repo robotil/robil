@@ -1,8 +1,9 @@
 Updates:
 Robot completes qual task 1 using dynamic walk:
-1. Task needs to be activated once it will return "Task Succeeded" after reaching finishing line. 
-2. Position update is from topic: /ground_truth_odom.
-3. Robot passes stepping stones using predetermined steps when robot reaches beginning position of stepping stones. 
+1. Changed task name from "DynamicLocomotion" to "DynamicQual1".
+2. Task needs to be activated once it will return "Task Succeeded" after reaching finishing line. 
+3. Position update is from topic: /ground_truth_odom.
+4. Robot passes stepping stones using predetermined steps when robot reaches beginning position of stepping stones. 
 
 USING DYNAMIC WALK:
 
