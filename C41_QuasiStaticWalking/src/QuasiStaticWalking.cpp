@@ -471,11 +471,11 @@ public:
 		step.start_pelvis_yaw = 0.0;
 		step.leg = LEFT;
 		step.position.x = 18.755;
-		step.position.y = 8.407;
+		step.position.y = 8.357;
 		step.position.z = 1.10;
 		step.orientation.x = 0;
 		step.orientation.y = 0;
-		step.orientation.z = 0.4;
+		step.orientation.z = 0.0;
 		step.PoV_is_world = true;
 		steps.push_back(step);
 
@@ -493,7 +493,7 @@ public:
 
 		step.start_pelvis_yaw = 0.0;
 		step.leg = LEFT;
-		step.position.x = 19.155;
+		step.position.x = 19.155;//19.155;
 		step.position.y = 8.157;
 		step.position.z = 1.10;
 		step.orientation.x = 0;
@@ -502,10 +502,10 @@ public:
 		step.PoV_is_world = true;
 		steps.push_back(step);
 
-		step.start_pelvis_yaw = -0.5;
+		step.start_pelvis_yaw = 0.0;
 		step.leg = RIGHT;
 		step.position.x = 19.305;
-		step.position.y = 7.907;
+		step.position.y = 8.007;
 		step.position.z = 1.10;
 		step.orientation.x = 0;
 		step.orientation.y = 0;
@@ -528,7 +528,7 @@ public:
 		step.start_pelvis_yaw = 0.0;
 		step.leg = RIGHT;
 		step.position.x = 19.655;
-		step.position.y = 7.947;
+		step.position.y = 7.957;
 		step.position.z = 1.10;
 		step.orientation.x = 0;
 		step.orientation.y = 0;
@@ -547,10 +547,10 @@ public:
 		step.PoV_is_world = true;
 		steps.push_back(step);
 
-		step.start_pelvis_yaw = 0.0;
+		step.start_pelvis_yaw = -0.3;
 		step.leg = RIGHT;
 		step.position.x = 19.755;
-		step.position.y = 7.947;
+		step.position.y = 7.957;
 		step.position.z = 1.10;
 		step.orientation.x = 0;
 		step.orientation.y = 0;
@@ -570,19 +570,29 @@ public:
 		pelvis_leg_target::pelvis_leg_target leg_target;
 		move_pelvis::move_pelvis move_pelvis;
 
+
+		tf::StampedTransform transform1;
+		try {
+			listener.waitForTransform("/pelvis","l_foot",ros::Time(0),ros::Duration(0.2));
+			listener.lookupTransform("/pelvis","l_foot",ros::Time(0),transform1);
+		} catch (tf::TransformException &ex) {
+			ROS_ERROR("%s",ex.what());
+		}
+
 		move_pelvis.request.PositionDestination.x = 0;
 		move_pelvis.request.PositionDestination.y = -0.0;
-		move_pelvis.request.PositionDestination.z = -0.05;
+		move_pelvis.request.PositionDestination.z = transform1.getOrigin().z() - (-0.75);
 		move_pelvis.request.AngleDestination.x = 0.0;
 		move_pelvis.request.AngleDestination.y = 0.0;
 		move_pelvis.request.AngleDestination.z = 0.0;
 		move_pelvis.request.LinkToMove = "pelvis";
 		ROS_INFO("Lowering pelvis");
 		if(!move_pelvis_cli_.call(move_pelvis)){
+			stop_posecontroller_cli_.call(e);
 			ROS_ERROR("Could not lower pelvis");
 			C0_RobilTask::RobilTaskResult _res;
 			_res.success = C0_RobilTask::RobilTask::FAULT;
-			as_.setSucceeded(_res);
+			as_.setAborted(_res);
 			return;
 		}
 
@@ -601,10 +611,17 @@ public:
 		for(unsigned int i = 0; i < steps.size(); i++){
 			ROS_INFO("Running iteration #%d", i+1);
 
+			try {
+				listener.waitForTransform("/pelvis","l_foot",ros::Time(0),ros::Duration(0.2));
+				listener.lookupTransform("/pelvis","l_foot",ros::Time(0),transform1);
+			} catch (tf::TransformException &ex) {
+				ROS_ERROR("%s",ex.what());
+			}
+
 			//Change pelvis orientation
 			move_pelvis.request.PositionDestination.x = 0;
 			move_pelvis.request.PositionDestination.y = 0;
-			move_pelvis.request.PositionDestination.z = 0;
+			move_pelvis.request.PositionDestination.z = transform1.getOrigin().z() - (-0.75);
 			move_pelvis.request.AngleDestination.x = 0;
 			move_pelvis.request.AngleDestination.y = 0;
 			move_pelvis.request.AngleDestination.z = steps[i].start_pelvis_yaw;

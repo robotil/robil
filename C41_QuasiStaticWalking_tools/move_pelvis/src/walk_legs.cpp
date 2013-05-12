@@ -460,7 +460,7 @@ public:
 	bool make_step(move_pelvis::move_pelvis::Request &req, move_pelvis::move_pelvis::Response &res){
 		if(!req.LinkToMove.compare("l_leg")){
 			std_srvs::Empty e;
-			reset_posecontroller_cli.call(e);
+			//reset_posecontroller_cli.call(e);
 
 			tf::StampedTransform l_foot_transform;
 			try {
@@ -559,7 +559,7 @@ public:
 
 
 				std_srvs::Empty e;
-				reset_posecontroller_cli.call(e);
+				//reset_posecontroller_cli.call(e);
 
 				tf::StampedTransform r_foot_transform;
 				try {
