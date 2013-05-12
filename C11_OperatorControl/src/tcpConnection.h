@@ -14,6 +14,10 @@ class ITcpConnectionInterface
 {
 public:
   virtual void OnOccupancyGridReceived(int grid[100][100], StructPoint robotPos, int xOffset, int yOffset, double orient) = 0;
+  virtual void OnPathReceived(std::vector<StructPoint> points) = 0;
+  virtual void OnImgReceived(QImage image) = 0;
+  virtual void OnHMIResponseReceived()=0;
+  virtual void OnExecutionStatusUpdate(int status) = 0;
 };
 
 class CTcpConnection : public QObject
@@ -29,6 +33,11 @@ public Q_SLOTS:
         void SltError(QAbstractSocket::SocketError socketError);
         void SltOnTimer();
 
+        void LoadMission(int index);
+        void Pause();
+        void Resume();
+        void SendPathUpdate(std::vector<StructPoint> points);
+
 public:
 
         CTcpConnection(QString ipAddress,int port);
@@ -42,7 +51,10 @@ private:
         QTimer* pTimer;
         bool IsSendingImage;
         bool IsSendingGrid;
+        bool IsSendingPath;
         int ImgSize;
+        bool WaitingForResponse;
+        int Counter;
         ITcpConnectionInterface* pITcpConnectionInterface;
 };
 

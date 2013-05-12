@@ -26,6 +26,13 @@ typedef struct
 
 typedef struct
 {
+    short MessageID;
+    unsigned int DataSize;
+    unsigned int Counter;
+} StructHeader;
+
+typedef struct
+{
   StructPoint   RobotPos;
   double       RobolOrientation;
   int           XOffset;

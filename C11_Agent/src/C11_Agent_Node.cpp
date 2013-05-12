@@ -60,6 +60,7 @@ bool C11_Agent_Node::init()
     pushS = new PushHMIServer();
     HMIResS = new HMIResponseServer();
     pushS->SetPushHMIInterface(this);
+    HMIResS->SetHMIResponseInterface(this);
 
 
     start();
@@ -143,17 +144,21 @@ bool C11_Agent_Node::PauseMission(C10_Common::pause_mission::Request& req,
     if (!c34PauseClient.call(srv34Pause))
     {
             ROS_ERROR("pause of mission error, exiting\n");
-            c11ExecutionStatusChangeClient = nh_->serviceClient<C10_Common::execution_status_change>("C11/execution_status_change");
-                    C10_Common::execution_status_change srv11EST;
-                    srv11EST.request.status.new_status = 0;
-                    if (!c11ExecutionStatusChangeClient.call(srv11EST))
-                    {
-                            ROS_ERROR("running update error, exiting\n");
-                    }
-                    else
-                    {
-                            ROS_INFO("running update sent\n");
-                    }
+//            c11ExecutionStatusChangeClient = nh_->serviceClient<C10_Common::execution_status_change>("C11/execution_status_change");
+//                    C10_Common::execution_status_change srv11EST;
+//                    srv11EST.request.status.new_status = 0;
+//                    if (!c11ExecutionStatusChangeClient.call(srv11EST))
+//                    {
+//                            ROS_ERROR("running update error, exiting\n");
+//                    }
+//                    else
+//                    {
+//                            ROS_INFO("running update sent\n");
+//                    }
+            if(pIAgentInterface != NULL)
+              {
+                pIAgentInterface->ExecutionStatusChanged(0);
+              }
             return false;
     }
 }
@@ -170,17 +175,21 @@ bool C11_Agent_Node::ResumeMission(C10_Common::resume_mission::Request& req,
     if (!c34ResumeClient.call(srv34Resume))
     {
             ROS_ERROR("resume of mission error, exiting\n");
-            c11ExecutionStatusChangeClient = nh_->serviceClient<C10_Common::execution_status_change>("C11/execution_status_change");
-                    C10_Common::execution_status_change srv11EST;
-                    srv11EST.request.status.new_status = 1;
-                    if (!c11ExecutionStatusChangeClient.call(srv11EST))
-                    {
-                            ROS_ERROR("paused update error, exiting\n");
-                    }
-                    else
-                    {
-                            ROS_INFO("paused update sent\n");
-                    }
+//            c11ExecutionStatusChangeClient = nh_->serviceClient<C10_Common::execution_status_change>("C11/execution_status_change");
+//                    C10_Common::execution_status_change srv11EST;
+//                    srv11EST.request.status.new_status = 1;
+//                    if (!c11ExecutionStatusChangeClient.call(srv11EST))
+//                    {
+//                            ROS_ERROR("paused update error, exiting\n");
+//                    }
+//                    else
+//                    {
+//                            ROS_INFO("paused update sent\n");
+//                    }
+            if(pIAgentInterface != NULL)
+              {
+                pIAgentInterface->ExecutionStatusChanged(1);
+              }
             return false;
     }
 }
@@ -209,16 +218,20 @@ void C11_Agent_Node::StopExecuteMessageCallback(const std_msgs::StringConstPtr& 
   {
           ROS_INFO("Stop request sent\n");
   }
-  c11ExecutionStatusChangeClient = nh_->serviceClient<C10_Common::execution_status_change>("C11/execution_status_change");
-  C10_Common::execution_status_change srv11EST;
-  srv11EST.request.status.new_status = 2;
-  if (!c11ExecutionStatusChangeClient.call(srv11EST))
+//  c11ExecutionStatusChangeClient = nh_->serviceClient<C10_Common::execution_status_change>("C11/execution_status_change");
+//  C10_Common::execution_status_change srv11EST;
+//  srv11EST.request.status.new_status = 2;
+//  if (!c11ExecutionStatusChangeClient.call(srv11EST))
+//  {
+//          ROS_ERROR("stop update error, exiting\n");
+//  }
+//  else
+//  {
+//          ROS_INFO("Stop update sent\n");
+//  }
+  if(pIAgentInterface != NULL)
   {
-          ROS_ERROR("stop update error, exiting\n");
-  }
-  else
-  {
-          ROS_INFO("Stop update sent\n");
+    pIAgentInterface->ExecutionStatusChanged(2);
   }
 }
 
@@ -232,8 +245,118 @@ void C11_Agent_Node::PushGrid(StructGridData grid)
   pIAgentInterface->PushGrid(grid);
 }
 
+void C11_Agent_Node::PushPath(vector<StructPoint> path)
+{
+  pIAgentInterface->PushPath(path);
+}
+
+void C11_Agent_Node::HMIResponse()
+{
+  pIAgentInterface->HMIResponse();
+}
+
 void C11_Agent_Node::SetReleased()
 {
   IsWaitForRelease = false;
   pushS->SetReleased();
+}
+
+void C11_Agent_Node::HMIResponded()
+{
+  if(HMIResS != NULL)
+  {
+      HMIResS->ResponseReceived();
+  }
+}
+
+void C11_Agent_Node::Pause()
+{
+  ROS_INFO("pause request received\n");
+
+  ros::ServiceClient c34PauseClient = nh_->serviceClient<C34_Executer::pause>("executer/pause");
+
+  C34_Executer::pause srv34Pause;
+  srv34Pause.request.tree_id = tree_id_str;
+  if (!c34PauseClient.call(srv34Pause))
+  {
+    ROS_ERROR("pause of mission error, exiting\n");
+    if(pIAgentInterface != NULL)
+      {
+        pIAgentInterface->ExecutionStatusChanged(0);
+      }
+  }
+}
+
+void C11_Agent_Node::Resume()
+{
+  ROS_INFO("resume request received\n");
+
+  ros::ServiceClient c34ResumeClient = nh_->serviceClient<C34_Executer::resume>("executer/resume");
+
+  C34_Executer::resume srv34Resume;
+  srv34Resume.request.tree_id = tree_id_str;
+  if (!c34ResumeClient.call(srv34Resume))
+  {
+          ROS_ERROR("resume of mission error, exiting\n");
+          if(pIAgentInterface != NULL)
+          {
+            pIAgentInterface->ExecutionStatusChanged(1);
+          }
+          return;
+  }
+}
+
+void C11_Agent_Node::LoadMission(int missionId)
+{
+  c34RunClient = nh_->serviceClient<C34_Executer::run>("executer/run");
+  C34_Executer::run srv34Run;
+
+  std::stringstream out;
+  out <<"id"<< missionId << std::endl;
+  tree_id_str = out.str();
+  ROS_INFO(tree_id_str.data());
+  srv34Run.request.tree_id = tree_id_str;
+
+  std::string filename;
+  filename = ros::package::getPath("C34_Designer");
+  filename.append("/plans/skill3.xml");
+
+  srv34Run.request.filename = filename;
+
+  if (!c34RunClient.call(srv34Run))
+  {
+          ROS_ERROR("send of mission error, exiting\n");
+          return;
+  }
+
+  ROS_INFO("send of mission success");
+
+  std::string str = srv34Run.response.output;
+  ROS_INFO(str.data());
+
+  c34ResumeClient = nh_->serviceClient<C34_Executer::resume>("executer/resume");
+  C34_Executer::resume srv34Resume;
+  srv34Resume.request.tree_id = tree_id_str;
+  if (!c34ResumeClient.call(srv34Resume))
+      {
+              ROS_ERROR("resume of mission error, exiting\n");
+              return;
+      }
+  ROS_INFO("resume of mission success");
+
+  status_subscriber = nh_->subscribe("executer/stop_stream",1000,&C11_Agent_Node::StopExecuteMessageCallback,this);
+}
+
+void C11_Agent_Node::PathUpdated(std::vector<StructPoint> points)
+{
+  ROS_INFO("path update received\n");
+  C31_PathPlanner::C31_Location location;
+  C31_PathPlanner::C31_Waypoints waypoints;
+  for(int i=0; i<points.size(); i++)
+  {
+    location.x = points[i].x;
+    location.y = points[i].y;
+    waypoints.points.push_back(location);
+  }
+  path_update_pub.publish(waypoints);
 }

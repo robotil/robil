@@ -9,8 +9,11 @@ CTcpConnection::CTcpConnection(QString ipAddress,int port)
 {
   IsSendingImage = false;
   IsSendingGrid = false;
+  IsSendingPath = false;
+  WaitingForResponse = false;
   pITcpConnectionInterface = NULL;
   ImgSize = 0;
+  Counter = 0;
   IpAddress = new  QHostAddress(ipAddress);
   pConnection = new QTcpSocket(this);
   connect(pConnection, SIGNAL(readyRead()), SLOT(SltReadyRead()));
@@ -70,13 +73,16 @@ void CTcpConnection::SltReadyRead()
           if(!IsSendingImage)
            {
               QImage img;
-           in >> img;
-//           if(!img.save("received.jpg"))
-//             {
-//               std::cout<<"TCP: Image save failed!\n";
-//             }
-           std::cout<<"TCP: Image receive completed!\n";
-           emit SigOnImgReceived(img);
+             in >> img;
+  //           if(!img.save("received.jpg"))
+  //             {
+  //               std::cout<<"TCP: Image save failed!\n";
+  //             }
+             std::cout<<"TCP: Image receive completed!\n";
+             if(pITcpConnectionInterface != NULL)
+             {
+               pITcpConnectionInterface->OnImgReceived(img);
+             }
            }
         }
       else if(IsSendingGrid)
@@ -118,6 +124,38 @@ void CTcpConnection::SltReadyRead()
                   }
               }
         }
+      else if(IsSendingPath)
+        {
+          if(bufSize < ImgSize)
+          {
+            std::cout<<"TCP: Size not big enough!\n";
+            std::cout<<"TCP: expected = " << ImgSize << " received = " << bufSize << "\n";
+            return;
+          }
+          else
+          {
+              IsSendingPath = false;
+          }
+          if(!IsSendingGrid)
+            {
+              short pathLength;
+              std::vector<StructPoint> points;
+              in >> pathLength;
+              std::cout<<"TCP: Path received:\n";
+              for(int i=0; i<pathLength; i++)
+                {
+                  StructPoint point;
+                  in >> point.x;
+                  in >> point.y;
+                  std::cout<<"TCP: Point "<<i<<" is: "<<point.x<<" "<< point.y<<":\n";
+                  points.push_back(point);
+                }
+              if(pITcpConnectionInterface != NULL)
+                {
+                  pITcpConnectionInterface->OnPathReceived(points);
+                }
+            }
+        }
       else
       { if (pConnection->bytesAvailable() < (int)sizeof(short))
         {
@@ -158,6 +196,26 @@ void CTcpConnection::SltReadyRead()
             ImgSize = dataSize;
             std::cout<<"TCP: grid coming!\n";
           }
+        else if(3 == msgId)
+          {
+            IsSendingPath = true;
+            ImgSize = dataSize;
+            std::cout<<"TCP: path coming!\n";
+          }
+        else if(4 == msgId)
+          {
+            if(pITcpConnectionInterface != NULL)
+            {
+                WaitingForResponse = true;
+              pITcpConnectionInterface->OnHMIResponseReceived();
+            }
+          }
+        else if(5 == msgId)
+          {
+            int status;
+            in >> status;
+            pITcpConnectionInterface->OnExecutionStatusUpdate(status);
+          }
       }
     }
 }
@@ -185,4 +243,110 @@ void CTcpConnection::SltOnTimer()
 {
 //  std::cout<<"TCP: Bytes avaliable: "<< pConnection->bytesAvailable() <<"\n";
 //  std::cout<<"TCP: The socket is: "<< pConnection->state() <<"\n";
+}
+
+void CTcpConnection::LoadMission(int index)
+{
+  StructHeader header;
+  header.MessageID = 12;
+  header.DataSize = 0;
+  header.Counter = Counter;
+  Counter++;
+  QByteArray block;
+  QDataStream out(&block, QIODevice::WriteOnly);
+  out.setByteOrder(QDataStream::LittleEndian);
+  out << header.MessageID;
+  out << header.DataSize;
+  out << header.Counter;
+  out << index;
+  pConnection->write(block);
+  pConnection->flush();
+  pConnection->waitForBytesWritten();
+  std::cout<<"TCP: LoadMission sent\n";
+}
+
+void CTcpConnection::Pause()
+{
+  StructHeader header;
+  header.MessageID = 13;
+  header.DataSize = 0;
+  header.Counter = Counter;
+  Counter++;
+  QByteArray block;
+  QDataStream out(&block, QIODevice::WriteOnly);
+  out.setByteOrder(QDataStream::LittleEndian);
+  out << header.MessageID;
+  out << header.DataSize;
+  out << header.Counter;
+  pConnection->write(block);
+  pConnection->flush();
+  pConnection->waitForBytesWritten();
+  std::cout<<"TCP: Pause sent\n";
+}
+
+void CTcpConnection::Resume()
+{
+  if(WaitingForResponse)
+    {
+      WaitingForResponse = false;
+      StructHeader header;
+      header.MessageID = 14;
+      header.DataSize = 0;
+      header.Counter = Counter;
+      Counter++;
+      QByteArray block;
+      QDataStream out(&block, QIODevice::WriteOnly);
+      out.setByteOrder(QDataStream::LittleEndian);
+      out << header.MessageID;
+      out << header.DataSize;
+      out << header.Counter;
+      pConnection->write(block);
+      pConnection->flush();
+      pConnection->waitForBytesWritten();
+      std::cout<<"TCP: HMIResponse sent\n";
+    }
+  else
+    {
+      StructHeader header;
+      header.MessageID = 11;
+      header.DataSize = 0;
+      header.Counter = Counter;
+      Counter++;
+      QByteArray block;
+      QDataStream out(&block, QIODevice::WriteOnly);
+      out.setByteOrder(QDataStream::LittleEndian);
+      out << header.MessageID;
+      out << header.DataSize;
+      out << header.Counter;
+      pConnection->write(block);
+      pConnection->flush();
+      pConnection->waitForBytesWritten();
+      std::cout<<"TCP: Resume sent\n";
+    }
+}
+
+void CTcpConnection::SendPathUpdate(std::vector<StructPoint> points)
+{
+  StructHeader header;
+  header.MessageID = 15;
+  header.DataSize = points.size()*sizeof(StructPoint) + sizeof(short);
+  header.Counter = Counter;
+  Counter++;
+  QByteArray block;
+  QDataStream out(&block, QIODevice::WriteOnly);
+  out.setByteOrder(QDataStream::LittleEndian);
+  out << header.MessageID;
+  out << header.DataSize;
+  out << header.Counter;
+  short pathLength = points.size();
+  out << pathLength;
+  for(int i=0; i<pathLength; i++)
+  {
+      out << points[i].x;
+      out << points[i].y;
+  }
+  pConnection->write(block);
+  pConnection->flush();
+  pConnection->waitForBytesWritten();
+  std::cout<<"TCP: Pause sent\n";
 }

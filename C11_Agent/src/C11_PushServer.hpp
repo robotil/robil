@@ -28,6 +28,7 @@ class IPushHMIInterface
 public:
   virtual void PushImage(QImage img) = 0;
   virtual void PushGrid(StructGridData grid) = 0;
+  virtual void PushPath(vector<StructPoint> path) = 0;
 };
 
 class PushHMIServer:public RobilTask{
@@ -163,24 +164,41 @@ public:
 		ROS_INFO("C11_Agent: path received!\n");
 		cout<<srv31.response.path<<"\n";
 
-		ros::ServiceClient c11Client = _node.serviceClient<C10_Common::push_path>("C11/push_path");
-
-		C10_Common::push_path srv11;
-
-		srv11.request.PTH = srv31.response.path;
-		if (!c11Client.call(srv11))
-		{
-			ROS_ERROR("couldn't get a C11 reply, exiting\n");
-			return TaskResult::FAULT();
-
-		}
+//		ros::ServiceClient c11Client = _node.serviceClient<C10_Common::push_path>("C11/push_path");
+//
+//		C10_Common::push_path srv11;
+//
+//		srv11.request.PTH = srv31.response.path;
+//		if (!c11Client.call(srv11))
+//		{
+//			ROS_ERROR("couldn't get a C11 reply, exiting\n");
+//			return TaskResult::FAULT();
+//
+//		}
+		vector<StructPoint> path;
+		for(int i=0; i<srv31.response.path.points.size(); i++)
+                {
+                        StructPoint point;
+                        point.x = srv31.response.path.points[i].x;
+                        point.y = srv31.response.path.points[i].y;
+                        path.push_back(point);
+                }
+		if(pIPushHMIInterface != NULL)
+                {
+                  IsWaitForRelease = true;
+                  pIPushHMIInterface->PushPath(path);
+                  while(IsWaitForRelease)
+                    {
+                      sleep(100);
+                    }
+                }
 
 		ROS_INFO("C11_Agent: path sent!\n");
 
-		if (srv11.response.ACK.mes != 1) {
-			ROS_ERROR("C11 ack is fault, exiting\n");
-			return TaskResult::FAULT();
-		 }
+//		if (srv11.response.ACK.mes != 1) {
+//			ROS_ERROR("C11 ack is fault, exiting\n");
+//			return TaskResult::FAULT();
+//		 }
 
 		ROS_INFO("C11_Agent: path_task end!\n");
 		return TaskResult::SUCCESS ();

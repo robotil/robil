@@ -20,9 +20,12 @@ class IAgentInterface
 public:
   virtual void PushImage(QImage img) = 0;
   virtual void PushGrid(StructGridData grid) = 0;
+  virtual void PushPath(vector<StructPoint> path) = 0;
+  virtual void HMIResponse() = 0;
+  virtual void ExecutionStatusChanged(int status) = 0;
 };
 
-class C11_Agent_Node : public QThread, public IPushHMIInterface
+class C11_Agent_Node : public QThread, public IPushHMIInterface, public IHMIResponseInterface
 {
   Q_OBJECT
 
@@ -48,8 +51,20 @@ public:
 
   void SetReleased();
 
+  void Pause();
+
+  void Resume();
+
+  void HMIResponded();
+
+  void LoadMission(int missionId);
+
+  void PathUpdated(std::vector<StructPoint> points);
+
   virtual void PushImage(QImage img);
   virtual void PushGrid(StructGridData grid);
+  virtual void PushPath(vector<StructPoint> path);
+  virtual void HMIResponse();
 
 private:
   ros::NodeHandle *nh_;
