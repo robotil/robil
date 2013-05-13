@@ -21,7 +21,7 @@ class DynamicLocomotion(RobilTask):
     def __init__(self,name):
         RobilTask.__init__(self, name)
         lpp = LocalPathPlanner()
-        lpp.SetDoingQual(False)
+        lpp.SetDoingQual(True)
         self._DynamicWalker = DynamicWalker(WalkingModeChooser(lpp),lpp)
         self._interval = rospy.Rate(2)
 
@@ -46,7 +46,7 @@ class DynamicLocomotion(RobilTask):
 
         self._DynamicWalker.Walk()
 
-        rospy.loginfo("DynamicLocomotion, task: %s" % ("Starting to walk") )
+        rospy.loginfo("DynamicQual1, task: %s" % ("Starting to walk") )
         while not self._DynamicWalker.IsDone():
             if self.isPreepted() or (3 == self._debug_cmd):
                 self._DynamicWalker.Stop()
@@ -62,7 +62,7 @@ class DynamicLocomotion(RobilTask):
     def WaitForPath(self):
         self._DynamicWalker._LPP.Stop()
 
-        rospy.loginfo("DynamicLocomotion, WaitForPath: %s" % ("Waiting to receive /path ...") )
+        rospy.loginfo("DynamicQual1, WaitForPath: %s" % ("Waiting to receive /path ...") )
         while not self._DynamicWalker.IsReady():
             if self.isPreepted():
                 self._DynamicWalker.Stop()
@@ -101,8 +101,8 @@ class DynamicLocomotion(RobilTask):
 #---------------------------  a little testing script -----------------------------
 ###################################################################################
 if __name__ == '__main__':
-    rospy.init_node('DynamicLocomotion')
-    node = DynamicLocomotion("DynamicLocomotion")
+    rospy.init_node('DynamicQual')
+    node = DynamicLocomotion("DynamicQual1")
     # Harness robot, with gravity off
     #mode = rospy.Publisher('/atlas/mode', String, None, False, True, None)
     #mode.publish("harnessed")
