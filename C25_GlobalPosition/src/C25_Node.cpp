@@ -21,6 +21,7 @@
 #include <C23_ObjectRecognition/C23C0_ODIM.h>
 #include <tf/tf.h>
 #include <tf/transform_listener.h>
+//#include <tf/Matrix3x3.h>
 #include <pcl/correspondence.h>
 #include <pcl/point_cloud.h>
 #include <pcl/common/common_headers.h>
@@ -96,16 +97,27 @@ public:
 	   * The call back function executed when a data is available
 	   */
 	  void callback(const geometry_msgs::PoseWithCovarianceStampedConstPtr& pos_msg){
-		  /*last_msg.imu.angular_velocity=imu_msg->angular_velocity;
-		  last_msg.imu.angular_velocity_covariance=imu_msg->angular_velocity_covariance;
-		  last_msg.imu.header=imu_msg->header;
-		  last_msg.imu.linear_acceleration=imu_msg->linear_acceleration;
-		  last_msg.imu.linear_acceleration_covariance=imu_msg->linear_acceleration_covariance;
-		  last_msg.imu.orientation=imu_msg->orientation;
-		  last_msg.imu.orientation_covariance=imu_msg->orientation_covariance;
-		  //last_msg.pose.child_frame_id="";*/
+		  double delta=last_msg.pose.header.stamp.toSec()-pos_msg->header.stamp.toSec();
+		  double x,y,z,r0,p0,y0,r1,p1,y1;
+		  x=pos_msg->pose.pose.position.x-last_msg.pose.pose.pose.position.x;
+		  y=pos_msg->pose.pose.position.y-last_msg.pose.pose.pose.position.y;
+		  z=pos_msg->pose.pose.position.z-last_msg.pose.pose.pose.position.z;
+		  tf::Quaternion oldQ;
+		  tf::quaternionMsgToTF(last_msg.pose.pose.pose.orientation, oldQ);
+		  tf::Matrix3x3 mOld(oldQ);
+		  mOld.getRPY(r0,p0,y0);
+		  tf::Quaternion newQ;
+		  tf::quaternionMsgToTF(pos_msg->pose.pose.orientation, newQ);
+		  tf::Matrix3x3 mNew(newQ);
+		  mOld.getRPY(r1,p1,y1);
 		  last_msg.pose.header=pos_msg->header;
 		  last_msg.pose.pose=pos_msg->pose;
+		  last_msg.pose.twist.twist.linear.x=x/(delta);
+		  last_msg.pose.twist.twist.linear.y=y/(delta);
+		  last_msg.pose.twist.twist.linear.z=z/(delta);
+		  last_msg.pose.twist.twist.angular.x=(r1-r0)/(delta);
+		  last_msg.pose.twist.twist.angular.y=(p1-p0)/(delta);
+		  last_msg.pose.twist.twist.angular.z=(y1-y0)/(delta);
 		  c25_publisher.publish(last_msg);
 	  }
 

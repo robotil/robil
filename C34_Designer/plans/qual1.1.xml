@@ -12,7 +12,7 @@
                   </seq>
                   <seq name="OverCliff" x="517.2142857142823" y="232.01948051947818" collapsed="false" id="b668d8b3-6787-4d21-a051-17def7419d8b"> 
                         <tsk name="PathPlanningFocus(target=Qual1P2)" x="324.45238095237823" y="344.146464646463" test_time="0" test_result="true" id="9fe743dd-3101-4988-8e76-2f01615c6604" />
-                        <tsk name="QuasiStaticWalking" x="526.7380952380912" y="330.7496392496361" test_time="0" test_result="true" id="c9112af6-dbb8-4445-8948-59f96dacf28b" />
+                        <tsk name="DynamicLocomotion" x="526.7380952380912" y="330.7496392496361" test_time="0" test_result="true" id="c9112af6-dbb8-4445-8948-59f96dacf28b" />
                   </seq>
                   <seq name="ToFinish" x="720.9603174603162" y="202.9559884559862" collapsed="false" id="2deef5af-9445-4863-a0c5-4ce0d1a71f4d"> 
                         <tsk name="PathPlanningFocus(target=Qual1P3)" x="671.9444444444437" y="312.09884559884335" test_time="0" test_result="true" id="9fe743dd-3101-4988-8e76-2f01615c6605" />

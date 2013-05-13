@@ -1,11 +1,9 @@
 #include <ros/ros.h>
-#include <actionlib/client/simple_action_client.h>
 #include <atlas_msgs/AtlasCommand.h>
 #include <atlas_msgs/AtlasState.h>
 #include <sensor_msgs/JointState.h>
 #include <osrf_msgs/JointCommands.h>
 #include <std_msgs/Float64.h>
-#include <boost/thread.hpp>
 #include <boost/algorithm/string.hpp>
 #include <std_srvs/Empty.h>
 #include <PoseController/back_movement.h>
@@ -22,11 +20,11 @@ private:
 	std::vector<double> joint_positions, wanted_positions, kp_positions;
 	ros::Publisher pub_atlas_commands_,pub_joint_states_;
 	ros::Subscriber joint_states_sub_;
-	ros::ServiceServer hand_service, foot_service, back_service, neck_service, reset_service;
+	ros::ServiceServer hand_service, foot_service, back_service, neck_service, reset_service, start_service, stop_service;
 	ros::ServiceServer delta_hand_service, delta_foot_service, delta_back_service, delta_neck_service;
 	osrf_msgs::JointCommands jointcommands;
 	atlas_msgs::AtlasCommand atlascommand;
-	bool up;
+	bool up, waitForJointStates;
 public:
 	PoseControllerClass(std::string name):action_name_(name),up(false){
 
@@ -49,11 +47,14 @@ public:
 
 		reset_service = nh_.advertiseService("/PoseController/reset_joints", &PoseControllerClass::reset_joints_CB, this);
 
+		start_service = nh_.advertiseService("/PoseController/start", &PoseControllerClass::start_CB, this);
+		stop_service = nh_.advertiseService("/PoseController/stop", &PoseControllerClass::stop_CB, this);
+
 		joint_states_sub_ = nh_.subscribe("/atlas/joint_states",100,&PoseControllerClass::joint_states_CB,this);
 		pub_atlas_commands_ = nh2_.advertise<atlas_msgs::AtlasCommand>("/atlas/atlas_command", 1, true);
 		pub_joint_states_ = nh2_.advertise<sensor_msgs::JointState>("/PoseController/joint_states", 1, true);
 
-		while(!up){
+		while(!waitForJointStates){
 			ros::spinOnce();
 			ros::Duration(0.05).sleep();
 		}
@@ -135,6 +136,7 @@ public:
 
 		std_srvs::Empty e;
 		this->reset_joints_CB(e.request, e.response);
+
 		this->ControlPose();
 		ROS_INFO("Running pose controller");
 	}
@@ -146,7 +148,11 @@ public:
 			joints[state->name[i]] = i;
 		}
 		joint_positions = state->position;
-		if(!up) up = true;
+		if(!waitForJointStates) {
+			std_srvs::Empty e;
+			this->reset_joints_CB(e.request, e.response);
+			waitForJointStates = true;
+		}
 	}
 
 	bool reset_joints_CB(std_srvs::Empty::Request &req, std_srvs::Empty::Response &res){
@@ -154,6 +160,19 @@ public:
 		for(unsigned int i = 0; i < joint_positions.size(); i++){
 			wanted_positions[i] = joint_positions[i];
 		}
+		return true;
+	}
+
+	bool start_CB(std_srvs::Empty::Request &req, std_srvs::Empty::Response &res){
+		ROS_INFO("Starting PoseController");
+		this->reset_joints_CB(req, res);
+		this->up = true;
+		return true;
+	}
+
+	bool stop_CB(std_srvs::Empty::Request &req, std_srvs::Empty::Response &res){
+		ROS_INFO("Stopping PoseController");
+		this->up = false;
 		return true;
 	}
 
@@ -412,8 +431,9 @@ public:
 			atlascommand.ki_position[atlas_msgs::AtlasState::back_ubx] = 10;
 			atlascommand.kd_position[atlas_msgs::AtlasState::back_ubx] = 50;
 
-			pub_atlas_commands_.publish(atlascommand);
-
+			if(up){
+				pub_atlas_commands_.publish(atlascommand);
+			}
 
 
 

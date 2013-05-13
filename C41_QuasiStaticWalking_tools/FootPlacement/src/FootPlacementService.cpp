@@ -5,7 +5,8 @@
  * advertise service foot_placement
  */
 FootPlacementService::FootPlacementService() {
-	mapClient = nh.serviceClient<C22_GroundRecognitionAndMapping::C22>("C22");
+	mapClient = nh.serviceClient
+			<C22_CompactGroundRecognitionAndMapping::C22>("C22compact");
 	footServer = nh.advertiseService
 			("foot_placement", &FootPlacementService::callback, this);
 }
