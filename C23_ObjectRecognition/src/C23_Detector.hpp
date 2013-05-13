@@ -3,6 +3,7 @@
 
 #include <ros/ros.h>
 #include <sensor_msgs/Image.h>
+#include <geometry_msgs/Point.h>
 #include <cv_bridge/cv_bridge.h>
 #include <sensor_msgs/image_encodings.h>
 #include <opencv2/opencv.hpp>
@@ -33,9 +34,6 @@
 #include <tf/transform_listener.h>
 #include <math.h>
 #include "GeneralDetector.hpp"
-
-
-
 
 //#include <columnDetect/COLUMN_DETECT_GATE.h>
 //#include <columnDetect/COLUMN_DETECT_GATES.h>
@@ -82,7 +80,11 @@ private:
 	ros::Publisher objectDetectedPublisher;
   ros::Publisher objectDeminsionsPublisher;
 	//vector<Gate*>* gates;
-
+	  //Register a service
+	  ros::ServiceClient c21client;
+	  geometry_msgs::Point point;
+	  
+  
 	  image_transport::ImageTransport it_;
 	  typedef image_transport::SubscriberFilter ImageSubscriber;
 	  ImageSubscriber left_image_sub_;
