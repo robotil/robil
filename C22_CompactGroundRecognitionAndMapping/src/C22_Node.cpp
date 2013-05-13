@@ -10,7 +10,6 @@
 #include "MapMatrix.h"
 #include "C22_CompactGroundRecognitionAndMapping/C22.h"
 #include "C22_CompactGroundRecognitionAndMapping/C22C24.h"
-#include <C21_VisionAndLidar/C21_C22.h>
 #include "sensor_msgs/PointCloud.h"
 #include <pcl/correspondence.h>
 #include <pcl/point_cloud.h>
@@ -110,10 +109,10 @@ bool C22_Node::proccess(C22_CompactGroundRecognitionAndMapping::C22::Request  &r
 /**
  * The call back function executed when a new point cloud has arrived
  */
-void C22_Node::callback(const C21_VisionAndLidar::C21_C22::ConstPtr& pclMsg,const nav_msgs::Odometry::ConstPtr& pos_msg){
+void C22_Node::callback(const sensor_msgs::PointCloud2::ConstPtr& pclMsg,const nav_msgs::Odometry::ConstPtr& pos_msg){
 
 	 pcl::PointCloud<pcl::PointXYZ>cloud;
-	 pcl::fromROSMsg<pcl::PointXYZ>(pclMsg->cloud,cloud);
+	 pcl::fromROSMsg<pcl::PointXYZ>(*pclMsg,cloud);
 	 pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_filtered(cloud.makeShared());
 	 //std::cout<<"points before:"<<cloud_filtered->points.size()<<std::endl;
 	 //sor.setInputCloud (cloud_filtered);
@@ -173,6 +172,7 @@ void C22_Node::callback(const C21_VisionAndLidar::C21_C22::ConstPtr& pclMsg,cons
 		 /*pcl::PointCloud<pcl::PointXYZ>empty;
 		 pcl::PointCloud<pcl::PointXYZ>::Ptr em(empty.makeShared());
 		 cloudRecord.swap(em);*/
+		 pcl::io::savePCDFileASCII ("test_pcd.pcd",*cloudRecord);
 		  pcl::PointCloud<int> sampled_indices;
 		  pcl::UniformSampling<pcl::PointXYZ> uniform_sampling;
 		  uniform_sampling.setInputCloud (cloudRecord);

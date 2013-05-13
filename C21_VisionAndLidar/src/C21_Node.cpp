@@ -102,6 +102,8 @@ public:
 			C21_VisionAndLidar::C21_obj::Response &res )
 	  {
 		  //ROS_INFO("recived request, tying to fetch data\n");
+		  int rounds=10;
+		  for(int k=0;k<rounds;k++){
 		  _posMutex->lock();
 		  tf::Transform trans2;
 		  trans2.setOrigin(tf::Vector3(c25msg.position.x,c25msg.position.y,c25msg.position.z));
@@ -146,9 +148,10 @@ public:
 			   z+=t.points.at(i).z;
 			   counter++;
 		   }
-		   res.point.x=((double)x)/counter;
-		   res.point.y=((double)y)/counter;
-		   res.point.z=((double)z)/counter;
+		   res.point.x+=((double)x)/(counter*rounds);
+		   res.point.y+=((double)y)/(counter*rounds);
+		   res.point.z+=((double)z)/(counter*rounds);
+		  }
 		  return true;
 	  }
 
