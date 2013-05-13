@@ -178,6 +178,7 @@ class LocalPathPlanner(object):
         self._CurrentSegment = Segment(self._Position,self._Position)
         self._PathReady = False
         self._Preview_Distance = 1.7 # [meters], should be updated according to distance of number of step ahead 
+        self._DoingQual = False
         
     def SetPath(self,waypointList):
         self._Path = deque(waypointList)
@@ -257,6 +258,12 @@ class LocalPathPlanner(object):
 
     def GetTargetDistance(self):
         return self._CurrentSegment.GetTarget().GetDistanceFrom(self._Position) - self.GetCloseEnoughToTargetDistance()
+
+    def SetDoingQual(self,DoingQual):
+        self._DoingQual = DoingQual
+
+    def GetDoingQual(self):
+        return self._DoingQual
 
 
 ###################################################################################
