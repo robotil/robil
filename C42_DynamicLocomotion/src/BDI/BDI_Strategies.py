@@ -31,8 +31,6 @@ class BDI_Strategy(object):
     def __init__(self,odometer):
 
         self._Odometer = odometer
-
-        self._k_effort = [0] * 28
         self._StepLength = 0.2
         self._StepWidth = 0.15
         self._alpha = 0.0
