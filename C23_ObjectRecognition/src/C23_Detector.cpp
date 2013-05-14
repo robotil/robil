@@ -34,10 +34,29 @@
 #include <C23_ObjectRecognition/C23C0_ODIM.h>
 #include "C23_Detector.hpp"
 #include <C21_VisionAndLidar/C21_obj.h>
+#include <math.h>
 
 
 #define MIN(x,y) (x < y ? x : y)
 #define MAX(x,y) (x > y ? x : y)
+bool C23_Detector::pictureCoordinatesToGlobalPosition(int x1, int y1, int x2, int y2, int* x, int* y, int *z) {
+    C21_VisionAndLidar::C21_obj c21srv;
+    c21srv.request.sample.x1 = x1;
+    c21srv.request.sample.y1 = y1;
+    c21srv.request.sample.x2 = x2;
+    c21srv.request.sample.y2 = y2;
+    
+    if(c21client.call(c21srv))
+    {
+        if(x != NULL) *x = round(c21srv.response.point.x);
+        if(y != NULL) *y = round(c21srv.response.point.y);
+        if(z != NULL) *z = round(c21srv.response.point.z);
+        cout << "Received data: " << c21srv.response.point.x << "," << c21srv.response.point.y << "," << c21srv.response.point.z << endl;
+        return true;
+    }
+    return false;
+    
+}
 
 Mat fromSensorMsg(const sensor_msgs::ImageConstPtr& msg)
 {
@@ -83,6 +102,12 @@ bool C23_Detector::detect(const string target) {
     } else if (!target.compare("Path")) {
         _target = PATH;
         ROS_INFO("We are looking for a path...");
+    } else if (!target.compare("Valve")) {
+        _target = VALVE;
+        ROS_INFO("We are looking for a valve...");
+    } else if (!target.compare("Firehose")) {
+        _target = FIREHOSE;
+        ROS_INFO("We are looking for a firehose...");
     } else if (!target.compare("Picture")) {
         _target = PICTURE;
         ROS_INFO("We are taking a picture ... say cheese ...");
@@ -122,7 +147,7 @@ void C23_Detector::publishMessage(bool isFound) {
 }
 void C23_Detector::callback(const sensor_msgs::ImageConstPtr& msg,const sensor_msgs::PointCloud2::ConstPtr &cloud)
 {
-    //	  ROS_INFO("Receiving image..");
+    //    ROS_INFO("Receiving image..");
     Mat srcImg = fromSensorMsg(msg);
     bool res;
     switch (_target) {
@@ -136,18 +161,196 @@ void C23_Detector::callback(const sensor_msgs::ImageConstPtr& msg,const sensor_m
             publishMessage(res);
             break;
         case GATE:
-            ROS_INFO("GATE");
-            
+            ROS_INFO("GATE");         
             res = detectGate(srcImg,cloud);
+            publishMessage(res);
+            break;
+        case VALVE:
+            ROS_INFO("VALVE");
+            res = detectValve(srcImg,cloud);
+            publishMessage(res);
+            break;
+        case FIREHOSE:
+            ROS_INFO("FIREHOSE");
+            res = detectFirehose(srcImg,cloud);
             publishMessage(res);
             break;
         case PICTURE:
             imwrite("picture.jpg",srcImg);
             _target=NONE;
+            break;
     }
     srcImg.release();
     
 }
+
+
+bool C23_Detector::detectValve(Mat srcImg, const sensor_msgs::PointCloud2::ConstPtr &cloud) {
+    ROS_INFO("Detecting a valve..");
+    RNG rng(12345);
+    
+    Mat imgHSV, imgThreshed;
+    cvtColor(srcImg,imgHSV,CV_BGR2HSV);
+    inRange(imgHSV,Scalar(60,30,30),Scalar(80,255,255),imgThreshed);
+    //namedWindow("TESTING");
+    // imshow("TESTING",imgThreshed);
+    // waitKey(0);
+    // imwrite("test12.jpg",imgThreshed);
+    Mat bw;
+    vector<vector<cv::Point> > contours;
+    threshold(imgThreshed,bw,10,255,CV_THRESH_BINARY);
+    // imshow("TESTING",bw);
+    // waitKey(0);
+    cv::Scalar colors[3];
+    colors[0] = cv::Scalar(120, 120, 0);
+    colors[1] = cv::Scalar(120, 255, 0);
+    colors[2] = cv::Scalar(0, 100, 255);
+    findContours(bw,contours,CV_RETR_LIST,CV_CHAIN_APPROX_SIMPLE);
+    size_t idx;
+    for (idx = 0; idx < contours.size(); idx++) {
+        cv::drawContours(srcImg, contours, idx, colors[idx % 3]);
+    }
+    
+    //  drawContours(srcImg,contours,-1,CV_RGB(255,0,0),2);
+    // imshow("TESSTING",srcImg);
+    waitKey(0);
+    vector<RotatedRect> minEllipse( contours.size() );
+    int biggest_size = 0;
+    int biggest = 0;
+    for( int i = 0; i < contours.size(); i++ )
+    {
+        cout << "Contour: " << i << ", Size: " << contours[i].size() << endl;
+        if( contours[i].size() > biggest_size )
+        { 
+            biggest_size = contours[i].size();
+            biggest = i;
+            
+        }
+    }
+    if(biggest_size > 30 && biggest_size < 80) {
+        
+        
+        
+        
+        /* for( int i = 0; i < contours.size(); i++ )
+         *            {
+         *                cout << "Contour: " << i << ", Size: " << contours[i].size() << endl;
+         *                if( contours[i].size() > 5 )
+         *                    { 
+         *                        minEllipse[i] = fitEllipse( Mat(contours[i]) ); 
+         *                        
+         }
+         }*/
+        RotatedRect minRect =  minAreaRect( Mat(contours[biggest]));
+        Point2f rect_points[4]; minRect.points( rect_points );
+        for( int j = 0; j < 4; j++ )
+            line( srcImg, rect_points[j], rect_points[(j+1)%4], CV_RGB(255,0,0), 1, 8 );
+        // ellipse( srcImg, fitEllipse( Mat(contours[biggest]) ), CV_RGB(255,0,0), 2, 8 );
+            /// Draw contours + rotated rects + ellipses
+            // Mat drawing = Mat::zeros( threshold_output.size(), CV_8UC3 );
+            /* for( int i = 0; i< contours.size(); i++ )
+             *            {
+             *                Scalar color = Scalar( rng.uniform(0, 255), rng.uniform(0,255), rng.uniform(0,255) );
+             *                // contour
+             *            //  drawContours( bw, contours, i, color, 1, 8, vector<Vec4i>(), 0, Pointf() );
+             *                // ellipse
+             *                ellipse( imgThreshed, minEllipse[i], color, 2, 8 );
+             }*/
+            imshow("TESTING",srcImg);
+            waitKey(0);
+            pictureCoordinatesToGlobalPosition(minRect.center.x-10,minRect.center.y+10,minRect.center.x+10,minRect.center.y+10,&x,&y,NULL);
+            return true;
+    }
+    return false;
+    
+}
+
+bool C23_Detector::detectFirehose(Mat srcImg, const sensor_msgs::PointCloud2::ConstPtr &cloud) {
+    ROS_INFO("Detecting a Firehose..");
+    RNG rng(12345);
+    
+    Mat imgHSV, imgThreshed;
+    cvtColor(srcImg,imgHSV,CV_BGR2HSV);
+    inRange(imgHSV,Scalar(90, 130, 40), Scalar(150, 255, 250),imgThreshed);
+    //namedWindow("TESTING");
+    imshow("TESTING",imgThreshed);
+    waitKey(0);
+   // imwrite("test12.jpg",imgThreshed);
+    Mat imgDilated;
+    Mat element = getStructuringElement( MORPH_ELLIPSE,
+                                         Size( 2*18 + 1, 2*18+1 ),
+                                         cv::Point( 18, 18 ) );
+    /// Apply the dilation operation
+    dilate( imgThreshed, imgDilated, element );
+    Mat bw;
+    vector<vector<cv::Point> > contours;
+    threshold(imgDilated,bw,10,255,CV_THRESH_BINARY);
+     imshow("TESTING",bw);
+     waitKey(0);
+    cv::Scalar colors[3];
+    colors[0] = cv::Scalar(120, 120, 0);
+    colors[1] = cv::Scalar(120, 255, 0);
+    colors[2] = cv::Scalar(0, 100, 255);
+    findContours(bw,contours,CV_RETR_LIST,CV_CHAIN_APPROX_SIMPLE);
+    size_t idx;
+    for (idx = 0; idx < contours.size(); idx++) {
+        cv::drawContours(srcImg, contours, idx, colors[idx % 3]);
+    }
+    
+    //  drawContours(srcImg,contours,-1,CV_RGB(255,0,0),2);
+    // imshow("TESSTING",srcImg);
+    waitKey(0);
+    vector<RotatedRect> minEllipse( contours.size() );
+    int biggest_size = 0;
+    int biggest = 0;
+    for( int i = 0; i < contours.size(); i++ )
+    {
+        cout << "Contour: " << i << ", Size: " << contours[i].size() << endl;
+        if( contours[i].size() > biggest_size )
+        { 
+            biggest_size = contours[i].size();
+            biggest = i;
+            
+        }
+    }
+    if(biggest_size > 50 && biggest_size < 180) {
+        
+        
+        
+        
+        /* for( int i = 0; i < contours.size(); i++ )
+         *            {
+         *                cout << "Contour: " << i << ", Size: " << contours[i].size() << endl;
+         *                if( contours[i].size() > 5 )
+         *                    { 
+         *                        minEllipse[i] = fitEllipse( Mat(contours[i]) ); 
+         *                        
+    }
+    }*/
+        RotatedRect minRect =  minAreaRect( Mat(contours[biggest]));
+        Point2f rect_points[4]; minRect.points( rect_points );
+        for( int j = 0; j < 4; j++ )
+            line( srcImg, rect_points[j], rect_points[(j+1)%4], CV_RGB(255,0,0), 1, 8 );
+        // ellipse( srcImg, fitEllipse( Mat(contours[biggest]) ), CV_RGB(255,0,0), 2, 8 );
+            /// Draw contours + rotated rects + ellipses
+            // Mat drawing = Mat::zeros( threshold_output.size(), CV_8UC3 );
+            /* for( int i = 0; i< contours.size(); i++ )
+             *            {
+             *                Scalar color = Scalar( rng.uniform(0, 255), rng.uniform(0,255), rng.uniform(0,255) );
+             *                // contour
+             *            //  drawContours( bw, contours, i, color, 1, 8, vector<Vec4i>(), 0, Pointf() );
+             *                // ellipse
+             *                ellipse( imgThreshed, minEllipse[i], color, 2, 8 );
+    }*/
+            imshow("TESTING",srcImg);
+            waitKey(0);
+            pictureCoordinatesToGlobalPosition(minRect.center.x-100,minRect.center.y+100,minRect.center.x+100,minRect.center.y+100,&x,&y,NULL);
+            return true;
+    }
+    return false;
+    
+}
+
 bool C23_Detector::detectCar(Mat srcImg, const sensor_msgs::PointCloud2::ConstPtr &cloud) {
     
     //Define the service client to be accessed
@@ -487,12 +690,12 @@ bool C23_Detector::detectGate(Mat srcImg, const sensor_msgs::PointCloud2::ConstP
                 cout << "Got data: " << x << "," << y << endl;
                 
             }
-           
+            
             
             Point2f a((float) (mcL[biggstL].x + mcR[biggstR].x)/2,(float)(mcL[biggstL].y + mcR[biggstR].y)/2);
             circle( srcImg, a, 16, Scalar(0,0,255), -1, 8, 0 );
-          //  imshow("TESTING",srcImg);
-           // waitKey(0);
+            //  imshow("TESTING",srcImg);
+            // waitKey(0);
             return true;
         }
     }
@@ -581,7 +784,7 @@ bool C23_Detector::detectGate(Mat srcImg, const sensor_msgs::PointCloud2::ConstP
                 cout << "Detected right" << endl;
                 circle( srcImg, Point2f(x_pic,y_pic), 16, Scalar(0,255,255), -1, 8, 0 );
             }
-           
+            
             //      imshow("Testing" , srcImg);
             //   waitKey(0);
             return mcM[biggstM].x < mcR[biggstR].x ? true : false;
