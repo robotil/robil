@@ -3,6 +3,7 @@
 
 #include <ros/ros.h>
 #include <sensor_msgs/Image.h>
+#include <geometry_msgs/Point.h>
 #include <cv_bridge/cv_bridge.h>
 #include <sensor_msgs/image_encodings.h>
 #include <opencv2/opencv.hpp>
@@ -34,9 +35,6 @@
 #include <math.h>
 #include "GeneralDetector.hpp"
 
-
-
-
 //#include <columnDetect/COLUMN_DETECT_GATE.h>
 //#include <columnDetect/COLUMN_DETECT_GATES.h>
 
@@ -53,7 +51,11 @@ using namespace tf;
 typedef enum targets { 
   CAR,
   GATE,
-  PATH
+  PATH,
+  PICTURE,
+  VALVE,
+  FIREHOSE,
+  NONE
 } TARGETS;
 
 class C23_Detector{
@@ -74,13 +76,20 @@ private:
     void publishMessage(bool isFound);
     bool detectPath(Mat srcImg);
     bool detectCar(Mat srcImg, const sensor_msgs::PointCloud2::ConstPtr &cloud);
-    
+    bool detectValve(Mat srcImg, const sensor_msgs::PointCloud2::ConstPtr &cloud);
+    bool detectFirehose(Mat srcImg, const sensor_msgs::PointCloud2::ConstPtr &cloud);
+        
+    bool pictureCoordinatesToGlobalPosition(int x1, int y1, int x2, int y2, int* x, int* y, int *z);
 	ros::NodeHandle nh;
 
 	ros::Publisher objectDetectedPublisher;
   ros::Publisher objectDeminsionsPublisher;
 	//vector<Gate*>* gates;
-
+	  //Register a service
+	  ros::ServiceClient c21client;
+	  geometry_msgs::Point point;
+	  
+  
 	  image_transport::ImageTransport it_;
 	  typedef image_transport::SubscriberFilter ImageSubscriber;
 	  ImageSubscriber left_image_sub_;
