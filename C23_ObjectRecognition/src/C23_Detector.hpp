@@ -53,6 +53,8 @@ typedef enum targets {
   GATE,
   PATH,
   PICTURE,
+  VALVE,
+  FIREHOSE,
   NONE
 } TARGETS;
 
@@ -74,7 +76,10 @@ private:
     void publishMessage(bool isFound);
     bool detectPath(Mat srcImg);
     bool detectCar(Mat srcImg, const sensor_msgs::PointCloud2::ConstPtr &cloud);
-    
+    bool detectValve(Mat srcImg, const sensor_msgs::PointCloud2::ConstPtr &cloud);
+    bool detectFirehose(Mat srcImg, const sensor_msgs::PointCloud2::ConstPtr &cloud);
+        
+    bool pictureCoordinatesToGlobalPosition(int x1, int y1, int x2, int y2, int* x, int* y, int *z);
 	ros::NodeHandle nh;
 
 	ros::Publisher objectDetectedPublisher;
