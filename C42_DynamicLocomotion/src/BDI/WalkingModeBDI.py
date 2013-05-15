@@ -14,7 +14,7 @@ from tf.transformations import quaternion_from_euler, euler_from_quaternion
 from sensor_msgs.msg import Imu
 
 from BDI_Odometer import *
-from BDI_WalkingModeStateMachine import *
+from BDI_StateMachine import *
 
 import math
 import rospy
@@ -37,6 +37,7 @@ from LocalPathPlanner import FootPlacement
 
 class WalkingModeBDI(WalkingMode):
     def __init__(self,localPathPlanner):
+        WalkingMode.__init__(self,localPathPlanner)
         self.step_index_for_reset = 0
         # Initialize atlas mode and atlas_sim_interface_command publishers        
         self.asi_command = rospy.Publisher('/atlas/atlas_sim_interface_command', AtlasSimInterfaceCommand, None, False, True, None)
@@ -50,8 +51,7 @@ class WalkingModeBDI(WalkingMode):
         self._setStep = True 
         self._passedSteppingStones = False
         ##############################
-        self._LPP = localPathPlanner
-        self._StateMachine = BDI_WalkingModeStateMachine(self._Odometer,self._LPP)
+        self._BDI_StateMachine = BDI_StateMachine(self._Odometer)
         #self._odom_position = Pose()
         self._odom_sub = rospy.Subscriber('/ground_truth_odom',Odometry,self._odom_cb)
         self._bDone = False
@@ -60,6 +60,7 @@ class WalkingModeBDI(WalkingMode):
         rospy.sleep(0.3)
 
     def Initialize(self):
+        WalkingMode.Initialize(self)
         self._bDone = False
         # # Puts robot into freeze behavior, all joints controlled
         # # Put the robot into a known state
@@ -85,18 +86,21 @@ class WalkingModeBDI(WalkingMode):
         # Initialize some variables before starting.
 
         self.is_swaying = False
-        self._StateMachine.Initialize(self.step_index_for_reset)
+        self._BDI_StateMachine.Initialize(self.step_index_for_reset)
     
     def StartWalking(self):
         self._bDone = False
         return 0.3
     
     def Walk(self):
-      self._yaw = 0
-      self._StateMachine.Walk(self._yaw)
+        WalkingMode.Walk(self)
+        self._yaw = 0
+        self._Odometer.SetYaw(yaw)
     
     def Stop(self):
-      self._StateMachine.Stop()
+        if(WalkingMode.Stop(self)):
+            self._BDI_StateMachine.Stop()
+        
     
     def EmergencyStop(self):
         # Puts robot into freeze behavior, all joints controlled
@@ -136,12 +140,13 @@ class WalkingModeBDI(WalkingMode):
                 print("asi_state_cb:: Initialize after stepping stones. Odometer X,Y: ",self._Odometer.GetGlobalPosition() )       
                 #self.Initialize()
                 print("asi_state_cb:: Initialize after stepping stones. step index: ",self.step_index )
-                self._StateMachine.Initialize(self.step_index)
+                WalkingMode.Initialize(self)
+                self._BDI_StateMachine.Initialize(self.step_index)
                 # self.step_index = state.behavior_feedback.walk_feedback.next_step_index_needed -1
                 # step1,step2,step3,step4 = self.initSteppingStoneStepData(self.step_index, state)
 
-            command = self._StateMachine.HandleStateMsg(state)
-            self._bDone = self._StateMachine.IsDone()
+            command = self.HandleStateMsg(state)
+            self._bDone = self._WalkingModeStateMachine.IsDone()
             ######################
             self._setStep = True
 
@@ -317,6 +322,53 @@ class WalkingModeBDI(WalkingMode):
             #print("GetSteppingStoneStepPlan:: step Data: ",stepData)
             self._SteppingStonesQueue.Append([stepData])
 
+    def HandleStateMsg(self,state):
+        command = 0
+        if ("Idle" == self._WalkingModeStateMachine.GetCurrentState().Name):
+            pass
+        elif ("Wait" == self._WalkingModeStateMachine.GetCurrentState().Name):
+            self.step_index_for_reset = state.behavior_feedback.walk_feedback.next_step_index_needed - 1
+            self._Odometer.SetPosition(state.pos_est.position.x,state.pos_est.position.y)
+            self._BDI_StateMachine.Initialize(self.step_index_for_reset)
+            self._BDI_StateMachine.GoForward()
+            self._WalkingModeStateMachine.PerformTransition(self,"Go")
+            #yaw?
+        elif ("Walking" == self._WalkingModeStateMachine.GetCurrentState().Name):
+            if (self._LPP.IsActive()):
+                # x,y = self._Odometer.GetGlobalPosition()
+                # self._LPP.UpdatePosition(x,y)
+                self._BDI_StateMachine.SetPathError(self._LPP.GetPathError())
+              
+                targetYaw = self._LPP.GetTargetYaw()
+                delatYaw = targetYaw - self._Odometer.GetYaw()
+                  
+                debug_transition_cmd = "NoCommand"
+                if (math.sin(delatYaw) > 0.6):
+                    #print("Sin(Delta)",math.sin(delatYaw), "Left")
+                    debug_transition_cmd = "TurnLeft"
+                    self._BDI_StateMachine.TurnLeft(targetYaw)
+                elif (math.sin(delatYaw) < -0.6):
+                    #print("Sin(Delta)",math.sin(delatYaw), "Right")
+                    debug_transition_cmd = "TurnRight"
+                    self._BDI_StateMachine.TurnRight(targetYaw)
+            else:
+                debug_transition_cmd = "Stop"
+                self._BDI_StateMachine.Stop()
+                if (self._BDI_StateMachine.IsDone()):
+                    self._WalkingModeStateMachine.PerformTransition(self,"Finished")
+                    
+            command = self._BDI_StateMachine.Step(state.behavior_feedback.walk_feedback.next_step_index_needed)
+            
+            if (0 !=command):
+                rospy.loginfo("WalkingModeBDI, asi_state_cb: State Machine Transition Cmd = %s" % (debug_transition_cmd) )
+        elif ("Done" == self._WalkingModeStateMachine.GetCurrentState().Name):
+                pass
+        else:
+                raise Exception("BDI_WalkingModeStateMachine::Bad State Name")
+    
+        return command
+
 
 def deg2r(deg):
     return (deg*math.pi/180.0)
+

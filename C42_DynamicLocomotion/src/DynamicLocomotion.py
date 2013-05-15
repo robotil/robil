@@ -2,7 +2,7 @@
 
 import roslib;roslib.load_manifest('C42_DynamicLocomotion')
 import rospy
-from Abstractions.DynamicWalker import *
+from Abstractions.Walker import *
 from WalkingModeChooser import *
 from C31_PathPlanner.msg import C31_Waypoints
 from RobilTaskPy import *
@@ -22,7 +22,7 @@ class DynamicLocomotion(RobilTask):
         RobilTask.__init__(self, name)
         lpp = LocalPathPlanner()
         lpp.SetDoingQual(False)
-        self._DynamicWalker = DynamicWalker(WalkingModeChooser(lpp),lpp)
+        self._Walker = Walker(WalkingModeChooser(lpp))
         self._interval = rospy.Rate(2)
 
         ## TOPIC setup:
@@ -40,32 +40,32 @@ class DynamicLocomotion(RobilTask):
         if (False == self.WaitForPath()):
             return RTResult_PREEPTED()
 
-        self._DynamicWalker.Initialize()
+        self._Walker.Initialize()
 
-        self._DynamicWalker.Start()
+        self._Walker.Start()
 
-        self._DynamicWalker.Walk()
+        self._Walker.Walk()
 
         rospy.loginfo("DynamicLocomotion, task: %s" % ("Starting to walk") )
-        while not self._DynamicWalker.IsDone():
+        while not self._Walker.IsDone():
             if self.isPreepted() or (3 == self._debug_cmd):
-                self._DynamicWalker.Stop()
+                self._Walker.Stop()
                 return RTResult_PREEPTED()
             self._interval.sleep()
 
-        self._DynamicWalker.Stop()
+        self._Walker.Stop()
 
         print("SUCCESS!!")
 
         return RTResult_SUCCESSED("Finished in Success")
 
     def WaitForPath(self):
-        self._DynamicWalker._LPP.Stop()
+        self._Walker._LPP.Stop()
 
         rospy.loginfo("DynamicLocomotion, WaitForPath: %s" % ("Waiting to receive /path ...") )
-        while not self._DynamicWalker.IsReady():
+        while not self._Walker.IsReady():
             if self.isPreepted():
-                self._DynamicWalker.Stop()
+                self._Walker.Stop()
                 print "Preempt Walker: Preempted before path was received"
                 return RTResult_PREEPTED()
             self._interval.sleep()
@@ -83,7 +83,7 @@ class DynamicLocomotion(RobilTask):
         p = []
         for wp in path.points:
             p.append(Waypoint(wp.x,wp.y))
-        self._DynamicWalker.SetPath(p)
+        self._Walker.SetPath(p)
 
     def _debug_command(self,debug_command): # cmd = 0 -> STOP; cmd = 3 -> Emergency STOP
         self._debug_cmd = debug_command.data
@@ -92,10 +92,10 @@ class DynamicLocomotion(RobilTask):
         rospy.loginfo(rospy.get_time())
         if 3 == self._debug_cmd:
              #self._ZmpStateMachine.EmergencyStop()
-             rospy.loginfo('DEBUG - _DynamicWalker "Emergency STOP" command')
+             rospy.loginfo('DEBUG - _Walker "Emergency STOP" command')
         elif 0 == self._debug_cmd:
-             self._DynamicWalker.Stop()
-             rospy.loginfo('DEBUG - _DynamicWalker STOP command')
+             self._Walker.Stop()
+             rospy.loginfo('DEBUG - _Walker STOP command')
 
 ###################################################################################
 #---------------------------  a little testing script -----------------------------
