@@ -409,12 +409,12 @@ bool C23_Detector::detectCar(Mat srcImg, const sensor_msgs::PointCloud2::ConstPt
 	cout<<"Max depth: "<<minPoint.x<<endl;
 	for(int i = 1; i < 500 && i + minImagePoint.x < srcImg.cols; i +=10) {
 		      flag = 0;
-		      cout << "Checking column: " << i << endl;
+		      //cout << "Checking column: " << i << endl;
 		      nanColumnFlag = true;
 		      for(int j= 150; j >= -150; j--) {
 			depth = pclcloud.at(minImagePoint.x+i,minImagePoint.y-j).x;
 			
-			cout<<"Depth: "<<depth<<endl;
+			//cout<<"Depth: "<<depth<<endl;
 			
 			
 			if (depth!=depth)//If all values are nan then it will stop
@@ -428,7 +428,7 @@ bool C23_Detector::detectCar(Mat srcImg, const sensor_msgs::PointCloud2::ConstPt
 			if(depth < minPoint.x+THRESHOLD && depth > minPoint.x-THRESHOLD) {
 			  
 			    x1 = minImagePoint.x+i;
-			    cout<<"X1: "<<x1<<endl;
+			    //cout<<"X1: "<<x1<<endl;
 			    flag = 1;
 			  }
 		    }
@@ -442,14 +442,14 @@ bool C23_Detector::detectCar(Mat srcImg, const sensor_msgs::PointCloud2::ConstPt
 	}
 	cout<<"X1: "<<x1<<", Xmin: "<<minImagePoint.x<<endl;
 	//Draw the right boundary column of the car
-	circle( srcImg, Point2f(x1,minImagePoint.y),10, 200, -1, 8, 0 );
+	//circle( srcImg, Point2f(x1,minImagePoint.y),10, 200, -1, 8, 0 );
 	
 	nanColumnCounter = 0;
 	nanColumnFlag = true;
 	depth = 0;
 	for(int i = 0; i < 500; i +=10) {
 	    flag = 0;
-	    cout << "Checking column: " << i << endl;
+	    //cout << "Checking column: " << i << endl;
 	    nanColumnFlag = true;
 	    for(int j= 150; j >= -150; j--) {
 		depth = pclcloud.at(minImagePoint.x-i,minImagePoint.y-j).x;
@@ -478,7 +478,7 @@ bool C23_Detector::detectCar(Mat srcImg, const sensor_msgs::PointCloud2::ConstPt
 	}
          cout << "X0: " << x0 << " X1: " << x1 << endl;
 	//The left boundary column of the car
-        circle( srcImg, Point2f(x0,minImagePoint.y),10, 300, -1, 8, 0 );
+        //circle( srcImg, Point2f(x0,minImagePoint.y),10, 300, -1, 8, 0 );
 	
          //Display the sub-region of the car found
          int carHeight = x1  - x0; //Asssume height and width are approximately the same
@@ -520,15 +520,16 @@ bool C23_Detector::detectCar(Mat srcImg, const sensor_msgs::PointCloud2::ConstPt
 	}
 	//Draw the closest point to the car
         cout << "Best point: " << sqrt(absolutePoint.x*absolutePoint.x+absolutePoint.y*absolutePoint.y+absolutePoint.z*absolutePoint.z) << endl;
-        circle( srcImg, Point2f(minImagePoint.x,minImagePoint.y), 5, 60, -1, 8, 0 ); 
+        //The closest point from the robot to the car
+	//circle( srcImg, Point2f(minImagePoint.x,minImagePoint.y), 5, 60, -1, 8, 0 ); 
 	//The average
-	//circle( srcImg, Point2f(), 5, 80, -1, 8, 0 ); 
         x = absolutePoint.x;
 	y = absolutePoint.y;
-	//imshow("Testing",srcImg);
-       // waitKey(0);
-        
-        
+	imshow("Testing",srcImg);
+        waitKey(0);
+	
+        //Determine if the robot is facing the driver or passenger side
+        detectPassengerDriver(srcImg, x0, minImagePoint.y - carHeight/4, x1,  minImagePoint.y + carHeight/2);
 	
 	
 	
@@ -539,6 +540,91 @@ bool C23_Detector::detectCar(Mat srcImg, const sensor_msgs::PointCloud2::ConstPt
     
     
 }
+
+bool C23_Detector::detectPassengerDriver(Mat srcImg, int x1,int y1,int x2,int y2){
+  
+   //Extract the segment of the car that has been detected
+  ROS_INFO("Extracting the car");
+  cout<<"X1: "<<x1<<" Y1: "<<y1<<"X2: "<<x2<<" Y2: "<<y2<<endl;
+  Rect carRect(x1, y1, x2-x1, y2-y1);
+  Mat carImage(srcImg, carRect);
+  //imshow("Car", carImage);
+  //waitKey(0);
+  
+  //Covert the image to HSV colour space
+  Mat imgHsvCar, imgThresholdedCar, imgCarOpened;
+  cvtColor(carImage, imgHsvCar, CV_BGR2HSV);
+  //imshow("HSV", imgHsvCar);
+  //waitKey(0);
+  
+  //Detect the blue blobs on the car
+  inRange(imgHsvCar, Scalar(100, 50, 40), Scalar(160, 255, 255), imgThresholdedCar);
+  
+  //imshow("Thresholded Image", imgThresholdedCar);
+  //waitKey(0);
+  
+  //Open the image to remove noise
+  Mat element3(5,5,CV_8U, Scalar(1));
+  morphologyEx(imgThresholdedCar, imgCarOpened, MORPH_OPEN,element3);  
+  
+  //imshow("Opened Image", imgCarOpened);
+  //waitKey(0);
+  
+    //Now find the contours of the blobs
+    vector<vector<cv::Point> > blobContours;
+    findContours(imgCarOpened,blobContours,CV_RETR_EXTERNAL, CV_CHAIN_APPROX_SIMPLE);
+    drawContours(carImage,blobContours,-1,CV_RGB(255,0,0),2);
+    
+    imshow("Contours", carImage);
+    waitKey(0);
+    
+    //Find the area of the contours and determine the largest contour
+    double maxArea = -1;
+    int maxContourIndex = -1;
+    double currentArea = -1;
+    vector<double> blobAreas;
+    for(int ii=0; ii<blobContours.size(); ii++)
+    {
+      blobAreas.push_back(contourArea(blobContours[ii], false));
+      currentArea = contourArea(blobContours[ii], false);
+      //cout<<"Max Area: "<<maxArea<<endl;
+      
+      if(maxArea<currentArea){
+	maxContourIndex = ii;
+	maxArea=currentArea;
+      } 
+    }
+    //Sort the blob areas (from smallest to largest)
+    sort(blobAreas.begin(), blobAreas.end());
+    
+    /*for(int jj=0;jj<blobAreas.size(); jj++)
+    {
+     cout<<"Sorted Area "<<jj<<": "<<blobAreas.at(jj)<<endl; 
+      
+    }*/
+    
+    //Find the center of mass of the contour with the largest area
+    // Get the moments
+    vector<Moments> mu(blobContours.size());
+    for( int ii = 0; ii < blobContours.size(); ii++ )
+     { mu[ii] = moments( blobContours[ii], false ); }
+
+    //  Get the mass centers:
+    vector<Point2f> mc( blobContours.size() );
+    for( int ii = 0; ii < blobContours.size() ; ii++ )
+     { mc[ii] = Point2f( mu[ii].m10/mu[ii].m00 , mu[ii].m01/mu[ii].m00 ); 
+       cout<<"CM: "<<mc[ii]<<", Area: "<<blobAreas[ii]<<endl;
+    }
+    cout<<"Largest: "<<mc[mc.size()-1].x<<", Second Largest: "<<mc[mc.size()-2].x<<endl;
+    if(mc[mc.size()-1].x > mc[mc.size()-2].x){
+     ROS_INFO("Robot is facing passenger side"); 
+    }else{
+      ROS_INFO("Robot is facing driver side"); 
+    }
+
+  return true;
+}
+
 
 bool C23_Detector::detectPath(Mat srcImg) {
     // IplImage* img = new IplImage(srcImg);
