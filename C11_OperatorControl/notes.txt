@@ -8,6 +8,7 @@ You may install them using: sudo apt-get install
 
 CONFIGURATION:
 The IP address of machine running the HMI should be updated on C11_OperatorControl/bin/C11Config.txt
+Create this file if it is not exist.
 
 //CHECK INSTRUCTIONS:
 1. Run Gazibo simulator - roslaunch atlas_utils atlas.launch

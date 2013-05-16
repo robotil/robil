@@ -57,6 +57,8 @@ bool C11_Agent_Node::init()
     service_ResumeSelection = nh_->advertiseService("ResumeMission", &C11_Agent_Node::ResumeMission,this);
     service_PathUpdate = nh_->advertiseService("PathUpdate", &C11_Agent_Node::PathUpdate,this);
 
+
+
     pushS = new PushHMIServer();
     HMIResS = new HMIResponseServer();
     pushS->SetPushHMIInterface(this);
@@ -319,7 +321,7 @@ void C11_Agent_Node::LoadMission(int missionId)
 
   std::string filename;
   filename = ros::package::getPath("C34_Designer");
-  filename.append("/plans/skill3.xml");
+  filename.append("/plans/qual1.1.hmi.xml");
 
   srv34Run.request.filename = filename;
 
@@ -360,3 +362,4 @@ void C11_Agent_Node::PathUpdated(std::vector<StructPoint> points)
   }
   path_update_pub.publish(waypoints);
 }
+
