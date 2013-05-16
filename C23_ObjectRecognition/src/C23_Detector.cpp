@@ -541,6 +541,13 @@ bool C23_Detector::detectCar(Mat srcImg, const sensor_msgs::PointCloud2::ConstPt
     
 }
 
+// comparison function object
+bool C23_Detector::compareContourAreas ( vector<cv::Point> contour1, vector<cv::Point> contour2 ) {
+    double i =  fabs(contourArea(contour1, false));
+    double j =  fabs(contourArea(contour2,false));
+    return ( i < j );
+}
+
 bool C23_Detector::detectPassengerDriver(Mat srcImg, int x1,int y1,int x2,int y2){
   
    //Extract the segment of the car that has been detected
@@ -578,32 +585,34 @@ bool C23_Detector::detectPassengerDriver(Mat srcImg, int x1,int y1,int x2,int y2
     imshow("Contours", carImage);
     waitKey(0);
     
-    //Find the area of the contours and determine the largest contour
+    
+    //Sort the contours based on their area
+    //sort(blobContours.begin(), blobContours.end(), compareContourAreas());
+    
+    //Find the area of the contours
     double maxArea = -1;
     int maxContourIndex = -1;
     double currentArea = -1;
     vector<double> blobAreas;
+    vector<int> blobIndices;
     for(int ii=0; ii<blobContours.size(); ii++)
     {
       blobAreas.push_back(contourArea(blobContours[ii], false));
+      blobIndices.push_back(ii);
       currentArea = contourArea(blobContours[ii], false);
-      //cout<<"Max Area: "<<maxArea<<endl;
-      
-      if(maxArea<currentArea){
-	maxContourIndex = ii;
-	maxArea=currentArea;
-      } 
+
     }
-    //Sort the blob areas (from smallest to largest)
-    sort(blobAreas.begin(), blobAreas.end());
     
-    /*for(int jj=0;jj<blobAreas.size(); jj++)
+    /*
+    for(int jj=0;jj<blobAreas.size(); jj++)
     {
      cout<<"Sorted Area "<<jj<<": "<<blobAreas.at(jj)<<endl; 
       
     }*/
+   
+   
     
-    //Find the center of mass of the contour with the largest area
+    //Find the center of mass of the contours
     // Get the moments
     vector<Moments> mu(blobContours.size());
     for( int ii = 0; ii < blobContours.size(); ii++ )
@@ -615,6 +624,8 @@ bool C23_Detector::detectPassengerDriver(Mat srcImg, int x1,int y1,int x2,int y2
      { mc[ii] = Point2f( mu[ii].m10/mu[ii].m00 , mu[ii].m01/mu[ii].m00 ); 
        cout<<"CM: "<<mc[ii]<<", Area: "<<blobAreas[ii]<<endl;
     }
+    
+    //Determine the largest and second largest contour
     cout<<"Largest: "<<mc[mc.size()-1].x<<", Second Largest: "<<mc[mc.size()-2].x<<endl;
     if(mc[mc.size()-1].x > mc[mc.size()-2].x){
      ROS_INFO("Robot is facing passenger side"); 
@@ -624,6 +635,7 @@ bool C23_Detector::detectPassengerDriver(Mat srcImg, int x1,int y1,int x2,int y2
 
   return true;
 }
+
 
 
 bool C23_Detector::detectPath(Mat srcImg) {

@@ -76,6 +76,7 @@ private:
     void publishMessage(bool isFound);
     bool detectPath(Mat srcImg);
     bool detectCar(Mat srcImg, const sensor_msgs::PointCloud2::ConstPtr &cloud);
+    bool compareContourAreas ( vector<cv::Point> contour1, vector<cv::Point> contour2) ;
     bool detectPassengerDriver(Mat srcImg, int x1,int y1,int x2,int y2);
     bool detectValve(Mat srcImg, const sensor_msgs::PointCloud2::ConstPtr &cloud);
     bool detectFirehose(Mat srcImg, const sensor_msgs::PointCloud2::ConstPtr &cloud);
