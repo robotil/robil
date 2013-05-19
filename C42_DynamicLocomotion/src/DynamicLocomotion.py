@@ -20,9 +20,9 @@ class DynamicLocomotion(RobilTask):
     
     def __init__(self,name):
         RobilTask.__init__(self, name)
-        lpp = LocalPathPlanner()
-        lpp.SetDoingQual(False)
-        self._Walker = Walker(WalkingModeChooser(lpp))
+        self._Lpp = LocalPathPlanner()
+        self._Lpp.SetDoingQual(False)
+        self._Walker = Walker(WalkingModeChooser(self._Lpp))
         self._interval = rospy.Rate(2)
 
         ## TOPIC setup:
@@ -36,11 +36,11 @@ class DynamicLocomotion(RobilTask):
 
         #initialize values:
         self._init_values()
-        
-        if (False == self.WaitForPath()):
-            return RTResult_PREEPTED()
 
         self._Walker.Initialize()
+
+        if (False == self.WaitForPath()):
+            return RTResult_PREEPTED()
 
         self._Walker.Start()
 
@@ -60,7 +60,7 @@ class DynamicLocomotion(RobilTask):
         return RTResult_SUCCESSED("Finished in Success")
 
     def WaitForPath(self):
-        self._Walker._LPP.Stop()
+        self._Lpp.Stop()
 
         rospy.loginfo("DynamicLocomotion, WaitForPath: %s" % ("Waiting to receive /path ...") )
         while not self._Walker.IsReady():

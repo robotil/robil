@@ -18,6 +18,7 @@ class Walker(object):
     
     def __init__(self,walkingModeChooser):
         self._ModeChooser = walkingModeChooser
+        self._WalkingMode = 0
 
     # Commands:
     def Initialize(self):
@@ -43,7 +44,7 @@ class Walker(object):
         return self._WalkingMode.IsDone()
 
     def IsReady(self):
-        return self._WalkingMode.IsActive()
+        return self._WalkingMode.IsReady()
 
 
 

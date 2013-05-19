@@ -95,7 +95,7 @@ class WalkingModeBDI(WalkingMode):
     def Walk(self):
         WalkingMode.Walk(self)
         self._yaw = 0
-        self._Odometer.SetYaw(yaw)
+        self._Odometer.SetYaw(self._yaw)
     
     def Stop(self):
         if(WalkingMode.Stop(self)):
@@ -125,7 +125,7 @@ class WalkingModeBDI(WalkingMode):
     def asi_state_cb(self, state):
         if self._LPP.GetDoingQual() and (16.2 < self._LPP.GetPos().GetX()) and (self._LPP.GetPos().GetX() < 19.7) and not self._passedSteppingStones:
             if (True == self._setStep): # Initialize before stepping stones
-                self.step_index = state.behavior_feedback.walk_feedback.next_step_index_needed -1
+                self.step_index = state.walk_feedback.next_step_index_needed -1
                 step1,step2,step3,step4 = self.initSteppingStoneStepData(self.step_index, state)
                 self._StepQueue.Initialize(step1,step2,step3,step4)
                 self.GetSteppingStoneStepPlan(state)
@@ -169,7 +169,7 @@ class WalkingModeBDI(WalkingMode):
 
     def SteppingStoneCommand(self,state):
         command = 0 
-        nextindex = state.behavior_feedback.walk_feedback.next_step_index_needed
+        nextindex = state.walk_feedback.next_step_index_needed
         if (nextindex>self.step_index):
             self.step_index += 1
             command = self.GetCommand()
@@ -243,13 +243,13 @@ class WalkingModeBDI(WalkingMode):
         command = AtlasSimInterfaceCommand()
         command.behavior = AtlasSimInterfaceCommand.WALK
         for i in range(4):
-            command.walk_params.step_data[i] = self._StepQueue.Peek(i)
+            command.walk_params.step_queue[i] = self._StepQueue.Peek(i)
         return command
 
     def initSteppingStoneStepData(self,step_index,state):
-        print("initSteppingStoneStepData - index need to match:: cmd index = ",step_index,"state first index = ",state.behavior_feedback.walk_feedback.step_data_saturated[0].step_index)
-        stepData1 = copy.deepcopy(state.behavior_feedback.walk_feedback.step_data_saturated[0])
-        stepData2 = copy.deepcopy(state.behavior_feedback.walk_feedback.step_data_saturated[1])
+        print("initSteppingStoneStepData - index need to match:: cmd index = ",step_index,"state first index = ",state.walk_feedback.step_queue_saturated[0].step_index)
+        stepData1 = copy.deepcopy(state.walk_feedback.step_queue_saturated[0])
+        stepData2 = copy.deepcopy(state.walk_feedback.step_queue_saturated[1])
         stepData3 = copy.deepcopy(stepData2)
         stepData4 = copy.deepcopy(stepData2)
 
@@ -327,11 +327,11 @@ class WalkingModeBDI(WalkingMode):
         if ("Idle" == self._WalkingModeStateMachine.GetCurrentState().Name):
             pass
         elif ("Wait" == self._WalkingModeStateMachine.GetCurrentState().Name):
-            self.step_index_for_reset = state.behavior_feedback.walk_feedback.next_step_index_needed - 1
+            self.step_index_for_reset = state.walk_feedback.next_step_index_needed - 1
             self._Odometer.SetPosition(state.pos_est.position.x,state.pos_est.position.y)
             self._BDI_StateMachine.Initialize(self.step_index_for_reset)
             self._BDI_StateMachine.GoForward()
-            self._WalkingModeStateMachine.PerformTransition(self,"Go")
+            self._WalkingModeStateMachine.PerformTransition("Go")
             #yaw?
         elif ("Walking" == self._WalkingModeStateMachine.GetCurrentState().Name):
             if (self._LPP.IsActive()):
@@ -355,9 +355,9 @@ class WalkingModeBDI(WalkingMode):
                 debug_transition_cmd = "Stop"
                 self._BDI_StateMachine.Stop()
                 if (self._BDI_StateMachine.IsDone()):
-                    self._WalkingModeStateMachine.PerformTransition(self,"Finished")
+                    self._WalkingModeStateMachine.PerformTransition("Finished")
                     
-            command = self._BDI_StateMachine.Step(state.behavior_feedback.walk_feedback.next_step_index_needed)
+            command = self._BDI_StateMachine.Step(state.walk_feedback.next_step_index_needed)
             
             if (0 !=command):
                 rospy.loginfo("WalkingModeBDI, asi_state_cb: State Machine Transition Cmd = %s" % (debug_transition_cmd) )
