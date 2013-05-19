@@ -1,8 +1,4 @@
 #!/usr/bin/env python
-import rospy
-from WalkingMode import *
-from WalkingModeChooserInterface import *
-from LocalPathPlanner import *
 
 ###################################################################################
 # File created by David Dovrat, 2013.
@@ -10,12 +6,19 @@ from LocalPathPlanner import *
 # The code in this file is provided "as is" and comes with no warranty whatsoever
 ################################################################################### 
 
-class DynamicWalker(object):
-    
-    def __init__(self,walkingModeChooser,localPathPlanner):
-        self._ModeChooser = walkingModeChooser
-        self._LPP = localPathPlanner
+import rospy
+from WalkingMode import *
+from WalkingModeChooserInterface import *
 
+###################################################################################
+#--------------------------- Walker -----------------------------------------------
+###################################################################################
+
+class Walker(object):
+    
+    def __init__(self,walkingModeChooser):
+        self._ModeChooser = walkingModeChooser
+        self._WalkingMode = 0
 
     # Commands:
     def Initialize(self):
@@ -32,18 +35,16 @@ class DynamicWalker(object):
     
     def Stop(self):
         self._WalkingMode.Stop()
-        self._LPP.Stop()
 
     def SetPath(self,Path):
-        self._LPP.SetPath(Path)
-
+        self._WalkingMode.SetPath(Path)
 
     # Status:
     def IsDone(self):
         return self._WalkingMode.IsDone()
 
     def IsReady(self):
-        return self._LPP.IsActive()
+        return self._WalkingMode.IsReady()
 
 
 
