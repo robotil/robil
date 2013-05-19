@@ -120,8 +120,16 @@ public:
 			return;
 		}
 		myImage=&left->image;
+
+		Rect box1;
+		box1.x=162;
+		box1.y=114;
+		box1.height=367-114;
+		box1.width=261-162;
+		draw_box( myImage, box1 );
 		if(box_chosen){
 			draw_box( myImage, box );
+
 			std::stringstream s;
 			s<<"Values to call service\n:"<<" x1:"<<minx<<" y1:"<<miny<<" x2:"<<maxx<<" y2:"<<maxy;
 			cv::Point org;

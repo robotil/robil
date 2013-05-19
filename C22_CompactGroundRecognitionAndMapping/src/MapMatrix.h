@@ -18,8 +18,8 @@
 #include "geometry_msgs/Point.h"
 
 #define PELVIS_HEIGHT 0.90845
-const int SIZEOFMAP = 5;	//The map matrix is defined as a square of SIZEOFMAP*SIZEOFMAP meters
-const double SIZEOFSQUARE = 0.05;	//Size of each square is defined by SIZEOFSQUARE*SIZEOFSQUARE in meters
+const int SIZEOFMAP = 10;	//The map matrix is defined as a square of SIZEOFMAP*SIZEOFMAP meters
+const double SIZEOFSQUARE = 0.25;	//Size of each square is defined by SIZEOFSQUARE*SIZEOFSQUARE in meters
 const int BEHIND = 2;		//Number of meters behind robot in map matrix
 const int BOUNDOFUPDATE = 0.05;
 const int NUMOFSQUARES = SIZEOFMAP/SIZEOFSQUARE;	//in one row or column
@@ -36,7 +36,7 @@ public:
 	void moveMapHarisontaly(int times);
 	void moveMapVerticaly(int times);
 	int xOffset,yOffset;
-	void computeMMatrix(pcl::PointCloud<pcl::PointXYZ>::Ptr map_cloud,geometry_msgs::Point pose);
+	void computeMMatrix(std::vector<pclPlane*>* mapPlanes,pcl::PointCloud<pcl::PointXYZ>::Ptr map_cloud);
 private:
 	double calcSlopeZ(float a,float b,float c);
 	bool inMatrixRange(pcl::PointXYZ p);
