@@ -26,7 +26,7 @@ from nav_msgs.msg import Odometry
 from geometry_msgs.msg import Pose
 from BDI_Strategies import *
 from Abstractions.StepQueue import *
-from LocalPathPlanner import FootPlacement
+from QS_PathPlanner import *
 
 
 ###################################################################################
@@ -35,8 +35,9 @@ from LocalPathPlanner import FootPlacement
 # The code in this file is provided "as is" and comes with no warranty whatsoever
 ###################################################################################
 
-class WalkingModeBDI(WalkingMode):
-    def __init__(self,localPathPlanner):
+class QS_WalkingMode(WalkingMode):
+    def __init__(self):
+        localPathPlanner
         WalkingMode.__init__(self,localPathPlanner)
         self.step_index_for_reset = 0
         # Initialize atlas mode and atlas_sim_interface_command publishers        

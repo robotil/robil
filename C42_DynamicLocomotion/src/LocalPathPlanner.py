@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
 from collections import deque
+from Abstractions.PathPlanner import *
 import math
 import rospy    # TODO - get rid of all these loginfo when done debugging
 
@@ -167,7 +168,7 @@ class Segment(object):
 #--------------------------- Local Path Planner -----------------------------------
 ###################################################################################
 
-class LocalPathPlanner(object):
+class LocalPathPlanner(PathPlanner):
     """
         The LocalPathPlanner class plans the next few steps for the ZMP module
     """

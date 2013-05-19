@@ -21,8 +21,7 @@ class DynamicLocomotion(RobilTask):
     def __init__(self,name,bIsDoingQual=False):
         RobilTask.__init__(self, name)
         self._Lpp = LocalPathPlanner()
-        self._Lpp.SetDoingQual(bIsDoingQual)
-        self._Walker = Walker(WalkingModeChooser(self._Lpp,'BDI'))
+        self._Walker = Walker(WalkingModeChooser(self._Lpp,'QS'))
         self._interval = rospy.Rate(2)
 
         ## TOPIC setup:
@@ -60,7 +59,7 @@ class DynamicLocomotion(RobilTask):
         return RTResult_SUCCESSED("Finished in Success")
 
     def WaitForPath(self):
-        self._Lpp.Stop()
+        self._Walker.Stop()
 
         rospy.loginfo("DynamicLocomotion, WaitForPath: %s" % ("Waiting to receive /path ...") )
         while not self._Walker.IsReady():
@@ -101,7 +100,7 @@ class DynamicLocomotion(RobilTask):
 #---------------------------  a little testing script -----------------------------
 ###################################################################################
 if __name__ == '__main__':
-    rospy.init_node('DynamicLocomotion')
-    node = DynamicLocomotion("DynamicLocomotion")
+    rospy.init_node('DynamicQS')
+    node = DynamicLocomotion("DynamicQS")
     rospy.spin()
     print "C42_DynamicLocomotion node Closed"

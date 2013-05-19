@@ -2,6 +2,7 @@
 
 from Abstractions.WalkingModeChooserInterface import *
 from BDI.WalkingModeBDI import *
+from QS.QS_WalkingMode import *
 
 ###################################################################################
 # File created by David Dovrat, 2013.
@@ -11,10 +12,10 @@ from BDI.WalkingModeBDI import *
 
 class WalkingModeChooser(WalkingModeChooserInterface):
 
-    def __init__(self,localPathPlanner):
-        self._Modes = {'BDI':WalkingModeBDI(localPathPlanner)}
-        self._CurrentMode = self._Modes['BDI']
-        self._Recommended = self._Modes['BDI']
+    def __init__(self,localPathPlanner,prefferedMode):
+        self._Modes = {'BDI':WalkingModeBDI(localPathPlanner),'QS':QS_WalkingMode()}
+        self._CurrentMode = self._Modes[prefferedMode]
+        self._Recommended = self._Modes[prefferedMode]
         
     def IsCurrentModeAppropriate(self):
         return True;
