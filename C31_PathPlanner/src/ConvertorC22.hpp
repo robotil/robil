@@ -32,7 +32,8 @@ static Map extractMap(const C22_GroundRecognitionAndMapping::C22C0_PATH &res, co
 		std::cout<<"size of map is wrong"<<std::endl;
 		return Map(0,0);
 	}
-	return m.map();
+	Map result_map = m.map();
+	return result_map;
 };
 
 

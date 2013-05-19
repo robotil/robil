@@ -771,4 +771,89 @@ int cogniteam_pathplanning_test_transits(int argc, char** argv) {
 
 }
 
+#include "WallDetector.h"
+int cogniteam_pathplanning_test_alts(int argc, char** argv) {
+	cout << "START: cogniteam_pathplanning_test_transits" << endl; // prints PP
 
+	double* cmap = 0;
+	size_t w=0,h=0;
+
+	vector<double> map_from_file;
+	if(argc>5){
+		cout<<"map from file: "<<argv[5]<<endl;
+		map_from_file = map_file_reader::readAltMap(argv[5], w, h, 0, 10, true);
+		cmap =  map_from_file.data();
+	}
+
+	AltMap alts(w, h, cmap);
+//	for(size_t y=0;y<alts.h();y++){
+//		for(size_t x=0;x<alts.w();x++){
+//			cout<<alts(x,y)<<' ';
+//		}
+//		cout<<endl;
+//	}
+
+	WallDetector wd(alts, 0.3);
+	Map map = wd.simplify();
+
+	printBitmap("map source",map);
+	return 0;
+	printAsVector("SOURCE",map);
+
+	long _sx=atoi(argv[1]), _sy=atoi(argv[2]);
+	long _ex=atoi(argv[3]), _ey=atoi(argv[4]);
+	long _rr=argc>6 ? 2 : atoi(argv[6]);
+
+	#define START_P _sx,_sy
+	#define END_P   _ex,_ey
+
+	#define POINTS START_P, END_P
+
+	printf("Robot radius : %i celles \n", _rr);
+	printf("Plan path : from %i,%i to %i,%i \n", POINTS);
+
+	if(map.inRange(END_P)==false){
+		map.approximate(START_P, END_P);
+	}
+
+	Waypoint start(START_P), finish(END_P);
+	RobotDimentions dimentions; dimentions.radius = _rr;
+	Transits transits;
+		int tpn = argc>7 ?  atoi(argv[7]) : 0;
+		printf("transit points number : %i \n", tpn);
+		for(int i=8;i<tpn*2+8 && argc>i+1;i+=2){
+			TransitWaypoint wp1={atoi(argv[i]),atoi(argv[i+1])}; cout<<"add transit: "<<wp1.x<<","<<wp1.y<<endl;
+			transits.push_back(wp1);
+		}
+	Attractors attractors;
+	Constraints con(dimentions, transits, attractors);
+
+
+	Path smoothed = test_searchPath_transitAccurate(map, start, finish, con);
+
+	for( size_t i=0;i<smoothed.size(); i++){
+		map(smoothed[i].x, smoothed[i].y)='o';
+	}
+	for( size_t i=0;i<transits.size(); i++){
+		if(map(transits[i].x, transits[i].y)=='o')
+			map(transits[i].x, transits[i].y)='T';
+		else
+			map(transits[i].x, transits[i].y)='t';
+	}
+	{
+		if(map(start.x, start.y)=='o')
+			map(start.x, start.y)='S';
+		else
+			map(start.x, start.y)='s';
+	}
+	{
+		if(map(finish.x, finish.y)=='o')
+			map(finish.x, finish.y)='G';
+		else
+			map(finish.x, finish.y)='g';
+	}
+
+	cout<<endl;
+	printBitmap("map with smoothed path",map);
+
+}

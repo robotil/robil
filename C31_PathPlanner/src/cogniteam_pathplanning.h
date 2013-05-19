@@ -10,7 +10,7 @@ using namespace std;
 int cogniteam_pathplanning_test(int, char**);
 int cogniteam_pathplanning_test_map_inflation(int argc, char** argv) ;
 int cogniteam_pathplanning_test_transits(int argc, char** argv) ;
-
+int cogniteam_pathplanning_test_alts(int argc, char** argv) ;
 
 struct TransitWaypoint{
 	size_t x; size_t y;
