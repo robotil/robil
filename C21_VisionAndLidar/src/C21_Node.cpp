@@ -66,7 +66,7 @@ public:
 		//more on filters and how to use them can be found on http://www.ros.org/wiki/message_filters
 		left_image_sub_( it_, left_camera, 1 ),
 		right_image_sub_( it_, right_camera, 1 ),
-		//pointcloud(nh_,"/multisense_sl/camera/points2",1),
+		pointcloud(nh_,"/multisense_sl/camera/points2",1),
 		laser_sub_(nh_, "/multisense_sl/laser/scan", 10),
 		laser_notifier_(laser_sub_,listener_, "pelvis", 10),
 		sync( MySyncPolicy( 10 ), left_image_sub_, right_image_sub_ ,pointcloud)
@@ -77,7 +77,7 @@ public:
 		c22Lidarpub= nh_.advertise<sensor_msgs::PointCloud2>("C21/C22Lidar", 1);
 		c22Cloudsub= nh_.subscribe("/multisense_sl/camera/points2", 1, &C21_Node::cloudCallback, this);
 		laser_notifier_.registerCallback(
-		      boost::bind(&C21_Node:: LidarCallback, this, _1));
+		      boost::bind(&C21_Node::LidarCallback, this, _1));
 		    laser_notifier_.setTolerance(ros::Duration(0.01));
 		//c25Sub=nh_.subscribe("/robot_pose_ekf/odom", 1,&C21_Node::C25Callback, this);
 		ground_truth_sub= nh_.subscribe("ground_truth_odom", 1, &C21_Node::poseCallback, this);
@@ -270,30 +270,9 @@ public:
 
 
 	  void HMIcallback(const sensor_msgs::ImageConstPtr& left_msg,const sensor_msgs::ImageConstPtr& right_msg,const sensor_msgs::PointCloud2::ConstPtr &cloud){
-	  		/*tf::StampedTransform transform;
-	  		try{
-	  		  listener.lookupTransform("/pelvis","/head",
-	  								   ros::Time(0), transform);
-	  		}
-	  		catch (tf::TransformException ex){
-	  		   return;
-	  		}
-	  		C21_VisionAndLidar::C21_C22 msg;
-	  		msg.header=cloud->header;
-	  		msg.image=*left_msg;
-	  		msg.cloud=*cloud;
-	  		tf::Vector3 orig=transform.getOrigin();
-	  		tf::Quaternion rot=transform.getRotation();
-	  		msg.pose.position.x=orig.getX();
-	  		msg.pose.position.y=orig.getY();
-	  		msg.pose.position.z=orig.getZ();
-	  		msg.pose.orientation.x=rot.getX();
-	  		msg.pose.orientation.y=rot.getY();
-	  		msg.pose.orientation.z=rot.getZ();
-	  		msg.pose.orientation.w=rot.getW();
-	  		c22pub.publish(msg);*/
 	  		 cv_bridge::CvImagePtr left;
 	  		 cv_bridge::CvImagePtr right;
+	  		 std::cout<<"asdasdasd"<<endl;
 	  		try
 	  		{
 	  		  left = cv_bridge::toCvCopy(left_msg,enc::RGB8);
@@ -335,8 +314,6 @@ public:
 		  tf::StampedTransform transform;
 		  sensor_msgs::PointCloud2 cloud;
 		try{
-		/*listener.lookupTransform("/pelvis","/head_hokuyo_frame",
-								   ros::Time(0), transform);*/
 		  projector_.transformLaserScanToPointCloud("/pelvis",*scan_in,
 		          cloud,listener_);
 		}
@@ -357,52 +334,12 @@ public:
 		//C21_VisionAndLidar::C21_C22 msg;
 		cloud3.header=scan_in->header;
 		cloud3.header.frame_id="/pelvis";
-		//msg.cloud=cloud3;
-		/*tf::Vector3 orig=transform.getOrigin();
-		tf::Quaternion rot=transform.getRotation();
-		msg.pose.position.x=orig.getX();
-		msg.pose.position.y=orig.getY();
-		msg.pose.position.z=orig.getZ();
-		msg.pose.orientation.x=rot.getX();
-		msg.pose.orientation.y=rot.getY();
-		msg.pose.orientation.z=rot.getZ();
-		msg.pose.orientation.w=rot.getW();*/
+
 		c22Lidarpub.publish(cloud3);
 		_detectionMutex->lock();
 		//detectionCloud+=cloud2;
 		_detectionMutex->unlock();
 
-		/* cv_bridge::CvImagePtr left;
-		 cv_bridge::CvImagePtr right;
-		try
-		{
-		  left = cv_bridge::toCvCopy(left_msg,enc::RGB8);
-		  right =cv_bridge::toCvCopy(right_msg,enc::RGB8);
-		}
-		catch (cv_bridge::Exception& e)
-		{
-		  ROS_ERROR("cv_bridge exception: %s", e.what());
-		  return;
-		}
-
-		//left_msg->header.stamp=ros::Time::now();
-		//right_msg->header.stamp=ros::Time::now();
-		leftpub.publish(left_msg);
-		rightpub.publish(right_msg);
-		/*
-		 *saving frames for HMI use
-		 */
-		/*_panMutex->lock();
-		left->image.copyTo(leftImage);
-		right->image.copyTo(rightImage);
-		_panMutex->unlock();
-		//pcl::PointCloud<pcl::PointXYZ> out;
-		//pcl::fromROSMsg(cloud,out);
-		_cloudMutex->lock();
-		my_answer.swap(cloud2);
-		//pcl::io::savePCDFile("cloud.pcd",out,true);
-		_cloudMutex->unlock();
-		//std::cout<<" position x:"<<msg.pose.position.x<<" y:"<<msg.pose.position.y<<" z:"<<msg.pose.position.z<<"\n";*/
 	  }
 
 private:
@@ -454,7 +391,7 @@ int main(int argc, char **argv)
   ros::init(argc, argv, "C21_VisionAndLidar");
   ros::AsyncSpinner spinner(7); // Use 7 threads
   spinner.start();
-  C21_Node my_node("/multisense_sl/camera/left/image_color","/multisense_sl/camera/right/image_color");
+  C21_Node my_node("/multisense_sl/camera/left/image_rect_color","/multisense_sl/camera/right/image_rect_color");
   ros::waitForShutdown();
   while(ros::ok()){
 	  ros::spin();
