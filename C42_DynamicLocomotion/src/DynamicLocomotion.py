@@ -18,10 +18,10 @@ from std_msgs.msg import Int32
 
 class DynamicLocomotion(RobilTask):
     
-    def __init__(self,name):
+    def __init__(self,name,bIsDoingQual=False):
         RobilTask.__init__(self, name)
         self._Lpp = LocalPathPlanner()
-        self._Lpp.SetDoingQual(False)
+        self._Lpp.SetDoingQual(bIsDoingQual)
         self._Walker = Walker(WalkingModeChooser(self._Lpp))
         self._interval = rospy.Rate(2)
 
@@ -103,9 +103,5 @@ class DynamicLocomotion(RobilTask):
 if __name__ == '__main__':
     rospy.init_node('DynamicLocomotion')
     node = DynamicLocomotion("DynamicLocomotion")
-    # Harness robot, with gravity off
-    #mode = rospy.Publisher('/atlas/mode', String, None, False, True, None)
-    #mode.publish("harnessed")
-    #node.task()
     rospy.spin()
     print "C42_DynamicLocomotion node Closed"
