@@ -238,13 +238,13 @@ class WalkingModeBDI(WalkingMode):
         command = AtlasSimInterfaceCommand()
         command.behavior = AtlasSimInterfaceCommand.WALK
         for i in range(4):
-            command.walk_params.step_data[i] = self._StepQueue.Peek(i)
+            command.walk_params.step_queue[i] = self._StepQueue.Peek(i)
         return command
 
     def initSteppingStoneStepData(self,step_index,state):
-        print("initSteppingStoneStepData - index need to match:: cmd index = ",step_index,"state first index = ",state.behavior_feedback.walk_feedback.step_data_saturated[0].step_index)
-        stepData1 = copy.deepcopy(state.behavior_feedback.walk_feedback.step_data_saturated[0])
-        stepData2 = copy.deepcopy(state.behavior_feedback.walk_feedback.step_data_saturated[1])
+        print("initSteppingStoneStepData - index need to match:: cmd index = ",step_index,"state first index = ",state.behavior_feedback.walk_feedback.step_queue_saturated[0].step_index)
+        stepData1 = copy.deepcopy(state.behavior_feedback.walk_feedback.step_queue_saturated[0])
+        stepData2 = copy.deepcopy(state.behavior_feedback.walk_feedback.step_queue_saturated[1])
         stepData3 = copy.deepcopy(stepData2)
         stepData4 = copy.deepcopy(stepData2)
 

@@ -47,7 +47,7 @@ class BDI_Strategy(object):
         self._counter += 1
         command = AtlasSimInterfaceCommand()
         
-        stepData = command.walk_params.step_data[0]
+        stepData = command.walk_params.step_queue[0]
         stepData.step_index = index
         stepData.foot_index = index%2
 

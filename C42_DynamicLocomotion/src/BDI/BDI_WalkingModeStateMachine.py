@@ -67,7 +67,7 @@ class BDI_WalkingModeStateMachine(StateMachine):
         if ("Idle" == StateMachine.GetCurrentState(self).Name):
             pass
         elif ("Wait" == StateMachine.GetCurrentState(self).Name):
-            self.step_index_for_reset = state.behavior_feedback.walk_feedback.next_step_index_needed - 1
+            self.step_index_for_reset = state.walk_feedback.next_step_index_needed - 1
             self._Odometer.SetPosition(state.pos_est.position.x,state.pos_est.position.y)
             self._BDI_StateMachine.Initialize(self.step_index_for_reset)
             self._BDI_StateMachine.GoForward()
@@ -97,7 +97,7 @@ class BDI_WalkingModeStateMachine(StateMachine):
                 self._BDI_StateMachine.Stop()
             if (self._BDI_StateMachine.IsDone()):
                 StateMachine.PerformTransition(self,"Finished")
-            command = self._BDI_StateMachine.Step(state.behavior_feedback.walk_feedback.next_step_index_needed)
+            command = self._BDI_StateMachine.Step(state.walk_feedback.next_step_index_needed)
 
             if (0 !=command):
                 rospy.loginfo("WalkingModeBDI, asi_state_cb: State Machine Transition Cmd = %s" % (debug_transition_cmd) )
