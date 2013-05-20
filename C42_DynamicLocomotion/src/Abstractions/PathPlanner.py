@@ -19,7 +19,7 @@ class PathPlanner(object):
         self._PathReady = False
         
     def SetPath(self,waypointList):
-        pass
+        self._PathReady = True
                       
     def Stop(self):
         self._PathReady = False 

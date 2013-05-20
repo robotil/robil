@@ -61,6 +61,9 @@ class WalkingModeBDI(WalkingMode):
 
     def Initialize(self):
         WalkingMode.Initialize(self)
+        # Subscriber
+        self._path_sub = rospy.Subscriber('/path',C31_Waypoints,self._path_cb)
+    
         self._bDone = False
         # # Puts robot into freeze behavior, all joints controlled
         # # Put the robot into a known state
@@ -119,6 +122,14 @@ class WalkingModeBDI(WalkingMode):
 ###################################################################################
 #--------------------------- CallBacks --------------------------------------------
 ###################################################################################
+
+    def _path_cb(self,path):
+        rospy.loginfo('got path %s',path)
+        p = []
+        for wp in path.points:
+            p.append(Waypoint(wp.x,wp.y))
+        self.SetPath(p)
+
 
     # /atlas/atlas_sim_interface_state callback. Before publishing a walk command, we need
     # the current robot position   

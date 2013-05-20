@@ -12,8 +12,14 @@ from QS.QS_WalkingMode import *
 
 class WalkingModeChooser(WalkingModeChooserInterface):
 
-    def __init__(self,localPathPlanner,prefferedMode):
-        self._Modes = {'BDI':WalkingModeBDI(localPathPlanner),'QS':QS_WalkingMode()}
+    def __init__(self,prefferedMode,bIsDoingQual):
+        
+        # Once we clean bIsDoingQual out of the code, we can allow for the lpp to be known only to the concrete walking
+        # mode
+        lpp = LocalPathPlanner()
+        lpp.SetDoingQual(bIsDoingQual)
+        
+        self._Modes = {'BDI':WalkingModeBDI(lpp),'QS':QS_WalkingMode()}
         self._CurrentMode = self._Modes[prefferedMode]
         self._Recommended = self._Modes[prefferedMode]
         

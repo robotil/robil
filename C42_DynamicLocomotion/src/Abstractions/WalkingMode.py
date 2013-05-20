@@ -9,14 +9,14 @@
 from WalkingModeStateMachine import *
 
 class WalkingMode(object):
-    
     def __init__(self,localPathPlanner):
         self._LPP = localPathPlanner
         self._WalkingModeStateMachine = WalkingModeStateMachine()
         
     def Initialize(self):
         self._WalkingModeStateMachine = WalkingModeStateMachine()
-    
+        self._LPP.Stop()
+
     def StartWalking(self):
         pass
     
@@ -38,3 +38,4 @@ class WalkingMode(object):
 
     def IsReady(self):
         return self._LPP.IsActive()
+    

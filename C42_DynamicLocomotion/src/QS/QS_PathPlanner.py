@@ -21,6 +21,6 @@ class QS_PathPlanner(PathPlanner):
         PathPlanner.__init__(self)
         
     def SetPath(self,waypointList):
-        pass
+        PathPlanner.SetPath(self,waypointList)
 
 

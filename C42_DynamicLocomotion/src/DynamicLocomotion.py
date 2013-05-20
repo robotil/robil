@@ -18,15 +18,12 @@ from std_msgs.msg import Int32
 
 class DynamicLocomotion(RobilTask):
     
-    def __init__(self,name,bIsDoingQual=False):
+    def __init__(self,name,prefferedWalkingMode,bIsDoingQual=False):
         RobilTask.__init__(self, name)
-        self._Lpp = LocalPathPlanner()
-        self._Lpp.SetDoingQual(bIsDoingQual)
-        self._Walker = Walker(WalkingModeChooser(self._Lpp,'BDI'))
+        self._Walker = Walker(WalkingModeChooser(prefferedWalkingMode,bIsDoingQual))
         self._interval = rospy.Rate(2)
 
         ## TOPIC setup:
-        self._path_sub = rospy.Subscriber('/path',C31_Waypoints,self._path_cb)
         self._debug_cmd_sub = rospy.Subscriber('walker_command',Int32,self._debug_command)
     
     def _init_values(self):
@@ -39,7 +36,7 @@ class DynamicLocomotion(RobilTask):
 
         self._Walker.Initialize()
 
-        if (False == self.WaitForPath()):
+        if (True != self.WaitForPath()):
             return RTResult_PREEPTED()
 
         self._Walker.Start()
@@ -60,8 +57,6 @@ class DynamicLocomotion(RobilTask):
         return RTResult_SUCCESSED("Finished in Success")
 
     def WaitForPath(self):
-        self._Lpp.Stop()
-
         rospy.loginfo("DynamicLocomotion, WaitForPath: %s" % ("Waiting to receive /path ...") )
         while not self._Walker.IsReady():
             if self.isPreepted():
@@ -75,15 +70,6 @@ class DynamicLocomotion(RobilTask):
 ###################################################################################
 #--------------------------- CallBacks -----------------------------------------------
 ###################################################################################
-
-    def _path_cb(self,path):
-        
-        rospy.loginfo('got path %s',path)
-        
-        p = []
-        for wp in path.points:
-            p.append(Waypoint(wp.x,wp.y))
-        self._Walker.SetPath(p)
 
     def _debug_command(self,debug_command): # cmd = 0 -> STOP; cmd = 3 -> Emergency STOP
         self._debug_cmd = debug_command.data
@@ -102,6 +88,6 @@ class DynamicLocomotion(RobilTask):
 ###################################################################################
 if __name__ == '__main__':
     rospy.init_node('DynamicLocomotion')
-    node = DynamicLocomotion("DynamicLocomotion")
+    node = DynamicLocomotion("DynamicLocomotion",'BDI')
     rospy.spin()
     print "C42_DynamicLocomotion node Closed"
