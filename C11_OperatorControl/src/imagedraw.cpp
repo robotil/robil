@@ -36,6 +36,15 @@ ImageDraw::ImageDraw(int argc, char** argv, QWidget *parent, Qt::WFlags flags)
 	if (!file.open(QIODevice::ReadOnly | QIODevice::Text))
 	  {
 	    std::cout << "Can't open config file!!! Restart the application" << std::endl;
+	    std::cout << "Can't open config file!!! Restart the application" << std::endl;
+	    std::cout << "Can't open config file!!! Restart the application" << std::endl;
+	    std::cout << "Can't open config file!!! Restart the application" << std::endl;
+	    std::cout << "Can't open config file!!! Restart the application" << std::endl;
+	    std::cout << "Can't open config file!!! Restart the application" << std::endl;
+	    std::cout << "Can't open config file!!! Restart the application" << std::endl;
+	    std::cout << "Can't open config file!!! Restart the application" << std::endl;
+	    std::cout << "Can't open config file!!! Restart the application" << std::endl;
+	    std::cout << "Can't open config file!!! Restart the application" << std::endl;
 	  }
 
 	else
@@ -50,6 +59,21 @@ ImageDraw::ImageDraw(int argc, char** argv, QWidget *parent, Qt::WFlags flags)
             connect(pCTcpConnection,SIGNAL(SigOnGridReceived(int[100][100],StructPoint,int,int,double)),this,SLOT(SltOnGridReceived(int[100][100],StructPoint,int,int,double)));
 
             pCTcpConnection->SetSubscriber(this);
+	  }
+
+	QFile missfile("Missions.txt");
+	if (!missfile.open(QIODevice::ReadOnly | QIODevice::Text))
+          {
+            std::cout << "Can't open Missions config file!!! Restart the application" << std::endl;
+          }
+	else
+	  {
+	    while (!missfile.atEnd())
+	     {
+	        QString line = missfile.readLine();
+	        MissionsList.append(line);
+             }
+	    ui.cmbMissions->addItems(MissionsList);
 	  }
 
 //	QString fileName = QFileDialog::getOpenFileName(this,
@@ -312,18 +336,7 @@ void ImageDraw::SltOnPlayPauseClick(bool checked)
                   if(!curMission.isEmpty())
                   {
                           int index=0;
-                          if(curMission == "Task1")
-                          {
-                                  index = 0;
-                          }
-                          else if(curMission == "Task2")
-                          {
-                                  index = 1;
-                          }
-                          else if(curMission == "Task3")
-                          {
-                                  index = 2;
-                          }
+                          index = MissionsList.indexOf(curMission);
                           //C11node.LoadMission(index);
                           pCTcpConnection->LoadMission(index);
                           ERunStatus = RUNNING_ENUM;
