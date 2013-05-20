@@ -20,7 +20,7 @@ C24_PID=$!
 echo $C24_PID
 sleep 3
 echo "Starting C25"
-rosrun C25_GlobalPosition              C25 &
+roslaunch C25_GlobalPosition              C25.launch &
 C25_PID=$!
 echo $C25_PID
 echo $C21_PID $C22_PID $C24_PID $C25_PID >> $PKILL
