@@ -336,23 +336,7 @@
               </widget>
              </item>
              <item>
-              <widget class="QComboBox" name="cmbMissions">
-               <item>
-                <property name="text">
-                 <string>Task1</string>
-                </property>
-               </item>
-               <item>
-                <property name="text">
-                 <string>Task2</string>
-                </property>
-               </item>
-               <item>
-                <property name="text">
-                 <string>Task3</string>
-                </property>
-               </item>
-              </widget>
+              <widget class="QComboBox" name="cmbMissions"/>
              </item>
             </layout>
            </widget>
@@ -1331,8 +1315,8 @@
  </resources>
  <connections/>
  <buttongroups>
-  <buttongroup name="buttonGroup"/>
   <buttongroup name="buttonGroup_2"/>
   <buttongroup name="buttonGroup_3"/>
+  <buttongroup name="buttonGroup"/>
  </buttongroups>
 </ui>

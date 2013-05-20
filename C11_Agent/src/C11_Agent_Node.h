@@ -14,6 +14,9 @@
 #include "C11_UntilOperatorIntervention.hpp"
 #include "C11_TCPServer.h"
 #include <QThread>
+#include <QFile>
+#include <QString>
+#include <QStringList>
 
 class IAgentInterface
 {
@@ -87,6 +90,7 @@ private:
   HMIResponseServer *HMIResS;
   IAgentInterface* pIAgentInterface;
   bool IsWaitForRelease;
+  QStringList MissionsList;
 };
 
 #endif // C11_AGENT_NODE_H
