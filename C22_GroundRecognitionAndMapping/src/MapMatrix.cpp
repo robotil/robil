@@ -189,13 +189,15 @@ void MapMatrix::computeMMatrix(pcl::PointCloud<pcl::PointXYZ>::Ptr map_cloud,geo
 					//pcl::ModelCoefficients::Ptr c_(new pcl::ModelCoefficients);
 					//MPlane* tempPlane=new MPlane(pcl::PointXYZ(p.x,p.y,p.z));
 					if(!ms->hasTop(p.z)){
+
 						//std::cout<<"mapp\n";
 						//pcl::ModelCoefficients::Ptr c_(new pcl::ModelCoefficients);
 						MPlane* newPlane=new MPlane(p);
 						newPlane->addRating();
 						newPlane->rating=20;
 						ms->square_Planes->push_back(newPlane);
-						if ((p.z > pose.z-1.5) and (p.z < pose.z-0.5)or(p.z > pose.z+1.0))
+						ms->height=std::max(ms->height,newPlane->representing_point.z);
+						if (((p.z > pose.z-1.5) and (p.z < pose.z-0.5))or(p.z > pose.z+1.0))
 							ms->square_status = AVAILABLE;
 						else
 							ms->square_status = BLOCKED;

@@ -21,6 +21,7 @@ class DynamicLocomotion(RobilTask):
     def __init__(self,name):
         RobilTask.__init__(self, name)
         lpp = LocalPathPlanner()
+        lpp.SetDoingQual(False)
         self._DynamicWalker = DynamicWalker(WalkingModeChooser(lpp),lpp)
         self._interval = rospy.Rate(2)
 

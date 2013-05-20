@@ -21,6 +21,7 @@
   <depend package="actionlib"/>
   <depend package="kdl"/>
   <depend package="pr2_controllers_msgs"/>
+  <depend package="hrl_kinematics"/>
   <depend package="legs_val_calc"/>
   <depend package="traj_splitter_to_vector"/>
   <depend package="PoseController"/>

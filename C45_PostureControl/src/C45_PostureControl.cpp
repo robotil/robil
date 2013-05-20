@@ -19,6 +19,7 @@
 #include <pr2_controllers_msgs/JointControllerState.h>
 #include <control_msgs/FollowJointTrajectoryAction.h>
 #include <actionlib/client/simple_action_client.h>
+#include <std_srvs/Empty.h>
 //#include <C45_PostureControl/back_lbz_poller_service.h>
 #include <C45_PostureControl/com_error.h>
 #include <std_msgs/Float64.h>
@@ -45,7 +46,7 @@ private:
 	std::vector<double> positions;
 	ros::Publisher pub_joint_commands_;
 	ros::Subscriber joint_states_sub_;
-	ros::ServiceClient backz_cli;
+	ros::ServiceClient backz_cli, start_posecontroller_cli_, stop_posecontroller_cli_;
 
 public:
 	posture_controller(std::string name)
@@ -57,6 +58,9 @@ public:
 		//COM_error_client = nh_.serviceClient<C45_PostureControl::com_error>("com_error");
 		joint_states_sub_ = nh_.subscribe("/atlas/joint_states",100,&posture_controller::joint_states_CB,this);
 		backz_cli = nh2_.serviceClient<PoseController::back_movement>("/PoseController/delta_back_movement");
+
+		start_posecontroller_cli_ = nh_.serviceClient<std_srvs::Empty>("/PoseController/start");
+		stop_posecontroller_cli_ = nh_.serviceClient<std_srvs::Empty>("/PoseController/stop");
 
 
 		//Set callback functions
@@ -118,6 +122,8 @@ public:
 		int segments = 50;
 		//ROS_INFO("Got back_lbz %f", positions[joints["back_lbz"]]);
 		double velocity = (direction - positions[joints["back_lbz"]])/total_time;
+		std_srvs::Empty e;
+		start_posecontroller_cli_.call(e);
 		//ROS_INFO("velocity %f", velocity);
 		for(int i = 0; i < segments; i++){
 			ros::spinOnce();
@@ -133,6 +139,7 @@ public:
 			}
 			ros::Duration(total_time/segments).sleep();
 		}
+		stop_posecontroller_cli_.call(e);
 
 	    /*goal.trajectory.joint_names.push_back("back_lbz" );
 		ROS_INFO("Pushed back");

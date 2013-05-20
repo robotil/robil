@@ -37,6 +37,20 @@ int main_for_qual1_2(int argc, char** argv){
 
 }
 
+int main_for_qual1_3(int argc, char** argv){
+	  ros::init(argc, argv, "C31_GlobalPathPlanner_stub13");
+	  ros::NodeHandle node;
+
+	  ROS_INFO("Start node with stubs for qual1.3");
+
+	  //Stub for walking tasks
+	  WhileInQSArea task_whileQS;
+	  WhileInZMPArea task_whileZmp;
+
+	  ROS_INFO("spin node");
+	  ros::spin();
+	  return 0;
+}
 
 int main_for_qual1_1and2(int argc, char** argv){
 	  ros::init(argc, argv, "C31_GlobalPathPlanner_stub112");
@@ -68,14 +82,18 @@ int main(int argc, char** argv){
 			std::cout<<"Syntax: "<<argv[0]<<" PARAMS"<<std::endl;
 			std::cout<<"PARAMS: "<<std::endl;
 			std::cout<<"        "<<"qual1.1"<<"  : "<<"for qualification 1.1 ( PathPlanning and PathPlanningFocus )"<<std::endl;
-			std::cout<<"        "<<"qual1.1"<<"  : "<<"for qualification 1.2 ( whileQS, whileZmp, searchObject )"<<std::endl;
+			std::cout<<"        "<<"qual1.2"<<"  : "<<"for qualification 1.2 ( whileQS, whileZmp, searchObject )"<<std::endl;
+			std::cout<<"        "<<"qual1.3"<<"  : "<<"for qualification 1.3 ( whileQS, whileZmp )"<<std::endl;
 			std::cout<<"        "<<"qual1.all"<<": "<<"for all"<<std::endl;
 			return 0;
 		}
 		if(a=="qual1.1") return main_for_qual1_1(argc, argv);
 		if(a=="qual1.2") return main_for_qual1_2(argc, argv);
+		if(a=="qual1.3") return main_for_qual1_3(argc, argv);
 		if(a=="qual1.all") return main_for_qual1_1and2(argc, argv);
 	}
-	return main_for_qual1_1and2(argc, argv);
+	std::cout<<"WARNING: qualification type not found. use --help argument for list of parameters."<<std::endl;
+	return 1;
+	//return main_for_qual1_1and2(argc, argv);
 }
 

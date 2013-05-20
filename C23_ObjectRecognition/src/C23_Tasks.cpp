@@ -40,13 +40,13 @@ public:
 		bool res;
 		while (!isPreempt()) {
       res = _detector->detect(target);
-      if (res) {
-
-		  } else {
-
-		  }
+      if (_detector->x != -1) {
+          return TaskResult(SUCCESS, "OK");
+			} else {
+          return TaskResult(FAULT, "Object isn't detected");
+			}
 		}
-		return TaskResult(SUCCESS, "OK");
+	  return TaskResult(SUCCESS, "OK");
 	}
 
 private:
@@ -81,6 +81,31 @@ public:
 		
 		
 	}
+private:
+	C23_Detector *_detector;
+
+};
+
+class C23_TakePicture: public RobilTask {
+public:
+	C23_TakePicture(C23_Detector *detector) :
+			RobilTask("/takePicture"), _detector(detector) {
+		ROS_INFO("Instance of takePictureTask has started.");
+		_detector->is_search = true;
+	}
+
+	TaskResult task(const string& name, const string& uid, Arguments& args) {
+		ROS_INFO("takePicture::I was called\n");
+		if (isPreempt()) {
+			/* SHOULD STOP EVERYTHING RUNNING! */
+			ROS_INFO("takePicture::I've been preempted");
+			return TaskResult::Preempted();
+		}
+		bool res;
+	      	res = _detector->detect("Picture");
+	        return TaskResult(SUCCESS, "OK");
+	}
+
 private:
 	C23_Detector *_detector;
 

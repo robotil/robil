@@ -21,6 +21,7 @@
 #include <C23_ObjectRecognition/C23C0_ODIM.h>
 #include <tf/tf.h>
 #include <tf/transform_listener.h>
+//#include <tf/Matrix3x3.h>
 #include <pcl/correspondence.h>
 #include <pcl/point_cloud.h>
 #include <pcl/common/common_headers.h>
@@ -96,93 +97,31 @@ public:
 	   * The call back function executed when a data is available
 	   */
 	  void callback(const geometry_msgs::PoseWithCovarianceStampedConstPtr& pos_msg){
-		  /*last_msg.imu.angular_velocity=imu_msg->angular_velocity;
-		  last_msg.imu.angular_velocity_covariance=imu_msg->angular_velocity_covariance;
-		  last_msg.imu.header=imu_msg->header;
-		  last_msg.imu.linear_acceleration=imu_msg->linear_acceleration;
-		  last_msg.imu.linear_acceleration_covariance=imu_msg->linear_acceleration_covariance;
-		  last_msg.imu.orientation=imu_msg->orientation;
-		  last_msg.imu.orientation_covariance=imu_msg->orientation_covariance;
-		  //last_msg.pose.child_frame_id="";*/
+		  double delta=last_msg.pose.header.stamp.toSec()-pos_msg->header.stamp.toSec();
+		  double x,y,z,r0,p0,y0,r1,p1,y1;
+		  x=pos_msg->pose.pose.position.x-last_msg.pose.pose.pose.position.x;
+		  y=pos_msg->pose.pose.position.y-last_msg.pose.pose.pose.position.y;
+		  z=pos_msg->pose.pose.position.z-last_msg.pose.pose.pose.position.z;
+		  tf::Quaternion oldQ;
+		  tf::quaternionMsgToTF(last_msg.pose.pose.pose.orientation, oldQ);
+		  tf::Matrix3x3 mOld(oldQ);
+		  mOld.getRPY(r0,p0,y0);
+		  tf::Quaternion newQ;
+		  tf::quaternionMsgToTF(pos_msg->pose.pose.orientation, newQ);
+		  tf::Matrix3x3 mNew(newQ);
+		  mOld.getRPY(r1,p1,y1);
 		  last_msg.pose.header=pos_msg->header;
 		  last_msg.pose.pose=pos_msg->pose;
+		  last_msg.pose.twist.twist.linear.x=x/(delta);
+		  last_msg.pose.twist.twist.linear.y=y/(delta);
+		  last_msg.pose.twist.twist.linear.z=z/(delta);
+		  last_msg.pose.twist.twist.angular.x=(r1-r0)/(delta);
+		  last_msg.pose.twist.twist.angular.y=(p1-p0)/(delta);
+		  last_msg.pose.twist.twist.angular.z=(y1-y0)/(delta);
 		  c25_publisher.publish(last_msg);
 	  }
 
-	 /* void cloudcallback(const C21_VisionAndLidar::C21_C22::Ptr & cloud_msg){
-		  if(!gotObj){
-			  return;
-		  }
-		  gotObj=false;
 
-		  pcl::PointCloud<pcl::PointXYZ>cloud;
-		  pcl::fromROSMsg<pcl::PointXYZ>(cloud_msg->cloud,cloud);
-		  pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_backup(cloud.makeShared());
-		  pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_filtered(new pcl::PointCloud<pcl::PointXYZ>);
-
-		  for(int i=last_obj_msg.x;i<last_obj_msg.x+last_obj_msg.width;i++){
-		  		for(int j=last_obj_msg.y;j<last_obj_msg.y+last_obj_msg.height;j++){
-		  			cloud_filtered->push_back(cloud.at(i,j));
-		  		}
-		  }
-		  pcl::StatisticalOutlierRemoval<pcl::PointXYZ> sor;
-		  sor.setInputCloud (cloud_filtered);
-		  sor.setMeanK (50);
-		  sor.setStddevMulThresh (1.0);
-		  sor.filter (*cloud_filtered);
-
-
-		 /*
-		  * this code segment filters the given cloud and lowers its resolution
-		  */
-		 //std::cout << "PointCloud before filtering has: " << cloud.points.size () << " data points." << std::endl; //*
-		 // Create the filtering object: downsample the dataset using a leaf size of 5cm
-
-/*
-		     tf::Transform trans;
-			 trans.setOrigin(tf::Vector3(cloud_msg->pose.position.x,cloud_msg->pose.position.y,cloud_msg->pose.position.z));
-			 trans.setRotation(tf::Quaternion(cloud_msg->pose.orientation.x,cloud_msg->pose.orientation.y,cloud_msg->pose.orientation.z,cloud_msg->pose.orientation.w));
-			 tf::Transform trans2;
-			 	trans2.setOrigin(tf::Vector3(last_msg.pose.pose.pose.position.x,last_msg.pose.pose.pose.position.y,last_msg.pose.pose.pose.position.z));
-			 	trans2.setRotation(tf::Quaternion(last_msg.pose.pose.pose.orientation.x,last_msg.pose.pose.pose.orientation.y,last_msg.pose.pose.pose.orientation.z,last_msg.pose.pose.pose.orientation.w));
-			 tf::Transform trans3;
-			 	trans3.setOrigin(tf::Vector3(0.0,-0.002, 0.035 ));
-			 	trans3.setRotation(tf::Quaternion(-1.57,3.14,1.57));
-			 Eigen::Matrix4f sensorToHead,headTopelvis,pelvisToWorld;
-			 pcl_ros::transformAsMatrix(trans3, sensorToHead);
-			 pcl_ros::transformAsMatrix(trans, headTopelvis);
-			 pcl_ros::transformAsMatrix(trans2, pelvisToWorld);
-			 // transform pointcloud from sensor frame to fixed robot frame
-			 pcl::transformPointCloud(*cloud_filtered, *cloud_filtered, sensorToHead);
-			 pcl::transformPointCloud(*cloud_filtered, *cloud_filtered, headTopelvis);
-			 pcl::transformPointCloud(*cloud_filtered, *cloud_filtered, pelvisToWorld);
-
-			 double x=0;
-			 double y=0;
-			 double z=0;
-			 double count=0;
-			 for(int i=0;i<cloud_filtered->points.size();i++){
-				 if(!(cloud_filtered->points.at(i).x != cloud_filtered->points.at(i).x)){
-					 x+=cloud_filtered->points.at(i).x;
-					 y+=cloud_filtered->points.at(i).y;
-					 z+=cloud_filtered->points.at(i).z;
-					 count++;
-				 }
-			 }
-			 geometry_msgs::Point msg;
-			 msg.x=x/count;
-			 msg.y=y/count;
-			 msg.z=z/count;
-			 //object_location_publisher.publish(msg);
-	  }
-
-	 /* void objectDimentionscallback(const C23_ObjectRecognition::C23C0_ODIM::Ptr& obj_msg){
-		  last_obj_msg.height=obj_msg->height;
-		  last_obj_msg.width=obj_msg->width;
-		  last_obj_msg.x=obj_msg->x;
-		  last_obj_msg.y=obj_msg->y;
-		  gotObj=true;
-	  }*/
 };
 
 int main(int argc, char **argv)
