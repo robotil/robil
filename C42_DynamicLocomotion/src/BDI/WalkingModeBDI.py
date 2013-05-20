@@ -119,7 +119,7 @@ class WalkingModeBDI(WalkingMode):
     # /atlas/atlas_sim_interface_state callback. Before publishing a walk command, we need
     # the current robot position   
     def asi_state_cb(self, state):
-        if (16.2 < self._LPP.GetPos().GetX()) and (self._LPP.GetPos().GetX() < 19.7) and not self._passedSteppingStones:
+        if self._LPP.GetDoingQual() and (16.2 < self._LPP.GetPos().GetX()) and (self._LPP.GetPos().GetX() < 19.7) and not self._passedSteppingStones:
             if (True == self._setStep): # Initialize before stepping stones
                 self.step_index = state.behavior_feedback.walk_feedback.next_step_index_needed -1
                 step1,step2,step3,step4 = self.initSteppingStoneStepData(self.step_index, state)
@@ -130,7 +130,7 @@ class WalkingModeBDI(WalkingMode):
             command = self.SteppingStoneCommand(state);
             #print(command)
         else:
-            if (False == self._setStep): # Initialize after stepping stones
+            if self._LPP.GetDoingQual() and (False == self._setStep): # Initialize after stepping stones
                 self._passedSteppingStones = True
                 self._Odometer.SetPosition(state.pos_est.position.x,state.pos_est.position.y)
                 print("asi_state_cb:: Initialize after stepping stones. Odometer X,Y: ",self._Odometer.GetGlobalPosition() )       

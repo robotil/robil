@@ -10,6 +10,7 @@
   <url>http://ros.org/wiki/C23_ObjectRecognition</url>
    <depend package="roscpp"/>
    <depend package="C0_RobilTask"/>
+   <depend package="C21_VisionAndLidar"/>
   <depend package="opencv2"/>
   <depend package="osrf_msgs"/>
   <depend package="sensor_msgs"/>

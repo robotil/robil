@@ -29,7 +29,7 @@
 #include <boost/thread/thread.hpp>
 #include <boost/bind.hpp>
 #include <pcl/sample_consensus/sac_model_plane.h>
-#include "C22_Node.h"
+#include "C22_NodeCheat.h"
 #include <tf/tf.h>
 #include <pcl_ros/transforms.h>
 #include <message_filters/subscriber.h>
@@ -55,7 +55,7 @@
 boost::mutex m;
 C22_Node::C22_Node():
 	pointCloud_sub(nh_,"/C21/C22Lidar",1),
-	pos_sub(nh_,"/robot_pose_ekf/odom",1),
+	pos_sub(nh_,"/ground_truth_odom",1),
 	sync( MySyncPolicy( 10 ),pointCloud_sub, pos_sub),
 	cloudRecord(new pcl::PointCloud<pcl::PointXYZ>)
 	{
@@ -189,7 +189,7 @@ bool C22_Node::proccess(C22_CompactGroundRecognitionAndMapping::C22::Request  &r
 /**
  * The call back function executed when a new point cloud has arrived
  */
-void C22_Node::callback(const sensor_msgs::PointCloud2::ConstPtr& pclMsg,const geometry_msgs::PoseWithCovarianceStamped::ConstPtr& pos_msg){
+void C22_Node::callback(const sensor_msgs::PointCloud2::ConstPtr& pclMsg,const nav_msgs::Odometry::ConstPtr& pos_msg){
 
 	 pcl::PointCloud<pcl::PointXYZ>cloud;
 	 pcl::fromROSMsg<pcl::PointXYZ>(*pclMsg,cloud);
