@@ -57,6 +57,7 @@ private:
 	bool IsUpdateCurrentImg;	//don't create new image, update the current
 	EnumRunStatus ERunStatus;
 	QTimer* WaitTimer;
+	QStringList MissionsList;
 };
 
 #endif // IMAGEDRAW_H

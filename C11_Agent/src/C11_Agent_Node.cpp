@@ -16,6 +16,22 @@ C11_Agent_Node::C11_Agent_Node(int argc, char** argv):
   HMIResS = NULL;
   pIAgentInterface = NULL;
   IsWaitForRelease = false;
+  std::string filepath;
+  filepath = ros::package::getPath("C11_OperatorControl");
+  filepath.append("/bin/Missions.txt");
+  QFile missfile(filepath.data());
+  if (!missfile.open(QIODevice::ReadOnly | QIODevice::Text))
+    {
+      std::cout << "Can't open Missions config file!!! Restart the application" << std::endl;
+    }
+  else
+    {
+      while (!missfile.atEnd())
+       {
+          QString line = missfile.readLine();
+          MissionsList.append(line);
+       }
+    }
 }
 C11_Agent_Node::~C11_Agent_Node()
 {
@@ -103,7 +119,8 @@ bool C11_Agent_Node::MissionSelection(C10_Common::mission_selection::Request& re
           //ostr << "skill3.xml";
           std::string filename;
           filename = ros::package::getPath("C34_Designer");
-          filename.append("/plans/skill3.xml");
+          filename.append("/plans/");
+          filename.append(MissionsList.at(test).toStdString());
 
           srv34Run.request.filename = filename;
   //      srv34.request.req.filename << "skill3.xml";
