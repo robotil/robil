@@ -118,7 +118,7 @@ bool C22_Node::proccess(C22_CompactGroundRecognitionAndMapping::C22::Request  &r
 				  seg.setModelType (pcl::SACMODEL_PLANE);
 				  seg.setMethodType (pcl::SAC_RANSAC);
 				  seg.setMaxIterations (100);
-				  seg.setDistanceThreshold (0.05);
+				  seg.setDistanceThreshold (0.01);
 					  /*
 					   * once we have defined a segment, we need to create clusters
 					   */
@@ -317,12 +317,12 @@ void C22_Node::callback(const sensor_msgs::PointCloud2::ConstPtr& pclMsg,const n
 	  pcl::PassThrough<pcl::PointXYZ> pass;
 	  pass.setInputCloud (cloudRecord);
 	  pass.setFilterFieldName ("y");
-	  pass.setFilterLimits (pos_msg->pose.pose.position.y-5,pos_msg->pose.pose.position.y+5);
+	  pass.setFilterLimits (pos_msg->pose.pose.position.y-3,pos_msg->pose.pose.position.y+3);
 	  //pass.setFilterLimitsNegative (true);
 	  pass.filter (*cloudRecord);
 	  pass.setInputCloud (cloudRecord);
 	  pass.setFilterFieldName ("x");
-	  pass.setFilterLimits (pos_msg->pose.pose.position.x-10,pos_msg->pose.pose.position.x+10);
+	  pass.setFilterLimits (pos_msg->pose.pose.position.x-3,pos_msg->pose.pose.position.x+3);
 	  //pass.setFilterLimitsNegative (true);
 	  pass.filter (*cloudRecord);
 	  pass.setFilterFieldName ("z");
@@ -330,7 +330,7 @@ void C22_Node::callback(const sensor_msgs::PointCloud2::ConstPtr& pclMsg,const n
 	  //pass.setFilterLimitsNegative (true);
 	  pass.filter (*cloudRecord);
 
-	  if(cloudRecord->points.size()>80000){
+	  if(cloudRecord->points.size()>120000){
 	  			 /*pcl::PointCloud<pcl::PointXYZ>empty;
 	  			 pcl::PointCloud<pcl::PointXYZ>::Ptr em(empty.makeShared());
 	  			 cloudRecord.swap(em);*/
@@ -338,17 +338,17 @@ void C22_Node::callback(const sensor_msgs::PointCloud2::ConstPtr& pclMsg,const n
 	  			  pcl::PointCloud<int> sampled_indices;
 	  			  pcl::UniformSampling<pcl::PointXYZ> uniform_sampling;
 	  			  uniform_sampling.setInputCloud (cloudRecord);
-	  			  uniform_sampling.setRadiusSearch (0.01);
+	  			  uniform_sampling.setRadiusSearch (0.005);
 	  			  uniform_sampling.compute (sampled_indices);
 	  			  //pcl::copyPointCloud (*scene, sampled_indices.points, *scene_keypoints);
 	  			  std::cout << "Scene total points: " << cloudRecord->points.size() ;
 	  			  pcl::copyPointCloud (*cloudRecord, sampled_indices.points, *cloudRecord);
 	  			  std::cout<< "; Selected Keypoints: " << cloudRecord->points.size() << std::endl;
-	  			  pcl::StatisticalOutlierRemoval<pcl::PointXYZ> sor;
+	  			  /*pcl::StatisticalOutlierRemoval<pcl::PointXYZ> sor;
 	  			  sor.setInputCloud (cloudRecord);
 	  			  sor.setMeanK (10);
 	  			  sor.setStddevMulThresh (1.0);
-	  			  sor.filter (*cloudRecord);
+	  			  sor.filter (*cloudRecord);*/
 
 	  		 }
 	  cloud_filtered.reset();
