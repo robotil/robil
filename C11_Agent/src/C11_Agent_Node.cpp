@@ -338,7 +338,10 @@ void C11_Agent_Node::LoadMission(int missionId)
 
   std::string filename;
   filename = ros::package::getPath("C34_Designer");
-  filename.append("/plans/qual1.1.hmi.xml");
+//  filename.append("/plans/qual1.1.hmi.xml");
+
+  filename.append("/plans/");
+  filename.append(MissionsList.at(missionId).toStdString());
 
   srv34Run.request.filename = filename;
 

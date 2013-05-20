@@ -332,6 +332,7 @@ void ImageDraw::SltOnPlayPauseClick(bool checked)
 	        if(ERunStatus==STOPPED_ENUM)
                 {
 	            QString curMission = ui.cmbMissions->currentText();
+	            std::cout << "Selected mission is: "<< curMission.toStdString() << std::endl;
 
                   if(!curMission.isEmpty())
                   {
