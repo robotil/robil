@@ -119,7 +119,7 @@ class BDI_StateMachine(StateMachine):
         command = AtlasSimInterfaceCommand()
         command.behavior = AtlasSimInterfaceCommand.WALK
         for i in range(4):
-            command.walk_params.step_data[i] = self._StepQueue.Peek(i)
+            command.walk_params.step_queue[i] = self._StepQueue.Peek(i)
             #print("BDI_StateMachine:: GetCommand step Data: index",command.walk_params.step_data[i].step_index,"positon x,y:",command.walk_params.step_data[i].pose.position.x,command.walk_params.step_data[i].pose.position.y)
         return command
 
