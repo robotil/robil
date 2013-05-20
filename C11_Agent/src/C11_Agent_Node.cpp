@@ -29,6 +29,7 @@ C11_Agent_Node::C11_Agent_Node(int argc, char** argv):
       while (!missfile.atEnd())
        {
           QString line = missfile.readLine();
+          line.remove(QChar('\n'));
           MissionsList.append(line);
        }
     }
@@ -344,6 +345,7 @@ void C11_Agent_Node::LoadMission(int missionId)
   filename.append(MissionsList.at(missionId).toStdString());
 
   srv34Run.request.filename = filename;
+  std::cout << "The task is:" << filename<< std::endl;
 
   if (!c34RunClient.call(srv34Run))
   {
