@@ -64,6 +64,12 @@ public:
 
   void PathUpdated(std::vector<StructPoint> points);
 
+  void ImageRequest();
+
+  void GridRequest();
+
+  void PathRequest();
+
   virtual void PushImage(QImage img);
   virtual void PushGrid(StructGridData grid);
   virtual void PushPath(vector<StructPoint> path);
