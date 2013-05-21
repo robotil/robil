@@ -1,8 +1,8 @@
 #!/bin/sh
-#This script should kill the  modules for test C31
+#This script should kill all the running modules
 
 CURR_WD=$PWD
-PKILLF=$CURR_WD'/.killC51test.txt'
+PKILLF=$CURR_WD'/.pc.txt'
 #cat $PKILLF >> $PKILLP
 if test -e $PKILLF; then
 

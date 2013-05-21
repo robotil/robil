@@ -92,6 +92,7 @@ private:
 	int GridXOffset;
 	int GridYOffset;
 	StructPoint CornerPos;
+	StructIntPoint RobotPixPos;
 
 	void drawLines(CRouteItem *route,bool ShowLines);
 	void AddPix();

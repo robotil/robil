@@ -7,7 +7,8 @@ pub = rospy.Publisher('/path',C31_Waypoints)
 rospy.sleep(1)
 wp = C31_Waypoints()
 #wp.points = [C31_Location(-0.5,0),C31_Location(1,0),C31_Location(6,0),C31_Location(10,4),C31_Location(14,8),C31_Location(16.7,8)]
-wp.points = [C31_Location(-0.5,0),C31_Location(1,0),C31_Location(6,0),C31_Location(10,0),C31_Location(10,4),C31_Location(10,8),C31_Location(14,8),C31_Location(23.0,8.0)]
+wp.points = [C31_Location(-0.5,0),C31_Location(1,0),C31_Location(6,0),C31_Location(10,0),C31_Location(10,4),C31_Location(10,8),C31_Location(14,8),C31_Location(16.7,8)]
+#wp.points = [C31_Location(-0.5,0),C31_Location(1,0),C31_Location(6,0),C31_Location(10,0),C31_Location(10,4),C31_Location(10,8),C31_Location(14,8),C31_Location(23.0,8.0)]
 #wp.points = [C31_Location(10,8),C31_Location(14,8),C31_Location(23.0,8.0)]
 pub.publish(wp)
 rospy.spin()

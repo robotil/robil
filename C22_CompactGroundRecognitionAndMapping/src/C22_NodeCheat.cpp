@@ -29,7 +29,7 @@
 #include <boost/thread/thread.hpp>
 #include <boost/bind.hpp>
 #include <pcl/sample_consensus/sac_model_plane.h>
-#include "C22_Node.h"
+#include "C22_NodeCheat.h"
 #include <tf/tf.h>
 #include <pcl_ros/transforms.h>
 #include <message_filters/subscriber.h>
@@ -55,7 +55,7 @@
 boost::mutex m;
 C22_Node::C22_Node():
 	pointCloud_sub(nh_,"/C21/C22Lidar",1),
-	pos_sub(nh_,"/robot_pose_ekf/odom",1),
+	pos_sub(nh_,"/ground_truth_odom",1),
 	sync( MySyncPolicy( 10 ),pointCloud_sub, pos_sub),
 	cloudRecord(new pcl::PointCloud<pcl::PointXYZ>)
 	{
@@ -118,7 +118,7 @@ bool C22_Node::proccess(C22_CompactGroundRecognitionAndMapping::C22::Request  &r
 				  seg.setModelType (pcl::SACMODEL_PLANE);
 				  seg.setMethodType (pcl::SAC_RANSAC);
 				  seg.setMaxIterations (100);
-				  seg.setDistanceThreshold (0.05);
+				  seg.setDistanceThreshold (0.01);
 					  /*
 					   * once we have defined a segment, we need to create clusters
 					   */
@@ -189,7 +189,7 @@ bool C22_Node::proccess(C22_CompactGroundRecognitionAndMapping::C22::Request  &r
 /**
  * The call back function executed when a new point cloud has arrived
  */
-void C22_Node::callback(const sensor_msgs::PointCloud2::ConstPtr& pclMsg,const geometry_msgs::PoseWithCovarianceStamped::ConstPtr& pos_msg){
+void C22_Node::callback(const sensor_msgs::PointCloud2::ConstPtr& pclMsg,const nav_msgs::Odometry::ConstPtr& pos_msg){
 
 	 pcl::PointCloud<pcl::PointXYZ>cloud;
 	 pcl::fromROSMsg<pcl::PointXYZ>(*pclMsg,cloud);
@@ -317,12 +317,12 @@ void C22_Node::callback(const sensor_msgs::PointCloud2::ConstPtr& pclMsg,const g
 	  pcl::PassThrough<pcl::PointXYZ> pass;
 	  pass.setInputCloud (cloudRecord);
 	  pass.setFilterFieldName ("y");
-	  pass.setFilterLimits (pos_msg->pose.pose.position.y-5,pos_msg->pose.pose.position.y+5);
+	  pass.setFilterLimits (pos_msg->pose.pose.position.y-3,pos_msg->pose.pose.position.y+3);
 	  //pass.setFilterLimitsNegative (true);
 	  pass.filter (*cloudRecord);
 	  pass.setInputCloud (cloudRecord);
 	  pass.setFilterFieldName ("x");
-	  pass.setFilterLimits (pos_msg->pose.pose.position.x-10,pos_msg->pose.pose.position.x+10);
+	  pass.setFilterLimits (pos_msg->pose.pose.position.x-3,pos_msg->pose.pose.position.x+3);
 	  //pass.setFilterLimitsNegative (true);
 	  pass.filter (*cloudRecord);
 	  pass.setFilterFieldName ("z");
@@ -330,7 +330,7 @@ void C22_Node::callback(const sensor_msgs::PointCloud2::ConstPtr& pclMsg,const g
 	  //pass.setFilterLimitsNegative (true);
 	  pass.filter (*cloudRecord);
 
-	  if(cloudRecord->points.size()>80000){
+	  if(cloudRecord->points.size()>120000){
 	  			 /*pcl::PointCloud<pcl::PointXYZ>empty;
 	  			 pcl::PointCloud<pcl::PointXYZ>::Ptr em(empty.makeShared());
 	  			 cloudRecord.swap(em);*/
@@ -338,17 +338,17 @@ void C22_Node::callback(const sensor_msgs::PointCloud2::ConstPtr& pclMsg,const g
 	  			  pcl::PointCloud<int> sampled_indices;
 	  			  pcl::UniformSampling<pcl::PointXYZ> uniform_sampling;
 	  			  uniform_sampling.setInputCloud (cloudRecord);
-	  			  uniform_sampling.setRadiusSearch (0.01);
+	  			  uniform_sampling.setRadiusSearch (0.005);
 	  			  uniform_sampling.compute (sampled_indices);
 	  			  //pcl::copyPointCloud (*scene, sampled_indices.points, *scene_keypoints);
 	  			  std::cout << "Scene total points: " << cloudRecord->points.size() ;
 	  			  pcl::copyPointCloud (*cloudRecord, sampled_indices.points, *cloudRecord);
 	  			  std::cout<< "; Selected Keypoints: " << cloudRecord->points.size() << std::endl;
-	  			  pcl::StatisticalOutlierRemoval<pcl::PointXYZ> sor;
+	  			  /*pcl::StatisticalOutlierRemoval<pcl::PointXYZ> sor;
 	  			  sor.setInputCloud (cloudRecord);
 	  			  sor.setMeanK (10);
 	  			  sor.setStddevMulThresh (1.0);
-	  			  sor.filter (*cloudRecord);
+	  			  sor.filter (*cloudRecord);*/
 
 	  		 }
 	  cloud_filtered.reset();

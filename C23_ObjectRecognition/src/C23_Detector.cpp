@@ -80,16 +80,19 @@ left_image_sub_( it_, left_cam, 1 ),
 pointcloud(nh,pointc,1),
 sync( MySyncPolicy( 10 ), left_image_sub_,pointcloud)
 {
+
     sync.registerCallback( boost::bind( &C23_Detector::callback, this, _1, _2 ) ); //Specifying what to do with the data
     objectDetectedPublisher = nh.advertise<C23_ObjectRecognition::C23C0_OD>("C23/object_detected", 1);
     objectDeminsionsPublisher = nh.advertise<C23_ObjectRecognition::C23C0_ODIM>("C23/object_deminsions", 1);
     c21client = nh.serviceClient<C21_VisionAndLidar::C21_obj>("C21/C23"); //Subscribe to the service node to get the absolute coordinates of a point
     ROS_INFO("Started...");
     //	gates = new vector<Gate*>();
+
 }
 
 
 bool C23_Detector::detect(const string target) {
+
     //   ROS_INFO(target.c_str());
     
     if(!target.compare("Gate")) {
@@ -400,84 +403,141 @@ bool C23_Detector::detectCar(Mat srcImg, const sensor_msgs::PointCloud2::ConstPt
             }
         }
         
+        
+        //Expand a bounding box to fit the car
+	int x1,y1;
+	int x0,y0;
+	int flag = 0;
+	float depth = 0;
+	double THRESHOLD = 2;
+	int nanColumnCounter = 0;
+	bool nanColumnFlag = true;
+	cout<<"Max depth: "<<minPoint.x<<endl;
+	for(int i = 1; i < 500 && i + minImagePoint.x < srcImg.cols; i +=10) {
+		      flag = 0;
+		      cout << "Checking column: " << i << endl;
+		      nanColumnFlag = true;
+		      for(int j= 150; j >= -150; j--) {
+			depth = pclcloud.at(minImagePoint.x+i,minImagePoint.y-j).x;
+			
+			cout<<"Depth: "<<depth<<endl;
+			
+			
+			if (depth!=depth)//If all values are nan then it will stop
+			{
+			  //ROS_INFO("Nan values obtained. Cannot determine the distance to the car");
+			  continue;
+			}
+			
+			nanColumnFlag = false;
+			
+			if(depth < minPoint.x+THRESHOLD && depth > minPoint.x-THRESHOLD) {
+			  
+			    x1 = minImagePoint.x+i;
+			    cout<<"X1: "<<x1<<endl;
+			    flag = 1;
+			  }
+		    }
+		    if(nanColumnFlag) nanColumnCounter++;
+		    
+		    
+		    if(!flag && nanColumnCounter>50) {
+		      break;
+		    }
+	
+	}
+	cout<<"X1: "<<x1<<", Xmin: "<<minImagePoint.x<<endl;
+	//Draw the right boundary column of the car
+	circle( srcImg, Point2f(x1,minImagePoint.y),10, 200, -1, 8, 0 );
+	
+	nanColumnCounter = 0;
+	nanColumnFlag = true;
+	depth = 0;
+	for(int i = 0; i < 500; i +=10) {
+	    flag = 0;
+	    cout << "Checking column: " << i << endl;
+	    nanColumnFlag = true;
+	    for(int j= 150; j >= -150; j--) {
+		depth = pclcloud.at(minImagePoint.x-i,minImagePoint.y-j).x;
+	      
+		if (depth!=depth)
+		{
+		  //ROS_INFO("Nan values obtained. Cannot determine the distance to the car");
+		  continue;
+		}
+		
+		nanColumnFlag = false;
+		
+		
+		if(depth < minPoint.x+THRESHOLD && depth > minPoint.x-THRESHOLD) {
+		    x0 = minImagePoint.x-i;
+		    flag = 1;
+		}
+	    }
+	    if(nanColumnFlag) nanColumnCounter++;
+		    
+	    
+	    if(!flag && nanColumnCounter>50) {
+	      break;
+	    }
+	   
+	}
+         cout << "X0: " << x0 << " X1: " << x1 << endl;
+	//The left boundary column of the car
+        circle( srcImg, Point2f(x0,minImagePoint.y),10, 300, -1, 8, 0 );
+	
+         //Display the sub-region of the car found
+         int carHeight = x1  - x0; //Asssume height and width are approximately the same
+         
+         std::vector<cv::Point> bounds;
+	 line( srcImg, cv::Point(x0, minImagePoint.y - carHeight/2), cv::Point(x0, minImagePoint.y + carHeight/2), Scalar(0,0,255), 3, CV_AA);
+	 line( srcImg, cv::Point(x0, minImagePoint.y + carHeight/2), cv::Point(x1, minImagePoint.y + carHeight/2), Scalar(0,0,255), 3, CV_AA);
+	 line( srcImg, cv::Point(x0, minImagePoint.y - carHeight/2), cv::Point(x1, minImagePoint.y - carHeight/2), Scalar(0,0,255), 3, CV_AA);
+	 line( srcImg, cv::Point(x1, minImagePoint.y - carHeight/2), cv::Point(x1, minImagePoint.y + carHeight/2), Scalar(0,0,255), 3, CV_AA);
+	 
+	 //Get the absolute coordinates of the closest point on the car
+        //--------------------------------------------------------------
         //Use the service to get the new coordinates
-        c21srv.request.sample.x1 = minImagePoint.x;
-        c21srv.request.sample.y1 = minImagePoint.y;
-        c21srv.request.sample.x2 = minImagePoint.x+3;
-        c21srv.request.sample.y2 = minImagePoint.y+3;
+        c21srv.request.sample.x1 = x0;
+        c21srv.request.sample.y1 = minImagePoint.y - carHeight/2;
+        c21srv.request.sample.x2 = x1;
+        c21srv.request.sample.y2 = minImagePoint.y + carHeight/3;
         
         if(c21client.call(c21srv)){
             ROS_INFO("Service initiated");
-            // minPoint.x = c21srv.response.x;
-            //minPoint.y = c21srv.response.y;
-            //minPoint.z = c21srv.response.z;
-            //absolutePoint = (pcl::PointXYZ)c21srv.response.point;
             ROS_INFO("Before...\n");
             absolutePoint.x = (float)c21srv.response.point.x;
             absolutePoint.y = (float)c21srv.response.point.y;
             absolutePoint.z = (float)c21srv.response.point.z;
             ROS_INFO("The points after are %f, %f, %f\n",absolutePoint.x , absolutePoint.y , absolutePoint.z);
-            //point.x = (float)c21srv.response.point.x;
-            //point.y =(float)c21srv.response.point.y;
-            //point.z = (float)c21srv.response.point.z;
-            //ROS_INFO("The points after are %f, %f, %f\n",point.x , point.y , point.z);
         }
         else{
-            ROS_ERROR("Failed to call the service C21/C23"); 
+            return false;
         }
         
-        cout << "Real World Points: "<<point.x << "," << point.y << "," << point.z << endl;   
-        cout<<"Image coords: "<<minImagePoint.x<<", "<<minImagePoint.y<<endl;
+        //The absolute coordinates of the center of the car
+        cout << "Real World Points: "<<absolutePoint.x << "," << absolutePoint.y << "," << absolutePoint.z << endl;   
         
-        cout << "Best point: " << sqrt(point.x*point.x+point.y*point.y+point.z*point.z) << endl;
-        circle( srcImg, Point2f(minImagePoint.x,minImagePoint.y), 5, 60, -1, 8, 0 );
-        imshow("Testing",srcImg);
-        waitKey(0);
-        
-        //Expand a bounding box to fit the car
-        /* int x1,y1;
-         *	    int x0,y0;
-         *	    int flag = 0;
-         *	    for(int i = 1; i < 100 && i + minImagePoint.x < srcImg.cols; i +=10) {
-         *	      flag = 0;
-         *	      cout << "Checking column: " << i << endl;
-         *	      for(int j= 20; j >= -20; j--) {
-         *		cout<<"Depth: "<<pclcloud.at(minImagePoint.x+i,minImagePoint.y-j).x<<endl;
-         *		cout<<"Max depth: "<<minPoint.x<<endl;
-         *		
-         *		if(pclcloud.at(minImagePoint.x+i,minImagePoint.y-j).x < minPoint.x+0.5 && pclcloud.at(minImagePoint.x+i,minImagePoint.y-j).x > minPoint.x-0.5) {
-         *		  
-         *		    x1 = minImagePoint.x+i;
-         *		    cout<<"X1: "<<x1<<endl;
-         *		    flag = 1;
-         }
-         }
-         if(!flag) break;
-         
-         }
-         
-         circle( srcImg, Point2f(x1,minImagePoint.y),5, 100, -1, 8, 0 );
-         cout<<x1<<", "<<minImagePoint.x<<endl;
-         
-         for(int i = 0; i < 100; i +=10) {
-             flag = 0;
-             cout << "Checking column: " << i << endl;
-             for(int j= 20; j >= -20; j--) {
-                 if(pclcloud.at(minImagePoint.x-i,minImagePoint.y-j).x < minPoint.x+0.5 && pclcloud.at(minImagePoint.x-i,minImagePoint.y-j).x > minPoint.x-0.5) {
-                     x0 = minImagePoint.x-i;
-                     flag = 1;
-                 }
-             }
-             if(!flag) break;
-             
-         }
-         cout << "X0: " << x0 << " X1: " << x1 << endl;
-         
-         //Display the sub-region of the car found
-         
-         */
+	//Check if the points are valid
+	if (absolutePoint.x!=absolutePoint.x && absolutePoint.y!=absolutePoint.y&&absolutePoint.z!=absolutePoint.z)
+	{
+	  ROS_INFO("Nan values obtained. Cannot determine the distance to the car");
+	  return false;
+	}
+	//Draw the closest point to the car
+        cout << "Best point: " << sqrt(absolutePoint.x*absolutePoint.x+absolutePoint.y*absolutePoint.y+absolutePoint.z*absolutePoint.z) << endl;
+        circle( srcImg, Point2f(minImagePoint.x,minImagePoint.y), 5, 60, -1, 8, 0 ); 
+	//The average
+	//circle( srcImg, Point2f(), 5, 80, -1, 8, 0 ); 
+        x = absolutePoint.x;
+	y = absolutePoint.y;
+	//imshow("Testing",srcImg);
+       // waitKey(0);
         
         
+	
+	
+	
         return true;
     }
     x = -1;
@@ -485,6 +545,7 @@ bool C23_Detector::detectCar(Mat srcImg, const sensor_msgs::PointCloud2::ConstPt
     
     
 }
+
 bool C23_Detector::detectPath(Mat srcImg) {
     // IplImage* img = new IplImage(srcImg);
     Mat imgHSV, imgThreshed;
@@ -849,3 +910,5 @@ bool C23_Detector::detectGate(Mat srcImg, const sensor_msgs::PointCloud2::ConstP
 
 
 
+   
+   
