@@ -1,0 +1,21 @@
+=========C25_AtlasFell============
+----------------------------------
+
+The purpose of this module is to check whether Atlas fell on the ground or not.
+
+This module receives data from the IMU, calculates the pitch and roll of atlas, and if the absolute angle is larger than 80 deg, it sends a True to the topic C35/falling, else it sends false. 
+
+---------
+Operation
+---------
+1.rosmake this package
+2. run rorrun C25_AtlasFell Fell_server.py
+3. run rorrun C25_AtlasFell Fell_client.py
+
+The Action lib task will stop in one of two cases:
+1. Preempted by user.
+2. If Atlas fell down.
+
+
+
+

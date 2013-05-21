@@ -21,6 +21,7 @@
   <depend package="arms_val_calc"/>
   <depend package="tf"/>
   <depend package="traj_splitter_to_vector"/>
+  <depend package="atlas_msgs"/>	
   
   <rosdep name="eigen"/>
 

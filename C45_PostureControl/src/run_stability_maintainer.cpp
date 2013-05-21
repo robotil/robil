@@ -51,7 +51,7 @@ public:
 
 		/*actionlib::SimpleClientGoalState state1 = ac.getState();
 		ROS_INFO("Status: %s", state1.toString().c_str());*/
-		ac.cancelAllGoals();
+		//ac.cancelAllGoals();
 		ros::Time t1 = ros::Time::now();
 		ac.sendGoal(goal_to_maintain/*, boost::bind(&run_maintainer::doneCB, this, _1, _2),
 				boost::bind(&run_maintainer::activeCB, this), boost::bind(&run_maintainer::feedbackCB, this, _1)*/);
@@ -66,6 +66,7 @@ public:
 	}
 
 	~run_maintainer(){
+		ac.cancelAllGoals();
 		nh_.shutdown();
 	}
 

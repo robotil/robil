@@ -16,48 +16,34 @@
 
 #include "cogniteam_pathplanning.h"
 
-#define PRINT_AS_VECTORS 1
-
-// #define SET_PARAMETERS(pf_params)\
-// 	pf_params.viewRadiusForward = 5;\
-// 	pf_params.viewRadiusSide = 2;\
-// 	pf_params.stepRate=0.6;\
-// 	pf_params.inertia=pow(1/pf_params.viewRadiusForward*0.5,2);\
-// 	pf_params.distanceBetweenPoints = 2;\
-// 	pf_params.maxAngleWhileReducing = Vec2d::d2r(10);
-#define SET_PARAMETERS(pf_params)\
-	pf_params.viewRadiusForward = 15;\
-	pf_params.viewRadiusSide = 4;\
-	pf_params.stepRate=0.3;\
-	pf_params.inertia=pow(1/pf_params.viewRadiusForward*0.5,2);\
-	pf_params.distanceBetweenPoints = 2;\
-	pf_params.maxAngleWhileReducing = Vec2d::d2r(10);
+#include "cogniteam_pathplanner_parameters.h"
 
 using namespace std;
 
 // -------------------------- MAP ---------------------------------------------
-int Map::map_id_counter = 0;
-Map::Map(int w, int h):map_id(map_id_counter++), _w(w),_h(h){
-	_data.resize(_w*_h);
-	for(size_t i=0;i<_data.size();i++) _data[i]=ST_UNCHARTED;
-}
-Map::Map(int w, int h, char* cmap):map_id(map_id_counter++), _w(w),_h(h){
-	_data.resize(_w*_h);
-	for(size_t i=0;i<_data.size();i++) _data[i]=cmap[i];
-}
-Map::Map(const Map& map):map_id(map_id_counter++), _w(map._w),_h(map._h){
-	_data.resize(_w*_h);
-	for(size_t i=0;i<_data.size();i++) _data[i]=map._data[i];
-}
+template<typename Item>
+int MapT<Item>::map_id_counter = 0;
+//Map::Map(int w, int h):map_id(map_id_counter++), _w(w),_h(h){
+//	_data.resize(_w*_h);
+//	for(size_t i=0;i<_data.size();i++) _data[i]=ST_UNCHARTED;
+//}
+//Map::Map(int w, int h, char* cmap):map_id(map_id_counter++), _w(w),_h(h){
+//	_data.resize(_w*_h);
+//	for(size_t i=0;i<_data.size();i++) _data[i]=cmap[i];
+//}
+//Map::Map(const Map& map):map_id(map_id_counter++), _w(map._w),_h(map._h){
+//	_data.resize(_w*_h);
+//	for(size_t i=0;i<_data.size();i++) _data[i]=map._data[i];
+//}
 
-const Map& Map::operator=(const Map& other){
-	_w = other._w; _h = other._h;
-	if(_data.size()!=other._data.size()){
-		_data.resize(_w*_h);
-	}
-	for(size_t i=0;i<_data.size();i++) _data[i]=other._data[i];
-	return *this;
-}
+//const Map& Map::operator=(const Map& other){
+//	_w = other._w; _h = other._h;
+//	if(_data.size()!=other._data.size()){
+//		_data.resize(_w*_h);
+//	}
+//	for(size_t i=0;i<_data.size();i++) _data[i]=other._data[i];
+//	return *this;
+//}
 
 ostream& operator<<(ostream& out, const Map& m){
 	out<<"  "; for(size_t x=0;x<10;x++){cout<<' '<<x<<' ';}for(size_t x=10;x<m.w();x++){cout<<x<<' ';} out<<endl;
@@ -77,15 +63,20 @@ bool Map::inRange(long x, long y)const{
 	if(x>=(long)w()||y>=(long)h()) return false;
 	return true;
 }
+bool AltMap::inRange(long x, long y)const{
+	if(x<0||y<0) return false;
+	if(x>=(long)w()||y>=(long)h()) return false;
+	return true;
+}
 double Map::approximate(const long cx, const long cy, long& tx, long& ty, char ctype)const{
 // 	cout<<"tx="<<tx<<", ty="<<ty<<", ctype="<<ctype<<", cx="<<cx<<", cy="<<cy<<endl;
 	if(inRange(tx, ty)) return 0;
 	long x = 0;long y = 0;
 	#define DIST(x,y, xx, yy) ::hypot(double((xx-cx)-(x-cx)), double((yy-cy)-(y-cy)))
-	
+
 	double min_dis = DIST(tx,ty,  x,y);
 	long minX(-1), minY(-1);
-	const Map& me = *this;   
+	const Map& me = *this;
 
 //	#define proc if(me(x,y) == ctype){ double dis = DIST(tx,ty,  x,y); cout<<"x,y="<<x<<","<<y<<"="<<dis; if(min_dis>dis || minX<0){ min_dis=dis; minX=x; minY=y; cout<<" set as min: "<<minX<<","<<minY<<"="<<min_dis;} cout<<endl;}
 	#define proc if(me(x,y) == ctype){ double dis = DIST(tx,ty,  x,y); if(min_dis>dis || minX<0){ min_dis=dis; minX=x; minY=y;} }
@@ -111,7 +102,7 @@ void Map::approximate(const long cx, const long cy, long& tx, long& ty)const{
 	tx=x; ty=y;
 	double dis_un = approximate(cx, cy, tx, ty, Map::ST_UNCHARTED);
 	long x_un(tx), y_un(ty);
-	
+
 	if(dis_av<=dis_un){ tx=x_av; ty=y_av; } else { tx=x_un; ty=y_un; }
 
 	if(inRange(tx, ty)){ /*cout<<"x,y on uncharted celles in range"<<endl;*/ return; }
@@ -503,21 +494,20 @@ PField::Points searchPath(const Map& source_map, const Waypoint& start, const Wa
 	
 	Inflator i( rr , Map::ST_BLOCKED);
 	MapEditor e;
-	
-// 	Map map =  i.inflate(source_map);
-	
-// 	Map map =  
-// 		e.replace(
-// 			i.inflate(source_map), 
-// 			Map::ST_UNCHARTED, Map::ST_AVAILABLE)
-// 	;
+
+	Map inflated_map = e.replace(
+			i.inflate(source_map),
+			Map::ST_UNCHARTED, Map::ST_AVAILABLE
+		);
+
+	if( inflated_map(start.x, start.y)==Map::ST_BLOCKED || inflated_map(finish.x, finish.y)==Map::ST_BLOCKED ){
+		cout<<"searchPath: "<<"some of interesting points are not available (after inflation)"<<endl;
+		return PField::Points();
+	}
 
 	Map map = 
 		e.coloring( 
-			e.replace(
-				i.inflate(source_map), 
-				Map::ST_UNCHARTED, Map::ST_AVAILABLE
-			),
+			inflated_map,
 			start.x, start.y, Map::ST_AVAILABLE,Map::ST_BLOCKED
 		);
 	
@@ -594,12 +584,19 @@ PField::Points searchPath_transitAccurate(const Map& source_map, const Waypoint&
 	Inflator i( rr , Map::ST_BLOCKED);
 	MapEditor e;
 
+	Map inflated_map = e.replace(
+			i.inflate(source_map),
+			Map::ST_UNCHARTED, Map::ST_AVAILABLE
+		);
+
+	if( inflated_map(start.x, start.y)==Map::ST_BLOCKED || inflated_map(finish.x, finish.y)==Map::ST_BLOCKED ){
+		cout<<"searchPath: "<<"some of interesting points are not available (after inflation)"<<endl;
+		return PField::Points();
+	}
+
 	Map map =
 		e.coloring(
-			e.replace(
-				i.inflate(source_map),
-				Map::ST_UNCHARTED, Map::ST_AVAILABLE
-			),
+			inflated_map,
 			start.x, start.y, Map::ST_AVAILABLE,Map::ST_BLOCKED
 		);
 

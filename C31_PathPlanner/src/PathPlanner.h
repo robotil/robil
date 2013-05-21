@@ -39,6 +39,7 @@ public:
 	const Map& map;
 	const Waypoint& start;
 	const Waypoint& finish;
+	const bool& targetDefined;
 	const TargetPosition& targetPosition;
 	const TargetGoal& targetGoal;
 	const GPSPoint& selfLocation;
@@ -46,7 +47,8 @@ public:
 	PlanningArguments(
 		const Map& map, 
 		const Waypoint& start, 
-		const Waypoint& finish, 
+		const Waypoint& finish,
+		const bool& targetDef,
 		const TargetPosition& targetPos, 
 		const TargetGoal& targetGoal, 
 		const GPSPoint& sloc, 
@@ -55,6 +57,7 @@ public:
 		map(map), 
 		start(start), 
 		finish(finish), 
+		targetDefined(targetDef),
 		targetPosition(targetPos), 
 		targetGoal(targetGoal), 
 		selfLocation(sloc), 
@@ -66,14 +69,18 @@ public:
 	Map& map;
 	Waypoint& start;
 	Waypoint& finish;
+public:
+	bool& targetDefined;
 	TargetPosition& targetPosition;
 	TargetGoal& targetGoal;
+public:
 	GPSPoint& selfLocation;
 	MapProperties& mapProperties;
 	Editable_PlanningArguments(
 		Map& map, 
 		Waypoint& start, 
-		Waypoint& finish, 
+		Waypoint& finish,
+		bool& targetDef,
 		TargetPosition& targetPos, 
 		TargetGoal& targetGoal,
 		GPSPoint& sloc, 
@@ -83,11 +90,24 @@ public:
 		map(map), 
 		start(start), 
 		finish(finish), 
+		targetDefined(targetDef),
 		targetPosition(targetPos), 
 		targetGoal(targetGoal),
 		selfLocation(sloc), 
 		mapProperties(mapProperties)
 	{   }
+
+	void defineTarget(const TargetGoal& goal){
+		targetDefined = false;
+		targetGoal = goal;
+	}
+	void defineTarget(const TargetPosition& pos){
+		targetDefined = true;
+		targetPosition = pos;
+	}
+//	bool getTargetDefined()const{ return targetDefined; }
+//	const TargetGoal& getTargetGoal()const{ return targetGoal; }
+//	const TargetPosition& getTargetPosition()const{ return targetPosition; }
 };
 
 class PlanningResult{
@@ -138,6 +158,7 @@ class PathPlanning{
 	};
 
 	//-------------- DATA ------------------------------
+	bool targetDefined;
 	TargetPosition targetPosition;
 	TargetGoal targetGoal;
 	GPSPoint selfLocation;
@@ -166,6 +187,7 @@ public:
 
 	PathPlanning():
 		//temporal data
+		targetDefined(false),
 		targetPosition(0,0), 
 		targetGoal(""),
 		selfLocation(0,0), 
@@ -177,10 +199,10 @@ public:
 		path(),
 		//parameters interfaces
 		//...read-only
-		   arguments(data.map, data.start, data.finish, targetPosition, targetGoal, selfLocation, mapProperties),
+		   arguments(data.map, data.start, data.finish, targetDefined, targetPosition, targetGoal, selfLocation, mapProperties),
 		   constraints(data.dimentions, data.transits, data.attractors), results(path),
 		//...read-write
-		ed_arguments(data.map, data.start, data.finish, targetPosition, targetGoal, selfLocation, mapProperties),
+		ed_arguments(data.map, data.start, data.finish, targetDefined, targetPosition, targetGoal, selfLocation, mapProperties),
 		ed_constraints(data.dimentions, data.transits, gps_transits, data.attractors)
 	{
 

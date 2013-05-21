@@ -3,7 +3,7 @@
 import roslib; roslib.load_manifest('C48_StandUp')
 import rospy
 import tf
-from osrf_msgs.msg import JointCommands
+from atlas_msgs.msg import AtlasCommand
 from sensor_msgs.msg import JointState
 from nav_msgs.msg import Odometry
 from numpy import zeros, array, linspace
@@ -36,9 +36,9 @@ class Controller:
 		self._currentOdometry = Odometry()
 
 		# initialize command
-		self._command = JointCommands()
-		self._command.name = list(self._atlasJointNames)
-		n = len(self._command.name)
+		self._command = AtlasCommand()
+		#self._command.name = list(self._atlasJointNames)
+		n = len(self._atlasJointNames)
 		self._command.velocity     = zeros(n)
 		self._command.effort       = zeros(n)
 		self._command.kp_position  = zeros(n)
@@ -47,8 +47,10 @@ class Controller:
 		self._command.kp_velocity  = zeros(n)
 		self._command.i_effort_min = zeros(n)
 		self._command.i_effort_max = zeros(n)
-		for i in xrange(len(self._command.name)):
-			name = self._command.name[i]
+		# Set k_effort to 255 to indicate that we want PID control of each joint
+  		self._command.k_effort = [255] * n
+		for i in xrange(len(self._atlasJointNames)):
+			name = self._atlasJointNames[i]
 			self._command.kp_position[i] = self._kp_position[i]
 			self._command.ki_position[i]  = rospy.get_param('atlas_controller/gains/' + name[7::] + '/i')
 			self._command.kd_position[i] = self._kd_position[i]
@@ -57,7 +59,7 @@ class Controller:
 
 		rospy.Subscriber("/atlas/joint_states", JointState, self._jointStatesCallback)
 		rospy.Subscriber("/ground_truth_odom", Odometry, self._OdometryCallback)
-		self._pub = rospy.Publisher('/atlas/joint_commands', JointCommands)
+		self._pub = rospy.Publisher('/atlas/atlas_command', AtlasCommand)
 		rospy.sleep(0.5)
 
 	# update joint states

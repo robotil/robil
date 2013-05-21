@@ -1,0 +1,23 @@
+<package>
+  <description brief="C22_CompactGroundRecognitionAndMapping">
+
+     C22_CompactGroundRecognitionAndMapping
+
+  </description>
+  <author>Lar</author>
+  <license>BSD</license>
+  <review status="unreviewed" notes=""/>
+  <depend package="roscpp"/>
+  <depend package="std_msgs"/>
+  <depend package="sensor_msgs"/>
+  <depend package="rospy"/>
+  <depend package="nav_msgs"/>
+  <depend package="message_filters"/>
+  <depend package="image_transport"/>
+  <depend package="pcl_ros"/>
+  <depend package="pcl"/>
+  <depend package="tf"/>
+  <depend package="C21_VisionAndLidar"/>
+</package>
+
+

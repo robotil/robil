@@ -4,6 +4,15 @@
 #
 ####*/
 
+#define PRINT_AS_VECTORS 1
+
+#define PRINT_AS_VECTORS_MAP 0
+#define PRINT_AS_VECTORS_PATH 0
+#define PRINT_INLINE_PATH 1
+#define PRINT_BITMAPS 1
+#define PRINT_QT 0
+
+
 int cogniteam_pathplanning_test_map_inflation(int argc, char** argv) {
 	cout << "START" << endl; // prints PP
 
@@ -43,7 +52,7 @@ int cogniteam_pathplanning_test_map_inflation(int argc, char** argv) {
 #include <cstdlib>
 #include <cstdio>
 #include "MapFileReader.hpp"
-int cogniteam_pathplanning_test(int argc, char** argv) {
+int cogniteam_pathplanning_test_(int argc, char** argv) {
 	cout << "START" << endl; // prints PP
 
 	char cmap_1[]={
@@ -171,19 +180,19 @@ int cogniteam_pathplanning_test(int argc, char** argv) {
 	
 	cout<<"QT:"<<endl<<qt<<endl;
 
-#define PRINT_NODE(X,Y){\
-	const QTNode* node = qt.findEmpty(X,Y);\
-	if(node){\
-		cout<<"FOUND:  "<<X<<":"<<Y<<endl;\
-		cout<<"FE: "<<endl<<(*node);\
-		QTNode::BORDER bord = node->getBorder();\
-		for(size_t i=0;i<bord.size();i++) cout<<bord[i].x<<","<<bord[i].y<<"  "; cout<<endl;\
-		QTNode::NEIGHBORS nei = node->getNeighbors();\
-		cout<<"NEIGHBORS: "<<nei.size()<<endl;\
-		for(QTNode::NEIGHBORS::const_iterator i=nei.begin();i!=nei.end();i++) cout<<(**i);\
-	}else{\
-		cout<<"NOT FOUND : "<<X<<":"<<Y<<endl;\
-	}cout<<"-------"<<endl;}
+	#define PRINT_NODE(X,Y){\
+		const QTNode* node = qt.findEmpty(X,Y);\
+		if(node){\
+			cout<<"FOUND:  "<<X<<":"<<Y<<endl;\
+			cout<<"FE: "<<endl<<(*node);\
+			QTNode::BORDER bord = node->getBorder();\
+			for(size_t i=0;i<bord.size();i++) cout<<bord[i].x<<","<<bord[i].y<<"  "; cout<<endl;\
+			QTNode::NEIGHBORS nei = node->getNeighbors();\
+			cout<<"NEIGHBORS: "<<nei.size()<<endl;\
+			for(QTNode::NEIGHBORS::const_iterator i=nei.begin();i!=nei.end();i++) cout<<(**i);\
+		}else{\
+			cout<<"NOT FOUND : "<<X<<":"<<Y<<endl;\
+		}cout<<"-------"<<endl;}
 
 	PRINT_NODE(19,13)
 	PRINT_NODE(20,14)
@@ -287,7 +296,75 @@ int cogniteam_pathplanning_test(int argc, char** argv) {
 	return 0;
 }
 
+inline void printQT(std::string title, const QTNode& qt){
+#if PRINT_QT == 1
+	cout<<""<<title<<": "<<endl<<qt<<endl;
 
+	#define PRINT_NODE(X,Y){\
+		const QTNode* node = qt.findEmpty(X,Y);\
+		if(node){\
+			cout<<"FOUND:  "<<X<<":"<<Y<<endl;\
+			cout<<"FE: "<<endl<<(*node);\
+			QTNode::BORDER bord = node->getBorder();\
+			for(size_t i=0;i<bord.size();i++) cout<<bord[i].x<<","<<bord[i].y<<"  "; cout<<endl;\
+			QTNode::NEIGHBORS nei = node->getNeighbors();\
+			cout<<"NEIGHBORS: "<<nei.size()<<endl;\
+			for(QTNode::NEIGHBORS::const_iterator i=nei.begin();i!=nei.end();i++) cout<<(**i);\
+		}else{\
+			cout<<"NOT FOUND : "<<X<<":"<<Y<<endl;\
+		}cout<<"-------"<<endl;}
+
+	PRINT_NODE(19,13)
+	PRINT_NODE(20,14)
+	PRINT_NODE(20,15)
+	PRINT_NODE(5,5)
+#endif
+}
+
+inline void printBitmap(std::string title, const Map& map){
+	#if PRINT_BITMAPS == 1
+		cout<<"\nPRINT MAP "<<title<<": "<<endl<<map<<endl;
+	#endif
+}
+inline void printAsVector(std::string title, const Map& map){
+	#if PRINT_AS_VECTORS_MAP == 1
+		cout<<"\nPRINT MAP "<<title<<" - STR"<<endl;
+		for(size_t yy=0;yy<map.h();yy++){
+			for(size_t xx=0;xx<map.w();xx++){
+				if(map(xx,yy)==Map::ST_BLOCKED){
+					cout<<xx<<'\t'<<yy<<endl;
+				}
+			}
+		}
+		cout<<"PRINT MAP "<<title<<" - END\n"<<endl;
+	#endif
+}
+template <class A>
+void printAsVector(std::string title, const A& path){
+	#if PRINT_AS_VECTORS_PATH == 1
+		cout<<"\nPRINT PATH "<<title<<" - STR"<<endl;
+		for( size_t i=0;i<path.size(); i++){
+			cout<<path[i].x<<'\t'<<path[i].y<<endl;
+		}
+		cout<<"PRINT PATH "<<title<<" - END\n"<<endl;
+	#endif
+}
+
+template <class A>
+void printInLine(std::string title, const A& path){
+	#if PRINT_INLINE_PATH == 1
+		cout<<"PATH: "<<title<<": ";
+		for( size_t i=0;i<path.size(); i++){
+			cout<<"("<<path[i].x<<","<<path[i].y<<") ";
+		}
+		cout<<endl;
+	#endif
+}
+
+template <class A, class B>
+void printLine(std::string title, const A& p1, const B& p2){
+	std::cout<<title<<": "<<p1.x<<","<<p1.y<<" -- "<<p1.x<<","<<p1.y<<std::endl;
+}
 //THIS FUNCTION IS EXACT COPY OF searchPath function in cogniteam_pathplanning.cpp WITH ADDITIONAL DEBUG INFORMATION OUTPUT
 Path test_searchPath(const Map& source_map, const Waypoint& start, const Waypoint& finish, const Constraints& constraints){
 	using namespace std;
@@ -305,17 +382,31 @@ Path test_searchPath(const Map& source_map, const Waypoint& start, const Waypoin
 	Inflator i( rr , Map::ST_BLOCKED);
 	MapEditor e;
 
+	Map inflated_map = e.replace(
+			i.inflate(source_map),
+			Map::ST_UNCHARTED, Map::ST_AVAILABLE
+		);
+	printBitmap("Inflated map", inflated_map);
+	printAsVector("INFLATED", inflated_map);
+
+	if( inflated_map(start.x, start.y)==Map::ST_BLOCKED || inflated_map(finish.x, finish.y)==Map::ST_BLOCKED ){
+		cout<<"searchPath: "<<"some of interesting points are not available (after inflation)"<<endl;
+		return Path();
+	}
+
 	Map map =
 		e.coloring(
-			e.replace(
-				i.inflate(source_map),
-				Map::ST_UNCHARTED, Map::ST_AVAILABLE
-			),
+			inflated_map,
 			start.x, start.y, Map::ST_AVAILABLE,Map::ST_BLOCKED
 		);
+	cout<<"Colored map: "<<endl<<map<<endl;
+	printAsVector("COLORED", map);
+
 
 	QTNode qt(0,map.w()-1, 0, map.h()-1, map);
 	qt.folding();
+
+	printQT("QT: ",qt);
 
 	// CHECK IF ALL INTERESTING POINTS (start, stop and transits) ARE AVAILABLE
 
@@ -338,17 +429,21 @@ Path test_searchPath(const Map& source_map, const Waypoint& start, const Waypoin
 	vector<Pair> segments;
 	if(constraints.transits.size()==0){
 		segments.push_back(Pair(start, finish));
-		cout<<"   "<<start.x<<","<<start.y<<" -- "<<finish.x<<","<<finish.y<<endl;
+		//cout<<"   "<<start.x<<","<<start.y<<" -- "<<finish.x<<","<<finish.y<<endl;
+		printLine("   ", start, finish);
 	}else{
 		size_t i=0;
 		segments.push_back(Pair(start, constraints.transits[i]));
-		cout<<"   "<<start.x<<","<<start.y<<" -- "<<constraints.transits[i].x<<","<<constraints.transits[i].y<<endl;
+		//cout<<"   "<<start.x<<","<<start.y<<" -- "<<constraints.transits[i].x<<","<<constraints.transits[i].y<<endl;
+		printLine("   ", start, constraints.transits[i]);
 		for(; i<constraints.transits.size()-1; i++){
 			segments.push_back(Pair(constraints.transits[i], constraints.transits[i+1]));
-			cout<<"   "<<constraints.transits[i].x<<","<<constraints.transits[i].y<<" -- "<<constraints.transits[i+1].x<<","<<constraints.transits[i+1].y<<endl;
+			//cout<<"   "<<constraints.transits[i].x<<","<<constraints.transits[i].y<<" -- "<<constraints.transits[i+1].x<<","<<constraints.transits[i+1].y<<endl;
+			printLine("   ", constraints.transits[i], constraints.transits[i]);
 		}
 		segments.push_back(Pair(constraints.transits[i], finish));
-		cout<<"   "<<constraints.transits[i].x<<","<<constraints.transits[i].y<<" -- "<<finish.x<<","<<finish.y<<endl;
+		//cout<<"   "<<constraints.transits[i].x<<","<<constraints.transits[i].y<<" -- "<<finish.x<<","<<finish.y<<endl;
+		printLine("   ", constraints.transits[i], finish);
 	}
 
 	// CREATE PATH
@@ -358,7 +453,9 @@ Path test_searchPath(const Map& source_map, const Waypoint& start, const Waypoin
 	cout<<"Search A* paths for segments: "<<endl;
 	for( size_t i=0; i<segments.size(); i++){
 		#define SEGMENT segments[i].s.x, segments[i].s.y,  segments[i].g.x,segments[i].g.y
-		cout<<"    "<<segments[i].s.x<<","<<segments[i].s.y<<" -- "<<segments[i].g.x<<","<<segments[i].g.y<<endl<<"    " "    ";
+		//cout<<"    "<<segments[i].s.x<<","<<segments[i].s.y<<" -- "<<segments[i].g.x<<","<<segments[i].g.y<<endl<<"    " "    ";
+		printLine("PROCESS SEGMENT", segments[i].s, segments[i].g);
+
 		AStar::Path qt_path = a_star.search( SEGMENT , &qt);
 		vector<QTNode::XY> points;
 		if( qt_path.size()>0 ) points = QTPath(qt_path).extractPoints( SEGMENT );
@@ -376,18 +473,13 @@ Path test_searchPath(const Map& source_map, const Waypoint& start, const Waypoin
 	PField pf(map, path);
 	PField::Points smoothed_path = pf.smooth(pf_params);
 
-	cout<<"smoothed path: ";
-	for( size_t i=0;i<smoothed_path.size(); i++){
-		cout<<"("<<smoothed_path[i].x<<","<<smoothed_path[i].y<<") ";
-	}
-	cout<<endl;
+	printInLine("smoothed path",smoothed_path);
+	printAsVector("SMOOTHED", smoothed_path);
 
 	Path smoothed = pf.smoothWaypoints(pf_params);
-	cout<<"smoothed path (rounded for grid): ";
-	for( size_t i=0;i<smoothed.size(); i++){
-		cout<<"("<<smoothed[i].x<<","<<smoothed[i].y<<") ";
-	}
-	cout<<endl;
+
+	printInLine("smoothed path (rounded for grid)",smoothed);
+	printAsVector("SMOOTHED (ROUNDED)", smoothed_path);
 
 
 	return smoothed;
@@ -409,20 +501,31 @@ Path test_searchPath_transitAccurate(const Map& source_map, const Waypoint& star
 	Inflator i( rr , Map::ST_BLOCKED);
 	MapEditor e;
 
+	Map inflated_map = e.replace(
+			i.inflate(source_map),
+			Map::ST_UNCHARTED, Map::ST_AVAILABLE
+		);
+	printBitmap("Inflated map",inflated_map);
+	printAsVector("INFLATED", inflated_map);
+
+	if( inflated_map(start.x, start.y)==Map::ST_BLOCKED || inflated_map(finish.x, finish.y)==Map::ST_BLOCKED ){
+		cout<<"searchPath: "<<"some of interesting points are not available (after inflation)"<<endl;
+		return Path();
+	}
+
 	Map map =
 		e.coloring(
-			e.replace(
-				i.inflate(source_map),
-				Map::ST_UNCHARTED, Map::ST_AVAILABLE
-			),
+			inflated_map,
 			start.x, start.y, Map::ST_AVAILABLE,Map::ST_BLOCKED
 		);
 
-	cout<<"Inflated map: "<<endl<<map<<endl;
+	printBitmap("Colored map",map);
+	printAsVector("COLORED", map);
 
 	QTNode qt(0,map.w()-1, 0, map.h()-1, map);
 	qt.folding();
-	cout<<"QT: "<<qt<<endl;
+
+	printQT("QT: ",qt);
 
 	// CHECK IF ALL INTERESTING POINTS (start, stop and transits) ARE AVAILABLE
 
@@ -445,17 +548,21 @@ Path test_searchPath_transitAccurate(const Map& source_map, const Waypoint& star
 	vector<Pair> segments;
 	if(constraints.transits.size()==0){
 		segments.push_back(Pair(start, finish));
-		cout<<"   "<<start.x<<","<<start.y<<" -- "<<finish.x<<","<<finish.y<<endl;
+		//cout<<"   "<<start.x<<","<<start.y<<" -- "<<finish.x<<","<<finish.y<<endl;
+		printLine("   ", start, finish);
 	}else{
 		size_t i=0;
 		segments.push_back(Pair(start, constraints.transits[i]));
-		cout<<"   "<<start.x<<","<<start.y<<" -- "<<constraints.transits[i].x<<","<<constraints.transits[i].y<<endl;
+		//cout<<"   "<<start.x<<","<<start.y<<" -- "<<constraints.transits[i].x<<","<<constraints.transits[i].y<<endl;
+		printLine("   ", start, constraints.transits[i]);
 		for(; i<constraints.transits.size()-1; i++){
 			segments.push_back(Pair(constraints.transits[i], constraints.transits[i+1]));
-			cout<<"   "<<constraints.transits[i].x<<","<<constraints.transits[i].y<<" -- "<<constraints.transits[i+1].x<<","<<constraints.transits[i+1].y<<endl;
+			//cout<<"   "<<constraints.transits[i].x<<","<<constraints.transits[i].y<<" -- "<<constraints.transits[i+1].x<<","<<constraints.transits[i+1].y<<endl;
+			printLine("   ", constraints.transits[i], constraints.transits[i]);
 		}
 		segments.push_back(Pair(constraints.transits[i], finish));
-		cout<<"   "<<constraints.transits[i].x<<","<<constraints.transits[i].y<<" -- "<<finish.x<<","<<finish.y<<endl;
+		//cout<<"   "<<constraints.transits[i].x<<","<<constraints.transits[i].y<<" -- "<<finish.x<<","<<finish.y<<endl;
+		printLine("   ", constraints.transits[i], finish);
 	}
 
 	// CREATE PATH
@@ -467,7 +574,9 @@ Path test_searchPath_transitAccurate(const Map& source_map, const Waypoint& star
 	for( size_t i=0; i<segments.size(); i++){
 		Path path;
 		#define SEGMENT segments[i].s.x, segments[i].s.y,  segments[i].g.x,segments[i].g.y
-		cout<<"    "<<segments[i].s.x<<","<<segments[i].s.y<<" -- "<<segments[i].g.x<<","<<segments[i].g.y<<endl;
+
+		printLine("PROCESS SEGMENT", segments[i].s, segments[i].g);
+
 		AStar::Path qt_path = a_star.search( SEGMENT , &qt);
 
 		cout<<"... QT path: ";
@@ -494,42 +603,32 @@ Path test_searchPath_transitAccurate(const Map& source_map, const Waypoint& star
 		PField pf(map, path);
 		PField::Points smoothed_path = pf.smooth(pf_params);
 
-		cout<<"    " "smoothed path: ";
-		for( size_t i=0;i<smoothed_path.size(); i++){
-			cout<<"("<<smoothed_path[i].x<<","<<smoothed_path[i].y<<") ";
-			g_smoothed_path.push_back(smoothed_path[i]);
-		}
-		cout<<endl;
+		cout<<"    "<<i<<")";
+		printInLine("smoothed path",smoothed_path);
+		printAsVector("SMOOTHED", smoothed_path);
+
 
 		Path smoothed = pf.smoothWaypoints(pf_params);
-		cout<<"    " "smoothed path (rounded for grid): ";
-		for( size_t i=0;i<smoothed.size(); i++){
-			cout<<"("<<smoothed[i].x<<","<<smoothed[i].y<<") ";
-			g_smoothed.push_back(smoothed[i]);
-		}
-		cout<<endl;
+
+		cout<<"    "<<i<<")";
+		printInLine("smoothed path (rounded for grid)",smoothed);
+		printAsVector("SMOOTHED (ROUNDED)", smoothed_path);
 
 
 	}
 
-	cout<<"G smoothed path: ";
-	for( size_t i=0;i<g_smoothed_path.size(); i++){
-		cout<<"("<<g_smoothed_path[i].x<<","<<g_smoothed_path[i].y<<") ";
-	}
-	cout<<endl;
+	printInLine("G smoothed path",g_smoothed_path);
+	printAsVector("G SMOOTHED", g_smoothed_path);
 
-	cout<<"G smoothed path (rounded for grid): ";
-	for( size_t i=0;i<g_smoothed.size(); i++){
-		cout<<"("<<g_smoothed[i].x<<","<<g_smoothed[i].y<<") ";
-	}
-	cout<<endl;
+	printInLine("G smoothed path (rounded for grid)",g_smoothed);
+	printAsVector("G SMOOTHED (ROUNDED)", g_smoothed_path);
 
 
 	return g_smoothed;
 }
 
-int cogniteam_pathplanning_test_transits(int argc, char** argv) {
-	cout << "START: cogniteam_pathplanning_test_transits" << endl; // prints PP
+int cogniteam_pathplanning_test(int argc, char** argv) {
+	cout << "START: cogniteam_pathplanning_test" << endl; // prints PP
 
 	char* cmap = 0;
 	size_t w=0,h=0;
@@ -542,11 +641,12 @@ int cogniteam_pathplanning_test_transits(int argc, char** argv) {
 	}
 
 	Map map(w, h, cmap);
-	cout<<"map source"<<endl<<map<<endl;
+	printBitmap("map source",map);
+	printAsVector("SOURCE",map);
 
 	long _sx=atoi(argv[1]), _sy=atoi(argv[2]);
 	long _ex=atoi(argv[3]), _ey=atoi(argv[4]);
-	long _rr=atoi(argv[6]);
+	long _rr=argc>6 ? 2 : atoi(argv[6]);
 
 	#define START_P _sx,_sy
 	#define END_P   _ex,_ey
@@ -563,10 +663,81 @@ int cogniteam_pathplanning_test_transits(int argc, char** argv) {
 	Waypoint start(START_P), finish(END_P);
 	RobotDimentions dimentions; dimentions.radius = _rr;
 	Transits transits;
-		TransitWaypoint wp1={36,48}; cout<<"add transit: "<<wp1.x<<","<<wp1.y<<endl;
-		TransitWaypoint wp2={10,53}; cout<<"add transit: "<<wp2.x<<","<<wp2.y<<endl;
-		transits.push_back(wp1);
-		transits.push_back(wp2);
+	Attractors attractors;
+	Constraints con(dimentions, transits, attractors);
+
+
+	Path smoothed = test_searchPath(map, start, finish, con);
+
+	for( size_t i=0;i<smoothed.size(); i++){
+		map(smoothed[i].x, smoothed[i].y)='o';
+	}
+	for( size_t i=0;i<transits.size(); i++){
+		if(map(transits[i].x, transits[i].y)=='o')
+			map(transits[i].x, transits[i].y)='T';
+		else
+			map(transits[i].x, transits[i].y)='t';
+	}
+	{
+		if(map(start.x, start.y)=='o')
+			map(start.x, start.y)='S';
+		else
+			map(start.x, start.y)='s';
+	}
+	{
+		if(map(finish.x, finish.y)=='o')
+			map(finish.x, finish.y)='G';
+		else
+			map(finish.x, finish.y)='g';
+	}
+
+	cout<<endl;
+	printBitmap("map with smoothed path",map);
+
+}
+
+int cogniteam_pathplanning_test_transits(int argc, char** argv) {
+	cout << "START: cogniteam_pathplanning_test_transits" << endl; // prints PP
+
+	char* cmap = 0;
+	size_t w=0,h=0;
+
+	vector<char> map_from_file;
+	if(argc>5){
+		cout<<"map from file: "<<argv[5]<<endl;
+		map_from_file = map_file_reader::readMap(argv[5], w, h);
+		cmap = map_from_file.data();
+	}
+
+	Map map(w, h, cmap);
+	printBitmap("map source",map);
+	printAsVector("SOURCE",map);
+
+	long _sx=atoi(argv[1]), _sy=atoi(argv[2]);
+	long _ex=atoi(argv[3]), _ey=atoi(argv[4]);
+	long _rr=argc>6 ? 2 : atoi(argv[6]);
+
+	#define START_P _sx,_sy
+	#define END_P   _ex,_ey
+
+	#define POINTS START_P, END_P
+
+	printf("Robot radius : %i celles \n", _rr);
+	printf("Plan path : from %i,%i to %i,%i \n", POINTS);
+
+	if(map.inRange(END_P)==false){
+		map.approximate(START_P, END_P);
+	}
+
+	Waypoint start(START_P), finish(END_P);
+	RobotDimentions dimentions; dimentions.radius = _rr;
+	Transits transits;
+		int tpn = argc>7 ?  atoi(argv[7]) : 0;
+		printf("transit points number : %i \n", tpn);
+		for(int i=8;i<tpn*2+8 && argc>i+1;i+=2){
+			TransitWaypoint wp1={atoi(argv[i]),atoi(argv[i+1])}; cout<<"add transit: "<<wp1.x<<","<<wp1.y<<endl;
+			transits.push_back(wp1);
+		}
 	Attractors attractors;
 	Constraints con(dimentions, transits, attractors);
 
@@ -596,8 +767,93 @@ int cogniteam_pathplanning_test_transits(int argc, char** argv) {
 	}
 
 	cout<<endl;
-	cout<<"map with smoothed path"<<endl<<map<<endl;
+	printBitmap("map with smoothed path",map);
 
 }
 
+#include "WallDetector.h"
+int cogniteam_pathplanning_test_alts(int argc, char** argv) {
+	cout << "START: cogniteam_pathplanning_test_transits" << endl; // prints PP
 
+	double* cmap = 0;
+	size_t w=0,h=0;
+
+	vector<double> map_from_file;
+	if(argc>5){
+		cout<<"map from file: "<<argv[5]<<endl;
+		map_from_file = map_file_reader::readAltMap(argv[5], w, h, 0, 10, true);
+		cmap =  map_from_file.data();
+	}
+
+	AltMap alts(w, h, cmap);
+//	for(size_t y=0;y<alts.h();y++){
+//		for(size_t x=0;x<alts.w();x++){
+//			cout<<alts(x,y)<<' ';
+//		}
+//		cout<<endl;
+//	}
+
+	WallDetector wd(alts, 0.3);
+	Map map = wd.simplify();
+
+	printBitmap("map source",map);
+	return 0;
+	printAsVector("SOURCE",map);
+
+	long _sx=atoi(argv[1]), _sy=atoi(argv[2]);
+	long _ex=atoi(argv[3]), _ey=atoi(argv[4]);
+	long _rr=argc>6 ? 2 : atoi(argv[6]);
+
+	#define START_P _sx,_sy
+	#define END_P   _ex,_ey
+
+	#define POINTS START_P, END_P
+
+	printf("Robot radius : %i celles \n", _rr);
+	printf("Plan path : from %i,%i to %i,%i \n", POINTS);
+
+	if(map.inRange(END_P)==false){
+		map.approximate(START_P, END_P);
+	}
+
+	Waypoint start(START_P), finish(END_P);
+	RobotDimentions dimentions; dimentions.radius = _rr;
+	Transits transits;
+		int tpn = argc>7 ?  atoi(argv[7]) : 0;
+		printf("transit points number : %i \n", tpn);
+		for(int i=8;i<tpn*2+8 && argc>i+1;i+=2){
+			TransitWaypoint wp1={atoi(argv[i]),atoi(argv[i+1])}; cout<<"add transit: "<<wp1.x<<","<<wp1.y<<endl;
+			transits.push_back(wp1);
+		}
+	Attractors attractors;
+	Constraints con(dimentions, transits, attractors);
+
+
+	Path smoothed = test_searchPath_transitAccurate(map, start, finish, con);
+
+	for( size_t i=0;i<smoothed.size(); i++){
+		map(smoothed[i].x, smoothed[i].y)='o';
+	}
+	for( size_t i=0;i<transits.size(); i++){
+		if(map(transits[i].x, transits[i].y)=='o')
+			map(transits[i].x, transits[i].y)='T';
+		else
+			map(transits[i].x, transits[i].y)='t';
+	}
+	{
+		if(map(start.x, start.y)=='o')
+			map(start.x, start.y)='S';
+		else
+			map(start.x, start.y)='s';
+	}
+	{
+		if(map(finish.x, finish.y)=='o')
+			map(finish.x, finish.y)='G';
+		else
+			map(finish.x, finish.y)='g';
+	}
+
+	cout<<endl;
+	printBitmap("map with smoothed path",map);
+
+}
