@@ -28,6 +28,9 @@ from nav_msgs.msg import Odometry
 from geometry_msgs.msg import Pose
 from std_msgs.msg import String
 
+from C42_DynamicLocomotion.srv import *
+from C42_DynamicLocomotion.msg import Foot_Placement_data
+
 class QS_WalkingMode(WalkingMode):
     def __init__(self):
         self._LPP = QS_PathPlanner()
@@ -45,7 +48,9 @@ class QS_WalkingMode(WalkingMode):
         self._odom_sub = rospy.Subscriber('/ground_truth_odom',Odometry,self._odom_cb)
         self.asi_state = rospy.Subscriber('/atlas/atlas_sim_interface_state', AtlasSimInterfaceState, self.asi_state_cb)
         self._atlas_imu_sub = rospy.Subscriber('/atlas/imu', Imu, self._get_imu)
-        
+
+        rospy.wait_for_service('foot_placement_path')
+        self._foot_placement_client = rospy.ServiceProxy('foot_placement_path', FootPlacement_Service)       
         self._RequestFootPlacements()
         rospy.sleep(0.3)
     
@@ -94,12 +99,20 @@ class QS_WalkingMode(WalkingMode):
     
         return command
     
-    def _RequestFootPlacements(self):
+    def _RequestFootPlacements(self,walking_mode):
         # Perform a service request from FP
+        try:
+            resp = self._foot_placement_client(walking_mode)
+            return resp
+        except rospy.ServiceException, e:
+            print "Foot Placement Service call failed: %s"%e
+        
         # Handle preemption?
         # if received a "End of mission" sort of message from FP:
+        # if 1 == resp.done:
         #    perform transition self._WalkingModeStateMachine.PerformTransition("Finished")
-        pass
+
+    
     
 ###################################################################################
 #--------------------------- CallBacks --------------------------------------------
