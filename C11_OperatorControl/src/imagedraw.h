@@ -23,6 +23,7 @@ public slots:
 	void SltOnPlayPauseClick(bool);
 	void SltOnCreateClick(bool);
 	void SltOnPathClick(bool);
+	void SltOnAllowClick();
 	void SltOperatorAction();
 	void SltOnWaitTimeout();
 	void SltOnGridReceived(int grid[100][100],StructPoint robotPos,int xOffset,int yOffset,double orient);
