@@ -1,0 +1,4 @@
+uint32                walking_mode         # 0=QuasiStatic step, 1=Dynamic foot placement
+---
+Foot_Placement_data[] foot_placement_path  # Array of foot placements in world frame 
+uint32                done                 # 1=reached goal, 0=task in progress
