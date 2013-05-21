@@ -63,6 +63,11 @@ class QS_WalkingMode(WalkingMode):
     
     def Walk(self):
         WalkingMode.Walk(self)
+        command = self.GetCommand()
+        self.asi_command.publish(command)
+        print(command)
+        self._WalkingModeStateMachine.PerformTransition("Go")
+        self._bIsSwaying = True
     
     def EmergencyStop(self):
         WalkingMode.Stop(self)
@@ -73,45 +78,70 @@ class QS_WalkingMode(WalkingMode):
     def GetCommand(self):
         command = AtlasSimInterfaceCommand()
         command.behavior = AtlasSimInterfaceCommand.STEP
-        command.step_params = self._LPP.GetNextStep()
-        # Not sure why such a magic number
-        command.step_params.desired_step.duration = 0.63
-        # Apparently this next line is a must
-        command.step_params.desired_step.step_index = 1
+        command.k_effort = [0] * 28
+        command.step_params.desired_step = self._LPP.GetNextStep()
+        if(0 != command.step_params.desired_step):
+            # Not sure why such a magic number
+            command.step_params.desired_step.duration = 0.63
+            # Apparently this next line is a must
+            command.step_params.desired_step.step_index = 1
+        else:
+            command = 0
         return command
     
     def HandleStateMsg(self,state):
         command = 0
         if ("Idle" == self._WalkingModeStateMachine.GetCurrentState().Name):
+            self._Odometer.SetPosition(state.pos_est.position.x,state.pos_est.position.y)
             pass
         elif ("Wait" == self._WalkingModeStateMachine.GetCurrentState().Name):
             self._Odometer.SetPosition(state.pos_est.position.x,state.pos_est.position.y)
+            print("Odometer Updated")
+            print(2)
             self._WalkingModeStateMachine.PerformTransition("Go")
         elif ("Walking" == self._WalkingModeStateMachine.GetCurrentState().Name):
+            print(3)
             if (QS_PathPlannerEnum.Active == self._LPP.State):
                 command = self.GetCommand()
             elif(QS_PathPlannerEnum.Waiting == self._LPP.State):
                 self._RequestFootPlacements()
         elif ("Done" == self._WalkingModeStateMachine.GetCurrentState().Name):
+            print(4)
             self._bDone = True
         else:
             raise Exception("QS_WalkingModeStateMachine::Bad State Name")
     
         return command
     
-    def _RequestFootPlacements(self,walking_mode):
+    def _RequestFootPlacements(self):
+        print("Request Foot Placements")
         # Perform a service request from FP
         try:
-            resp = self._foot_placement_client(walking_mode)
-            return resp
+            # Handle preemption?
+                # if received a "End of mission" sort of message from FP
+            resp = self._foot_placement_client(0)
+            if 1 == resp.done:
+                self._WalkingModeStateMachine.PerformTransition("Finished")
+            else:
+                listSteps = []
+                for desired in resp.foot_placement_path:
+                    command = AtlasSimInterfaceCommand()
+                    step = command.step_params.desired_step
+                    step.foot_index = desired.foot_index
+                    step.swing_height = 0.4#desired.clearance_height
+                    step.pose.position.x = desired.pose.position.x
+                    step.pose.position.y = desired.pose.position.y
+                    step.pose.position.z = desired.pose.position.z
+                    Q = quaternion_from_euler(desired.pose.ang_euler.x, desired.pose.ang_euler.y, desired.pose.ang_euler.z)
+                    step.pose.orientation.x = Q[0]
+                    step.pose.orientation.y = Q[1]
+                    step.pose.orientation.z = Q[2]
+                    step.pose.orientation.w = Q[3]
+                    listSteps.append(step)
+                self._LPP.SetPath(listSteps)
+                print(listSteps)
         except rospy.ServiceException, e:
             print "Foot Placement Service call failed: %s"%e
-        
-        # Handle preemption?
-        # if received a "End of mission" sort of message from FP:
-        # if 1 == resp.done:
-        #    perform transition self._WalkingModeStateMachine.PerformTransition("Finished")
-
     
     
 ###################################################################################
@@ -122,14 +152,17 @@ class QS_WalkingMode(WalkingMode):
     # the current robot position   
     def asi_state_cb(self, state):
         command = 0
+        #print(state.step_feedback.status_flags)
         # When the robot status_flags are 1 (SWAYING), you can publish the next step command.
         if (state.step_feedback.status_flags == 1 and not self._bIsSwaying):
             command = self.HandleStateMsg(state)
-            self.is_swaying = True
-        elif (state.step_feedback.status_flags == 2):
-            self.is_swaying = False
+        elif (state.step_feedback.status_flags == 2):# and self._bIsSwaying):
+            self._bIsSwaying = False
+            #print("step done")
         if (0 !=command):
+            self._bIsSwaying = True
             self.asi_command.publish(command)
+            print(command)
 
     def _odom_cb(self,odom):
         self._LPP.UpdatePosition(odom.pose.pose.position.x,odom.pose.pose.position.y)

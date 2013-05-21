@@ -39,6 +39,7 @@ class QS_PathPlanner(PathPlanner):
             step_params = self._Queue.popleft()
         else:
             self.State = QS_PathPlannerEnum.Waiting
+        return step_params
 
     def Stop(self):
         PathPlanner.Stop(self)
