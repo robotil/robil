@@ -13,5 +13,6 @@
   <depend package="roscpp"/>
   <depend package="tf"/>
   <depend package="C0_RobilTask"/>
-  <depend package="osrf_msgs"/>
+  <depend package="atlas_msgs"/>
+  <depend package="sensor_msgs"/>
 </package>

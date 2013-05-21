@@ -28,20 +28,24 @@ int main(int argc, char **argv)
 		   for (unsigned int i=0;i<srv.response.drivingPath.row.size();i++){
 		  		if (i==0){
 		  			std::cout<<"   ";
-		  			for (unsigned  int j=0;j<srv.response.drivingPath.row.size();j++){
+		  			for (int j=srv.response.drivingPath.row.size()-1;j>=0;j--){
 		  				std::cout<<std::setw(2)<<std::setfill('0')<<j<<" ";
 		  			}
 		  			std::cout<<endl;
 		  		}
 		  	}
+		   int robotPoseRow=(srv.response.drivingPath.robotPos.x-srv.response.drivingPath.xOffset)*4;
+		   int robotPoseColum=(srv.response.drivingPath.robotPos.y-srv.response.drivingPath.yOffset)*4;
 		  	for (int i=srv.response.drivingPath.row.size();i>0;i--){
 		  		std::cout<<std::setw(2)<<std::setfill('0')<<i<<" ";
-		  		for (unsigned int j=0;j<srv.response.drivingPath.row.size();j++){
-		  			if (srv.response.drivingPath.row.at(i-1).column.at(j).status==0)
-		  				std::cout << "A  ";
-		  				else if (srv.response.drivingPath.row.at(i-1).column.at(j).status==1)
-		  					std::cout << "B  ";
-		  				else std::cout << "-  ";
+		  		for (int j=srv.response.drivingPath.row.size()-1;j>=0;j--){
+		  			if(robotPoseColum==j && robotPoseRow==i)
+		  				std::cout <<  "\033[0;34m"<< "R  ";
+						else if (srv.response.drivingPath.row.at(i-1).column.at(j).status==0)
+							std::cout << "\033[0m"<< "A  ";
+							else if (srv.response.drivingPath.row.at(i-1).column.at(j).status==1)
+								std::cout << "\033[0;33m"<<"B  ";
+							else std::cout << "\033[0m"<< "-  ";
 		  		}
 		  		std::cout <<endl;
 		  	}

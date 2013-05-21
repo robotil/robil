@@ -1,0 +1,25 @@
+<plan descriptions="./plans/TaskDescriptions.xml">
+   <par name="Qualification1"> 
+         <par name="Perception"> 
+               <tsk name="LocalizationTrack" />
+               <tsk name="ObstacleDetection" />
+               <tsk name="PathPlanning" />
+         </par>
+      <dec name="!L!"> 
+            <seq name="Mission"> 
+                  <seq name="UpToCliff"> 
+                        <tsk name="PathPlanningFocus(target=Qual1P1)" />
+                        <tsk name="ZmpWalk" />
+                  </seq>
+                  <seq name="OverCliff"> 
+                        <tsk name="PathPlanningFocus(target=Qual1P2)" />
+                        <tsk name="QuasiStaticWalk" />
+                  </seq>
+                  <seq name="ToFinish"> 
+                        <tsk name="PathPlanningFocus(target=Qual1P3)" />
+                        <tsk name="ZmpWalk" />
+                  </seq>
+            </seq>
+      </dec>
+   </par>
+</plan>

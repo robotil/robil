@@ -1,0 +1,24 @@
+<plan descriptions="./plans/TaskDescriptions.xml">
+   <par name="Qualification1" x="280.56349206349125" y="-75.40909090909145" collapsed="false" id="63f81135-edae-4bc9-9ef3-9f12d8ba2c6b"> 
+         <par name="Perception" x="45.92477913985283" y="4.207871144648891" collapsed="false" id="50ae34a1-b4f6-42b9-a59e-23a1de45eaca"> 
+               <tsk name="LocalizationTrack" x="-122.07522086014748" y="45.20787114464892" test_time="0" test_result="true" id="b680e465-1580-4fcd-964d-4ac78748b7d3" />
+               <tsk name="PathPlanning" x="54.992063492062925" y="49.32106782106726" test_time="0" test_result="true" id="0e442f5e-e4f4-4d44-9f36-038aa11042d8" />
+         </par>
+      <dec name="!L!" x="456.3412698412684" y="18.368686868686353"> 
+            <seq name="Mission" x="445.27777777777567" y="113.57503607503591" collapsed="false" id="e476250a-7477-4a98-a8c7-bed5aed10672"> 
+                  <seq name="UpToCliff" x="198.3571428571413" y="227.25757575757365" collapsed="false" id="63d27bf9-f56a-4c0f-8b32-583e8edd36c6"> 
+                        <tsk name="PathPlanningFocus(target=Qual1P1)" x="-48.642857142857736" y="292.384559884557" test_time="0" test_result="true" id="9fe743dd-3101-4988-8e76-2f01615c6603" />
+                        <tsk name="DynamicLocomotion" x="155.34126984126863" y="366.2258297258264" test_time="0" test_result="true" id="4675c8a2-4623-4235-b386-920a1c243e82" />
+                  </seq>
+                  <seq name="OverCliff" x="517.2142857142823" y="232.01948051947818" collapsed="false" id="b668d8b3-6787-4d21-a051-17def7419d8b"> 
+                        <tsk name="PathPlanningFocus(target=Qual1P2)" x="324.45238095237823" y="344.146464646463" test_time="0" test_result="true" id="9fe743dd-3101-4988-8e76-2f01615c6604" />
+                        <tsk name="DynamicLocomotion" x="526.7380952380912" y="330.7496392496361" test_time="0" test_result="true" id="c9112af6-dbb8-4445-8948-59f96dacf28b" />
+                  </seq>
+                  <seq name="ToFinish" x="720.9603174603162" y="202.9559884559862" collapsed="false" id="2deef5af-9445-4863-a0c5-4ce0d1a71f4d"> 
+                        <tsk name="PathPlanningFocus(target=Qual1P3)" x="671.9444444444437" y="312.09884559884335" test_time="0" test_result="true" id="9fe743dd-3101-4988-8e76-2f01615c6605" />
+                        <tsk name="DynamicLocomotion" x="889.7857142857165" y="321.6861471861445" test_time="0" test_result="true" id="4675c8a2-4623-4235-b386-920a5c243e82" />
+                  </seq>
+            </seq>
+      </dec>
+   </par>
+</plan>

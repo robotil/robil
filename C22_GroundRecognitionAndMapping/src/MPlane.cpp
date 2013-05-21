@@ -19,11 +19,14 @@ MPlane::MPlane():representing_point(0,0,0){
 	  ratable=true;
 }
 
-MPlane::MPlane(pcl::PointXYZ point, pcl::ModelCoefficients::Ptr c_):representing_point(point){
-	coefficient_x=c_->values.at(0);
-	coefficient_y=c_->values.at(1);
-	coefficient_z=c_->values.at(2);
-	coefficient_d=c_->values.at(3);
+MPlane::MPlane(pcl::PointXYZ point):representing_point(point){
+	//coefficient_x=c_->values.at(0);
+	//coefficient_y=c_->values.at(1);
+	//coefficient_z=c_->values.at(2);
+	//coefficient_d=c_->values.at(3);
+	representing_point.x=point.x;
+	representing_point.y=point.y;
+	representing_point.z=point.z;
 }
 
 MPlane::~MPlane(){
@@ -56,7 +59,7 @@ bool MPlane::isEqualTo(MPlane * other){
 
 std::string MPlane::toString(){
   std::stringstream ss;
-  ss<<coefficient_x<<"x + "<<coefficient_y<<"y + "<<coefficient_z<<"z + "<<coefficient_d<<" = 0";
+  //ss<<coefficient_x<<"x + "<<coefficient_y<<"y + "<<coefficient_z<<"z + "<<coefficient_d<<" = 0";
   return ss.str();
 }
 

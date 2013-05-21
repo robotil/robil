@@ -2,13 +2,14 @@
 #include <QFileDialog>
 #include <QDateTime>
 #include <QGraphicsTextItem>
+#include <QFile>
 //#include "cnode.h"
 //#include "figure.h"
 #include "imagedraw.h"
 
 ImageDraw::ImageDraw(int argc, char** argv, QWidget *parent, Qt::WFlags flags)
 	: QMainWindow(parent, flags)
-        , C11node(argc,argv,this)
+//        , C11node(argc,argv,this)
 {
 	ui.setupUi(this);
 
@@ -25,11 +26,56 @@ ImageDraw::ImageDraw(int argc, char** argv, QWidget *parent, Qt::WFlags flags)
 
 	connect(this,SIGNAL(SigOnNewImg(QImage)),this,SLOT(SltOnNewImg(QImage)),Qt::QueuedConnection);
 	connect(ui.btnPlayPause,SIGNAL(clicked(bool)),this,SLOT(SltOnPlayPauseClick(bool)));
+	connect(ui.btnAllow,SIGNAL(clicked()),this,SLOT(SltOnAllowClick()));
 	connect(ui.btnCreate,SIGNAL(clicked(bool)),this,SLOT(SltOnCreateClick(bool)));
 	connect(ui.btnPath,SIGNAL(clicked(bool)),this,SLOT(SltOnPathClick(bool)));
 	connect(WaitTimer,SIGNAL(timeout()),this,SLOT(SltOnWaitTimeout()));
 	connect(ui.mapWidget,SIGNAL(SigOperatorAction()),this,SLOT(SltOperatorAction()));
-	C11node.init();
+//	C11node.init();
+
+	QFile file("C11Config.txt");
+	if (!file.open(QIODevice::ReadOnly | QIODevice::Text))
+	  {
+	    std::cout << "Can't open config file!!! Restart the application" << std::endl;
+	    std::cout << "Can't open config file!!! Restart the application" << std::endl;
+	    std::cout << "Can't open config file!!! Restart the application" << std::endl;
+	    std::cout << "Can't open config file!!! Restart the application" << std::endl;
+	    std::cout << "Can't open config file!!! Restart the application" << std::endl;
+	    std::cout << "Can't open config file!!! Restart the application" << std::endl;
+	    std::cout << "Can't open config file!!! Restart the application" << std::endl;
+	    std::cout << "Can't open config file!!! Restart the application" << std::endl;
+	    std::cout << "Can't open config file!!! Restart the application" << std::endl;
+	    std::cout << "Can't open config file!!! Restart the application" << std::endl;
+	  }
+
+	else
+	  {
+	    QTextStream in(&file);
+            QString line = in.readLine();
+//	    pCTcpConnection = new CTcpConnection(QString("172.23.1.130"),45671);
+            pCTcpConnection = new CTcpConnection(line,45671);
+
+
+            connect(pCTcpConnection,SIGNAL(SigOnImgReceived(QImage)),this,SLOT(SltOnNewImg(QImage)));
+            connect(pCTcpConnection,SIGNAL(SigOnGridReceived(int[100][100],StructPoint,int,int,double)),this,SLOT(SltOnGridReceived(int[100][100],StructPoint,int,int,double)));
+
+            pCTcpConnection->SetSubscriber(this);
+	  }
+
+	QFile missfile("Missions.txt");
+	if (!missfile.open(QIODevice::ReadOnly | QIODevice::Text))
+          {
+            std::cout << "Can't open Missions config file!!! Restart the application" << std::endl;
+          }
+	else
+	  {
+	    while (!missfile.atEnd())
+	     {
+	        QString line = missfile.readLine();
+	        MissionsList.append(line);
+             }
+	    ui.cmbMissions->addItems(MissionsList);
+	  }
 
 //	QString fileName = QFileDialog::getOpenFileName(this,
 //	     tr("Open Image"), "", tr("Image Files (*.png *.jpg *.bmp)"));
@@ -45,6 +91,11 @@ ImageDraw::~ImageDraw()
     {
       delete WaitTimer;
       WaitTimer = NULL;
+    }
+  if(pCTcpConnection != NULL)
+    {
+      delete pCTcpConnection;
+      pCTcpConnection = NULL;
     }
 }
 
@@ -121,6 +172,11 @@ void ImageDraw::OnImgReceived(std::string fileName)
 	emit SigOnNewImg(myImage);
 }
 
+void ImageDraw::SltOnGridReceived(int grid[100][100],StructPoint robotPos,int xOffset,int yOffset,double orient)
+{
+  OnOccupancyGridReceived(grid,robotPos,xOffset,yOffset,orient);
+}
+
 void ImageDraw::OnOccupancyGridReceived(int grid[100][100], StructPoint robotPos, int xOffset, int yOffset, double orient)
 {
 	ui.mapWidget->UpdateGrid(grid,robotPos,xOffset,yOffset,orient);
@@ -145,7 +201,8 @@ void ImageDraw::SltOnWaitTimeout()
 {
   std::cout << "SltOnWaitTimeout" << std::endl;
   OnWaitResponseFinished();
-  C11node.Resume();
+//  C11node.Resume();
+  pCTcpConnection->Resume();
 }
 
 void ImageDraw::OnWaitResponseFinished()
@@ -276,23 +333,14 @@ void ImageDraw::SltOnPlayPauseClick(bool checked)
 	        if(ERunStatus==STOPPED_ENUM)
                 {
 	            QString curMission = ui.cmbMissions->currentText();
+	            std::cout << "Selected mission is: "<< curMission.toStdString() << std::endl;
 
                   if(!curMission.isEmpty())
                   {
                           int index=0;
-                          if(curMission == "Task1")
-                          {
-                                  index = 0;
-                          }
-                          else if(curMission == "Task2")
-                          {
-                                  index = 1;
-                          }
-                          else if(curMission == "Task3")
-                          {
-                                  index = 2;
-                          }
-                          C11node.LoadMission(index);
+                          index = MissionsList.indexOf(curMission);
+                          //C11node.LoadMission(index);
+                          pCTcpConnection->LoadMission(index);
                           ERunStatus = RUNNING_ENUM;
                           ui.btnCreate->setEnabled(false);
                           SltOnCreateClick(false);
@@ -304,9 +352,11 @@ void ImageDraw::SltOnPlayPauseClick(bool checked)
 	            std::vector<StructPoint> points = ui.mapWidget->GetUpdatedRoute();
 	            if(!points.empty())
 	              {
-	                C11node.SendPathUpdate(points);
+	                //C11node.SendPathUpdate(points);
+	                pCTcpConnection->SendPathUpdate(points);
 	              }
-	            C11node.Resume();
+//	            C11node.Resume();
+	            pCTcpConnection->Resume();
 	            ERunStatus = RUNNING_ENUM;
 	            ui.btnCreate->setEnabled(false);
 	            SltOnCreateClick(false);
@@ -314,7 +364,8 @@ void ImageDraw::SltOnPlayPauseClick(bool checked)
 	}
 	else
         {
-	    C11node.Pause();
+	    //C11node.Pause();
+	    pCTcpConnection->Pause();
 	    ERunStatus = PAUSED_ENUM;
 	    ui.btnCreate->setEnabled(true);
 	    ui.mapWidget->SetEditable(true);
@@ -349,6 +400,25 @@ void ImageDraw::SltOnPathClick(bool checked)
 	{
 		ui.mapWidget->setMode(E_PATH_MODE);
 	}
+}
+
+void ImageDraw::SltOnAllowClick()
+{
+  int reqType = ui.cmbRequest->currentIndex();
+  switch(reqType)
+  {
+    case 1:
+      pCTcpConnection->SendImageRequest();
+      break;
+    case 2:
+      pCTcpConnection->SendGridRequest();
+      break;
+    case 3:
+      pCTcpConnection->SendPathRequest();
+      break;
+    default:
+      break;
+  }
 }
 
 

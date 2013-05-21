@@ -1,5 +1,183 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <task_description>
+    <task name="Walk">
+        <conditions/>
+        <constraints/>
+        <effects/>
+        <algorithm/>
+    </task>
+    <task name="AlignObjects">
+        <conditions/>
+        <constraints/>
+        <effects/>
+        <algorithm>C66 Align objects A and B</algorithm>
+    </task>
+    <task name="HMIResponce">
+        <conditions/>
+        <constraints/>
+        <effects/>
+        <algorithm>C11 receives data from OCU (TCP/UDP/ROS whatever chosen) and updates the relevant tasks</algorithm>
+    </task>
+    <task name="PostureControl">
+        <conditions/>
+        <constraints/>
+        <effects/>
+        <algorithm>C45 given a pose it executes it 
+Params:
+   stabilization - prevent falling
+</algorithm>
+    </task>
+    <task name="Mission">
+        <conditions/>
+        <constraints/>
+        <effects/>
+        <algorithm/>
+    </task>
+    <task name="QuasiStaticWalk">
+        <conditions/>
+        <constraints/>
+        <effects/>
+        <algorithm/>
+    </task>
+    <task name="MountVehicleInit">
+        <conditions/>
+        <constraints/>
+        <effects/>
+        <algorithm>C45 - need to sync with C46 requirements for mounting on the vehicle</algorithm>
+    </task>
+    <task name="PathPlanning">
+        <conditions/>
+        <constraints/>
+        <effects/>
+        <algorithm>C31 calculates paths on occupancy grids, fails when it's no longer possible to do so</algorithm>
+    </task>
+    <task name="FollowPath">
+        <conditions/>
+        <constraints/>
+        <effects/>
+        <algorithm>ZMP Walk: C42 retrieves a path from the path planner and moves the robot along that path</algorithm>
+    </task>
+    <task name="PathPlanningFocus">
+        <conditions/>
+        <constraints/>
+        <effects/>
+        <algorithm>C31 Path planner should set the planning for target A</algorithm>
+    </task>
+    <task name="WhileZmpGood">
+        <conditions/>
+        <constraints/>
+        <effects/>
+        <algorithm/>
+    </task>
+    <task name="LocalizationTrack">
+        <conditions/>
+        <constraints/>
+        <effects/>
+        <algorithm>C25 tracks robot position in 3D environment, fails when it's no longer possible to do so (not when localization is bad)</algorithm>
+    </task>
+    <task name="ReturnToEntryPosture">
+        <conditions/>
+        <constraints/>
+        <effects/>
+        <algorithm>C45 - return the robot to the start position
+</algorithm>
+    </task>
+    <task name="whileInQSArea">
+        <conditions/>
+        <constraints/>
+        <effects/>
+        <algorithm/>
+    </task>
+    <task name="TestSteering">
+        <conditions/>
+        <constraints/>
+        <effects/>
+        <algorithm>C51 - Robot in vehicle, test steering</algorithm>
+    </task>
+    <task name="IsQSGood">
+        <conditions/>
+        <constraints/>
+        <effects/>
+        <algorithm/>
+    </task>
+    <task name="InitDrive">
+        <conditions/>
+        <constraints/>
+        <effects/>
+        <algorithm>C52 - test that the shift is neutral/forward (preconditions of WayPointsDriving), and that the driving can begin</algorithm>
+    </task>
+    <task name="TurnTo">
+        <conditions/>
+        <constraints/>
+        <effects/>
+        <algorithm>C41 it gets the locations of A from the perception services and turns towards it
+
+parameters:
+target=Doorway
+selfPosition=internal,external</algorithm>
+    </task>
+    <task name="PickUp">
+        <conditions/>
+        <constraints/>
+        <effects/>
+        <algorithm>C66 pick up an object (without walking)</algorithm>
+    </task>
+    <task name="ObstacleDetection">
+        <conditions/>
+        <constraints/>
+        <effects/>
+        <algorithm>C24 detects obstacles in 3D, fails when it's no longer possible to detect objects </algorithm>
+    </task>
+    <task name="LookAt">
+        <conditions/>
+        <constraints/>
+        <effects/>
+        <algorithm>C</algorithm>
+    </task>
+    <task name="PushHMI">
+        <conditions/>
+        <constraints/>
+        <effects/>
+        <algorithm>data=occupancy_grid - C11 it retrieves the occupancy grid and sends it back to the operator
+data=panoramic_image - C11 it retrieves the panoramic image and sends it back to the operator
+data=path - C11 it retrieves the path and sends it back to the operator</algorithm>
+    </task>
+    <task name="UntilZmpGood">
+        <conditions/>
+        <constraints/>
+        <effects/>
+        <algorithm/>
+    </task>
+    <task name="whileSolution">
+        <conditions/>
+        <constraints/>
+        <effects/>
+        <algorithm>31: Task-Condition of PathPlanner, that return  when no path planned</algorithm>
+    </task>
+    <task name="QuaziStatyWalk">
+        <conditions/>
+        <constraints/>
+        <effects/>
+        <algorithm/>
+    </task>
+    <task name="ReturnToExitPosture">
+        <conditions/>
+        <constraints/>
+        <effects/>
+        <algorithm>C51 - return the robot to initial position so it can exit</algorithm>
+    </task>
+    <task name="temp">
+        <conditions/>
+        <constraints/>
+        <effects/>
+        <algorithm/>
+    </task>
+    <task name="OperatorCheckPoint">
+        <conditions/>
+        <constraints/>
+        <effects/>
+        <algorithm/>
+    </task>
     <task name="DismountVechicleInit">
         <conditions/>
         <constraints/>
@@ -24,32 +202,11 @@
         <effects/>
         <algorithm>C66 Attach object A to B</algorithm>
     </task>
-    <task name="AlignObjects">
-        <conditions/>
-        <constraints/>
-        <effects/>
-        <algorithm>C66 Align objects A and B</algorithm>
-    </task>
     <task name="DismountVechicle">
         <conditions/>
         <constraints/>
         <effects/>
         <algorithm>C47</algorithm>
-    </task>
-    <task name="HMIResponce">
-        <conditions/>
-        <constraints/>
-        <effects/>
-        <algorithm>C11 receives data from OCU (TCP/UDP/ROS whatever chosen) and updates the relevant tasks</algorithm>
-    </task>
-    <task name="PostureControl">
-        <conditions/>
-        <constraints/>
-        <effects/>
-        <algorithm>C45 given a pose it executes it 
-Params:
-   stabilization - prevent falling
-</algorithm>
     </task>
     <task name="SearchObjectsFromInside">
         <conditions/>
@@ -63,11 +220,11 @@ Params:
         <effects/>
         <algorithm>C47 scripted motion</algorithm>
     </task>
-    <task name="MountVehicleInit">
+    <task name="whileInZmpArea">
         <conditions/>
         <constraints/>
         <effects/>
-        <algorithm>C45 - need to sync with C46 requirements for mounting on the vehicle</algorithm>
+        <algorithm/>
     </task>
     <task name="WayPointsDriving">
         <conditions/>
@@ -75,11 +232,11 @@ Params:
         <effects/>
         <algorithm>C51 - way point driver, asks path from C31 and drives according to it</algorithm>
     </task>
-    <task name="PathPlanning">
+    <task name="Squat">
         <conditions/>
         <constraints/>
         <effects/>
-        <algorithm>C31 calculates paths on occupancy grids, fails when it's no longer possible to do so</algorithm>
+        <algorithm>C47 scripted motion</algorithm>
     </task>
     <task name="PlaceFeetOnPedals">
         <conditions/>
@@ -87,17 +244,11 @@ Params:
         <effects/>
         <algorithm>C52 - move the foots to be on the pedals</algorithm>
     </task>
-    <task name="Squat">
+    <task name="OverCliff">
         <conditions/>
         <constraints/>
         <effects/>
-        <algorithm>C47 scripted motion</algorithm>
-    </task>
-    <task name="FollowPath">
-        <conditions/>
-        <constraints/>
-        <effects/>
-        <algorithm>ZMP Walk: C42 retrieves a path from the path planner and moves the robot along that path</algorithm>
+        <algorithm/>
     </task>
     <task name="Monitor">
         <conditions/>
@@ -109,17 +260,11 @@ Params:
    target=Stable: 35 returns when the robot is not stable
    target=Timeout: C35 returns if the subtree execution is taking too long</algorithm>
     </task>
-    <task name="PathPlanningFocus">
+    <task name="ToFinish">
         <conditions/>
         <constraints/>
         <effects/>
-        <algorithm>C31 Path planner should set the planning for target A</algorithm>
-    </task>
-    <task name="LocalizationTrack">
-        <conditions/>
-        <constraints/>
-        <effects/>
-        <algorithm>C25 tracks robot position in 3D environment, fails when it's no longer possible to do so (not when localization is bad)</algorithm>
+        <algorithm/>
     </task>
     <task name="StandUp">
         <conditions/>
@@ -127,46 +272,17 @@ Params:
         <effects/>
         <algorithm>C47 scripted motion</algorithm>
     </task>
-    <task name="ReturnToEntryPosture">
-        <conditions/>
-        <constraints/>
-        <effects/>
-        <algorithm>C45 - return the robot to the start position
-</algorithm>
-    </task>
-    <task name="TestSteering">
-        <conditions/>
-        <constraints/>
-        <effects/>
-        <algorithm>C51 - Robot in vehicle, test steering</algorithm>
-    </task>
     <task name="ZmpWalk">
         <conditions/>
         <constraints/>
         <effects/>
         <algorithm/>
     </task>
-    <task name="InitDrive">
-        <conditions/>
-        <constraints/>
-        <effects/>
-        <algorithm>C52 - test that the shift is neutral/forward (preconditions of WayPointsDriving), and that the driving can begin</algorithm>
-    </task>
     <task name="WalkTypeSelector">
         <conditions/>
         <constraints/>
         <effects/>
         <algorithm/>
-    </task>
-    <task name="TurnTo">
-        <conditions/>
-        <constraints/>
-        <effects/>
-        <algorithm>C41 it gets the locations of A from the perception services and turns towards it
-
-parameters:
-target=Doorway
-selfPosition=internal,external</algorithm>
     </task>
     <task name="ReverseAttachment">
         <conditions/>
@@ -195,29 +311,23 @@ Params:
    target - target object
       Gate - selected by SearchObject task.</algorithm>
     </task>
-    <task name="PickUp">
-        <conditions/>
-        <constraints/>
-        <effects/>
-        <algorithm>C66 pick up an object (without walking)</algorithm>
-    </task>
     <task name="whileObjectInHands">
         <conditions/>
         <constraints/>
         <effects/>
         <algorithm>C66 returns if there is no more an object in one of the hands</algorithm>
     </task>
-    <task name="ObstacleDetection">
+    <task name="IsZmpGood">
         <conditions/>
         <constraints/>
         <effects/>
-        <algorithm>C24 detects obstacles in 3D, fails when it's no longer possible to detect objects </algorithm>
+        <algorithm/>
     </task>
-    <task name="LookAt">
+    <task name="UntilZpGood">
         <conditions/>
         <constraints/>
         <effects/>
-        <algorithm>C</algorithm>
+        <algorithm/>
     </task>
     <task name="ZMP">
         <conditions/>
@@ -225,25 +335,35 @@ Params:
         <effects/>
         <algorithm>ZMP Walk: C42 retrieves a path from the path planner and moves the robot along that path</algorithm>
     </task>
+    <task name="UpToCliff">
+        <conditions/>
+        <constraints/>
+        <effects/>
+        <algorithm/>
+    </task>
     <task name="isObjectInHand">
         <conditions/>
         <constraints/>
         <effects/>
         <algorithm>C66 returns if there is an object in one of the hands</algorithm>
     </task>
-    <task name="PushHMI">
+    <task name="UntilChangeWalkType">
         <conditions/>
         <constraints/>
         <effects/>
-        <algorithm>data=occupancy_grid - C11 it retrieves the occupancy grid and sends it back to the operator
-data=panoramic_image - C11 it retrieves the panoramic image and sends it back to the operator
-data=path - C11 it retrieves the path and sends it back to the operator</algorithm>
+        <algorithm/>
     </task>
-    <task name="whileSolution">
+    <task name="SelectZmp">
         <conditions/>
         <constraints/>
         <effects/>
-        <algorithm>31: Task-Condition of PathPlanner, that return  when no path planned</algorithm>
+        <algorithm/>
+    </task>
+    <task name="isInZmpArea">
+        <conditions/>
+        <constraints/>
+        <effects/>
+        <algorithm/>
     </task>
     <task name="OpenSpigot">
         <conditions/>
@@ -251,7 +371,7 @@ data=path - C11 it retrieves the path and sends it back to the operator</algorit
         <effects/>
         <algorithm/>
     </task>
-    <task name="QuaziStatyWalk">
+    <task name="Wait">
         <conditions/>
         <constraints/>
         <effects/>
@@ -265,12 +385,6 @@ data=path - C11 it retrieves the path and sends it back to the operator</algorit
 Parameters:
   target - target object
      Gate - nearest and unvisited gate</algorithm>
-    </task>
-    <task name="ReturnToExitPosture">
-        <conditions/>
-        <constraints/>
-        <effects/>
-        <algorithm>C51 - return the robot to initial position so it can exit</algorithm>
     </task>
     <task name="HMIResponse">
         <conditions/>
@@ -289,11 +403,5 @@ Parameters:
         <constraints/>
         <effects/>
         <algorithm>C52 - finish the driving rutine</algorithm>
-    </task>
-    <task name="OperatorCheckPoint">
-        <conditions/>
-        <constraints/>
-        <effects/>
-        <algorithm/>
     </task>
 </task_description>

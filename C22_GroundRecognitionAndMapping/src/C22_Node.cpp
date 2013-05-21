@@ -10,7 +10,6 @@
 #include "MapMatrix.h"
 #include "C22_GroundRecognitionAndMapping/C22.h"
 #include "C22_GroundRecognitionAndMapping/C22C24.h"
-#include <C21_VisionAndLidar/C21_C22.h>
 #include "sensor_msgs/PointCloud.h"
 #include <pcl/correspondence.h>
 #include <pcl/point_cloud.h>
@@ -43,46 +42,34 @@
 #include <sensor_msgs/Imu.h>
 #include <tf/transform_datatypes.h>
 #include <tf/LinearMath/Matrix3x3.h>
+#include <pcl/filters/passthrough.h>
+ #include <pcl/visualization/cloud_viewer.h>
+#include <pcl/keypoints/uniform_sampling.h>
+#include <pcl/filters/extract_indices.h>
+#include <boost/thread/mutex.hpp>
 /**
  * this class represent the C22_Node,
  * it subscribe to the drc multisense topic and provide the Eagle eye mapping
  **/
-C22_Node::C22_Node():
-	pointCloud_sub(nh_,"/C21/C22",1),
-	pos_sub(nh_,"/ground_truth_odom",1),
-	sync( MySyncPolicy( 10 ),pointCloud_sub, pos_sub){
 
+boost::mutex m;
+C22_Node::C22_Node():
+	pointCloud_sub(nh_,"/C21/C22Lidar",1),
+	pos_sub(nh_,"/ground_truth_odom",1),
+	sync( MySyncPolicy( 10 ),pointCloud_sub, pos_sub),
+	cloudRecord(new pcl::PointCloud<pcl::PointXYZ>)
+	{
 	sync.registerCallback( boost::bind( &C22_Node::callback, this, _1, _2) );
 	_myMatrix=new MapMatrix();
 	_myPlanes=new std::vector<pclPlane*>();
+
 	ROS_INFO("C22 Online\n");
+	C22_pub=nh2_.advertise<C22_GroundRecognitionAndMapping::C22C0_PATH>("C22_pub",1);
 	//test1=nh_.subscribe("/C21/C22",1,&C22_Node::callback2,this);
 	//test2=nh_.subscribe("/ground_truth_odom",1,&C22_Node::callback3,this);
-	service = nh_.advertiseService("C22", &C22_Node::proccess, this); //Specifying what to do when a reconstructed 3d scene is requested
-	service2 = nh_.advertiseService("C22/C24", &C22_Node::proccess2, this); //Specifying what to do when a reconstructed 3d scene is requested
-	/*pcl::PointCloud<pcl::PointXYZ>::Ptr basic_cloud_ptr (new pcl::PointCloud<pcl::PointXYZ>);
-	std::cout << "Genarating example point clouds.\n\n";
-	// We're going to make an ellipse extruded along the z-axis. The color for
-	for (float z(-1.0); z <= 1.0; z += 0.05)
-	{
-	  for (float angle(0.0); angle <= 360.0; angle += 5.0)
-	  {
-	    pcl::PointXYZ basic_point;
-	    basic_point.x = 0.5 * std::cos (pcl::deg2rad(angle));
-	    basic_point.y = std::sin (pcl::deg2rad(angle));
-	    basic_point.z = z;
-	    basic_cloud_ptr->points.push_back(basic_point);
+	service = nh2_.advertiseService("C22", &C22_Node::proccess, this); //Specifying what to do when a reconstructed 3d scene is requested
+	service2 = nh2_.advertiseService("C22/C24", &C22_Node::proccess2, this); //Specifying what to do when a reconstructed 3d scene is requested
 
-	  }
-	}
-	basic_cloud_ptr->width = (int) basic_cloud_ptr->points.size ();
-	basic_cloud_ptr->height = 1;
-	boost::shared_ptr<pcl::visualization::PCLVisualizer> myviewer (new pcl::visualization::PCLVisualizer ("3D Viewer"));
-	viewer=myviewer;
-	viewer->setBackgroundColor (0, 0, 0);
-	viewer->addPointCloud<pcl::PointXYZ> (basic_cloud_ptr, "reconstruction");
-	viewer->addCoordinateSystem ( 1.0 );
-	viewer->initCameraParameters ();*/
 }
 
 /**
@@ -93,7 +80,7 @@ C22_Node::C22_Node():
  */
 bool C22_Node::proccess(C22_GroundRecognitionAndMapping::C22::Request  &req,
 	C22_GroundRecognitionAndMapping::C22::Response &res ){
-	//ROS_INFO("recived request, trying to fetch data\n");
+	//ROS_INFO("received request, trying to fetch data\n");
 	res.drivingPath.row.resize(_myMatrix->data->size());
 	res.drivingPath.robotPos.x=robotPos.x;
 	res.drivingPath.robotPos.y=robotPos.y;
@@ -101,14 +88,16 @@ bool C22_Node::proccess(C22_GroundRecognitionAndMapping::C22::Request  &req,
 	res.drivingPath.robotOri.x=robotOri.x;
 	res.drivingPath.robotOri.y=robotOri.y;
 	res.drivingPath.robotOri.z=robotOri.z;
+	boost::mutex::scoped_lock l(_myMatrix->mutex);
 	res.drivingPath.xOffset=_myMatrix->xOffset;
 	res.drivingPath.yOffset=_myMatrix->yOffset;
-	for(int i=0;i<_myMatrix->data->size();i++){
+	for(unsigned int i=0;i<_myMatrix->data->size();i++){
 		res.drivingPath.row.at(i).column.resize(_myMatrix->data->at(i)->size());
-		for(int j=0;j<_myMatrix->data->at(i)->size();j++){
+		for(unsigned int j=0;j<_myMatrix->data->at(i)->size();j++){
 			res.drivingPath.row.at(i).column.at(j).status=_myMatrix->data->at(i)->at(j)->square_status;
+			res.drivingPath.row.at(i).column.at(j).height=_myMatrix->data->at(i)->at(j)->height;
 			res.drivingPath.row.at(i).column.at(j).planes.resize(_myMatrix->data->at(i)->at(j)->square_Planes->size());
-			for(int k=0;k<_myMatrix->data->at(i)->at(j)->square_Planes->size();k++){
+			for(unsigned int k=0;k<_myMatrix->data->at(i)->at(j)->square_Planes->size();k++){
 				res.drivingPath.row.at(i).column.at(j).planes.at(k).x=_myMatrix->data->at(i)->at(j)->square_Planes->at(k)->coefficient_x;
 				res.drivingPath.row.at(i).column.at(j).planes.at(k).y=_myMatrix->data->at(i)->at(j)->square_Planes->at(k)->coefficient_y;
 				res.drivingPath.row.at(i).column.at(j).planes.at(k).z=_myMatrix->data->at(i)->at(j)->square_Planes->at(k)->coefficient_z;
@@ -128,14 +117,14 @@ bool C22_Node::proccess(C22_GroundRecognitionAndMapping::C22::Request  &req,
  */
 bool C22_Node::proccess2(C22_GroundRecognitionAndMapping::C22C24::Request  &req,
 	C22_GroundRecognitionAndMapping::C22C24::Response &res ){
-	ROS_INFO("recived request, tying to fetch data\n");
+	ROS_INFO("received request, tying to fetch data\n");
 	res.drivingPath.row.resize(_myMatrix->data->size());
-	for(int i=0;i<_myMatrix->data->size();i++){
+	for(unsigned int i=0;i<_myMatrix->data->size();i++){
 		res.drivingPath.row. at(i).column.resize(_myMatrix->data->at(i)->size());
-		for(int j=0;j<_myMatrix->data->at(i)->size();j++){
+		for(unsigned int j=0;j<_myMatrix->data->at(i)->size();j++){
 			res.drivingPath.row.at(i).column.at(j).status=_myMatrix->data->at(i)->at(j)->square_status;
 			res.drivingPath.row.at(i).column.at(j).height=-1000;
-			for(int k=0;k<_myMatrix->data->at(i)->at(j)->square_Planes->size();k++){
+			for(unsigned int k=0;k<_myMatrix->data->at(i)->at(j)->square_Planes->size();k++){
 				res.drivingPath.row.at(i).column.at(j).height=std::max(res.drivingPath.row.at(i).column.at(j).height,_myMatrix->data->at(i)->at(j)->square_Planes->at(k)->representing_point.y);
 			}
 		}
@@ -146,119 +135,107 @@ bool C22_Node::proccess2(C22_GroundRecognitionAndMapping::C22C24::Request  &req,
 /**
  * The call back function executed when a new point cloud has arrived
  */
-void C22_Node::callback(const C21_VisionAndLidar::C21_C22::ConstPtr& pclMsg,const nav_msgs::Odometry::ConstPtr& pos_msg){
-	 pcl::PointCloud<pcl::PointXYZ>cloud;
-	 pcl::fromROSMsg<pcl::PointXYZ>(pclMsg->cloud,cloud);
-	 pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_backup(cloud.makeShared());
-	 /*
-	  * this code segment filters the given cloud and lowers its resolution
-	  */
-	 //std::cout << "PointCloud before filtering has: " << cloud.points.size () << " data points." << std::endl; //*
-	 // Create the filtering object: downsample the dataset using a leaf size of 5cm
-	 pcl::VoxelGrid<pcl::PointXYZ> vg;
-	 pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_filtered(new pcl::PointCloud<pcl::PointXYZ>);
-	 // create the radius outlier removal filter
-	  vg.setInputCloud (cloud_backup);
-	  vg.setLeafSize (0.01f, 0.01f, 0.01f);
-	  vg.filter (*cloud_filtered);
-	 pcl::StatisticalOutlierRemoval<pcl::PointXYZ> sor;
-	  sor.setInputCloud (cloud_filtered);
-	  sor.setMeanK (600);
-	  sor.setStddevMulThresh (1.0);
-	  sor.filter (*cloud_filtered);
+void C22_Node::callback(const sensor_msgs::PointCloud2::ConstPtr& pclMsg,const nav_msgs::Odometry::ConstPtr& pos_msg){
+	pcl::PointCloud<pcl::PointXYZ>cloud;
+		 pcl::fromROSMsg<pcl::PointXYZ>(*pclMsg,cloud);
+		 pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_filtered(cloud.makeShared());
+		 tf::Quaternion q;
+		 tf::quaternionMsgToTF(pos_msg->pose.pose.orientation, q);
+		 tf::Transform trans;
+		 tf::Transform trans2;
+		 tf::Transform trans3;
+		 trans.setOrigin(tf::Vector3(pos_msg->pose.pose.position.x,pos_msg->pose.pose.position.y,pos_msg->pose.pose.position.z));
+		 trans.setRotation(tf::Quaternion(q));
+		 trans3.setOrigin(tf::Vector3(0,0,0));
+		 trans3.setRotation(tf::Quaternion(q).inverse());
+		 Eigen::Matrix4f recordToPlace,recordToRobot,sensorToFrame;
+		 pcl_ros::transformAsMatrix(trans, recordToPlace);
+		 pcl_ros::transformAsMatrix(trans, recordToPlace);
+		 pcl_ros::transformAsMatrix(trans2, recordToRobot);
+		 pcl_ros::transformAsMatrix(trans3,sensorToFrame);
+		 double roll, pitch, yaw;
+		 tf::Matrix3x3(q).getRPY(roll, pitch, yaw);
+		 tf::Quaternion myEuler(pos_msg->pose.pose.orientation.x,pos_msg->pose.pose.orientation.y,pos_msg->pose.pose.orientation.z,pos_msg->pose.pose.orientation.w);
+		 robotPos.x=pos_msg->pose.pose.position.x;
+		 robotPos.y=pos_msg->pose.pose.position.y;
+		 robotPos.z=pos_msg->pose.pose.position.z;
+		 robotOri.x=roll;
+		 robotOri.y=pitch;
+		 robotOri.z=yaw;
+		 // transform pointcloud from sensor frame to fixed robot frame
+		 //
+		 pcl::transformPointCloud(*cloud_filtered, *cloud_filtered, recordToPlace);
 
+		 //transform the point cloud (mirror image)
 
-	 tf::Transform trans;
-	 trans.setOrigin(tf::Vector3(pclMsg->pose.position.x,pclMsg->pose.position.y,pclMsg->pose.position.z));
-	 trans.setRotation(tf::Quaternion(pclMsg->pose.orientation.x,pclMsg->pose.orientation.y,pclMsg->pose.orientation.z,pclMsg->pose.orientation.w));
-	 tf::Transform trans2;
-	 	 trans2.setOrigin(tf::Vector3(pos_msg->pose.pose.position.x,pos_msg->pose.pose.position.y,pos_msg->pose.pose.position.z));
-	 	 trans2.setRotation(tf::Quaternion(pos_msg->pose.pose.orientation.x,pos_msg->pose.pose.orientation.y,pos_msg->pose.pose.orientation.z,pos_msg->pose.pose.orientation.w));
-	 tf::Transform trans3;
-	 	 trans3.setOrigin(tf::Vector3(0.0,-0.002, 0.035 ));
-	 	 trans3.setRotation(tf::Quaternion(-1.57,3.14,1.57));
-	 Eigen::Matrix4f sensorToHead,headTopelvis,pelvisToWorld;
-	 pcl_ros::transformAsMatrix(trans3, sensorToHead);
-     pcl_ros::transformAsMatrix(trans, headTopelvis);
-	 pcl_ros::transformAsMatrix(trans2, pelvisToWorld);
+		// std::cout<<"cloud record before addition:"<<cloudRecord->points.size()<<std::endl;
+		 *cloudRecord+=*cloud_filtered;
 
-	 tf::Quaternion q;
-	 double roll, pitch, yaw;
-	 tf::quaternionMsgToTF(pos_msg->pose.pose.orientation, q);
-	 tf::Matrix3x3(q).getRPY(roll, pitch, yaw);
-	 tf::Quaternion myEuler(pos_msg->pose.pose.orientation.x,pos_msg->pose.pose.orientation.y,pos_msg->pose.pose.orientation.z,pos_msg->pose.pose.orientation.w);
-	 robotPos.x=pos_msg->pose.pose.position.x;
-	 robotPos.y=pos_msg->pose.pose.position.y;
-	 robotPos.z=pos_msg->pose.pose.position.z;
-	 robotOri.x=roll;
-	 robotOri.y=pitch;
-	 robotOri.z=yaw;
-	 // transform pointcloud from sensor frame to fixed robot frame
-	 pcl::transformPointCloud(*cloud_filtered, *cloud_filtered, sensorToHead);
-	 pcl::transformPointCloud(*cloud_filtered, *cloud_filtered, headTopelvis);
-	 pcl::transformPointCloud(*cloud_filtered, *cloud_filtered, pelvisToWorld);
-	/*	viewer->spinOnce (100);
-		if(!viewer->updatePointCloud(cloud_filtered,"reconstruction"))
-			viewer->addPointCloud(cloud_filtered, "reconstruction");*/
-	 _myMatrix->updateMapRelationToWorld(pos_msg->pose.pose.position.x,pos_msg->pose.pose.position.y);
-	 //_myMatrix->clearMatrix();
-	 pcl::PointCloud<pcl::PointXYZ>::Ptr cloudf_backup(cloud_filtered->makeShared());
-	  /*
-	   * while there are indices there are planes we haven't checked
-	   */
+		 //pcl::transformPointCloud(*cloudRecord, *cloud_filtered, recordToRobot);
+		 //pcl::transformPointCloud(*cloud_filtered, *cloud_filtered, sensorToFrame);
+		 if(cloudRecord->points.size()>60000){
+			 /*pcl::PointCloud<pcl::PointXYZ>empty;
+			 pcl::PointCloud<pcl::PointXYZ>::Ptr em(empty.makeShared());
+			 cloudRecord.swap(em);*/
+			  pcl::PointCloud<int> sampled_indices;
+			  pcl::UniformSampling<pcl::PointXYZ> uniform_sampling;
+			  uniform_sampling.setInputCloud (cloudRecord);
+			  uniform_sampling.setRadiusSearch (0.01);
+			  uniform_sampling.compute (sampled_indices);
+			  //pcl::copyPointCloud (*scene, sampled_indices.points, *scene_keypoints);
+			  std::cout << "Scene total points: " << cloudRecord->points.size() ;
+			  pcl::copyPointCloud (*cloudRecord, sampled_indices.points, *cloudRecord);
+			  std::cout<< "; Selected Keypoints: " << cloudRecord->points.size() << std::endl;
+			  pcl::StatisticalOutlierRemoval<pcl::PointXYZ> sor;
+			  sor.setInputCloud (cloudRecord);
+			  sor.setMeanK (10);
+			  sor.setStddevMulThresh (1.0);
+			  sor.filter (*cloudRecord);
+		 }
 
-	  while (1){
+		 _myMatrix->updateMapRelationToWorld(pos_msg->pose.pose.position.x,pos_msg->pose.pose.position.y);
+		  pcl::PassThrough<pcl::PointXYZ> pass;
+		  pass.setInputCloud (cloudRecord);
+		  pass.setFilterFieldName ("y");
+		  pass.setFilterLimits (_myMatrix->yOffset,_myMatrix->yOffset+25);
+		  //pass.setFilterLimitsNegative (true);
+		  pass.filter (*cloudRecord);
+		  pass.setInputCloud (cloudRecord);
+		  pass.setFilterFieldName ("x");
+		  pass.setFilterLimits (_myMatrix->xOffset,_myMatrix->xOffset+25);
+		  //pass.setFilterLimitsNegative (true);
+		  pass.filter (*cloudRecord);
+		  cloud_filtered.reset();
+		_myMatrix->computeMMatrix(cloudRecord,robotPos);
+		cloud_filtered.reset();
 
-		  /*
-		  * this is a definition of a segment, notice that it allows us to define its size
-		  */
-		  // Create the segmentation object for the planar model and set all the parameters
-		  pcl::SACSegmentation<pcl::PointXYZ> seg;
-		  pcl::PointIndices::Ptr inliers (new pcl::PointIndices);
-		  pcl::ModelCoefficients::Ptr coefficients (new pcl::ModelCoefficients);
-		  seg.setOptimizeCoefficients (true);
-		  seg.setModelType (pcl::SACMODEL_PLANE);
-		  seg.setMethodType (pcl::SAC_RANSAC);
-		  seg.setMaxIterations (100);
-		  seg.setDistanceThreshold (0.05);
-			  /*
-			   * once we have defined a segment, we need to create clusters
-			   */
-		  seg.setInputCloud (cloud_filtered);
-		  seg.segment (*inliers, *coefficients);
-		 // std::cout << "size " <<inliers->indices.size()<< std::endl;
-		  if(inliers->indices.size()==0)
-			  break;
-		  pclPlane *plane =new pclPlane();
-		  plane->inliers=inliers;
-		  plane->coefficients=coefficients;
-		  _myPlanes->push_back(plane);
-
-
-		  pcl::ExtractIndices<pcl::PointXYZ> extract;
-		  //now we remove the plane we found from the cloud and search again
-		  extract.setInputCloud (cloud_filtered);
-		  extract.setIndices (inliers);	//problem only in eclipse, works->ignore
-		  extract.setNegative (true);
-		  pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_temp (new pcl::PointCloud<pcl::PointXYZ>);
-		  extract.filter (*cloud_temp);
-		  cloud_filtered.swap(cloud_temp);
-		  if(cloud_filtered->points.size()<10)
-			  break;
-
-	  }
-	  _myMatrix->computeMMatrix(_myPlanes,cloudf_backup);//cloud_filtered);
-
-	  while(_myPlanes->size()!=0){
-		  pclPlane* temp=_myPlanes->back();
-		  _myPlanes->pop_back();
-		  delete temp;
-	  }
-	  delete _myPlanes;
-	  _myPlanes=new std::vector<pclPlane*>();
-	  cloud_backup.reset();
-	  cloudf_backup.reset();
-	  cloud_filtered.reset();
+	  C22_GroundRecognitionAndMapping::C22C0_PATH outMsg;
+	  outMsg.row.resize(_myMatrix->data->size());
+	  outMsg.robotPos.x=robotPos.x;
+	  outMsg.robotPos.y=robotPos.y;
+	  outMsg.robotPos.z=robotPos.z;
+	  outMsg.robotOri.x=robotOri.x;
+	  outMsg.robotOri.y=robotOri.y;
+	  outMsg.robotOri.z=robotOri.z;
+			  	boost::mutex::scoped_lock l(_myMatrix->mutex);
+			  	outMsg.xOffset=_myMatrix->xOffset;
+			  	outMsg.yOffset=_myMatrix->yOffset;
+			  	for(unsigned int i=0;i<_myMatrix->data->size();i++){
+			  		outMsg.row.at(i).column.resize(_myMatrix->data->at(i)->size());
+			  		for(unsigned int j=0;j<_myMatrix->data->at(i)->size();j++){
+			  			outMsg.row.at(i).column.at(j).status=_myMatrix->data->at(i)->at(j)->square_status;
+			  			outMsg.row.at(i).column.at(j).height=_myMatrix->data->at(i)->at(j)->height;
+			  			outMsg.row.at(i).column.at(j).planes.resize(_myMatrix->data->at(i)->at(j)->square_Planes->size());
+			  			for(unsigned int k=0;k<_myMatrix->data->at(i)->at(j)->square_Planes->size();k++){
+			  				outMsg.row.at(i).column.at(j).planes.at(k).x=_myMatrix->data->at(i)->at(j)->square_Planes->at(k)->coefficient_x;
+			  				outMsg.row.at(i).column.at(j).planes.at(k).y=_myMatrix->data->at(i)->at(j)->square_Planes->at(k)->coefficient_y;
+			  				outMsg.row.at(i).column.at(j).planes.at(k).z=_myMatrix->data->at(i)->at(j)->square_Planes->at(k)->coefficient_z;
+			  				outMsg.row.at(i).column.at(j).planes.at(k).d=_myMatrix->data->at(i)->at(j)->square_Planes->at(k)->coefficient_d;
+			  			}
+			  		}
+			  	}
+	//_myMatrix->setAtlasPos(robotPos);
+	  C22_pub.publish(outMsg);
 }
 
 C22_Node *node22;
@@ -266,8 +243,8 @@ int main(int argc, char **argv)
 {
   ros::init(argc, argv, "c22_groundReconition_and_mapping");
   node22=new C22_Node();
-  while(ros::ok()){
-	  ros::spin();
-  }
+  ros::AsyncSpinner spinner(4); // Use 4 threads
+  spinner.start();
+  ros::waitForShutdown();
   return 0;
 }

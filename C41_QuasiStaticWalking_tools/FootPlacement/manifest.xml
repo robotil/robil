@@ -1,0 +1,18 @@
+<package>
+  <description brief="FootPlacement">
+
+     FootPlacement
+
+  </description>
+  <author>Dudi</author>
+  <license>BSD</license>
+  <review status="unreviewed" notes=""/>
+  <url>http://ros.org/wiki/FootPlacement</url>
+  <depend package="roscpp"/>
+  <depend package="geometry_msgs"/>
+  <depend package="tf"/>
+  <depend package="C22_CompactGroundRecognitionAndMapping"/>
+
+</package>
+
+

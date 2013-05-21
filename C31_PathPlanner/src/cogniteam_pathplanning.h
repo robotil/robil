@@ -9,6 +9,7 @@ using namespace std;
 
 int cogniteam_pathplanning_test(int, char**);
 int cogniteam_pathplanning_test_map_inflation(int argc, char** argv) ;
+int cogniteam_pathplanning_test_transits(int argc, char** argv) ;
 
 
 struct TransitWaypoint{
@@ -58,6 +59,7 @@ struct Constraints{
 };
 
 SmoothedPath searchPath(const Map& map, const Waypoint& start, const Waypoint& finish, const Constraints& constraints);
+SmoothedPath searchPath_transitAccurate(const Map& map, const Waypoint& start, const Waypoint& finish, const Constraints& constraints);
 
 
 #endif

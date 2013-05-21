@@ -36,7 +36,7 @@ private:
 
 public:
 	turn_in_place(std::string side):
-		ac(nh_, "QuasiStaticWalking",true){
+		ac(nh_, "QuasiStaticWalk",true){
 
 		ROS_INFO("Waiting.");
 		ROS_INFO("Waiting for maintain_stability action server to start.");

@@ -11,6 +11,7 @@
 #include "math.h"
 #include <pcl/ModelCoefficients.h>
 #include <pcl/point_types.h>
+#include <boost/thread/mutex.hpp>
 using namespace std;
 
 //c24 added includes
@@ -40,6 +41,13 @@ MapMatrix::~MapMatrix() {
 	//delete data;
 }
 
+void MapMatrix::setAtlasPos(geometry_msgs::Point pose){
+	int ax=(pose.x-xOffset)*SIZEOFSQUARE;
+	int ay=(pose.y-yOffset)*SIZEOFSQUARE;
+	//cout<<"Atlas is in "<<"("<<ax<<","<<ay<<")"<<endl;
+
+	data->at(ax)->at(ay)->square_status=ATLAS;
+}
 
 void MapMatrix::printMatrix(){
 	cout<<"About to print matrix"<<endl;
@@ -59,7 +67,10 @@ void MapMatrix::printMatrix(){
 				std::cout << "A  ";
 				else if (data->at(i-1)->at(j)->square_status==BLOCKED)
 					std::cout << "B  ";
-				else std::cout << "-  ";
+				else   if (data->at(i-1)->at(j)->square_status==ATLAS)
+					std::cout << "X  ";
+				else
+					std::cout << "-  ";
 		}
 		std::cout <<endl;
 	}
@@ -87,7 +98,7 @@ bool MapMatrix::inMatrixRange(pcl::PointXYZ p){
 
 
 void MapMatrix::updateMapRelationToWorld(float x,float y){
-
+	boost::mutex::scoped_lock l(mutex);
 	//calculate the map offsets according to the robot's global position and update bound
 	int newOffsetX=xOffset;
 	int newOffsetY=yOffset;
@@ -162,9 +173,53 @@ void MapMatrix::moveMapVerticaly(int times){
  * how similar they should be, and if they are similar (meaning also part of the ground) then "erase"
  * this plane and going to the next plane etc.
  */
-void MapMatrix::computeMMatrix(std::vector<pclPlane*>* mapPlanes,pcl::PointCloud<pcl::PointXYZ>::Ptr map_cloud){ //update way of calculating x and y indices of mapMatrix
+void MapMatrix::computeMMatrix(pcl::PointCloud<pcl::PointXYZ>::Ptr map_cloud,geometry_msgs::Point pose){ //update way of calculating x and y indices of mapMatrix
+	//pcl::ModelCoefficients c;
+	for (unsigned int i=0; i< map_cloud->points.size();i++){
+		pcl::PointXYZ p = map_cloud->points.at(i);
+				if (inMatrixRange(p)){
+					int xIndex,yIndex;
+					xIndex = (p.x -xOffset)*(1/SIZEOFSQUARE);	//added for now instead of previous three lines
+					yIndex = (p.y-yOffset) *(1/SIZEOFSQUARE);	//same as above
+					//std::cout<<"xOffset:"<<xOffset<<" yOffset:"<<yOffset<<"\n";
+					//std::cout<<"indexX:"<<xIndex<<" indexY"<<yIndex<<"\n";
+					boost::mutex::scoped_lock l(mutex);
+					MapSquare* ms=data->at(xIndex)->at(yIndex);
+					ms->addRating();
+					//pcl::ModelCoefficients::Ptr c_(new pcl::ModelCoefficients);
+					//MPlane* tempPlane=new MPlane(pcl::PointXYZ(p.x,p.y,p.z));
+					if(!ms->hasTop(p.z)){
 
-	for (unsigned int i=0; i< mapPlanes->size();i++){ //goes through all planes
+						//std::cout<<"mapp\n";
+						//pcl::ModelCoefficients::Ptr c_(new pcl::ModelCoefficients);
+						MPlane* newPlane=new MPlane(p);
+						newPlane->addRating();
+						newPlane->rating=20;
+						ms->square_Planes->push_back(newPlane);
+						ms->height=std::max(ms->height,newPlane->representing_point.z);
+						if (((p.z > pose.z-1.5) and (p.z < pose.z-0.5))or(p.z > pose.z+1.0))
+							ms->square_status = AVAILABLE;
+						else
+							ms->square_status = BLOCKED;
+
+	/*					if (std::abs(angle)>25 && p.z>0.20){
+							std::cout<<"angle:"<<angle<<std::endl;
+							ms->square_status = BLOCKED;
+						}
+						else{
+							if(ms->square_status!=BLOCKED){
+								ms->square_status = AVAILABLE;
+							}
+						}*/
+					}else{
+						MPlane* temp=ms->getTop(p.z);
+						if(temp)
+							temp->addRating();
+					}
+				}
+	}
+
+	/*for (unsigned int i=0; i< mapPlanes->size();i++){ //goes through all planes
 		pcl::PointIndices::Ptr inliers = mapPlanes->at(i)->inliers;
 		pcl::ModelCoefficients::Ptr coff= mapPlanes->at(i)->coefficients;
 		MPlane* tempPlane=new MPlane(pcl::PointXYZ(0,0,0),coff);
@@ -178,7 +233,7 @@ void MapMatrix::computeMMatrix(std::vector<pclPlane*>* mapPlanes,pcl::PointCloud
 				yIndex = (p.y-yOffset) *(1/SIZEOFSQUARE);	//same as above
 				//std::cout<<"xOffset:"<<xOffset<<" yOffset:"<<yOffset<<"\n";
 				//std::cout<<"indexX:"<<xIndex<<" indexY"<<yIndex<<"\n";
-
+				boost::mutex::scoped_lock l(mutex);
 				MapSquare* ms=data->at(xIndex)->at(yIndex);
 				ms->addRating();
 				if(!ms->hasPlane(tempPlane)){
@@ -196,13 +251,13 @@ void MapMatrix::computeMMatrix(std::vector<pclPlane*>* mapPlanes,pcl::PointCloud
 							ms->square_status = AVAILABLE;
 						}
 					}*/
-				}else{
+	/*			}else{
 					MPlane* temp=ms->getPlane(tempPlane);
 					 temp->addRating();
 				}
 			}
 		}
-	}
+	}*/
 	for(unsigned int i=0; i< data->size();i++){
 		for(unsigned int j=0; j< data->at(i)->size();j++){
 			 data->at(i)->at(j)->setRatable();

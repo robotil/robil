@@ -9,8 +9,10 @@
   <review status="unreviewed" notes=""/>
   <url>http://ros.org/wiki/pelvis_leg_target</url>
   <depend package="roscpp"/>
+  <depend package="C43_LocalBodyCOM"/>
   <depend package="tf"/>
   <depend package="move_pelvis"/>
+  
 
 </package>
 

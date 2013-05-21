@@ -1,0 +1,26 @@
+<package>
+  <description brief="PoseController">
+
+     PoseController
+
+  </description>
+  <author>lab116-1</author>
+  <license>BSD</license>
+  <review status="unreviewed" notes=""/>
+  <url>http://ros.org/wiki/PoseController</url>
+  <depend package="C0_RobilTask"/>
+  <depend package="std_msgs"/>
+  <depend package="osrf_msgs"/>
+  <depend package="control_toolbox"/>
+  <depend package="pr2_controllers_msgs"/>
+  <depend package="sensor_msgs"/>
+  <depend package="atlas_msgs"/>
+  <depend package="control_msgs"/>
+
+  <export>
+    <cpp cflags="-I${prefix}/include"  lflags="-L${prefix}/lib -Wl,-rpath,${prefix}/lib -lhrl_kinematics"/>
+  </export>
+
+</package>
+
+
