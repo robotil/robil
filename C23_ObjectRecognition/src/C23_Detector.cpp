@@ -193,7 +193,7 @@ bool C23_Detector::detectValve(Mat srcImg, const sensor_msgs::PointCloud2::Const
     RNG rng(12345);
      vector<Vec3f> circles;
    Mat src_gray;
-    cvtColor(srcImg,src_gray,BGR2GRAY);
+    cvtColor(srcImg,src_gray,CV_BGR2GRAY);
   /// Apply the Hough Transform to find the circles
     HoughCircles( src_gray, circles, CV_HOUGH_GRADIENT, 1, src_gray.rows/8, 200, 100, 0, 0 );
     cout << "Found: " << circles.size() << endl;
