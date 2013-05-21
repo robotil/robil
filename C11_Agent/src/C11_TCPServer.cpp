@@ -149,6 +149,21 @@ void CTcpServer::SltOnDataReceived()
               IsPathComing = true;
               DataSizeToContinue = dataSize;
             }
+          else if(16 == msgId)
+            {
+              emit SigImageRequest();
+              std::cout<<"TCP: ImageRequest received!\n";
+            }
+          else if(17 == msgId)
+            {
+              emit SigGridRequest();
+              std::cout<<"TCP: GridRequest received!\n";
+            }
+          else if(18 == msgId)
+            {
+              emit SigPathRequest();
+              std::cout<<"TCP: PathRequest received!\n";
+            }
         }
     }
 }
