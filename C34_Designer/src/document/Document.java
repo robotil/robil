@@ -40,6 +40,7 @@ import terminal.communication.StopStreamMessage.PlanFinishReason;
 import windows.PlanEditor;
 import windows.PlanExecutionHistoryDialog;
 import windows.designer.BTDesigner;
+import windows.designer.BTDesigner.DesignerTab;
 
 import document.actions.Dialogs;
 import document.description.TaskDescription;
@@ -1136,7 +1137,7 @@ public class Document extends JPanel {
 		_documentChanged = false;
 		updateTabTitle();
 		updateRootElement();
-		updateOverrides();
+		updateOverrides();		
 		repaint();
 	}
 	
@@ -1157,6 +1158,18 @@ public class Document extends JPanel {
 		repaint();
 	}
 	
+// 	@Deprecated
+//	private void updateTabId() {
+//		DesignerTab tab = this.mainWindow.getTabByDocument(this);
+//		GElement rootElement;
+//		if (this.getRoot().size() > 0 && tab != null) {
+//			rootElement = this.getRoot().get(0);
+//			tab.setID(rootElement.id.toString());
+//			Log.d("Tab id = " + rootElement.id.toString());
+//		}
+//			
+//	}
+	
 	private void updateOverrides() {
 		for (GElement element : elements)
 			if (element.isTaskType() && _lookupTable.containsTask(element.getAsTask().getNameWithoutParameters()))
@@ -1165,6 +1178,9 @@ public class Document extends JPanel {
 	
 	PlanExecution _currentPlanExecution;
 	public void onRun() {
+		this.mainWindow.getTabByDocument(this).updateId();
+		Log.d("Tab id = " + this.mainWindow.getTabByDocument(this).getID());
+		
 		for (GElement element : elements)
 			if (element.isTaskType())
 				element.getAsTask().onPlanRun();

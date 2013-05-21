@@ -1,4 +1,4 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <lookup>
-    <task file-name="/home/ariy/robil/C34_Designer/plans/comp2.xml" name="RobotGoesSomewhere" planner="file" type="local"/>
+    <task file-name="./plans/test_override.xml" name="Test1" planner="file" type="local"/>
 </lookup>
