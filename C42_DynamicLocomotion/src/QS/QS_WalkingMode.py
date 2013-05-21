@@ -46,8 +46,7 @@ class QS_WalkingMode(WalkingMode):
         self.asi_state = rospy.Subscriber('/atlas/atlas_sim_interface_state', AtlasSimInterfaceState, self.asi_state_cb)
         self._atlas_imu_sub = rospy.Subscriber('/atlas/imu', Imu, self._get_imu)
         
-        # Subscribe to some other topic / service
-        #self._path_sub = rospy.Subscriber('/path',C31_Waypoints,self._path_cb)
+        self._RequestFootPlacements()
         rospy.sleep(0.3)
     
         k_effort = [0] * 28
@@ -86,28 +85,36 @@ class QS_WalkingMode(WalkingMode):
         elif ("Walking" == self._WalkingModeStateMachine.GetCurrentState().Name):
             if (QS_PathPlannerEnum.Active == self._LPP.State):
                 command = self.GetCommand()
+            elif(QS_PathPlannerEnum.Waiting == self._LPP.State):
+                self._RequestFootPlacements()
         elif ("Done" == self._WalkingModeStateMachine.GetCurrentState().Name):
-            self._bDone
+            self._bDone = True
         else:
             raise Exception("QS_WalkingModeStateMachine::Bad State Name")
     
         return command
     
+    def _RequestFootPlacements(self):
+        # Perform a service request from FP
+        # Handle preemption?
+        # if received a "End of mission" sort of message from FP:
+        #    perform transition self._WalkingModeStateMachine.PerformTransition("Finished")
+        pass
+    
 ###################################################################################
 #--------------------------- CallBacks --------------------------------------------
 ###################################################################################
 
-    def _path_cb(self,path):
-        rospy.loginfo('got path %s',path)
-        p = []
-        for wp in path.points:
-            p.append(Waypoint(wp.x,wp.y))
-        self.SetPath(p)
-
     # /atlas/atlas_sim_interface_state callback. Before publishing a walk command, we need
     # the current robot position   
     def asi_state_cb(self, state):
-        command = self.HandleStateMsg(state)
+        command = 0
+        # When the robot status_flags are 1 (SWAYING), you can publish the next step command.
+        if (state.step_feedback.status_flags == 1 and not self._bIsSwaying):
+            command = self.HandleStateMsg(state)
+            self.is_swaying = True
+        elif (state.step_feedback.status_flags == 2):
+            self.is_swaying = False
         if (0 !=command):
             self.asi_command.publish(command)
 
