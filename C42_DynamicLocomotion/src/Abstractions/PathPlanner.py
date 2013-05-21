@@ -27,3 +27,5 @@ class PathPlanner(object):
     def IsActive(self):
         return self._PathReady
 
+    def UpdatePosition(self,CoordinateX,CoordinateY,CoordinateZ = 0.0):
+        pass

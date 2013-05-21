@@ -4,7 +4,6 @@ import roslib;roslib.load_manifest('C42_DynamicLocomotion')
 import rospy
 from Abstractions.Walker import *
 from WalkingModeChooser import *
-from C31_PathPlanner.msg import C31_Waypoints
 from RobilTaskPy import *
 from LocalPathPlanner import *
 import actionlib

@@ -3,6 +3,7 @@
 from Abstractions.WalkingModeChooserInterface import *
 from BDI.WalkingModeBDI import *
 from QS.QS_WalkingMode import *
+from LocalPathPlanner import *
 
 ###################################################################################
 # File created by David Dovrat, 2013.

@@ -47,7 +47,7 @@ class QS_WalkingMode(WalkingMode):
         self._atlas_imu_sub = rospy.Subscriber('/atlas/imu', Imu, self._get_imu)
         
         # Subscribe to some other topic / service
-        self._path_sub = rospy.Subscriber('/path',C31_Waypoints,self._path_cb)
+        #self._path_sub = rospy.Subscriber('/path',C31_Waypoints,self._path_cb)
         rospy.sleep(0.3)
     
         k_effort = [0] * 28

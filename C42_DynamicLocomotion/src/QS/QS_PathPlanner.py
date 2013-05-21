@@ -41,6 +41,6 @@ class QS_PathPlanner(PathPlanner):
             self.State = QS_PathPlannerEnum.Waiting
 
     def Stop(self):
-        PathPlanner.Stop(self,waypointList)
+        PathPlanner.Stop(self)
         self.State = QS_PathPlannerEnum.Empty
 

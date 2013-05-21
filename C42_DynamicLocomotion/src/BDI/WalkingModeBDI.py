@@ -16,13 +16,14 @@ from Abstractions.StepQueue import *
 
 from BDI_StateMachine import *
 from BDI_Strategies import *
-from LocalPathPlanner import FootPlacement
+from LocalPathPlanner import *
 
 from atlas_msgs.msg import AtlasCommand, AtlasSimInterfaceCommand, AtlasSimInterfaceState, AtlasState, AtlasBehaviorStepData
 from sensor_msgs.msg import Imu
 from std_msgs.msg import String
 from geometry_msgs.msg import Pose
 from nav_msgs.msg import Odometry
+from C31_PathPlanner.msg import C31_Waypoints
 
 from tf_conversions import posemath
 from tf.transformations import quaternion_from_euler, euler_from_quaternion
