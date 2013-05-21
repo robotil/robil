@@ -36,7 +36,7 @@ public class BTDesigner extends JFrame {
 
 	private static final long serialVersionUID = 5495864869110385684L;
 
-	public final static String VERSION = "0.2.6.5";
+	public final static String VERSION = "0.2.6.6";
 	
 	public ArrayList<DesignerTab> tabs = new ArrayList<DesignerTab>();
 	private Menubar _menu;
