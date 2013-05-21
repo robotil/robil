@@ -1,33 +1,31 @@
 #!/usr/bin/env python
-import roslib
-roslib.load_manifest('C42_DynamicLocomotion')
-from Abstractions.WalkingMode import *
+
 import time
-from atlas_msgs.msg import AtlasCommand, AtlasSimInterfaceCommand, AtlasSimInterfaceState, AtlasState, AtlasBehaviorStepData
-from sensor_msgs.msg import Imu
-import PyKDL
-from tf_conversions import posemath
-from atlas_msgs.msg import AtlasSimInterfaceCommand, AtlasSimInterfaceState, AtlasState
-from std_msgs.msg import String
-from tf.transformations import quaternion_from_euler, euler_from_quaternion
-
-from sensor_msgs.msg import Imu
-
-from BDI_Odometer import *
-from BDI_StateMachine import *
-
 import math
 import rospy
 import sys
 import copy
+import roslib
+import PyKDL
 
-from nav_msgs.msg import Odometry
+roslib.load_manifest('C42_DynamicLocomotion')
 
-from geometry_msgs.msg import Pose
-from BDI_Strategies import *
+from Abstractions.WalkingMode import *
+from Abstractions.Odometer import *
 from Abstractions.StepQueue import *
+
+from BDI_StateMachine import *
+from BDI_Strategies import *
 from LocalPathPlanner import FootPlacement
 
+from atlas_msgs.msg import AtlasCommand, AtlasSimInterfaceCommand, AtlasSimInterfaceState, AtlasState, AtlasBehaviorStepData
+from sensor_msgs.msg import Imu
+from std_msgs.msg import String
+from geometry_msgs.msg import Pose
+from nav_msgs.msg import Odometry
+
+from tf_conversions import posemath
+from tf.transformations import quaternion_from_euler, euler_from_quaternion
 
 ###################################################################################
 # File created by David Dovrat, 2013.
@@ -41,7 +39,7 @@ class WalkingModeBDI(WalkingMode):
         self.step_index_for_reset = 0
         # Initialize atlas mode and atlas_sim_interface_command publishers        
         self.asi_command = rospy.Publisher('/atlas/atlas_sim_interface_command', AtlasSimInterfaceCommand, None, False, True, None)
-        self._Odometer = BDI_Odometer()
+        self._Odometer = Odometer()
         ##############################
         #self._StrategyForward = BDI_StrategyForward(self._Odometer)
         self._stepDataInit = BDI_Strategy(self._Odometer)
