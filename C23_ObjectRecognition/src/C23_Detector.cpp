@@ -188,7 +188,13 @@ void C23_Detector::callback(const sensor_msgs::ImageConstPtr& msg,const sensor_m
 bool C23_Detector::detectValve(Mat srcImg, const sensor_msgs::PointCloud2::ConstPtr &cloud) {
     ROS_INFO("Detecting a valve..");
     RNG rng(12345);
-    
+     vector<Vec3f> circles;
+   Mat src_gray;
+    cvtColor(srcImg,src_gray,BGR2GRAY);
+  /// Apply the Hough Transform to find the circles
+    HoughCircles( src_gray, circles, CV_HOUGH_GRADIENT, 1, src_gray.rows/8, 200, 100, 0, 0 );
+    cout << "Found: " << circles.size() << endl;
+    return false;
     Mat imgHSV, imgThreshed;
     cvtColor(srcImg,imgHSV,CV_BGR2HSV);
     inRange(imgHSV,Scalar(60,30,30),Scalar(80,255,255),imgThreshed);
@@ -297,7 +303,7 @@ bool C23_Detector::detectFirehose(Mat srcImg, const sensor_msgs::PointCloud2::Co
         cv::drawContours(srcImg, contours, idx, colors[idx % 3]);
     }
     
-    //  drawContours(srcImg,contours,-1,CV_RGB(255,0,0),2);
+    // drawContours(srcImg,contours,-1,CV_RGB(255,0,0),2);
     // imshow("TESSTING",srcImg);
     waitKey(0);
     vector<RotatedRect> minEllipse( contours.size() );
