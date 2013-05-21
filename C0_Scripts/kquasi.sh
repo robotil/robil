@@ -2,7 +2,7 @@
 #This script should kill the  modules for test C31
 
 CURR_WD=$PWD
-PKILLF=$CURR_WD'/.killC31test.txt'
+PKILLF=$CURR_WD'/.killQuasiAvizarim.txt'
 #cat $PKILLF >> $PKILLP
 if test -e $PKILLF; then
 

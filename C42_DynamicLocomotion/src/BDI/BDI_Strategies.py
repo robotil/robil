@@ -31,8 +31,6 @@ class BDI_Strategy(object):
     def __init__(self,odometer):
 
         self._Odometer = odometer
-
-        self._k_effort = [0] * 28
         self._StepLength = 0.2
         self._StepWidth = 0.15
         self._alpha = 0.0
@@ -49,7 +47,7 @@ class BDI_Strategy(object):
         self._counter += 1
         command = AtlasSimInterfaceCommand()
         
-        stepData = command.walk_params.step_data[0]
+        stepData = command.walk_params.step_queue[0]
         stepData.step_index = index
         stepData.foot_index = index%2
 
@@ -112,6 +110,7 @@ class BDI_StrategyForward(BDI_Strategy):
         self._ErrorCorrection = self._StepWidth
         self._ErrorCorrected = 0.0
         self._MinimalCorrection = 0.02
+        self._Error = 0.0
 
     def GetStepData(self,index):
         stepData = BDI_Strategy.GetStepData(self,index)

@@ -111,7 +111,7 @@ void C11_Node::viewImage(const sensor_msgs::ImageConstPtr& msg)
 	if(msg->width > 1 && msg->height > 1)
 	{
 		QImage myImage(msg->data.data(), msg->width, msg->height, msg->step, QImage::Format_RGB888);
-		pIC11_Node_Subscriber->OnImgReceived(myImage);
+//		pIC11_Node_Subscriber->OnImgReceived(myImage);
 	}
 
 }
@@ -150,7 +150,7 @@ bool C11_Node::push_img_proccess(C10_Common::push_img::Request  &req,
 		imgName = out.str();
 		imgName.append(".jpg");
 		cv::imwrite(imgName,pan->image);
-		pIC11_Node_Subscriber->OnImgReceived(imgName);
+//		pIC11_Node_Subscriber->OnImgReceived(imgName);
 		img_counter++;
 		res.ACK.mes = 1;
 		return true;
@@ -183,7 +183,7 @@ bool C11_Node::push_occupancy_grid_proccess(C10_Common::push_occupancy_grid::Req
 	StructPoint robotPos;
 	robotPos.x = req.OGD.robotPos.x;
 	robotPos.y = req.OGD.robotPos.y;
-	pIC11_Node_Subscriber->OnOccupancyGridReceived(grid,robotPos,req.OGD.xOffset,req.OGD.yOffset,req.OGD.robotOri.z);
+//	pIC11_Node_Subscriber->OnOccupancyGridReceived(grid,robotPos,req.OGD.xOffset,req.OGD.yOffset,req.OGD.robotOri.z);
 
 	return true;
 }
@@ -200,7 +200,7 @@ bool C11_Node::push_path_proccess(C10_Common::push_path::Request  &req, C10_Comm
 		point.y = req.PTH.points[i].y;
 		points.push_back(point);
 	}
-	pIC11_Node_Subscriber->OnPathReceived(points);
+//	pIC11_Node_Subscriber->OnPathReceived(points);
 	res.ACK.mes = 1;
 	return true;
 }
@@ -210,7 +210,7 @@ bool C11_Node::hmi_response_proccess(C10_Common::HMIResponse::Request  &req, C10
         ROS_INFO("C11_OperatorControl: HMIResponse received!\n");
         WaitingForResponse = true;
 
-        pIC11_Node_Subscriber->OnHMIResponseReceived();
+//        pIC11_Node_Subscriber->OnHMIResponseReceived();
         while(WaitingForResponse)
         {
             sleep(1);
@@ -238,7 +238,7 @@ bool C11_Node::execution_status_change(C10_Common::execution_status_change::Requ
 {
   ROS_INFO("C11_OperatorControl: execution status changed!\n");
   std::cout<<"The new status is: " << req.status.new_status << "\n";
-  pIC11_Node_Subscriber->OnExecutionStatusUpdate(req.status.new_status);
+//  pIC11_Node_Subscriber->OnExecutionStatusUpdate(req.status.new_status);
 }
 
 void C11_Node::LoadMission(int index)
@@ -249,34 +249,34 @@ void C11_Node::LoadMission(int index)
 	{
 		if(ms.response.MES.mes != 1)
 		{
-		    pIC11_Node_Subscriber->OnExecutionStatusUpdate(2);
+//		    pIC11_Node_Subscriber->OnExecutionStatusUpdate(2);
 		}
 		else
 		  {
-		    pIC11_Node_Subscriber->OnExecutionStatusUpdate(0);
+//		    pIC11_Node_Subscriber->OnExecutionStatusUpdate(0);
 		  }
 	}
 	else
 	{
 		ROS_ERROR("Failed to call service C11_Agent::mission_selection");
-		pIC11_Node_Subscriber->OnExecutionStatusUpdate(2);
+//		pIC11_Node_Subscriber->OnExecutionStatusUpdate(2);
 	}
 }
 
 void C11_Node::Resume()
 {
-        if(WaitingForResponse)
-          {
-            ROS_INFO("C11_OperatorControl: Resume!\n");
-            WaitingForResponse = false;
-            return;
-          }
-        C10_Common::resume_mission rs;
-        if (!ResumeMissionClient.call(rs))
-        {
-            ROS_ERROR("Failed to call service C11_Agent::resume_mission");
-            pIC11_Node_Subscriber->OnExecutionStatusUpdate(2);
-        }
+//        if(WaitingForResponse)
+//          {
+//            ROS_INFO("C11_OperatorControl: Resume!\n");
+//            WaitingForResponse = false;
+//            return;
+//          }
+//        C10_Common::resume_mission rs;
+//        if (!ResumeMissionClient.call(rs))
+//        {
+//            ROS_ERROR("Failed to call service C11_Agent::resume_mission");
+//            pIC11_Node_Subscriber->OnExecutionStatusUpdate(2);
+//        }
 }
 
 void C11_Node::Pause()
@@ -285,7 +285,7 @@ void C11_Node::Pause()
         if(!PauseMissionClient.call(ps))
         {
             ROS_ERROR("Failed to call service C11_Agent::pause_mission");
-            pIC11_Node_Subscriber->OnExecutionStatusUpdate(0);
+//            pIC11_Node_Subscriber->OnExecutionStatusUpdate(0);
         }
 }
 

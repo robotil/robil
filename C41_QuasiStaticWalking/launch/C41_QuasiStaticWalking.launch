@@ -2,6 +2,7 @@
 	<include file="$(find move_pelvis)/launch/move_pelvis.launch" />
 	<!--<node name="bend_knees" pkg="position0" type="bend_knees" />-->	
 	<node name="pelvis_leg_target" pkg="pelvis_leg_target" type="pelvis_leg_target" cwd="node" output="screen" />
+	<node name="FootPlacement" pkg="FootPlacement" type="FootPlacement" cwd="node" output="screen" />
 	<!--<node name="test_stability" pkg="hrl_kinematics" type="test_stability" cwd="node"/>-->
 	
 	<node name="QuasiStaticWalking" pkg="C41_QuasiStaticWalking" type="QuasiStaticWalking" cwd="node" output="screen" />

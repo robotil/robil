@@ -18,6 +18,7 @@ class Fell(object):
         self.sub = rospy.Subscriber('/atlas/imu', Imu,self.IMU_callback)
         self._feedback = C25_AtlasFell.msg.FallenFeedback()
         self._result   = C25_AtlasFell.msg.FallenResult()
+        rospy.loginfo('C25_AtlasFell service Online!')
         self._action_name = name
         self._as = actionlib.SimpleActionServer(self._action_name, C25_AtlasFell.msg.FallenAction, execute_cb=self.FellCallback, auto_start=False)
         self._as.start()
@@ -47,14 +48,17 @@ class Fell(object):
 
             if (self.RPY[1]>80 or self.RPY[1]<-80 ):
                 Status = True
-                for i in range(1,1000):
-                  self.pub.publish(Status)
-                break
+                #for i in range(1,1000):
+                  #self.pub.publish(Status)
+                #break
+            else:
+                Status = False
             self.pub.publish(Status)
+            rospy.sleep(0.1)
             
             
             #----------end of while-----------------#
-        rospy.loginfo('Atlas Fell down!!!')
+        rospy.loginfo('Exiting C25_AtlasFell module!!!')
         self._as.set_succeeded(self._result)
         #----------------hand brake released --------------------------#
 
