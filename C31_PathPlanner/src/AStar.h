@@ -21,7 +21,7 @@
 class AStar{
 public:
 
-	typedef const QTNode* QT;
+	typedef const BWQTNode* QT;
 	typedef vector<QT> Path;
 
 private:
@@ -48,6 +48,47 @@ private:
 	Path reconstruct_path(map<QT,QT>& came_from, QT current_node);
 };
 
+
+static bool operator<(const QTNode::XY& __x, const QTNode::XY& __y){return __x.x!=__y.x?__x.x < __y.x:__x.y<__y.y;};
+static bool operator==(const QTNode::XY& __x, const QTNode::XY& __y){ return __x.x==__y.x && __x.y==__y.y; }
+
+class BStar{
+public:
+
+	typedef const QTNode* QT;
+	typedef QTNode::XY Point;
+	typedef vector<Point> Path;
+
+private:
+
+	double heuristic_cost_estimate(const Point& start, const Point& goal)const;
+	double cost_estimate(const Point& current, const Point& neighbor)const;
+
+	struct lowest_first {
+		bool operator()(const BStar::Point& __x, const BStar::Point& __y) const {
+			return __x.x!=__y.x?__x.x < __y.x:__x.y<__y.y;
+		}
+	};
+
+	class QTComparison{
+		BStar& eng;
+	public:
+		QTComparison(BStar& eng):eng(eng){}
+		bool operator() (const Point & a, const Point & b) const{
+			return eng.f_score[a] > eng.f_score[b];
+		}
+	};
+
+	map<Point,double> f_score;
+
+public:
+	Path search(size_t sx, size_t sy, size_t gx, size_t gy, QT qtRoot);
+
+private:
+	Path reconstruct_path(map<Point,Point>& came_from, const Point& current_node);
+
+	const AltMap* _map;
+};
 
 
 

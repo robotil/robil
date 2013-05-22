@@ -107,14 +107,14 @@ public:\
 	ME(const Supper& map):Supper(map){ }
 
 
-class Map:public MapT<char>{
+class ObsMap:public MapT<char>{
 //	typedef MapT<char> Supper;
 //public:
 //	Map(int w, int h):Supper(w,h){	}
 //	Map(int w, int h, char* cmap):Supper(w, h, cmap){ }
 //	Map(const Map& map):Supper(map){ }
 //	Map(const Supper& map):Supper(map){ }
-	EXTENDS(char, Map)
+	EXTENDS(char, ObsMap)
 
 	enum STATUS{ST_AVAILABLE=0,ST_BLOCKED,ST_UNCHARTED};
 
@@ -136,7 +136,7 @@ private:
 	double approximate(const long cx, const long cy, long& x, long& y, char ctype)const;
 
 };
-ostream& operator<<(ostream& out, const Map& m);
+ostream& operator<<(ostream& out, const ObsMap& m);
 
 class AltMap:public MapT<double>{
 //	typedef MapT<double> Supper;
@@ -157,19 +157,19 @@ class MapEditor{
 public:
 
 	MapEditor(){};
-	Map coloring(const Map& source, size_t x, size_t y, char av, char bl)const;
-	Map replace(const Map& source, const char from, const char to)const;
+	ObsMap coloring(const ObsMap& source, size_t x, size_t y, char av, char bl)const;
+	ObsMap replace(const ObsMap& source, const char from, const char to)const;
 
 private:
-	void coloring(const Map& source, size_t x, size_t y, char c, char av, char bl, Map& visited, Map& res)const;
+	void coloring(const ObsMap& source, size_t x, size_t y, char c, char av, char bl, ObsMap& visited, ObsMap& res)const;
 
 };
 
 class World{
 public:
-	Map grid;
+	ObsMap grid;
 	AltMap altitudes;
-	World(const Map& m, const AltMap& a):grid(m), altitudes(a){}
+	World(const ObsMap& m, const AltMap& a):grid(m), altitudes(a){}
 	World(const World& w):grid(w.grid), altitudes(w.altitudes){}
 	const World& operator=(const World& w){grid=(w.grid); altitudes=(w.altitudes); return *this;}
 };
