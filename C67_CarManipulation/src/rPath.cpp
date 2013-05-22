@@ -45,20 +45,24 @@ bool callBackRun = false;
 
 void SetAtlasState(const atlas_msgs::AtlasState::ConstPtr &_as)
 {
-	static ros::Time startTime = ros::Time::now();
-	t0 = startTime;
-
-	// lock to copy incoming AtlasState
-	{
-		boost::mutex::scoped_lock lock(mutex);
-		as = *_as;
-	}
 	
-	ac.header.stamp = as.header.stamp;
 
 	if (callBackRun == false)
 	{
 		callBackRun = true;
+
+		static ros::Time startTime = ros::Time::now();
+		t0 = startTime;
+
+		// lock to copy incoming AtlasState
+		{
+			boost::mutex::scoped_lock lock(mutex);
+			as = *_as;
+		}
+
+		ac.header.stamp = as.header.stamp;
+
+
 		// set cout presentation	
 		std::cout.precision(6);
 		std::cout.setf (std::ios::fixed , std::ios::floatfield ); 
@@ -154,7 +158,21 @@ int main(int argc, char** argv)
 		if (callBackRun)
 		{
 			// check if no arguments			
-			if (!use_arg) break;			
+			if (!use_arg) break;
+
+			for (unsigned int i = 0; i < n; i++)
+			{
+				ac.kp_position[i] = as.kp_position[i];
+				ac.ki_position[i] = as.ki_position[i];
+				ac.kd_position[i] = as.kd_position[i];
+				ac.i_effort_min[i] = as.i_effort_min[i];
+				ac.i_effort_max[i] = as.i_effort_max[i];
+
+				ac.velocity[i] = 0;
+				ac.effort[i] = 0;
+				ac.kp_velocity[i] = 0;
+
+			}
 						
 			IkSolution IkCurrent = IkSolution(as.position[q4r], as.position[q5r], as.position[q6r], as.position[q7r],
 					as.position[q8r], as.position[q9r]);
@@ -191,16 +209,19 @@ int main(int argc, char** argv)
 			ac.k_effort[q8r]  = 255;
 			ac.k_effort[q9r]  = 255;
 			
-			for (int i=0; i<N; i++)
+			// assign current joint angles
+			for (unsigned int j=0; j<numJoints; j++)
+			{
+				ac.position[j] = as.position[j];
+				ac.k_effort[j]  = 255;
+				//std::cout << state[j] << " ";
+			}
+
+			for (int i=0; i<pointsNum; i++)
 			{
 				// ros::spinOnce();
-				// assign current joint angles 
-				for (unsigned int j=0; j<numJoints; j++)
-				{
-					ac.position[j] = as.position[j];
-					//std::cout << state[j] << " ";
-				}
 				
+
 				ac.position[q4r] = points.pArray[i]._q4;
 				ac.position[q5r] = points.pArray[i]._q5;
 				ac.position[q6r] = points.pArray[i]._q6;

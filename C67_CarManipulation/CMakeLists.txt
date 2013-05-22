@@ -43,9 +43,15 @@ include_directories (src)
 
 #common commands for building c++ executables and libraries
 #rosbuild_add_library(${PROJECT_NAME} src/example.cpp)
-rosbuild_add_library(Kinematics src/FK.cpp src/IK.cpp src/Path.cpp)
+rosbuild_add_library(Kinematics src/FK.cpp src/IK.cpp src/Path.cpp src/Trace.cpp)
 #target_link_libraries(${PROJECT_NAME} another_library)
 rosbuild_add_boost_directories()
+
+rosbuild_add_executable(TraceTest src/TraceTest.cpp)
+target_link_libraries(TraceTest Kinematics)
+
+rosbuild_add_executable(rTrace src/rTrace.cpp)
+target_link_libraries(rTrace Kinematics)
 
 rosbuild_add_executable(rPoint src/rPoint.cpp)
 target_link_libraries(rPoint Kinematics)
