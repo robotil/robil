@@ -33,6 +33,9 @@ void C11Main::SetTcp(CTcpServer* ptcpServer)
   connect(pCTcpServer,SIGNAL(SigResume()),this,SLOT(SltResume()));
   connect(pCTcpServer,SIGNAL(SigLoadMission(int)),this,SLOT(SltLoadMission(int)));
   connect(pCTcpServer,SIGNAL(SigPathUpdated(std::vector<StructPoint>)),this,SLOT(SltPathUpdated(std::vector<StructPoint>)));
+  connect(pCTcpServer,SIGNAL(SigImageRequest()),this,SLOT(SltImageRequest()));
+  connect(pCTcpServer,SIGNAL(SigGridRequest()),this,SLOT(SltGridRequest()));
+  connect(pCTcpServer,SIGNAL(SigPathRequest()),this,SLOT(SltPathRequest()));
 }
 
 void C11Main::PushImage(QImage img)
@@ -111,4 +114,19 @@ void C11Main::SltLoadMission(int MissionId)
 void C11Main::SltPathUpdated(std::vector<StructPoint> points)
 {
   pC11Node->PathUpdated(points);
+}
+
+void C11Main::SltImageRequest()
+{
+  pC11Node->ImageRequest();
+}
+
+void C11Main::SltGridRequest()
+{
+  pC11Node->GridRequest();
+}
+
+void C11Main::SltPathRequest()
+{
+  pC11Node->PathRequest();
 }

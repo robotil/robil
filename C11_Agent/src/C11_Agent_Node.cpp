@@ -6,7 +6,10 @@
 #include "C31_PathPlanner/C31_Waypoints.h"
 #include <sstream>
 #include <stdlib.h>
+#include "tinyxml2.h"
 #include "C11_Agent_Node.h"
+
+using namespace tinyxml2;
 
 C11_Agent_Node::C11_Agent_Node(int argc, char** argv):
                   init_argc(argc),
@@ -16,6 +19,23 @@ C11_Agent_Node::C11_Agent_Node(int argc, char** argv):
   HMIResS = NULL;
   pIAgentInterface = NULL;
   IsWaitForRelease = false;
+  std::string filepath;
+  filepath = ros::package::getPath("C11_OperatorControl");
+  filepath.append("/bin/Missions.txt");
+  QFile missfile(filepath.data());
+  if (!missfile.open(QIODevice::ReadOnly | QIODevice::Text))
+    {
+      std::cout << "Can't open Missions config file!!! Restart the application" << std::endl;
+    }
+  else
+    {
+      while (!missfile.atEnd())
+       {
+          QString line = missfile.readLine();
+          line.remove(QChar('\n'));
+          MissionsList.append(line);
+       }
+    }
 }
 C11_Agent_Node::~C11_Agent_Node()
 {
@@ -103,7 +123,8 @@ bool C11_Agent_Node::MissionSelection(C10_Common::mission_selection::Request& re
           //ostr << "skill3.xml";
           std::string filename;
           filename = ros::package::getPath("C34_Designer");
-          filename.append("/plans/skill3.xml");
+          filename.append("/plans/");
+          filename.append(MissionsList.at(test).toStdString());
 
           srv34Run.request.filename = filename;
   //      srv34.request.req.filename << "skill3.xml";
@@ -313,17 +334,55 @@ void C11_Agent_Node::LoadMission(int missionId)
   c34RunClient = nh_->serviceClient<C34_Executer::run>("executer/run");
   C34_Executer::run srv34Run;
 
-  std::stringstream out;
-  out <<"id"<< missionId << std::endl;
-  tree_id_str = out.str();
-  ROS_INFO(tree_id_str.data());
-  srv34Run.request.tree_id = tree_id_str;
+//  std::stringstream out;
+//  out <<"id"<< missionId << std::endl;
+//  tree_id_str = out.str();
+//  ROS_INFO(tree_id_str.data());
+//  srv34Run.request.tree_id = tree_id_str;
 
   std::string filename;
   filename = ros::package::getPath("C34_Designer");
-  filename.append("/plans/qual1.1.hmi.xml");
+
+  filename.append("/plans/");
+  filename.append(MissionsList.at(missionId).toStdString());
 
   srv34Run.request.filename = filename;
+  std::cout << "The task is:" << filename<< std::endl;
+
+  XMLDocument doc;
+  doc.LoadFile( filename.data());
+  if(doc.ErrorID())
+    {
+      ROS_ERROR("can't open the the plan file, exiting\n");
+//      return;
+    }
+  XMLElement* titleElement = doc.FirstChildElement();
+  if(titleElement != NULL)
+    {
+      XMLElement* firstElement = titleElement->FirstChildElement();
+      if(firstElement == NULL)
+        {
+          ROS_ERROR("the plan file is incorrect, exiting\n");
+                          return;
+        }
+      const char* value = firstElement->Attribute( "id" );
+      if(value != NULL)
+        {
+          std::string strid(value);
+          srv34Run.request.tree_id = strid;
+          tree_id_str = strid;
+        }
+      else
+        {
+          ROS_ERROR("the plan file is incorrect, id not found , exiting\n");
+                return;
+        }
+    }
+  else
+    {
+      ROS_ERROR("the plan file is incorrect, exiting\n");
+            return;
+    }
 
   if (!c34RunClient.call(srv34Run))
   {
@@ -361,5 +420,20 @@ void C11_Agent_Node::PathUpdated(std::vector<StructPoint> points)
     waypoints.points.push_back(location);
   }
   path_update_pub.publish(waypoints);
+}
+
+void C11_Agent_Node::ImageRequest()
+{
+  pushS->panoramic_image_task();
+}
+
+void C11_Agent_Node::GridRequest()
+{
+  pushS->occupancy_grid_task();
+}
+
+void C11_Agent_Node::PathRequest()
+{
+  pushS->path_task();
 }
 

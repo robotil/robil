@@ -187,9 +187,6 @@ void MapMatrix::computeMMatrix(std::vector<pclPlane*>* mapPlanes,pcl::PointCloud
 					int xIndex,yIndex;
 					xIndex = (p.x -xOffset)*(1/SIZEOFSQUARE);	//added for now instead of previous three lines
 					yIndex = (p.y-yOffset) *(1/SIZEOFSQUARE);	//same as above
-					//std::cout<<"xOffset:"<<xOffset<<" yOffset:"<<yOffset<<"\n";
-					//std::cout<<"indexX:"<<xIndex<<" indexY"<<yIndex<<"\n";
-
 					MapSquare* ms=data->at(xIndex)->at(yIndex);
 					ms->addRating();
 					if(!ms->hasPlane(tempPlane)){
@@ -197,8 +194,7 @@ void MapMatrix::computeMMatrix(std::vector<pclPlane*>* mapPlanes,pcl::PointCloud
 						newPlane->addRating();
 						newPlane->rating=20;
 						ms->square_Planes->push_back(newPlane);
-						if (//(std::abs(angle)>25  && std::abs(angle-90)>25) ||
-								p.z>(0.5+(-0.83)) || p.z<(-0.4+-0.83)){
+						if (p.z>(0.5+(-0.83)) || p.z<(-0.4+-0.83)){
 							ms->square_status = BLOCKED;
 						}
 						else{

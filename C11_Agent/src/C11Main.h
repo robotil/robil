@@ -27,6 +27,9 @@ class C11Main: public QObject, public IAgentInterface
     void SltResume();
     void SltLoadMission(int MissionId);
     void SltPathUpdated(std::vector<StructPoint> points);
+    void SltImageRequest();
+    void SltGridRequest();
+    void SltPathRequest();
 
 public:
   C11Main(int argc, char **argv);

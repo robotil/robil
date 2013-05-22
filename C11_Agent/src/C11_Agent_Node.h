@@ -14,6 +14,9 @@
 #include "C11_UntilOperatorIntervention.hpp"
 #include "C11_TCPServer.h"
 #include <QThread>
+#include <QFile>
+#include <QString>
+#include <QStringList>
 
 class IAgentInterface
 {
@@ -61,6 +64,12 @@ public:
 
   void PathUpdated(std::vector<StructPoint> points);
 
+  void ImageRequest();
+
+  void GridRequest();
+
+  void PathRequest();
+
   virtual void PushImage(QImage img);
   virtual void PushGrid(StructGridData grid);
   virtual void PushPath(vector<StructPoint> path);
@@ -87,6 +96,7 @@ private:
   HMIResponseServer *HMIResS;
   IAgentInterface* pIAgentInterface;
   bool IsWaitForRelease;
+  QStringList MissionsList;
 };
 
 #endif // C11_AGENT_NODE_H

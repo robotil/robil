@@ -38,6 +38,10 @@ public Q_SLOTS:
         void Resume();
         void SendPathUpdate(std::vector<StructPoint> points);
 
+        void SendImageRequest();
+        void SendGridRequest();
+        void SendPathRequest();
+
 public:
 
         CTcpConnection(QString ipAddress,int port);

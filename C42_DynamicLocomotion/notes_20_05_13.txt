@@ -1,0 +1,27 @@
+Updates:
+Compatible with new versions DRCSim - 2.6.1 and Gazebo - 1.8.0:
+1. To run set environment variable VRC_CHEATS_ENABLED = 1. (in order to use point 2. and reset robot at initial position) 
+2. Global Position is updated from topic: /ground_truth_odom.
+
+USING DYNAMIC WALK:
+
+Robot waits for start,then goes to path planner and asks for the path, takes points from path and walks alongside a segment of two points.
+
+To run Dynamic Walker:
+
+1. A - run DynamicLocomotion.py: 
+   $ rosrun C42_DynamicLocomotion DynamicLocomotion.py
+
+   B - run DynamicQual.py: 
+   $ rosrun C42_DynamicLocomotion DynamicQual.py
+
+
+2. run task using C0 task_tester:
+   A - $ rosrun C0_RobilTask task_tester DynamicLocomotion
+   B - $ rosrun C0_RobilTask task_tester DynamicQual1
+
+3. run C31_clone to emulate the C31PathPlanner (publish a path message): 
+   rosrun C42_ZMPWalk scripts/C31_Clone.py
+ 
+4. reset robot at initial position:
+   rosrun C42_DynamicLocomotion scripts/Reset_start_pose.py

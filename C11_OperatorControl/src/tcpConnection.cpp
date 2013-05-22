@@ -350,3 +350,63 @@ void CTcpConnection::SendPathUpdate(std::vector<StructPoint> points)
   pConnection->waitForBytesWritten();
   std::cout<<"TCP: Pause sent\n";
 }
+
+void CTcpConnection::SendImageRequest()
+{
+  WaitingForResponse = false;
+  StructHeader header;
+  header.MessageID = 16;
+  header.DataSize = 0;
+  header.Counter = Counter;
+  Counter++;
+  QByteArray block;
+  QDataStream out(&block, QIODevice::WriteOnly);
+  out.setByteOrder(QDataStream::LittleEndian);
+  out << header.MessageID;
+  out << header.DataSize;
+  out << header.Counter;
+  pConnection->write(block);
+  pConnection->flush();
+  pConnection->waitForBytesWritten();
+  std::cout<<"TCP: SendImageRequest sent\n";
+}
+
+void CTcpConnection::SendGridRequest()
+{
+  WaitingForResponse = false;
+  StructHeader header;
+  header.MessageID = 17;
+  header.DataSize = 0;
+  header.Counter = Counter;
+  Counter++;
+  QByteArray block;
+  QDataStream out(&block, QIODevice::WriteOnly);
+  out.setByteOrder(QDataStream::LittleEndian);
+  out << header.MessageID;
+  out << header.DataSize;
+  out << header.Counter;
+  pConnection->write(block);
+  pConnection->flush();
+  pConnection->waitForBytesWritten();
+  std::cout<<"TCP: SendGridRequest sent\n";
+}
+
+void CTcpConnection::SendPathRequest()
+{
+  WaitingForResponse = false;
+  StructHeader header;
+  header.MessageID = 18;
+  header.DataSize = 0;
+  header.Counter = Counter;
+  Counter++;
+  QByteArray block;
+  QDataStream out(&block, QIODevice::WriteOnly);
+  out.setByteOrder(QDataStream::LittleEndian);
+  out << header.MessageID;
+  out << header.DataSize;
+  out << header.Counter;
+  pConnection->write(block);
+  pConnection->flush();
+  pConnection->waitForBytesWritten();
+  std::cout<<"TCP: SendPathRequest sent\n";
+}
