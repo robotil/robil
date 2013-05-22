@@ -49,7 +49,7 @@ public:
 //		path.push_back(Vec2d(35,43));	path_gps.push_back(Vec2d(-0.218230,1.874729));
 //		path.push_back(Vec2d(36,76));	path_gps.push_back(Vec2d(0.003749,10.149953));
 
-		path = path;//_gps;
+//		path = path_gps;
 
 #ifndef PRINT_FOR_CALC
 		std::cout<<"Input path: "<<path<<std::endl;

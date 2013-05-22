@@ -5,6 +5,8 @@
 #include "cogniteam_pathplanning.h"
 using namespace std;
 
+typedef ObsMap Map;
+
 class PField{
 //------------------ types
 public:

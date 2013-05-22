@@ -19,7 +19,7 @@
 using namespace std;
 using namespace C0_RobilTask;
 
-
+typedef ObsMap Map;
 typedef GPSPoint TargetPosition;
 typedef GPSPoint Localization;
 typedef std::string TargetGoal;

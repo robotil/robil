@@ -133,7 +133,7 @@ namespace {
 		return e*(e-f);
 	}
 	Points frontiers( const Points& points, const Vec2d& loc ){
-		const int k = 180;
+		const size_t k = 180;
 		const double block = PI2/k;
 		Vec2d blocks[k];
 		for(size_t i=0;i<k;i++) blocks[i] = Vec2d::Null();
