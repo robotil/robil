@@ -10,27 +10,15 @@ roslaunch C25_GlobalPosition C25.launch &
 C25_PID=$!
 echo $C25_PID
 sleep 3
-echo "Starting C24"
-rosrun C24_ObstacleDetection           C24 &
-C24_PID=$!
-echo $C24_PID
+echo "Starting C23"
+rosrun C23_ObjectRecognition C23 /multisense_sl/camera/left/image_color /multisense_sl/camera/right/image_color /multisense_sl/camera/points2 &
+C23_PID=$!
+echo $C23_PID
 sleep 3
 rosrun C31_PathPlanner gpp > gpp.log &
 C31_PID=$!
 echo $C31_PID
-echo "Starting Zmp"
-roslaunch C42_ZMPWalk zmp_walk.launch &
+echo "Starting DL"
+rosrun C42_DynamicLocomotion DynamicLocomotion.py > dl.log &
 C42_PID=$!
-echo "Starting DRCSim tools"
-rosrun C42_DRCSim2_tools foot_contact_filter.py &
-C42T_PID=$!
-echo "Starting C45"
-roslaunch C45_PostureControl C45_PostureControl.launch &
-C45_PID=$!
-echo "Starting computeCOM"
-rosrun C43_LocalBodyCOM computeCOM &
-C43_PID=$!
-echo "Starting QuasiStatic"
-roslaunch C41_QuasiStaticWalking C41_QuasiStaticWalking.launch &
-C41_PID=$!
-echo $C24_PID $C25_PID $C42_PID $C42T_PID $C45_PID $C41_PID $C43_PID>> $PKILL
+echo $C23_PID $C25_PID $C42_PID $C31_PID >> $PKILL
