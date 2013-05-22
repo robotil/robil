@@ -18,8 +18,7 @@ class AtlasWalk():
           True, None)
         self.asi_command = rospy.Publisher('/atlas/atlas_sim_interface_command', AtlasSimInterfaceCommand, None, False, True, None)
         
-        # Put the robot into a known state
-        self.reset_to_standing()
+        # Assume that we're already in BDI Stand mode
         
         # Initialize some variables before starting.
         self.step_index = 0
@@ -160,7 +159,7 @@ class AtlasWalk():
         
         # The z position is observed for static walking, but the foot
         # will be placed onto the ground if the ground is lower than z
-        pose.position.z = 0
+        pose.position.z = 0.2#0
         
         pose.orientation.x = Q[0]
         pose.orientation.y = Q[1]
@@ -169,31 +168,6 @@ class AtlasWalk():
 
         return pose
        
-    # Publishes commands to reset robot to a standing position
-    def reset_to_standing(self):
-        # Harness robot, with gravity off
-        self.mode.publish("harnessed")
-        k_effort = [0] * 28
-        # Puts robot into freeze behavior, all joints controlled
-        freeze = AtlasSimInterfaceCommand(None,AtlasSimInterfaceCommand.FREEZE, None, None, None, None, k_effort )
-        self.asi_command.publish(freeze)
-        
-        # Puts robot into stand_prep behavior, a joint configuration suitable
-        # to go into stand mode
-        stand_prep = AtlasSimInterfaceCommand(None,AtlasSimInterfaceCommand.STAND_PREP, None, None, None, None, k_effort)
-        self.asi_command.publish(stand_prep)
-
-        rospy.sleep(2.0)
-        self.mode.publish("nominal")
-        
-        # Put robot into stand position
-        stand = AtlasSimInterfaceCommand(None,AtlasSimInterfaceCommand.STAND, None, None, None, None, k_effort)
-                
-        rospy.sleep(0.3)
-        
-        self.asi_command.publish(stand)
-
- 
 if __name__ == '__main__':
     rospy.init_node('walking_tutorial')
     walk = AtlasWalk()

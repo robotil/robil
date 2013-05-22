@@ -57,15 +57,17 @@ class QS_WalkingMode(WalkingMode):
         k_effort = [0] * 28
         self._bDone = False
         self._bIsSwaying = False
+        
+        self._command = 0
     
     def StartWalking(self):
         self._bDone = False
     
     def Walk(self):
         WalkingMode.Walk(self)
-        command = self.GetCommand()
-        self.asi_command.publish(command)
-        print(command)
+        self._command = self.GetCommand()
+        self.asi_command.publish(self._command)
+        #print(command)
         self._WalkingModeStateMachine.PerformTransition("Go")
         self._bIsSwaying = True
     
@@ -156,13 +158,15 @@ class QS_WalkingMode(WalkingMode):
         # When the robot status_flags are 1 (SWAYING), you can publish the next step command.
         if (state.step_feedback.status_flags == 1 and not self._bIsSwaying):
             command = self.HandleStateMsg(state)
-        elif (state.step_feedback.status_flags == 2):# and self._bIsSwaying):
+        elif (state.step_feedback.status_flags == 2 and self._bIsSwaying):
             self._bIsSwaying = False
             #print("step done")
         if (0 !=command):
+            self._command = command
             self._bIsSwaying = True
-            self.asi_command.publish(command)
-            print(command)
+        
+        if(0 != self._command):
+            self.asi_command.publish(self._command)
 
     def _odom_cb(self,odom):
         self._LPP.UpdatePosition(odom.pose.pose.position.x,odom.pose.pose.position.y)

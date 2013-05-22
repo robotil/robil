@@ -18,8 +18,8 @@ def Get_foot_placement_path(req):
     FP_res = FootPlacement_ServiceResponse()
     FP_res.done = 0
     # assumption: placements are relative to left foot which is at position (0,0,0), in world frame 
-    FP_res.foot_placement_path = [FP_data(1,[0.1,-0.14,0.0],[0.0,0.0,0.0],0.3),FP_data(0,[0.2,0.14,0.0],[0.0,0.0,0.0],0.3),FP_data(1,[0.3,-0.14,0.0],[0.0,0.0,0.0],0.3),\
-                                  FP_data(0,[0.4,0.14,0.0],[0.0,0.0,0.0],0.3),FP_data(1,[0.5,-0.14,0.0],[0.0,0.0,0.0],0.3)]
+    FP_res.foot_placement_path = [FP_data(1,[0.1,-0.14,0.2],[0.0,0.0,0.0],0.3),FP_data(0,[0.2,0.14,0.2],[0.0,0.0,0.0],0.3),FP_data(1,[0.3,-0.14,0.2],[0.0,0.0,0.0],0.3),\
+                                  FP_data(0,[0.4,0.14,0.2],[0.0,0.0,0.0],0.3),FP_data(1,[0.5,-0.14,0.2],[0.0,0.0,0.0],0.3)]
     print "Returning foot placement path: %s"%(FP_res.foot_placement_path)
     return FP_res
 
