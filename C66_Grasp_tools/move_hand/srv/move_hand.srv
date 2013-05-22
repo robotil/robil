@@ -2,6 +2,6 @@ geometry_msgs/Vector3 PositionDestination_left
 geometry_msgs/Vector3 AngleDestination_left
 geometry_msgs/Vector3 PositionDestination_right
 geometry_msgs/Vector3 AngleDestination_right
-float64 Radius
+bool quick
 ---
 bool success

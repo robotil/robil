@@ -9,7 +9,7 @@ rosrun C43_LocalBodyCOM computeCOM
 To run:
 2) Launch:
 roslaunch C41_QuasiStaticWalking C41_QuasiStaticWalking.launch
-2) Calling action QuasiStaticWalking with no parameters. Makes the robot walk forward purposelessly.
+2) Calling action QuasiStaticWalk with no parameters. Makes the robot walk forward purposelessly.
 	Available services:
 	a) 	/make_step
 		Input: XYZRPY of the destination of the dynamic leg in pelvis coordinate system. LinkToMove is 'l_leg' or 'r_leg' 

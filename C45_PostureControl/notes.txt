@@ -9,3 +9,6 @@ To run:
 1) Launch:
 roslaunch C45_PostureControl C45_PostureControl.launch
 2) Use action C45_PostureControl with parameter direction=0/1/-1
+
+Note that BDI walking module does not work with this module and there are no plans to make them work together. Therefore, you cannot do BDI walking while moving the neck/enabling stability maintaining/moving the back. The robot will maintain its joints values and will not move.
+To enable BDI after doing the above, "/PoseController/stop" must be called.
