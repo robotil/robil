@@ -1,4 +1,4 @@
-V0.0.0.202
+V0.0.0.203
 ===========================================================
 C0_RobilTask     		0.5
 C0_Scripts     		        0.22
@@ -20,7 +20,7 @@ C34_Designer     		0.32
 C34_Executer     		0.8
 C35_Monitoring     		0.10
 C41_BodyControl     		0.1
-C41_QuasiStaticWalking     	0.8
+C41_QuasiStaticWalking     	0.9
 C41_QuasiStaticWalking_tools    0.9
 C42_DRCSim2_tools     		0.2
 C42_DynamicLocomotion     	0.9
@@ -29,7 +29,7 @@ C42_ZMPWalk     		0.8
 C43_LocalBodyCOM     		0.1
 C43_LocalBodyCOM_tools     	0.1
 C43_LocalBodyPVA     		0.2
-C45_PostureControl     		0.9
+C45_PostureControl     		0.10
 C45_PostureControl_tools     	0.2
 C46_MountVehicle     		0.6
 C47_DismountVehicle     	0.3
@@ -37,7 +37,7 @@ C48_StandUp     		0.7
 C51_CarOperation     		0.9
 C65_CloseValve     		0.1
 C66_Grasp     			0.5
-C66_Grasp_tools     		0.3
+C66_Grasp_tools     		0.4
 C67_CarManipulation     	0.12
 libviso2     			0.1
 viso2_ros     			0.1
