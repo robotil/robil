@@ -23,17 +23,13 @@ ostream& operator<<(ostream& out, const Map& m){
 	return out;
 }
 
-bool Map::inRange(long x, long y)const{
+bool BaseMap::inRange(long x, long y)const{
 	if(x<0||y<0) return false;
 	if(x>=(long)w()||y>=(long)h()) return false;
 	return true;
 }
-bool AltMap::inRange(long x, long y)const{
-	if(x<0||y<0) return false;
-	if(x>=(long)w()||y>=(long)h()) return false;
-	return true;
-}
-double Map::approximate(const long cx, const long cy, long& tx, long& ty, char ctype)const{
+
+double ObsMap::approximate(const long cx, const long cy, long& tx, long& ty, char ctype)const{
 // 	cout<<"tx="<<tx<<", ty="<<ty<<", ctype="<<ctype<<", cx="<<cx<<", cy="<<cy<<endl;
 	if(inRange(tx, ty)) return 0;
 	long x = 0;long y = 0;
@@ -57,7 +53,7 @@ double Map::approximate(const long cx, const long cy, long& tx, long& ty, char c
 // 	cout<<"----"<<endl;
 	return min_dis;
 }
-void Map::approximate(const long cx, const long cy, long& tx, long& ty)const{
+void ObsMap::approximate(const long cx, const long cy, long& tx, long& ty)const{
 	long x(tx), y(ty);
 	if(inRange(tx, ty)){ /*cout<<"original x,y in range"<<endl;*/ return; }
 	double dis_av = approximate(cx, cy, tx, ty, Map::ST_AVAILABLE);
@@ -75,3 +71,17 @@ void Map::approximate(const long cx, const long cy, long& tx, long& ty)const{
 	//cout<<"x,y on blocked celles"<<endl;
 }
 
+
+#include "AltTransforms.h"
+
+void World::update(const ObsMap& grid, const AltMap &alts){
+	this->grid = grid;
+#if MAP_MODE == MM_ALTS
+	this->altitudes = alts;
+	AltTransforms wd1(alts, AltTransformsParameters());
+	this->walls = wd1.walls();
+	this->slops = wd1.slops();
+	AltTransforms wd2(slops, AltTransformsParameters());
+	this->costs = wd2.costs();
+#endif
+}

@@ -10,7 +10,7 @@ using namespace std;
 int cogniteam_pathplanning_test(int, char**);
 int cogniteam_pathplanning_test_map_inflation(int argc, char** argv) ;
 int cogniteam_pathplanning_test_transits(int argc, char** argv) ;
-int cogniteam_pathplanning_test_alts(int argc, char** argv) ;
+int cogniteam_pathplanning_test_alts(int argc, char** argv, int planning_code=3) ;
 
 #define Map ObsMap
 
@@ -39,8 +39,11 @@ void append(std::vector<A>& target, const std::vector<A>& source){
 		if(target.size()>0){
 			const A* t = &(target.back());
 			const A* s = &(source[i]);
-			bool same_points = strncmp((const char*)t, (const char*)s, sizeof(A))==0;
-			if(same_points) continue;
+			bool same_points = memcmp((const char*)t, (const char*)s, sizeof(A))==0;
+			if(same_points){
+				//std::cout<<"SAME POINTS. REMOVE ONE : "<<target.back().x<<","<<target.back().y<<" --- "<<source[i].x<<","<<source[i].y<<std::endl;
+				continue;
+			}
 		}
 		target.push_back(source[i]);
 	}
@@ -74,7 +77,17 @@ struct Constraints{
 
 SmoothedPath searchPath(const Map& map, const Waypoint& start, const Waypoint& finish, const Constraints& constraints);
 SmoothedPath searchPath_transitAccurate(const Map& map, const Waypoint& start, const Waypoint& finish, const Constraints& constraints);
+SmoothedPath searchPath(
+		const AltMap& alts, const AltMap& slops, const AltMap& costs, const Map& s_walls,
+		const Waypoint& start, const Waypoint& finish, const Constraints& constraints
+);
+SmoothedPath searchPath_transitAccurate(
+		const AltMap& alts, const AltMap& slops, const AltMap& costs, const Map& s_walls,
+		const Waypoint& start, const Waypoint& finish, const Constraints& constraints
+);
 
 #undef Map
 
+
+#define PRINT_VERSION std::cout<<"VERSION: "<<PLANNER_VERSION<<". ["<<__FUNCTION__<<"]"<<std::endl;
 #endif

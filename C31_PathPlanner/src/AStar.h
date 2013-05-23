@@ -17,6 +17,7 @@
 #include <map>
 #include <math.h>
 
+#include "cogniteam_pathplanner_parameters.h"
 
 class AStar{
 public:
@@ -52,6 +53,16 @@ private:
 static bool operator<(const QTNode::XY& __x, const QTNode::XY& __y){return __x.x!=__y.x?__x.x < __y.x:__x.y<__y.y;};
 static bool operator==(const QTNode::XY& __x, const QTNode::XY& __y){ return __x.x==__y.x && __x.y==__y.y; }
 
+class BStarParameters{
+public:
+	double w_distance;
+	double w_slop;
+	double w_alt_delta;
+	BStarParameters(){
+		SET_BS_PARAMETERS((*this));
+	}
+};
+
 class BStar{
 public:
 
@@ -82,12 +93,23 @@ private:
 	map<Point,double> f_score;
 
 public:
-	Path search(size_t sx, size_t sy, size_t gx, size_t gy, QT qtRoot);
+
+	BStar(QT qtRoot, const AltMap& alts, const AltMap& slops, const ObsMap& walls, const BStarParameters& params):
+		_qtRoot(qtRoot), _alts(alts), _slops(slops), _walls(walls), _params(params)
+	{
+
+	}
+
+	Path search(size_t sx, size_t sy, size_t gx, size_t gy);
 
 private:
 	Path reconstruct_path(map<Point,Point>& came_from, const Point& current_node);
 
-	const AltMap* _map;
+	QT _qtRoot;
+	const AltMap& _alts;
+	const AltMap& _slops;
+	const ObsMap& _walls;
+	const BStarParameters& _params;
 };
 
 

@@ -18,22 +18,45 @@
 #include <math.h>
 using namespace std;
 
+#define MM_GRID 0
+#define MM_ALTS 1
+#define MAP_MODE MM_ALTS
+
+
+class BaseMap{
+protected:
+	static int map_id_counter;
+	int map_id;
+	BaseMap(int w, int h):map_id(map_id_counter++), _w(w),_h(h){}
+	BaseMap(const BaseMap& map):map_id(map_id_counter++), _w(map._w),_h(map._h){}
+
+	size_t _w, _h;
+
+public:
+
+	size_t w()const{ return _w; }
+	size_t h()const{ return _h; }
+	size_t index(int x, int y)const{ return y*w()+x; }
+
+	bool inRange(long x, long y)const;
+
+};
 
 template <typename Item>
-class MapT{
+class MapT:public BaseMap{
 public:
 	enum STATUS{ST_AVAILABLE=0,ST_BLOCKED,ST_UNCHARTED};
 
 
-	MapT(int w, int h):map_id(map_id_counter++), _w(w),_h(h){
+	MapT(int w, int h):BaseMap(w,h){
 		_data.resize(_w*_h);
 		for(size_t i=0;i<_data.size();i++) _data[i]=ST_UNCHARTED;
 	}
-	MapT(int w, int h, Item* cmap):map_id(map_id_counter++), _w(w),_h(h){
+	MapT(int w, int h, Item* cmap):BaseMap(w,h){
 		_data.resize(_w*_h);
 		for(size_t i=0;i<_data.size();i++) _data[i]=cmap[i];
 	}
-	MapT(const MapT<Item>& map):map_id(map_id_counter++), _w(map._w),_h(map._h){
+	MapT(const MapT<Item>& map):BaseMap(map){
 		_data.resize(_w*_h);
 		for(size_t i=0;i<_data.size();i++) _data[i]=map._data[i];
 	}
@@ -41,14 +64,14 @@ public:
 	public:
 		vector<Item> data;
 		size_t w, h;
-		const MapT<Item>& map()const{
+		MapT<Item> map()const{
 			MapT<Item> m(w, h);
 			for(size_t i=0;i<m._data.size();i++){ m._data[i] = data[i]; }
 			return m;
 		}
 	};
 
-	size_t index(int x, int y)const{ return y*w()+x; }
+
 	Item operator()(int x, int y)const{
 		return getByIndex(index(x,y));
 	}
@@ -65,9 +88,6 @@ public:
 		return *this;
 	}
 
-	size_t w()const{ return _w; }
-	size_t h()const{ return _h; }
-
 	char str(int x, int y)const{
 		char c = (*this)(x,y);
 		if(c==ST_AVAILABLE) return '.';
@@ -77,8 +97,8 @@ public:
 		return '?';
 	}
 
-	bool inRange(long x, long y)const;
-	void approximate(const long cx, const long cy, long& x, long& y)const;
+//	bool inRange(long x, long y)const;
+//	void approximate(const long cx, const long cy, long& x, long& y)const;
 
 	inline void clear(){
 		_w=_h=0;
@@ -86,15 +106,12 @@ public:
 	}
 
 private:
-	double approximate(const long cx, const long cy, long& x, long& y, char ctype)const;
+//	double approximate(const long cx, const long cy, long& x, long& y, char ctype)const;
 
 	Item getByIndex(size_t ix)const{ return _data[ix]; }
 	Item& getByIndex(size_t ix){ return _data[ix]; }
 
-	static int map_id_counter;
-	int map_id;
 
-	size_t _w, _h;
 	vector<Item> _data;
 };
 
@@ -108,12 +125,7 @@ public:\
 
 
 class ObsMap:public MapT<char>{
-//	typedef MapT<char> Supper;
-//public:
-//	Map(int w, int h):Supper(w,h){	}
-//	Map(int w, int h, char* cmap):Supper(w, h, cmap){ }
-//	Map(const Map& map):Supper(map){ }
-//	Map(const Supper& map):Supper(map){ }
+
 	EXTENDS(char, ObsMap)
 
 	enum STATUS{ST_AVAILABLE=0,ST_BLOCKED,ST_UNCHARTED};
@@ -129,25 +141,16 @@ class ObsMap:public MapT<char>{
 		return '?';
 	}
 
-	bool inRange(long x, long y)const;
 	void approximate(const long cx, const long cy, long& x, long& y)const;
 
-private:
+protected:
 	double approximate(const long cx, const long cy, long& x, long& y, char ctype)const;
 
 };
 ostream& operator<<(ostream& out, const ObsMap& m);
 
 class AltMap:public MapT<double>{
-//	typedef MapT<double> Supper;
-//public:
-//	AltMap(int w, int h):Supper(w,h){	}
-//	AltMap(int w, int h, double* cmap):Supper(w, h, cmap){ }
-//	AltMap(const AltMap& map):Supper(map){ }
-//	AltMap(const Supper& map):Supper(map){ }
 	EXTENDS(double, AltMap)
-
-	bool inRange(long x, long y)const;
 
 };
 //ostream& operator<<(ostream& out, const Map& m);
@@ -169,9 +172,22 @@ class World{
 public:
 	ObsMap grid;
 	AltMap altitudes;
-	World(const ObsMap& m, const AltMap& a):grid(m), altitudes(a){}
-	World(const World& w):grid(w.grid), altitudes(w.altitudes){}
-	const World& operator=(const World& w){grid=(w.grid); altitudes=(w.altitudes); return *this;}
+	ObsMap walls;
+	AltMap slops;
+	AltMap costs;
+	World():grid(0,0),altitudes(0,0),walls(0,0),slops(0,0),costs(0,0){}
+	void update(const ObsMap& grid, const AltMap& alts);
+#if MAP_MODE == MM_ALTS
+	size_t w()const{ return altitudes.w(); }
+	size_t h()const{ return altitudes.h(); }
+	bool inRange(long x, long y)const{ return altitudes.inRange(x,y); }
+	void approximate(const long cx, const long cy, long& x, long& y)const{ walls.approximate(cx, cy, x, y); }
+#else
+	size_t w()const{ return grid.w(); }
+	size_t h()const{ return grid.h(); }
+	bool inRange(long x, long y)const{ return grid.inRange(x,y); }
+	void approximate(const long cx, const long cy, long& x, long& y)const{ grid.approximate(cx, cy, x, y); }
+#endif
 };
 
 

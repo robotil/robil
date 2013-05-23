@@ -7,7 +7,6 @@
 #include "Map.h"
 #include "Gps.h"
 
-typedef ObsMap Map;
 
 static AltMap extractMap(const C22_GroundRecognitionAndMapping::C22C0_PATH &res, const MapProperties& prop){
 	AltMap::MapCreator m;
@@ -37,8 +36,8 @@ static AltMap extractMap(const C22_GroundRecognitionAndMapping::C22C0_PATH &res,
 	return result_map;
 };
 
-static Map extractOccupancyGrid(const C22_GroundRecognitionAndMapping::C22C0_PATH &res, const MapProperties& prop){
-	Map::MapCreator m;
+static ObsMap extractOccupancyGrid(const C22_GroundRecognitionAndMapping::C22C0_PATH &res, const MapProperties& prop){
+	ObsMap::MapCreator m;
 	size_t h = res.row.size();
 	bool size_ok = false;
 	if(h){
@@ -59,9 +58,9 @@ static Map extractOccupancyGrid(const C22_GroundRecognitionAndMapping::C22C0_PAT
 	}
 	if(size_ok==false){
 		std::cout<<"size of map is wrong"<<std::endl;
-		return Map(0,0);
+		return ObsMap(0,0);
 	}
-	Map result_map = m.map();
+	ObsMap result_map = m.map();
 	return result_map;
 };
 
@@ -119,7 +118,7 @@ static MapProperties extractMapProperties(const C22_GroundRecognitionAndMapping:
 static AltMap extractMap(C22_GroundRecognitionAndMapping::C22::Response &res, const MapProperties& prop){
 	return extractMap(res.drivingPath, prop);
 };
-static Map extractOccupancyGrid(C22_GroundRecognitionAndMapping::C22::Response &res, const MapProperties& prop){
+static ObsMap extractOccupancyGrid(C22_GroundRecognitionAndMapping::C22::Response &res, const MapProperties& prop){
 	return extractOccupancyGrid(res.drivingPath, prop);
 };
 

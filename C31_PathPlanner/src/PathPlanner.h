@@ -19,7 +19,7 @@
 using namespace std;
 using namespace C0_RobilTask;
 
-typedef ObsMap Map;
+typedef World Map;
 typedef GPSPoint TargetPosition;
 typedef GPSPoint Localization;
 typedef std::string TargetGoal;
@@ -133,7 +133,7 @@ class PathPlanning{
 		RobotDimentions dimentions;
 		Transits transits;
 		Attractors attractors;
-		PlanningInputData():map(0,0){}
+		PlanningInputData():map(){}
 		PlanningInputData(const PlanningInputData& p):
 			 map(p.map)
 			,start(p.start)

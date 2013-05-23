@@ -10,6 +10,8 @@ typedef ObsMap Map;
 
 #include "Vec2d.hpp"
 
+#define PRINT_SEARCH_INFO 0
+
 // -------------------------- AStar ---------------------------------------------
 
 namespace {
@@ -126,16 +128,26 @@ namespace {
 }
 
 double BStar::heuristic_cost_estimate(const Point& start, const Point& goal)const{
-		return Vec2d::distance(vec2d(start), vec2d(goal));
+
+		double slop = _slops(start.x, start.y);
+		double distance = Vec2d::distance(vec2d(start), vec2d(goal));
+		double obsticle = _walls(start.x, start.y)==ObsMap::ST_BLOCKED ? 100000 : 0;
+		double alts_delta = fabs( _alts(start.x, start.y) - _alts(goal.x, goal.y) );
+
+		return obsticle
+			  + _params.w_distance	*	distance
+			  + _params.w_slop		*	slop
+			  + _params.w_alt_delta	*	alts_delta
+		;
 	}
 double BStar::cost_estimate(const Point& current, const Point& neighbor)const{
-//		double w_dist=0.0, w_slop=1;
-//		double w_dist=0.01, w_slop=3;
-//		double w_dist=1, w_slop=0;
-		double w_dist=1, w_slop=1;
-		return
-				w_dist*	Vec2d::distance(vec2d(current), vec2d(neighbor))
-			  + w_slop*	(*_map)(neighbor.x, neighbor.y)
+		double slop = _slops(neighbor.x, neighbor.y);
+		double distance = Vec2d::distance(vec2d(current), vec2d(neighbor));
+		double obsticle = _walls(neighbor.x, neighbor.y)==ObsMap::ST_BLOCKED ? 100000 : 0;
+
+		return obsticle
+			  + _params.w_distance	*	distance
+			  + _params.w_slop		*	slop
 		;
 	}
 
@@ -152,8 +164,12 @@ namespace{
 	void print(string text, string tag="INFO"){
 		cout<<"B*: ["<<tag<<"] "<<text<<endl;
 	}
-#define P(TEXT){ stringstream sss; sss<<TEXT; print(sss.str()); }
-//#define P(TEXT){ cout<<TEXT<<endl; }
+#if ( PRINT_SEARCH_INFO==1 )
+	#define P(TEXT){ stringstream sss; sss<<TEXT; print(sss.str()); }
+#else
+	#define P(TEXT)
+#endif
+
 	ostream& operator<<(ostream& o, const QTNode::XY& v){
 		return o<<"{"<<v.x<<","<<v.y<<"}";
 	}
@@ -164,8 +180,8 @@ namespace{
 	}
 }
 
-BStar::Path BStar::search(size_t sx, size_t sy, size_t gx, size_t gy, BStar::QT qtRoot){
-	 _map = qtRoot->mapPtr();
+BStar::Path BStar::search(size_t sx, size_t sy, size_t gx, size_t gy){
+	 BStar::QT qtRoot = _qtRoot;
 	 Path path;
 	 Point start = {sx,sy};
 	 Point goal = {gx,gy};

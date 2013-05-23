@@ -459,6 +459,7 @@ void printLine(std::string title, const A& p1, const B& p2){
 //THIS FUNCTION IS EXACT COPY OF searchPath function in cogniteam_pathplanning.cpp WITH ADDITIONAL DEBUG INFORMATION OUTPUT
 Path test_searchPath(const Map& source_map, const Waypoint& start, const Waypoint& finish, const Constraints& constraints){
 	using namespace std;
+	PRINT_VERSION
 
 	//TODO: PROCESS CONSTRAINTS PATH BEFORE INFLATION
 
@@ -574,6 +575,7 @@ Path test_searchPath(const Map& source_map, const Waypoint& start, const Waypoin
 
 Path test_searchPath_transitAccurate(const Map& source_map, const Waypoint& start, const Waypoint& finish, const Constraints& constraints){
 	using namespace std;
+	PRINT_VERSION
 
 	//TODO: PROCESS CONSTRAINTS PATH BEFORE INFLATION
 
@@ -712,43 +714,45 @@ Path test_searchPath_transitAccurate(const Map& source_map, const Waypoint& star
 }
 
 Path test_searchPath(
-		const AltMap& alts, const AltMap& slops, const AltMap& costs, const Map& walls,
+		const AltMap& alts, const AltMap& slops, const AltMap& costs, const Map& s_walls,
 		const Waypoint& start, const Waypoint& finish, const Constraints& constraints
 ){
 	using namespace std;
+	PRINT_VERSION
 
 	//TODO: PROCESS CONSTRAINTS PATH BEFORE INFLATION
 
-//	if( source_map(start.x, start.y)==Map::ST_BLOCKED || source_map(finish.x, finish.y)==Map::ST_BLOCKED ){
-//		cout<<"searchPath: "<<"some of interesting points are not available (before inflation)"<<endl;
-//		return Path();
-//	}
+	if( s_walls(start.x, start.y)==Map::ST_BLOCKED || s_walls(finish.x, finish.y)==Map::ST_BLOCKED ){
+		cout<<"searchPath: "<<"some of interesting points are not available (before inflation)"<<endl;
+		return Path();
+	}
 
 	size_t rr = constraints.dimentions.radius;
 	if( rr<constraints.dimentions.radius) rr++;
 
-//	Inflator i( rr , Map::ST_BLOCKED);
-//	MapEditor e;
-//
-//	Map inflated_map = e.replace(
-//			i.inflate(source_map),
-//			Map::ST_UNCHARTED, Map::ST_AVAILABLE
-//		);
-//	printBitmap("Inflated map", inflated_map);
-//	printAsVector("INFLATED", inflated_map);
-//
-//	if( inflated_map(start.x, start.y)==Map::ST_BLOCKED || inflated_map(finish.x, finish.y)==Map::ST_BLOCKED ){
-//		cout<<"searchPath: "<<"some of interesting points are not available (after inflation)"<<endl;
-//		return Path();
-//	}
+	Inflator i( rr , Map::ST_BLOCKED);
+	MapEditor e;
 
-//	Map map =
-//		e.coloring(
-//			inflated_map,
-//			start.x, start.y, Map::ST_AVAILABLE,Map::ST_BLOCKED
-//		);
-//	cout<<"Colored map: "<<endl<<map<<endl;
-//	printAsVector("COLORED", map);
+	Map inflated_map = e.replace(
+			i.inflate(s_walls),
+			Map::ST_UNCHARTED, Map::ST_AVAILABLE
+		);
+	printBitmap("Inflated map", inflated_map);
+	printAsVector("INFLATED", inflated_map);
+
+	if( inflated_map(start.x, start.y)==Map::ST_BLOCKED || inflated_map(finish.x, finish.y)==Map::ST_BLOCKED ){
+		cout<<"searchPath: "<<"some of interesting points are not available (after inflation)"<<endl;
+		return Path();
+	}
+
+	Map walls =
+		e.coloring(
+			inflated_map,
+			start.x, start.y, Map::ST_AVAILABLE,Map::ST_BLOCKED
+		);
+	cout<<"Colored map: "<<endl<<walls<<endl;
+	printAsVector("COLORED", walls);
+
 	AltMap map = costs;
 
 	QTNode qt(0,map.w()-1, 0, map.h()-1, map);
@@ -758,18 +762,18 @@ Path test_searchPath(
 
 	// CHECK IF ALL INTERESTING POINTS (start, stop and transits) ARE AVAILABLE
 
-//	if( !qt.findEmpty(start.x, start.y) || !qt.findEmpty(finish.x, finish.y) ){
-//		cout<<"searchPath: "<<"some of interesting points are not available"<<endl;
-//		return Path();
-//	}
-//	if(constraints.transits.size()!=0){
-//		for( size_t i=0 ; i<constraints.transits.size(); i++ ){
-//			if( !qt.findEmpty(constraints.transits[i].x, constraints.transits[i].y) ){
-//				cout<<"searchPath: "<<"some of transit points are not available"<<endl;
-//				return Path();
-//			}
-//		}
-//	}
+	if( walls(start.x, start.y)==ObsMap::ST_BLOCKED || walls(finish.x, finish.y)==ObsMap::ST_BLOCKED ){
+		cout<<"searchPath: "<<"some of interesting points are not available"<<endl;
+		return Path();
+	}
+	if(constraints.transits.size()!=0){
+		for( size_t i=0 ; i<constraints.transits.size(); i++ ){
+			if( walls(constraints.transits[i].x, constraints.transits[i].y)==ObsMap::ST_BLOCKED ){
+				cout<<"searchPath: "<<"some of transit points are not available"<<endl;
+				return Path();
+			}
+		}
+	}
 
 	// CREATE SEGMENTS
 
@@ -793,14 +797,15 @@ Path test_searchPath(
 	// CREATE PATH
 
 	Path path;
-	BStar b_star;
+	BStarParameters bstarparams;
+	BStar b_star(&qt, alts, slops, walls, bstarparams);
 	cout<<"Search B* paths for segments: "<<endl;
 	for( size_t i=0; i<segments.size(); i++){
 		#define SEGMENT segments[i].s.x, segments[i].s.y,  segments[i].g.x,segments[i].g.y
 		//cout<<"    "<<segments[i].s.x<<","<<segments[i].s.y<<" -- "<<segments[i].g.x<<","<<segments[i].g.y<<endl<<"    " "    ";
 		printLine("PROCESS SEGMENT", segments[i].s, segments[i].g);
 
-		BStar::Path qt_path = b_star.search( SEGMENT , &qt);
+		BStar::Path qt_path = b_star.search( SEGMENT );
 		cout<<"founded path size is "<<qt_path.size()<<endl;
 		vector<QTNode::XY> points = qt_path;
 		//if( qt_path.size()>0 ) points = QTPath(qt_path).extractPoints( SEGMENT );
@@ -811,11 +816,11 @@ Path test_searchPath(
 		cout<<endl;
 		#undef SEGMENT
 	}
-
+#ifdef DO_SMOOTHING
 	PField::SmoothingParameters pf_params;
 	SET_PF_PARAMETERS(pf_params)
 
-	PField pf(walls, path);
+	PField pf(s_walls, path);
 	PField::Points smoothed_path = pf.smooth(pf_params);
 
 	printInLine("smoothed path",smoothed_path);
@@ -826,10 +831,151 @@ Path test_searchPath(
 	printInLine("smoothed path (rounded for grid)",smoothed);
 	printAsVector("SMOOTHED (ROUNDED)", smoothed_path);
 	return smoothed;
-
-//	return  path;
+#else
+	return path;
+#endif
 }
 
+Path test_searchPath_transitAccurate(
+		const AltMap& alts, const AltMap& slops, const AltMap& costs, const Map& s_walls,
+		const Waypoint& start, const Waypoint& finish, const Constraints& constraints
+){
+	using namespace std;
+	PRINT_VERSION
+
+	//TODO: PROCESS CONSTRAINTS PATH BEFORE INFLATION
+
+	if( s_walls(start.x, start.y)==Map::ST_BLOCKED || s_walls(finish.x, finish.y)==Map::ST_BLOCKED ){
+		cout<<"searchPath: "<<"some of interesting points are not available (before inflation)"<<endl;
+		return Path();
+	}
+
+	size_t rr = constraints.dimentions.radius;
+	if( rr<constraints.dimentions.radius) rr++;
+
+	Inflator i( rr , Map::ST_BLOCKED);
+	MapEditor e;
+
+	Map inflated_map = e.replace(
+			i.inflate(s_walls),
+			Map::ST_UNCHARTED, Map::ST_AVAILABLE
+		);
+	printBitmap("Inflated map", inflated_map);
+	printAsVector("INFLATED", inflated_map);
+
+	if( inflated_map(start.x, start.y)==Map::ST_BLOCKED || inflated_map(finish.x, finish.y)==Map::ST_BLOCKED ){
+		cout<<"searchPath: "<<"some of interesting points are not available (after inflation)"<<endl;
+		return Path();
+	}
+
+	Map walls =
+		e.coloring(
+			inflated_map,
+			start.x, start.y, Map::ST_AVAILABLE,Map::ST_BLOCKED
+		);
+	cout<<"Colored map: "<<endl<<walls<<endl;
+	printAsVector("COLORED", walls);
+
+	AltMap map = costs;
+
+	QTNode qt(0,map.w()-1, 0, map.h()-1, map);
+	qt.folding();
+
+	printQT("QT: ",qt);
+
+	// CHECK IF ALL INTERESTING POINTS (start, stop and transits) ARE AVAILABLE
+
+	if( walls(start.x, start.y)==ObsMap::ST_BLOCKED || walls(finish.x, finish.y)==ObsMap::ST_BLOCKED ){
+		cout<<"searchPath: "<<"some of interesting points are not available"<<endl;
+		return Path();
+	}
+	if(constraints.transits.size()!=0){
+		for( size_t i=0 ; i<constraints.transits.size(); i++ ){
+			if( walls(constraints.transits[i].x, constraints.transits[i].y)==ObsMap::ST_BLOCKED ){
+				cout<<"searchPath: "<<"some of transit points are not available"<<endl;
+				return Path();
+			}
+		}
+	}
+
+	// CREATE SEGMENTS
+
+	cout<<"CREATE SEGMENTS ("<<constraints.transits.size()<<"): "<<endl;
+	vector<Pair> segments;
+	if(constraints.transits.size()==0){
+		segments.push_back(Pair(start, finish));
+		printLine("   ", start, finish);
+	}else{
+		size_t i=0;
+		segments.push_back(Pair(start, constraints.transits[i]));
+		printLine("   ", start, constraints.transits[i]);
+		for(; i<constraints.transits.size()-1; i++){
+			segments.push_back(Pair(constraints.transits[i], constraints.transits[i+1]));
+			printLine("   ", constraints.transits[i], constraints.transits[i+1]);
+		}
+		segments.push_back(Pair(constraints.transits[i], finish));
+		printLine("   ", constraints.transits[i], finish);
+	}
+
+	// CREATE PATH
+
+	PField::Points g_smoothed_path;
+	Path g_smoothed;
+	BStarParameters bstarparams;
+	BStar b_star(&qt, alts, slops, walls, bstarparams);
+	cout<<"Search B* paths for segments: "<<endl;
+	for( size_t i=0; i<segments.size(); i++){
+		Path path;
+		#define SEGMENT segments[i].s.x, segments[i].s.y,  segments[i].g.x,segments[i].g.y
+
+		printLine("PROCESS SEGMENT", segments[i].s, segments[i].g);
+
+		BStar::Path qt_path = b_star.search( SEGMENT );
+
+		cout<<"founded path size is "<<qt_path.size()<<endl;
+
+		vector<QTNode::XY> points = qt_path;
+		for( size_t p=0; p<points.size(); p++ ){
+			path.push_back(Waypoint(points[p].x,points[p].y));
+			cout<<"("<<points[p].x<<","<<points[p].y<<") ";
+		}cout<<endl;
+
+		#undef SEGMENT
+
+#ifdef DO_SMOOTHING
+		PField::SmoothingParameters pf_params;
+		SET_PF_PARAMETERS(pf_params)
+
+		PField pf(s_walls, path);
+		PField::Points smoothed_path = pf.smooth(pf_params);
+
+		cout<<"    "<<i<<")";
+		printInLine("smoothed path",smoothed_path);
+		printAsVector("SMOOTHED", smoothed_path);
+
+
+		Path smoothed = pf.smoothWaypoints(pf_params);
+
+		cout<<"    "<<i<<")";
+		printInLine("smoothed path (rounded for grid)",smoothed);
+		printAsVector("SMOOTHED (ROUNDED)", smoothed);
+
+		append(g_smoothed_path, smoothed_path);
+#else
+		Path smoothed = path;
+#endif
+		append(g_smoothed, smoothed);
+	}
+
+	printInLine("G smoothed path",g_smoothed_path);
+	printAsVector("G SMOOTHED", g_smoothed_path);
+
+	printInLine("G smoothed path (rounded for grid)",g_smoothed);
+	printAsVector("G SMOOTHED (ROUNDED)", g_smoothed);
+
+
+	return g_smoothed;
+}
 
 int cogniteam_pathplanning_test(int argc, char** argv) {
 	cout << "START: cogniteam_pathplanning_test" << endl; // prints PP
@@ -1055,7 +1201,7 @@ int cogniteam_pathplanning_test_alts_simple(int argc, char** argv) {
 	printBitmap("map with smoothed path",map);
 
 }
-int cogniteam_pathplanning_test_alts(int argc, char** argv) {
+int cogniteam_pathplanning_test_alts(int argc, char** argv, int planning_code ) {
 	cout << "START: cogniteam_pathplanning_test_transits" << endl; // prints PP
 
 	double* cmap = 0;
@@ -1109,9 +1255,18 @@ int cogniteam_pathplanning_test_alts(int argc, char** argv) {
 	Attractors attractors;
 	Constraints con(dimentions, transits, attractors);
 
+	Path smoothed;
+	switch(planning_code){
+	case 1:
+		smoothed= test_searchPath(alts, slops, costs, walls, start, finish, con); break;
+	case 2:
+		smoothed = test_searchPath(walls, start, finish, con); break;
+	case 3:
+		smoothed= test_searchPath_transitAccurate(alts, slops, costs, walls, start, finish, con); break;
+	case 4:
+		smoothed = test_searchPath_transitAccurate(walls, start, finish, con); break;
+	};
 
-	Path smoothed = test_searchPath(alts, slops, costs, walls, start, finish, con);
-//	Path smoothed = test_searchPath(walls, start, finish, con);
 	double slop_counter = 0;
 	for( size_t i=0;i<smoothed.size(); i++){
 		walls(smoothed[i].x, smoothed[i].y)='o';

@@ -1,6 +1,8 @@
 #include "PathPlanner.h"
 #include "PField.h"
 
+typedef World Map;
+
 // copy from HEADER
 #define SYNCHRONIZED boost::mutex::scoped_lock l(_mtx);
 #define LOCK( X ) boost::shared_ptr<boost::mutex::scoped_lock> X(new boost::mutex::scoped_lock(_mtx));
@@ -26,12 +28,24 @@
 
 			Constraints constraints(_data.dimentions, _data.transits, _data.attractors);
 			
-			_data.map(_data.start.x, _data.start.y) = Map::ST_AVAILABLE;
-			SmoothedPath _path = searchPath_transitAccurate(_data.map, _data.start, _data.finish, constraints);
+
+#if MAP_MODE == MM_ALTS
+			_data.map.walls(_data.start.x, _data.start.y) = ObsMap::ST_AVAILABLE;
+			ObsMap printed_map = _data.map.walls;
+			SmoothedPath _path = searchPath_transitAccurate(
+					_data.map.altitudes, _data.map.slops, _data.map.costs, _data.map.walls,
+					_data.start, _data.finish, constraints
+			);
+#else
+			_data.map.grid(_data.start.x, _data.start.y) = ObsMap::ST_AVAILABLE;
+			ObsMap printed_map = _data.map.grid;
+			SmoothedPath _path = searchPath_transitAccurate(_data.map.grid, _data.start, _data.finish, constraints);
+#endif
+
 			ROS_INFO("Calculated path: %s",STR(_path));
 			
-			PField pf(_data.map, Path());
-			Map map = _data.map;
+			PField pf(printed_map, Path());
+			ObsMap map = printed_map;
 			Path spath = pf.castPath(_path);
 			for( size_t wp=0;wp<spath.size();wp++){
 				map(spath[wp].x,spath[wp].y)='o';

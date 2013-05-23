@@ -24,7 +24,7 @@ using namespace C0_RobilTask;
 #define TIME_STR(T) std::string(ctime(&T)).substr(0,std::string(ctime(&T)).size()-1)
 #define SET_CURRENT_TIME(V) {V = NOW;}
 
-#define USE_ALT_MAP
+typedef World Map;
 
 
 class PathPlanningServer:public RobilTask{
@@ -286,12 +286,14 @@ public:
 			SYNCH(SET_CURRENT_TIME(statistic.time_map_lastReceive));
 			
 			MapProperties mprop = extractMapProperties(c22.response);
-#ifdef USE_ALT_MAP
+#if MAP_MODE == MM_ALTS
 			AltMap alts = extractMap(c22.response, mprop);
-			Map map = AltTransforms(alts, AltTransformsParameters()).walls();
 #else
-			Map map = extractOccupancyGrid(c22.response, mprop);
+			AltMap alts(0,0);
 #endif
+			ObsMap grid = extractOccupancyGrid(c22.response, mprop);
+			Map map; map.update(grid, alts);
+
 			Gps2Grid gps_grid = extractLocation(c22.response, mprop);
 			
 			bool map_size_ok = map.w()>0 && map.h()>0;
@@ -332,12 +334,14 @@ public:
 		SYNCH(SET_CURRENT_TIME(statistic.time_map_lastReceive));
 
 		MapProperties mprop = extractMapProperties(*msg);
-#ifdef USE_ALT_MAP
+#if MAP_MODE == MM_ALTS
 		AltMap alts = extractMap(*msg, mprop);
-		Map map = AltTransforms(alts, AltTransformsParameters()).walls();
 #else
-		Map map = extractOccupancyGrid(*msg, mprop);
+		AltMap alts(0,0);
 #endif
+		ObsMap grid = extractOccupancyGrid(*msg, mprop);
+		Map map; map.update(grid, alts);
+
 		Gps2Grid gps_grid = extractLocation(*msg, mprop);
 
 		bool map_size_ok = map.w()>0 && map.h()>0;

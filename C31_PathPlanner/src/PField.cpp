@@ -4,6 +4,7 @@
 
 using namespace std;
 typedef vector<Vec2d> Points;
+typedef PField::Map Map;
 
 #define DISPLAY_VIEW_FRAME 0
 #define DISPLAY_ATTRACTORS 0

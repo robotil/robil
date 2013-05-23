@@ -58,7 +58,7 @@ public:
 #endif
 		std::cout<<"distanceBetweenPoints" << pf_params.distanceBetweenPoints <<std::endl;
 
-		PField pf(Map(10,10), Waypoints());
+		PField pf(ObsMap(10,10), Waypoints());
 		Points reduced = pf.reducePath(path, pf_params);
 		reduced = pf.reducePath(reduced, pf_params);
 		reduced = pf.reducePath(reduced, pf_params);
