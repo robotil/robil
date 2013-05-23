@@ -488,21 +488,29 @@ public class Document extends JPanel {
 			outElements.add(clonedElement);
 		}
 		
+		// Arrows
 		for (GElement arrow : sourceArrows) {
 			ArrayList<GElement> clonedTargets = new ArrayList<GElement>();
 			
 			if (!clonedElements.containsKey(arrow.getAsArrow().source))
 				continue;
 			
+			GElement decorator = null;
+			
 			for (GElement target : arrow.getAsArrow().targets)
 				if (clonedElements.containsKey(target))
 					clonedTargets.add(clonedElements.get(target));
+				else if (target.isDecorator())
+					decorator = target.clone();
 				else
 					continue;
 			
 			Arrow clonedArrow = arrow.getAsArrow().clone(
 				clonedElements.get(arrow.getAsArrow().source), 
 				clonedTargets);
+			
+			if (decorator != null)
+				clonedArrow.add(0, decorator);
 			
 			outArrows.add(clonedArrow);
 		}
@@ -1205,13 +1213,17 @@ public class Document extends JPanel {
 	public void onStop(StopStreamMessage message) {
 		Log.i("STOPSTREAM", "Plan execution finished [" + message.getFinishReason() + "]");
 		
+		if (_currentPlanExecution == null)
+			_currentPlanExecution = new PlanExecution();
+		
 		_currentPlanExecution.stop(
 				findTaskById(message.getTargetTaskId()),
 				findTasksById(message.getTasksTree()),
 				message.getFinishReason() == PlanFinishReason.Failure,  
 				false);
-		
+	
 		_executionResults.add(_currentPlanExecution);
+		
 
 		_planExecutionMessage = _currentPlanExecution.toString() + String.format("(%d)", message.getFinishCode());
 		

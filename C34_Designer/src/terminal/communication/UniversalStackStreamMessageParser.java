@@ -17,9 +17,9 @@ public class UniversalStackStreamMessageParser extends MessageParser<StackStream
 	 */
 	@Override
 	public StackStreamMessage parse(String inputString) {
-		if(inputString.indexOf("ExeStack: changed")>=0){
+		if (inputString.indexOf("ExeStack: changed") >= 0) {
 			return full_parser.parse(inputString);
-		}else{
+		} else {
 			return compact_parser.parse(inputString);
 		}
 	}
