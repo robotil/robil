@@ -509,8 +509,10 @@ public class Document extends JPanel {
 				clonedElements.get(arrow.getAsArrow().source), 
 				clonedTargets);
 			
-			if (decorator != null)
+			if (decorator != null) {
 				clonedArrow.add(0, decorator);
+				outElements.add(decorator);
+			}
 			
 			outArrows.add(clonedArrow);
 		}
