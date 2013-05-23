@@ -96,7 +96,6 @@ class QS_WalkingMode(WalkingMode):
         command = 0
         if ("Idle" == self._WalkingModeStateMachine.GetCurrentState().Name):
             self._Odometer.SetPosition(state.pos_est.position.x,state.pos_est.position.y)
-            pass
         elif ("Wait" == self._WalkingModeStateMachine.GetCurrentState().Name):
             self._Odometer.SetPosition(state.pos_est.position.x,state.pos_est.position.y)
             print("Odometer Updated")
@@ -156,21 +155,22 @@ class QS_WalkingMode(WalkingMode):
     # the current robot position   
     def asi_state_cb(self, state):
         command = 0
-        #print(state.step_feedback.status_flags)
+        #print("Current: ",state.current_behavior,"Desired: ",state.desired_behavior)
         # When the robot status_flags are 1 (SWAYING), you can publish the next step command.
         if (state.step_feedback.status_flags == 1 and not self._bIsSwaying):
             command = self.HandleStateMsg(state)
         elif (state.step_feedback.status_flags == 2 and self._bIsSwaying):
             self._bIsSwaying = False
-            #print("step done")
-#        elif(state.step_feedback.status_flags != 1 and state.step_feedback.status_flags != 2):
-#            print("State status flag:",state.step_feedback.status_flags)
+            print("step done")
         if (0 !=command):
             self._command = command
             self._bIsSwaying = True
         
-        if(0 != self._command):
+        if(0 == state.current_behavior and 0 != self._command):
             self.asi_command.publish(self._command)
+            self._command = 0
+            print("step start")
+            
 
     def _odom_cb(self,odom):
         self._LPP.UpdatePosition(odom.pose.pose.position.x,odom.pose.pose.position.y)
