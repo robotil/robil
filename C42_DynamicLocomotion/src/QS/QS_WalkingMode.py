@@ -41,6 +41,7 @@ class QS_WalkingMode(WalkingMode):
         self._Odometer = Odometer()
         self._bDone = False
         self._bIsSwaying = False
+        self._command = 0
         
     def Initialize(self):
         WalkingMode.Initialize(self)
@@ -99,16 +100,16 @@ class QS_WalkingMode(WalkingMode):
         elif ("Wait" == self._WalkingModeStateMachine.GetCurrentState().Name):
             self._Odometer.SetPosition(state.pos_est.position.x,state.pos_est.position.y)
             print("Odometer Updated")
-            print(2)
+            #print(2)
             self._WalkingModeStateMachine.PerformTransition("Go")
         elif ("Walking" == self._WalkingModeStateMachine.GetCurrentState().Name):
-            print(3)
+            #print(3)
             if (QS_PathPlannerEnum.Active == self._LPP.State):
                 command = self.GetCommand()
             elif(QS_PathPlannerEnum.Waiting == self._LPP.State):
                 self._RequestFootPlacements()
         elif ("Done" == self._WalkingModeStateMachine.GetCurrentState().Name):
-            print(4)
+            #print(4)
             self._bDone = True
         else:
             raise Exception("QS_WalkingModeStateMachine::Bad State Name")
@@ -127,10 +128,11 @@ class QS_WalkingMode(WalkingMode):
             else:
                 listSteps = []
                 for desired in resp.foot_placement_path:
+                    #print("Desired: ",desired)
                     command = AtlasSimInterfaceCommand()
                     step = command.step_params.desired_step
                     step.foot_index = desired.foot_index
-                    step.swing_height = 0.4#desired.clearance_height
+                    step.swing_height = desired.clearance_height#0.4
                     step.pose.position.x = desired.pose.position.x
                     step.pose.position.y = desired.pose.position.y
                     step.pose.position.z = desired.pose.position.z
@@ -141,7 +143,7 @@ class QS_WalkingMode(WalkingMode):
                     step.pose.orientation.w = Q[3]
                     listSteps.append(step)
                 self._LPP.SetPath(listSteps)
-                print(listSteps)
+                #print("listSteps: ",listSteps)
         except rospy.ServiceException, e:
             print "Foot Placement Service call failed: %s"%e
     
@@ -161,6 +163,8 @@ class QS_WalkingMode(WalkingMode):
         elif (state.step_feedback.status_flags == 2 and self._bIsSwaying):
             self._bIsSwaying = False
             #print("step done")
+#        elif(state.step_feedback.status_flags != 1 and state.step_feedback.status_flags != 2):
+#            print("State status flag:",state.step_feedback.status_flags)
         if (0 !=command):
             self._command = command
             self._bIsSwaying = True
