@@ -86,6 +86,49 @@ static vector<char> readMap(string fname, size_t& w, size_t& h, bool verb=false)
 	return map;
 }
 
+static vector<double> readAltMap(string fname, size_t& w, size_t& h, double min, double max, bool reverse_colors, bool verb=false){
+	ifstream f(fname.c_str());
+	stringstream sl;
+	string line;
+	vector<string> lines;
+	//int w,h;
+	vector<double> map;
+	while( getline(f, line) ){
+		//cout<<line<<endl;
+		lines.push_back(line);
+	}
+	Dim dim = getDim(lines);
+	w = dim.w; h=dim.h;
+	if(verb) cout<<"Dim: "<<w<<"x"<<h<<(dim.reversed?" reversed":"")<<endl;
+
+	size_t s, e, inc;
+	if(dim.reversed){
+		s=1+dim.h-1; e=0; inc=-1;
+	}else{
+		s=1; e=s+dim.h; inc=1;
+	}
+
+	for(size_t i=s; i!=e; i+=inc){
+		stringstream sl(lines[i]);
+
+		double n;
+		int nline;
+		if(!(sl>>nline)) break;
+		while(true){
+			int c;
+			if(!(sl>>c)) break;
+			if(reverse_colors) c=255-c;
+			n=((double)c/255.0)*(max-min)-min;
+			//cout<<n;
+			if(verb) cout<<c;
+			map.push_back(n);
+		}
+		if(verb) cout<<endl;
+	}
+
+	return map;
+}
+
 }
 
 #endif /* MAPFILEREADER_HPP_ */

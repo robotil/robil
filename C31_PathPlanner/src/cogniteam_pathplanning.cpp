@@ -20,346 +20,12 @@
 
 using namespace std;
 
-// -------------------------- MAP ---------------------------------------------
-int Map::map_id_counter = 0;
-Map::Map(int w, int h):map_id(map_id_counter++), _w(w),_h(h){
-	_data.resize(_w*_h);
-	for(size_t i=0;i<_data.size();i++) _data[i]=ST_UNCHARTED;
-}
-Map::Map(int w, int h, char* cmap):map_id(map_id_counter++), _w(w),_h(h){
-	_data.resize(_w*_h);
-	for(size_t i=0;i<_data.size();i++) _data[i]=cmap[i];
-}
-Map::Map(const Map& map):map_id(map_id_counter++), _w(map._w),_h(map._h){
-	_data.resize(_w*_h);
-	for(size_t i=0;i<_data.size();i++) _data[i]=map._data[i];
-}
+typedef ObsMap Map;
 
-const Map& Map::operator=(const Map& other){
-	_w = other._w; _h = other._h;
-	if(_data.size()!=other._data.size()){
-		_data.resize(_w*_h);
-	}
-	for(size_t i=0;i<_data.size();i++) _data[i]=other._data[i];
-	return *this;
-}
+int BaseMap::map_id_counter = 0;
 
-ostream& operator<<(ostream& out, const Map& m){
-	out<<"  "; for(size_t x=0;x<10;x++){cout<<' '<<x<<' ';}for(size_t x=10;x<m.w();x++){cout<<x<<' ';} out<<endl;
-	for(long y=(long)m.h()-1;y>=0;y--){
-//	for(size_t y=0;y<m.h();y++){
-		if(y<10) out<<' '; out<<y;
-		for(size_t x=0;x<m.w();x++){
-			out<<' '<<m.str(x,y)<<' ';
-		}
-		out<<endl;
-	}
-	return out;
-}
 
-bool Map::inRange(long x, long y)const{
-	if(x<0||y<0) return false;
-	if(x>=(long)w()||y>=(long)h()) return false;
-	return true;
-}
-double Map::approximate(const long cx, const long cy, long& tx, long& ty, char ctype)const{
-// 	cout<<"tx="<<tx<<", ty="<<ty<<", ctype="<<ctype<<", cx="<<cx<<", cy="<<cy<<endl;
-	if(inRange(tx, ty)) return 0;
-	long x = 0;long y = 0;
-	#define DIST(x,y, xx, yy) ::hypot(double((xx-cx)-(x-cx)), double((yy-cy)-(y-cy)))
-	
-	double min_dis = DIST(tx,ty,  x,y);
-	long minX(-1), minY(-1);
-	const Map& me = *this;   
 
-//	#define proc if(me(x,y) == ctype){ double dis = DIST(tx,ty,  x,y); cout<<"x,y="<<x<<","<<y<<"="<<dis; if(min_dis>dis || minX<0){ min_dis=dis; minX=x; minY=y; cout<<" set as min: "<<minX<<","<<minY<<"="<<min_dis;} cout<<endl;}
-	#define proc if(me(x,y) == ctype){ double dis = DIST(tx,ty,  x,y); if(min_dis>dis || minX<0){ min_dis=dis; minX=x; minY=y;} }
-
-	for(; x< (long)w()	; x++){ proc }	x--; y++;
-	for(; y< (long)h()	; y++){ proc }	x--; y--;
-	for(; x>=0  		; x--){ proc }	x++; y++;
-	for(; y>=0  		; y--){ proc }
-
-	#undef proc
-	#undef DIST
-	tx = minX; ty=minY;
-// 	cout<<"----"<<endl;
-	return min_dis;
-}
-void Map::approximate(const long cx, const long cy, long& tx, long& ty)const{
-	long x(tx), y(ty);
-	if(inRange(tx, ty)){ /*cout<<"original x,y in range"<<endl;*/ return; }
-	double dis_av = approximate(cx, cy, tx, ty, Map::ST_AVAILABLE);
-	long x_av(tx), y_av(ty);
-
-	//if(inRange(tx, ty)){ cout<<"x,y on available celles in range : "<<tx<<","<<ty<<endl; return; }
-	tx=x; ty=y;
-	double dis_un = approximate(cx, cy, tx, ty, Map::ST_UNCHARTED);
-	long x_un(tx), y_un(ty);
-	
-	if(dis_av<=dis_un){ tx=x_av; ty=y_av; } else { tx=x_un; ty=y_un; }
-
-	if(inRange(tx, ty)){ /*cout<<"x,y on uncharted celles in range"<<endl;*/ return; }
-	approximate(cx, cy, tx, ty, Map::ST_BLOCKED);
-	//cout<<"x,y on blocked celles"<<endl;
-}
-// -------------------------- QTNode ---------------------------------------------
-
-QTNode::QTNode(size_t x1, size_t x2, size_t y1, size_t y2, const Map& map, QTNode* supper):
-	_x1(x1),_x2(x2),_y1(y1),_y2(y2),_supper(supper),_map(map){
-
-	state = _x1==_x2 && _y1==_y2 ? QTNode::st_sing : QTNode::st_mult;
-
-	::memset(subs, 0, 4*sizeof(QTNode*));
-	if(state!=st_sing){
-		size_t x11=x1, xn=(x2-x1)/2, x12=x1+xn, x21=x12+1, x22=x2;
-		size_t y11=y1, yn=(y2-y1)/2, y12=y1+yn, y21=y12+1, y22=y2;
-
-		#define CNODE(x11, x12, y11, y12, N) if(x11<=x12 && y11<=y12) subs[N]=new QTNode(x11, x12, y11, y12, map, this);
-		CNODE(x11, x12, y11, y12, 0)
-		CNODE(x21, x22, y11, y12, 1)
-		CNODE(x11, x12, y21, y22, 2)
-		CNODE(x21, x22, y21, y22, 3)
-		#undef CNODE
-	}
-}
-QTNode::~QTNode(){
-	for(size_t i=0;i<4;i++){
-		if(subs[i]) delete subs[i]; subs[i]=0;
-	}
-}
-#define FOR_ALL for(size_t i=0;i<4;i++)if(subs[i])
-
-const QTNode* QTNode::findEmpty(size_t x, size_t y)const{
-	if(!inRange(x,y)) return NULL;
-	if(state == st_bl) return NULL;
-	if(state == st_av) return this;
-	if(state == st_sing){
-		if(isEmpty()) return this;
-		return NULL;
-	}
-	FOR_ALL{
-		const QTNode* res = subs[i]->findEmpty(x,y);
-		if(res) return res;
-	}
-	return NULL;
-}
-
-bool QTNode::isAvailable(size_t x, size_t y)const{
-	if(!inRange(x,y)) return true;
-	if(isOneCell()){
-		return _map(_x1,_y1) == Map::ST_AVAILABLE;
-	}
-	if(state == st_bl) return false;
-	if(state == st_av) return true;
-	FOR_ALL{
-		if(subs[i]->inRange(x,y))
-			return subs[i]->isAvailable(x,y);
-	}
-	return true;
-}
-
-int QTNode::folding(){
-	if(isOneCell()){
-		return _map(_x1,_y1) == Map::ST_AVAILABLE ? 1 : -1;
-	}else{
-		int ca=0, cb=0;
-		FOR_ALL{
-			int res = subs[i]->folding();
-			if( res==1 ){
-				ca++;
-			}else if(res == -1){
-				cb++;
-			}
-		}else{ca++;cb++;}
-		if(ca==4 || cb==4){
-			FOR_ALL{delete subs[i]; subs[i]=0;}
-			if(ca==4){
-				state = st_av;
-				return 1;
-			}
-			state = st_bl;
-			return -1;
-		}
-		return 0;
-	}
-}
-
-vector<QTNode::XY> QTNode::getBorder()const{
-	vector<XY> res;
-	#define add(x,y) if(x>=0 && y>=0 && x<(long)_map.w() && y<(long)_map.h()){XY xy={x,y};res.push_back(xy);}
-	long x = _x1-1;long y = _y1-1;
-	for(; x<=(long)_x2; x++) add(x,y)
-	for(; y<=(long)_y2; y++) add(x,y)
-	for(; x>=(long)  _x1; x--) add(x,y)
-	for(; y>=(long)  _y1; y--) add(x,y)
-	return res;
-	#undef add
-}
-set<const QTNode*> QTNode::getNeighbors()const{
-	if(state == st_bl) return set<const QTNode*>();
-	if(state == st_mult){
-		set<const QTNode*> s;
-		#define UNION(A, B) {set<const QTNode*> b = B; for(set<const QTNode*>::const_iterator n=b.begin();n!=b.end();n++) A.insert(*n); }
-		FOR_ALL{ UNION(s, subs[i]->getNeighbors()); }
-		#undef UNION
-		return s;
-	}
-	vector<XY> border = getBorder();
-	set<const QTNode*> s;
-	for(size_t i=0;i<border.size();i++){
-		const QTNode* e = getRoot()->findEmpty(border[i].x, border[i].y);
-		if(e) s.insert(e);
-	}
-	return s;
-}
-size_t QTNode::linesIntersectCenter(size_t a1, size_t a2, size_t b1, size_t b2)const{
-	if(a1<=b1 && b2<=a2) return (b2+b1)/2;
-	if(b1<=a1 && a2<=b2) return (a2+a1)/2;
-	if(b2<a1 || a2<b1) return -1;
-	if(a1<=b1 && a2<=b2) return (a2+b1)/2;
-	if(b1<=a1 && b2<=a2) return (b2+a1)/2;
-	return -1;
-}
-vector<QTNode::XY> QTNode::corridorX(size_t x11, size_t x12, size_t x21, size_t x22, size_t y)const{
-	vector<XY> res;
-	if(x11>x22){ XY p1={x11,y}, p2={x22,y}; res.push_back(p1); res.push_back(p2); }
-	if(x21>x12){ XY p1={x12,y}, p2={x21,y}; res.push_back(p1); res.push_back(p2); }
-	return res;
-}
-vector<QTNode::XY> QTNode::corridorY(size_t y11, size_t y12, size_t y21, size_t y22, size_t x)const{
-	vector<XY> res;
-	if(y11>y22){ XY p1={x,y11}, p2={x,y22}; res.push_back(p1); res.push_back(p2); }
-	if(y21>y12){ XY p1={x,y12}, p2={x,y21}; res.push_back(p1); res.push_back(p2); }
-	return res;
-}
-vector<QTNode::XY> QTNode::corridorDiagonal(size_t x11, size_t x12, size_t x21, size_t x22,   size_t y11, size_t y12, size_t y21, size_t y22)const{
-	vector<XY> res;
-	if(y11>y22){
-		if(x11>x22){ XY p1={x11,y11}, p2={x22,y22}; res.push_back(p1); res.push_back(p2); }
-		if(x21>x12){ XY p1={x12,y11}, p2={x21,y22}; res.push_back(p1); res.push_back(p2); }
-	}
-	if(y21>y12){
-		if(x11>x22){ XY p1={x11,y12}, p2={x22,y21}; res.push_back(p1); res.push_back(p2); }
-		if(x21>x12){ XY p1={x12,y12}, p2={x21,y21}; res.push_back(p1); res.push_back(p2); }
-	}
-	return res;
-}
-
-vector<QTNode::XY> QTNode::getCorridor(const QTNode* target)const{
-	int y = linesIntersectCenter(_y1, _y2, target->_y1, target->_y2);
-	int x = linesIntersectCenter(_x1, _x2, target->_x1, target->_x2);
-	if(x<0 && y>=0) return corridorX(_x1, _x2, target->_x1, target->_x2, y);
-	if(x>=0 && y<0) return corridorY(_y1, _y2, target->_y1, target->_y2, x);
-	return corridorDiagonal(_x1, _x2, target->_x1, target->_x2,   _y1, _y2, target->_y1, target->_y2);
-}
-
-#undef FOR_ALL
-
-// -------------------------- AStar ---------------------------------------------
-
-namespace {
-	Vec2d vec2d(const AStar::QT& c){
-		return Vec2d(c->getCenterX(),c->getCenterY());
-	}
-}
-
-double AStar::heuristic_cost_estimate(size_t sx, size_t sy, size_t gx, size_t gy){
-		return Vec2d::distance(Vec2d(sx, sy), Vec2d(gx, gy));
-	}
-double AStar::dist_between(QT current, QT neighbor){
-		return Vec2d::distance( vec2d(current), vec2d(neighbor) );
-	}
-
-AStar::Path AStar::search(size_t sx, size_t sy, size_t gx, size_t gy, AStar::QT qtRoot){
-	 Path path;
-	 QT start = qtRoot->findEmpty(sx,sy);
-	 QT goal = qtRoot->findEmpty(gx,gy);
-	 if(start==NULL || goal==NULL) return path;
-
-	 set<QT> closedset;    								// The set of nodes already evaluated.
-	 QTComparison comparison(*this);
-	 priority_queue<QT,vector<QT>, QTComparison> openset(comparison);
-	 map<QT,QT> came_from;    							// The map of navigated nodes.
-
-	 map<QT,double> g_score;    // Cost from start along best known path.
-	 f_score = map<QT,double>();
-
-	 g_score[start]=0;
-	 // Estimated total cost from start to goal .
-	 f_score[start] = g_score[start] + heuristic_cost_estimate(sx,sy, gx, gy);
-	 openset.push(start);    							// The set of tentative nodes to be evaluated, initially containing the start node
-
-	 while( openset.empty()==false ){
-		 QT current  =  openset.top(); // the node in openset having the lowest f_score[] value
-		 if( current == goal ){
-			 return reconstruct_path(came_from, goal);
-		 }
-
-		 openset.pop(); // remove current from openset
-		 closedset.insert(current); // add current to closedset
-		 QTNode::NEIGHBORS neighbor_nodes = current->getNeighbors();
-		 for(QTNode::NEIGHBORS::const_iterator i_neighbor=neighbor_nodes.begin();i_neighbor!=neighbor_nodes.end();i_neighbor++){
-			 QT neighbor = *i_neighbor;
-			 if( closedset.find(neighbor)!=closedset.end() ){
-				 continue;
-			 }
-			 double tentative_g_score = g_score[current] + dist_between(current,neighbor);
-
-			 bool not_in_openset = f_score.find(neighbor)==f_score.end();
-			 if( not_in_openset || tentative_g_score <= g_score[neighbor] ){
-				 came_from[neighbor] = current;
-				 g_score[neighbor] = tentative_g_score;
-				 // Estimated total cost from start to goal through neighbor.
-				 f_score[neighbor] = g_score[neighbor] + heuristic_cost_estimate(neighbor->getCenterX(), neighbor->getCenterY(), gx, gy);
-				 if(not_in_openset) openset.push(neighbor);
-			 }
-		 }
-	 }
-	 return Path();
-}
-
-vector<QTNode::XY> QTPath::extractPoints(size_t sx, size_t sy, size_t gx, size_t gy, bool centers)const{
-	typedef const QTNode* QT;
-	const vector<QT>& path = _path;
-	vector<QTNode::XY> points;
-	if(path.size()>0){
-		QTNode::XY p = {sx,sy};
-		points.push_back(p);
-		if(path.size()>=2){
-			const QTNode* prev = path[0];
-			for(size_t i=1;i<path.size()-1;i++) {
-				vector<QTNode::XY> corr = prev->getCorridor(path[i]);
-				points.push_back(corr[0]);
-				points.push_back(corr[1]);
-				if(centers){
-					QTNode::XY p = {path[i]->getCenterX(),path[i]->getCenterY()};
-					points.push_back(p);
-				}
-				prev = path[i];
-			}
-			{
-				vector<QTNode::XY> corr = prev->getCorridor(path[path.size()-1]);
-				points.push_back(corr[0]);
-				points.push_back(corr[1]);
-			}
-		}
-		QTNode::XY e = {gx,gy};
-		points.push_back(e);
-	}
-	return points;
-}
-
-AStar::Path AStar::reconstruct_path(map<AStar::QT,AStar::QT>& came_from, AStar::QT current_node){
-	 if( came_from.find(current_node) != came_from.end() ){
-		 Path p = reconstruct_path(came_from, came_from[current_node]);
-		 p.push_back(current_node);
-		 return p;
-	 }else{
-		 Path p; p.push_back(current_node);
-		 return p;
-	 }
-}
 
 // -------------------------------- Inflator -------------------------------------
 
@@ -473,6 +139,7 @@ namespace {
 
 PField::Points searchPath(const Map& source_map, const Waypoint& start, const Waypoint& finish, const Constraints& constraints){
 	using namespace std;
+	PRINT_VERSION
 
 	//cout<<"searchPath: "<<"Input map:"<<endl<<source_map<<endl;
 	
@@ -507,7 +174,7 @@ PField::Points searchPath(const Map& source_map, const Waypoint& start, const Wa
 	
 	//cout<<"searchPath: "<<"Inflated map:"<<endl<<map<<endl;
 
-	QTNode qt(0,map.w()-1, 0, map.h()-1, map);
+	BWQTNode qt(0,map.w()-1, 0, map.h()-1, map);
 	qt.folding();
 
 	// CHECK IF ALL INTERESTING POINTS (start, stop and transits) ARE AVAILABLE
@@ -545,7 +212,7 @@ PField::Points searchPath(const Map& source_map, const Waypoint& start, const Wa
 	for( size_t i=0; i<segments.size(); i++){
 		#define SEGMENT segments[i].s.x, segments[i].s.y,  segments[i].g.x,segments[i].g.y
 		AStar::Path qt_path = a_star.search( SEGMENT , &qt);
-		vector<QTNode::XY> points;
+		vector<BWQTNode::XY> points;
 		if( qt_path.size()>0 ) points = QTPath(qt_path).extractPoints( SEGMENT );
 		for( size_t p=0; p<points.size(); p++ ){
 			path.push_back(Waypoint(points[p].x,points[p].y));
@@ -554,7 +221,7 @@ PField::Points searchPath(const Map& source_map, const Waypoint& start, const Wa
 	}
 
 	PField::SmoothingParameters pf_params;
-	SET_PARAMETERS(pf_params)
+	SET_PF_PARAMETERS(pf_params)
 
 	PField pf(map, path);
 	PField::Points smoothed_path = pf.smooth(pf_params);
@@ -564,6 +231,7 @@ PField::Points searchPath(const Map& source_map, const Waypoint& start, const Wa
 
 PField::Points searchPath_transitAccurate(const Map& source_map, const Waypoint& start, const Waypoint& finish, const Constraints& constraints){
 	using namespace std;
+	PRINT_VERSION
 
 	//TODO: PROCESS CONSTRAINTS PATH BEFORE INFLATION
 
@@ -594,7 +262,7 @@ PField::Points searchPath_transitAccurate(const Map& source_map, const Waypoint&
 			start.x, start.y, Map::ST_AVAILABLE,Map::ST_BLOCKED
 		);
 
-	QTNode qt(0,map.w()-1, 0, map.h()-1, map);
+	BWQTNode qt(0,map.w()-1, 0, map.h()-1, map);
 	qt.folding();
 
 	// CHECK IF ALL INTERESTING POINTS (start, stop and transits) ARE AVAILABLE
@@ -633,7 +301,7 @@ PField::Points searchPath_transitAccurate(const Map& source_map, const Waypoint&
 		Path path;
 		#define SEGMENT segments[i].s.x, segments[i].s.y,  segments[i].g.x,segments[i].g.y
 		AStar::Path qt_path = a_star.search( SEGMENT , &qt);
-		vector<QTNode::XY> points;
+		vector<BWQTNode::XY> points;
 		if( qt_path.size()>0 ) points = QTPath(qt_path).extractPoints( SEGMENT );
 		for( size_t p=0; p<points.size(); p++ ){
 			path.push_back(Waypoint(points[p].x,points[p].y));
@@ -641,19 +309,233 @@ PField::Points searchPath_transitAccurate(const Map& source_map, const Waypoint&
 		#undef SEGMENT
 
 		PField::SmoothingParameters pf_params;
-		SET_PARAMETERS(pf_params)
+		SET_PF_PARAMETERS(pf_params)
 
 		PField pf(map, path);
 		PField::Points smoothed_path = pf.smooth(pf_params);
 
-		for( size_t i=0;i<smoothed_path.size(); i++){
-			g_smoothed_path.push_back(smoothed_path[i]);
-		}
-
+		append(g_smoothed_path, smoothed_path);
 	}
 
 	return g_smoothed_path;
 }
+
+#define EmptyPath PField::Points()
+
+PField::Points searchPath(
+		const AltMap& alts, const AltMap& slops, const AltMap& costs, const Map& s_walls,
+		const Waypoint& start, const Waypoint& finish, const Constraints& constraints
+){
+	using namespace std;
+	PRINT_VERSION
+
+	//TODO: PROCESS CONSTRAINTS PATH BEFORE INFLATION
+
+	if( s_walls(start.x, start.y)==Map::ST_BLOCKED || s_walls(finish.x, finish.y)==Map::ST_BLOCKED ){
+		cout<<"searchPath: "<<"some of interesting points are unattainable (before inflation)"<<endl;
+		return EmptyPath;
+	}
+
+	size_t rr = constraints.dimentions.radius;
+	if( rr<constraints.dimentions.radius) rr++;
+
+	Inflator i( rr , Map::ST_BLOCKED);
+	MapEditor e;
+
+	Map inflated_map = e.replace(
+			i.inflate(s_walls),
+			Map::ST_UNCHARTED, Map::ST_AVAILABLE
+		);
+
+	if( inflated_map(start.x, start.y)==Map::ST_BLOCKED || inflated_map(finish.x, finish.y)==Map::ST_BLOCKED ){
+		cout<<"searchPath: "<<"some of interesting points are unattainable (after inflation)"<<endl;
+		return EmptyPath;
+	}
+
+	Map walls =
+		e.coloring(
+			inflated_map,
+			start.x, start.y, Map::ST_AVAILABLE,Map::ST_BLOCKED
+		);
+
+	AltMap map = costs;
+
+	QTNode qt(0,map.w()-1, 0, map.h()-1, map);
+	qt.folding();
+
+	// CHECK IF ALL INTERESTING POINTS (start, stop and transits) ARE AVAILABLE
+
+	if( walls(start.x, start.y)==ObsMap::ST_BLOCKED || walls(finish.x, finish.y)==ObsMap::ST_BLOCKED ){
+		cout<<"searchPath: "<<"some of interesting points are unattainable"<<endl;
+		return EmptyPath;
+	}
+	if(constraints.transits.size()!=0){
+		for( size_t i=0 ; i<constraints.transits.size(); i++ ){
+			if( walls(constraints.transits[i].x, constraints.transits[i].y)==ObsMap::ST_BLOCKED ){
+				cout<<"searchPath: "<<"some of transit points are unattainable"<<endl;
+				return EmptyPath;
+			}
+		}
+	}
+
+	// CREATE SEGMENTS
+
+	vector<Pair> segments;
+	if(constraints.transits.size()==0){
+		segments.push_back(Pair(start, finish));
+	}else{
+		size_t i=0;
+		segments.push_back(Pair(start, constraints.transits[i]));
+		for(; i<constraints.transits.size()-1; i++){
+			segments.push_back(Pair(constraints.transits[i], constraints.transits[i+1]));
+		}
+		segments.push_back(Pair(constraints.transits[i], finish));
+	}
+
+	// CREATE PATH
+
+	Path path;
+	BStarParameters bstarparams;
+	BStar b_star(&qt, alts, slops, walls, bstarparams);
+	for( size_t i=0; i<segments.size(); i++){
+		#define SEGMENT segments[i].s.x, segments[i].s.y,  segments[i].g.x,segments[i].g.y
+
+		BStar::Path qt_path = b_star.search( SEGMENT );
+		vector<QTNode::XY> points = qt_path;
+		for( size_t p=0; p<points.size(); p++ ){
+			path.push_back(Waypoint(points[p].x,points[p].y));
+		}
+		#undef SEGMENT
+	}
+#ifdef DO_SMOOTHING
+	PField::SmoothingParameters pf_params;
+	SET_PF_PARAMETERS(pf_params)
+
+	PField pf(s_walls, path);
+	PField::Points smoothed_path = pf.smooth(pf_params);
+
+	return smoothed_path;
+#else
+	PField::Points smoothed_path;
+	for( size_t p=0; p<path.size(); p++ )
+		smoothed_path.push_back(Vec2d(path[p].x,path[p].y));
+	return smoothed_path;
+#endif
+}
+
+PField::Points searchPath_transitAccurate(
+		const AltMap& alts, const AltMap& slops, const AltMap& costs, const Map& s_walls,
+		const Waypoint& start, const Waypoint& finish, const Constraints& constraints
+){
+	using namespace std;
+	PRINT_VERSION
+
+	//TODO: PROCESS CONSTRAINTS PATH BEFORE INFLATION
+
+	if( s_walls(start.x, start.y)==Map::ST_BLOCKED || s_walls(finish.x, finish.y)==Map::ST_BLOCKED ){
+		cout<<"searchPath: "<<"some of interesting points are unattainable (before inflation)"<<endl;
+		return EmptyPath;
+	}
+
+	size_t rr = constraints.dimentions.radius;
+	if( rr<constraints.dimentions.radius) rr++;
+
+	Inflator i( rr , Map::ST_BLOCKED);
+	MapEditor e;
+
+	Map inflated_map = e.replace(
+			i.inflate(s_walls),
+			Map::ST_UNCHARTED, Map::ST_AVAILABLE
+		);
+
+	if( inflated_map(start.x, start.y)==Map::ST_BLOCKED || inflated_map(finish.x, finish.y)==Map::ST_BLOCKED ){
+		cout<<"searchPath: "<<"some of interesting points are unattainable (after inflation)"<<endl;
+		return EmptyPath;
+	}
+
+	Map walls =
+		e.coloring(
+			inflated_map,
+			start.x, start.y, Map::ST_AVAILABLE,Map::ST_BLOCKED
+		);
+
+	AltMap map = costs;
+
+	QTNode qt(0,map.w()-1, 0, map.h()-1, map);
+	qt.folding();
+
+	// CHECK IF ALL INTERESTING POINTS (start, stop and transits) ARE AVAILABLE
+
+	if( walls(start.x, start.y)==ObsMap::ST_BLOCKED || walls(finish.x, finish.y)==ObsMap::ST_BLOCKED ){
+		cout<<"searchPath: "<<"some of interesting points are unattainable"<<endl;
+		return EmptyPath;
+	}
+	if(constraints.transits.size()!=0){
+		for( size_t i=0 ; i<constraints.transits.size(); i++ ){
+			if( walls(constraints.transits[i].x, constraints.transits[i].y)==ObsMap::ST_BLOCKED ){
+				cout<<"searchPath: "<<"some of transit points are unattainable"<<endl;
+				return EmptyPath;
+			}
+		}
+	}
+
+	// CREATE SEGMENTS
+
+	vector<Pair> segments;
+	if(constraints.transits.size()==0){
+		segments.push_back(Pair(start, finish));
+	}else{
+		size_t i=0;
+		segments.push_back(Pair(start, constraints.transits[i]));
+		for(; i<constraints.transits.size()-1; i++){
+			segments.push_back(Pair(constraints.transits[i], constraints.transits[i+1]));
+		}
+		segments.push_back(Pair(constraints.transits[i], finish));
+	}
+
+	// CREATE PATH
+
+	PField::Points g_smoothed_path;
+	Path g_smoothed;
+	BStarParameters bstarparams;
+	BStar b_star(&qt, alts, slops, walls, bstarparams);
+	for( size_t i=0; i<segments.size(); i++){
+		Path path;
+		#define SEGMENT segments[i].s.x, segments[i].s.y,  segments[i].g.x,segments[i].g.y
+
+		BStar::Path qt_path = b_star.search( SEGMENT );
+
+		vector<QTNode::XY> points = qt_path;
+		for( size_t p=0; p<points.size(); p++ ){
+			path.push_back(Waypoint(points[p].x,points[p].y));
+		}
+
+		#undef SEGMENT
+
+#ifdef DO_SMOOTHING
+		PField::SmoothingParameters pf_params;
+		SET_PF_PARAMETERS(pf_params)
+
+		PField pf(s_walls, path);
+		PField::Points smoothed_path = pf.smooth(pf_params);
+
+#else
+		PField::Points smoothed_path;
+		for( size_t p=0; p<path.size(); p++ )
+			smoothed_path.push_back(Vec2d(path[p].x,path[p].y));
+#endif
+		append(g_smoothed_path, smoothed_path);
+	}
+
+	return g_smoothed_path;
+}
+
+#undef EmptyPath
+
+
+
+
+
 
 #include "cogniteam_pathplanning_tests.cpp"
 

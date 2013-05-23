@@ -15,7 +15,6 @@ public class Arrow extends GElement {
 
 	public interface ArrayElement {
 		public void add(Arrow array);
-
 		public Arrow getArray();
 	}
 
