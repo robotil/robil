@@ -362,13 +362,18 @@ bool C23_Detector::detectCar(Mat srcImg, const sensor_msgs::PointCloud2::ConstPt
     pcl::PointCloud<pcl::PointXYZ>pclcloud;
     pcl::fromROSMsg<pcl::PointXYZ>(*cloud,pclcloud);
     
-    // _generalDetector.detect(srcImg);
+     _generalDetector.detect(srcImg);
     cout << "Done detection" << endl;
     // 215,365,182,114
-    _generalDetector._x = 215;
+    /*_generalDetector._x = 215;
     _generalDetector._y = 365;
     _generalDetector._width = 182;
     _generalDetector._height = 114;
+    */
+    Rect carRect(_generalDetector._x, _generalDetector._y, _generalDetector._width, _generalDetector._height);
+    Mat carImage(srcImg, carRect);
+    imshow("Car patch", carImage);
+    waitKey(0);
     
     Point2f minImagePoint;
     minImagePoint.x = -1;
@@ -383,6 +388,11 @@ bool C23_Detector::detectCar(Mat srcImg, const sensor_msgs::PointCloud2::ConstPt
         pcl::PointXYZ minPoint, absolutePoint;
         
         
+	
+	//Add a transformation matrix to convert the camera coordinates to absolute coordinates
+	//TO DO....
+	geometry_msgs::Pose pose;
+	
         //Get the closest point from the robot to the car
         cout << x << "," << y << "," << width << "," << height << endl;
         for(int i = x; i < x + width; i++) {
@@ -409,9 +419,9 @@ bool C23_Detector::detectCar(Mat srcImg, const sensor_msgs::PointCloud2::ConstPt
 	cout<<"Max depth: "<<minPoint.x<<endl;
 	for(int i = 1; i < 500 && i + minImagePoint.x < srcImg.cols; i +=10) {
 		      flag = 0;
-		      //cout << "Checking column: " << i << endl;
+		     // cout << "Checking column in right direction: " << i << endl;
 		      nanColumnFlag = true;
-		      for(int j= 150; j >= -150; j--) {
+		      for(int j= 150; j >= -150 && (minImagePoint.y -j >0 && minImagePoint.y -j <srcImg.rows); j--) {
 			depth = pclcloud.at(minImagePoint.x+i,minImagePoint.y-j).x;
 			
 			//cout<<"Depth: "<<depth<<endl;
@@ -447,11 +457,11 @@ bool C23_Detector::detectCar(Mat srcImg, const sensor_msgs::PointCloud2::ConstPt
 	nanColumnCounter = 0;
 	nanColumnFlag = true;
 	depth = 0;
-	for(int i = 0; i < 500; i +=10) {
+	for(int i = 0; i < 500 && minImagePoint.x-i >0; i +=10) {
 	    flag = 0;
-	    //cout << "Checking column: " << i << endl;
+	    //cout << "Checking column in left direction: " << i << endl;
 	    nanColumnFlag = true;
-	    for(int j= 150; j >= -150; j--) {
+	    for(int j= 150; j >= -150 && (minImagePoint.y -j >0 && minImagePoint.y -j <srcImg.rows); j--) {
 		depth = pclcloud.at(minImagePoint.x-i,minImagePoint.y-j).x;
 	      
 		if (depth!=depth)
@@ -483,21 +493,52 @@ bool C23_Detector::detectCar(Mat srcImg, const sensor_msgs::PointCloud2::ConstPt
          //Display the sub-region of the car found
          int carHeight = x1  - x0; //Asssume height and width are approximately the same
          
+          y0 = minImagePoint.y - carHeight/2;
+	  y1 = minImagePoint.y + carHeight/2;
+	  
+	 
+	 int srcImgWidth = srcImg.cols;
+	 int srcImgHeight = srcImg.rows;
+	 
+	 //Make sure the points are within the image bounds
+	 if(y1 > srcImgHeight)
+	   y1 = srcImgHeight-1;
+	 if(y0 < 0)
+	   y0 = 1;
+	 if (x0<0)
+	   x0 = 1;
+	 if(x1>srcImgWidth)
+	   x1 = srcImgWidth-1;
+	 
+	 
+	 cout<<"The image dimensions are "<<srcImgWidth<<", "<<srcImgHeight<<endl;
+         
          std::vector<cv::Point> bounds;
-	 line( srcImg, cv::Point(x0, minImagePoint.y - carHeight/2), cv::Point(x0, minImagePoint.y + carHeight/2), Scalar(0,0,255), 3, CV_AA);
-	 line( srcImg, cv::Point(x0, minImagePoint.y + carHeight/2), cv::Point(x1, minImagePoint.y + carHeight/2), Scalar(0,0,255), 3, CV_AA);
-	 line( srcImg, cv::Point(x0, minImagePoint.y - carHeight/2), cv::Point(x1, minImagePoint.y - carHeight/2), Scalar(0,0,255), 3, CV_AA);
-	 line( srcImg, cv::Point(x1, minImagePoint.y - carHeight/2), cv::Point(x1, minImagePoint.y + carHeight/2), Scalar(0,0,255), 3, CV_AA);
+	 line( srcImg, cv::Point(x0, y0), cv::Point(x0, y1), Scalar(0,0,255), 3, CV_AA);
+	 line( srcImg, cv::Point(x0, y1), cv::Point(x1, y1), Scalar(0,0,255), 3, CV_AA);
+	 line( srcImg, cv::Point(x0, y0), cv::Point(x1, y0), Scalar(0,0,255), 3, CV_AA);
+	 line( srcImg, cv::Point(x1, y0), cv::Point(x1, y1), Scalar(0,0,255), 3, CV_AA);
 	 
 	 //Get the absolute coordinates of the closest point on the car
         //--------------------------------------------------------------
-        //Use the service to get the new coordinates
-        c21srv.request.sample.x1 = x0;
-        c21srv.request.sample.y1 = minImagePoint.y - carHeight/2;
-        c21srv.request.sample.x2 = x1;
-        c21srv.request.sample.y2 = minImagePoint.y + carHeight/3;
         
-        if(c21client.call(c21srv)){
+	//Heuristic to contain the car frame
+	int yTop =  minImagePoint.y - carHeight/3;
+	if(yTop<0)
+	  yTop  =1;
+	
+	//Use the service to get the new coordinates
+        c21srv.request.sample.x1 = x0;
+        c21srv.request.sample.y1 = yTop;
+        c21srv.request.sample.x2 = x1;
+        c21srv.request.sample.y2 = y1;
+	
+	 cout << "X1: " << x0 << " X2: " << x1 <<" Y1: "<<yTop<<" Y2:"<< y1<< endl;
+        
+	 
+	 pictureCoordinatesToGlobalPosition(x0, yTop, x1, y1, &x, &y, NULL);
+	 
+       /* if(c21client.call(c21srv)){
             ROS_INFO("Service initiated");
             ROS_INFO("Before...\n");
             absolutePoint.x = (float)c21srv.response.point.x;
@@ -506,6 +547,7 @@ bool C23_Detector::detectCar(Mat srcImg, const sensor_msgs::PointCloud2::ConstPt
             ROS_INFO("The points after are %f, %f, %f\n",absolutePoint.x , absolutePoint.y , absolutePoint.z);
         }
         else{
+	  ROS_INFO("HERE");
             return false;
         }
         
@@ -516,20 +558,27 @@ bool C23_Detector::detectCar(Mat srcImg, const sensor_msgs::PointCloud2::ConstPt
 	if (absolutePoint.x!=absolutePoint.x && absolutePoint.y!=absolutePoint.y&&absolutePoint.z!=absolutePoint.z)
 	{
 	  ROS_INFO("Nan values obtained. Cannot determine the distance to the car");
-	  return false;
+	  //return false; //*****This should be uncommented
 	}
+	
+	
 	//Draw the closest point to the car
         cout << "Best point: " << sqrt(absolutePoint.x*absolutePoint.x+absolutePoint.y*absolutePoint.y+absolutePoint.z*absolutePoint.z) << endl;
+
+	*/
+	
+	
         //The closest point from the robot to the car
 	//circle( srcImg, Point2f(minImagePoint.x,minImagePoint.y), 5, 60, -1, 8, 0 ); 
 	//The average
-        x = absolutePoint.x;
-	y = absolutePoint.y;
+        //x = absolutePoint.x;
+	//y = absolutePoint.y;
+	
 	imshow("Testing",srcImg);
         waitKey(0);
 	
         //Determine if the robot is facing the driver or passenger side
-        detectPassengerDriver(srcImg, x0, minImagePoint.y - carHeight/4, x1,  minImagePoint.y + carHeight/2);
+        detectPassengerDriver(srcImg, x0, yTop, x1,  y1);
 	
 	
 	
@@ -542,13 +591,19 @@ bool C23_Detector::detectCar(Mat srcImg, const sensor_msgs::PointCloud2::ConstPt
 }
 
 // comparison function object
-bool C23_Detector::compareContourAreas ( vector<cv::Point> contour1, vector<cv::Point> contour2 ) {
+bool compareContourAreas ( vector<cv::Point> contour1, vector<cv::Point> contour2 ) {
+  
     double i =  fabs(contourArea(contour1, false));
     double j =  fabs(contourArea(contour2,false));
+    cout<<"Area1: "<<i<<" Area2: "<<j<<endl;
+   
     return ( i < j );
 }
 
 bool C23_Detector::detectPassengerDriver(Mat srcImg, int x1,int y1,int x2,int y2){
+  
+  //To determine where the driver/passenger sides are using blob detection set to true.
+  bool detectBlobs = true;
   
    //Extract the segment of the car that has been detected
   ROS_INFO("Extracting the car");
@@ -564,74 +619,124 @@ bool C23_Detector::detectPassengerDriver(Mat srcImg, int x1,int y1,int x2,int y2
   //imshow("HSV", imgHsvCar);
   //waitKey(0);
   
-  //Detect the blue blobs on the car
-  inRange(imgHsvCar, Scalar(100, 50, 40), Scalar(160, 255, 255), imgThresholdedCar);
   
-  //imshow("Thresholded Image", imgThresholdedCar);
-  //waitKey(0);
+  if(detectBlobs)
+  {
   
-  //Open the image to remove noise
-  Mat element3(5,5,CV_8U, Scalar(1));
-  morphologyEx(imgThresholdedCar, imgCarOpened, MORPH_OPEN,element3);  
-  
-  //imshow("Opened Image", imgCarOpened);
-  //waitKey(0);
-  
-    //Now find the contours of the blobs
-    vector<vector<cv::Point> > blobContours;
-    findContours(imgCarOpened,blobContours,CV_RETR_EXTERNAL, CV_CHAIN_APPROX_SIMPLE);
-    drawContours(carImage,blobContours,-1,CV_RGB(255,0,0),2);
-    
-    imshow("Contours", carImage);
-    waitKey(0);
-    
-    
-    //Sort the contours based on their area
-    //sort(blobContours.begin(), blobContours.end(), compareContourAreas());
-    
-    //Find the area of the contours
-    double maxArea = -1;
-    int maxContourIndex = -1;
-    double currentArea = -1;
-    vector<double> blobAreas;
-    vector<int> blobIndices;
-    for(int ii=0; ii<blobContours.size(); ii++)
-    {
-      blobAreas.push_back(contourArea(blobContours[ii], false));
-      blobIndices.push_back(ii);
-      currentArea = contourArea(blobContours[ii], false);
-
-    }
-    
-    /*
-    for(int jj=0;jj<blobAreas.size(); jj++)
-    {
-     cout<<"Sorted Area "<<jj<<": "<<blobAreas.at(jj)<<endl; 
+      //Detect the blue blobs on the car
+      inRange(imgHsvCar, Scalar(100, 50, 40), Scalar(160, 255, 255), imgThresholdedCar);
       
-    }*/
-   
-   
-    
-    //Find the center of mass of the contours
-    // Get the moments
-    vector<Moments> mu(blobContours.size());
-    for( int ii = 0; ii < blobContours.size(); ii++ )
-     { mu[ii] = moments( blobContours[ii], false ); }
+      //imshow("Thresholded Image", imgThresholdedCar);
+      //waitKey(0);
+      
+      //Open the image to remove noise
+      Mat element3(5,5,CV_8U, Scalar(1));
+      morphologyEx(imgThresholdedCar, imgCarOpened, MORPH_OPEN,element3);  
+      
+      //imshow("Opened Image", imgCarOpened);
+      //waitKey(0);
+      
+	//Now find the contours of the blobs
+	vector<vector<cv::Point> > blobContours;
+	findContours(imgCarOpened,blobContours,CV_RETR_EXTERNAL, CV_CHAIN_APPROX_SIMPLE);
+	drawContours(carImage,blobContours,-1,CV_RGB(255,0,0),2);
+	
+	imshow("Contours", carImage);
+	waitKey(0);
+	
+	
+	cout<<"Number of contours found "<<blobContours.size()<<endl;
+	if(blobContours.size()!=0)
+	{  
+	    //Sort the contours based on their area
+	    sort(blobContours.begin(), blobContours.end(), compareContourAreas);
+	    
+	    //Find the area of the contours
+	    double maxArea = -1;
+	    int maxContourIndex = -1;
+	    double currentArea = -1;
+	    vector<double> blobAreas;
+	    vector<int> blobIndices;
+	    for(int ii=0; ii<blobContours.size(); ii++)
+	    {
+	      blobAreas.push_back(contourArea(blobContours[ii], false));
+	      blobIndices.push_back(ii);
+	      currentArea = contourArea(blobContours[ii], false);
 
-    //  Get the mass centers:
-    vector<Point2f> mc( blobContours.size() );
-    for( int ii = 0; ii < blobContours.size() ; ii++ )
-     { mc[ii] = Point2f( mu[ii].m10/mu[ii].m00 , mu[ii].m01/mu[ii].m00 ); 
-       cout<<"CM: "<<mc[ii]<<", Area: "<<blobAreas[ii]<<endl;
-    }
+	    }
+  
+	    //Find the center of mass of the contours
+	    // Get the moments
+	    vector<Moments> mu(blobContours.size());
+	    for( int ii = 0; ii < blobContours.size(); ii++ )
+	    { mu[ii] = moments( blobContours[ii], false ); }
+
+	    //  Get the mass centers:
+	    vector<Point2f> mc( blobContours.size() );
+	    for( int ii = 0; ii < blobContours.size() ; ii++ )
+	    { mc[ii] = Point2f( mu[ii].m10/mu[ii].m00 , mu[ii].m01/mu[ii].m00 ); 
+	      cout<<"CM: "<<mc[ii]<<", Area: "<<blobAreas[ii]<<endl;
+	    }
+	    
+	    //Determine the largest and second largest contour
+	    cout<<"Largest: "<<mc[mc.size()-1].x<<", Second Largest: "<<mc[mc.size()-2].x<<endl;
+	    if(mc[mc.size()-1].x > mc[mc.size()-2].x){
+	    ROS_INFO("Robot is facing passenger side"); 
+	    }else{
+	      ROS_INFO("Robot is facing driver side"); 
+	    }
+	
+	}else{
+	  
+	  ROS_INFO("No contours found");
+	  
+	}
     
-    //Determine the largest and second largest contour
-    cout<<"Largest: "<<mc[mc.size()-1].x<<", Second Largest: "<<mc[mc.size()-2].x<<endl;
-    if(mc[mc.size()-1].x > mc[mc.size()-2].x){
-     ROS_INFO("Robot is facing passenger side"); 
-    }else{
-      ROS_INFO("Robot is facing driver side"); 
-    }
+  }else
+  {
+   //This is an alternative algorithm to determining whether the robot is facing the passenger or driver
+  
+   /*//Get the closest point from the robot to the car
+	float min = 10000;
+        cout << x << "," << y << "," << width << "," << height << endl;
+        for(int i = 1; i < carImage.width; i++) {
+            for(int j = 1; j < carImage.height; j++) {
+                //     cout << "(" << i << "," << j << "," << pclcloud.at(i,j).z << ")" << endl;
+                if(sqrt(pclcloud.at(i,j).x*pclcloud.at(i,j).x+pclcloud.at(i,j).y*pclcloud.at(i,j).y+pclcloud.at(i,j).z*pclcloud.at(i,j).z*10000) < min) {
+                    min = sqrt(pclcloud.at(i,j).x*pclcloud.at(i,j).x+pclcloud.at(i,j).y*pclcloud.at(i,j).y+pclcloud.at(i,j).z*pclcloud.at(i,j).z*10000);
+                    minPoint = pcl::PointXYZ(pclcloud.at(i,j).x,pclcloud.at(i,j).y,pclcloud.at(i,j).z);//Check
+                    minImagePoint.x = i;
+                    minImagePoint.y = j;
+                }
+            }
+        }
+   */
+   
+  
+   
+      //Detect the car
+      inRange(imgHsvCar, Scalar(0, 0, 0), Scalar(20, 255, 255), imgThresholdedCar);
+      
+      imshow("Thresholded Image Routine 2", imgThresholdedCar);
+      waitKey(0);
+      
+      //Open the image to remove noise
+      Mat element3(5,5,CV_8U, Scalar(1));
+      morphologyEx(imgThresholdedCar, imgCarOpened, MORPH_OPEN,element3);  
+      
+      imshow("Opened Image Routine 2", imgCarOpened);
+      waitKey(0);
+      
+	//Now find the contours of the blobs
+	vector<vector<cv::Point> > blobContours;
+	findContours(imgCarOpened,blobContours,CV_RETR_EXTERNAL, CV_CHAIN_APPROX_SIMPLE);
+	drawContours(carImage,blobContours,-1,CV_RGB(255,0,0),2);
+	
+	imshow("Contours Routine 2", carImage);
+	waitKey(0);
+    
+    
+  }
 
   return true;
 }
