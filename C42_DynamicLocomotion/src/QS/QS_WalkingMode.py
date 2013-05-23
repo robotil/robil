@@ -36,7 +36,6 @@ class QS_WalkingMode(WalkingMode):
     def __init__(self):
         self._LPP = QS_PathPlanner()
         WalkingMode.__init__(self,self._LPP)
-        self.step_index_for_reset = 0
         self._listener = tf.TransformListener()
         self._tf_br = tf.TransformBroadcaster()
         # Initialize atlas atlas_sim_interface_command publisher       
@@ -44,6 +43,8 @@ class QS_WalkingMode(WalkingMode):
         self._Odometer = Odometer()
         self._bDone = False
         self._bIsSwaying = False
+        self._command = 0
+
         
         self._odom_sub = rospy.Subscriber('/ground_truth_odom',Odometry,self._odom_cb)
 
@@ -99,20 +100,19 @@ class QS_WalkingMode(WalkingMode):
         command = 0
         if ("Idle" == self._WalkingModeStateMachine.GetCurrentState().Name):
             self._Odometer.SetPosition(state.pos_est.position.x,state.pos_est.position.y)
-            pass
         elif ("Wait" == self._WalkingModeStateMachine.GetCurrentState().Name):
             self._Odometer.SetPosition(state.pos_est.position.x,state.pos_est.position.y)
             print("Odometer Updated")
-            print(2)
+            #print(2)
             self._WalkingModeStateMachine.PerformTransition("Go")
         elif ("Walking" == self._WalkingModeStateMachine.GetCurrentState().Name):
-            print(3)
+            #print(3)
             if (QS_PathPlannerEnum.Active == self._LPP.State):
                 command = self.GetCommand(state)
             elif(QS_PathPlannerEnum.Waiting == self._LPP.State):
                 self._RequestFootPlacements()
         elif ("Done" == self._WalkingModeStateMachine.GetCurrentState().Name):
-            print(4)
+            #print(4)
             self._bDone = True
         else:
             raise Exception("QS_WalkingModeStateMachine::Bad State Name")
@@ -146,7 +146,7 @@ class QS_WalkingMode(WalkingMode):
                     step.pose.orientation.w = Q[3]
                     listSteps.append(step)
                 self._LPP.SetPath(listSteps)
-                print(listSteps)
+                #print(listSteps)
         except rospy.ServiceException, e:
             print "Foot Placement Service call failed: %s"%e
     
@@ -196,9 +196,11 @@ class QS_WalkingMode(WalkingMode):
             self._command = command
             self._bIsSwaying = True
         
-        if(0 != self._command):
+        if(0 == state.current_behavior and 0 != self._command):
             #print self._command
             self.asi_command.publish(self._command)
+            self._command = 0
+            print("step start")
 
     def _odom_cb(self,odom):
         self._LPP.UpdatePosition(odom.pose.pose.position.x,odom.pose.pose.position.y)
