@@ -154,6 +154,12 @@ data=path - C11 it retrieves the path and sends it back to the operator</algorit
         <effects/>
         <algorithm>31: Task-Condition of PathPlanner, that return  when no path planned</algorithm>
     </task>
+    <task name="PerceptionCalibration">
+        <conditions/>
+        <constraints/>
+        <effects/>
+        <algorithm/>
+    </task>
     <task name="QuaziStatyWalk">
         <conditions/>
         <constraints/>
@@ -296,12 +302,6 @@ data=path - C11 it retrieves the path and sends it back to the operator</algorit
         <effects/>
         <algorithm/>
     </task>
-    <task name="TestPedals">
-        <conditions/>
-        <constraints/>
-        <effects/>
-        <algorithm>C51 - move foot to pedals</algorithm>
-    </task>
     <task name="TrackObject">
         <conditions/>
         <constraints/>
@@ -310,6 +310,12 @@ data=path - C11 it retrieves the path and sends it back to the operator</algorit
 Params:
    target - target object
       Gate - selected by SearchObject task.</algorithm>
+    </task>
+    <task name="TestPedals">
+        <conditions/>
+        <constraints/>
+        <effects/>
+        <algorithm>C51 - move foot to pedals</algorithm>
     </task>
     <task name="whileObjectInHands">
         <conditions/>

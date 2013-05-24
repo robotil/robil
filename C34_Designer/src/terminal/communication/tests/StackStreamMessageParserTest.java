@@ -126,6 +126,15 @@ public class StackStreamMessageParserTest {
 				"}\n\n" +
 				"---";
 		
+//		data: ExeStack: changed : 38e95426-0932-40d2-aefa-270a3dcd9298 code=0, node=Parallel(event1) [id=38e95426-0932-40d2-aefa-270a3dcd9298]
+//				plan{
+//				  Unknown(){
+//				    Parallel(event1) [id=38e95426-0932-40d2-aefa-270a3dcd9298]
+//				  }
+//				}
+//
+
+		
 		StackStreamMessage message = _parser.parse(testInputString);
 		
 		assertNotNull("Message is null", message);
@@ -134,6 +143,30 @@ public class StackStreamMessageParserTest {
 		assertEquals("PathPlanning", message.getTaskParameters());
 		assertEquals(1000, message.getTaskResultCode());
 		assertEquals("PP_ID", message.getTaskId());
+		assertEquals(ChangeType.TaskFinished, message.getChangeType());
+	}
+	
+	@Test
+	public void testParseTaskWithRealGUID() {
+		String testInputString = 
+				"data: ExeStack: changed : 38e95426-0932-40d2-aefa-270a3dcd9298 code=1, node=Task(PathPlanning) [id=38e95426-0932-40d2-aefa-270a3dcd9298]($Task(PathPlanning) [id=PP_ID]:FAILURE(1000)$)\n" +
+				"plan{\n" +
+				"  Unknown(){\n" +
+				"    Sequence(S){\n" +
+				"      Task(PathPlanning) [id=PP_ID]\n" +
+				"    }\n" +
+				"  }\n" +
+				"}\n\n" +
+				"---";
+		
+		StackStreamMessage message = _parser.parse(testInputString);
+		
+		assertNotNull("Message is null", message);
+		assertEquals("38e95426-0932-40d2-aefa-270a3dcd9298", message.getPlanLabel());
+		assertEquals("Task", message.getTaskName());
+		assertEquals("PathPlanning", message.getTaskParameters());
+		assertEquals(1000, message.getTaskResultCode());
+		assertEquals("38e95426-0932-40d2-aefa-270a3dcd9298", message.getTaskId());
 		assertEquals(ChangeType.TaskFinished, message.getChangeType());
 	}
 	
