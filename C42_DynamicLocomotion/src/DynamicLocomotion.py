@@ -17,9 +17,9 @@ from std_msgs.msg import Int32
 
 class DynamicLocomotion(RobilTask):
     
-    def __init__(self,name,prefferedWalkingMode,bIsDoingQual=False):
+    def __init__(self,name,walkingModeChooser):
         RobilTask.__init__(self, name)
-        self._Walker = Walker(WalkingModeChooser(prefferedWalkingMode,bIsDoingQual))
+        self._Walker = Walker(walkingModeChooser)
         self._interval = rospy.Rate(2)
 
         ## TOPIC setup:
@@ -87,6 +87,7 @@ class DynamicLocomotion(RobilTask):
 ###################################################################################
 if __name__ == '__main__':
     rospy.init_node('DynamicLocomotion')
-    node = DynamicLocomotion("DynamicLocomotion",'BDI')
+    walkingModeChooser = WalkingModeChooser('BDI',False)
+    node = DynamicLocomotion("DynamicLocomotion",walkingModeChooser)
     rospy.spin()
     print "C42_DynamicLocomotion node Closed"

@@ -12,9 +12,8 @@ roslib.load_manifest('C42_DynamicLocomotion')
 
 from Abstractions.WalkingMode import *
 from Abstractions.Odometer import *
-from QS_PathPlanner import *
+from DD_PathPlanner import *
 
-from tf_conversions import posemath
 from tf.transformations import quaternion_from_euler, euler_from_quaternion
 
 from atlas_msgs.msg import AtlasCommand, AtlasSimInterfaceCommand, AtlasSimInterfaceState, AtlasState, AtlasBehaviorStepData
@@ -26,16 +25,16 @@ from std_msgs.msg import String
 from C42_DynamicLocomotion.srv import *
 from C42_DynamicLocomotion.msg import Foot_Placement_data
 
-class QS_WalkingMode(WalkingMode):
+class DD_WalkingMode(WalkingMode):
     def __init__(self):
-        self._LPP = QS_PathPlanner()
+        self._LPP = DD_PathPlanner()
         WalkingMode.__init__(self,self._LPP)
         self.step_index_for_reset = 0
         # Initialize atlas atlas_sim_interface_command publisher       
         self.asi_command = rospy.Publisher('/atlas/atlas_sim_interface_command', AtlasSimInterfaceCommand, None, False, True, None)
         self._Odometer = Odometer()
         self._bDone = False
-        self._bIsSwaying = False
+        self._StepIndex = 1
         self._command = 0
         
     def Initialize(self):
@@ -53,19 +52,18 @@ class QS_WalkingMode(WalkingMode):
         k_effort = [0] * 28
         self._bDone = False
         self._bIsSwaying = False
-        
-        self._command = 0
     
     def StartWalking(self):
         self._bDone = False
     
     def Walk(self):
         WalkingMode.Walk(self)
-        self._command = self.GetCommand()
-        self.asi_command.publish(self._command)
+        command = self.GetCommand()         
+        print ("Walk ",command)
+        self.asi_command.publish(command)
         #print(command)
         self._WalkingModeStateMachine.PerformTransition("Go")
-        self._bIsSwaying = True
+        self._StepIndex = self._StepIndex + 1
     
     def EmergencyStop(self):
         WalkingMode.Stop(self)
@@ -75,16 +73,16 @@ class QS_WalkingMode(WalkingMode):
     
     def GetCommand(self):
         command = AtlasSimInterfaceCommand()
-        command.behavior = AtlasSimInterfaceCommand.STEP
+        command.behavior = AtlasSimInterfaceCommand.WALK
         command.k_effort = [0] * 28
-        command.step_params.desired_step = self._LPP.GetNextStep()
-        if(0 != command.step_params.desired_step):
-            # Not sure why such a magic number
-            command.step_params.desired_step.duration = 0.63
-            # Apparently this next line is a must
-            command.step_params.desired_step.step_index = 1
-        else:
+        command.walk_params.step_queue = self._LPP.GetNextStep()
+        if(0 == command.walk_params.step_queue):
             command = 0
+        else:
+            for i in range(4):
+                command.walk_params.step_queue[i].step_index = self._StepIndex + i
+                command.walk_params.step_queue[i].duration = 0.63
+                #print("GetCommand",command.walk_params.step_queue)
         return command
     
     def HandleStateMsg(self,state):
@@ -98,9 +96,9 @@ class QS_WalkingMode(WalkingMode):
             self._WalkingModeStateMachine.PerformTransition("Go")
         elif ("Walking" == self._WalkingModeStateMachine.GetCurrentState().Name):
             #print(3)
-            if (QS_PathPlannerEnum.Active == self._LPP.State):
+            if (DD_PathPlannerEnum.Active == self._LPP.State):
                 command = self.GetCommand()
-            elif(QS_PathPlannerEnum.Waiting == self._LPP.State):
+            elif(DD_PathPlannerEnum.Waiting == self._LPP.State):
                 self._RequestFootPlacements()
         elif ("Done" == self._WalkingModeStateMachine.GetCurrentState().Name):
             #print(4)
@@ -126,7 +124,7 @@ class QS_WalkingMode(WalkingMode):
                     command = AtlasSimInterfaceCommand()
                     step = command.step_params.desired_step
                     step.foot_index = desired.foot_index
-                    step.swing_height = desired.clearance_height#0.4
+                    step.swing_height = desired.clearance_height
                     step.pose.position.x = desired.pose.position.x
                     step.pose.position.y = desired.pose.position.y
                     step.pose.position.z = desired.pose.position.z
@@ -150,22 +148,12 @@ class QS_WalkingMode(WalkingMode):
     # the current robot position   
     def asi_state_cb(self, state):
         command = 0
-        #print("Current: ",state.current_behavior,"Desired: ",state.desired_behavior)
-        # When the robot status_flags are 1 (SWAYING), you can publish the next step command.
-        if (state.step_feedback.status_flags == 1 and not self._bIsSwaying):
+        if(self._StepIndex < state.walk_feedback.next_step_index_needed):
             command = self.HandleStateMsg(state)
-        elif (state.step_feedback.status_flags == 2 and self._bIsSwaying):
-            self._bIsSwaying = False
-            print("step done")
-        if (0 !=command):
-            self._command = command
-            self._bIsSwaying = True
-        
-        if(0 == state.current_behavior and 0 != self._command):
-            self.asi_command.publish(self._command)
-            self._command = 0
-            print("step start")
-            
+        if (0 != command):
+            print("Step",self._StepIndex,command)
+            self.asi_command.publish(command)
+            self._StepIndex = self._StepIndex+1
 
     def _odom_cb(self,odom):
         self._LPP.UpdatePosition(odom.pose.pose.position.x,odom.pose.pose.position.y)

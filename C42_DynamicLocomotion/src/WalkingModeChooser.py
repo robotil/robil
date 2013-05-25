@@ -3,6 +3,7 @@
 from Abstractions.WalkingModeChooserInterface import *
 from BDI.WalkingModeBDI import *
 from QS.QS_WalkingMode import *
+from DD.DD_WalkingMode import *
 from LocalPathPlanner import *
 
 ###################################################################################
@@ -13,14 +14,14 @@ from LocalPathPlanner import *
 
 class WalkingModeChooser(WalkingModeChooserInterface):
 
-    def __init__(self,prefferedMode,bIsDoingQual):
+    def __init__(self,prefferedMode,bIsDoingQual=False):
         
         # Once we clean bIsDoingQual out of the code, we can allow for the lpp to be known only to the concrete walking
         # mode
         lpp = LocalPathPlanner()
         lpp.SetDoingQual(bIsDoingQual)
         
-        self._Modes = {'BDI':WalkingModeBDI(lpp),'QS':QS_WalkingMode()}
+        self._Modes = {'BDI':WalkingModeBDI(lpp),'QS':QS_WalkingMode(),'DD':DD_WalkingMode()}
         self._CurrentMode = self._Modes[prefferedMode]
         self._Recommended = self._Modes[prefferedMode]
         
