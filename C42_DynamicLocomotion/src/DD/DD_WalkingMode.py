@@ -59,7 +59,7 @@ class DD_WalkingMode(WalkingMode):
     def Walk(self):
         WalkingMode.Walk(self)
         command = self.GetCommand()         
-        print ("Walk ",command)
+        #print ("Walk ",command)
         self.asi_command.publish(command)
         #print(command)
         self._WalkingModeStateMachine.PerformTransition("Go")
@@ -151,7 +151,7 @@ class DD_WalkingMode(WalkingMode):
         if(self._StepIndex < state.walk_feedback.next_step_index_needed):
             command = self.HandleStateMsg(state)
         if (0 != command):
-            print("Step",self._StepIndex,command)
+            #print("Step",self._StepIndex,command)
             self.asi_command.publish(command)
             self._StepIndex = self._StepIndex+1
 
