@@ -111,9 +111,9 @@ def ProcFrame(fid, lines):
 	
 	
 	print '<frame id="'+str(fid)+'">'
-	printGrid(2,lines)
-	printPublishPath(3,lines)
-	printStartAndGoals(4,lines)
+	printGrid(10,lines)
+	printPublishPath(30,lines)
+	printStartAndGoals(40,lines)
 	print '</frame>'
 
 	

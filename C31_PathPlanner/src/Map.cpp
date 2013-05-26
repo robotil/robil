@@ -28,7 +28,7 @@ ostream& operator<<(ostream& out, const AltMap& m){
 //	for(size_t y=0;y<m.h();y++){
 		if(y<10) out<<' '; out<<y;
 		for(size_t x=0;x<m.w();x++){
-			out<<' '<<m.str(x,y)<<' ';
+			out<<' '<<m(x,y)<<' ';
 		}
 		out<<endl;
 	}
