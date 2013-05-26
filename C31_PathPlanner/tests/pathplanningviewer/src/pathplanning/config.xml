@@ -1,0 +1,17 @@
+<config>
+    <var name="MAP_COLOR" value="0,0,255" type="color" />
+    <var name="MAP_COLOR_OBST" value="255,255,255" type="color" />
+    <var name="MAP_COLOR_FREE" value="0,0,0" type="color" />
+    <var name="MAP_COLOR_UNKN" value="100,100,100" type="color" />
+    <var name="MAP_STROKE" value="1" type="double" />
+    
+    <var name="PATH_COLOR_result" value="0,255,0" type="color" />
+    <var name="PATH_STROKE_result" value="0.5" type="double" />
+    
+    <var name="PATH_COLOR_start" value="0,255,255" type="color" />
+    <var name="POINT_STROKE_start" value="0.5" type="double" />
+    
+    <var name="PATH_COLOR_goal" value="255,255,0" type="color" />
+    <var name="POINT_STROKE_goal" value="0.5" type="double" />
+    
+</config>
