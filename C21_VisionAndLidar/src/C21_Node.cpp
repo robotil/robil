@@ -132,7 +132,7 @@ public:
 				   pcl::PointXYZ p=detectionCloud.at(i,j);
 				   if(p.x!=p.x)
 					   continue;
-				   if(p.x>0.3 && p.y>0.3)
+				   //if(p.x>0.3 && p.y>0.3)
 					   t.points.push_back(p);
 			   }
 		   }
@@ -272,7 +272,6 @@ public:
 	  void HMIcallback(const sensor_msgs::ImageConstPtr& left_msg,const sensor_msgs::ImageConstPtr& right_msg,const sensor_msgs::PointCloud2::ConstPtr &cloud){
 	  		 cv_bridge::CvImagePtr left;
 	  		 cv_bridge::CvImagePtr right;
-	  		 std::cout<<"asdasdasd"<<endl;
 	  		try
 	  		{
 	  		  left = cv_bridge::toCvCopy(left_msg,enc::RGB8);
