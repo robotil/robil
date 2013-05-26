@@ -1,0 +1,19 @@
+<package>
+  <description brief="DogWorm">
+
+     DogWorm
+
+  </description>
+  <author>DARPA 2</author>
+  <license>BSD</license>
+  <review status="unreviewed" notes=""/>
+  <url>http://ros.org/wiki/ControllerPlugin</url>
+  <depend package="geometry_msgs"/>
+  <depend package="std_msgs"/>
+  <depend package="nav_msgs"/>
+  <depend package="tf"/>
+  <depend package="atlas_msgs"/>
+  <depend package="osrf_msgs"/>
+</package>
+
+
