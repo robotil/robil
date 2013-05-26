@@ -230,7 +230,7 @@ class Drive(object):
         rospy.sleep(1)
         self.C31_path = numpy.array([])
         self.sub = rospy.Subscriber('/path', C31_Waypoints,self.getPath) #get atlas location by subscribing to C25 module        
-        self.path=[(30, 1.5),(43, 0), (60, -2),(95, 0),(104, 4.5), (149.5, 50),(150, 95), (157, 100), (198, 100)]#[(151.5, 93), (158, 98.7), (198, 100)] #  self.C31_path#      [(9, 8), (30, 3),(60, 80), (100, 100)]#
+        self.path=self.C31_path#[(30, 1.5),(43, 0), (60, -2),(95, 0),(104, 4.5), (149.5, 50),(150, 95), (157, 100), (198, 100)]#[(151.5, 93), (158, 98.7), (198, 100)] #  self.C31_path#      [(9, 8), (30, 3),(60, 80), (100, 100)]#
         DATA=LOG()
         DATA.StartDrive = DATA.getTime()
         while not rospy.is_shutdown():
