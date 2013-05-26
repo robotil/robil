@@ -70,6 +70,10 @@ C22_Node::C22_Node():
 
 	}
 
+
+
+static tf::StampedTransform lefttransform;
+static tf::StampedTransform righttransform;
 /**
  * The call back function executed when a service is requested
  * it must return true in order to work properly
@@ -78,6 +82,28 @@ C22_Node::C22_Node():
  */
 bool C22_Node::proccess(C22_CompactGroundRecognitionAndMapping::C22::Request  &req,
 	C22_CompactGroundRecognitionAndMapping::C22::Response &res ){
+
+
+	 bool retry=true;
+		    while(retry){
+		    	retry=false;
+				try{
+				  listener.lookupTransform( "pelvis","l_foot",
+										   ros::Time(0), lefttransform);
+				}
+				catch (tf::TransformException ex){
+					retry=true;
+				  ROS_ERROR("%s",ex.what());
+				}
+				try{
+						  listener.lookupTransform("pelvis","r_foot",
+												   ros::Time(0), righttransform);
+						}
+				catch (tf::TransformException ex){
+					retry=true;
+				  ROS_ERROR("%s",ex.what());
+				}
+		    }
 
 	 pcl::PointCloud<pcl::PointXYZ>cloud;
      pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_filtered(cloud.makeShared());

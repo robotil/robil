@@ -6,6 +6,8 @@
 #include "Map.h"
 #include "MapFileReader.hpp"
 
+typedef ObsMap Map;
+
 struct robotPos_t{
 	double x, y, z;
 	robotPos_t(double x, double y, double z):x(x),y(y),z(z){}

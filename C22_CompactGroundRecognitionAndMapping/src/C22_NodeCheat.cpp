@@ -31,6 +31,7 @@
 #include <pcl/sample_consensus/sac_model_plane.h>
 #include "C22_NodeCheat.h"
 #include <tf/tf.h>
+#include <tf/transform_listener.h>
 #include <pcl_ros/transforms.h>
 #include <message_filters/subscriber.h>
 #include <message_filters/synchronizer.h>
@@ -69,7 +70,8 @@ C22_Node::C22_Node():
 
 
 	}
-
+static tf::StampedTransform lefttransform;
+static tf::StampedTransform righttransform;
 /**
  * The call back function executed when a service is requested
  * it must return true in order to work properly
@@ -78,6 +80,28 @@ C22_Node::C22_Node():
  */
 bool C22_Node::proccess(C22_CompactGroundRecognitionAndMapping::C22::Request  &req,
 	C22_CompactGroundRecognitionAndMapping::C22::Response &res ){
+
+	    bool retry=true;
+	    while(retry){
+	    	retry=false;
+			try{
+			  listener.lookupTransform( "pelvis","l_foot",
+									   ros::Time(0), lefttransform);
+			}
+			catch (tf::TransformException ex){
+				retry=true;
+			  ROS_ERROR("%s",ex.what());
+			}
+			try{
+					  listener.lookupTransform("pelvis","r_foot",
+											   ros::Time(0), righttransform);
+					}
+			catch (tf::TransformException ex){
+				retry=true;
+			  ROS_ERROR("%s",ex.what());
+			}
+	    }
+
 
 	 pcl::PointCloud<pcl::PointXYZ>cloud;
      pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_filtered(cloud.makeShared());
@@ -159,6 +183,13 @@ bool C22_Node::proccess(C22_CompactGroundRecognitionAndMapping::C22::Request  &r
 	boost::mutex::scoped_lock l(_myMatrix->mutex);
 	res.drivingPath.xOffset=_myMatrix->xOffset;
 	res.drivingPath.yOffset=_myMatrix->yOffset;
+	res.drivingPath.left_foot.x=(int)(lefttransform.getOrigin().getX()/0.05);
+	res.drivingPath.left_foot.y=-(int)(lefttransform.getOrigin().getY()/0.05)+20;
+	res.drivingPath.left_foot.z=lefttransform.getOrigin().getZ();
+	res.drivingPath.right_foot.x=(int)(righttransform.getOrigin().getX()/0.05);
+	res.drivingPath.right_foot.y=-(int)(righttransform.getOrigin().getY()/0.05)+20;
+	res.drivingPath.right_foot.z=righttransform.getOrigin().getZ();
+
 	for(unsigned int i=0;i<_myMatrix->data->size();i++){
 		res.drivingPath.row.at(i).column.resize(_myMatrix->data->at(i)->size());
 		for(unsigned int j=0;j<_myMatrix->data->at(i)->size();j++){

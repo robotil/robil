@@ -29,6 +29,8 @@
 #include <message_filters/time_synchronizer.h>
 #include <message_filters/sync_policies/approximate_time.h>
 #include <ros/callback_queue.h>
+#include <tf/transform_listener.h>
+
 class C22_Node{
 private:
   ros::NodeHandle nh_;
@@ -50,6 +52,7 @@ private:
   geometry_msgs::Point robotPos;
   geometry_msgs::Point robotOri;
   ros::Publisher C22_pub;
+  tf::TransformListener listener;
 public:
 
 	/**

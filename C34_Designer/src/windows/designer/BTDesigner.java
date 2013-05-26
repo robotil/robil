@@ -24,6 +24,7 @@ import document.Parameters;
 import document.ParametersXmlHandler;
 import document.ui.Menubar;
 import document.ui.Toolbar;
+import elements.GElement;
 
 
 import logger.Log;
@@ -35,7 +36,7 @@ public class BTDesigner extends JFrame {
 
 	private static final long serialVersionUID = 5495864869110385684L;
 
-	public final static String VERSION = "0.2.6.5";
+	public final static String VERSION = "0.2.6.9";
 	
 	public ArrayList<DesignerTab> tabs = new ArrayList<DesignerTab>();
 	private Menubar _menu;
@@ -63,6 +64,14 @@ public class BTDesigner extends JFrame {
 
 		public void setID(String id) {
 			this.executionID = new String(id);
+		}
+		
+		/*
+		 * Updates tab's id to match first node of the document id
+		 */
+		public void updateId() {
+			if (this.document.getRoot().size() > 0)
+				this.setID(this.document.getRoot().get(0).id.toString());
 		}
 	}
 
@@ -202,7 +211,8 @@ public class BTDesigner extends JFrame {
 		// add new document
 		this.activeTab = new DesignerTab(new Document(this), null);
 		this.tabs.add(this.activeTab);
-
+		// this.activeTab.updateId();
+		
 		panelDoc.add(this.activeTab.document, BorderLayout.CENTER);
 		this.tabbedPane.addTab(this.activeTab.document.getShortFilePath(), panelDoc);
 		this.tabbedPane.setTabComponentAt(numOfTabs, new ButtonTabComponent(
@@ -218,6 +228,7 @@ public class BTDesigner extends JFrame {
 		// add new document
 		this.activeTab = new DesignerTab(new Document(this, fileName), null);
 		this.tabs.add(this.activeTab);
+		this.activeTab.updateId();
 
 		panelDoc.add(this.activeTab.document, BorderLayout.CENTER);
 		this.tabbedPane.addTab(this.activeTab.document.getShortFilePath(), panelDoc);
@@ -280,9 +291,10 @@ public class BTDesigner extends JFrame {
 	}
 
 	public Document getDocumentOfRunningPlan(String id) {
-		for (DesignerTab tab : this.tabs)
+		for (DesignerTab tab : this.tabs) {
 			if (tab.getID() != null && tab.getID().equals(id))
 				return tab.document;
+		}
 
 		return null;
 	}
@@ -311,6 +323,14 @@ public class BTDesigner extends JFrame {
 				setTabName(i, name);
 				return;
 			}
+	}
+	
+	public DesignerTab getTabByDocument(Document document) {
+		for (DesignerTab tab : this.tabs)
+			if (tab.document.equals(document))
+				return tab;
+		
+		return null;
 	}
 	
 	public Menubar getMenubar() {
