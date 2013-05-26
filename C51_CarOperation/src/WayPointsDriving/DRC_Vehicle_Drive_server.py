@@ -10,16 +10,96 @@ from nav_msgs.msg import Odometry
 from std_msgs.msg import  Float64
 from Point2Point import P2P
 import numpy
-from geometry_msgs.msg import Pose
+from geometry_msgs.msg import Pose, Polygon
 from plotGraph import plotGraph
 from math import *
 from LogData import LOG
 from Point2Point import P2P
 from tf.transformations import euler_from_quaternion
 import time
+from datetime import datetime, timedelta
 from datetime import datetime
-
+from C25_GlobalPosition.msg import C25C0_ROP
+from C31_PathPlanner.msg import C31_Waypoints
 from C31_PathPlanner.srv import C31_GetPath
+import Tkinter
+from GUI import App
+from ObsticalDetection import plotG
+import Queue
+import threading
+
+
+
+TIME = 3
+
+
+class RTD():
+    def __init__(self):
+        self.object = [0, 0]
+        self.location = [0, 0]
+        self.speed = 0.0
+        self.turn = 0.0
+        self.distance = 0
+        self.OriEr = 0
+        self.AllWP=[]
+        self.ActSpeed = 0.0
+        self.dO=0
+        self.ObsticalPoints=[]
+class INPUTrtd:
+    def __init__(self):
+        self.MAP=0
+        self.GOAL=[-1, -1]
+        self.WP = []
+def task(root,app,q_in,  q_out):
+    host=RTD()
+    try:
+        host = q_out.get(timeout=0.01)
+        q_out.task_done()
+        app.updateWP(host.AllWP)
+    except Queue.Empty:
+                # do whatever background check needs doing
+                pass
+    #print host.location
+    INP=INPUTrtd()
+
+    q_in.put(INP)
+    #app.distancePlot(host.ObsticalPoints)
+    app.showMAP(host.ObsticalPoints)
+    try:
+        pass
+        #app.canvas.draw()
+    except:
+        pass    
+    
+    if host.location:
+        
+        app.updateLocation([int(host.location[0]), int(host.location[1])])
+        app.updateActSpeed(int(host.ActSpeed*100)/100.0)
+        app.updateObject([int(host.object[0]), int(host.object[1])])
+        app.updateSpeed(host.speed)
+        app.updateCircularSp(host.turn)
+        app.updateDistance(host.distance)
+        app.updateOrientation(host.OriEr)
+        app.updatedO(host.dO)
+    
+    else:
+        pass
+    if not app.exitVal:
+        root.after(20,task, root, app,q_in,  q_out)
+    else:
+        root.quit
+    
+
+
+def doGui(q_in, q_out):
+    root = Tkinter.Tk()
+    
+    app = App(root)
+    
+    root.after(20,task, root, app,q_in,  q_out)
+    
+    root.mainloop()
+
 
 class Drive(object):
     _feedback = C51_CarOperation.msg.DriveFeedback()
@@ -28,24 +108,97 @@ class Drive(object):
     pub=0
     sub=0
     path=0
-    def __init__(self, name, pathVec):    
-        self._action_name = name
-        self.path=pathVec
-        self._as = actionlib.SimpleActionServer(self._action_name, C51_CarOperation.msg.DriveAction, execute_cb=self.DriveCallback, auto_start=False)
-        self.feedback_publisher = rospy.Publisher("C51/m_feedback", Monitoring)
-        self._as.start()
+    def __init__(self, name, pathVec):  
+        self.xPosition = 0
+        self.yPosition = 0
+        self.zOrientation = 0
+        self.ActSpeed=0
+        self.OE = [0, 0]
+        self.dOE = 0
+        self.Htime = 0
+        self.q_in = Queue.Queue()
+        self.q_out = Queue.Queue()
+        
+        self.Obsticalpoints=[]
+        self.ObsticalTime=[]
+        sub = rospy.Subscriber('/my_cloud', Polygon,self.Obs_callback)    
+
+        t = threading.Thread(target=doGui, args =  (self.q_in, self.q_out, ) )
+        t.daemon = True
+        t.start()
+#        MAPthread=threading.Thread(target=self.MAPPING, args =  (self.q_in, self.q_out, )) 
+#        MAPthread.daemon = True
+#        MAPthread.start()
+        a=RTD()
+        
+        self.q_out.put(a)
         
 
-    def callback(self, data):
-        self.world =data
-        #print self.world
+        self._action_name = name
+        self.path=pathVec
+        
+        self._as = actionlib.SimpleActionServer(self._action_name, C51_CarOperation.msg.DriveAction, execute_cb=self.DriveCallback, auto_start=False)
+        self.feedback_publisher = rospy.Publisher("C51/m_feedback", Monitoring)
+    
+        self._as.start()
+    def Obs_callback(self, data):
+        a=datetime.now()
+        for pt in data.points:
+            self.Obsticalpoints.append((pt.x, -pt.y))
+            self.ObsticalTime.append(a)
+        
+        self.filter()
+    def filter(self):
+        n = datetime.now()
+        try:
+            while (n-self.ObsticalTime[0]> timedelta(seconds=TIME)):
+                self.Obsticalpoints.pop(0)
+                self.ObsticalTime.pop(0)
+            
+        except:
+            pass
+        self.MAPPING()
+    def MAPPING(self):
+        
+            #print self.Obsticalpoints
+            try:
+                host = self.q_out.get(timeout=0.01)
+            except:
+                host=RTD()
+            host.ObsticalPoints=self.Obsticalpoints
+            self.q_out.put(host)
+
+    def exit_Drive(self, DATA, num):
+        DATA.FinishDrive = DATA.getTime()
+        DATA.print2file()
+        print "Finished generating log.txt"
+        
+        if (not (DATA.MyPathLst==[])):
+            plotGraph(DATA)    
+        
+        self._result.success = num
+        self._result.plan = "finished driving car"
+        self._result.description = "finished driving car"
+    
+    def MyLocation_callback(self, data):
+        self.Htime=(10**-9)*data.pose.header.stamp.nsecs+data.pose.header.stamp.secs
+        self.xPosition =data.pose.pose.pose.position.x
+        self.yPosition =data.pose.pose.pose.position.y
+        Orientation=euler_from_quaternion( numpy.array((data.pose.pose.pose.orientation.x, data.pose.pose.pose.orientation.y, data.pose.pose.pose.orientation.z, data.pose.pose.pose.orientation.w), dtype=numpy.float64))
+        self.zOrientation = Orientation[2]
+        self.ActSpeed = (data.pose.twist.twist.linear.x**2+data.pose.twist.twist.linear.y**2)**0.5
     def DistanceToWP(self, object):
-        return float((object[0]-self.world.pose.pose.position.x)**2+(object[1]-self.world.pose.pose.position.y)**2)**0.5 #Distance^2 = (Xd-Xc)^2+(Yd-Yc)^2
+        return float((object[0]-self.xPosition)**2+(object[1]-self.yPosition)**2)**0.5 #Distance^2 = (Xd-Xc)^2+(Yd-Yc)^2
     
     def OrientationErrorToWP(self, object):
-        OrientationOfCar=euler_from_quaternion( numpy.array((self.world.pose.pose.orientation.x, self.world.pose.pose.orientation.y, self.world.pose.pose.orientation.z, self.world.pose.pose.orientation.w), dtype=numpy.float64))
-        OrientationofObject =atan2(object[1]-self.world.pose.pose.position.y, object[0]-self.world.pose.pose.position.x)
-        return 180/pi*(OrientationofObject-OrientationOfCar[2]) #Desired_Orientation = Orientation of the object - Orientation of the car
+        OrientationofObject =atan2(object[1]-self.yPosition, object[0]-self.xPosition)
+        self.ChangeInOrientation(180/pi*(OrientationofObject-self.zOrientation)) #Desired_Orientation = Orientation of the object - Orientation of the car
+    def ChangeInOrientation(self, theta):
+        try:
+            self.dOE = (theta - self.OE[0])/(self.Htime - self.OE[1])
+        except:
+            pass
+        self.OE = [theta, self.Htime]
     def isPassedNormal(self, currx, curry, m, b, flag):
         #print (currx, curry, m, b, flag)
         if flag==1:
@@ -65,146 +218,182 @@ class Drive(object):
                 return True
             return False    
     def DriveCallback(self, goal):
-        self.path=getPath()
-        self.path = [(5, 5)]
-        #DRC Vehicles controllers online - should be replaced with C67 module
-        #hb=handB()         #handbrake online
+        rtd=RTD()
+        
+        
         gasP=Gas() #gas pedal online
         brakeP=Brake() #gas pedal online
         Steer=SW()      #steering wheel online        
-        # helper variables
-        success = True
-        #Perform job
-        if success:
-            
-            '''Library ----------------------------------
-            for driving write the desired speed.. max:0.09
-            --------------------->self.gasP.gas( desired speed)
-            
-            for turning max: 6*pi
-            ---------------------->self.Steer.turn(desired turn)
-            ''' 
-            self._result.success = 1
-            success = True
-            self.sub = rospy.Subscriber('/ground_truth_odom', Odometry,self.callback ) #get atlas location
-            while not rospy.is_shutdown():
-                DATA=LOG()
-                DATA.StartDrive = DATA.getTime()
-                i=0
-                brakeP.brake(0)
-                if not self.path:
-                    self.path=getPath()
-                    print self.path
-                else:
-                    for object in self.path:
-                        if self._as.is_preempt_requested():
-                            success = False
-                            rospy.loginfo('%s: Preempted' % self._action_name)
-                            self._as.set_preempted()
-                            gasP.gas(0)
-                            return
-                        #self._feedback.WayPointsGiven.append(object)
-                        DATA.WayPoint(object)
-                        flag=b=m=0
-                        if(object[1]-self.world.pose.pose.position.y==0): #define the normal to the way points for: "isPassedNormal" function
-                            b=object[0]
-                            if object[0]>self.world.pose.pose.position.x:
-                                flag=1
-                            else:
-                                flag=2
+        self._result.success = 1
+        self.sub = rospy.Subscriber('/C25/publish', C25C0_ROP,self.MyLocation_callback) #get atlas location by subscribing to C25 module       
+        #self.sub = rospy.Subscriber('/ground_truth_odom', Odometry,self.MyLocation_callback) #get atlas location by subscribing to C25 module       
+        rospy.sleep(1)
+        self.C31_path = numpy.array([])
+        self.sub = rospy.Subscriber('/path', C31_Waypoints,self.getPath) #get atlas location by subscribing to C25 module        
+        self.path=[(30, 1.5),(43, 0), (60, -2),(95, 0),(104, 4.5), (149.5, 50),(150, 95), (157, 100), (198, 100)]#[(151.5, 93), (158, 98.7), (198, 100)] #  self.C31_path#      [(9, 8), (30, 3),(60, 80), (100, 100)]#
+        DATA=LOG()
+        DATA.StartDrive = DATA.getTime()
+        while not rospy.is_shutdown():
+            i=0
+            brakeP.brake(0)
+            if not self.path:
+                flag=0
+                while (not self.path and flag!=10):
+                    rospy.sleep(0.02)
+                    self.path=self.C31_path
+                    flag+=1
+            if self.path:
+                rtd.AllWP = [[(int(i*100))/100.0, float(int(j*100))/100] for i, j in self.path]
+                self.q_out.put(rtd)
+                for object in self.path:
+                    if self._as.is_preempt_requested():
+                        success = False
+                        rospy.loginfo('%s: Preempted' % self._action_name)
+                        self._as.set_preempted()
+                        gasP.gas(0)
+                        brakeP.brake(1)
+                        self.exit_Drive(DATA, 1)
+                        return
+                    DATA.WayPoint(object)
+                    flag=b=m=0
+                    if(object[1]-self.yPosition==0): #define the normal to the way points for: "isPassedNormal" function
+                        b=object[0]
+                        if object[0]>self.xPosition:
+                            flag=1
                         else:
-                            m=-1* float((object[0]-self.world.pose.pose.position.x)/(object[1]-self.world.pose.pose.position.y))
-                            b= float(object[1])-m*float(object[0])
-                            if object[1]>self.world.pose.pose.position.y:
-                                flag=3
-                            else:
-                                flag=4
-                        al=atan2(object[1]-self.world.pose.pose.position.y,  object[0]-self.world.pose.pose.position.x)*180/pi
-                        try:
-                            m1=atan2(self.path[i+1][1]-object[1], self.path[i+1][0]-object[0])*180/pi
-                        except: 
-                            m1=360
-                        if success:#(abs(al-m1)>20 and self.DistanceToWP(object)>5) :
-                            print "-------------------------------"
-                            print "Driving to way point x=%f, y=%f" %(object[0],object[1])
-                            while (self.isPassedNormal(self.world.pose.pose.position.x,self.world.pose.pose.position.y, m, b,flag)):
-                                if self._as.is_preempt_requested():
-                                    success = False
-                                    rospy.loginfo('%s: Preempted' % self._action_name)
-                                    self._as.set_preempted()
-                                    gasP.gas(0)
-                                    return
-                                rospy.sleep(0.02)
-                                print "still driving"
-                                DATA.MyPath(self.world.pose.pose.position.x, self.world.pose.pose.position.y)
-                                [speed, Cspeed]=P2P(self.DistanceToWP(object), self.OrientationErrorToWP(object)) 
-                                gasP.gas(speed/100)
-                                Steer.turn(Cspeed)
-                            DATA.DistanceError(sqrt((self.world.pose.pose.position.x-object[0])*(self.world.pose.pose.position.x-object[0])+( self.world.pose.pose.position.y-object[1])*( self.world.pose.pose.position.y-object[1])))
-                            DATA.PassedWayPoint(object)
-                            if object==[30, 30]:
-                                rospy.sleep(2)
-                            newMsg=Monitoring()
-                            newMsg.LastWPpassed = object
-                            newMsg.MyLoc4LastWP= [self.world.pose.pose.position.x , self.world.pose.pose.position.y]
-                            self.feedback_publisher.publish(newMsg)
-                            print newMsg
-                            #self._feedback.LastWPpassed_Y = object[1]
-                            #self._feedback.MyLoc4LastWP= [self.world.pose.pose.position.x , self.world.pose.pose.position.y]
-                            #self._feedback.MyLoc4LastWP_Y=  self.world.pose.pose.position.y
-                            #print self._feedback
-                            self._feedback.complete = 32.22
-                            self._as.publish_feedback(self._feedback)
-                            print "arrived at Way point"
-                        i+=1
-                    #self.path=getPath() #Note - the module is still not ready to be fully operable because it always considers your location as (0,0) and does not update your location.
-                #print self.path
-
-                self.path=[]
-                DATA.FinishDrive = DATA.getTime()
-                DATA.print2file()
-                print "Finished generating log.txt"
-                if not self.path:
+                            flag=2
+                    else:
+                        m=-1* float((object[0]-self.xPosition)/(object[1]-self.yPosition))
+                        b= float(object[1])-m*float(object[0])
+                        if object[1]>self.yPosition:
+                            flag=3
+                        else:
+                            flag=4
+                    al=atan2(object[1]-self.yPosition,  object[0]-self.xPosition)*180/pi
+                    try:
+                        m1=atan2(self.path[i+1][1]-object[1], self.path[i+1][0]-object[0])*180/pi
+                    except: 
+                        m1=360
+                    if (abs(al-m1)>20 and self.DistanceToWP(object)>3) :
+                        print "-------------------------------"
+                        print "Driving to way point x=%f, y=%f" %(object[0],object[1])
+                        while (self.isPassedNormal(self.xPosition,self.yPosition, m, b,flag)):
+                            
+                            if self._as.is_preempt_requested():
+                                rospy.loginfo('%s: Preempted' % self._action_name)
+                                self._as.set_preempted()
+                                gasP.gas(0)
+                                brakeP.brake(1)
+                                self.exit_Drive(DATA, 1)
+                                return
+                            DATA.MyPath(self.xPosition, self.yPosition)
+                            self.OrientationErrorToWP(object)
+                            
+                            
+                            [dSpeed, Cspeed]=P2P(self.DistanceToWP(object), self.OE[0], self.dOE)
+                            #dSpeed = 10
+                            [  acc, brk] = self.SpeedController(dSpeed)
+                            Cspeed = -Cspeed*pi
+                            #print brk, acc
+                            #rospy.sleep(0.5)
+                            gasP.gas(acc)
+                            brakeP.brake(brk)
+                            Steer.turn(Cspeed)
+                            rtd.object=object
+                            rtd.location = [self.xPosition,self.yPosition]
+                            rtd.speed = dSpeed
+                            rtd.turn = Cspeed
+                            rtd.distance = self.DistanceToWP(object)
+                            rtd.OriEr = self.OE[0]
+                            rtd.dO = self.dOE
+                            rtd.ActSpeed = self.ActSpeed
+                            self.q_out.put(rtd) #data to GUI!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+                        DATA.DistanceError(sqrt((self.xPosition-object[0])*(self.xPosition-object[0])+( self.yPosition-object[1])*( self.yPosition-object[1])))
+                        DATA.PassedWayPoint(object)
+                        newMsg=Monitoring()
+                       
+                        newMsg.LastWPpassed = object
+                        newMsg.MyLoc4LastWP= [self.xPosition , self.yPosition]
+                        self.feedback_publisher.publish(newMsg)
+                        print newMsg
+                        self._feedback.complete = 32.22
+                        self._as.publish_feedback(self._feedback)
+                        print "arrived at Way point"
+                        print "-------------------------------"
+                        
+                    i+=1
+            self.path=self.C31_path #[]#
+            try:
+                if (sqrt((self.path[-1][0]-self.xPosition)*(self.path[-1][0]-self.xPosition) +(self.path[-1][1]-self.yPosition)*(self.path[-1][1]-self.yPosition))<0.5):
+                    print "get out!!!!!!!!!!!!!!!!!!!!!!", self.path[-1], self.xPosition, self.yPosition
                     gasP.gas(0)
-                    brakeP.brake(0)
-                    Steer.turn(0)
-                    self._result.success = 0
-                    self._result.description = "finished driving car"
-                    self._result.plan = "finished driving car"
+                    brakeP.brake(1)
+                    self.exit_Drive(DATA, 0)
                     break   
+            except:
+                print "path array is empty", self.path
+                gasP.gas(0)
+                brakeP.brake(1)
+                self.exit_Drive(DATA, 0)
+                break   
             
-        plotGraph(DATA)    
-        if success:
-            rospy.loginfo('Finished Driving!! Please run "FinishDrive" client, in order to pull hand brake.')
-            self._as.set_succeeded(self._result)
-        #----------------hand brake released --------------------------#
-
-def getPath():
-    #rospy.wait_for_service('C31_GlobalPathPlanner/getPath')
-    try:
-        rospy.loginfo ("Connecting to C31_GlobalPathPlanner/getPath")
-        add_two_ints = rospy.ServiceProxy('C31_GlobalPathPlanner/getPath', C31_GetPath)
-        array = add_two_ints().path.points
-        array2=[(po.x, po.y) for po in array]
-        if array2==[]:
-            rospy.loginfo ("No way points!!! check preception module")
+        gasP.gas(0)
+        rospy.loginfo('Finished Driving!! Please run "FinishDrive" client, in order to pull hand brake.')
+        self._as.set_succeeded(self._result)
+    def SpeedController(self, desiredSpd):
+        error=desiredSpd-self.ActSpeed
+        kp = 1
+        if error>0:
+            return [error*kp, 0]
         else:
-             rospy.loginfo ( "Way Points collected")
-        return array2
-    except rospy.ServiceException, e:
-        rospy.loginfo ( "Check that C31 is running properly." )
-        rospy.loginfo ( "try running in terminal: rosservice call /C31_GlobalPathPlanner/getPath ")
+            return [0, -error*kp/10]
+    def SteeringController(self, desiredTurn):
+        error=desiredTurn-self.ActSpeed
+        kp = 1
+        if error>0:
+            return [error*kp, 0]
+        else:
+            return [0, -error*kp/10]            
+    def getPath(self, data):
+#        try:
+            self.C31_path = []
+            for point in data.points:
+                self.C31_path.append([point.x, point.y])
+            if not self.C31_path:
+                rospy.loginfo('Can not access C31_Path topic!')
+
+#def getPath():
+#    #rospy.wait_for_service('C31_GlobalPathPlanner/getPath')
+#    try:
+#        rospy.loginfo ("Connecting to C31_GlobalPathPlanner/getPath")
+#        add_two_ints = rospy.ServiceProxy('C31_GlobalPathPlanner/getPath', C31_GetPath)
+#        array = add_two_ints().path.points
+#        array2=[(po.x, po.y) for po in array]
+#        if array2==[]:
+#            rospy.loginfo ("No way points!!! check perception module")
+#        else:
+#            rospy.loginfo ( "Way Points collected")
+#        return array2
+#    except rospy.ServiceException, e:
+#        rospy.loginfo ( "Check that C31 is running properly." )
+#        rospy.loginfo ( "try running in terminal: rosservice call /C31_GlobalPathPlanner/getPath ")
+
+
+
 #=========================================================================================#
 #----------DRC vehicle controllers.....note! - will be erased once the C67 module is complete----------------#
 #=========================================================================================#
+
+car='drc_vehicle'#'golf_cart'#
+
 class handB:
 
     handbrake=1
     pub=0
     sub=0
     def __init__(self):
-        self.pub = rospy.Publisher('drc_vehicle/hand_brake/cmd', Float64)
-        self.sub = rospy.Subscriber('/drc_vehicle/hand_brake/state', Float64, self.handbrakeCallback)
+        self.pub = rospy.Publisher(car+'/hand_brake/cmd', Float64)
+        self.sub = rospy.Subscriber('/'+car+'/hand_brake/state', Float64, self.handbrakeCallback)
     def handbrakeCallback(self, data):
         self.handbrake=data.data
 
@@ -222,8 +411,8 @@ class Gas:
     pub=0
     sub=0
     def __init__(self):
-        self.pub = rospy.Publisher('drc_vehicle/gas_pedal/cmd', Float64)
-        self.sub = rospy.Subscriber('/drc_vehicle/gas_pedal/state', Float64, self.gasCallback)
+        self.pub = rospy.Publisher(car+'/gas_pedal/cmd', Float64)
+        self.sub = rospy.Subscriber('/'+car+'/gas_pedal/state', Float64, self.gasCallback)
     def gasCallback(self, data):
         self.status=data.data
 
@@ -235,8 +424,8 @@ class Brake:
     pub=0
     sub=0
     def __init__(self):
-        self.pub = rospy.Publisher('drc_vehicle/brake_pedal/cmd', Float64)
-        self.sub = rospy.Subscriber('/drc_vehicle/brake_pedal/state', Float64, self.brakeCallback)
+        self.pub = rospy.Publisher(car+'/brake_pedal/cmd', Float64)
+        self.sub = rospy.Subscriber('/'+car+'/brake_pedal/state', Float64, self.brakeCallback)
     def brakeCallback(self, data):
         self.status=data.data
 
@@ -248,8 +437,8 @@ class SW:
     pub=0
     sub=0
     def __init__(self):
-        self.pub = rospy.Publisher('drc_vehicle/hand_wheel/cmd', Float64)
-        self.sub = rospy.Subscriber('/drc_vehicle/hand_wheel/state', Float64, self.SWCallback)
+        self.pub = rospy.Publisher(car+'/hand_wheel/cmd', Float64)
+        self.sub = rospy.Subscriber('/'+car+'/hand_wheel/state', Float64, self.SWCallback)
     def SWCallback(self, data):
         self.status=data.data
 

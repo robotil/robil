@@ -1,9 +1,8 @@
 <launch>
-<!-- Launch the atlas & vehicle & fire hose world-->
-<include file="$(find atlas_utils)/launch/atlas_drc_vehicle_fire_hose.launch" />
+
 
 <!-- Atlas, enter car!!!-->
-<include  file="$(find C51_CarOperation)/launch/bash.launch" />
+<include  file="$(find C51_CarOperation)/launch/servers.launch" />
 
 
 <!-- Start Drive Init server -->

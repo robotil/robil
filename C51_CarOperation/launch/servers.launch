@@ -1,0 +1,30 @@
+<launch>
+
+
+<!-- Atlas, enter car!!! -->
+<node name="C51_bash" pkg="C51_CarOperation" type="C51_bash.bash" />
+
+<!-- C21 - on! -->
+<!--include  file="$(find C21_VisionAndLidar)/launch/C21.launch" /-->
+
+<!-- Start C22 -->
+<!--node name="C22" pkg="C22_GroundRecognitionAndMapping" type="C22" /-->
+
+<!-- Start C25 -->
+<include  file="$(find C25_GlobalPosition)/launch/C25.launch" />
+
+<!-- Start C34 -->
+<node name="C34" pkg="C34_Executer" type="executer" />
+
+<!-- Start C31 -->
+<node name="C31" pkg="C31_PathPlanner" type="gpp" />
+
+<!-- C34_Designer - on! -->
+<include  file="$(find C34_Designer)/launch/start.launch" />
+
+<!-- Start Lidar for Obstacle detection -->
+<node name="C22" pkg="LidarObstacleDetection" type="Lidar" />
+
+</launch>
+  
+
