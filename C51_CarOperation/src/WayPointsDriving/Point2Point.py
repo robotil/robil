@@ -7,6 +7,8 @@ from nav_msgs.msg import Odometry
 from math import *
 from geometry_msgs.msg import Pose
 import sys
+import Tkinter
+from GUI import App
 
 class MemberFunc():
     arr=0;
@@ -73,131 +75,140 @@ class MemberFunc():
         return m.getArea(minval)
     def getCenterMass(self, arg):
         [xmax, xmin] = self.getInvertedFuzzyValue(arg)
-        #print "arg:%f Xmax:%f Xmin: %f" %(arg, xmax, xmin)
         firstTri=float(self.arr[0])/3+(xmin*2/3)
         firstTriArea=arg*(xmin-float(self.arr[0]))/2
-        #print "FT: CM: %f, Area: %f" %(firstTri, firstTriArea)
         rec=(xmax+xmin)/2
         recArea=(xmax-xmin)*arg
-        #print "rec: CM: %f, Area: %f" %(rec, recArea)
         secTri=float(self.arr[len(self.arr)-1])/3+(xmax*2/3)
         secTriArea=arg*(float(self.arr[len(self.arr)-1])-xmax)/2
-        #print "ST: CM: %f, Area: %f" %(secTri, secTriArea)
-        CM=(firstTri*firstTriArea+rec*recArea+secTri*secTriArea)/(firstTriArea+recArea+secTriArea)
+        try:
+            CM=(firstTri*firstTriArea+rec*recArea+secTri*secTriArea)/(firstTriArea+recArea+secTriArea)
+        except:
+            CM=0
         return CM
         
 #--------------------Define Membership Functions Variables ----------------------------------#
 
-OrientationMF= [ MemberFunc([-1,  -1,  -(60.0/180.0),  -(30.0/180.0)]),  MemberFunc([-(60.0/180.0),  -(30.0/180.0),  0]),  MemberFunc([-(5.0/180.0),  0,  (5.0/180.0)]),  MemberFunc([0,  30.0/180.0,  60.0/180.0]),  MemberFunc([30.0/180.0, 60.0/180.0,  1,  1])]#[VNO NO ZO PO VPO]   
+OrientationMF= [ MemberFunc([-1,  -1,  -(60.0/180.0),  -(30.0/180.0)]),  MemberFunc([-(60.0/180.0),  -(30.0/180.0),  0]),  MemberFunc([30.0/180.0, 60.0/180.0,  1,  1]),  MemberFunc([-(5.0/180.0),  0,  (5.0/180.0)]),  MemberFunc([0,  30.0/180.0,  60.0/180.0])]#[VNO NO ZO PO VPO]   
+
+dOrientationMF= [ MemberFunc( [-180,  -180,-60,   -30]),  MemberFunc( [-10,  0,  10]),  MemberFunc( [30,  60,  180, 180]),  MemberFunc( [-50,  -30,  3]),  MemberFunc( [3,  30,  50])]#[VNO NO ZO PO VPO]   
 
 #Distance
-DistanceMF= [ MemberFunc([0, 0,  3.5, 7]),  MemberFunc([3.5,  13.5, 23.5]),   MemberFunc([20,  30,  100000,  100000])] #[CLOSE FAR VFAR] 
+DistanceMF= [ MemberFunc([0, 0,  3.5, 7]),   MemberFunc([20,  30,  100000,  100000]),  MemberFunc([3.5,  13.5, 23.5])] #[CLOSE FAR VFAR] 
 
 #Speed
-SpeedMF = [ MemberFunc([1,  1.5,  2]) ,  MemberFunc([1.5,  2.25,  3]),   MemberFunc([2.5,  6,  6])] #[SLOW  FAST  VFAST ]
+SpeedMF = [ MemberFunc([0,  0.75,  1.5]) ,  MemberFunc([1,  2.5,  4]),   MemberFunc([3,  10,  17])] #[SLOW  FAST  VFAST ]
 
 
 #Circular Speed
-CircularSpeedMF = [ MemberFunc([-15,  -10,  -5]),  MemberFunc([-7.5,  -3,  0]),  MemberFunc([-1,  0,  1]),  MemberFunc([0,  5,  10]),   MemberFunc([3,   7.5,  15])] # [HL L  ST  R  HR]
+CircularSpeedMF = [   MemberFunc([-0.75,  -0.3,  0]),  MemberFunc([-0.1,  0,  0.1]),  MemberFunc([0,  0.3,  0.75]),MemberFunc([-1.3,  -1.0,  -0.7]),   MemberFunc([0.7,   1.0,  1.3])] # [HL L  ST  R  HR]
 
 #-------------------End of Definition --------------------------------------------------------------#
 
 #---------------------Rules array -------------------------------------------------------------------#
+Inp = 3 #Number of Inputs
+Outp = 2 #Number of Outputs
 RuleArray=[
-                    [0, -1, 0, 0],
-                    [1, 0, 1, 0],
-                    [1, 2, 1, 1], 
-                    [1, 1, 1, 1],
-                    [3, 1, 3, 1],
-                    [3, 2, 3, 1], 
-                    [2, 0, 2, 0],
-                    [2, 1, 2, 1],
-                    [2, 2, 2, 2],
-                    [3, 0, 3, 0],
-                    [4, -1, 4, 0]
+                    [0,1,2,1,5],
+                    [0,1,5,2,3],
+                    [0,1,3,2,2],
+                    [0,2,3,1,1],
+                    [0,2,5,2,2],
+                    [0,2,2,1,3],
+                    [1,4,2,2,2],
+                    [0,4,4,2,3],
+                    [0,4,5,2,1],
+                    [0,5,2,1,1],
+                    [0,5,4,2,2],
+                    [0,5,1,1,3],
+                    [0,3,1,2,2],
+                    [0,3,4,1,1],
+                    [0,3,2,1,4],
+                    [3,4,2,3,2],
+                    [3,1,3,2,2],
+                    [2,1,3,2,2],
+                    [2,4,2,3,2]
                     ]
 # -------------------------End of Rules -------------------------------------------------------------#
+def isZero(number):
+        if number:
+            return 1
+        else:
+            return 0
+def findMin(seq):
+        #print seq
+        val = 0
+        min =2
+        for v in seq:
+            if v > val and v<min:
+                min = v
+        if min<2:
 
-def P2P(Distance, dOrientation):
+            return min
+
+        return 0
+def P2P(Distance, Orientation, dOrientation):
         SF=-1.0/90.0/360.0*Distance+19.0/(18.0*180)
         #SF = 1/180
         if SF<1.0/360.0:
             SF=1.0/360.0
         OrientationMFflag=[0, 0, 0, 0, 0]
+        dOrientationMFflag=[0, 0, 0, 0, 0]
         DistanceMFflag=[0, 0, 0]
         SpeedMFflag = [0, 0, 0]
         CircularSpeedMFflag=[0, 0, 0, 0, 0]
         
         
-        if dOrientation>180:
-            dOrientation-=360
-        if dOrientation<-180:
-            dOrientation+=360
-        dOrientation = dOrientation*SF
-        if dOrientation>1:
-            dOrientation=1
-        if dOrientation<-1:
-            dOrientation=-1
+        if Orientation>180:
+            Orientation-=360
+        if Orientation<-180:
+            Orientation+=360
+        Orientation = Orientation*SF
+        if Orientation>1:
+            Orientation=1
+        if Orientation<-1:
+            Orientation=-1
         #print "Distance %f, Orientation %f" %(Distance, dOrientation)
         pos=0
         for i in OrientationMF: #Define which Membership functions of the Orientation are relevant
-            if i.isFuzzied(dOrientation):       
+            if i.isFuzzied(Orientation):       
                 OrientationMFflag[pos]=1
             pos+=1
+
         pos=0
+        for i in dOrientationMF: #Define which Membership functions of the Orientation are relevant
+            if i.isFuzzied(dOrientation):       
+                dOrientationMFflag[pos]=1
+            pos+=1
+        pos=0  
+
         for i in DistanceMF: #Define which Membership functions of the Distance are relevant
             if i.isFuzzied(Distance):
                 DistanceMFflag[pos]=1
             pos+=1
-        
+
         
         CSpeedArea=CSpeedMoment=SpeedArea=SpeedMoment=0
-        rule=-1
+        rule=0
         for RuleCon in RuleArray:
             rule+=1
-            Area=CM=0
-            if RuleCon[0]==-1 and DistanceMFflag[RuleCon[1]]==1:
-                Area=CircularSpeedMF[RuleCon[2]].getArea(DistanceMF[RuleCon[1]].getFuzzyValue(Distance))
-                CM=CircularSpeedMF[RuleCon[2]].getCenterMass(DistanceMF[RuleCon[1]].getFuzzyValue(Distance))
-                #print "Rule %d:Circular Speed->rules Area: %f rules CM: %f" %(rule+1, Area, CM)
+            if DistanceMF[RuleCon[0]-1].isFuzzied(Distance) or not (isZero(RuleCon[0])):
+                if OrientationMF[RuleCon[1]-1].isFuzzied(Orientation) or not(isZero(RuleCon[1])):
+                    if dOrientationMF[RuleCon[2]-1].isFuzzied(dOrientation) or not(isZero(RuleCon[2])):
+                        #print rule, RuleCon
+                        MinVal = findMin([isZero(RuleCon[0])*DistanceMF[RuleCon[0]-1].getFuzzyValue(Distance),isZero(RuleCon[1])*OrientationMF[RuleCon[1]-1].getFuzzyValue(Orientation), isZero(RuleCon[2])*dOrientationMF[RuleCon[2]-1].getFuzzyValue(dOrientation) ])
 
-                CSpeedArea+=Area
-                CSpeedMoment+=Area*CM
-                
-                Area=SpeedMF[RuleCon[3]].getArea(DistanceMF[RuleCon[1]].getFuzzyValue(Distance))
-                CM=SpeedMF[RuleCon[3]].getCenterMass(DistanceMF[RuleCon[1]].getFuzzyValue(Distance))
-                #print "Rule %d: Linear Speed -> rules Area: %f rules CM: %f" %(rule+1, Area, CM)
-                
-                SpeedArea+=Area
-                SpeedMoment+=Area*CM
-            elif RuleCon[1]==-1 and OrientationMFflag[RuleCon[0]]==1:
-                Area=CircularSpeedMF[RuleCon[2]].getArea(OrientationMF[RuleCon[0]].getFuzzyValue(dOrientation))
-                CM=CircularSpeedMF[RuleCon[2]].getCenterMass(OrientationMF[RuleCon[0]].getFuzzyValue(dOrientation))
-                #print "Rule %d:Circular Speed->rules Area: %f rules CM: %f" %(rule+1, Area, CM)
-
-                CSpeedArea+=Area
-                CSpeedMoment+=Area*CM
-                
-                Area=SpeedMF[RuleCon[3]].getArea(OrientationMF[RuleCon[0]].getFuzzyValue(dOrientation))
-                CM=SpeedMF[RuleCon[3]].getCenterMass(OrientationMF[RuleCon[0]].getFuzzyValue(dOrientation))
-                #print "Rule %d: Linear Speed -> rules Area: %f rules CM: %f" %(rule+1, Area, CM)
-                
-                SpeedArea+=Area
-                SpeedMoment+=Area*CM
-            elif DistanceMFflag[RuleCon[1]]==1 and OrientationMFflag[RuleCon[0]]==1:
-                Area=CircularSpeedMF[RuleCon[2]].getArea(OrientationMF[RuleCon[0]].getFuzzyValue(dOrientation))
-                CM=CircularSpeedMF[RuleCon[2]].getCenterMass(OrientationMF[RuleCon[0]].getFuzzyValue(dOrientation))
-                #print "Rule %d:Circular Speed->rules Area: %f rules CM: %f" %(rule+1, Area, CM)
-
-                CSpeedArea+=Area
-                CSpeedMoment+=Area*CM
-                
-                Area=SpeedMF[RuleCon[3]].getArea(DistanceMF[RuleCon[1]].getFuzzyValue(Distance))
-                CM=SpeedMF[RuleCon[3]].getCenterMass(DistanceMF[RuleCon[1]].getFuzzyValue(Distance))
-                #print "Rule %d: Linear Speed -> rules Area: %f rules CM: %f" %(rule+1, Area, CM)
-                
-                SpeedArea+=Area
-                SpeedMoment+=Area*CM
+                        area=isZero(RuleCon[4])*CircularSpeedMF[RuleCon[4]-1].getArea(MinVal)
+                        CM=isZero(RuleCon[4])*CircularSpeedMF[RuleCon[4]-1].getCenterMass(MinVal)
+                        CSpeedArea+=area
+                        CSpeedMoment+=area*CM
+                        
+                        area=isZero(RuleCon[3])*SpeedMF[RuleCon[3]-1].getArea(MinVal)
+                        CM=isZero(RuleCon[3])*SpeedMF[RuleCon[3]-1].getCenterMass(MinVal)
+                        SpeedArea+=area
+                        SpeedMoment+=area*CM
+                        #print CSpeedArea, SpeedArea
+            
         speed = 0
         CircularSpeed = 0
         if SpeedArea!=0:
@@ -205,4 +216,5 @@ def P2P(Distance, dOrientation):
         if CSpeedArea!=0:
             CircularSpeed=CSpeedMoment/CSpeedArea
         #print "Moment %f Area %f" %(CSpeedMoment, CircularSpeedArea)
+
         return [speed, CircularSpeed] 
