@@ -139,6 +139,19 @@ class DD_WalkingMode(WalkingMode):
         except rospy.ServiceException, e:
             print "Foot Placement Service call failed: %s"%e
     
+    def Fitness(self,path):
+        stepList = self._LPP.GetPath()
+        result = True
+        AllowedDeltaZ = 0.1
+        StartingZ = stepList[0].pose.position.z
+        if(4 < len(stepList)):
+            endRange = 5
+        else:
+            endRange = len(stepList)
+        for i in range(1,endRange):
+            if (AllowedDeltaZ < math.fabs(StartingZ-stepList[i].pose.position.z)):
+                result = False
+        return result
     
 ###################################################################################
 #--------------------------- CallBacks --------------------------------------------

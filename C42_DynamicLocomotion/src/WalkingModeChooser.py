@@ -15,20 +15,47 @@ from LocalPathPlanner import *
 class WalkingModeChooser(WalkingModeChooserInterface):
 
     def __init__(self,prefferedMode,bIsDoingQual=False):
-        
         # Once we clean bIsDoingQual out of the code, we can allow for the lpp to be known only to the concrete walking
         # mode
         lpp = LocalPathPlanner()
         lpp.SetDoingQual(bIsDoingQual)
         
         self._Modes = {'BDI':WalkingModeBDI(lpp),'QS':QS_WalkingMode(),'DD':DD_WalkingMode()}
-        self._CurrentMode = self._Modes[prefferedMode]
-        self._Recommended = self._Modes[prefferedMode]
+        self._Preferred = prefferedMode
+        self._CurrentMode = prefferedMode
+        self._Recommended = prefferedMode
+        self._bIsAppropriate = True
         
     def IsCurrentModeAppropriate(self):
-        return True;
+        self._bIsAppropriate = True
+        # Always appropriate when done
+        if(False == self._Modes[self._CurrentMode].IsDone()):
+            path = self._Modes[self._CurrentMode].GetPath()
+            # If the preferred mode is fit, that means current is inappropriate if current is not preferred
+            if (self._Preferred == self._CurrentMode):
+                if (True == self._Modes[self._Preferred].Fitness(path)):
+                    self._bIsAppropriate = True
+                else:
+                    self._bIsAppropriate = False
+                    if ('QS' == self._Preferred):
+                        self._Recommended = 'DD'
+                    elif ('DD' == self._Preferred):
+                        self._Recommended = 'QS'
+            elif (True == self._Modes[self._Preferred].Fitness(path)):
+                self._bIsAppropriate = False
+                self._Recommended = self._Preffered
+            else:
+                self._bIsAppropriate = (True == self._Modes[self._CurrentMode].Fitness(path))
+        return self._bIsAppropriate;
     
     def GetRecommendedMode(self):
-        return self._Recommended
+        result = self._Modes[self._CurrentMode]
+        if (False == self._bIsAppropriate):
+            path = self._Modes[self._CurrentMode].GetPath()
+            result = False
+            if (True == self._Modes[self._Recommended].Fitness(path)):
+                self._Modes[self._Recommended].SetPath(path)
+                result = self._Modes[self._Recommended]
+        return result
 
 

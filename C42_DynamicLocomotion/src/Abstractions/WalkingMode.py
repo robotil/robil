@@ -33,9 +33,14 @@ class WalkingMode(object):
     def SetPath(self,Path):
         self._LPP.SetPath(Path)
         
+    def GetPath(self):
+        return self._LPP.GetPath()
+        
     def IsDone(self):
         return False
 
     def IsReady(self):
         return self._LPP.IsActive()
     
+    def Fitness(self,path):
+        return True

@@ -40,7 +40,20 @@ class Walker(object):
 
     # Status:
     def IsDone(self):
-        return self._WalkingMode.IsDone()
+        """
+        Return True if the walker is done walking.
+        """
+        bIsDone = False
+        if self._ModeChooser.IsCurrentModeAppropriate():
+            bIsDone = self._WalkingMode.IsDone()
+        else:
+            RecommendedWalkingMode = self._ModeChooser.GetRecommendedMode()
+            if (False != RecommendedWalkingMode):
+                self._WalkingMode = RecommendedWalkingMode
+                self._WalkingMode.Initialize()
+                self._WalkingMode.StartWalking()
+                self._WalkingMode.Walk()
+        return bIsDone
 
     def IsReady(self):
         return self._WalkingMode.IsReady()

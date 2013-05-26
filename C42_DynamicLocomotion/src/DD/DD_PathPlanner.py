@@ -31,6 +31,9 @@ class DD_PathPlanner(PathPlanner):
         self._Queue.extend(waypointList)
         if(0 < len(self._Queue)):
             self.State = DD_PathPlannerEnum.Active
+            
+    def GetPath(self):
+        return self._Queue
         
     def GetNextStep(self):
         step_queue = 0
