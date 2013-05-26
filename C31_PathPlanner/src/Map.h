@@ -153,7 +153,7 @@ class AltMap:public MapT<double>{
 	EXTENDS(double, AltMap)
 
 };
-//ostream& operator<<(ostream& out, const Map& m);
+ostream& operator<<(ostream& out, const AltMap& m);
 
 
 class MapEditor{
