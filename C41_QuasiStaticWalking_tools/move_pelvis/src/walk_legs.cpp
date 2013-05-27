@@ -25,7 +25,7 @@ class walk_legs_service{
 protected:
 	ros::NodeHandle nh_, nh2_;
 	ros::NodeHandle* rosnode;
-	ros::ServiceServer walk_legs_srv_, step_down_srv_, make_step_srv_;
+	ros::ServiceServer walk_legs_srv_, step_down_srv_, make_step_srv_, walk_legs_by_pelvis_srv_;
 	ros::ServiceClient traj_vector_cli_,walking_vector_cli_,walking_position_vector_cli_;
 	ros::ServiceClient legs_val_calc_cli_,left_leg_val_calc_cli_,right_leg_val_calc_cli_;
 	ros::Publisher traj_action_pub_;
@@ -97,6 +97,7 @@ public:
 
 
 		walk_legs_srv_ = nh_.advertiseService("walk_legs", &walk_legs_service::gen_traj, this);
+		walk_legs_by_pelvis_srv_ = nh_.advertiseService("walk_legs_by_pelvis", &walk_legs_service::walk_legs_by_pelvis, this);
 		step_down_srv_ = nh2_.advertiseService("step_down", &walk_legs_service::step_down, this);
 		make_step_srv_ = nh2_.advertiseService("make_step", &walk_legs_service::make_step, this);
 		ROS_INFO("running walk_legs service");
@@ -658,6 +659,101 @@ public:
 			}
 		}
 	}
+
+
+	bool walk_legs_by_pelvis(move_pelvis::move_pelvis::Request &req, move_pelvis::move_pelvis::Response &res){
+		if(!req.LinkToMove.compare("l_leg")){
+			std_srvs::Empty e;
+			//reset_posecontroller_cli.call(e);
+
+			tf::StampedTransform l_foot_transform;
+			try {
+				listener.waitForTransform("/l_foot","/pelvis",ros::Time(0),ros::Duration(0.2));
+				listener.lookupTransform("/l_foot","/pelvis",ros::Time(0),l_foot_transform);
+			} catch (tf::TransformException &ex) {
+				ROS_ERROR("%s",ex.what());
+			}
+
+			XYZRPY tranform = VectorTranformation(	req.PositionDestination.x, req.PositionDestination.y, req.PositionDestination.z,
+					req.AngleDestination.x, req.AngleDestination.y, req.AngleDestination.z,
+					l_foot_transform.getOrigin().x(), l_foot_transform.getOrigin().y(), l_foot_transform.getOrigin().z(),
+					QuatToRoll(l_foot_transform.getRotation()), QuatToPitch(l_foot_transform.getRotation()), QuatToYaw(l_foot_transform.getRotation()));
+
+			move_pelvis::move_pelvis move;
+
+			//ros::Duration(2.0).sleep();
+
+
+			//Move left leg forward
+			move.request.PositionDestination.x = tranform.x;
+			move.request.PositionDestination.y = tranform.y;
+			move.request.PositionDestination.z = tranform.z;
+			move.request.AngleDestination.x = tranform.roll;
+			move.request.AngleDestination.y = tranform.pitch;
+			move.request.AngleDestination.z = tranform.yaw;
+			move.request.LinkToMove = "l_leg";
+			ROS_INFO("Moving left leg forward");
+			if(!this->gen_traj(move.request, move.response)){
+				ROS_ERROR("Could not move left leg forward");
+				return false;
+			}
+
+
+			return true;
+		}else{
+			if(!req.LinkToMove.compare("r_leg")){
+
+
+				std_srvs::Empty e;
+				//reset_posecontroller_cli.call(e);
+
+				tf::StampedTransform r_foot_transform;
+				try {
+					listener.waitForTransform("/r_foot","/pelvis",ros::Time(0),ros::Duration(0.2));
+					listener.lookupTransform("/r_foot","/pelvis",ros::Time(0),r_foot_transform);
+				} catch (tf::TransformException &ex) {
+					ROS_ERROR("%s",ex.what());
+				}
+
+				XYZRPY tranform = VectorTranformation(	req.PositionDestination.x, req.PositionDestination.y, req.PositionDestination.z,
+						req.AngleDestination.x, req.AngleDestination.y, req.AngleDestination.z,
+						r_foot_transform.getOrigin().x(), r_foot_transform.getOrigin().y(), r_foot_transform.getOrigin().z(),
+						QuatToRoll(r_foot_transform.getRotation()), QuatToPitch(r_foot_transform.getRotation()), QuatToYaw(r_foot_transform.getRotation()));
+
+				move_pelvis::move_pelvis move;
+
+				//ros::Duration(2.0).sleep();
+
+
+				//Move left leg forward
+				move.request.PositionDestination.x = tranform.x;
+				move.request.PositionDestination.y = tranform.y;
+				move.request.PositionDestination.z = tranform.z;
+				move.request.AngleDestination.x = tranform.roll;
+				move.request.AngleDestination.y = tranform.pitch;
+				move.request.AngleDestination.z = tranform.yaw;
+				move.request.LinkToMove = "r_leg";
+				ROS_INFO("Moving left right forward");
+				if(!this->gen_traj(move.request, move.response)){
+					ROS_ERROR("Could not move right leg forward");
+					return false;
+				}
+
+
+				return true;
+			}else{
+				ROS_ERROR("Wrong link %s", req.LinkToMove.c_str());
+				return false;
+			}
+		}
+	}
+
+
+
+
+
+
+
 
 
 	bool step_down(std_srvs::Empty::Request &req, std_srvs::Empty::Response &res){

@@ -1,0 +1,7 @@
+geometry_msgs/Vector3 wheel_center
+float64 radius
+float64 pitch
+float64 yaw
+float64 fangle
+float64 phi
+float64 dangle

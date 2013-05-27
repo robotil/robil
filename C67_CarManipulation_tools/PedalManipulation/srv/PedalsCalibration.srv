@@ -1,0 +1,4 @@
+geometry_msgs/Point right_pedal_location
+geometry_msgs/Point left_pedal_location
+---
+bool success

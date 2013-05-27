@@ -1,6 +1,8 @@
 #include "PathPlanner.h"
 #include "PField.h"
 
+typedef World Map;
+
 // copy from HEADER
 #define SYNCHRONIZED boost::mutex::scoped_lock l(_mtx);
 #define LOCK( X ) boost::shared_ptr<boost::mutex::scoped_lock> X(new boost::mutex::scoped_lock(_mtx));
@@ -26,17 +28,46 @@
 
 			Constraints constraints(_data.dimentions, _data.transits, _data.attractors);
 			
-			_data.map(_data.start.x, _data.start.y) = Map::ST_AVAILABLE;
-			SmoothedPath _path = searchPath_transitAccurate(_data.map, _data.start, _data.finish, constraints);
-			ROS_INFO("Calculated path: %s",STR(_path));
+
+#if MAP_MODE == MM_ALTS
+			_data.map.walls(_data.start.x, _data.start.y) = ObsMap::ST_AVAILABLE;
+			ObsMap printed_map = _data.map.walls;
+			SmoothedPath _path = searchPath_transitAccurate(
+					_data.map.altitudes, _data.map.slops, _data.map.costs, _data.map.walls,
+					_data.start, _data.finish, constraints
+			);
+#else
+			_data.map.grid(_data.start.x, _data.start.y) = ObsMap::ST_AVAILABLE;
+			ObsMap printed_map = _data.map.grid;
+			SmoothedPath _path = searchPath_transitAccurate(_data.map.grid, _data.start, _data.finish, constraints);
+#endif
+
+			ROS_INFO("Calculated path (%i): %s",(int)(_path.size()),STR(_path));
 			
-			PField pf(_data.map, Path());
-			Map map = _data.map;
+			PField pf(printed_map, Path());
+			ObsMap& map = printed_map;
 			Path spath = pf.castPath(_path);
 			for( size_t wp=0;wp<spath.size();wp++){
 				map(spath[wp].x,spath[wp].y)='o';
 			}
 			cout<<map<<endl;
+
+			if(_data.transits.size()>0){
+				cout<<"transits: ";
+				for(size_t t=0;t<_data.transits.size();t++){
+					cout<<"("<<_data.transits[t].x<<","<<_data.transits[t].y<<") ";
+				}
+				cout<<endl;
+			}
+
+#if MAP_MODE == MM_ALTS
+			ROS_INFO("Altitudes:");
+			cout<<_data.map.altitudes<<endl;
+			ROS_INFO("Slops:");
+			cout<<_data.map.slops<<endl;
+			ROS_INFO("Costs:");
+			cout<<_data.map.costs<<endl;
+#endif
 
 			LOCK( locker_aft )
 				path = _path;
@@ -45,7 +76,8 @@
 		}else{
 			ROS_INFO("PathPlanning::plan : %s","map is not ready => can not calculate path");
 		}
-		ROS_INFO("PathPlanning::plan : %s","no path calculated");
+		if(plan_created) ROS_INFO("PathPlanning::plan : %s","path successfully calculated");
+		else ROS_INFO("PathPlanning::plan : %s","no path calculated");
 		return plan_created;
 	}
 

@@ -15,17 +15,19 @@
 #include <string>
 #include <map>
 #include "move_hand/pelvis_move_hand.h"
+#include "move_hand/wheel_move_hand.h"
 #include "move_hand/matrix.h"
 #include <Eigen/Dense>
 #include <tf/transform_listener.h>
 #include <atlas_msgs/AtlasCommand.h>
+#include <math.h>
 
 class move_hand_service{
 
 protected:
-	ros::NodeHandle nh_, nh2_,nh3_,nh4_;
+	ros::NodeHandle nh_, nh2_,nh3_,nh4_,nh5_;
 	ros::NodeHandle* rosnode;
-	ros::ServiceServer move_hand_srv_,pelvis_move_hand_srv_,C66_matrix_srv_;
+	ros::ServiceServer move_hand_srv_,pelvis_move_hand_srv_,C66_matrix_srv_,wheel_move_hand_srv_;
 	ros::ServiceClient traj_vector_cli_,wheel_traj_vector_cli_;
 	ros::ServiceClient arms_val_calc_cli_;
 	ros::Subscriber joint_states_sub_;
@@ -104,6 +106,9 @@ public:
 
 		C66_matrix_srv_ = nh4_.advertiseService("C66_matrix",&move_hand_service::matrix_in,this);
 
+		wheel_move_hand_srv_ = nh5_.advertiseService("wheel_move_hand",&move_hand_service::wheel_move_hand_CB,this);
+		ROS_INFO("running wheel move hand service");
+
 	}
 	~move_hand_service(){
 		delete rosnode;
@@ -143,7 +148,14 @@ public:
                 traj_vec_right_srv.request.Angle = req.AngleDestination_right;
                 traj_vec_right_srv.request.segments_number = 1000 ;
                 traj_vec_right_srv.request.total_time = 5 ;
-		/*
+		if(req.quick){
+			traj_vec_left_srv.request.segments_number = 40 ;
+			traj_vec_left_srv.request.total_time = (5.0/25);
+			traj_vec_right_srv.request.segments_number = 40 ;
+			traj_vec_right_srv.request.total_time = (5.0/25);
+		}
+
+      /*
 	trajectory_msgs::JointTrajectory jt;
 	jt.header.stamp = ros::Time::now();
     jt.header.frame_id = "atlas::hand";
@@ -229,13 +241,8 @@ public:
 			atlas_command.k_effort[i] = 255;
 		}
 		if(traj_vector_cli_.call(traj_vec_left_srv)&&traj_vector_cli_.call(traj_vec_right_srv)){
-		  if(req.Radius!=0){
-		    if(wheel_traj_vector_cli_.call(traj_vec_left_srv)&&wheel_traj_vector_cli_.call(traj_vec_right_srv))
-		      int nop=0;
-		    else return false;
-		  }
-		  else req.Radius = 1;
-		        double p0_l,p1_l,p2_l,p3_l,p4_l,p5_l;
+
+			double p0_l,p1_l,p2_l,p3_l,p4_l,p5_l;
 			double p0_r,p1_r,p2_r,p3_r,p4_r,p5_r;
 			p0_l = q0_l;
 			p1_l = q1_l;
@@ -258,19 +265,19 @@ public:
 			for(unsigned int ind = 0; ind < traj_vec_left_srv.response.PositionArray.size(); ind++){
 				arms_val_calc::arms_val_calc v_left,v_right;
 				//ROS_INFO("Response from trajectory vector service example: %f", traj_vec_srv.response.PositionArray[ind].x);
-				v_left.request.x_dot = req.Radius*traj_vec_left_srv.response.PositionArray[ind].x;
-				v_left.request.y_dot = req.Radius*traj_vec_left_srv.response.PositionArray[ind].y;
-				v_left.request.z_dot = req.Radius*traj_vec_left_srv.response.PositionArray[ind].z;
-				v_left.request.roll_dot = req.Radius*traj_vec_left_srv.response.AngleArray[ind].x;
-				v_left.request.pitch_dot = req.Radius*traj_vec_left_srv.response.AngleArray[ind].y;
-				v_left.request.yaw_dot = req.Radius*traj_vec_left_srv.response.AngleArray[ind].z;
+				v_left.request.x_dot = traj_vec_left_srv.response.PositionArray[ind].x;
+				v_left.request.y_dot = traj_vec_left_srv.response.PositionArray[ind].y;
+				v_left.request.z_dot = traj_vec_left_srv.response.PositionArray[ind].z;
+				v_left.request.roll_dot = traj_vec_left_srv.response.AngleArray[ind].x;
+				v_left.request.pitch_dot = traj_vec_left_srv.response.AngleArray[ind].y;
+				v_left.request.yaw_dot = traj_vec_left_srv.response.AngleArray[ind].z;
 
-                                v_right.request.x_dot = req.Radius*traj_vec_right_srv.response.PositionArray[ind].x;
-                                v_right.request.y_dot = req.Radius*traj_vec_right_srv.response.PositionArray[ind].y;
-                                v_right.request.z_dot = req.Radius*traj_vec_right_srv.response.PositionArray[ind].z;
-                                v_right.request.roll_dot = req.Radius*traj_vec_right_srv.response.AngleArray[ind].x;
-                                v_right.request.pitch_dot = req.Radius*traj_vec_right_srv.response.AngleArray[ind].y;
-                                v_right.request.yaw_dot = req.Radius*traj_vec_right_srv.response.AngleArray[ind].z;
+                                v_right.request.x_dot = traj_vec_right_srv.response.PositionArray[ind].x;
+                                v_right.request.y_dot = traj_vec_right_srv.response.PositionArray[ind].y;
+                                v_right.request.z_dot = traj_vec_right_srv.response.PositionArray[ind].z;
+                                v_right.request.roll_dot = traj_vec_right_srv.response.AngleArray[ind].x;
+                                v_right.request.pitch_dot = traj_vec_right_srv.response.AngleArray[ind].y;
+                                v_right.request.yaw_dot = traj_vec_right_srv.response.AngleArray[ind].z;
 				/*ROS_INFO("Pose of dt %f: (%f,%f,%f)",traj_vec_srv.response.dt[ind], traj_vec_srv.response.PositionArray[ind].x,
 						traj_vec_srv.response.PositionArray[ind].y, traj_vec_srv.response.PositionArray[ind].z);*/
 
@@ -339,20 +346,42 @@ public:
 					positions_check[0] = p0_l;positions_check[1] = p1_l;positions_check[2] = p2_l;positions_check[3] = p3_l;positions_check[4] = p4_l;
 					positions_check[5] =p5_l;positions_check[6] = p0_r;positions_check[7] = p1_r;positions_check[8] = p2_r;positions_check[9] = p3_r;
 					positions_check[10] =p4_r;positions_check[11] =p5_r;
-					if (!((positions_check[0]>=-1.9635)&&(positions_check[0]<=1.9635)&&
-			                      (positions_check[1]>=-1.39626)&&(positions_check[1]<=1.74533)&&
-			                      (positions_check[2]>=0)&&(positions_check[2]<=3.14159)&&
-			                      (positions_check[3]>=0)&&(positions_check[3]<=2.35619)&&
-			                      (positions_check[4]>=-1.571)&&(positions_check[4]<=1.571)&&
-			                      (positions_check[5]>=-0.436)&&(positions_check[5]<=1.571)&&
-			                      (positions_check[6]>=-1.9635)&&(positions_check[6]<=1.9635)&&
-			                      (positions_check[7]>=-1.74533)&&(positions_check[7]<=1.39626)&&
-			                      (positions_check[8]>=0)&&(positions_check[8]<=3.14159)&&
-			                      (positions_check[9]>=-2.35619)&&(positions_check[9]<=0)&&
-			                      (positions_check[10]>=-1.571)&&(positions_check[10]<=1.571)&&
-			                      (positions_check[11]>=-1.571)&&(positions_check[11]<=0.436))){
-					  ROS_INFO("cannot reach position");
-					  return false;
+					if (!((positions_check[0]>=-1.9635)&&(positions_check[0]<=1.9635))){
+						ROS_INFO("cannot reach position because l_arm_usy is %f",positions_check[0]);
+						return false;
+					}else if(!((positions_check[1]>=-1.39626)&&(positions_check[1]<=1.74533))){
+						ROS_INFO("cannot reach position because l_arm_shx is %f",positions_check[1]);
+						return false;
+					}else if(!((positions_check[2]>=0)&&(positions_check[2]<=3.14159))){
+						ROS_INFO("cannot reach position because l_arm_ely is %f",positions_check[2]);
+						return false;
+					}else if(!((positions_check[3]>=0)&&(positions_check[3]<=2.35619))){
+						ROS_INFO("cannot reach position because l_arm_elx is %f",positions_check[3]);
+						return false;
+					}else if(!((positions_check[4]>=-1.571)&&(positions_check[4]<=1.571))){
+						ROS_INFO("cannot reach position because l_arm_uwy is %f",positions_check[4]);
+						return false;
+					}else if(!((positions_check[5]>=-0.436)&&(positions_check[5]<=1.571))){
+						ROS_INFO("cannot reach position because l_arm_mwx is %f",positions_check[5]);
+						return false;
+					}else if(!((positions_check[6]>=-1.9635)&&(positions_check[6]<=1.9635))){
+						ROS_INFO("cannot reach position because r_arm_usy is %f",positions_check[6]);
+						return false;
+					}else if(!((positions_check[7]>=-1.74533)&&(positions_check[7]<=1.39626))){
+						ROS_INFO("cannot reach position because r_arm_shx is %f",positions_check[7]);
+						return false;
+					}else if(!((positions_check[8]>=0)&&(positions_check[8]<=3.14159))){
+						ROS_INFO("cannot reach position because r_arm_ely is %f",positions_check[8]);
+						return false;
+					}else if(!((positions_check[9]>=-2.35619)&&(positions_check[9]<=0))){
+						ROS_INFO("cannot reach position because r_arm_elx is %f",positions_check[9]);
+						return false;
+					}else if(!((positions_check[10]>=-1.571)&&(positions_check[10]<=1.571))){
+						ROS_INFO("cannot reach position because r_arm_uwy is %f",positions_check[10]);
+						return false;
+					}else if(!((positions_check[11]>=-1.571)&&(positions_check[11]<=0.436))){
+						ROS_INFO("cannot reach position because r_arm_mwx is %f",positions_check[11]);
+						return false;
 					}
 					// To be reached 1+ind second after the start of the trajectory
 					pub_joint_commands_.publish(atlas_command);
@@ -499,8 +528,8 @@ public:
                   move_hand_msg.request.AngleDestination_right.z = (atan2((double)right_mat(1,0),(double)right_mat(0,0)))- QuatToYaw(transform_right_finger.getRotation());
                   ROS_INFO("right x y z roll pitch yaw: %f %f %f %f %f %f",move_hand_msg.request.PositionDestination_right.x,move_hand_msg.request.PositionDestination_right.y,move_hand_msg.request.PositionDestination_right.z,
                                                                           move_hand_msg.request.AngleDestination_right.x,move_hand_msg.request.AngleDestination_right.y,move_hand_msg.request.AngleDestination_right.z);
+                  move_hand_msg.request.quick = req.quick;
                   }
-                  move_hand_msg.request.Radius = req.Radius;
                   ROS_INFO("moving hand");
 
                   if (gen_traj(move_hand_msg.request,move_hand_msg.response))
@@ -611,7 +640,59 @@ public:
           ROS_INFO("error in pelvis_move_hand service");
           return false;
 	}
+	bool wheel_move_hand_CB(move_hand::wheel_move_handRequest &req,move_hand::wheel_move_handResponse &res){
+		double cone = 0.5;
+		Eigen::Matrix4f Rr,Rp,Ry,Rd,Rcone,Rl;
+		Rd << 1,0,0,req.wheel_center.x,
+			  0,1,0,req.wheel_center.y,
+			  0,0,1,req.wheel_center.z,
+			  0,0,0,			1;
 
+		Rcone << cos(cone), 0, sin(cone), 0,
+					0, 		1, 	 0, 	 0,
+				-sin(cone), 0, cos(cone),0,
+					0, 		0, 	 0, 	 1;
+
+		Rp << cos(req.pitch), 0, sin(req.pitch), 0,
+				0, 		      1, 		0, 		 0,
+			-sin(req.pitch), 0 ,cos(req.pitch),  0,
+					0,		 0, 	0,			 1;
+
+		Ry << cos(req.yaw), -sin(req.yaw), 0, 0,
+			  sin(req.yaw), cos(req.yaw),  0, 0,
+			       0,			 0, 	   1, 0,
+			       0, 			 0,        0, 1;
+		ROS_INFO("start steering");
+		for(double i=req.fangle;fabs(i-(req.phi+req.fangle))>=req.dangle;i=i+copysign(req.dangle,req.phi)){
+			if(i==req.fangle) continue;
+			ROS_INFO("angel is %f",i);
+			Rr << 1, 	0,				 0,					 0,
+				  0, cos(i-M_PI/2), -sin(i-M_PI/2), 	  	 0,
+				  0, sin(i-M_PI/2), cos(i-M_PI/2), 			 0,
+				  0, 	 0, 			 0, 				 1;
+			Eigen::Vector4f Rvec,XYZ;
+			Rvec << 0 , req.radius*cos(i) , req.radius*sin(i) ,1;
+			XYZ = Rd*Ry*Rp*Rvec;
+			Rl = Ry*Rp*Rr*Rcone;
+			double roll = atan2((double)Rl(2,1),(double)Rl(2,2));
+			roll-=M_PI;
+			double pitch = atan2((double)Rl(2,0)*-1,sqrt(pow((double)Rl(2,1),2)+pow((double)Rl(2,2),2)));
+			double yaw = atan2((double)Rl(1,0),(double)Rl(0,0));
+			move_hand::pelvis_move_hand msg;
+			msg.request.PositionDestination_right.x = XYZ(0); msg.request.PositionDestination_right.y = XYZ(1); msg.request.PositionDestination_right.z = XYZ(2);
+			msg.request.AngleDestination_right.x = roll; msg.request.AngleDestination_right.y = pitch; msg.request.AngleDestination_right.z = yaw;
+			msg.request.quick = true;
+			ROS_INFO("steer to x y z r p y: %f,%f,%f,%f,%f,%f",msg.request.PositionDestination_right.x,msg.request.PositionDestination_right.y,
+					msg.request.PositionDestination_right.z,msg.request.AngleDestination_right.x,msg.request.AngleDestination_right.y,msg.request.AngleDestination_right.z);
+			if(!(pelvis_move_hand_CB(msg.request,msg.response))){
+				ROS_INFO("error when calling pelvis move hand from wheel move hand");
+				return false;
+			}
+			ros::spinOnce();
+		}
+		ROS_INFO("end steering");
+		return true;
+	}
 };
 int main(int argc, char **argv)
 {

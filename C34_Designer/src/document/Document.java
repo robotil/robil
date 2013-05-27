@@ -40,6 +40,7 @@ import terminal.communication.StopStreamMessage.PlanFinishReason;
 import windows.PlanEditor;
 import windows.PlanExecutionHistoryDialog;
 import windows.designer.BTDesigner;
+import windows.designer.BTDesigner.DesignerTab;
 
 import document.actions.Dialogs;
 import document.description.TaskDescription;
@@ -487,21 +488,31 @@ public class Document extends JPanel {
 			outElements.add(clonedElement);
 		}
 		
+		// Arrows
 		for (GElement arrow : sourceArrows) {
 			ArrayList<GElement> clonedTargets = new ArrayList<GElement>();
 			
 			if (!clonedElements.containsKey(arrow.getAsArrow().source))
 				continue;
 			
+			GElement decorator = null;
+			
 			for (GElement target : arrow.getAsArrow().targets)
 				if (clonedElements.containsKey(target))
 					clonedTargets.add(clonedElements.get(target));
+				else if (target.isDecorator())
+					decorator = target.clone();
 				else
 					continue;
 			
 			Arrow clonedArrow = arrow.getAsArrow().clone(
 				clonedElements.get(arrow.getAsArrow().source), 
 				clonedTargets);
+			
+			if (decorator != null) {
+				clonedArrow.add(0, decorator);
+				outElements.add(decorator);
+			}
 			
 			outArrows.add(clonedArrow);
 		}
@@ -1136,7 +1147,7 @@ public class Document extends JPanel {
 		_documentChanged = false;
 		updateTabTitle();
 		updateRootElement();
-		updateOverrides();
+		updateOverrides();		
 		repaint();
 	}
 	
@@ -1157,6 +1168,18 @@ public class Document extends JPanel {
 		repaint();
 	}
 	
+// 	@Deprecated
+//	private void updateTabId() {
+//		DesignerTab tab = this.mainWindow.getTabByDocument(this);
+//		GElement rootElement;
+//		if (this.getRoot().size() > 0 && tab != null) {
+//			rootElement = this.getRoot().get(0);
+//			tab.setID(rootElement.id.toString());
+//			Log.d("Tab id = " + rootElement.id.toString());
+//		}
+//			
+//	}
+	
 	private void updateOverrides() {
 		for (GElement element : elements)
 			if (element.isTaskType() && _lookupTable.containsTask(element.getAsTask().getNameWithoutParameters()))
@@ -1165,6 +1188,9 @@ public class Document extends JPanel {
 	
 	PlanExecution _currentPlanExecution;
 	public void onRun() {
+		this.mainWindow.getTabByDocument(this).updateId();
+		Log.d("Tab id = " + this.mainWindow.getTabByDocument(this).getID());
+		
 		for (GElement element : elements)
 			if (element.isTaskType())
 				element.getAsTask().onPlanRun();
@@ -1189,13 +1215,17 @@ public class Document extends JPanel {
 	public void onStop(StopStreamMessage message) {
 		Log.i("STOPSTREAM", "Plan execution finished [" + message.getFinishReason() + "]");
 		
+		if (_currentPlanExecution == null)
+			_currentPlanExecution = new PlanExecution();
+		
 		_currentPlanExecution.stop(
 				findTaskById(message.getTargetTaskId()),
 				findTasksById(message.getTasksTree()),
 				message.getFinishReason() == PlanFinishReason.Failure,  
 				false);
-		
+	
 		_executionResults.add(_currentPlanExecution);
+		
 
 		_planExecutionMessage = _currentPlanExecution.toString() + String.format("(%d)", message.getFinishCode());
 		

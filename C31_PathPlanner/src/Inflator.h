@@ -4,6 +4,7 @@
 #include "Map.h"
 using namespace std;
 
+typedef ObsMap Map;
 
 class Inflator{
 public:
