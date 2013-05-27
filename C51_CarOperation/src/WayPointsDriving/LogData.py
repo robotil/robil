@@ -41,13 +41,11 @@ class LOG:
         diff = self.Difference(self.StartDrive, self.FinishDrive)
         f.write(str(diff.total_seconds()))
         f.write('\n')
-        f.write("List of all of the way points given:\n")
-        f.write(str(self.WayPointLst))
-        f.write('\n\n')
-        f.write("Actually drove thru the following way points:\n")
+
+        f.write("Actually drove through the following way points:\n")
         i=1
         for obj in self.PassedWayPointLst:
-            f.write("%2d.)"%i)
+            f.write("%2d) "%i)
             i+=1
             f.write(str(obj[0]))
             f.write(',')
@@ -57,14 +55,17 @@ class LOG:
             f.write('\n')       
         f.write('\n')       
         f.write("Distances errors are:\n")
-        i=0
+        i=1
         for obj in self.DistanceErrorLst:
-            f.write("%2d.)"%i)
+            f.write("%2d) "%i)
             i+=1            
             f.write(str(obj[0]))
             f.write(':  ')
             f.write(str(obj[1]))
             f.write('\n')       
         f.write('\n')
+        f.write("List of all of the way points given:\n")
+        f.write(str(self.WayPointLst))
+        f.write('\n\n')
         
         f.close()
