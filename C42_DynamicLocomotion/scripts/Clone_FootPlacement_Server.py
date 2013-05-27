@@ -18,10 +18,13 @@ def Get_foot_placement_path(req):
     FP_res = FootPlacement_ServiceResponse()
     FP_res.done = 0
     # assumption: placements from foot model measurments (add off-set to ground in function FP_data)
-    FP_res.foot_placement_path = [FP_data(1,[-2.75,-38.14,0.1],[0.0,0.0,0.0],0.0),FP_data(0,[-2.50,-37.84,0.1],[0.0,0.0,0.0],0.0),FP_data(1,[-2.25,-38.14,0.1],[0.0,0.0,0.0],0.0),\
-                                  FP_data(0,[-2.00,-37.84,0.1],[0.0,0.0,0.0],0.0),FP_data(1,[-1.75,-38.14,0.1],[0.0,0.0,0.0],0.0)]
+    FP_res.foot_placement_path = [FP_data(1,[-2.78,-38.1,0.1],[0.0,0.0,0.0],0.1),FP_data(0,[-2.50,-37.9,0.1],[0.0,0.0,0.0],0.1),FP_data(1,[-2.25,-38.1,0.1],[0.0,0.0,0.0],0.1),\
+                                  FP_data(0,[-2.00,-37.9,0.1],[0.0,0.0,0.0],0.1),FP_data(1,[-1.75,-38.1,0.1],[0.0,0.0,0.0],0.1),FP_data(0,[-1.50,-37.9,0.1],[0.0,0.0,0.0],0.1),\
+                                  FP_data(1,[-1.25,-38.1,0.1],[0.0,0.0,0.0],0.1),FP_data(0,[-1.1,-37.9,0.1],[0.0,0.0,0.0],0.1),FP_data(1,[-0.84,-38.1,0.1],[0.0,0.0,0.0],0.1),\
+                                  FP_data(0,[-0.84,-37.9,0.1],[0.0,0.0,0.40],0.1),FP_data(1,[-0.84,-38.1,0.1],[0.0,0.0,-0.4],0.1),FP_data(0,[-0.83,-37.74,0.1],[0.0,0.0,-0.4],0.1)] # doesn't respond to yaw = -0.80 # FP_data(0,[-0.63,-37.87,0.1],[0.0,0.0,-1.579],0.1)
 
-    if PositionsDistance(FP_res.foot_placement_path[0].pose.position, req.start_pose.pose.position) >= 0.5: # to avoid sending the path a few times
+    print req.start_pose.pose.position
+    if PositionsDistance(FP_res.foot_placement_path[0].pose.position, req.start_pose.pose.position) >= 0.5: # to avoid sending the same path a few times
     	FP_res.foot_placement_path = []
 
     print "Returning foot placement path: %s"%(FP_res.foot_placement_path)
@@ -41,7 +44,7 @@ def FP_data(foot_index,position,euler_angle,clearance_height):
     return res
 
 def PositionsDistance(position1,position2):
-	return ( (position2.x-position1.x)**2 + (position2.y-position1.y)**2 + (position2.z-position1.z)**2 )**0.5
+	return ( (position2.x-position1.x)**2 + (position2.y-position1.y)**2 )**0.5 #+ (position2.z-position1.z)**2
 
 def deg2r(deg):
     return (deg*math.pi/180.0)
