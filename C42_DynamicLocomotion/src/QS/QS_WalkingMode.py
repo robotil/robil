@@ -183,7 +183,7 @@ class QS_WalkingMode(WalkingMode):
     # /atlas/atlas_sim_interface_state callback. Before publishing a walk command, we need
     # the current robot position   
     def asi_state_cb(self, state):
-        #self._Update_tf_BDI_odom(state)
+        self._Update_tf_BDI_odom(state)
         self._BDI_state = copy.copy(state)
         command = 0
         #print(state.step_feedback.status_flags)
@@ -216,49 +216,57 @@ class QS_WalkingMode(WalkingMode):
 
 ###############################################################################################
 
-    # def _Update_tf_BDI_odom(self,state):
-    #     self._tf_br.sendTransform( vec2tuple(state.pos_est.position), (0, 0, 0, 1), state.header.stamp, "BDI_pelvis", "World")
-    #     self._tf_br.sendTransform( vec2tuple(state.foot_pos_est[0].position), vec2tuple(state.foot_pos_est[0].orientation),\
-    #                  state.header.stamp, "BDI_l_foot", "World")
-    #     self._tf_br.sendTransform( vec2tuple(state.foot_pos_est[1].position), vec2tuple(state.foot_pos_est[1].orientation),\
-    #                  state.header.stamp, "BDI_r_foot", "World")
-    #     # check foot index:
-    #     if AtlasSimInterfaceCommand.STEP == state.current_behavior:
-    #         static_foot_index = state.step_feedback.desired_step_saturated.foot_index
-    #     elif AtlasSimInterfaceCommand.WALK == state.current_behavior:
-    #         static_foot_index = state.step_feedback.desired_step_saturated.foot_index
-    #     else:
-    #         static_foot_index = 2
-    #     # determine static foot: ??? if needed
-    #     if 0 == static_foot_index: # Left foot is static
-    #         self._tf_br.sendTransform( vec2tuple(state.foot_pos_est[0].position), vec2tuple(state.foot_pos_est[0].orientation),\
-    #                  state.header.stamp, "BDI_static_foot", "World")
-    #     elif 1 == static_foot_index: # Right foot is static
-    #         self._tf_br.sendTransform( vec2tuple(state.foot_pos_est[1].position) , vec2tuple(state.foot_pos_est[1].orientation),\
-    #                  state.header.stamp, "BDI_static_foot", "World")
-    #     elif 2 == static_foot_index: # both feet are static
-    #         self._tf_br.sendTransform( (0, 0, 0), (0, 0, 0, 1), state.header.stamp, "BDI_static_foot", "World")
-    #     else: # problem
-    #         self._tf_br.sendTransform( (0, 0, -10), (0, 0, 0, 1), state.header.stamp, "BDI_static_foot", "World")
+    def _Update_tf_BDI_odom(self,state):
+        self._tf_br.sendTransform( vec2tuple(state.pos_est.position), (0, 0, 0, 1), state.header.stamp, "BDI_pelvis", "World")
+        self._tf_br.sendTransform( vec2tuple(state.foot_pos_est[0].position), vec2tuple(state.foot_pos_est[0].orientation),\
+                     state.header.stamp, "BDI_l_foot", "World")
+        self._tf_br.sendTransform( vec2tuple(state.foot_pos_est[1].position), vec2tuple(state.foot_pos_est[1].orientation),\
+                     state.header.stamp, "BDI_r_foot", "World")
+        # check foot index:
+        if AtlasSimInterfaceCommand.STEP == state.current_behavior:
+            static_foot_index = state.step_feedback.desired_step_saturated.foot_index
+        elif AtlasSimInterfaceCommand.WALK == state.current_behavior:
+            static_foot_index = state.step_feedback.desired_step_saturated.foot_index
+        else:
+            static_foot_index = 2
+        # determine static foot: ??? if needed
+        if 0 == static_foot_index: # Left foot is static
+            self._tf_br.sendTransform( vec2tuple(state.foot_pos_est[0].position), vec2tuple(state.foot_pos_est[0].orientation),\
+                     state.header.stamp, "BDI_static_foot", "World")
+        elif 1 == static_foot_index: # Right foot is static
+            self._tf_br.sendTransform( vec2tuple(state.foot_pos_est[1].position) , vec2tuple(state.foot_pos_est[1].orientation),\
+                     state.header.stamp, "BDI_static_foot", "World")
+        elif 2 == static_foot_index: # both feet are static
+            self._tf_br.sendTransform( (0, 0, 0), (0, 0, 0, 1), state.header.stamp, "BDI_static_foot", "World")
+        else: # problem
+            self._tf_br.sendTransform( (0, 0, -10), (0, 0, 0, 1), state.header.stamp, "BDI_static_foot", "World")
 
     def _TransforFromGlobalToBDI(self,step_data,state):
         foot_off_set = (0.06, 0.0, -0.085) # off-set from foot frame ('l_foot') to center of foot on ground (step_data refrence point)
         static_foot_index = (step_data.foot_index+1) % 2 # the foot that we arn't placing        
         if 0 == static_foot_index:
             static_foot_global_position , static_foot_global_rotation = self._GetTf('World','l_foot')
+            trans2BDI,rot2BDI = self._GetTf('World','BDI_l_foot') #,'l_foot')
         else:
             static_foot_global_position , static_foot_global_rotation = self._GetTf('World','r_foot')
-        # new_BDI_foot_pose = BDI_static_foot_pose + Global_pose_delta_between_feet 
-        step_data.pose.position.x = state.foot_pos_est[static_foot_index].position.x + (step_data.pose.position.x-foot_off_set[0]) - static_foot_global_position[0]
-        step_data.pose.position.y = state.foot_pos_est[static_foot_index].position.y + (step_data.pose.position.y-foot_off_set[1]) - static_foot_global_position[1]
-        step_data.pose.position.z = state.foot_pos_est[static_foot_index].position.z + (step_data.pose.position.z-foot_off_set[2]) - static_foot_global_position[2]
+            trans2BDI,rot2BDI = self._GetTf('World','BDI_r_foot') #,'r_foot')
+        # new_BDI_foot_pose = BDI_static_foot_pose + Global_pose_delta_between_feet
+        global_X_delta = (step_data.pose.position.x-foot_off_set[0]) - static_foot_global_position[0]
+        global_Y_delta = (step_data.pose.position.y-foot_off_set[1]) - static_foot_global_position[1]
+        global_Z_delta = (step_data.pose.position.z-foot_off_set[2]) - static_foot_global_position[2]
         # rotation correction using euler angles:
         des_global_roll, des_global_pitch, des_global_yaw = euler_from_quaternion([step_data.pose.orientation.x, step_data.pose.orientation.y, step_data.pose.orientation.z, step_data.pose.orientation.w])
-        
-        # !!!Problem to Calc. Orientation = BDI_static_foot_pose + Global_pose_delta_between_feet
-        # global_roll_delta = des_global_roll - static_foot_global_rotation[0]
-        # global_pitch_delta = des_global_pitch - static_foot_global_rotation[1]
-        # global_yaw_delta = des_global_yaw - static_foot_global_rotation[2]        
+        global_roll_delta = des_global_roll - static_foot_global_rotation[0]
+        global_pitch_delta = des_global_pitch - static_foot_global_rotation[1]
+        global_yaw_delta = des_global_yaw - static_foot_global_rotation[2]
+
+        # homogeneous tranformation:
+        transform_global2BDI = tf.fromTranslationRotation(trans2BDI, rot2BDI) # Returns a Numpy 4x4 matrix for a transform
+
+        step_data.pose.position.x = state.foot_pos_est[static_foot_index].position.x + BDI_X_delta
+        step_data.pose.position.y = state.foot_pos_est[static_foot_index].position.y + BDI_Y_delta
+        step_data.pose.position.z = state.foot_pos_est[static_foot_index].position.z + BDI_Z_delta
+                
         # BDI_static_foot_roll, BDI_static_foot_pitch, BDI_static_foot_yaw = euler_from_quaternion([state.foot_pos_est[static_foot_index].orientation.x,\
         #  state.foot_pos_est[static_foot_index].orientation.y, state.foot_pos_est[static_foot_index].orientation.z, state.foot_pos_est[static_foot_index].orientation.w])        
         # Q = quaternion_from_euler(BDI_static_foot_roll + global_roll_delta, BDI_static_foot_pitch + global_pitch_delta, BDI_static_foot_yaw + global_yaw_delta)
