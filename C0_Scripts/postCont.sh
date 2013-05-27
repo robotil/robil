@@ -8,7 +8,7 @@ rm $PKILL
 #echo "Starting Perception"
 #roslaunch C25_GlobalPosition C25.launch &
 #C25_PID=$!
-echo $C25_PID
+#echo $C25_PID
 #rosrun C31_PathPlanner qual > gpp.log &
 #C31_PID=$!
 #echo $C31_PID
