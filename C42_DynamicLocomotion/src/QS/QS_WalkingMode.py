@@ -6,6 +6,7 @@
 # The code in this file is provided "as is" and comes with no warranty whatsoever
 ###################################################################################
 
+import copy
 import rospy
 import roslib
 roslib.load_manifest('C42_DynamicLocomotion')
@@ -306,12 +307,12 @@ class QS_WalkingMode(WalkingMode):
         while self._listener.waitForTransform (base_frame, get_frames, rospy.Time(0), time_out, polling_sleep_duration) and not rospy.is_shutdown():
                 rospy.loginfo("QS_WalkingMode - _GetTf:: Not ready for Global To BDI transform")
         try:
-          (translation,rotation) = self._listener.lookupTransform(base_frame, get_frames, rospy.Time(0))  #  rospy.Time(0) to use latest availble transform 
+          (translation,rotation_q) = self._listener.lookupTransform(base_frame, get_frames, rospy.Time(0))  #  rospy.Time(0) to use latest availble transform 
         except (tf.LookupException, tf.ConnectivityException, tf.ExtrapolationException) as ex:
           print ex
           rospy.loginfo("QS_WalkingMode - _GetTf:: tf exception")
           translation = [0,0,0]
-          rotation = [0,0,0,1]
+          rotation_q = [0,0,0,1]
           #continue
         return translation,rotation_q
 

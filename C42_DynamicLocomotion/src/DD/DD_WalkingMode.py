@@ -14,6 +14,7 @@ from Abstractions.WalkingMode import *
 from Abstractions.Odometer import *
 from DD_PathPlanner import *
 
+import tf
 from tf.transformations import quaternion_from_euler, euler_from_quaternion
 
 from atlas_msgs.msg import AtlasCommand, AtlasSimInterfaceCommand, AtlasSimInterfaceState, AtlasState, AtlasBehaviorStepData
@@ -29,6 +30,8 @@ class DD_WalkingMode(WalkingMode):
     def __init__(self):
         self._LPP = DD_PathPlanner()
         WalkingMode.__init__(self,self._LPP)
+        self._listener = tf.TransformListener()
+        self._tf_br = tf.TransformBroadcaster()
         self.step_index_for_reset = 0
         # Initialize atlas atlas_sim_interface_command publisher       
         self.asi_command = rospy.Publisher('/atlas/atlas_sim_interface_command', AtlasSimInterfaceCommand, None, False, True, None)
@@ -114,7 +117,8 @@ class DD_WalkingMode(WalkingMode):
         try:
             # Handle preemption?
                 # if received a "End of mission" sort of message from FP
-            resp = self._foot_placement_client(0)
+            start_pose,other_foot_pose = self._GetStartingFootPose()
+            resp = self._foot_placement_client(0,start_pose,other_foot_pose)
             if 1 == resp.done:
                 self._WalkingModeStateMachine.PerformTransition("Finished")
             else:
@@ -138,6 +142,48 @@ class DD_WalkingMode(WalkingMode):
                 #print("listSteps: ",listSteps)
         except rospy.ServiceException, e:
             print "Foot Placement Service call failed: %s"%e
+
+    def _GetStartingFootPose(self): #*************** NEED TO CHANGE when not static *************#
+        start_pose = Foot_Placement_data()
+        other_foot_pose = Foot_Placement_data()
+        
+        trans, rot_q = self._GetTf('World','l_foot')
+        start_pose.foot_index = 2 # both feet are static
+        start_pose.pose.position.x = trans[0]
+        start_pose.pose.position.y = trans[1]
+        start_pose.pose.position.z = trans[2]
+        rot_euler = euler_from_quaternion(rot_q)
+        start_pose.pose.ang_euler.x = rot_euler[0]
+        start_pose.pose.ang_euler.y = rot_euler[1]
+        start_pose.pose.ang_euler.z = rot_euler[2]
+
+        trans, rot_q = self._GetTf('World','r_foot')
+        other_foot_pose.foot_index = 1 # right foot
+        other_foot_pose.pose.position.x = trans[0]
+        other_foot_pose.pose.position.y = trans[1]
+        other_foot_pose.pose.position.z = trans[2]
+        rot_euler = euler_from_quaternion(rot_q)
+        other_foot_pose.pose.ang_euler.x = rot_euler[0]
+        other_foot_pose.pose.ang_euler.y = rot_euler[1]
+        other_foot_pose.pose.ang_euler.z = rot_euler[2]
+
+        return start_pose,other_foot_pose
+
+    def _GetTf(self,base_frame,get_frames):
+        # waiting for transform to be avilable
+        time_out = rospy.Duration(2)
+        polling_sleep_duration = rospy.Duration(0.01)
+        while self._listener.waitForTransform (base_frame, get_frames, rospy.Time(0), time_out, polling_sleep_duration) and not rospy.is_shutdown():
+                rospy.loginfo("QS_WalkingMode - _GetTf:: Not ready for Global To BDI transform")
+        try:
+          (translation,rotation_q) = self._listener.lookupTransform(base_frame, get_frames, rospy.Time(0))  #  rospy.Time(0) to use latest availble transform 
+        except (tf.LookupException, tf.ConnectivityException, tf.ExtrapolationException) as ex:
+          print ex
+          rospy.loginfo("QS_WalkingMode - _GetTf:: tf exception")
+          translation = [0,0,0]
+          rotation_q = [0,0,0,1]
+          #continue
+        return translation,rotation_q
     
     def Fitness(self,path):
         stepList = self._LPP.GetPath()
