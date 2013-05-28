@@ -30,8 +30,6 @@ class DD_WalkingMode(WalkingMode):
     def __init__(self):
         self._LPP = DD_PathPlanner()
         WalkingMode.__init__(self,self._LPP)
-        self._listener = tf.TransformListener()
-        self._tf_br = tf.TransformBroadcaster()
         self.step_index_for_reset = 0
         # Initialize atlas atlas_sim_interface_command publisher       
         self.asi_command = rospy.Publisher('/atlas/atlas_sim_interface_command', AtlasSimInterfaceCommand, None, False, True, None)
@@ -43,6 +41,9 @@ class DD_WalkingMode(WalkingMode):
     def Initialize(self):
         WalkingMode.Initialize(self)
         # Subscribers:
+        self._listener = tf.TransformListener()
+        self._tf_br = tf.TransformBroadcaster()
+        
         self._odom_sub = rospy.Subscriber('/ground_truth_odom',Odometry,self._odom_cb)
         self.asi_state = rospy.Subscriber('/atlas/atlas_sim_interface_state', AtlasSimInterfaceState, self.asi_state_cb)
         self._atlas_imu_sub = rospy.Subscriber('/atlas/imu', Imu, self._get_imu)

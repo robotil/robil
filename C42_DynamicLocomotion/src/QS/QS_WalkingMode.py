@@ -33,8 +33,6 @@ class QS_WalkingMode(WalkingMode):
     def __init__(self):
         self._LPP = QS_PathPlanner()
         WalkingMode.__init__(self,self._LPP)
-        self._listener = tf.TransformListener()
-        self._tf_br = tf.TransformBroadcaster()
         # Initialize atlas atlas_sim_interface_command publisher       
         self.asi_command = rospy.Publisher('/atlas/atlas_sim_interface_command', AtlasSimInterfaceCommand, None, False, True, None)
         self._Odometer = Odometer()
@@ -42,19 +40,22 @@ class QS_WalkingMode(WalkingMode):
         self._bIsSwaying = False
         self._command = 0
 
-        
-        self._odom_sub = rospy.Subscriber('/ground_truth_odom',Odometry,self._odom_cb)
-
     def Initialize(self):
         WalkingMode.Initialize(self)
         self._command = 0
         # Subscribers:
+        self._listener = tf.TransformListener()
+        self._tf_br = tf.TransformBroadcaster()
+
+        self._odom_sub = rospy.Subscriber('/ground_truth_odom',Odometry,self._odom_cb)
         self.asi_state = rospy.Subscriber('/atlas/atlas_sim_interface_state', AtlasSimInterfaceState, self.asi_state_cb)
         self._atlas_imu_sub = rospy.Subscriber('/atlas/imu', Imu, self._get_imu)
 
         rospy.wait_for_service('foot_placement_path')
         self._foot_placement_client = rospy.ServiceProxy('foot_placement_path', FootPlacement_Service)       
         self._RequestFootPlacements()
+
+
         rospy.sleep(0.3)
     
         k_effort = [0] * 28
