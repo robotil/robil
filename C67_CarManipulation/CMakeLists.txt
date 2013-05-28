@@ -68,6 +68,9 @@ target_link_libraries(lPoint2 Kinematics)
 rosbuild_add_executable(rPath src/rPath.cpp)
 target_link_libraries(rPath Kinematics)
 
+#rosbuild_add_executable(rPath2 src/rPath2.cpp)
+#target_link_libraries(rPath2 Kinematics)
+
 rosbuild_add_executable(lPath src/lPath.cpp)
 target_link_libraries(lPath Kinematics)
 
@@ -142,6 +145,7 @@ rosbuild_link_boost(GripHandBrake thread)
 
 rosbuild_add_executable(GripGearStick src/GripGearStick.cpp)
 rosbuild_link_boost(GripGearStick thread)
+target_link_libraries(GripGearStick Kinematics)
 
 rosbuild_add_executable(task_tester src/taskTester.cpp)
 rosbuild_link_boost(task_tester thread)
