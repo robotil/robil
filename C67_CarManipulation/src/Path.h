@@ -4,7 +4,7 @@
 #define N 100
 #define _r 0
 #define _l 1
-
+enum PathOptions{ StartEnd, NoStart, NoEnd, NoStartEnd };
 class PathPoints{
 public:
 	IkSolution Array[2][N];
@@ -22,7 +22,14 @@ class pPathPoints{
 public:
 	int size;
 	IkSolution *pArray;
-	pPathPoints(IkSolution R0, IkSolution R1, int m_size);
-	~pPathPoints(){ delete [] pArray; }
+	pPathPoints(){}
+	pPathPoints(int m_size){pArray = new IkSolution[m_size];size = m_size;}
+	pPathPoints(IkSolution R0, IkSolution R1, int m_size, int option = StartEnd);
+	void Update(IkSolution R0, IkSolution R1, int option = StartEnd);
+	~pPathPoints(){
+		//std::cout <<"before1\n";
+		delete [] pArray;
+		//std::cout<<"after1\n";
+	}
 };
 #endif

@@ -30,6 +30,7 @@
 #include "FK.h"
 #include "IK.h"
 #include "Path.h"
+#include "Trace.h"
 
 ros::Publisher pubAtlasCommand;
 atlas_msgs::AtlasCommand ac;
@@ -45,29 +46,30 @@ bool callBackRun = false;
 
 void SetAtlasState(const atlas_msgs::AtlasState::ConstPtr &_as)
 {
-	static ros::Time startTime = ros::Time::now();
-	t0 = startTime;
-
-	// lock to copy incoming AtlasState
-	{
-		boost::mutex::scoped_lock lock(mutex);
-		as = *_as;
-	}
-	
-	ac.header.stamp = as.header.stamp;
 
 	if (callBackRun == false)
 	{
 		callBackRun = true;
+
+		static ros::Time startTime = ros::Time::now();
+		t0 = startTime;
+
+		// lock to copy incoming AtlasState
+		{
+			boost::mutex::scoped_lock lock(mutex);
+			as = *_as;
+		}
+
+		ac.header.stamp = as.header.stamp;
 		// set cout presentation	
 		std::cout.precision(6);
 		std::cout.setf (std::ios::fixed , std::ios::floatfield ); 
 		// print current state
 		std::cout << "Current Position:\n";
-		IkSolution IkCurrent = IkSolution(as.position[q4l],as.position[q5l],
-			as.position[q6l],	as.position[q7l], as.position[q8l], as.position[q9l]);
+		IkSolution IkCurrent = IkSolution(as.position[q4r],as.position[q5r],
+			as.position[q6r],	as.position[q7r], as.position[q8r], as.position[q9r]);
 		IkCurrent.Print();	
-		RPY rCurrent = lPose(as.position[q1], as.position[q2],as.position[q3],IkCurrent);
+		RPY rCurrent = rPose(as.position[q1], as.position[q2],as.position[q3],IkCurrent);
 		rCurrent.Print();
 
 		// print target
@@ -86,22 +88,28 @@ void SetAtlasState(const atlas_msgs::AtlasState::ConstPtr &_as)
 
 int main(int argc, char** argv)
 {
-	int pointsNum;
-	double seconds; 
-	if (argc == 9)
+	int pointsNum = 0, totalPoints;
+	int viasNum = 1;
+	double radius = 0, seconds, dt;
+	if (argc == 11)
 	{
-		double dubGet[6];
-		for (int i=0; i<6; i++)
+		double dubGet[8];
+		for (int i=0; i<8; i++)
 		{
 			dubGet[i] = boost::lexical_cast<double>(argv[i+1]);
 		}
 		argTarget = RPY(dubGet[0],dubGet[1], dubGet[2], dubGet[3], dubGet[4], dubGet[5]);
-		seconds =  boost::lexical_cast<double>(argv[7]);
-		pointsNum = boost::lexical_cast<int>(argv[8]);
+		radius = dubGet[6];
+		// first second will be for first point
+		seconds =  dubGet[7]-1;
+		viasNum = boost::lexical_cast<int>(argv[9]);
+		totalPoints = boost::lexical_cast<int>(argv[10]);
+		pointsNum = totalPoints/viasNum;
+		dt = seconds/totalPoints;
 		use_arg = true;
 	}
    
-	ros::init(argc, argv, "pub_path_command_rhand");
+	ros::init(argc, argv, "pub_trace_command_rhand");
 
 	ros::NodeHandle* rosnode = new ros::NodeHandle();
 
@@ -153,31 +161,27 @@ int main(int argc, char** argv)
 		}*/
 		if (callBackRun)
 		{
+			IkSolution IkNext;
+			pPathPoints points = pPathPoints(pointsNum);
+			//std::cout<<"print 1\n";
+			Trace wheelTrace  = Trace(argTarget, radius, 0, M_PI/2, viasNum);
 			// check if no arguments			
-			if (!use_arg) break;			
-						
-			IkSolution IkCurrent = IkSolution(as.position[q4l], as.position[q5l], as.position[q6l], as.position[q7l],
-					as.position[q8l], as.position[q9l]);
-			IkSolution IkNext = lSearchSolution(as.position[q1], as.position[q2], as.position[q3], argTarget);
-			
-			// check if solution valid
-			if (IkNext.valid)
+			if (!use_arg) break;
+
+			for (unsigned int i = 0; i < n; i++)
 			{
-				// print solution		
-				std::cout << "Solution/Command:\n";			
-				IkNext.Print();		
-				RPY r = lPose(as.position[q1], as.position[q2], as.position[q3], IkNext);
-				r.Print();	
-				std::cout << "error: " << IkNext.error << std::endl;
+				ac.kp_position[i] = as.kp_position[i];
+				ac.ki_position[i] = as.ki_position[i];
+				ac.kd_position[i] = as.kd_position[i];
+				ac.i_effort_min[i] = as.i_effort_min[i];
+				ac.i_effort_max[i] = as.i_effort_max[i];
+
+				ac.velocity[i] = 0;
+				ac.effort[i] = 0;
+				ac.kp_velocity[i] = 0;
+
 			}
-			else
-			{
-				std::cout << "No Solution.\n";
-				break;
-			}
-			
-			pPathPoints points = pPathPoints(IkCurrent, IkNext, pointsNum);
-			
+
 			ac.k_effort[q4l]  = 255;
 			ac.k_effort[q5l]  = 255;
 			ac.k_effort[q6l]  = 255;
@@ -190,7 +194,7 @@ int main(int argc, char** argv)
 			ac.k_effort[q7r]  = 255;
 			ac.k_effort[q8r]  = 255;
 			ac.k_effort[q9r]  = 255;
-			
+
 			// assign current joint angles
 			for (unsigned int j=0; j<numJoints; j++)
 			{
@@ -198,30 +202,79 @@ int main(int argc, char** argv)
 				//std::cout << state[j] << " ";
 			}
 
-			for (int i=0; i<pointsNum; i++)
+			for (int i = 0; i < viasNum; i++)
 			{
-				// ros::spinOnce();
-				
+				//std::cout<<"print 2,"<<i<<"\n";
+				IkNext = rSearchSolution(as.position[q1], as.position[q2], as.position[q3], wheelTrace.pArray[i]);
+				std::cout << "error:" << IkNext.error << "\n";
 
-				ac.position[q4l] = points.pArray[i]._q4;
-				ac.position[q5l] = points.pArray[i]._q5;
-				ac.position[q6l] = points.pArray[i]._q6;
-				ac.position[q7l] = points.pArray[i]._q7;
-				ac.position[q8l] = points.pArray[i]._q8;
-				ac.position[q9l] = points.pArray[i]._q9;
-				
-				//ROS_INFO("");
-				//std::cout << i <<": ";				
-				//points.Array[i].Print();
-				
-				pubAtlasCommand.publish(ac);
-					
-				ros::Duration(seconds/pointsNum).sleep();
-			}
+				if (!IkNext.valid) break;
+				if (i==0)
+					points.Update(IkSolution(as.position[q4r], as.position[q5r], as.position[q6r], as.position[q7r],
+							as.position[q8r], as.position[q9r])
+							, IkNext, NoEnd);
+				else if (i==(viasNum-1))
+					points.Update(IkSolution(ac.position[q4r], ac.position[q5r], ac.position[q6r], ac.position[q7r],
+						ac.position[q8r], ac.position[q9r])
+						, IkNext, NoStart);
+				else
+					points.Update(IkSolution(ac.position[q4r], ac.position[q5r], ac.position[q6r], ac.position[q7r],
+						ac.position[q8r], ac.position[q9r])
+						, IkNext, NoStartEnd);
+
+				//std::cout<<"print 3,"<<i<<"\n";
+
+				for (int j=0; j<pointsNum; j++)
+				{
+					// ros::spinOnce();
+
+
+					ac.position[q4r] = points.pArray[j]._q4;
+					ac.position[q5r] = points.pArray[j]._q5;
+					ac.position[q6r] = points.pArray[j]._q6;
+					ac.position[q7r] = points.pArray[j]._q7;
+					ac.position[q8r] = points.pArray[j]._q8;
+					ac.position[q9r] = points.pArray[j]._q9;
+
+					//ROS_INFO("");
+					//std::cout << i <<": ";
+					//points.Array[i].Print();
+					//std::cout<<"print 3,"<<i<<","<<j<<"\n";
+
+					pubAtlasCommand.publish(ac);
+					if (i)
+						ros::Duration(dt).sleep();
+					else
+						ros::Duration(1.0/pointsNum).sleep();
+				}
+				//std::cout<<"print 4,"<<i<<"\n";
+			} //end for
+			std::cout<<"print 5\n";
+			
+			// check if solution valid
+//			if (IkNext.valid)
+//			{
+//				// print solution
+//				std::cout << "Solution/Command:\n";
+//				IkNext.Print();
+//				RPY r = rPose(as.position[q1], as.position[q2], as.position[q3], IkNext);
+//				r.Print();
+//				std::cout << "error: " << IkNext.error << std::endl;
+//			}
+//			else
+//			{
+//				std::cout << "No Solution.\n";
+//				break;
+//			}
+			
+			
+			
+
 			break;
-		}
+		} //end if
 		ros::Duration(0.1).sleep();
-	}
-
+		//std::cout<<"print 6\n";
+	}// end while
+	//std::cout<<"print 7\n";
   return 0;
 }
