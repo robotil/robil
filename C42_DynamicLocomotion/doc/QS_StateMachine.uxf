@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<diagram program="umlet" version="11.4">
+  <zoom_level>10</zoom_level>
+  <element>
+    <type>com.umlet.element.custom.State</type>
+    <coordinates>
+      <x>480</x>
+      <y>140</y>
+      <w>90</w>
+      <h>40</h>
+    </coordinates>
+    <panel_attributes>Active</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <type>com.umlet.element.custom.State</type>
+    <coordinates>
+      <x>120</x>
+      <y>270</y>
+      <w>90</w>
+      <h>40</h>
+    </coordinates>
+    <panel_attributes>Empty</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <type>com.umlet.element.custom.State</type>
+    <coordinates>
+      <x>450</x>
+      <y>380</y>
+      <w>140</w>
+      <h>80</h>
+    </coordinates>
+    <panel_attributes>Waiting
+(For More Steps)</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <type>com.umlet.element.Relation</type>
+    <coordinates>
+      <x>160</x>
+      <y>130</y>
+      <w>340</w>
+      <h>160</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;-
+Fill
+
+(SetPath)</panel_attributes>
+    <additional_attributes>320;30;30;140</additional_attributes>
+  </element>
+  <element>
+    <type>com.umlet.element.Relation</type>
+    <coordinates>
+      <x>380</x>
+      <y>150</y>
+      <w>262</w>
+      <h>250</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;-
+Num Of Remaining Steps = 0
+(GetStep)</panel_attributes>
+    <additional_attributes>140;230;140;30</additional_attributes>
+  </element>
+  <element>
+    <type>com.umlet.element.Relation</type>
+    <coordinates>
+      <x>540</x>
+      <y>130</y>
+      <w>222</w>
+      <h>290</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;-
+Fill
+
+(SetPath)</panel_attributes>
+    <additional_attributes>30;30;170;30;170;270;50;270</additional_attributes>
+  </element>
+  <element>
+    <type>com.umlet.element.Relation</type>
+    <coordinates>
+      <x>160</x>
+      <y>280</y>
+      <w>310</w>
+      <h>140</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;-
+Stop
+(Could be Done)</panel_attributes>
+    <additional_attributes>30;30;290;120</additional_attributes>
+  </element>
+  <element>
+    <type>com.umlet.element.Relation</type>
+    <coordinates>
+      <x>130</x>
+      <y>50</y>
+      <w>390</w>
+      <h>240</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;-
+Stop
+(Could be Done)</panel_attributes>
+    <additional_attributes>30;220;50;60;280;30;370;90</additional_attributes>
+  </element>
+</diagram>

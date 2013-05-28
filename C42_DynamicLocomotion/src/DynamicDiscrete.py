@@ -9,7 +9,7 @@ from DynamicLocomotion import *
 ###################################################################################
 
 if __name__ == '__main__':
-    rospy.init_node('DynamicQual')
-    node = DynamicLocomotion("DynamicQual1",'BDI',True)
+    rospy.init_node('DynamicQS')
+    node = DynamicLocomotion("DynamicQS",'DD')
     rospy.spin()
     print "C42_DynamicLocomotion node Closed"
