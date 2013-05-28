@@ -17,6 +17,7 @@ using namespace C0_RobilTask;
 #include <boost/algorithm/string.hpp>
 #include <atlas_msgs/AtlasState.h>
 #include <atlas_msgs/AtlasCommand.h>
+#include <sandia_hand_msgs/SimpleGraspSrv.h>
 #include "std_msgs/String.h"
 #include <sstream>
 #include <iostream>
@@ -32,6 +33,8 @@ using namespace C0_RobilTask;
 ros::Publisher pubAtlasCommand;
 atlas_msgs::AtlasCommand ac;
 atlas_msgs::AtlasState as;
+ros::ServiceClient sandia_client;
+sandia_hand_msgs::SimpleGraspSrv sandia_srv;
 boost::mutex mutex;
 ros::Time t0;
 const unsigned int numJoints = 28;
@@ -53,7 +56,7 @@ ostream& operator<<(ostream& o, std::vector<string>& s){
 class GripGearStickServer: public RobilTask {
 protected:
 	enum Consts { Time = 7 };
-	enum Errors { NoParams = 1, NoSolution = 2 };
+	enum Errors { NoParams = 1, NoSolution = 2 , SandiaCallFail = 3};
 	std::vector<string> params;
 	int operation;
 	int time;
@@ -144,7 +147,8 @@ public:
 		int time = this->time;
 		// initiate return value
 		retValue = 0;
-		
+		// get status data again
+		callBackRun  = false;
 		if( exists(args,"operation") ){
 			operation = cast<int>(args["operation"]);
 		}
@@ -188,6 +192,16 @@ public:
 			return TaskResult(retValue, "ERROR");
 		}
 
+		//open hand
+		sandia_srv.request.grasp.name = "cylindrical";
+		sandia_srv.request.grasp.closed_amount = 0.0;
+		if (!sandia_client.call(sandia_srv))
+		{
+			ROS_INFO("%s: Sandia Hand Service Call Failed!", _name.c_str());
+			retValue  = SandiaCallFail;
+			return TaskResult(retValue, "ERROR");
+		}
+
 
 		ROS_INFO("%s: Target Operation %d - %s", _name.c_str(), operation, (operation == 1? "Drive": "Reverse"));
 
@@ -207,12 +221,13 @@ public:
 				ROS_INFO("Call Back Entered.");
 				IkSolution IkCurrent = IkSolution(as.position[q4r], as.position[q5r], as.position[q6r], as.position[q7r],
 									as.position[q8r], as.position[q9r]);
-				IkSolution IkNext = rScanRPY(as.position[q1], as.position[q2], as.position[q3], argTarget,0.01);
-				//advance in 5 centimeter
+				//back in 5 centimeter
 				argTarget.x -= 0.05;
-				IkSolution IkNext2 = rScanRPY(as.position[q1], as.position[q2], as.position[q3], argTarget,0.01);
+				IkSolution IkNext = rScanRPY(as.position[q1], as.position[q2], as.position[q3], argTarget,0.01);
 				//back to origin
 				argTarget.x += 0.05;
+				IkSolution IkNext2 = rScanRPY(as.position[q1], as.position[q2], as.position[q3], argTarget,0.01);
+
 				if ((!IkNext.valid)||(!IkNext2.valid)){
 					ROS_INFO("%s: No Solution!", _name.c_str());
 					retValue  = NoSolution;
@@ -377,6 +392,10 @@ int main(int argc, char **argv)
 		"/atlas/atlas_command", 100, true);
 	//end additions
 	
+	//Sandia client
+	sandia_client = rosnode->serviceClient<sandia_hand_msgs::SimpleGraspSrv>("/sandia_hands/r_hand/simple_grasp");
+
+
 	ROS_INFO("create task");
 	
 
