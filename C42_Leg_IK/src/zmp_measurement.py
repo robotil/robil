@@ -170,7 +170,7 @@ def zmp_calculation(listener):
 
 def fall(msg):
     if msg.data:
-      zmp.write('----------------------ROBOT HAS FALLEN!---------------------------\n')  
+      zmp.write('FALLEN!\n')  
   
 def zmp_check():
     rospy.init_node('zmp_check')
