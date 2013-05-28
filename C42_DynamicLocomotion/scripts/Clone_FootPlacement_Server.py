@@ -17,23 +17,34 @@ import math
 def Get_foot_placement_path(req):
     FP_res = FootPlacement_ServiceResponse()
     FP_res.done = 0
-    # assumption: placements are relative to left foot which is at position (0,0,0), in world frame 
-    FP_res.foot_placement_path = [FP_data(1,[0.1,-0.14,0.0],[0.0,0.0,0.0],0.1),FP_data(0,[0.2,0.14,0.0],[0.0,0.0,0.0],0.1),FP_data(1,[0.3,-0.14,0.0],[0.0,0.0,0.0],0.1),\
-                                  FP_data(0,[0.4,0.14,0.0],[0.0,0.0,0.0],0.1),FP_data(1,[0.5,-0.14,0.0],[0.0,0.0,0.0],0.1)]
+    # assumption: placements from foot model measurments (add off-set to ground in function FP_data)
+    FP_res.foot_placement_path = [FP_data(1,[-2.78,-38.1,0.1],[0.0,0.0,0.0],0.1),FP_data(0,[-2.50,-37.9,0.1],[0.0,0.0,0.0],0.1),FP_data(1,[-2.25,-38.1,0.1],[0.0,0.0,0.0],0.1),\
+                                  FP_data(0,[-2.00,-37.9,0.1],[0.0,0.0,0.0],0.1),FP_data(1,[-1.75,-38.1,0.1],[0.0,0.0,0.0],0.1),FP_data(0,[-1.50,-37.9,0.1],[0.0,0.0,0.0],0.1),\
+                                  FP_data(1,[-1.25,-38.1,0.1],[0.0,0.0,0.0],0.1),FP_data(0,[-1.1,-37.9,0.1],[0.0,0.0,0.0],0.1),FP_data(1,[-0.84,-38.1,0.1],[0.0,0.0,0.0],0.1),\
+                                  FP_data(0,[-0.74,-37.9,0.1],[0.0,0.0,0.40],0.1),FP_data(1,[-0.64,-38.1,0.1],[0.0,0.0,-0.4],0.1),FP_data(0,[-0.54,-37.74,0.1],[0.0,0.0,-0.4],0.1)] # doesn't respond to yaw = -0.80 # FP_data(0,[-0.63,-37.87,0.1],[0.0,0.0,-1.579],0.1)
+
+    print req.start_pose.pose.position
+    if PositionsDistance(FP_res.foot_placement_path[0].pose.position, req.start_pose.pose.position) >= 0.5: # to avoid sending the same path a few times
+    	FP_res.foot_placement_path = []
+
     print "Returning foot placement path: %s"%(FP_res.foot_placement_path)
     return FP_res
 
-def FP_data(foot_index,position,euler_angle_deg,clearance_height):
+def FP_data(foot_index,position,euler_angle,clearance_height):
     res = Foot_Placement_data()
+    foot_off_set = (0.06, 0.0, -0.085) # off-set from foot frame ('l_foot') to center of foot on ground  
     res.foot_index = foot_index
-    res.pose.position.x = position[0]
-    res.pose.position.y = position[1]
-    res.pose.position.z = position[2]
-    res.pose.ang_euler.x = deg2r(euler_angle_deg[0]) # roll
-    res.pose.ang_euler.y = deg2r(euler_angle_deg[1]) # pitch
-    res.pose.ang_euler.z = deg2r(euler_angle_deg[2]) # yaw
+    res.pose.position.x = position[0] + foot_off_set[0]
+    res.pose.position.y = position[1] + foot_off_set[1]
+    res.pose.position.z = position[2] + foot_off_set[2]
+    res.pose.ang_euler.x = euler_angle[0] # deg2r(euler_angle_deg[0]) # roll
+    res.pose.ang_euler.y = euler_angle[1] # deg2r(euler_angle_deg[1]) # pitch
+    res.pose.ang_euler.z = euler_angle[2] # deg2r(euler_angle_deg[2]) # yaw
     res.clearance_height = clearance_height
     return res
+
+def PositionsDistance(position1,position2):
+	return ( (position2.x-position1.x)**2 + (position2.y-position1.y)**2 )**0.5 #+ (position2.z-position1.z)**2
 
 def deg2r(deg):
     return (deg*math.pi/180.0)

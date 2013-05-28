@@ -1,0 +1,21 @@
+Updates:
+Add Quasi-Static Foot Placement task.
+
+USING QS WALK:
+
+Robot waits to start task, then goes to the foot_placement_path server to get FP path, walks according to FP points and orientation.
+
+To run QS Walker:
+
+1. run DynamicQS.py: 
+   $ rosrun C42_DynamicLocomotion DynamicQS.py
+
+2. run FootPlacement_Service.srv to emulate the foot_placement_path server (returns a FP path message): 
+   $ rosrun C42_DynamicLocomotion Clone_FootPlacement_Server.py
+
+3. run task using C0 task_tester:
+   $ rosrun C0_RobilTask task_tester DynamicQS
+
+
+4. reset robot at initial position:
+   rosrun C42_DynamicLocomotion scripts/Reset_start_pose.py
