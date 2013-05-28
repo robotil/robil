@@ -22,6 +22,7 @@ from QS_PathPlanner import *
 import tf
 from tf_conversions import posemath
 from tf.transformations import quaternion_from_euler, euler_from_quaternion
+import numpy as np
 
 from atlas_msgs.msg import AtlasCommand, AtlasSimInterfaceCommand, AtlasSimInterfaceState, AtlasState, AtlasBehaviorStepData
 from sensor_msgs.msg import Imu
@@ -63,7 +64,7 @@ class QS_WalkingMode(WalkingMode):
         k_effort = [0] * 28
         self._bDone = False
         self._bIsSwaying = False
-        self._GetOrientationDelta0Values() # Orientation difference between BDI odom and Global
+        #self._GetOrientationDelta0Values() # Orientation difference between BDI odom and Global
     
     def StartWalking(self):
         self._bDone = False
@@ -155,23 +156,25 @@ class QS_WalkingMode(WalkingMode):
         start_pose = Foot_Placement_data()
         other_foot_pose = Foot_Placement_data()
         
-        trans, rot = self._GetTf('World','l_foot')
+        trans, rot_q = self._GetTf('World','l_foot')
         start_pose.foot_index = 2 # both feet are static
         start_pose.pose.position.x = trans[0]
         start_pose.pose.position.y = trans[1]
         start_pose.pose.position.z = trans[2]
-        start_pose.pose.ang_euler.x = rot[0]
-        start_pose.pose.ang_euler.y = rot[1]
-        start_pose.pose.ang_euler.z = rot[2]
+        rot_euler = euler_from_quaternion(rot_q)
+        start_pose.pose.ang_euler.x = rot_euler[0]
+        start_pose.pose.ang_euler.y = rot_euler[1]
+        start_pose.pose.ang_euler.z = rot_euler[2]
 
-        trans, rot = self._GetTf('World','r_foot')
+        trans, rot_q = self._GetTf('World','r_foot')
         other_foot_pose.foot_index = 1 # right foot
         other_foot_pose.pose.position.x = trans[0]
         other_foot_pose.pose.position.y = trans[1]
         other_foot_pose.pose.position.z = trans[2]
-        other_foot_pose.pose.ang_euler.x = rot[0]
-        other_foot_pose.pose.ang_euler.y = rot[1]
-        other_foot_pose.pose.ang_euler.z = rot[2]
+        rot_euler = euler_from_quaternion(rot_q)
+        other_foot_pose.pose.ang_euler.x = rot_euler[0]
+        other_foot_pose.pose.ang_euler.y = rot_euler[1]
+        other_foot_pose.pose.ang_euler.z = rot_euler[2]
 
 
         return start_pose,other_foot_pose
@@ -193,7 +196,7 @@ class QS_WalkingMode(WalkingMode):
         elif (state.step_feedback.status_flags == 2 and self._bIsSwaying):
             self._bIsSwaying = False
             #print("step done")
-        if (0 !=command):
+        if (0 != command):
             self._command = command
             self._bIsSwaying = True
         
@@ -245,49 +248,61 @@ class QS_WalkingMode(WalkingMode):
         foot_off_set = (0.06, 0.0, -0.085) # off-set from foot frame ('l_foot') to center of foot on ground (step_data refrence point)
         static_foot_index = (step_data.foot_index+1) % 2 # the foot that we arn't placing        
         if 0 == static_foot_index:
-            static_foot_global_position , static_foot_global_rotation = self._GetTf('World','l_foot')
-            trans2BDI,rot2BDI = self._GetTf('World','BDI_l_foot') #,'l_foot')
+            static_foot_global_position , static_foot_global_rotation_q = self._GetTf('World','l_foot')
+            trans2BDI,rot2BDI_quat = self._GetTf('World','BDI_l_foot') #,'l_foot')
         else:
-            static_foot_global_position , static_foot_global_rotation = self._GetTf('World','r_foot')
-            trans2BDI,rot2BDI = self._GetTf('World','BDI_r_foot') #,'r_foot')
+            static_foot_global_position , static_foot_global_rotation_q = self._GetTf('World','r_foot')
+            trans2BDI,rot2BDI_quat = self._GetTf('World','BDI_r_foot') #,'r_foot')
+        static_foot_global_rotation_euler = euler_from_quaternion(static_foot_global_rotation_q)
+        rot2BDI_euler = euler_from_quaternion(rot2BDI_quat)
         # new_BDI_foot_pose = BDI_static_foot_pose + Global_pose_delta_between_feet
         global_X_delta = (step_data.pose.position.x-foot_off_set[0]) - static_foot_global_position[0]
         global_Y_delta = (step_data.pose.position.y-foot_off_set[1]) - static_foot_global_position[1]
         global_Z_delta = (step_data.pose.position.z-foot_off_set[2]) - static_foot_global_position[2]
+        #glabal_trans_delta_vec = [[global_X_delta],[global_Y_delta],[global_Z_delta]] # list
+        glabal_trans_delta_vec = np.matrix([[global_X_delta],[global_Y_delta],[global_Z_delta],[1.0]]) # numpy matrix (vector)
         # rotation correction using euler angles:
         des_global_roll, des_global_pitch, des_global_yaw = euler_from_quaternion([step_data.pose.orientation.x, step_data.pose.orientation.y, step_data.pose.orientation.z, step_data.pose.orientation.w])
-        global_roll_delta = des_global_roll - static_foot_global_rotation[0]
-        global_pitch_delta = des_global_pitch - static_foot_global_rotation[1]
-        global_yaw_delta = des_global_yaw - static_foot_global_rotation[2]
+        global_roll_delta = des_global_roll - static_foot_global_rotation_euler[0]
+        global_pitch_delta = des_global_pitch - static_foot_global_rotation_euler[1]
+        global_yaw_delta = des_global_yaw - static_foot_global_rotation_euler[2]
+        #glabal_rot_delta_vec = [[global_roll_delta],[global_pitch_delta],[global_yaw_delta]] # list
 
-        # homogeneous tranformation:
-        transform_global2BDI = tf.fromTranslationRotation(trans2BDI, rot2BDI) # Returns a Numpy 4x4 matrix for a transform
+        # homogeneous transformations:        
+        transform_world2BDI = self._listener.fromTranslationRotation(trans2BDI, rot2BDI_quat) # homogeneous trans. of static foot to BDI coord. (Returns a Numpy 4x4 matrix for a transform)
+        # transform_static2new_FP = tf.fromTranslationRotation(glabal_trans_delta_vec, glabal_rot_delta_vec) # homogeneous trans. of static foot to new foot placement pose,
+        #   # the transform is according to relative coordinates (delta) calculated in global coordinate system (but not connected to global coord. which only a ref. system)  
+        # transform_world2new_FP = transform_world2BDI*transform_static2new_FP # homogeneous trans. of new foot placemen to BDI coord.
+        BDI_new_FP = transform_world2BDI*glabal_trans_delta_vec
+        rospy.loginfo("_TransforFromGlobalToBDI:: BDI static foot -pos: x=%f, y=%f , z=%f; ori: roll=%f, pitch=%f , yaw=%f; \
+                      foot_pos_est- pos: x=%f ori: x=%f, y=%f z=%f w=%f" \
+             % (trans2BDI[0], trans2BDI[1], trans2BDI[2], rot2BDI_euler[0], rot2BDI_euler[1], rot2BDI_euler[2],\
+                state.foot_pos_est[0].position.x, state.foot_pos_est[0].orientation.x,state.foot_pos_est[0].orientation.y,state.foot_pos_est[0].orientation.z,state.foot_pos_est[0].orientation.w) )
 
-        step_data.pose.position.x = state.foot_pos_est[static_foot_index].position.x + BDI_X_delta
-        step_data.pose.position.y = state.foot_pos_est[static_foot_index].position.y + BDI_Y_delta
-        step_data.pose.position.z = state.foot_pos_est[static_foot_index].position.z + BDI_Z_delta
+        step_data.pose.position.x = BDI_new_FP.item(0) #[state.foot_pos_est[static_foot_index].position.x + BDI_X_delta
+        step_data.pose.position.y = BDI_new_FP.item(1) #state.foot_pos_est[static_foot_index].position.y + BDI_Y_delta
+        step_data.pose.position.z = BDI_new_FP.item(2) #state.foot_pos_est[static_foot_index].position.z + BDI_Z_delta
                 
         # BDI_static_foot_roll, BDI_static_foot_pitch, BDI_static_foot_yaw = euler_from_quaternion([state.foot_pos_est[static_foot_index].orientation.x,\
         #  state.foot_pos_est[static_foot_index].orientation.y, state.foot_pos_est[static_foot_index].orientation.z, state.foot_pos_est[static_foot_index].orientation.w])        
-        # Q = quaternion_from_euler(BDI_static_foot_roll + global_roll_delta, BDI_static_foot_pitch + global_pitch_delta, BDI_static_foot_yaw + global_yaw_delta)
-
-        Q = quaternion_from_euler(self._roll_delta0 + des_global_roll, self._pitch_delta0 + des_global_pitch, self._yaw_delta0 + des_global_yaw)
+        Q = quaternion_from_euler(rot2BDI_euler[0] + global_roll_delta, rot2BDI_euler[1] + global_pitch_delta, rot2BDI_euler[2] + global_yaw_delta)
+        #Q = quaternion_from_euler(self._roll_delta0 + des_global_roll, self._pitch_delta0 + des_global_pitch, self._yaw_delta0 + des_global_yaw)
         step_data.pose.orientation.x = Q[0]
         step_data.pose.orientation.y = Q[1]
         step_data.pose.orientation.z = Q[2]
         step_data.pose.orientation.w = Q[3]
 
-        rospy.loginfo("_TransforFromGlobalToBDI:: command position: x=%f, y=%f , z=%f; des Global delta: roll=%f, pitch=%f , yaw=%f; delta0 : roll=%f, pitch=%f , yaw=%f" \
+        rospy.loginfo("_TransforFromGlobalToBDI:: command position: x=%f, y=%f , z=%f; des Global delta: roll=%f, pitch=%f , yaw=%f; global delta : roll=%f, pitch=%f , yaw=%f" \
              % (step_data.pose.position.x, step_data.pose.position.y, step_data.pose.position.z, des_global_roll, des_global_pitch, des_global_yaw,\
-                self._roll_delta0, self._pitch_delta0, self._yaw_delta0) )
+                global_roll_delta, global_pitch_delta, global_yaw_delta) )
         print Q
         return step_data
 
-    def _GetOrientationDelta0Values(self):
-        # TODO: learn delta0 values on initialize:
-        self._roll_delta0 = 0.0 # [rad] initial orientation difference between BDI odom and Global
-        self._pitch_delta0 = 0.0 # [rad] initial orientation difference between BDI odom and Global
-        self._yaw_delta0 = 0.0 # [rad] initial orientation difference between BDI odom and Global  
+    # def _GetOrientationDelta0Values(self):
+    #     # TODO: learn delta0 values on initialize:
+    #     self._roll_delta0 = 0.0 # [rad] initial orientation difference between BDI odom and Global
+    #     self._pitch_delta0 = 0.0 # [rad] initial orientation difference between BDI odom and Global
+    #     self._yaw_delta0 = 0.0 # [rad] initial orientation difference between BDI odom and Global  
 
     def _GetTf(self,base_frame,get_frames):
         # waiting for transform to be avilable
@@ -301,9 +316,9 @@ class QS_WalkingMode(WalkingMode):
           print ex
           rospy.loginfo("QS_WalkingMode - _GetTf:: tf exception")
           translation = [0,0,0]
-          rotation = [0,0,0]
+          rotation = [0,0,0,1]
           #continue
-        return translation,rotation
+        return translation,rotation_q
 
 
 def vec2tuple(vector):
