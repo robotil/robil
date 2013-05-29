@@ -54,10 +54,10 @@ class QS_WalkingMode(WalkingMode):
 
         rospy.wait_for_service('foot_placement_path')
         self._foot_placement_client = rospy.ServiceProxy('foot_placement_path', FootPlacement_Service)       
-        self._RequestFootPlacements()
 
         rospy.sleep(0.3)
-    
+        
+        self._RequestFootPlacements()
         k_effort = [0] * 28
         self._bDone = False
         self._bIsSwaying = False
@@ -319,8 +319,8 @@ class QS_WalkingMode(WalkingMode):
         #      % (step_data.pose.position.x, step_data.pose.position.y, step_data.pose.position.z, des_global_roll, des_global_pitch, des_global_yaw,\
         #         global_roll_delta, global_pitch_delta, global_yaw_delta) )
         #print Q
-        rospy.loginfo("_TransforFromGlobalToBDI:: command relative to static foot: distanceXY=%f, z=%f, yaw=%f "\
-                     % ( (global_X_delta**2+global_Y_delta**2)**0.5, global_Z_delta, global_yaw_delta) )
+        rospy.loginfo("_TransforFromGlobalToBDI:: command relative to static foot: distanceXY=%f, z=%f, yaw=%f, Global FP: pitch=%f, roll=%f "\
+                     % ( (global_X_delta**2+global_Y_delta**2)**0.5, global_Z_delta, global_yaw_delta,des_global_pitch,des_global_roll) )
         return step_data
 
     def _GetOrientationDelta0Values(self):
