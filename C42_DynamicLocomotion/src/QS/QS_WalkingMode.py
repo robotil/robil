@@ -23,7 +23,7 @@ import numpy as np
 from atlas_msgs.msg import AtlasCommand, AtlasSimInterfaceCommand, AtlasSimInterfaceState, AtlasState, AtlasBehaviorStepData
 from sensor_msgs.msg import Imu
 from nav_msgs.msg import Odometry
-from geometry_msgs.msg import Pose
+from geometry_msgs.msg import Pose, Quaternion
 from std_msgs.msg import String
 
 from C42_DynamicLocomotion.srv import *
@@ -43,6 +43,7 @@ class QS_WalkingMode(WalkingMode):
     def Initialize(self):
         WalkingMode.Initialize(self)
         self._command = 0
+        self._bRobotIsStatic = True
         # Subscribers:
         self._listener = tf.TransformListener()
         self._tf_br = tf.TransformBroadcaster()
@@ -55,13 +56,13 @@ class QS_WalkingMode(WalkingMode):
         self._foot_placement_client = rospy.ServiceProxy('foot_placement_path', FootPlacement_Service)       
         self._RequestFootPlacements()
 
-
         rospy.sleep(0.3)
     
         k_effort = [0] * 28
         self._bDone = False
         self._bIsSwaying = False
-        #self._GetOrientationDelta0Values() # Orientation difference between BDI odom and Global
+        self._bRobotIsStatic = False
+        self._GetOrientationDelta0Values() # Orientation difference between BDI odom and Global
     
     def StartWalking(self):
         self._bDone = False
@@ -183,6 +184,8 @@ class QS_WalkingMode(WalkingMode):
     # /atlas/atlas_sim_interface_state callback. Before publishing a walk command, we need
     # the current robot position   
     def asi_state_cb(self, state):
+        if self._bRobotIsStatic:
+            self._BDI_Static_orientation_q = state.foot_pos_est[0].orientation
         self._Update_tf_BDI_odom(state)
         self._BDI_state = copy.copy(state)
         command = 0
@@ -200,11 +203,12 @@ class QS_WalkingMode(WalkingMode):
         if(0 == state.current_behavior and 0 != self._command):
             #print self._command
             self.asi_command.publish(self._command)
-            print self._command.step_params.desired_step.pose.orientation
             self._command = 0
             print("step start")
 
     def _odom_cb(self,odom):
+        if self._bRobotIsStatic:
+            self._Global_Static_orientation_q = odom.pose.pose.orientation
         self._LPP.UpdatePosition(odom.pose.pose.position.x,odom.pose.pose.position.y)
         # sendTransform(translation - tuple (x, y, z), rotation - tuple (x, y, z, w), time, child, parent)
         self._tf_br.sendTransform(vec2tuple(odom.pose.pose.position), vec2tuple(odom.pose.pose.orientation), odom.header.stamp, "pelvis", "World") # "World", "pelvis") 
@@ -243,52 +247,60 @@ class QS_WalkingMode(WalkingMode):
 
     def _TransforFromGlobalToBDI(self,step_data,state):
         foot_off_set = (0.06, 0.0, -0.085) # off-set from foot frame ('l_foot') to center of foot on ground (step_data refrence point)
-        static_foot_index = (step_data.foot_index+1) % 2 # the foot that we arn't placing        
-        t = self._listener.getLatestCommonTime('World','BDI_pelvis')
-        trans2BDI,rot2BDI_quat = self._GetTf('World','BDI_pelvis',t)
-        pelvis_global_position , pelvis_global_rotation_q = self._GetTf('World','pelvis',t)
-        ## check pelvis placement error at time t, BDI Vs. Global: (the relation (position), pelvis to feet, at time t should be identical -> error=0 ) 
-        BDI_l_foot,rot = self._GetTf('BDI_pelvis','BDI_l_foot',t)
-        BDI_r_foot,rot = self._GetTf('BDI_pelvis','BDI_r_foot',t)
-        global_l_foot,rot = self._GetTf('pelvis','l_foot',t)
-        global_r_foot,rot = self._GetTf('pelvis','r_foot',t)
-        err_l_foot = ( (global_l_foot[0]-(BDI_l_foot[0]-foot_off_set[0]))**2 + (global_l_foot[1]-(BDI_l_foot[1]-foot_off_set[1]))**2 \
-                     + (global_l_foot[2]-(BDI_l_foot[2]-foot_off_set[2]))**2 )**0.5
-        err_r_foot = ( (global_r_foot[0]-(BDI_r_foot[0]-foot_off_set[0]))**2 + (global_r_foot[1]-(BDI_r_foot[1]-foot_off_set[1]))**2 \
-                     + (global_r_foot[2]-(BDI_r_foot[2]-foot_off_set[2]))**2 )**0.5
-        # if 0 == static_foot_index:
-        #     static_foot_global_position , static_foot_global_rotation_q = self._GetTf('World','l_foot')
-        #     trans2BDI,rot2BDI_quat = self._GetTf('World','BDI_l_foot')
-        # else:
-        #     static_foot_global_position , static_foot_global_rotation_q = self._GetTf('World','r_foot')
-        #     trans2BDI,rot2BDI_quat = self._GetTf('World','BDI_r_foot')
-        # static_foot_global_rotation_euler = euler_from_quaternion(static_foot_global_rotation_q)
-        rot2BDI_euler = euler_from_quaternion(rot2BDI_quat)
-        pelvis_global_rotation_euler = euler_from_quaternion(pelvis_global_rotation_q)
+        static_foot_index = (step_data.foot_index+1) % 2 # the foot that we arn't placing
+        ## USING PELVIS AS REFRENCE:        
+        # t = self._listener.getLatestCommonTime('World','BDI_pelvis')
+        # trans2BDI,rot2BDI_quat = self._GetTf('World','BDI_pelvis',t)
+        # pelvis_global_position , pelvis_global_rotation_q = self._GetTf('World','pelvis',t)
+        # ## check pelvis placement error at time t, BDI Vs. Global: (the relation (position), pelvis to feet, at time t should be identical -> error=0 ) 
+        # BDI_l_foot,rot = self._GetTf('BDI_pelvis','BDI_l_foot',t)
+        # BDI_r_foot,rot = self._GetTf('BDI_pelvis','BDI_r_foot',t)
+        # global_l_foot,rot = self._GetTf('pelvis','l_foot',t)
+        # global_r_foot,rot = self._GetTf('pelvis','r_foot',t)
+        # err_l_foot = ( (global_l_foot[0]-(BDI_l_foot[0]-foot_off_set[0]))**2 + (global_l_foot[1]-(BDI_l_foot[1]-foot_off_set[1]))**2 \
+        #              + (global_l_foot[2]-(BDI_l_foot[2]-foot_off_set[2]))**2 )**0.5
+        # err_r_foot = ( (global_r_foot[0]-(BDI_r_foot[0]-foot_off_set[0]))**2 + (global_r_foot[1]-(BDI_r_foot[1]-foot_off_set[1]))**2 \
+        #              + (global_r_foot[2]-(BDI_r_foot[2]-foot_off_set[2]))**2 )**0.5
+        # pelvis_global_rotation_euler = euler_from_quaternion(pelvis_global_rotation_q)
+        
+        ## !!!---- Transformation Calculation: -------!!!:
+        ## 1) Orientation difference between Global and BDI coordinates is calculated when robot is static (on initialize).
+        ##    To determine BDI orientation we add difference (_GetOrientationDelta0Values) to Global orientation.  
+        ## 2) Translation vector from static foot to new FP is calculated in Global coordinates (glabal_trans_delta_vec).
+        ##    To determine BDI position we rotate vector to BDI coord. system and add the BDI static foot position (using one homogeneous transformations).
+        if 0 == static_foot_index:
+            static_foot_global_position , static_foot_global_rotation_q = self._GetTf('World','l_foot')
+            trans2BDI,rot2BDI_quat = self._GetTf('World','BDI_l_foot')
+        else:
+            static_foot_global_position , static_foot_global_rotation_q = self._GetTf('World','r_foot')
+            trans2BDI,rot2BDI_quat = self._GetTf('World','BDI_r_foot')
+        static_foot_global_rotation_euler = euler_from_quaternion(static_foot_global_rotation_q)
+        rot2BDI_euler = euler_from_quaternion(rot2BDI_quat) # Problem that rot2BDI_quat (foot_pos_est) doesn't return foot orientation (returns pelvis ori.?)  
+        
         # new_BDI_foot_pose = BDI_static_foot_pose + Global_pose_delta_between_feet
-        global_X_delta = (step_data.pose.position.x-foot_off_set[0]) - pelvis_global_position[0] #static_foot_global_position[0]
-        global_Y_delta = (step_data.pose.position.y-foot_off_set[1]) - pelvis_global_position[1] #static_foot_global_position[1]
-        global_Z_delta = (step_data.pose.position.z-foot_off_set[2]) - pelvis_global_position[2] #static_foot_global_position[2]
-        #glabal_trans_delta_vec = [[global_X_delta],[global_Y_delta],[global_Z_delta]] # list
+        global_X_delta = (step_data.pose.position.x-foot_off_set[0]) - static_foot_global_position[0] #pelvis_global_position[0] #
+        global_Y_delta = (step_data.pose.position.y-foot_off_set[1]) - static_foot_global_position[1] #pelvis_global_position[1] #
+        global_Z_delta = (step_data.pose.position.z-foot_off_set[2]) - static_foot_global_position[2] #pelvis_global_position[2] #
         glabal_trans_delta_vec = np.matrix([[global_X_delta],[global_Y_delta],[global_Z_delta],[1.0]]) # numpy matrix (vector)
         # rotation correction using euler angles:
         des_global_roll, des_global_pitch, des_global_yaw = euler_from_quaternion([step_data.pose.orientation.x, step_data.pose.orientation.y, step_data.pose.orientation.z, step_data.pose.orientation.w])
-        global_roll_delta = des_global_roll - pelvis_global_rotation_euler[0] #static_foot_global_rotation_euler[0]
-        global_pitch_delta = des_global_pitch - pelvis_global_rotation_euler[0] #static_foot_global_rotation_euler[1]
-        global_yaw_delta = des_global_yaw - pelvis_global_rotation_euler[0] #static_foot_global_rotation_euler[2]
-        #glabal_rot_delta_vec = [[global_roll_delta],[global_pitch_delta],[global_yaw_delta]] # list
+        global_roll_delta = des_global_roll - static_foot_global_rotation_euler[0] #pelvis_global_rotation_euler[0] #
+        global_pitch_delta = des_global_pitch - static_foot_global_rotation_euler[1] #pelvis_global_rotation_euler[0] #
+        global_yaw_delta = des_global_yaw - static_foot_global_rotation_euler[2] #pelvis_global_rotation_euler[0] #
 
-        # homogeneous transformations:        
-        transform_world2BDI = self._listener.fromTranslationRotation(trans2BDI, rot2BDI_quat) # homogeneous trans. of static foot to BDI coord. (Returns a Numpy 4x4 matrix for a transform)
+        # homogeneous transformations:                                   
+        Global2BDI_q = quaternion_from_euler(self._roll_delta0, self._pitch_delta0, self._yaw_delta0)
+        transform_world2BDI = self._listener.fromTranslationRotation(trans2BDI, Global2BDI_q) #state.step_feedback.desired_step_saturated.pose.orientation)# rot2BDI_quat) 
+           # homogeneous trans. of static foot to BDI coord. (Returns a Numpy 4x4 matrix for a transform)
         # transform_static2new_FP = tf.fromTranslationRotation(glabal_trans_delta_vec, glabal_rot_delta_vec) # homogeneous trans. of static foot to new foot placement pose,
         #   # the transform is according to relative coordinates (delta) calculated in global coordinate system (but not connected to global coord. which only a ref. system)  
         # transform_world2new_FP = transform_world2BDI*transform_static2new_FP # homogeneous trans. of new foot placemen to BDI coord.
         BDI_new_FP = transform_world2BDI*glabal_trans_delta_vec
-        rospy.loginfo("_TransforFromGlobalToBDI:: BDI pelvis -pos: x=%f, y=%f , z=%f; ori: roll=%f, pitch=%f , yaw=%f; \
-                      pos_est- pos: x=%f ori: x=%f, y=%f z=%f w=%f; pelvis err: to l_foot=%f to r_foot=%f" \
-             % (trans2BDI[0], trans2BDI[1], trans2BDI[2], rot2BDI_euler[0], rot2BDI_euler[1], rot2BDI_euler[2],\
-                state.pos_est.position.x, state.foot_pos_est[0].orientation.x,state.foot_pos_est[0].orientation.y,\
-                state.foot_pos_est[0].orientation.z,state.foot_pos_est[0].orientation.w, err_l_foot, err_r_foot) )
+        # rospy.loginfo("_TransforFromGlobalToBDI:: BDI static foot -pos: x=%f, y=%f , z=%f; ori: roll=%f, pitch=%f , yaw=%f; \
+        #               foot_pos_est- pos: x=%f ori: x=%f, y=%f z=%f w=%f;" \
+        #      % (trans2BDI[0], trans2BDI[1], trans2BDI[2], rot2BDI_euler[0], rot2BDI_euler[1], rot2BDI_euler[2],\
+        #         state.foot_pos_est[0].position.x, state.foot_pos_est[0].orientation.x,state.foot_pos_est[0].orientation.y,\
+        #         state.foot_pos_est[0].orientation.z,state.foot_pos_est[0].orientation.w) )
 
         step_data.pose.position.x = BDI_new_FP.item(0) #[state.foot_pos_est[static_foot_index].position.x + BDI_X_delta
         step_data.pose.position.y = BDI_new_FP.item(1) #state.foot_pos_est[static_foot_index].position.y + BDI_Y_delta
@@ -296,24 +308,28 @@ class QS_WalkingMode(WalkingMode):
                 
         # BDI_static_foot_roll, BDI_static_foot_pitch, BDI_static_foot_yaw = euler_from_quaternion([state.foot_pos_est[static_foot_index].orientation.x,\
         #  state.foot_pos_est[static_foot_index].orientation.y, state.foot_pos_est[static_foot_index].orientation.z, state.foot_pos_est[static_foot_index].orientation.w])        
-        Q = quaternion_from_euler(rot2BDI_euler[0] + global_roll_delta, rot2BDI_euler[1] + global_pitch_delta, rot2BDI_euler[2] + global_yaw_delta)
-        #Q = quaternion_from_euler(self._roll_delta0 + des_global_roll, self._pitch_delta0 + des_global_pitch, self._yaw_delta0 + des_global_yaw)
-        step_data.pose.orientation.x = Q[0]
-        step_data.pose.orientation.y = Q[1]
-        step_data.pose.orientation.z = Q[2]
-        step_data.pose.orientation.w = Q[3]
+        #Q = quaternion_from_euler(rot2BDI_euler[0] + global_roll_delta, rot2BDI_euler[1] + global_pitch_delta, rot2BDI_euler[2] + global_yaw_delta)
+        BDI_new_FP_q = quaternion_from_euler(self._roll_delta0 + des_global_roll, self._pitch_delta0 + des_global_pitch, self._yaw_delta0 + des_global_yaw)
+        step_data.pose.orientation.x = BDI_new_FP_q[0]
+        step_data.pose.orientation.y = BDI_new_FP_q[1]
+        step_data.pose.orientation.z = BDI_new_FP_q[2]
+        step_data.pose.orientation.w = BDI_new_FP_q[3]
 
-        rospy.loginfo("_TransforFromGlobalToBDI:: command position: x=%f, y=%f , z=%f; des Global delta: roll=%f, pitch=%f , yaw=%f; global delta : roll=%f, pitch=%f , yaw=%f" \
-             % (step_data.pose.position.x, step_data.pose.position.y, step_data.pose.position.z, des_global_roll, des_global_pitch, des_global_yaw,\
-                global_roll_delta, global_pitch_delta, global_yaw_delta) )
+        # rospy.loginfo("_TransforFromGlobalToBDI:: command position: x=%f, y=%f , z=%f; des Global delta: roll=%f, pitch=%f , yaw=%f; global delta : roll=%f, pitch=%f , yaw=%f" \
+        #      % (step_data.pose.position.x, step_data.pose.position.y, step_data.pose.position.z, des_global_roll, des_global_pitch, des_global_yaw,\
+        #         global_roll_delta, global_pitch_delta, global_yaw_delta) )
         #print Q
+        rospy.loginfo("_TransforFromGlobalToBDI:: command relative to static foot: distanceXY=%f, z=%f, yaw=%f "\
+                     % ( (global_X_delta**2+global_Y_delta**2)**0.5, global_Z_delta, global_yaw_delta) )
         return step_data
 
-    # def _GetOrientationDelta0Values(self):
-    #     # TODO: learn delta0 values on initialize:
-    #     self._roll_delta0 = 0.0 # [rad] initial orientation difference between BDI odom and Global
-    #     self._pitch_delta0 = 0.0 # [rad] initial orientation difference between BDI odom and Global
-    #     self._yaw_delta0 = 0.0 # [rad] initial orientation difference between BDI odom and Global  
+    def _GetOrientationDelta0Values(self):
+        # learn delta0 values on initialize:
+        global_euler = euler_from_quaternion([self._Global_Static_orientation_q.x,self._Global_Static_orientation_q.y,self._Global_Static_orientation_q.z,self._Global_Static_orientation_q.w])
+        BDI_euler = euler_from_quaternion([self._BDI_Static_orientation_q.x,self._BDI_Static_orientation_q.y,self._BDI_Static_orientation_q.z,self._BDI_Static_orientation_q.w])
+        self._roll_delta0 = global_euler[0] - BDI_euler[0]  # [rad] initial orientation difference between BDI odom and Global
+        self._pitch_delta0 = global_euler[1] - BDI_euler[1] # [rad] initial orientation difference between BDI odom and Global
+        self._yaw_delta0 = global_euler[2] - BDI_euler[2] # [rad] initial orientation difference between BDI odom and Global  
 
     def _GetTf(self,base_frame,get_frames,time=rospy.Time(0)):
         # waiting for transform to be avilable
