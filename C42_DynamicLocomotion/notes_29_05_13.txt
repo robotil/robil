@@ -1,0 +1,40 @@
+Updates:
+Add Quasi-Static Foot Placement task.
+
+USING QS WALK:
+
+Robot waits to start task, then goes to the foot_placement_path server to get FP path, walks according to FP points and orientation.
+
+To run QS Walker:
+
+1. A - run in Continuous Dynamic mode:
+       $ rosrun C42_DynamicLocomotion WalkerNode.py BDI
+
+   B - Discrete Foot Placement
+       run in Discrete Dynamic (FP) mode (with degradation to Discrete Quasi-Static mode):
+       $ rosrun C42_DynamicLocomotion WalkerNode.py DD
+    OR
+       run in Discrete (FP) Quasi-Static mode:
+       $ rosrun C42_DynamicLocomotion WalkerNode.py QS
+
+
+2. A - For Continuous Dynamic (BDI):
+     FIRST:
+       run task using C0 task_tester:
+       $ rosrun C0_RobilTask task_tester DynamicLocomotion
+     SECOND:
+       run C31_clone to emulate the C31PathPlanner (publish a path message): 
+       rosrun C42_DynamicLocomotion scripts/C31_Clone.py
+
+   B - For Discrete Foot Placement (DD and QS):
+     FIRST:
+       run FootPlacement_Service.srv to emulate the foot_placement_path server (returns a FP path message): 
+       $ rosrun C42_DynamicLocomotion Clone_FootPlacement_Server.py
+     SECOND:
+       run task using C0 task_tester:
+       $ rosrun C0_RobilTask task_tester WalkerNode
+       $ rosrun C0_RobilTask task_tester DynamicQS
+
+
+3. reset robot at initial position:
+   rosrun C42_DynamicLocomotion scripts/Reset_start_pose.py
