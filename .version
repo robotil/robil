@@ -1,4 +1,4 @@
-V0.0.0.212
+V0.0.0.214
 ===========================================================
 C0_RobilTask                               0.5
 C0_Scripts                                 0.22
@@ -38,7 +38,7 @@ C51_CarOperation     			0.10
 C65_CloseValve     			0.1
 C66_Grasp     			0.5
 C66_Grasp_tools     			0.4
-C67_CarManipulation     			0.12
+C67_CarManipulation     			0.14
 C67_CarManipulation_tools     			0.1
 libviso2     			0.1
 viso2_ros     			0.1
