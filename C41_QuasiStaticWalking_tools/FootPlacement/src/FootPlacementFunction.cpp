@@ -112,19 +112,34 @@ double FootPlacementService::singleCellWeight(const double &slope,const double &
 }
 
 void FootPlacementService::calcFootMatrix(
-		std::vector<FootPlacement::Pos>& positions,
+		std::vector<FootPlacement::Foot_Placement_data>& foot_placement_path,
 		const int &useC22,
-		const int &leg,
-		const C22_CompactGroundRecognitionAndMapping::C22C0_PATH& path,
-		const geometry_msgs::Point& robotLeftLegPos,
-		const geometry_msgs::Point& robotRightLegPos,
-		const double &dirX, const double &dirY,
+		const C22_CompactGroundRecognitionAndMapping::C22C0_PATH& map,
+		const FootPlacement::Foot_Placement_data& start_pose,
+		const FootPlacement::Foot_Placement_data& other_foot_pose,
+		const std::vector<C31_PathPlanner::C31_Location>& points,
 		const double &slopeWeight,
 		const double &distanceWeight,
 		const double &heightWeight,
 		const double &directionWeight)
 {
 
+    FootPlacement::Foot_Placement_data data;
+    data.foot_index = LEFT;
+    data.pose.position.x = 0.5;
+    data.pose.position.y = 0.5;
+    data.pose.position.z = 0.0;
+    data.pose.ang_euler.x = 0.0;
+    data.pose.ang_euler.y = 0.0;
+    data.pose.ang_euler.z = 0.0;
+    data.clearance_height = 0.0;
+    foot_placement_path.push_back(data);
+    data.foot_index = RIGHT;
+    data.pose.position.x = 1.0;
+    data.pose.position.y = 0.5;
+    foot_placement_path.push_back(data);
+
+/*
 	int map[SIZE][SIZE];
 
 
@@ -268,5 +283,5 @@ void FootPlacementService::calcFootMatrix(
 			}
 		}
 	}
-
+*/
 }
