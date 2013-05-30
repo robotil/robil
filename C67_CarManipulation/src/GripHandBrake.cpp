@@ -232,7 +232,7 @@ public:
 					argTarget.z -= 0.08;
 					IkSolution IkNext3 = rScanRPY(as.position[q1], as.position[q2], as.position[q3], argTarget,0.01);
 					//move out hand
-					argTarget.z += 0.12;
+					argTarget.z += 0.20;
 					IkSolution IkNext4 = rScanRPY(as.position[q1], as.position[q2], as.position[q3], argTarget,0.01);
 
 					if ((!IkNext.valid)||(!IkNext2.valid)||(!IkNext3.valid)||(!IkNext4.valid)){
@@ -279,7 +279,7 @@ public:
 					argTarget.z += 0.04;
 					IkSolution IkNext3 = rScanRPY(as.position[q1], as.position[q2], as.position[q3], argTarget,0.01);
 					//move out hand
-					argTarget.z += 0.1;
+					argTarget.z += 0.20;
 					IkSolution IkNext4 = rScanRPY(as.position[q1], as.position[q2], as.position[q3], argTarget,0.01);
 
 					if ((!IkNext.valid)||(!IkNext2.valid)||(!IkNext3.valid)||(!IkNext4.valid)){
