@@ -30,19 +30,17 @@ using namespace C0_RobilTask;
 // end added
 
 //variables added
-ros::Publisher pubAtlasCommand;
-atlas_msgs::AtlasCommand ac;
-atlas_msgs::AtlasState as;
-ros::ServiceClient sandia_client;
-sandia_hand_msgs::SimpleGraspSrv sandia_srv;
-boost::mutex mutex;
-ros::Time t0;
-const unsigned int numJoints = 28;
+static ros::Publisher pubAtlasCommand;
+static atlas_msgs::AtlasCommand ac;
+static atlas_msgs::AtlasState as;
+static ros::ServiceClient sandia_client;
+static sandia_hand_msgs::SimpleGraspSrv sandia_srv;
+static boost::mutex mutex;
+static ros::Time t0;
+static const unsigned int numJoints = 28;
 
-int	 callback_called = 0;
-RPY argTarget;
-bool use_arg = false;
-bool callBackRun = false;
+static RPY argTarget;
+static bool callBackRun = false;
 //end added
 
 ostream& operator<<(ostream& o, std::vector<string>& s){
@@ -203,7 +201,7 @@ public:
 		}
 
 
-		ROS_INFO("%s: Target Operation %d - %s", _name.c_str(), operation, (operation == 1? "Drive": "Reverse"));
+		ROS_INFO("%s: Target Operation %d - %s", _name.c_str(), operation, (operation == 1? "Forward": "Reverse"));
 
 		while(time >= 0) {
 			
