@@ -101,7 +101,7 @@ SpeedMF = [ MemberFunc([0,  0.75,  1.5]) ,  MemberFunc([1,  2.5,  4]),   MemberF
 
 
 #Circular Speed
-CircularSpeedMF = [   MemberFunc([-0.75,  -0.3,  0]),  MemberFunc([-0.1,  0,  0.1]),  MemberFunc([0,  0.3,  0.75]),MemberFunc([-1.3,  -1.0,  -0.7]),   MemberFunc([0.7,   1.0,  1.3])] # [HL L  ST  R  HR]
+CircularSpeedMF = [   MemberFunc([-0.75,  -0.3,  0]),  MemberFunc([-0.1,  0,  0.1]),  MemberFunc([0,  0.3,  0.75]),MemberFunc([-1.3,  -1.0,  -0.7]),   MemberFunc([0.7,   1.0,  1.3])] # [L  ST  R HL  HR]
 
 #-------------------End of Definition --------------------------------------------------------------#
 
@@ -147,7 +147,7 @@ def findMin(seq):
             return min
 
         return 0
-def P2P(Distance, Orientation, dOrientation):
+def P2P(Distance, Orientation, dOrientation, factor):
         SF=-1.0/90.0/360.0*Distance+19.0/(18.0*180)
         #SF = 1/180
         if SF<1.0/360.0:
@@ -198,7 +198,7 @@ def P2P(Distance, Orientation, dOrientation):
                         #print rule, RuleCon
                         MinVal = findMin([isZero(RuleCon[0])*DistanceMF[RuleCon[0]-1].getFuzzyValue(Distance),isZero(RuleCon[1])*OrientationMF[RuleCon[1]-1].getFuzzyValue(Orientation), isZero(RuleCon[2])*dOrientationMF[RuleCon[2]-1].getFuzzyValue(dOrientation) ])
 
-                        area=isZero(RuleCon[4])*CircularSpeedMF[RuleCon[4]-1].getArea(MinVal)
+                        area=isZero(RuleCon[4])*CircularSpeedMF[RuleCon[4]-1].getArea(MinVal)*factor[RuleCon[4]-1]
                         CM=isZero(RuleCon[4])*CircularSpeedMF[RuleCon[4]-1].getCenterMass(MinVal)
                         CSpeedArea+=area
                         CSpeedMoment+=area*CM

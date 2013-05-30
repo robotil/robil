@@ -28,9 +28,10 @@ from ObsticalDetection import plotG
 import Queue
 import threading
 
+LEFT = -1
+RIGHT = 1
+TIME = 2
 
-
-TIME = 3
 
 
 class RTD():
@@ -109,6 +110,8 @@ class Drive(object):
     sub=0
     path=0
     def __init__(self, name, pathVec):  
+        self.rtd=RTD()
+
         self.xPosition = 0
         self.yPosition = 0
         self.zOrientation = 0
@@ -122,13 +125,16 @@ class Drive(object):
         self.Obsticalpoints=[]
         self.ObsticalTime=[]
         sub = rospy.Subscriber('/my_cloud', Polygon,self.Obs_callback)    
-
+        
+        #self.sub = rospy.Subscriber('/C25/publish', C25C0_ROP,self.MyLocation_callback) #get atlas location by subscribing to C25 module       
+        self.sub = rospy.Subscriber('/ground_truth_odom', Odometry,self.MyLocation_callback2) #get atlas location by subscribing to C25 module   
+        
         t = threading.Thread(target=doGui, args =  (self.q_in, self.q_out, ) )
         t.daemon = True
         t.start()
-#        MAPthread=threading.Thread(target=self.MAPPING, args =  (self.q_in, self.q_out, )) 
-#        MAPthread.daemon = True
-#        MAPthread.start()
+        MAPthread=threading.Thread(target=self.MAPPING) #, args =  (self.q_in, self.q_out, )
+        MAPthread.daemon = True
+        MAPthread.start()
         a=RTD()
         
         self.q_out.put(a)
@@ -157,16 +163,24 @@ class Drive(object):
             
         except:
             pass
-        self.MAPPING()
+        self.rtd.ObsticalPoints=self.Obsticalpoints
+        self.q_out.put(self.rtd)
     def MAPPING(self):
-        
-            #print self.Obsticalpoints
-            try:
-                host = self.q_out.get(timeout=0.01)
-            except:
-                host=RTD()
-            host.ObsticalPoints=self.Obsticalpoints
-            self.q_out.put(host)
+        while not rospy.is_shutdown():
+            rospy.sleep(0.5)
+            f =self.factorGenerator()
+            print "VL", f[3],"L", f[0],"Z", f[1],"R",f[2], "VR", f[4]
+            # [L  ST  R HL  HR]
+#            [collisionPt, side]=self.willCollide()
+#            if collisionPt:
+#                if side==LEFT:
+#                    print "will colide in %f meters. can pass on the LEFT side" %collisionPt[0]
+#                elif side==RIGHT:
+#                    print "will colide in %f meters. can pass on the RIGHT side" %collisionPt[0]
+#                else:
+#                    print "will colide in %f meters. can't pass!!!!" %collisionPt[0]
+            
+
 
     def exit_Drive(self, DATA, num):
         DATA.FinishDrive = DATA.getTime()
@@ -187,6 +201,21 @@ class Drive(object):
         Orientation=euler_from_quaternion( numpy.array((data.pose.pose.pose.orientation.x, data.pose.pose.pose.orientation.y, data.pose.pose.pose.orientation.z, data.pose.pose.pose.orientation.w), dtype=numpy.float64))
         self.zOrientation = Orientation[2]
         self.ActSpeed = (data.pose.twist.twist.linear.x**2+data.pose.twist.twist.linear.y**2)**0.5
+        
+        self.rtd.ActSpeed=self.ActSpeed
+        self.rtd.location = [self.xPosition, self.yPosition]
+        self.q_out.put(self.rtd)
+    def MyLocation_callback2(self, data):
+        self.Htime=(10**-9)*data.header.stamp.nsecs+data.header.stamp.secs
+        self.xPosition =data.pose.pose.position.x
+        self.yPosition =data.pose.pose.position.y
+        Orientation=euler_from_quaternion( numpy.array((data.pose.pose.orientation.x, data.pose.pose.orientation.y, data.pose.pose.orientation.z, data.pose.pose.orientation.w), dtype=numpy.float64))
+        self.zOrientation = Orientation[2]
+        self.ActSpeed = (data.twist.twist.linear.x**2+data.twist.twist.linear.y**2)**0.5
+        
+        self.rtd.ActSpeed=self.ActSpeed
+        self.rtd.location = [self.xPosition, self.yPosition]
+        self.q_out.put(self.rtd)
     def DistanceToWP(self, object):
         return float((object[0]-self.xPosition)**2+(object[1]-self.yPosition)**2)**0.5 #Distance^2 = (Xd-Xc)^2+(Yd-Yc)^2
     
@@ -216,21 +245,33 @@ class Drive(object):
         if flag==4:
             if curry>(currx*m+b):
                 return True
-            return False    
+            return False   
+    def NormalProperties(self, object):
+        flag=b=m=0
+        if(object[1]-self.yPosition==0): #define the normal to the way points for: "isPassedNormal" function
+            b=object[0]
+            if object[0]>self.xPosition:
+                flag=1
+            else:
+                flag=2
+        else:
+            m=-1* float((object[0]-self.xPosition)/(object[1]-self.yPosition))
+            b= float(object[1])-m*float(object[0])
+            if object[1]>self.yPosition:
+                flag=3
+            else:
+                flag=4
+        
+        return ([flag, b, m])
     def DriveCallback(self, goal):
-        rtd=RTD()
-        
-        
         gasP=Gas() #gas pedal online
         brakeP=Brake() #gas pedal online
         Steer=SW()      #steering wheel online        
         self._result.success = 1
-        self.sub = rospy.Subscriber('/C25/publish', C25C0_ROP,self.MyLocation_callback) #get atlas location by subscribing to C25 module       
-        #self.sub = rospy.Subscriber('/ground_truth_odom', Odometry,self.MyLocation_callback) #get atlas location by subscribing to C25 module       
-        rospy.sleep(1)
+    
         self.C31_path = numpy.array([])
         self.sub = rospy.Subscriber('/path', C31_Waypoints,self.getPath) #get atlas location by subscribing to C25 module        
-        self.path=self.C31_path#[(30, 1.5),(43, 0), (60, -2),(95, 0),(104, 4.5), (149.5, 50),(150, 95), (157, 100), (198, 100)]#[(151.5, 93), (158, 98.7), (198, 100)] #  self.C31_path#      [(9, 8), (30, 3),(60, 80), (100, 100)]#
+        self.path=  [(5, -1.5), (18, -1.5),(51, -1.5), (97, -1.5), (103, 0.5), (149, 47.5), (151.44, 52.5) ]#self.C31_path#
         DATA=LOG()
         DATA.StartDrive = DATA.getTime()
         while not rospy.is_shutdown():
@@ -243,8 +284,8 @@ class Drive(object):
                     self.path=self.C31_path
                     flag+=1
             if self.path:
-                rtd.AllWP = [[(int(i*100))/100.0, float(int(j*100))/100] for i, j in self.path]
-                self.q_out.put(rtd)
+                self.rtd.AllWP = [[(int(k*100))/100.0, float(int(j*100))/100] for k, j in self.path]
+                self.q_out.put(self.rtd)
                 for object in self.path:
                     if self._as.is_preempt_requested():
                         success = False
@@ -255,26 +296,13 @@ class Drive(object):
                         self.exit_Drive(DATA, 1)
                         return
                     DATA.WayPoint(object)
-                    flag=b=m=0
-                    if(object[1]-self.yPosition==0): #define the normal to the way points for: "isPassedNormal" function
-                        b=object[0]
-                        if object[0]>self.xPosition:
-                            flag=1
-                        else:
-                            flag=2
-                    else:
-                        m=-1* float((object[0]-self.xPosition)/(object[1]-self.yPosition))
-                        b= float(object[1])-m*float(object[0])
-                        if object[1]>self.yPosition:
-                            flag=3
-                        else:
-                            flag=4
+                    [flag, b, m] = self.NormalProperties(object) #create the normal Properties needed, i.e. flag, slope and b for y=m*x+b
                     al=atan2(object[1]-self.yPosition,  object[0]-self.xPosition)*180/pi
                     try:
                         m1=atan2(self.path[i+1][1]-object[1], self.path[i+1][0]-object[0])*180/pi
                     except: 
                         m1=360
-                    if (abs(al-m1)>20 and self.DistanceToWP(object)>3) :
+                    if (abs(al-m1)>20 and self.DistanceToWP(object)>5) :
                         print "-------------------------------"
                         print "Driving to way point x=%f, y=%f" %(object[0],object[1])
                         while (self.isPassedNormal(self.xPosition,self.yPosition, m, b,flag)):
@@ -289,8 +317,9 @@ class Drive(object):
                             DATA.MyPath(self.xPosition, self.yPosition)
                             self.OrientationErrorToWP(object)
                             
-                            
-                            [dSpeed, Cspeed]=P2P(self.DistanceToWP(object), self.OE[0], self.dOE)
+
+                            factor = self.factorGenerator()
+                            [dSpeed, Cspeed]=P2P(self.DistanceToWP(object), self.OE[0], self.dOE, factor)
                             #dSpeed = 10
                             [  acc, brk] = self.SpeedController(dSpeed)
                             Cspeed = -Cspeed*pi
@@ -299,15 +328,15 @@ class Drive(object):
                             gasP.gas(acc)
                             brakeP.brake(brk)
                             Steer.turn(Cspeed)
-                            rtd.object=object
-                            rtd.location = [self.xPosition,self.yPosition]
-                            rtd.speed = dSpeed
-                            rtd.turn = Cspeed
-                            rtd.distance = self.DistanceToWP(object)
-                            rtd.OriEr = self.OE[0]
-                            rtd.dO = self.dOE
-                            rtd.ActSpeed = self.ActSpeed
-                            self.q_out.put(rtd) #data to GUI!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+                            self.rtd.object=object
+                            self.rtd.location = [self.xPosition,self.yPosition]
+                            self.rtd.speed = dSpeed
+                            self.rtd.turn = Cspeed
+                            self.rtd.distance = self.DistanceToWP(object)
+                            self.rtd.OriEr = self.OE[0]
+                            self.rtd.dO = self.dOE
+                            self.rtd.ActSpeed = self.ActSpeed
+                            self.q_out.put(self.rtd) #data to GUI!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
                         DATA.DistanceError(sqrt((self.xPosition-object[0])*(self.xPosition-object[0])+( self.yPosition-object[1])*( self.yPosition-object[1])))
                         DATA.PassedWayPoint(object)
                         newMsg=Monitoring()
@@ -320,8 +349,9 @@ class Drive(object):
                         self._as.publish_feedback(self._feedback)
                         print "arrived at Way point"
                         print "-------------------------------"
-                        
+
                     i+=1
+                    
             self.path=self.C31_path #[]#
             try:
                 if (sqrt((self.path[-1][0]-self.xPosition)*(self.path[-1][0]-self.xPosition) +(self.path[-1][1]-self.yPosition)*(self.path[-1][1]-self.yPosition))<0.5):
@@ -361,7 +391,87 @@ class Drive(object):
                 self.C31_path.append([point.x, point.y])
             if not self.C31_path:
                 rospy.loginfo('Can not access C31_Path topic!')
+    def willCollide(self):
+        DB = self.Obsticalpoints
+        HazardPoints=[]
+        minPointR=[100, 100]
+        minPointL=[100, -100]
+        DIR = 0
+        Xmin = -5
+        Xmax = 5
+        
+        left=1
+        YminL = -2.5
+        YmaxL = -0.5
+        
+        right=1
+        YminR = 0.5
+        YmaxR = 2.5
+        
+        for pot in DB:
+            if pot[0]<11 and pot[1]>-0.2 and pot[1]<1:
+                if (minPointL[0]>pot[0]+0.5):
+                    minPointL = pot
+                elif minPointL[1]>pot[1]:
+                    minPointL = pot
+                elif minPointL[0]>pot[0]:
+                    minPointL = pot
+                if (minPointR[0]>pot[0]+0.5):
+                    minPointR = pot
+                elif minPointR[1]<pot[1]:
+                    minPointR = pot
+                elif minPointR[0]>pot[0]:
+                    minPointR = pot
+        if minPointR[0]==100 and minPointL[0]==100:
+            return [[], 0]
+        for pt in DB:#check left
+            if (pt[0]>minPointL[0]+Xmin) and (pt[0]<minPointL[0]+Xmax) and (pt[1]>minPointL[1]+YminL) and (pt[1]<minPointL[1]+YmaxL):
+                left=0
+            if (pt[0]>minPointR[0]+Xmin) and (pt[0]<minPointR[0]+Xmax) and (pt[1]>minPointR[1]+YminR) and (pt[1]<minPointR[1]+YmaxR):
+                right=0
+        if left:
+            return [minPointL, LEFT]
+        if right:
+            return [minPointR, RIGHT]
+        return [minPointL, 0]
+    def maneuver(self, DIR, pt):
+        if DIR==LEFT:
+            self.path.append(self.xPosition+pt[0]-3)
+            self.path.append(self.yPosition+pt[1]-3)
+    def factorGenerator(self):
+        VL=L=Z=R=VR=1
+        DB = self.Obsticalpoints
 
+        for pt in DB:
+            if pt[1]>-0.5 and pt[1]<2: #create Straight forward factor
+                print pt
+                if pt[0]<2:
+                    rospy.loginfo("Will surely collide!!!")
+                    return [0, 0, 0, 0, 0]
+                z=1/(15.0-2.0)*(pt[0]-2.0)
+                if z<Z:#choose lowest
+                    Z=z
+            elif pt[1]>2 and pt[1]<4:#create right factor
+                if pt[0]>0.5:
+                    r=1/(15.0-0.5)*(pt[0]-0.5)
+                    if r<R:
+                        R=r
+            elif  pt[1]>4 and pt[1]<6:#create very right factor
+                if pt[0]>2:
+                    vr=1/(15.0-2)*(pt[0]-2)
+                    if vr<VR:
+                        VR=vr
+            elif pt[1]>-2.5 and pt[1]<-0.5:#create left factor
+                if pt[0]>0.5:
+                    l=1/(15.0-0.5)*(pt[0]-0.5)
+                    if l<L:
+                        L=l
+            elif  pt[1]>-4.5 and pt[1]<-2.5:#create very right factor
+                if pt[0]>2:
+                    vl=1/(15.0-2)*(pt[0]-2)
+                    if vl<VL:
+                        VL=vl                    
+        return [L, Z, R, VL, VR]# [L  ST  R HL  HR]
 #def getPath():
 #    #rospy.wait_for_service('C31_GlobalPathPlanner/getPath')
 #    try:

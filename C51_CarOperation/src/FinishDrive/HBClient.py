@@ -2,20 +2,19 @@
 import roslib; roslib.load_manifest('C51_CarOperation')
 import rospy
 import actionlib
-import C51_CarOperation.msg
+import C0_RobilTask.msg
 
-
-def InitDrive_client():
+def HB_client(dir):
     # Creates the SimpleActionClient, passing the type of the action
     # (FibonacciAction) to the constructor.
-    client = actionlib.SimpleActionClient('InitDrive', C51_CarOperation.msg.DriveAction)
+    client = actionlib.SimpleActionClient('GripHandBrake', C0_RobilTask.msg.RobilTaskAction)
 
     # Waits until the action server has started up and started
     # listening for goals.
     client.wait_for_server()
 
     # Creates a goal to send to the action server.
-    goal = C51_CarOperation.msg.DriveGoal(name='moshe',uid='5',parameters='xyz')
+    goal = C0_RobilTask.msg.RobilTaskGoal(name='Switch',uid='dz=0.1',parameters='operation=%d,dz=0.1'%dir)#
 
     # Sends the goal to the action server.
     client.send_goal(goal)
@@ -31,7 +30,7 @@ if __name__ == '__main__':
         # Initializes a rospy node so that the SimpleActionClient can
         # publish and subscribe over ROS.
         rospy.init_node('InitDrive_client')
-        result =  InitDrive_client()
+        result =  Switch_client(1)
         if result:
             print 'Car is initialized and ready to go - hand brake released and brake pedal is pressed!'
     except rospy.ROSInterruptException:

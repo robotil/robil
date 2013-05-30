@@ -250,9 +250,9 @@ class App:
                         x2.append(pt[0])
                         y2.append(pt[1])
                 line,  = self.Distanceax.plot(y2, x2, "bo")
-                self.Distanceax.set_xlim([-10, 10])
+                self.Distanceax.set_xlim([-5, 5])
                 self.Distanceax.set_ylim([0, 15])
-                self.Distanceax.set_xticks(ticks=[ -10, -5,0, 5, 10])
+                self.Distanceax.set_xticks(ticks=[ -5, -4, -3, -2, -1,0, 1, 2, 3, 4,  5])
                 self.Distanceax.set_yticks(ticks=[0, 2, 4, 6, 8, 10, 15 ])
                 self.Distanceax.set_xlabel("Left         Right")
                 self.Distanceax.set_ylabel("Astern           Ahead")
@@ -275,7 +275,7 @@ class App:
            self.DistVal.set(1)
            self.distancePlot()
         
-    def distancePlot(self, points):
+    def distancePlot(self, points, WP, wp):
         if self.DistVal.get():
             #print "hi"
             if not self.MAPflag:
