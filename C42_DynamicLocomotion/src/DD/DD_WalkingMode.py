@@ -6,7 +6,6 @@
 # The code in this file is provided "as is" and comes with no warranty whatsoever
 ###################################################################################
 
-import rospy
 import roslib
 roslib.load_manifest('C42_DynamicLocomotion')
 
@@ -44,9 +43,9 @@ class DD_WalkingMode(WalkingMode):
         self._listener = tf.TransformListener()
         self._tf_br = tf.TransformBroadcaster()
         
-        self._odom_sub = rospy.Subscriber('/ground_truth_odom',Odometry,self._odom_cb)
-        self.asi_state = rospy.Subscriber('/atlas/atlas_sim_interface_state', AtlasSimInterfaceState, self.asi_state_cb)
-        self._atlas_imu_sub = rospy.Subscriber('/atlas/imu', Imu, self._get_imu)
+        self._Subscribers["Odometry"] = rospy.Subscriber('/ground_truth_odom',Odometry,self._odom_cb)
+        self._Subscribers["ASI_State"]  = rospy.Subscriber('/atlas/atlas_sim_interface_state', AtlasSimInterfaceState, self.asi_state_cb)
+        self._Subscribers["IMU"]  = rospy.Subscriber('/atlas/imu', Imu, self._get_imu)
 
         rospy.wait_for_service('foot_placement_path')
         self._foot_placement_client = rospy.ServiceProxy('foot_placement_path', FootPlacement_Service)       

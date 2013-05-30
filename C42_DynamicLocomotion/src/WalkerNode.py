@@ -35,6 +35,8 @@ if __name__ == '__main__':
         print " DD for Discrete Dynamic mode"
         sys.exit(2)
     if walkingMode in ('BDI','QS','DD'):
+        # If there should ever be a reason for Discrete and Continuous modes to work at the same time,
+        # different names should be given to the init_node function
         rospy.init_node('WalkerNode')       
         walkingModeChooser = WalkingModeChooser(walkingMode)
         node = DynamicLocomotion("WalkerNode",walkingModeChooser)
