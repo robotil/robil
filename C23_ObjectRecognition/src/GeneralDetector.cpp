@@ -86,8 +86,8 @@ void GeneralDetector::initialize(const string& object) {
 }
 
 void GeneralDetector::detect(Mat img) {
-  int  minScale = -4;
-  int  maxScale = 2;
+  int  minScale = -2;//-4
+  int  maxScale = -1;//2
   int  minSize = 25;
   int objWidth = 315;
   int objHeight = 198;
@@ -185,7 +185,7 @@ void GeneralDetector::detect(Mat img) {
   Mat output2;
   detector.detect(subImg, keypoints);
   cv::drawKeypoints(subImg, keypoints, output2);
-  // imwrite("daniel.jpg",output);
+  //imwrite("daniel.jpg",output);
   cv::imwrite("sift_result.jpg", output2);
   cout << "Best match: " << bestMatch << endl;
   _x = x_;
