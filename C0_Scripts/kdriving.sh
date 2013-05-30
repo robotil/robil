@@ -2,18 +2,16 @@
 #This script should kill all the running modules
 
 CURR_WD=$PWD
-PKILLF=$CURR_WD'/.c11agent.txt'
+PKILLF=$CURR_WD'/.driving.txt'
 #cat $PKILLF >> $PKILLP
 if test -e $PKILLF; then
 
-        echo "Killing "
-        cat $PKILLF
+	echo "Killing "
+	cat $PKILLF
 
-        kill `cat $PKILLF`
+	kill `cat $PKILLF`
 
-        echo "Killed "
+	echo "Killed "
 else echo "No processes to kill"
 fi
-#echo $PKILLP
-#kill $PKILLP
-
+exit 0

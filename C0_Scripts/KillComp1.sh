@@ -1,5 +1,5 @@
 ./kc11.sh
 ./kpc.sh
 ./kperception.sh
-./kskill4_test1.sh
+./kdriving.sh
 ./kstandup.sh

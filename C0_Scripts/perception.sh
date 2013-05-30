@@ -23,4 +23,8 @@ echo "Starting C25"
 roslaunch C25_GlobalPosition              C25.launch &
 C25_PID=$!
 echo $C25_PID
-echo $C21_PID $C22_PID $C24_PID $C25_PID >> $PKILL
+echo "Starting Lidar"
+roslaunch LidarObstacleDetection    lidar.launch &
+LDR_PID=$!
+echo $LDR_PID
+echo $C21_PID $C22_PID $C24_PID $C25_PID $LDR_PID >> $PKILL
