@@ -52,16 +52,16 @@ class WalkingModeBDI(WalkingMode):
         ##############################
         self._BDI_StateMachine = BDI_StateMachine(self._Odometer)
         #self._odom_position = Pose()
-        self._odom_sub = rospy.Subscriber('/ground_truth_odom',Odometry,self._odom_cb)
         self._bDone = False
-        self.asi_state = rospy.Subscriber('/atlas/atlas_sim_interface_state', AtlasSimInterfaceState, self.asi_state_cb)
-        self._atlas_imu_sub = rospy.Subscriber('/atlas/imu', Imu, self._get_imu)
-        rospy.sleep(0.3)
 
     def Initialize(self):
         WalkingMode.Initialize(self)
         # Subscriber
-        self._path_sub = rospy.Subscriber('/path',C31_Waypoints,self._path_cb)
+        self._Subscribers["Path"] = rospy.Subscriber('/path',C31_Waypoints,self._path_cb)
+        self._Subscribers["Odometry"] = rospy.Subscriber('/ground_truth_odom',Odometry,self._odom_cb)
+        self._Subscribers["ASI_State"]  = rospy.Subscriber('/atlas/atlas_sim_interface_state', AtlasSimInterfaceState, self.asi_state_cb)
+        self._Subscribers["IMU"]  = rospy.Subscriber('/atlas/imu', Imu, self._get_imu)
+        rospy.sleep(0.3)
     
         self._bDone = False
         # # Puts robot into freeze behavior, all joints controlled

@@ -21,17 +21,16 @@ class DynamicLocomotion(RobilTask):
         RobilTask.__init__(self, name)
         self._Walker = Walker(walkingModeChooser)
         self._interval = rospy.Rate(2)
-
-        ## TOPIC setup:
-        self._debug_cmd_sub = rospy.Subscriber('walker_command',Int32,self._debug_command)
     
     def _init_values(self):
         self._debug_cmd = 1 # default value, has no effect
 
     def task(self, name, uid, parameters):
-
         #initialize values:
         self._init_values()
+        
+        ## TOPIC setup:
+        self._debug_cmd_sub = rospy.Subscriber('walker_command',Int32,self._debug_command)
 
         self._Walker.Initialize()
 
@@ -50,7 +49,9 @@ class DynamicLocomotion(RobilTask):
             self._interval.sleep()
 
         self._Walker.Stop()
-
+        
+        self._debug_cmd_sub.unregister
+        
         print("SUCCESS!!")
 
         return RTResult_SUCCESSED("Finished in Success")
