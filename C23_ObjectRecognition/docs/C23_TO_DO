@@ -7,4 +7,18 @@ C23_ObjectRecogition TO DO
 2. Identify the square at the back of the car and identify the steering wheel
 3. Identify the handbreak and pedals
 4. Test identification of these objects at different angles
-5. 
+5. Implement the neck movements so the robot can scan and look for an objects
+6. Implement the torso movements so the robot can search for an object
+7. Visual feedback dexterity
+8. 
+
+
+
+
+29/05/13
+1. Bounding box from all angles on the car
+1.1 Need to detect the driver/passenger side
+1.2 Need to detect the steering wheel from outside as well as inside
+2. Steering wheel, pedal etc...
+
+

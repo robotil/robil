@@ -3,14 +3,14 @@ C23_General_Info
 For neck control:
 
 1. Follow instructions on Robil site
-2. ~/darpa/robil/C42_DRCSim2_tools/src$ rosrun C42_DRCSim2_too foot_contact_filter.py
+2. ~/darpa/robil/C42_DRCSim2_tools/src$ rosrun C42_DRCSim2_tools foot_contact_filter.py
 3. ~/darpa/robil/C45_PostureControl$ roslaunch C45_PostureControl C45_PostureControl.launch
 4. ~/darpa/robil/C45_PostureControl$ rosservice call /PoseController/start "{}"
 5. rosservice call /PoseController/delta_neck_movement "neck_ay: 0.1"
 
 
 To run the robot using teleoperation
-Run: VRC_CHEAT_ENABLE=1
+Run: export VRC_CHEATS_ENABLE=1
 rosrun pr2_teleop teleop_pr2_keyboard cmd_vel:=atlas/cmd_vel
 
 

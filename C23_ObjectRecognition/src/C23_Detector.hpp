@@ -55,6 +55,10 @@ typedef enum targets {
   PICTURE,
   VALVE,
   FIREHOSE,
+  INSIDE_STEERINGWHEEL,
+  OUTSIDE_STEERINGWHEEL,
+  INSIDE_HANDBRAKE,
+  OUTSIDE_HANDBRAKE,
   NONE
 } TARGETS;
 
@@ -80,15 +84,22 @@ private:
     bool detectPassengerDriver(Mat srcImg, int x1,int y1,int x2,int y2);
     bool detectValve(Mat srcImg, const sensor_msgs::PointCloud2::ConstPtr &cloud);
     bool detectFirehose(Mat srcImg, const sensor_msgs::PointCloud2::ConstPtr &cloud);
-        
+    
+    bool detectSteeringWheel(Mat srcImg,const sensor_msgs::PointCloud2::ConstPtr &cloud,int location);
+    bool detectHandbrake(Mat srcImg,const sensor_msgs::PointCloud2::ConstPtr &cloud,int location);
+    
     bool pictureCoordinatesToGlobalPosition(int x1, int y1, int x2, int y2, int* x, int* y, int *z);
 	ros::NodeHandle nh;
+    bool takePictures(Mat srcImg);
+    bool templateMatching( Mat img, Mat templateImage, int matching_method );
 
 	ros::Publisher objectDetectedPublisher;
   ros::Publisher objectDeminsionsPublisher;
 	//vector<Gate*>* gates;
 	  //Register a service
 	  ros::ServiceClient c21client;
+	  ros::ServiceClient c23_start_posecontroller;
+	  ros::ServiceClient c23_stop_posecontroller;
 	  geometry_msgs::Point point;
 	  
   
