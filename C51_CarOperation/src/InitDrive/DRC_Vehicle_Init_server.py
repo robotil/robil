@@ -8,6 +8,8 @@ import geometry_msgs.msg
 from nav_msgs.msg import Odometry
 from std_msgs.msg import  Float64
 from geometry_msgs.msg import Pose
+from directionClient import Switch_client
+from HBClient import HB_client
 car='drc_vehicle'#'golf_cart'#
 
 class InitDrive(object):
@@ -29,7 +31,8 @@ class InitDrive(object):
             
         if success:
             #DRC Vehicles controllers online - should be replaced with C67 module
-            hb=handB()         #handbrake online
+            Switch_client(1)
+            HB_client(1)         #handbrake online
             gasP=Gas() #gas pedal online
             brakeP=Brake() #gas pedal online
             Steer=SW()      #steering wheel online
@@ -38,8 +41,6 @@ class InitDrive(object):
             gasP.gas(0)
 
             self._feedback.complete = 50
-            hb.releaseHB()     #release handbrake
-
             self._feedback.complete = 100
             self._result.success = 0
             self._result.description = "init car"
@@ -50,25 +51,6 @@ class InitDrive(object):
             rospy.loginfo('Car is initialized and ready to go - hand brake released and brake pedal is pressed!')
             self._as.set_succeeded(self._result)
         #----------------hand brake released --------------------------#
-
-class handB:
-
-    handbrake=1
-    pub=0
-    sub=0
-    def __init__(self):
-        self.pub = rospy.Publisher(car+'/hand_brake/cmd', Float64)
-        self.sub = rospy.Subscriber('/'+car+'/hand_brake/state', Float64, self.handbrakeCallback)
-    def handbrakeCallback(self, data):
-        self.handbrake=data.data
-
-    def releaseHB(self):
-        while self.handbrake>0.1 :
-            self.pub.publish(0.1)
-
-    def pullHB(self):
-        self.pub.publish(0.1)
-        #while self.handbrake<0.5 :
 
 
 class Gas:

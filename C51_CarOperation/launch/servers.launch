@@ -5,7 +5,7 @@
 <node name="C51_bash" pkg="C51_CarOperation" type="C51_bash.bash" />
 
 <!-- C21 - on! -->
-<!--include  file="$(find C21_VisionAndLidar)/launch/C21.launch" /-->
+<include  file="$(find C21_VisionAndLidar)/launch/C21.launch" />
 
 <!-- Start C22 -->
 <!--node name="C22" pkg="C22_GroundRecognitionAndMapping" type="C22" /-->
@@ -19,11 +19,17 @@
 <!-- Start C31 -->
 <node name="C31" pkg="C31_PathPlanner" type="gpp" />
 
+<!-- Start C67 - Handbrake -->
+<node name="C67_HB" pkg="C67_CarManipulation" type="GripHandBrake" />
+
+<!-- Start C67 - GearStick -->
+<node name="C67_GS" pkg="C67_CarManipulation" type="GripGearStick" />
+
 <!-- C34_Designer - on! -->
 <include  file="$(find C34_Designer)/launch/start.launch" />
 
 <!-- Start Lidar for Obstacle detection -->
-<node name="C22" pkg="LidarObstacleDetection" type="Lidar" />
+<node name="LIDAR_OBS" pkg="LidarObstacleDetection" type="Lidar" />
 
 </launch>
   

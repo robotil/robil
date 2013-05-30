@@ -102,6 +102,7 @@ class Matrix{
 public:
 	double T[4][4];	
 	Matrix(){}
+	Matrix(double A[4][4]);
 	void rGet(int Type, double val);
 	void lGet(int Type, double val);
 	void rMultiply(int Type, double val);
@@ -122,5 +123,15 @@ public:
 	void Print();
 };
 
+class Quarternion{
+public:
+	double x, y, z, a, b, c, d;
+	Quarternion (){};
+	Quarternion(double m_x, double m_y, double m_z, double m_a, double m_b, double m_c, double m_d);
+
+	Matrix ToMatrix();
+	void Print();
+};
+Quarternion QuarAngle(double m_x, double m_y, double m_z, double angle, double ax, double ay, double az);
 
 #endif
