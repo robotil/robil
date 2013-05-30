@@ -1,5 +1,5 @@
 #!/bin/sh
-#This script should start the perception modules
+#This script should start the anything related to OCU at the site 
 
 CURR_WD=$PWD
 PKILL=$CURR_WD'/.c11agent.txt'
