@@ -29,9 +29,11 @@ for CalibratePedals use: - stub
 rosrun C67_CarManipulation CalibratePedals 
 rosrun C67_CarManipulation task_tester CalibratePedals 1
 
-for GripHandBrake use:(in this example wait for 1 second use target operation 1(1-Release, 2-Engage)) - stub
+for GripHandBrake use:(in this example wait for 1 second use target operation 1(1-Release, 2-Engage)) - active
 rosrun C67_CarManipulation GripHandBrake 
 rosrun C67_CarManipulation task_tester GripHandBrake 1 args="operation=1"
+
+ou can specify target position, or offset, for example  args="operation=2,dx=0.02,dy=0.01"(offset x=+2cm, y=+1cm) 
 
 for GripGearStick use:(in this example wait for 1 second use target operation 2(1-Forward, 2-Reverse)) - active
 rosrun C67_CarManipulation GripGearStick 
