@@ -142,6 +142,7 @@ rosbuild_link_boost(CalibratePedals thread)
 
 rosbuild_add_executable(GripHandBrake src/GripHandBrake.cpp)
 rosbuild_link_boost(GripHandBrake thread)
+target_link_libraries(GripHandBrake Kinematics)
 
 rosbuild_add_executable(GripGearStick src/GripGearStick.cpp)
 rosbuild_link_boost(GripGearStick thread)
