@@ -128,12 +128,16 @@
 	    ROS_INFO("We are looking for the steering wheel while outside the car...");
 	}
 	else if (!target.compare("InsideHandbrake")) {
-	    _target = INSIDE_HANDBRAKE;
+	    _target = HANDBRAKE;
 	    ROS_INFO("We are looking for the handbrake while inside the car...");
 	}
-	else if (!target.compare("OutsideHandbrake")) {
-	    _target = OUTSIDE_HANDBRAKE;
-	    ROS_INFO("We are looking for the handbrake while outside the car...");
+	else if (!target.compare("Gear")) {
+	    _target = GEAR;
+	    ROS_INFO("We are looking for the gear inside the car...");
+	}
+	else if (!target.compare("PushButton")) {
+	    _target = PUSHBUTTON;
+	    ROS_INFO("We are looking for the push button inside the car...");
 	}
 	return true;
 	
@@ -213,16 +217,21 @@
 		res = detectSteeringWheel(srcImg,cloud,1);
 		publishMessage(res);
 	      break;
-	    case INSIDE_HANDBRAKE:
-		ROS_INFO("INSIDE_HANDBRAKE");
+	    case HANDBRAKE:
+		ROS_INFO("HANDBRAKE");
 		res = detectHandbrake(srcImg,cloud,0);
 		publishMessage(res);
 	      break;
-	  case OUTSIDE_HANDBRAKE:
-		ROS_INFO("OUTSIDE_HANDBRAKE");
-		res = detectHandbrake(srcImg,cloud,1);
+	  case GEAR:
+		ROS_INFO("GEAR");
+		res = detectGear(srcImg,cloud,1);
 		publishMessage(res);
 	      break; 
+	  case PUSHBUTTON:
+	    ROS_INFO("PUSHBUTTON");
+	    res = detectPushButton(srcImg,cloud,1);
+	    publishMessage(res);
+	  break; 
 	    
 	}
 	srcImg.release();
@@ -284,7 +293,7 @@
     bool C23_Detector::detectSteeringWheel(Mat srcImg,const sensor_msgs::PointCloud2::ConstPtr &cloud,int location){
      
       //Load the image template for the steering wheel
-      Mat steeringwheelTemplate = imread("template_matching_images/steering_wheel_template.jpg");
+      Mat steeringwheelTemplate = imread("template_matching_images/steering_wheel_template_qual.jpg");
       imshow("Steering wheel template", steeringwheelTemplate);
       waitKey(0);
       
@@ -298,12 +307,40 @@
     bool C23_Detector::detectHandbrake(Mat srcImg,const sensor_msgs::PointCloud2::ConstPtr &cloud,int location){
      
       //Load the image template for the steering wheel
-      Mat handbrakeTemplate = imread("template_matching_images/hand_brake_template.jpg");
+      Mat handbrakeTemplate = imread("template_matching_images/hand_brake_template_qual.jpg");
       imshow("Hand brake template", handbrakeTemplate);
       waitKey(0);
       
      bool res =  templateMatching(srcImg, handbrakeTemplate, 1);
       
+      
+      
+      return res;
+    }
+    
+    //Detect the car gear
+    bool C23_Detector::detectGear(Mat srcImg,const sensor_msgs::PointCloud2::ConstPtr &cloud,int location){
+     
+      //Load the image template for the steering wheel
+      Mat gearTemplate = imread("template_matching_images/gear_template_qual.jpg");
+      imshow("Gear template", gearTemplate);
+      waitKey(0);
+      
+      bool res  = templateMatching(srcImg, gearTemplate, 1);
+      
+      
+      return res;
+    }
+    
+    //Detect the car push button to start the engine
+      bool C23_Detector::detectPushButton(Mat srcImg,const sensor_msgs::PointCloud2::ConstPtr &cloud,int location){
+     
+      //Load the image template for the steering wheel
+      Mat pushButtonTemplate = imread("template_matching_images/push_button_template_qual.jpg");
+      imshow("Push button template", pushButtonTemplate );
+      waitKey(0);
+      
+      bool res  = templateMatching(srcImg, pushButtonTemplate , 1);
       
       
       return res;
