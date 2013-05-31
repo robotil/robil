@@ -3,23 +3,34 @@
 /*
  * subscribe to service C22
  * advertise service foot_placement
+ * subscribe to path topic
  */
 FootPlacementService::FootPlacementService() {
 	mapClient = nh.serviceClient
 			<C22_CompactGroundRecognitionAndMapping::C22>("C22compact");
 	footServer = nh.advertiseService
 			("foot_placement", &FootPlacementService::callback, this);
+	ros::SubscribeOptions pathSo =
+			ros::SubscribeOptions::create<C31_PathPlanner::C31_Waypoints>(
+			"path", 1,
+			boost::bind( &FootPlacementService::getPath,this,_1),
+		    ros::VoidPtr(), nh.getCallbackQueue());
+	pathSub = nh.subscribe(pathSo);
 }
 
 /*
  * callback function when foot_placement service is called
  */
-bool FootPlacementService::callback(FootPlacement::FootPlacement::Request &req,
-		FootPlacement::FootPlacement::Response &res) {
+bool FootPlacementService::callback(FootPlacement::FootPlacement_Service::Request &req,
+		FootPlacement::FootPlacement_Service::Response &res) {
 	// requesting for map recognition
 	if (mapClient.call(mapService)) {
 
 		geometry_msgs::Point pelvis = mapService.response.drivingPath.robotPos;
+
+		/****************************************************************************************
+		 * code to find feet position. not necessary anymore since we get it at service request *
+		 ****************************************************************************************
 		geometry_msgs::Point leftFootPos;
 		geometry_msgs::Point rightFootPos;
 
@@ -45,17 +56,32 @@ bool FootPlacementService::callback(FootPlacement::FootPlacement::Request &req,
 	    rightFootPos.x = pelvis.x + tfRightFoot.getOrigin().getX();
 	    rightFootPos.y = pelvis.y + tfRightFoot.getOrigin().getY();
 	    rightFootPos.z = pelvis.z + tfRightFoot.getOrigin().getZ();
+		****************************************************************************************/
 
 	    // calculating the costs list
 	    calcFootMatrix(
-				res.positions,
-				req.useC22, req.foot,
+				res.foot_placement_path,
+				USE_C22,
 				mapService.response.drivingPath,
-				leftFootPos, rightFootPos,
-				req.dirX, req.dirY,
+				req.start_pose, req.other_foot_pose,
+				pathPoints->points,
 				SLOPE_WEIGHT, DISTANCE_WEIGHT, HEIGHT_WEIGHT, DIRECTION_WEIGHT);
 	}
+	else {
+		printf("ERROR! NO MAP SERVICE!\n");
+		return false;
+	}
 	return true;
+}
+
+/*
+ * updating the path points
+ */
+void FootPlacementService::getPath(const C31_PathPlanner::C31_Waypoints::ConstPtr& points) {
+	pathPoints = points;
+	printf("Receieved path:\n");
+	for (unsigned long i = 0; i < points->points.size(); i++)
+		printf("  point %lu: %lf %lf\n", i, points->points[i].x, points->points[i].y);
 }
 
 /*
