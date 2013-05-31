@@ -14,6 +14,10 @@ import math
 ###    $ rosservice call /foot_placement_path 0                      ###
 ########################################################################
 
+class Nasmpace: pass
+ns = Nasmpace()
+ns._bSent_path_once = False
+
 def Get_foot_placement_path(req):
     FP_res = FootPlacement_ServiceResponse()
     FP_res.done = 0
@@ -24,10 +28,11 @@ def Get_foot_placement_path(req):
                                   #FP_data(0,[-0.84,-37.9,0.1],[0.0,0.0,0.40],0.1),FP_data(1,[-0.84,-38.2,0.1],[0.0,0.0,-0.4],0.1),FP_data(0,[-0.84,-37.9,0.1],[0.0,0.0,-0.4],0.1)] # doesn't respond to yaw = -0.80 # FP_data(0,[-0.63,-37.87,0.1],[0.0,0.0,-1.579],0.1)
 
     print req.start_pose.pose.position
-    if PositionsDistance(FP_res.foot_placement_path[0].pose.position, req.start_pose.pose.position) >= 0.5: # to avoid sending the same path a few times
+    if PositionsDistance(FP_res.foot_placement_path[0].pose.position, req.start_pose.pose.position) >= 0.5 or ns._bSent_path_once: # to avoid sending the same path a few times
     	FP_res.foot_placement_path = []
 
     print "Returning foot placement path: %s"%(FP_res.foot_placement_path)
+    ns._bSent_path_once = True
     return FP_res
 
 def FP_data(foot_index,position,euler_angle,clearance_height):
@@ -57,5 +62,5 @@ def foot_placement_path_server():
     print "Ready to get foot placement path."
     rospy.spin()
 
-if __name__ == "__main__":
+if __name__ == "__main__":    
     foot_placement_path_server()

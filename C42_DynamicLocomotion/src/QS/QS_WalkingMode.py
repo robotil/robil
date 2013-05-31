@@ -34,6 +34,10 @@ class QS_WalkingMode(WalkingMode):
         WalkingMode.__init__(self,self._LPP)
         # Initialize atlas atlas_sim_interface_command publisher       
         self.asi_command = rospy.Publisher('/atlas/atlas_sim_interface_command', AtlasSimInterfaceCommand, None, False, True, None)
+
+        rospy.wait_for_service('foot_placement_path')
+        self._foot_placement_client = rospy.ServiceProxy('foot_placement_path', FootPlacement_Service)       
+
         self._Odometer = Odometer()
         self._bDone = False
         self._bIsSwaying = False
@@ -43,16 +47,14 @@ class QS_WalkingMode(WalkingMode):
         WalkingMode.Initialize(self)
         self._command = 0
         self._bRobotIsStatic = True
-        # Subscribers:
+
+        #tf
         self._listener = tf.TransformListener()
         self._tf_br = tf.TransformBroadcaster()
-
+        # Subscribers:
         self._Subscribers["Odometry"] = rospy.Subscriber('/ground_truth_odom',Odometry,self._odom_cb)
         self._Subscribers["ASI_State"]  = rospy.Subscriber('/atlas/atlas_sim_interface_state', AtlasSimInterfaceState, self.asi_state_cb)
         self._Subscribers["IMU"]  = rospy.Subscriber('/atlas/imu', Imu, self._get_imu)
-
-        rospy.wait_for_service('foot_placement_path')
-        self._foot_placement_client = rospy.ServiceProxy('foot_placement_path', FootPlacement_Service)       
 
         rospy.sleep(0.3)
         
@@ -75,6 +77,11 @@ class QS_WalkingMode(WalkingMode):
         self._bIsSwaying = True
     
     def EmergencyStop(self):
+        WalkingMode.Stop(self)
+
+    def Stop(self):
+        # self._listener.__del__()
+        # self._tf_br.__del__()
         WalkingMode.Stop(self)
 
     def IsDone(self):

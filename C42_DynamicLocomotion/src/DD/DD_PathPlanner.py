@@ -32,6 +32,7 @@ class DD_PathPlanner(PathPlanner):
         self._Queue.extend(waypointList)
         if(0 < len(self._Queue)):
             self.State = DD_PathPlannerEnum.Active
+        #print ("SetPath",self._Queue)
             
     def GetPath(self):
         return self._Queue
@@ -52,7 +53,7 @@ class DD_PathPlanner(PathPlanner):
                 #print("GetNextStep ",i,self._Queue[i])
                 step_queue.append(self._Queue[i])
             self._Queue.popleft()
-            step_queue.append(self._Queue[i-1])
+            step_queue.append(self._Queue[0])
             self._countEnteries = 0
         else:
             step_queue = []
@@ -64,7 +65,7 @@ class DD_PathPlanner(PathPlanner):
             step_queue.append(self._Queue[one_or_zero])
             self._countEnteries += 1
             self.State = DD_PathPlannerEnum.Waiting
-        print step_queue
+        #print ("GetNextStep",step_queue)
         return step_queue
 
     def Stop(self):

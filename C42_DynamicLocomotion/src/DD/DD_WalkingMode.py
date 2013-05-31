@@ -8,7 +8,6 @@
 
 import copy
 import rospy
->>>>>>> develop_VRC
 import roslib
 roslib.load_manifest('C42_DynamicLocomotion')
 
@@ -36,6 +35,10 @@ class DD_WalkingMode(WalkingMode):
         self.step_index_for_reset = 0
         # Initialize atlas atlas_sim_interface_command publisher       
         self.asi_command = rospy.Publisher('/atlas/atlas_sim_interface_command', AtlasSimInterfaceCommand, None, False, True, None)
+
+        rospy.wait_for_service('foot_placement_path')
+        self._foot_placement_client = rospy.ServiceProxy('foot_placement_path', FootPlacement_Service)       
+
         # for debug publish:
         self._debug_pub_StepIndex = rospy.Publisher('debug_DD_StepIndex',Int32)
         self._Odometer = Odometer()
@@ -46,17 +49,15 @@ class DD_WalkingMode(WalkingMode):
     def Initialize(self):
         WalkingMode.Initialize(self)
         self._bRobotIsStatic = True
-        # Subscribers:
+
+        #tf
         self._listener = tf.TransformListener()
         self._tf_br = tf.TransformBroadcaster()
-        
+        # Subscribers:        
         self._Subscribers["Odometry"] = rospy.Subscriber('/ground_truth_odom',Odometry,self._odom_cb)
         self._Subscribers["ASI_State"]  = rospy.Subscriber('/atlas/atlas_sim_interface_state', AtlasSimInterfaceState, self.asi_state_cb)
         self._Subscribers["IMU"]  = rospy.Subscriber('/atlas/imu', Imu, self._get_imu)
 
-        rospy.wait_for_service('foot_placement_path')
-        self._foot_placement_client = rospy.ServiceProxy('foot_placement_path', FootPlacement_Service)       
-        
         rospy.sleep(0.3)
 
         self._RequestFootPlacements()
@@ -81,6 +82,11 @@ class DD_WalkingMode(WalkingMode):
     def EmergencyStop(self):
         WalkingMode.Stop(self)
 
+    def Stop(self):
+        # self._listener.__del__()
+        # self._tf_br.__del__()
+        WalkingMode.Stop(self)
+
     def IsDone(self):
         return self._bDone
     
@@ -88,11 +94,12 @@ class DD_WalkingMode(WalkingMode):
         command = AtlasSimInterfaceCommand()
         command.behavior = AtlasSimInterfaceCommand.WALK
         command.k_effort = [0] * 28
-        command.walk_params.step_queue = self._LPP.GetNextStep()
-        if(0 == command.walk_params.step_queue):
+        step_queue = self._LPP.GetNextStep()
+        if(0 == step_queue):
             command = 0
         else:
             for i in range(4):
+                command.walk_params.step_queue[i] = copy.deepcopy(step_queue[i])
                 command.walk_params.step_queue[i].step_index = self._StepIndex + i
                 command.walk_params.step_queue[i].duration = 0.63
                 #print("GetCommand",command.walk_params.step_queue)
