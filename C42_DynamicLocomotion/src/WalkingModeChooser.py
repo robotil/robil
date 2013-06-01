@@ -1,16 +1,17 @@
 #!/usr/bin/env python
 
-from Abstractions.WalkingModeChooserInterface import *
-from BDI.WalkingModeBDI import *
-from QS.QS_WalkingMode import *
-from DD.DD_WalkingMode import *
-from LocalPathPlanner import *
-
 ###################################################################################
 # File created by David Dovrat, 2013.
 # For Robil, under project Robil's license of choice
 # The code in this file is provided "as is" and comes with no warranty whatsoever
 ###################################################################################
+
+from Abstractions.WalkingModeChooserInterface import *
+from Absractions.Interface_tf import *
+from BDI.WalkingModeBDI import *
+from QS.QS_WalkingMode import *
+from DD.DD_WalkingMode import *
+from LocalPathPlanner import *
 
 class WalkingModeChooser(WalkingModeChooserInterface):
 
@@ -19,8 +20,9 @@ class WalkingModeChooser(WalkingModeChooserInterface):
         # mode
         lpp = LocalPathPlanner()
         lpp.SetDoingQual(bIsDoingQual)
+        iTf = Interface_tf()
         
-        self._Modes = {'BDI':WalkingModeBDI(lpp),'QS':QS_WalkingMode(),'DD':DD_WalkingMode()}
+        self._Modes = {'BDI':WalkingModeBDI(lpp),'QS':QS_WalkingMode(iTf),'DD':DD_WalkingMode(iTf)}
         self._Preferred = prefferedMode
         self._CurrentMode = prefferedMode
         self._Recommended = prefferedMode

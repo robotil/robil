@@ -15,7 +15,6 @@ from Abstractions.WalkingMode import *
 from Abstractions.Odometer import *
 from DD_PathPlanner import *
 
-import tf
 from tf.transformations import quaternion_from_euler, euler_from_quaternion
 import numpy as np
 
@@ -29,9 +28,10 @@ from C42_DynamicLocomotion.srv import *
 from C42_DynamicLocomotion.msg import Foot_Placement_data
 
 class DD_WalkingMode(WalkingMode):
-    def __init__(self):
+    def __init__(self,iTf):
         self._LPP = DD_PathPlanner()
         WalkingMode.__init__(self,self._LPP)
+        self._tf = iTf
         self.step_index_for_reset = 0
         # Initialize atlas atlas_sim_interface_command publisher       
         self.asi_command = rospy.Publisher('/atlas/atlas_sim_interface_command', AtlasSimInterfaceCommand, None, False, True, None)
@@ -50,9 +50,6 @@ class DD_WalkingMode(WalkingMode):
         WalkingMode.Initialize(self)
         self._bRobotIsStatic = True
 
-        #tf
-        self._listener = tf.TransformListener()
-        self._tf_br = tf.TransformBroadcaster()
         # Subscribers:        
         self._Subscribers["Odometry"] = rospy.Subscriber('/ground_truth_odom',Odometry,self._odom_cb)
         self._Subscribers["ASI_State"]  = rospy.Subscriber('/atlas/atlas_sim_interface_state', AtlasSimInterfaceState, self.asi_state_cb)
@@ -83,8 +80,6 @@ class DD_WalkingMode(WalkingMode):
         WalkingMode.Stop(self)
 
     def Stop(self):
-        # self._listener.__del__()
-        # self._tf_br.__del__()
         WalkingMode.Stop(self)
 
     def IsDone(self):
@@ -165,7 +160,7 @@ class DD_WalkingMode(WalkingMode):
         start_pose = Foot_Placement_data()
         other_foot_pose = Foot_Placement_data()
         
-        t = self._listener.getLatestCommonTime('World','l_foot')
+        t = self._tf.TransformListener().getLatestCommonTime('World','l_foot')
         trans, rot_q = self._GetTf('World','l_foot',t)
         start_pose.foot_index = 2 # both feet are static
         start_pose.pose.position.x = trans[0]
@@ -228,7 +223,7 @@ class DD_WalkingMode(WalkingMode):
         if self._bRobotIsStatic:
             self._Global_Static_orientation_q = odom.pose.pose.orientation
         self._LPP.UpdatePosition(odom.pose.pose.position.x,odom.pose.pose.position.y)
-        self._tf_br.sendTransform(vec2tuple(odom.pose.pose.position), vec2tuple(odom.pose.pose.orientation), odom.header.stamp, "pelvis", "World")
+        self._tf.TransformBroadcaster().sendTransform(vec2tuple(odom.pose.pose.position), vec2tuple(odom.pose.pose.orientation), odom.header.stamp, "pelvis", "World")
  
     def _get_imu(self,msg):  #listen to /atlas/imu/pose/pose/orientation
         roll, pitch, yaw = euler_from_quaternion([msg.orientation.x, msg.orientation.y, msg.orientation.z, msg.orientation.w])
@@ -238,10 +233,10 @@ class DD_WalkingMode(WalkingMode):
 ###############################################################################################
 
     def _Update_tf_BDI_odom(self,state):
-        self._tf_br.sendTransform( vec2tuple(state.pos_est.position), vec2tuple(state.foot_pos_est[0].orientation), state.header.stamp, "BDI_pelvis", "World")
-        self._tf_br.sendTransform( vec2tuple(state.foot_pos_est[0].position), vec2tuple(state.foot_pos_est[0].orientation),\
+        self._tf.TransformBroadcaster().sendTransform( vec2tuple(state.pos_est.position), vec2tuple(state.foot_pos_est[0].orientation), state.header.stamp, "BDI_pelvis", "World")
+        self._tf.TransformBroadcaster().sendTransform( vec2tuple(state.foot_pos_est[0].position), vec2tuple(state.foot_pos_est[0].orientation),\
                      state.header.stamp, "BDI_l_foot", "World")
-        self._tf_br.sendTransform( vec2tuple(state.foot_pos_est[1].position), vec2tuple(state.foot_pos_est[1].orientation),\
+        self._tf.TransformBroadcaster().sendTransform( vec2tuple(state.foot_pos_est[1].position), vec2tuple(state.foot_pos_est[1].orientation),\
                      state.header.stamp, "BDI_r_foot", "World")
         # check foot index:
         if AtlasSimInterfaceCommand.STEP == state.current_behavior:
@@ -273,7 +268,7 @@ class DD_WalkingMode(WalkingMode):
             trans2BDI = copy.copy(self._previous_BDI_FP)
 
         # ##TODO: determine which foot is static (=>self._static_foot_index) 
-        # t = self._listener.getLatestCommonTime('World','l_foot')
+        # t = self._tf.TransformListener().getLatestCommonTime('World','l_foot')
         # if 0 == self._static_foot_index:
         #     static_foot_global_position , static_foot_global_rotation_q = self._GetTf('World','l_foot',t)
         #     trans2BDI,rot2BDI_quat = self._GetTf('World','BDI_l_foot',t)
@@ -301,7 +296,7 @@ class DD_WalkingMode(WalkingMode):
 
         # homogeneous transformations:                                   
         Global2BDI_q = quaternion_from_euler(self._roll_delta0, self._pitch_delta0, self._yaw_delta0)
-        transform_world2BDI = self._listener.fromTranslationRotation(trans2BDI, Global2BDI_q) #state.step_feedback.desired_step_saturated.pose.orientation)# rot2BDI_quat) 
+        transform_world2BDI = self._tf.TransformListener().fromTranslationRotation(trans2BDI, Global2BDI_q) #state.step_feedback.desired_step_saturated.pose.orientation)# rot2BDI_quat) 
            # homogeneous trans. of static foot to BDI coord. (Returns a Numpy 4x4 matrix for a transform)
         BDI_new_FP = transform_world2BDI*glabal_trans_delta_vec
 
@@ -336,10 +331,10 @@ class DD_WalkingMode(WalkingMode):
         # waiting for transform to be avilable
         time_out = rospy.Duration(2)
         polling_sleep_duration = rospy.Duration(0.01)
-        while self._listener.waitForTransform (base_frame, get_frames, time, time_out, polling_sleep_duration) and not rospy.is_shutdown():
+        while self._tf.TransformListener().waitForTransform (base_frame, get_frames, time, time_out, polling_sleep_duration) and not rospy.is_shutdown():
                 rospy.loginfo("QS_WalkingMode - _GetTf:: Not ready for Global To BDI transform")
         try:
-          (translation,rotation_q) = self._listener.lookupTransform(base_frame, get_frames, time)  #  rospy.Time(0) to use latest availble transform 
+          (translation,rotation_q) = self._tf.TransformListener().lookupTransform(base_frame, get_frames, time)  #  rospy.Time(0) to use latest availble transform 
         except (tf.LookupException, tf.ConnectivityException, tf.ExtrapolationException) as ex:
           print ex
           rospy.loginfo("QS_WalkingMode - _GetTf:: tf exception")
