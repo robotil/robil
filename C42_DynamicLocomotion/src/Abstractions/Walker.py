@@ -14,15 +14,20 @@ from WalkingModeChooserInterface import *
 #--------------------------- Walker -----------------------------------------------
 ###################################################################################
 
+class WalkerResultEnum:
+    Failure,Success = range(2)
+
 class Walker(object):
     
     def __init__(self,walkingModeChooser):
         self._ModeChooser = walkingModeChooser
+        self._Result = WalkerResultEnum.Failure
 
     # Commands:
     def Initialize(self):
         self._WalkingMode = self._ModeChooser.GetRecommendedMode()
         self._WalkingMode.Initialize()
+        self._Result = WalkerResultEnum.Failure
         
     def Start(self):
         pass
@@ -34,6 +39,8 @@ class Walker(object):
     
     def Stop(self):
         self._WalkingMode.Stop()
+        # Put somewhere with meaning
+        self._Result = WalkerResultEnum.Success
 
     def SetPath(self,Path):
         self._WalkingMode.SetPath(Path)
@@ -57,7 +64,4 @@ class Walker(object):
 
     def IsReady(self):
         return self._WalkingMode.IsReady()
-
-
-
 

@@ -52,9 +52,12 @@ class DynamicLocomotion(RobilTask):
         
         self._debug_cmd_sub.unregister
         
-        print("SUCCESS!!")
-
-        return RTResult_SUCCESSED("Finished in Success")
+        if(WalkerResultEnum.Success == self._Walker.Result()):
+            print("SUCCESS!!")
+            return RTResult_SUCCESSED("Finished in Success")
+        else:
+            print("FAIL")
+            return RTResult(RobilTask_FAULT, "", "Did not end in success", False) 
 
     def WaitForPath(self):
         rospy.loginfo("DynamicLocomotion, WaitForPath: %s" % ("Waiting to receive /path ...") )
@@ -73,7 +76,7 @@ class DynamicLocomotion(RobilTask):
 
     def _debug_command(self,debug_command): # cmd = 0 -> STOP; cmd = 3 -> Emergency STOP
         self._debug_cmd = debug_command.data
-        rospy.loginfo("DEBUG - recieved debug_command = %i" % (self._debug_cmd) )
+        rospy.loginfo("DEBUG - received debug_command = %i" % (self._debug_cmd) )
         rospy.loginfo("time:")
         rospy.loginfo(rospy.get_time())
         if 3 == self._debug_cmd:
