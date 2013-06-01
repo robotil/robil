@@ -195,6 +195,9 @@ class LocalPathPlanner(PathPlanner):
             self._CurrentSegment.SetTarget(self._Path.popleft()) 
         self._PathReady = True   
         
+    def SetPath(self):
+        return self._Path
+        
     def GetPathError(self):
         sagital,lateral = self._CurrentSegment.GetDistanceFrom(self._Position)
         return lateral

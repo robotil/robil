@@ -21,17 +21,16 @@ class DynamicLocomotion(RobilTask):
         RobilTask.__init__(self, name)
         self._Walker = Walker(walkingModeChooser)
         self._interval = rospy.Rate(2)
-
-        ## TOPIC setup:
-        self._debug_cmd_sub = rospy.Subscriber('walker_command',Int32,self._debug_command)
     
     def _init_values(self):
         self._debug_cmd = 1 # default value, has no effect
 
     def task(self, name, uid, parameters):
-
         #initialize values:
         self._init_values()
+        
+        ## TOPIC setup:
+        self._debug_cmd_sub = rospy.Subscriber('walker_command',Int32,self._debug_command)
 
         self._Walker.Initialize()
 
@@ -50,10 +49,15 @@ class DynamicLocomotion(RobilTask):
             self._interval.sleep()
 
         self._Walker.Stop()
-
-        print("SUCCESS!!")
-
-        return RTResult_SUCCESSED("Finished in Success")
+        
+        self._debug_cmd_sub.unregister
+        
+        if(WalkerResultEnum.Success == self._Walker.Result()):
+            print("SUCCESS!!")
+            return RTResult_SUCCESSED("Finished in Success")
+        else:
+            print("FAIL")
+            return RTResult(RobilTask_FAULT, "", "Did not end in success", False) 
 
     def WaitForPath(self):
         rospy.loginfo("DynamicLocomotion, WaitForPath: %s" % ("Waiting to receive /path ...") )
@@ -72,7 +76,7 @@ class DynamicLocomotion(RobilTask):
 
     def _debug_command(self,debug_command): # cmd = 0 -> STOP; cmd = 3 -> Emergency STOP
         self._debug_cmd = debug_command.data
-        rospy.loginfo("DEBUG - recieved debug_command = %i" % (self._debug_cmd) )
+        rospy.loginfo("DEBUG - received debug_command = %i" % (self._debug_cmd) )
         rospy.loginfo("time:")
         rospy.loginfo(rospy.get_time())
         if 3 == self._debug_cmd:

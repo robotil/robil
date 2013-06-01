@@ -25,12 +25,17 @@ class DD_PathPlanner(PathPlanner):
         PathPlanner.__init__(self)
         self._Queue = deque([])
         self.State = DD_PathPlannerEnum.Empty
+        self._countEnteries = 0
         
     def SetPath(self,waypointList):
         PathPlanner.SetPath(self,waypointList)
         self._Queue.extend(waypointList)
         if(0 < len(self._Queue)):
             self.State = DD_PathPlannerEnum.Active
+        #print ("SetPath",self._Queue)
+            
+    def GetPath(self):
+        return self._Queue
         
     def GetNextStep(self):
         step_queue = 0
@@ -41,8 +46,26 @@ class DD_PathPlanner(PathPlanner):
                 #print("GetNextStep ",i,self._Queue[i])
                 step_queue.append(self._Queue[i])
             self._Queue.popleft()
+        elif(3 == len(self._Queue)):
+            step_queue = []
+            #print self._Queue
+            for i in range(3):
+                #print("GetNextStep ",i,self._Queue[i])
+                step_queue.append(self._Queue[i])
+            self._Queue.popleft()
+            step_queue.append(self._Queue[0])
+            self._countEnteries = 0
         else:
+            step_queue = []
+            zero_or_one = self._countEnteries%2
+            one_or_zero = (self._countEnteries+1)%2
+            step_queue.append(self._Queue[zero_or_one])
+            step_queue.append(self._Queue[one_or_zero])
+            step_queue.append(self._Queue[zero_or_one])
+            step_queue.append(self._Queue[one_or_zero])
+            self._countEnteries += 1
             self.State = DD_PathPlannerEnum.Waiting
+        #print ("GetNextStep",step_queue)
         return step_queue
 
     def Stop(self):

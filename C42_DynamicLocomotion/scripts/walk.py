@@ -10,6 +10,10 @@ import math
 import rospy
 import sys
 
+########################################################################
+#--- To Run: rosrun C42_DynamicLocomotion scripts/walk.py static
+########################################################################
+
 class AtlasWalk():
     
     def walk(self):
@@ -159,7 +163,7 @@ class AtlasWalk():
         
         # The z position is observed for static walking, but the foot
         # will be placed onto the ground if the ground is lower than z
-        pose.position.z = 0.2#0
+        pose.position.z = 0.15#0
         
         pose.orientation.x = Q[0]
         pose.orientation.y = Q[1]
