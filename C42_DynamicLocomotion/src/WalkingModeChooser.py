@@ -7,11 +7,14 @@
 ###################################################################################
 
 from Abstractions.WalkingModeChooserInterface import *
-from Absractions.Interface_tf import *
+from Abstractions.Interface_tf import *
 from BDI.WalkingModeBDI import *
 from QS.QS_WalkingMode import *
 from DD.DD_WalkingMode import *
 from LocalPathPlanner import *
+
+class WalkingModeChooserEnum:
+    DontCare,BDI,QS,DD = range(4)
 
 class WalkingModeChooser(WalkingModeChooserInterface):
 
@@ -26,12 +29,25 @@ class WalkingModeChooser(WalkingModeChooserInterface):
         self._Preferred = prefferedMode
         self._CurrentMode = prefferedMode
         self._Recommended = prefferedMode
+        self._OverRide = WalkingModeChooserEnum.DontCare
         self._bIsAppropriate = True
+        
+        self._debug_cmd_sub = rospy.Subscriber('walker_mode_override',Int32,self._walker_mode_handler)
         
     def IsCurrentModeAppropriate(self):
         self._bIsAppropriate = True
+        if (WalkingModeChooserEnum.DontCare != self._OverRide):
+            if self._CurrentMode in ('QS','DD'):
+                if (WalkingModeChooserEnum.DD == self._OverRide):
+                    if ('QS' == self._CurrentMode):
+                       self._bIsAppropriate = False
+                    self._Recommended = 'DD'
+                else:
+                    if ('DD' == self._CurrentMode):
+                       self._bIsAppropriate = False
+                    self._Recommended = 'QS'
         # Always appropriate when done
-        if(False == self._Modes[self._CurrentMode].IsDone()):
+        elif(False == self._Modes[self._CurrentMode].IsDone()):
             path = self._Modes[self._CurrentMode].GetPath()
             # If the preferred mode is fit, that means current is inappropriate if current is not preferred
             if (self._Preferred == self._CurrentMode):
@@ -59,5 +75,8 @@ class WalkingModeChooser(WalkingModeChooserInterface):
                 self._Modes[self._Recommended].SetPath(path)
                 result = self._Modes[self._Recommended]
         return result
+    
+    def _walker_mode_handler(self,walker_mode):
+        self._OverRide = walker_mode.data
 
 
