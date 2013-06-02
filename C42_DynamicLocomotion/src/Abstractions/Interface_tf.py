@@ -10,8 +10,8 @@ import tf
 
 class Interface_tf(object):
     def __init__(self):
-    	self._TransformListener = None
-        self._TransformBroadcaster = None
+    	self._TransformListener = tf.TransformListener() #None
+        self._TransformBroadcaster = tf.TransformBroadcaster() #None
  
     def TransformListener(self):
         if (None == self._TransformListener):

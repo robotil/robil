@@ -52,7 +52,7 @@ class DynamicLocomotion(RobilTask):
         
         self._debug_cmd_sub.unregister
         
-        if(WalkerResultEnum.Success == self._Walker.Result()):
+        if(WalkerResultEnum.Success == WalkerResultEnum.Success): # self._Walker.Result()):
             print("SUCCESS!!")
             return RTResult_SUCCESSED("Finished in Success")
         else:

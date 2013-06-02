@@ -32,7 +32,6 @@ class DD_WalkingMode(WalkingMode):
         self._LPP = DD_PathPlanner()
         WalkingMode.__init__(self,self._LPP)
         self._tf = iTf
-        self.step_index_for_reset = 0
         # Initialize atlas atlas_sim_interface_command publisher       
         self.asi_command = rospy.Publisher('/atlas/atlas_sim_interface_command', AtlasSimInterfaceCommand, None, False, True, None)
 
@@ -48,6 +47,7 @@ class DD_WalkingMode(WalkingMode):
         
     def Initialize(self):
         WalkingMode.Initialize(self)
+        self._LPP.Initialize()
         self._bRobotIsStatic = True
 
         # Subscribers:        
@@ -61,6 +61,8 @@ class DD_WalkingMode(WalkingMode):
         k_effort = [0] * 28
         self._bDone = False
         self._bIsSwaying = False
+        self._StepIndex = 1
+        self._command = 0
         #self._bRobotIsStatic = False
         self._GetOrientationDelta0Values() # Orientation difference between BDI odom and Global
     
