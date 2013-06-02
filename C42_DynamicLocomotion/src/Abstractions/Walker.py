@@ -65,3 +65,5 @@ class Walker(object):
     def IsReady(self):
         return self._WalkingMode.IsReady()
 
+    def GetResult(self):
+        return self._Result
