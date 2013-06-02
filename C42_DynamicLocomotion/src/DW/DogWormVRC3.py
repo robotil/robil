@@ -222,11 +222,10 @@ class DW_Controller(object):
 
         # Initialize robot state listener
         self.RS = robot_state(self._jnt_names)
-        self.MsgSub = rospy.Subscriber('/'+self._robot_name+'/atlas_state',AtlasState,self.RS_cb)
-        self.OdomSub = rospy.Subscriber('/ground_truth_odom',Odometry,self.Odom_cb)
+        print("DW::Initialize")
         self.GlobalPos = 0
         self.GlobalOri = 0
-
+        
         self.reset_srv = rospy.ServiceProxy('/gazebo/reset_models', Empty)
 
         ##################################################################
@@ -259,6 +258,7 @@ class DW_Controller(object):
         self.RS.UpdateState(msg)
 
     def Odom_cb(self,msg):
+        print ("Odom_cb::", self.GlobalPos)
         self.GlobalPos = msg.pose.pose.position
         self.GlobalOri = msg.pose.pose.orientation
 
@@ -353,6 +353,9 @@ class DW_Controller(object):
 
     def GoToPoint(self,Point):
         # Calculate distance and orientation to target
+        while (0 == self.GlobalPos):
+            rospy.sleep(1)
+            print("Waiting for GlobalPos")
         DeltaPos = [Point[0]-self.GlobalPos.x,Point[1]-self.GlobalPos.y]
         Distance = math.sqrt(DeltaPos[0]**2+DeltaPos[1]**2)
 
