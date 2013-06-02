@@ -25,7 +25,7 @@ protected:
 	ros::NodeHandle nh_, nh2_;
 	ros::NodeHandle* rosnode;
 	ros::ServiceServer move_pelvis_srv_;
-	ros::ServiceClient traj_vector_cli_,walking_vector_cli_,walking_position_vector_cli_;
+	ros::ServiceClient traj_vector_cli_,walking_vector_cli_,walking_position_vector_cli_, legs_val_calc_cli_;
 	ros::ServiceClient left_leg_val_calc_cli_,right_leg_val_calc_cli_;
 	ros::Publisher traj_action_pub_;
 	ros::Subscriber joint_states_sub_, imu_sub_, posecontroller_joint_states_sub_;
@@ -79,6 +79,12 @@ public:
 
 		while(!delta_back_posecontroller_cli.waitForExistence(ros::Duration(1.0))){
 			ROS_INFO("Waiting for the /PoseController/delta_back_movement server");
+		}
+
+		legs_val_calc_cli_ = nh_.serviceClient<legs_val_calc::legs_val_calc>("walk_legs_val_calc_srv");
+
+		while(!legs_val_calc_cli_.waitForExistence(ros::Duration(1.0))){
+			ROS_INFO("Waiting for the legs_val_calc_srv server");
 		}
 
 		left_leg_val_calc_cli_ = nh_.serviceClient<legs_val_calc::legs_val_calc>("LeftFoot2Pelvis_jacobian_srv");
@@ -507,7 +513,7 @@ public:
 				return false;
 			}
 		}else{
-			/*traj_vec_srv.request.total_time = 1.5 ;
+			/*traj_vec_srv.request.total_time = 2 ;
 			if(walking_position_vector_cli_.call(traj_vec_srv)){
 
 				double p0_l,p1_l,p2_l,p3_l,p4_l,p5_l;
@@ -605,20 +611,6 @@ public:
 								ROS_ERROR("%s",ex.what());
 							}
 
-							legs_val_calc::legs_val_calc tfv;
-							tfv.request.x_dot = original_l_foot_transform.getOrigin().x() - l_foot_transform.getOrigin().x();
-							tfv.request.y_dot = original_l_foot_transform.getOrigin().x() - l_foot_transform.getOrigin().x();
-							tfv.request.z_dot = original_l_foot_transform.getOrigin().x() - l_foot_transform.getOrigin().x();
-							tfv.request.roll_dot = QuatToRoll(original_l_foot_transform.getRotation().x(),original_l_foot_transform.getRotation().y(),original_l_foot_transform.getRotation().z(),original_l_foot_transform.getRotation().w()) - QuatToRoll(l_foot_transform.getRotation().x(),l_foot_transform.getRotation().y(),l_foot_transform.getRotation().z(),l_foot_transform.getRotation().w());// - imu.x;
-							tfv.request.pitch_dot = QuatToPitch(original_l_foot_transform.getRotation().x(),original_l_foot_transform.getRotation().y(),original_l_foot_transform.getRotation().z(),original_l_foot_transform.getRotation().w()) - QuatToPitch(l_foot_transform.getRotation().x(),l_foot_transform.getRotation().y(),l_foot_transform.getRotation().z(),l_foot_transform.getRotation().w());// - imu.y;
-							tfv.request.yaw_dot =QuatToYaw(original_l_foot_transform.getRotation().x(),original_l_foot_transform.getRotation().y(),original_l_foot_transform.getRotation().z(),original_l_foot_transform.getRotation().w()) - QuatToYaw(l_foot_transform.getRotation().x(),l_foot_transform.getRotation().y(),l_foot_transform.getRotation().z(),l_foot_transform.getRotation().w());// - imu.z;
-
-							if(!legs_val_calc_cli_.call(tfv)){
-								ROS_ERROR("Could not reach gen leg velocity vector server");
-								res.success = false;
-								return false;
-							}
-
 							if(legs_val_calc_cli_.call(v)){
 								jointcommands.position[joints["r_leg_uhz"]] = v.response.q_right_dot[0]*traj_vec_srv.response.dt[ind];
 								p0_r = jointcommands.position[joints["r_leg_uhz"]];
@@ -632,13 +624,6 @@ public:
 								p4_r = jointcommands.position[joints["r_leg_uay"]];
 								jointcommands.position[joints["r_leg_lax"]] = v.response.q_right_dot[5]*traj_vec_srv.response.dt[ind];
 								p5_r = jointcommands.position[joints["r_leg_lax"]];
-								jointcommands.position[joints["l_leg_uhz"]] = tfv.response.q_right_dot[0]*traj_vec_srv.response.dt[ind];;//initial_positions[joints["l_leg_uhz"]];
-								jointcommands.position[joints["l_leg_mhx"]] = tfv.response.q_right_dot[1]*traj_vec_srv.response.dt[ind];;//initial_positions[joints["l_leg_mhx"]];
-								jointcommands.position[joints["l_leg_lhy"]] = tfv.response.q_right_dot[2]*traj_vec_srv.response.dt[ind];;//initial_positions[joints["l_leg_lhy"]];
-								jointcommands.position[joints["l_leg_kny"]] = tfv.response.q_right_dot[3]*traj_vec_srv.response.dt[ind];;//initial_positions[joints["l_leg_kny"]];
-								jointcommands.position[joints["l_leg_uay"]] = tfv.response.q_right_dot[4]*traj_vec_srv.response.dt[ind];;//initial_positions[joints["l_leg_uay"]];
-								jointcommands.position[joints["l_leg_lax"]] = tfv.response.q_right_dot[5]*traj_vec_srv.response.dt[ind];;//initial_positions[joints["l_leg_lax"]];
-
 							}else{
 								ROS_ERROR("Could not reach gen right leg velocity vector server");
 								res.success = false;
