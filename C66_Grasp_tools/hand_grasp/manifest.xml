@@ -12,6 +12,7 @@
   <depend package="osrf_msgs"/>
   <depend package="atlas_utils"/>
   <depend package="atlas_msgs"/>
+  <depend package="move_hand"/>
 
 </package>
 
