@@ -1,10 +1,10 @@
-V0.0.0.219
+V0.0.0.230
 ===========================================================
 C0_RobilTask     	0.5
 C0_Scripts     		0.23
 C10_Common     		0.5
-C11_Agent     		0.20
-C11_OperatorControl     0.22
+C11_Agent     		0.21
+C11_OperatorControl     0.23
 C21_VisionAndLidar     	0.16
 C22_CompactGroundRecognitionAndMapping     0.7
 C22_GroundRecognitionAndMapping     0.13
@@ -33,7 +33,7 @@ C45_PostureControl        0.10
 C45_PostureControl_tools     0.2
 C46_MountVehicle          0.6
 C47_DismountVehicle       0.3
-C48_StandUp               0.8
+C48_StandUp               0.9
 C51_CarOperation          0.11
 C65_CloseValve            0.1
 C66_Grasp                 0.5
