@@ -43,9 +43,15 @@ include_directories (src)
 
 #common commands for building c++ executables and libraries
 #rosbuild_add_library(${PROJECT_NAME} src/example.cpp)
-rosbuild_add_library(Kinematics src/FK.cpp src/IK.cpp src/Path.cpp)
+rosbuild_add_library(Kinematics src/FK.cpp src/IK.cpp src/Path.cpp src/Trace.cpp)
 #target_link_libraries(${PROJECT_NAME} another_library)
 rosbuild_add_boost_directories()
+
+rosbuild_add_executable(TraceTest src/TraceTest.cpp)
+target_link_libraries(TraceTest Kinematics)
+
+rosbuild_add_executable(rTrace src/rTrace.cpp)
+target_link_libraries(rTrace Kinematics)
 
 rosbuild_add_executable(rPoint src/rPoint.cpp)
 target_link_libraries(rPoint Kinematics)
@@ -61,6 +67,9 @@ target_link_libraries(lPoint2 Kinematics)
 
 rosbuild_add_executable(rPath src/rPath.cpp)
 target_link_libraries(rPath Kinematics)
+
+#rosbuild_add_executable(rPath2 src/rPath2.cpp)
+#target_link_libraries(rPath2 Kinematics)
 
 rosbuild_add_executable(lPath src/lPath.cpp)
 target_link_libraries(lPath Kinematics)
@@ -133,9 +142,11 @@ rosbuild_link_boost(CalibratePedals thread)
 
 rosbuild_add_executable(GripHandBrake src/GripHandBrake.cpp)
 rosbuild_link_boost(GripHandBrake thread)
+target_link_libraries(GripHandBrake Kinematics)
 
 rosbuild_add_executable(GripGearStick src/GripGearStick.cpp)
 rosbuild_link_boost(GripGearStick thread)
+target_link_libraries(GripGearStick Kinematics)
 
 rosbuild_add_executable(task_tester src/taskTester.cpp)
 rosbuild_link_boost(task_tester thread)

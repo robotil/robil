@@ -191,16 +191,18 @@ int main(int argc, char** argv)
 			ac.k_effort[q8r]  = 255;
 			ac.k_effort[q9r]  = 255;
 			
-			for (int i=0; i<N; i++)
+			// assign current joint angles
+			for (unsigned int j=0; j<numJoints; j++)
+			{
+				ac.position[j] = as.position[j];
+				//std::cout << state[j] << " ";
+			}
+
+			for (int i=0; i<pointsNum; i++)
 			{
 				// ros::spinOnce();
-				// assign current joint angles 
-				for (unsigned int j=0; j<numJoints; j++)
-				{
-					ac.position[j] = as.position[j];
-					//std::cout << state[j] << " ";
-				}
 				
+
 				ac.position[q4l] = points.pArray[i]._q4;
 				ac.position[q5l] = points.pArray[i]._q5;
 				ac.position[q6l] = points.pArray[i]._q6;
