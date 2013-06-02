@@ -68,7 +68,16 @@ C67_CLP_PID=$!
 echo $C67_CLP_PID
 sleep 2
 
+echo "Entering and exiting the car"
+rosrun C46_MountVehicle C46_MountVehicle.py &
+C46=$!
+echo $C46
+sleep 2
+rosrun C47_DismountVehicle C47_DismountVehicle.py &
+C47=$!
+echo $C47
 
-echo $C51_INIT_PID $C51_DRIVE_PID $C51_FINISH_PID $C67_GSTICK_PID $C67_GHB_PID $C67_GSW_PID $C67_CLW_PID $C67_PFP_PID $C67_CLP_PID>> $PKILLS
+
+echo $C51_INIT_PID $C51_DRIVE_PID $C51_FINISH_PID $C67_GSTICK_PID $C67_GHB_PID $C67_GSW_PID $C67_CLW_PID $C67_PFP_PID $C67_CLP_PID $C46 $C47 >> $PKILLS
 
 exit 0
