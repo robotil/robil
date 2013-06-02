@@ -24,7 +24,7 @@ To run QS Walker:
        $ rosrun C0_RobilTask task_tester WalkerNode_Continuous
      SECOND:
        run C31_clone to emulate the C31PathPlanner (publish a path message): 
-       rosrun C42_DynamicLocomotion scripts/C31_Clone.py
+       $ rosrun C42_DynamicLocomotion scripts/C31_Clone.py
 
    B - For Discrete Foot Placement (DD and QS):
      FIRST:
@@ -36,4 +36,4 @@ To run QS Walker:
 
 
 3. reset robot at initial position:
-   rosrun C42_DynamicLocomotion scripts/Reset_start_pose.py
+   $ rosrun C42_DynamicLocomotion scripts/Reset_start_pose.py

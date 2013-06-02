@@ -353,11 +353,11 @@ class WalkingModeBDI(WalkingMode):
                 delatYaw = targetYaw - self._Odometer.GetYaw()
                   
                 debug_transition_cmd = "NoCommand"
-                if (math.sin(delatYaw) > 0.6):
+                if (math.sin(delatYaw) > 0.12):
                     #print("Sin(Delta)",math.sin(delatYaw), "Left")
                     debug_transition_cmd = "TurnLeft"
                     self._BDI_StateMachine.TurnLeft(targetYaw)
-                elif (math.sin(delatYaw) < -0.6):
+                elif (math.sin(delatYaw) < -0.12):
                     #print("Sin(Delta)",math.sin(delatYaw), "Right")
                     debug_transition_cmd = "TurnRight"
                     self._BDI_StateMachine.TurnRight(targetYaw)
