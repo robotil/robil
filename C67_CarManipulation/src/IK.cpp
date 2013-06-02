@@ -601,7 +601,7 @@ void lFindAltSolution(double &mpx, double &mpy, double &mpz )
 
 }
 
-IkSolution rScanRPY(double mq1, double mq2, double mq3, RPY target, double error)
+IkSolution ScanRPY(double mq1, double mq2, double mq3, RPY target, double error, bool rightSide)
 {
 	double i,j,k,R0,P0,Y0;
 	IkSolution solution;
@@ -618,7 +618,7 @@ IkSolution rScanRPY(double mq1, double mq2, double mq3, RPY target, double error
 				target.R = R0 + i;
 				target.P = P0 + j;
 				target.Y = Y0 + k;
-				solution = rSearchSolution(mq1, mq2, mq3, target);
+				solution = rightSide? rSearchSolution(mq1, mq2, mq3, target): lSearchSolution(mq1, mq2, mq3, target);
 				if (solution.error < error)
 				{
 					valid = true;
@@ -627,7 +627,7 @@ IkSolution rScanRPY(double mq1, double mq2, double mq3, RPY target, double error
 				target.R = R0 + i;
 				target.P = P0 + j;
 				target.Y = Y0 - k;
-				solution = rSearchSolution(mq1, mq2, mq3, target);
+				solution = rightSide? rSearchSolution(mq1, mq2, mq3, target): lSearchSolution(mq1, mq2, mq3, target);
 				if (solution.error < error)
 				{
 					valid = true;
@@ -636,7 +636,7 @@ IkSolution rScanRPY(double mq1, double mq2, double mq3, RPY target, double error
 				target.R = R0 + i;
 				target.P = P0 - j;
 				target.Y = Y0 + k;
-				solution = rSearchSolution(mq1, mq2, mq3, target);
+				solution = rightSide? rSearchSolution(mq1, mq2, mq3, target): lSearchSolution(mq1, mq2, mq3, target);
 				if (solution.error < error)
 				{
 					valid = true;
@@ -645,7 +645,7 @@ IkSolution rScanRPY(double mq1, double mq2, double mq3, RPY target, double error
 				target.R = R0 + i;
 				target.P = P0 - j;
 				target.Y = Y0 - k;
-				solution = rSearchSolution(mq1, mq2, mq3, target);
+				solution = rightSide? rSearchSolution(mq1, mq2, mq3, target): lSearchSolution(mq1, mq2, mq3, target);
 				if (solution.error < error)
 				{
 					valid = true;
@@ -654,7 +654,7 @@ IkSolution rScanRPY(double mq1, double mq2, double mq3, RPY target, double error
 				target.R = R0 - i;
 				target.P = P0 + j;
 				target.Y = Y0 + k;
-				solution = rSearchSolution(mq1, mq2, mq3, target);
+				solution = rightSide? rSearchSolution(mq1, mq2, mq3, target): lSearchSolution(mq1, mq2, mq3, target);
 				if (solution.error < error)
 				{
 					valid = true;
@@ -663,7 +663,7 @@ IkSolution rScanRPY(double mq1, double mq2, double mq3, RPY target, double error
 				target.R = R0 - i;
 				target.P = P0 + j;
 				target.Y = Y0 - k;
-				solution = rSearchSolution(mq1, mq2, mq3, target);
+				solution = rightSide? rSearchSolution(mq1, mq2, mq3, target): lSearchSolution(mq1, mq2, mq3, target);
 				if (solution.error < error)
 				{
 					valid = true;
@@ -672,7 +672,7 @@ IkSolution rScanRPY(double mq1, double mq2, double mq3, RPY target, double error
 				target.R = R0 - i;
 				target.P = P0 - j;
 				target.Y = Y0 + k;
-				solution = rSearchSolution(mq1, mq2, mq3, target);
+				solution = rightSide? rSearchSolution(mq1, mq2, mq3, target): lSearchSolution(mq1, mq2, mq3, target);
 				if (solution.error < error)
 				{
 					valid = true;
@@ -681,7 +681,7 @@ IkSolution rScanRPY(double mq1, double mq2, double mq3, RPY target, double error
 				target.R = R0 - i;
 				target.P = P0 - j;
 				target.Y = Y0 - k;
-				solution = rSearchSolution(mq1, mq2, mq3, target);
+				solution = rightSide? rSearchSolution(mq1, mq2, mq3, target): lSearchSolution(mq1, mq2, mq3, target);
 				if (solution.error < error)
 				{
 					valid = true;
@@ -697,7 +697,14 @@ IkSolution rScanRPY(double mq1, double mq2, double mq3, RPY target, double error
 	return solution;
 }
 
+IkSolution rScanRPY(double mq1, double mq2, double mq3, RPY target, double error)
+{
+	return ScanRPY(mq1, mq2, mq3, target, error, true);
+}
 
-
+IkSolution lScanRPY(double mq1, double mq2, double mq3, RPY target, double error)
+{
+	return ScanRPY(mq1, mq2, mq3, target, error, false);
+}
 
 

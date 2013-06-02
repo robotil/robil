@@ -18,6 +18,7 @@ public:
 	~Trace();
 
 };
+RPY TraceAngle(RPY center, RPY position, double angle);
 
 
 #endif /* TRACE_H_ */
