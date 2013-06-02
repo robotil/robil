@@ -10,6 +10,8 @@
   <url>http://ros.org/wiki/PedalManipulation</url>
   <depend package="geometry_msgs"/>
   <depend package="move_pelvis"/>
+  <depend package="PoseController"/>
+  
 
 </package>
 
