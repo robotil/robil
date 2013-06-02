@@ -1,5 +1,7 @@
 #! /usr/bin/env python
-import roslib; roslib.load_manifest('DogWorm')
+import roslib
+roslib.load_manifest('C42_DynamicLocomotion')
+#import roslib; roslib.load_manifest('DogWorm')
 import math, rospy, os, rosparam
 import tf
 from sensor_msgs.msg import JointState
@@ -17,8 +19,9 @@ from std_srvs.srv import Empty
 
 class DW_Controller(object):
     """DW_Controller"""
-    def __init__(self, arg):
+    def __init__(self,iTf):
         super(DW_Controller, self).__init__()
+        self._iTf = iTf
 
         ##################################################################
         ######################## GAIT PARAMETERS #########################
@@ -204,6 +207,7 @@ class DW_Controller(object):
         ########################## INITIALIZE ############################
         ##################################################################
 
+    def Initialize(self):
         self._robot_name = "atlas"
         self._jnt_names = ['back_lbz', 'back_mby', 'back_ubx', 'neck_ay', #3
                            'l_leg_uhz', 'l_leg_mhx', 'l_leg_lhy', 'l_leg_kny', 'l_leg_uay', 'l_leg_lax', #9
@@ -224,8 +228,6 @@ class DW_Controller(object):
         self.GlobalOri = 0
 
         self.reset_srv = rospy.ServiceProxy('/gazebo/reset_models', Empty)
-
-        self.TF = tf.TransformListener()
 
         ##################################################################
         ######################## Controller Gains ########################
@@ -292,13 +294,13 @@ class DW_Controller(object):
             pos1 = array(pos1)
             pos2 = array(pos2)
 
-            init_com, rot = self.TF.lookupTransform('/com','/l_foot',rospy.Time(0))
+            init_com, rot = self._iTf.TransformListener().lookupTransform('/com','/l_foot',rospy.Time(0))
             if COMref != 0:
                 COMref0 = [init_com[0],init_com[1]]
                 init_com = [0]*2
 
             for ratio in linspace(0, 1, N):
-                cur_com, rot = self.TF.lookupTransform('/com','/l_foot',rospy.Time(0))
+                cur_com, rot = self._iTf.TransformListener().lookupTransform('/com','/l_foot',rospy.Time(0))
                 interpCommand = (1-ratio)*pos1 + ratio * pos2
   
                 if COMref != 0:

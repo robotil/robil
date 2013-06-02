@@ -29,8 +29,7 @@ from C42_DynamicLocomotion.msg import Foot_Placement_data
 
 class DD_WalkingMode(WalkingMode):
     def __init__(self,iTf):
-        self._LPP = DD_PathPlanner()
-        WalkingMode.__init__(self,self._LPP)
+        WalkingMode.__init__(self,DD_PathPlanner())
         self._tf = iTf
         self.step_index_for_reset = 0
         # Initialize atlas atlas_sim_interface_command publisher       
@@ -77,9 +76,6 @@ class DD_WalkingMode(WalkingMode):
         self._StepIndex = self._StepIndex + 1
     
     def EmergencyStop(self):
-        WalkingMode.Stop(self)
-
-    def Stop(self):
         WalkingMode.Stop(self)
 
     def IsDone(self):

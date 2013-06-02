@@ -1,5 +1,7 @@
 #! /usr/bin/env python
-import roslib; roslib.load_manifest('RobotController')
+import roslib
+roslib.load_manifest('C42_DynamicLocomotion')
+#import roslib; roslib.load_manifest('RobotController')
 import rospy
 import tf
 #import PyKDL

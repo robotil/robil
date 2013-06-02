@@ -1,5 +1,7 @@
 #! /usr/bin/env python
-import roslib; roslib.load_manifest('DogWorm');
+import roslib
+roslib.load_manifest('C42_DynamicLocomotion')
+#import roslib; roslib.load_manifest('DogWorm');
 import math, rospy, os, rosparam
 from atlas_msgs.msg import AtlasCommand
 from osrf_msgs.msg import JointCommands

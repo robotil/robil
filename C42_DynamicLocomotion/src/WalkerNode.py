@@ -33,6 +33,7 @@ if __name__ == '__main__':
         print " BDI for Dynamic Continuous mode"
         print " QS for Discrete Quasi-Static mode"
         print " DD for Discrete Dynamic mode"
+        print " DW for DW mode"
         sys.exit(2)
     if walkingMode in ('BDI'):
         rospy.init_node('WalkerNode_Continuous')       
@@ -44,12 +45,18 @@ if __name__ == '__main__':
         walkingModeChooser = WalkingModeChooser(walkingMode)
         node = DynamicLocomotion("WalkerNode_Discrete",walkingModeChooser)
         rospy.spin()
+    elif walkingMode in ('DW'):
+        rospy.init_node('WalkerNode_DW')       
+        walkingModeChooser = WalkingModeChooser(walkingMode)
+        node = DynamicLocomotion("WalkerNode_DW",walkingModeChooser)
+        rospy.spin()
     else:
         print "Usage: WalkingMode.py <Option>"
         print "Options are:"
         print " BDI for Dynamic Continuous mode"
         print " QS for Discrete Quasi-Static mode"
         print " DD for Discrete Dynamic mode"
+        print " DW for DW mode"
     print "WalkerNode Closed"
 
                

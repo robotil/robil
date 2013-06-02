@@ -11,6 +11,7 @@ from Abstractions.Interface_tf import *
 from BDI.WalkingModeBDI import *
 from QS.QS_WalkingMode import *
 from DD.DD_WalkingMode import *
+from DW.DW_WalkingMode import *
 from LocalPathPlanner import *
 
 class WalkingModeChooserEnum:
@@ -25,7 +26,7 @@ class WalkingModeChooser(WalkingModeChooserInterface):
         lpp.SetDoingQual(bIsDoingQual)
         iTf = Interface_tf()
         
-        self._Modes = {'BDI':WalkingModeBDI(lpp),'QS':QS_WalkingMode(iTf),'DD':DD_WalkingMode(iTf)}
+        self._Modes = {'BDI':WalkingModeBDI(lpp),'QS':QS_WalkingMode(iTf),'DD':DD_WalkingMode(iTf),'DW':DW_WalkingMode(iTf)}
         self._Preferred = prefferedMode
         self._CurrentMode = prefferedMode
         self._Recommended = prefferedMode
