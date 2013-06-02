@@ -679,88 +679,85 @@ public:
 	            req.matrix[12],req.matrix[13],req.matrix[14],req.matrix[15];
 
 
-	  Eigen::Matrix4f TF1,TF2;
-	            TF1(0,0)=0.956958030337725;
-	            TF1(0,1)=0.187313741592912;
-	            TF1(0,2)=-0.221686468650221;
-	            TF1(0,3)=0.555000000000000;
-	            TF1(1,0)=0.226085162286393;
-	            TF1(1,1)=0.132946235442734;
-	            TF1(1,2)=0.974105103609595;
-	            TF1(1,3)=-0.289000000000000;
-	            TF1(2,0)= 0.181980294444418;
-	            TF1(2,1)=-0.982297722533646;
-	            TF1(2,2)=-0.044433734247019;
-	            TF1(2,3)=0.136000000000000;
-	            TF1(3,0)=0;
-	            TF1(3,1)=0;
-	            TF1(3,2)=0;
-	            TF1(3,3)=1;
+	  double  tx_l=req.PositionDestination_left.x,
+			  ty_l=req.PositionDestination_left.y,
+			  tz_l=req.PositionDestination_left.z,
+			  troll_l=req.AngleDestination_left.x,
+	  	  	  tpitch_l=req.AngleDestination_left.y,
+	  	  	  tyaw_l=req.AngleDestination_left.x;
+double
+	  sr_l=sin(troll_l),
+	  cr_l=cos(troll_l),
+	  sp_l=sin(tpitch_l),
+	  cp_l=cos(tpitch_l),
+	  sy_l=sin(tyaw_l),
+	  cy_l=cos(tyaw_l);
 
-                    TF2(0,0)=0.956958030337725;
-                    TF2(0,1)=0.187313741592912;
-                    TF2(0,2)=-0.221686468650221;
-                    TF2(0,3)=0.505000000000000;
-                    TF2(1,0)=0.226085162286393;
-                    TF2(1,1)=0.132946235442734;
-                    TF2(1,2)=0.974105103609595;
-                    TF2(1,3)=-0.339000000000000;
-                    TF2(2,0)= 0.181980294444418;
-                    TF2(2,1)=-0.982297722533646;
-                    TF2(2,2)=-0.044433734247019;
-                    TF2(2,3)=0.136000000000000;
-                    TF2(3,0)=0;
-                    TF2(3,1)=0;
-                    TF2(3,2)=0;
-                    TF2(3,3)=1;
+double  tx_r=req.PositionDestination_right.x,
+		  ty_r=req.PositionDestination_right.y,
+		  tz_r=req.PositionDestination_right.z,
+		  troll_r=req.AngleDestination_right.x,
+	  	  tpitch_r=req.AngleDestination_right.y,
+	  	  tyaw_r=req.AngleDestination_right.x;
+double
+sr_r=sin(troll_r),
+cr_r=cos(troll_r),
+sp_r=sin(tpitch_r),
+cp_r=cos(tpitch_r),
+sy_r=sin(tyaw_r),
+cy_r=cos(tyaw_r);
 
-	            Eigen::Matrix4f mat,mat2;
-	            mat=in_mat*TF1;
-	            double x= mat(0,3);
-	            double y= mat(1,3);
-	            double z= mat(2,3);
-	            double roll    =(std::atan2((double)mat(2,1),(double)mat(2,2)));
-	            double pitch = (std::atan2((double)-mat(2,0),std::sqrt(std::pow((double)mat(2,1),2) +std::pow((double)mat(2,2),2) )));
-	            double yaw   = (std::atan2((double)mat(1,0),(double)mat(0,0)));
+	  Eigen::Matrix4f TF_l,TF_r;
+	  TF_l<<  cp_l*cy_l,   cy_l*sp_l*sr_l-cr_l*sy_l,    sr_l*sy_l+cr_l*cy_l*sp_l,   tx_l,
+	         cp_l*sy_l,   cr_l*cy_l+cy_l*sp_l*sr_l,    cr_l*sp_l*sy_l-cy_l*sr_l,   ty_l,
+	        -sp_l,     		 	cp_l*sr_l,             cp_l*cr_l,         		   tz_l,
+	         0,   					 0,             		    0 ,           	    1;
+	  TF_r<<  cp_r*cy_r,   cy_r*sp_r*sr_r-cr_r*sy_r,    sr_r*sy_r+cr_r*cy_r*sp_r,   tx_r,
+	         cp_r*sy_r,   cr_r*cy_r+cy_r*sp_r*sr_r,    cr_r*sp_r*sy_r-cy_r*sr_r,   ty_r,
+	        -sp_r,     		 	cp_r*sr_r,             cp_r*cr_r,         		   tz_r,
+	         0,   					 0,             		    0 ,           	    1;
 
-	            mat2=in_mat*TF2;
-                    double x2= mat2(0,3);
-                    double y2= mat2(1,3);
-                    double z2= mat2(2,3);
-                    double roll2    =(std::atan2((double)mat2(2,1),(double)mat2(2,2)));
-                    double pitch2 = (std::atan2((double)-mat2(2,0),std::sqrt(std::pow((double)mat2(2,1),2) +std::pow((double)mat2(2,2),2) )));
-                    double yaw2   = (std::atan2((double)mat2(1,0),(double)mat2(0,0)));
+	            Eigen::Matrix4f mat_l,mat_r;
+	            mat_l=in_mat*TF_l;
+	            double x_l= mat_l(0,3);
+	            double y_l= mat_l(1,3);
+	            double z_l= mat_l(2,3);
+	            double roll_l=(std::atan2((double)mat_l(2,1),(double)mat_l(2,2)));
+	            double pitch_l = (std::atan2((double)-mat_l(2,0),std::sqrt(std::pow((double)mat_l(2,1),2) +std::pow((double)mat_l(2,2),2) )));
+	            double yaw_l   = (std::atan2((double)mat_l(1,0),(double)mat_l(0,0)));
 
-	            std::cout<<"x:"<<x<<"\n";
-	            std::cout<<"y:"<<y<<"\n";
-	            std::cout<<"z:"<<z<<"\n";
-	            std::cout<<"roll:"<<roll<<"\n";
-	            std::cout<<"pitch:"<<pitch<<"\n";
-	            std::cout<<"yaw:"<<yaw<<"\n";
+	            mat_r=in_mat*TF_r;
+	            double x_r= mat_r(0,3);
+	            double y_r= mat_r(1,3);
+	            double z_r= mat_r(2,3);
+	            double roll_r=(std::atan2((double)mat_r(2,1),(double)mat_r(2,2)));
+	            double pitch_r = (std::atan2((double)-mat_r(2,0),std::sqrt(std::pow((double)mat_r(2,1),2) +std::pow((double)mat_r(2,2),2) )));
+	            double yaw_r   = (std::atan2((double)mat_r(1,0),(double)mat_r(0,0)));
 
-	            move_hand::pelvis_move_hand move_msg,move_msg2;
 
-	                move_msg.request.PositionDestination_right.x =  x;
-	                move_msg.request.PositionDestination_right.y =  y;
-	                move_msg.request.PositionDestination_right.z =  z;
-	                move_msg.request.AngleDestination_right.x = roll;
-	                move_msg.request.AngleDestination_right.y = pitch;
-	                move_msg.request.AngleDestination_right.z = yaw;
+                x_l = (tx_l==0) ? 0: x_l;
+                y_l = (ty_l==0) ? 0: y_l;
+                z_l = (tz_l==0) ? 0: z_l;
 
-                        move_msg2.request.PositionDestination_right.x =  x2;
-                        move_msg2.request.PositionDestination_right.y =  y2;
-                        move_msg2.request.PositionDestination_right.z =  z2;
-                        move_msg2.request.AngleDestination_right.x = roll2;
-                        move_msg2.request.AngleDestination_right.y = pitch2;
-                        move_msg2.request.AngleDestination_right.z = yaw2;
+                x_r = (tx_r==0) ? 0: x_r;
+                y_r = (ty_r==0) ? 0: y_r;
+                z_r = (tz_r==0) ? 0: z_r;
 
-                        if (!pelvis_move_hand_CB(move_msg2.request,move_msg2.response)){
-                        ROS_INFO("error in pelvis_move_hand service");
-                        return false;
-                        }
+	            move_hand::pelvis_move_hand move_msg;
 
-                        ros::spinOnce();
+	            move_msg.request.PositionDestination_left.x =  x_l;
+                move_msg.request.PositionDestination_left.y =  y_l;
+                move_msg.request.PositionDestination_left.z =  z_l;
+                move_msg.request.AngleDestination_left.x = roll_l;
+                move_msg.request.AngleDestination_left.y = pitch_l;
+                move_msg.request.AngleDestination_left.z = yaw_l;
 
+                move_msg.request.PositionDestination_right.x =  x_r;
+                move_msg.request.PositionDestination_right.y =  y_r;
+                move_msg.request.PositionDestination_right.z =  z_r;
+                move_msg.request.AngleDestination_right.x = roll_r;
+                move_msg.request.AngleDestination_right.y = pitch_r;
+                move_msg.request.AngleDestination_right.z = yaw_r;
 
           if (pelvis_move_hand_CB(move_msg.request,move_msg.response))
           {
