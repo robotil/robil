@@ -53,7 +53,7 @@ ImageDraw::ImageDraw(int argc, char** argv, QWidget *parent, Qt::WFlags flags)
 	    QTextStream in(&file);
             QString line = in.readLine();
 //	    pCTcpConnection = new CTcpConnection(QString("172.23.1.130"),45671);
-            pCTcpConnection = new CTcpConnection(line,45671);
+            pCTcpConnection = new CTcpConnection(line,45677);
 
 
             connect(pCTcpConnection,SIGNAL(SigOnImgReceived(QImage)),this,SLOT(SltOnNewImg(QImage)));
