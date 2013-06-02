@@ -56,6 +56,7 @@ class WalkingModeBDI(WalkingMode):
 
     def Initialize(self):
         WalkingMode.Initialize(self)
+        self._Preview_Distance = 0.0 # planned ahead distance in BDI command
         # Subscriber
         self._Subscribers["Path"] = rospy.Subscriber('/path',C31_Waypoints,self._path_cb)
         self._Subscribers["Odometry"] = rospy.Subscriber('/ground_truth_odom',Odometry,self._odom_cb)
@@ -167,7 +168,7 @@ class WalkingModeBDI(WalkingMode):
 
     def _odom_cb(self,odom):
         # SHOULD USE:
-        self._LPP.UpdatePosition(odom.pose.pose.position.x,odom.pose.pose.position.y)
+        self._LPP.UpdatePosition(odom.pose.pose.position.x,odom.pose.pose.position.y, self._Preview_Distance)
         #self._odom_position = odom.pose.pose
  
     def _get_imu(self,msg):  #listen to /atlas/imu/pose/pose/orientation
@@ -333,6 +334,11 @@ class WalkingModeBDI(WalkingMode):
             self._SteppingStonesQueue.Append([stepData])
 
     def HandleStateMsg(self,state):
+        step_queue_i = 3 # 0-3 
+        self._Preview_Distance = 0.3 + ( (state.pos_est.position.x-state.walk_feedback.step_queue_saturated[step_queue_i].pose.position.x)**2 + \
+                                   (state.pos_est.position.y-state.walk_feedback.step_queue_saturated[step_queue_i].pose.position.y)**2  )**0.5
+        if 2.0 <= self._Preview_Distance:
+            self._Preview_Distance = 2.0
         command = 0
         if ("Idle" == self._WalkingModeStateMachine.GetCurrentState().Name):
             pass
@@ -353,11 +359,11 @@ class WalkingModeBDI(WalkingMode):
                 delatYaw = targetYaw - self._Odometer.GetYaw()
                   
                 debug_transition_cmd = "NoCommand"
-                if (math.sin(delatYaw) > 0.12):
+                if (math.sin(delatYaw) > 0.15):
                     #print("Sin(Delta)",math.sin(delatYaw), "Left")
                     debug_transition_cmd = "TurnLeft"
                     self._BDI_StateMachine.TurnLeft(targetYaw)
-                elif (math.sin(delatYaw) < -0.12):
+                elif (math.sin(delatYaw) < -0.15):
                     #print("Sin(Delta)",math.sin(delatYaw), "Right")
                     debug_transition_cmd = "TurnRight"
                     self._BDI_StateMachine.TurnRight(targetYaw)
@@ -370,7 +376,7 @@ class WalkingModeBDI(WalkingMode):
             command = self._BDI_StateMachine.Step(state.walk_feedback.next_step_index_needed)
             
             if (0 !=command):
-                rospy.loginfo("WalkingModeBDI, asi_state_cb: State Machine Transition Cmd = %s" % (debug_transition_cmd) )
+                rospy.loginfo("WalkingModeBDI, asi_state_cb: State Machine Transition Cmd = %s, Preview Distance=%f" % (debug_transition_cmd,self._Preview_Distance) )
         elif ("Done" == self._WalkingModeStateMachine.GetCurrentState().Name):
                 pass
         else:
