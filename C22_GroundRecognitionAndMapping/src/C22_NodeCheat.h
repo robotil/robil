@@ -30,17 +30,16 @@
 #include <message_filters/sync_policies/approximate_time.h>
 #include <ros/callback_queue.h>
 #include <tf/transform_listener.h>
-
 class C22_Node{
 private:
   ros::NodeHandle nh_;
   ros::NodeHandle nh2_;
 
   typedef message_filters::sync_policies::ApproximateTime<
-		  sensor_msgs::PointCloud2, geometry_msgs::PoseWithCovarianceStamped
+		  sensor_msgs::PointCloud2,nav_msgs::Odometry
     > MySyncPolicy;
   message_filters::Subscriber<sensor_msgs::PointCloud2> pointCloud_sub;
-  message_filters::Subscriber<geometry_msgs::PoseWithCovarianceStamped> pos_sub;
+  message_filters::Subscriber<nav_msgs::Odometry> pos_sub;
   message_filters::Synchronizer< MySyncPolicy > sync;
   pcl::PointCloud<pcl::PointXYZ>::Ptr cloudRecord;
   nav_msgs::Odometry lastPose;
@@ -52,7 +51,8 @@ private:
   geometry_msgs::Point robotPos;
   geometry_msgs::Point robotOri;
   ros::Publisher C22_pub;
-  tf::TransformListener listener;
+
+ tf::TransformListener listener;
 public:
 
 	/**
@@ -80,7 +80,7 @@ public:
 	   * @param left_msg ROS mesage with image data from the left camera topic
 	   * @param right_msg ROS mesage with image data from the right camera topic
 	   */
-	  void callback(const sensor_msgs::PointCloud2::ConstPtr& pclMsg,const geometry_msgs::PoseWithCovarianceStamped::ConstPtr& pos_msg);
+	  void callback(const sensor_msgs::PointCloud2::ConstPtr& pclMsg,const nav_msgs::Odometry::ConstPtr& pos_msg);
 
 
 };
