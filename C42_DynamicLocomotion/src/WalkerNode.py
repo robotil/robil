@@ -39,11 +39,13 @@ if __name__ == '__main__':
         rospy.init_node('WalkerNode_Continuous')       
         walkingModeChooser = WalkingModeChooser(walkingMode)
         node = DynamicLocomotion("WalkerNode_Continuous",walkingModeChooser)
+        print "WalkerNode_Continuous TASK created"
         rospy.spin()
     elif walkingMode in ('QS','DD'):
         rospy.init_node('WalkerNode_Discrete')       
         walkingModeChooser = WalkingModeChooser(walkingMode)
         node = DynamicLocomotion("WalkerNode_Discrete",walkingModeChooser)
+        print "WalkerNode_Discrete TASK created"
         rospy.spin()
     elif walkingMode in ('DW'):
         rospy.init_node('WalkerNode_DW')       

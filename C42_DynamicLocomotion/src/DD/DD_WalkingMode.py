@@ -31,12 +31,8 @@ class DD_WalkingMode(WalkingMode):
     def __init__(self,iTf):
         WalkingMode.__init__(self,DD_PathPlanner())
         self._tf = iTf
-        self.step_index_for_reset = 0
         # Initialize atlas atlas_sim_interface_command publisher       
-        self.asi_command = rospy.Publisher('/atlas/atlas_sim_interface_command', AtlasSimInterfaceCommand, None, False, True, None)
-
-        rospy.wait_for_service('foot_placement_path')
-        self._foot_placement_client = rospy.ServiceProxy('foot_placement_path', FootPlacement_Service)       
+        self.asi_command = rospy.Publisher('/atlas/atlas_sim_interface_command', AtlasSimInterfaceCommand, None, False, True, None)       
 
         # for debug publish:
         self._debug_pub_StepIndex = rospy.Publisher('debug_DD_StepIndex',Int32)
@@ -47,8 +43,11 @@ class DD_WalkingMode(WalkingMode):
         
     def Initialize(self):
         WalkingMode.Initialize(self)
+        self._LPP.Initialize()
         self._bRobotIsStatic = True
 
+        rospy.wait_for_service('foot_placement_path')
+        self._foot_placement_client = rospy.ServiceProxy('foot_placement_path', FootPlacement_Service)
         # Subscribers:        
         self._Subscribers["Odometry"] = rospy.Subscriber('/ground_truth_odom',Odometry,self._odom_cb)
         self._Subscribers["ASI_State"]  = rospy.Subscriber('/atlas/atlas_sim_interface_state', AtlasSimInterfaceState, self.asi_state_cb)
@@ -60,6 +59,8 @@ class DD_WalkingMode(WalkingMode):
         k_effort = [0] * 28
         self._bDone = False
         self._bIsSwaying = False
+        self._StepIndex = 1
+        self._command = 0
         #self._bRobotIsStatic = False
         self._GetOrientationDelta0Values() # Orientation difference between BDI odom and Global
     

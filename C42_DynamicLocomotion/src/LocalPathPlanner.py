@@ -195,7 +195,7 @@ class LocalPathPlanner(PathPlanner):
             self._CurrentSegment.SetTarget(self._Path.popleft()) 
         self._PathReady = True   
         
-    def SetPath(self):
+    def GetPath(self):
         return self._Path
         
     def GetPathError(self):

@@ -23,10 +23,13 @@ class DD_PathPlanner(PathPlanner):
     
     def __init__(self):
         PathPlanner.__init__(self)
+        self.Initialize()
+    
+    def Initialize(self):
         self._Queue = deque([])
         self.State = DD_PathPlannerEnum.Empty
         self._countEnteries = 0
-        
+
     def SetPath(self,waypointList):
         PathPlanner.SetPath(self,waypointList)
         self._Queue.extend(waypointList)
