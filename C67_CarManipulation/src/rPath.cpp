@@ -176,7 +176,7 @@ int main(int argc, char** argv)
 						
 			IkSolution IkCurrent = IkSolution(as.position[q4r], as.position[q5r], as.position[q6r], as.position[q7r],
 					as.position[q8r], as.position[q9r]);
-			IkSolution IkNext = rSearchSolution(as.position[q1], as.position[q2], as.position[q3], argTarget);
+			IkSolution IkNext = rScanRPY(as.position[q1], as.position[q2], as.position[q3], argTarget,0.01);
 			
 			// check if solution valid
 			if (IkNext.valid)
@@ -213,7 +213,7 @@ int main(int argc, char** argv)
 			for (unsigned int j=0; j<numJoints; j++)
 			{
 				ac.position[j] = as.position[j];
-				ac.k_effort[j]  = 255;
+				//ac.k_effort[j]  = 255;
 				//std::cout << state[j] << " ";
 			}
 

@@ -158,7 +158,7 @@ int main(int argc, char** argv)
 						
 			IkSolution IkCurrent = IkSolution(as.position[q4l], as.position[q5l], as.position[q6l], as.position[q7l],
 					as.position[q8l], as.position[q9l]);
-			IkSolution IkNext = lSearchSolution(as.position[q1], as.position[q2], as.position[q3], argTarget);
+			IkSolution IkNext = lScanRPY(as.position[q1], as.position[q2], as.position[q3], argTarget,0.01);
 			
 			// check if solution valid
 			if (IkNext.valid)
