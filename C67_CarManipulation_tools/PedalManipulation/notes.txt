@@ -1,0 +1,13 @@
+PedalsManipulation
+-------------------------------------------
+Prerequisites:
+1) C45
+2) C41
+
+To run:
+1) run:
+rosrun PedalManipulation PalsManipulation
+2) calibrate using /PedalsManipulation/calibrate service (relative to pelvis coordinations)
+3) start by calling /PedalsManipulation/start service
+4) publish to /PedalsManipulation/move_right_pedal and /PedalsManipulation/move_left_pedal topics with percentage (values between 0.0 and 100.0) of type std_msgs/Float64
+5) end by calling /PedalsManipulation/stop service
