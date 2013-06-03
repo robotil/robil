@@ -78,6 +78,7 @@ bool C11_Agent_Node::init()
     service_ResumeSelection = nh_->advertiseService("ResumeMission", &C11_Agent_Node::ResumeMission,this);
     service_PathUpdate = nh_->advertiseService("PathUpdate", &C11_Agent_Node::PathUpdate,this);
     robot_pos_subscriber = nh_->subscribe("C25/publish",1000,&C11_Agent_Node::RobotPosUpdateCallback,this);
+    robot_pos_subscriber = nh_->subscribe("executer/stack_stream",1000,&C11_Agent_Node::ExecuterStackSubscriber,this);;
 
 
     pushS = new PushHMIServer();
@@ -449,6 +450,17 @@ void C11_Agent_Node::GridRequest()
 void C11_Agent_Node::PathRequest()
 {
   pushS->path_task();
+}
+
+void C11_Agent_Node::ExecuterStackSubscriber(const std_msgs::StringConstPtr& stack)
+{
+	cout<<"ExecuterStackSubscriber received data"<< endl;
+//	cout<<"ExecuterStackUpdate: "<< stack << "\n";
+//	cout<<endl<<endl<<endl<<endl<<endl<<endl;
+	QString str(stack->data.data());
+	pIAgentInterface->SendExecuterStack(str);
+//	cout<<"ExecuterStackUpdate: "<< str.toStdString() << "\n";
+
 }
 
 void C11_Agent_Node::CheckPath()
