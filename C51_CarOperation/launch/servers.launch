@@ -8,7 +8,7 @@
 <include  file="$(find C21_VisionAndLidar)/launch/C21.launch" />
 
 <!-- Start C22 -->
-<!--node name="C22" pkg="C22_GroundRecognitionAndMapping" type="C22" /-->
+<node name="C22" pkg="C22_GroundRecognitionAndMapping" type="C22" />
 
 <!-- Start C25 -->
 <include  file="$(find C25_GlobalPosition)/launch/C25.launch" />
