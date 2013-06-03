@@ -6,25 +6,35 @@
 # The code in this file is provided "as is" and comes with no warranty whatsoever
 ###################################################################################
 
+from WalkingModeStateMachine import *
+
 class WalkingMode(object):
     
-    def __init__(self):
-      self._rate = 100  # [Hz]
+    def __init__(self,localPathPlanner):
+        self._LPP = localPathPlanner
+        self._WalkingModeStateMachine = WalkingModeStateMachine()
         
     def Initialize(self):
-        pass
+        self._WalkingModeStateMachine = WalkingModeStateMachine()
     
     def StartWalking(self):
-        return self._rate
+        pass
     
     def Walk(self):
-        return True
+        return self._WalkingModeStateMachine.PerformTransition("Walk")
     
     def Stop(self):
-        pass
+        self._LPP.Stop()
+        return self._WalkingModeStateMachine.PerformTransition("Stop")
     
     def EmergencyStop(self):
         pass    
-
+    
+    def SetPath(self,Path):
+        self._LPP.SetPath(Path)
+        
     def IsDone(self):
         return False
+
+    def IsReady(self):
+        return self._LPP.IsActive()

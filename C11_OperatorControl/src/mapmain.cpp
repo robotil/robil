@@ -460,6 +460,8 @@ void CMapMain::AddPix()
 		p_j=p_j-8.0;
 	}
 	traingle = new CtraingleItem(ui.graphicsView->scene(),QPointF(pPixItem[19][49]->pos()),QPointF(pPixItem[19][49]->pos()));
+	RobotPixPos.x = pPixItem[19][49]->pos().x();
+	RobotPixPos.y = pPixItem[19][49]->pos().y();
 	ui.graphicsView->scene()->addItem(traingle);
 }
 
@@ -758,17 +760,26 @@ void CMapMain::AddPath(std::vector<StructPoint> points)
 	LastUpdatedRoute.clear();
 	IsPathChanged = false;
 	std::cout<<"Path size: "<<points.size()<<"\n";
+	std::cout<<"RobotOrientation: "<<RobotOrientation<<"\n";
 	for(int i=0; i<points.size(); i++)
 	{
 //		QPointF point = PointToPix(points[i]);
 		if(i<points.size()-1)
 		{
 			routePathReady->addPointToLine(PointToPix(points[i]),true);
+//		    StructPoint p1;
+//		    p1.x = points[i].y;
+//		    p1.y = points[i].x;
+//		    routePathReady->addPointToLine(PointToPix(p1),true);
 		}
 		else
 		{
 			routePathReady->addPointToLine(PointToPix(points[i]),true);
-			routePathReady->endPath(QPointF(0,0));
+//		    StructPoint p1;
+//                    p1.x = points[i].y;
+//                    p1.y = points[i].x;
+//                    routePathReady->addPointToLine(PointToPix(p1),true);
+//			routePathReady->endPath(QPointF(0,0));
 		}
 	}
 	setMode(E_NULL_MODE);
@@ -777,9 +788,19 @@ void CMapMain::AddPath(std::vector<StructPoint> points)
 QPointF CMapMain::PointToPix(StructPoint point)
 {
 	QPointF GPoint;
-//	GPoint.setX(50+((point.x - CornerPos.y)*32) - CornerPos.y*32 + 12.5*32);
-	GPoint.setX(50+((RobotPos.x - point.x)*(32)) + 400);
-	GPoint.setY(930-((point.y - RobotPos.y)*32) - 160);
+	double pointX,pointY;
+	pointX = 50+((RobotPos.x - point.x)*(32)) + 400;
+	pointY = 930-((point.y - RobotPos.y)*32) - 160;
+	std::cout<<"pointX: "<<pointX<<" pointY: "<<pointY<<"\n";
+	GPoint.setX((pointX-RobotPixPos.x)*(-sin(RobotOrientation)) - (pointY-RobotPixPos.y)*(-cos(RobotOrientation))+RobotPixPos.x);
+//	GPoint.setX((pointY-pPixItem[19][49]->pos().y())*cos(WorldToRobotOrientation) - (pointX-pPixItem[19][49]->pos().x())*sin(WorldToRobotOrientation)+pPixItem[19][49]->pos().x());
+	GPoint.setY((pointY-RobotPixPos.y)*sin(RobotOrientation) + (pointX-RobotPixPos.x)*cos(RobotOrientation)+RobotPixPos.y);
+//	GPoint.setX(50+((RobotPos.x - point.x)*(32)) + 400);
+//	GPoint.setY(930-((point.y - RobotPos.y)*32) - 160);
+//	GPoint.setX(50 + ((point.x-RobotGridPos.x)*sin(WorldToRobotOrientation) - (point.y-RobotGridPos.y)*cos(WorldToRobotOrientation))*32 + 400);
+//	GPoint.setY(930 - ((point.y-RobotGridPos.y)*sin(WorldToRobotOrientation) + (point.x-RobotGridPos.x)*cos(WorldToRobotOrientation))*32 - 160);
+//	GPoint.setX((point.x-CornerPos.x)*sin(WorldToRobotOrientation) - (point.y-CornerPos.y)*cos(WorldToRobotOrientation) + 20);
+//	GPoint.setY((point.y-CornerPos.y)*sin(WorldToRobotOrientation) + (point.x-CornerPos.x)*cos(WorldToRobotOrientation) + 50);
 	std::cout<<"PointX: "<<GPoint.x()<<" PointY: "<<GPoint.y()<<"\n";
 	return GPoint;
 }
@@ -788,8 +809,11 @@ StructPoint CMapMain::PixToPoint(QPointF pix)
 {
         std::cout<<"pixX: "<<pix.x()<<" pixY: "<<pix.y()<<"\n";
 	StructPoint point;
-	point.x = RobotPos.x - ((pix.x() - 400 - 50)/(32));
-	point.y = RobotPos.y + ((pix.y() + 160 - 930)/(32));
+	point.x = RobotPixPos.x - (pix.x()-RobotPixPos.x)*(-sin(-RobotOrientation)) - (pix.y()-RobotPixPos.y)*(-cos(-RobotOrientation));
+	point.y = RobotPixPos.y - (pix.y()-RobotPixPos.y)*sin(-RobotOrientation) + (pix.x()-RobotPixPos.x)*cos(-RobotOrientation);
+	std::cout<<"point.x: "<<point.x<<" point.y: "<<point.y<<"\n";
+	point.x = RobotPos.x - ((point.x - 400 - 50)/(32));
+	point.y = RobotPos.y + ((point.y + 160 - 930)/(32));
 	point.y *= -1;
 	std::cout<<"WorldPosX: "<<point.x<<" WorldPosY: "<<point.y<<"\n";
 	return point;
@@ -829,6 +853,9 @@ std::vector<StructPoint> CMapMain::GetUpdatedRoute()
                 for(int i=0; i<vec.size(); i++)
                 {
                         p = PixToPoint(vec[i]);
+//                        StructPoint p1;
+//                        p1.x = p.y;
+//                        p1.y = p.x;
                         if(!IsPointInPath(p))
                         {
                                 LastUpdatedRoute.push_back(p);
