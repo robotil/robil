@@ -1,4 +1,4 @@
-V0.0.1.5
+V0.0.1.8
 ===========================================================
 C0_RobilTask     		0.5
 C0_Scripts     		        0.25
@@ -15,11 +15,11 @@ C24_ObstacleDetection     	0.6
 C25_AtlasFell     		0.2
 C25_GlobalPosition     		0.9
 C25_ekf     			0.1
-C31_PathPlanner     		0.20
+C31_PathPlanner     		0.21
 C34_BTExecuter     		0.8
-C34_Designer     		0.36
+C34_Designer     		0.37
 C34_Executer     		0.8
-C35_Monitoring     		0.10
+C35_Monitoring     		0.11
 C41_BodyControl     		0.1
 C41_QuasiStaticWalking     	0.9
 C41_QuasiStaticWalking_tools     0.10
@@ -35,7 +35,7 @@ C45_PostureControl_tools     	0.2
 C46_MountVehicle    	 	0.6
 C47_DismountVehicle     	0.3
 C48_StandUp    	 		0.10
-C51_CarOperation     		0.11
+C51_CarOperation     		0.12
 C65_CloseValve     		0.1
 C66_Grasp     			0.5
 C66_Grasp_tools     		0.4
