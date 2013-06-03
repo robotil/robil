@@ -4,6 +4,7 @@
  */
 package pathplanning;
 
+import com.sun.org.apache.xml.internal.resolver.Catalog;
 import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Dialog;
@@ -974,10 +975,12 @@ public class MapBoard extends javax.swing.JFrame {
                     }
                     if(line.length()>0){
                         String[] l = line.split(",");
-                        for(String x: l){
-                            x = x.trim();
-                            if(x.length()>0) frame.map.data[frame.map.i++]=Integer.parseInt(x);
-                        }
+                        try{
+                            for(String x: l){
+                                x = x.trim();
+                                if(x.length()>0) frame.map.data[frame.map.i++]=Integer.parseInt(x);
+                            }
+                        }catch(Exception e){}
                     }
                     continue;
                 }
@@ -988,10 +991,12 @@ public class MapBoard extends javax.swing.JFrame {
                     }
                     if(line.length()>0){
                         String[] l = line.split(",");
-                        for(String x: l){
-                            x = x.trim();
-                            if(x.length()>0) alt.data[alt.i++]=Double.parseDouble(x);
-                        }
+                        try{
+                            for(String x: l){
+                                x = x.trim();
+                                if(x.length()>0) alt.data[alt.i++]=Double.parseDouble(x);
+                            }
+                        }catch(Exception e){}
                     }
                     continue;
                 }
@@ -1044,7 +1049,7 @@ public class MapBoard extends javax.swing.JFrame {
             }
         } catch (Exception ex) {
             Logger.getLogger(MapBoard.class.getName()).log(Level.SEVERE, null, ex);
-            StatusMessage("EXCEPTION: problem during XML file loading.");
+            StatusMessage("EXCEPTION: problem during XML file loading. "+ex.getMessage());
             xmlname = old_xmlString;
             frames.clear();
             frames.addAll(old_frames);

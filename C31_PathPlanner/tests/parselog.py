@@ -1,5 +1,8 @@
 #!/usr/bin/python
 
+from math import isnan
+
+
 def readlines():
 	lines=[]
 	import fileinput
@@ -40,7 +43,43 @@ def ProcFrame(fid, lines):
 		print '   <map id="'+str(eid)+'" w="'+str(w)+'" h="'+str(h)+'">'
 		print '\n'.join(grid)
 		print '   </map>'
-		
+	def printAlt(eid, lines, tag, ttype):
+		try:
+			this_map=False
+			line_num=0
+			w=0
+			h=0
+			grid=[]
+			#print "\n".join(lines)
+			for line in lines:
+				if line.find(tag)>=0: this_map = True
+				if this_map:
+					if len(line.strip())==0:
+						break
+					line_num+=1
+					if line_num==2:
+						w=int(line.strip().split(' ')[-1])+1
+					if line_num==3:
+						h=int(line.strip().split(' ')[0])+1
+					if line_num > 2:
+						grid.append( line.strip().split(' ')[1:] )
+			#print "\n".join([ " ".join([c for c in r]) for r in grid])
+			grid = [[float(c) for c in r if len(c.strip())>0] for r in grid]
+			maxnum=[-100000.0]
+			def maxUpdate(m):
+				if m>3: m=3
+				if isnan(m): m=0
+				if m>maxnum[0]: maxnum[0]=m
+				return m
+			grid = [[maxUpdate(c) for c in r] for r in grid]
+			def C(x):
+				return int(float(x)/maxnum[0] * 255)
+			grid = reversed([ '      '+','.join([ str(C(c)) for c in r]) for r in grid])
+			print '   <alt id="'+str(eid)+'" w="'+str(w)+'" h="'+str(h)+'" type="'+ttype+'">'
+			print '\n'.join(grid)
+			print '   </alt>'		
+		except:
+			pass
 	def printPublishPath(eid, lines):
 		this_path=False
 		line_num=0
@@ -112,6 +151,9 @@ def ProcFrame(fid, lines):
 	
 	print '<frame id="'+str(fid)+'">'
 	printGrid(10,lines)
+	printAlt(12,lines, ': Altitudes:', 'alts')
+	printAlt(14,lines, ': Slops:', 'slops')
+	printAlt(16,lines, ': Costs:', 'costs')
 	printPublishPath(30,lines)
 	printStartAndGoals(40,lines)
 	print '</frame>'
@@ -136,7 +178,7 @@ i=0
 frames = splitFrames(lines)
 for frame in frames:
 	ProcFrame(i, frame)
-	if i==2: break
+	if i==200: break
 	i+=1
 print '</frames>'
 
