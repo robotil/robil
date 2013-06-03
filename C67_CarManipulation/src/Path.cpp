@@ -141,11 +141,10 @@ void pPathPoints::Update(IkSolution R0, IkSolution R1, int option)
 	IkSolution pDelta = IkSolution(R1.m_q[0]-R0.m_q[0], R1.m_q[1]-R0.m_q[1], R1.m_q[2]-R0.m_q[2],
 			R1.m_q[3]-R0.m_q[3], R1.m_q[4]-R0.m_q[4], R1.m_q[5]-R0.m_q[5]);
 
-		int i;
-		std::cout<<"option:"<<option<<"/n";
-		for (i=0; i<size/4; i++)
+		int i, i0;
+		if (option == StartEnd)
 		{
-			if ((option != NoStart)&&(option != NoStartEnd))
+			for (i=0; i<size/4; i++)
 			{
 				pArray[i]._q4 = 8.0/3.0*pDelta._q4/(size*size)*(i+1)*(i+1) + R0._q4;
 				pArray[i]._q5 = 8.0/3.0*pDelta._q5/(size*size)*(i+1)*(i+1) + R0._q5;
@@ -154,7 +153,8 @@ void pPathPoints::Update(IkSolution R0, IkSolution R1, int option)
 				pArray[i]._q8 = 8.0/3.0*pDelta._q8/(size*size)*(i+1)*(i+1) + R0._q8;
 				pArray[i]._q9 = 8.0/3.0*pDelta._q9/(size*size)*(i+1)*(i+1) + R0._q9;
 			}
-			else
+
+			for (; i<size*3/4; i++)
 			{
 				pArray[i]._q4 = 4.0/3.0*pDelta._q4/size*(i+1) - pDelta._q4/6 + R0._q4;
 				pArray[i]._q5 = 4.0/3.0*pDelta._q5/size*(i+1) - pDelta._q5/6 + R0._q5;
@@ -163,21 +163,8 @@ void pPathPoints::Update(IkSolution R0, IkSolution R1, int option)
 				pArray[i]._q8 = 4.0/3.0*pDelta._q8/size*(i+1) - pDelta._q8/6 + R0._q8;
 				pArray[i]._q9 = 4.0/3.0*pDelta._q9/size*(i+1) - pDelta._q9/6 + R0._q9;
 			}
-		}
 
-		for (; i<size*3/4; i++)
-		{
-			pArray[i]._q4 = 4.0/3.0*pDelta._q4/size*(i+1) - pDelta._q4/6 + R0._q4;
-			pArray[i]._q5 = 4.0/3.0*pDelta._q5/size*(i+1) - pDelta._q5/6 + R0._q5;
-			pArray[i]._q6 = 4.0/3.0*pDelta._q6/size*(i+1) - pDelta._q6/6 + R0._q6;
-			pArray[i]._q7 = 4.0/3.0*pDelta._q7/size*(i+1) - pDelta._q7/6 + R0._q7;
-			pArray[i]._q8 = 4.0/3.0*pDelta._q8/size*(i+1) - pDelta._q8/6 + R0._q8;
-			pArray[i]._q9 = 4.0/3.0*pDelta._q9/size*(i+1) - pDelta._q9/6 + R0._q9;
-		}
-
-		for (; i<size; i++)
-		{
-			if ((option != NoEnd)&&(option != NoStartEnd))
+			for (; i<size; i++)
 			{
 				pArray[i]._q4 = -8.0/3.0*pDelta._q4/(size*size)*(i+1)*(i+1) +
 					16.0/3.0*pDelta._q4/size*(i+1) - 5.0/3.0*pDelta._q4 + R0._q4;
@@ -192,15 +179,75 @@ void pPathPoints::Update(IkSolution R0, IkSolution R1, int option)
 				pArray[i]._q9 = -8.0/3.0*pDelta._q9/(size*size)*(i+1)*(i+1) +
 					16.0/3.0*pDelta._q9/size*(i+1) - 5.0/3.0*pDelta._q9 + R0._q9;
 			}
-			else
+		}
+		else if (option == NoStartEnd)
+		{
+			// constant velocity
+			for (i=0; i<size; i++)
 			{
-				pArray[i]._q4 = 4.0/3.0*pDelta._q4/size*(i+1) - pDelta._q4/6 + R0._q4;
-				pArray[i]._q5 = 4.0/3.0*pDelta._q5/size*(i+1) - pDelta._q5/6 + R0._q5;
-				pArray[i]._q6 = 4.0/3.0*pDelta._q6/size*(i+1) - pDelta._q6/6 + R0._q6;
-				pArray[i]._q7 = 4.0/3.0*pDelta._q7/size*(i+1) - pDelta._q7/6 + R0._q7;
-				pArray[i]._q8 = 4.0/3.0*pDelta._q8/size*(i+1) - pDelta._q8/6 + R0._q8;
-				pArray[i]._q9 = 4.0/3.0*pDelta._q9/size*(i+1) - pDelta._q9/6 + R0._q9;
+				pArray[i]._q4 = pDelta._q4/size*(i+1) + R0._q4;
+				pArray[i]._q5 = pDelta._q5/size*(i+1) + R0._q5;
+				pArray[i]._q6 = pDelta._q6/size*(i+1) + R0._q6;
+				pArray[i]._q7 = pDelta._q7/size*(i+1) + R0._q7;
+				pArray[i]._q8 = pDelta._q8/size*(i+1) + R0._q8;
+				pArray[i]._q9 = pDelta._q9/size*(i+1) + R0._q9;
+			}
+		}
+		else if (option == NoEnd)
+		{
+			// constant acceleration
+			for (i=0; i<size/2; i++)
+			{
+				pArray[i]._q4 = 4.0/6.0*pDelta._q4/(size*size)*(i+1)*(i+1) + R0._q4;
+				pArray[i]._q5 = 4.0/6.0*pDelta._q5/(size*size)*(i+1)*(i+1) + R0._q5;
+				pArray[i]._q6 = 4.0/6.0*pDelta._q6/(size*size)*(i+1)*(i+1) + R0._q6;
+				pArray[i]._q7 = 4.0/6.0*pDelta._q7/(size*size)*(i+1)*(i+1) + R0._q7;
+				pArray[i]._q8 = 4.0/6.0*pDelta._q8/(size*size)*(i+1)*(i+1) + R0._q8;
+				pArray[i]._q9 = 4.0/6.0*pDelta._q9/(size*size)*(i+1)*(i+1) + R0._q9;
+			}
+			// constant velocity
+			i0 = i;
+			for (; i<size; i++)
+			{
+				pArray[i]._q4 = 4.0/3.0*pDelta._q4/size*(i+1-i0) + pDelta._q4/3.0 + R0._q4;
+				pArray[i]._q5 = 4.0/3.0*pDelta._q5/size*(i+1-i0) + pDelta._q5/3.0 + R0._q5;
+				pArray[i]._q6 = 4.0/3.0*pDelta._q6/size*(i+1-i0) + pDelta._q6/3.0 + R0._q6;
+				pArray[i]._q7 = 4.0/3.0*pDelta._q7/size*(i+1-i0) + pDelta._q7/3.0 + R0._q7;
+				pArray[i]._q8 = 4.0/3.0*pDelta._q8/size*(i+1-i0) + pDelta._q8/3.0 + R0._q8;
+				pArray[i]._q9 = 4.0/3.0*pDelta._q9/size*(i+1-i0) + pDelta._q9/3.0 + R0._q9;
+			}
+		}
+		else // No Start
+		{
+			// constant velocity
+			for (i=0; i<size/2; i++)
+			{
+				pArray[i]._q4 = 4.0/3.0*pDelta._q4/size*(i+1) + R0._q4;
+				pArray[i]._q5 = 4.0/3.0*pDelta._q5/size*(i+1) + R0._q5;
+				pArray[i]._q6 = 4.0/3.0*pDelta._q6/size*(i+1) + R0._q6;
+				pArray[i]._q7 = 4.0/3.0*pDelta._q7/size*(i+1) + R0._q7;
+				pArray[i]._q8 = 4.0/3.0*pDelta._q8/size*(i+1) + R0._q8;
+				pArray[i]._q9 = 4.0/3.0*pDelta._q9/size*(i+1) + R0._q9;
+			}
+			i0 = i+1;
+			// constant deceleration
+			for (; i<(size); i++)
+			{
+				pArray[i]._q4 =4.0/3.0*pDelta._q4/size*(i+1-i0) -4.0/6.0*pDelta._q4/(size*size)*(i+1-i0)*(i+1-i0) +
+						+ pDelta._q4*2.0/3.0 + R0._q4;
+				pArray[i]._q5 =4.0/3.0*pDelta._q5/size*(i+1-i0) -4.0/6.0*pDelta._q5/(size*size)*(i+1-i0)*(i+1-i0) +
+						+ pDelta._q5*2.0/3.0 + R0._q5;
+				pArray[i]._q6 =4.0/3.0*pDelta._q6/size*(i+1-i0) -4.0/6.0*pDelta._q6/(size*size)*(i+1-i0)*(i+1-i0) +
+						+ pDelta._q6*2.0/3.0 + R0._q6;
+				pArray[i]._q7 =4.0/3.0*pDelta._q7/size*(i+1-i0) -4.0/6.0*pDelta._q7/(size*size)*(i+1-i0)*(i+1-i0) +
+						+ pDelta._q7*2.0/3.0 + R0._q7;
+				pArray[i]._q8 =4.0/3.0*pDelta._q8/size*(i+1-i0) -4.0/6.0*pDelta._q8/(size*size)*(i+1-i0)*(i+1-i0) +
+						+ pDelta._q8*2.0/3.0 + R0._q8;
+				pArray[i]._q9 =4.0/3.0*pDelta._q9/size*(i+1-i0) -4.0/6.0*pDelta._q9/(size*size)*(i+1-i0)*(i+1-i0) +
+						+ pDelta._q9*2.0/3.0 + R0._q9;
+
 			}
 
 		}
+
 }

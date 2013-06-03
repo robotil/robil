@@ -10,37 +10,60 @@
 #include "FK.h"
 #include "IK.h"
 #include "Trace.h"
+#include "Path.h"
 
 int main(int argc, char** argv)
 {
 	std::cout.precision(6);
 	std::cout.setf (std::ios::fixed , std::ios::floatfield );
 	std::cout<< "Test Program End\n";
-	Trace wheelTrace  = Trace(RPY(0.3,0,0.4,M_PI,M_PI,0), 0.2, 0, M_PI/2, 10);
-	IkSolution solution = rScanRPY(0, 0, 0, RPY(.42 ,-.34 ,0.0,M_PI,0,0), 0.01);
-	if (solution.valid)
+//	Trace wheelTrace  = Trace(RPY(0.3,0,0.4,M_PI,M_PI,0), 0.2, 0, M_PI/2, 10);
+//	IkSolution solution = rScanRPY(0, 0, 0, RPY(.42 ,-.34 ,0.0,M_PI,0,0), 0.01);
+//	if (solution.valid)
+//	{
+//		solution.Print();
+//		RPY r = rPose(0,0,0, solution);
+//		r.Print();
+//		std::cout << "error1: " << solution.error << std::endl;
+//	}
+//	solution = rScanRPY(0, 0, 0, RPY(.50 ,-.34 ,0.02,M_PI,0,0), 0.01);
+//	if (solution.valid)
+//	{
+//		solution.Print();
+//		RPY r = rPose(0,0,0, solution);
+//		r.Print();
+//		std::cout << "error2: " << solution.error << std::endl;
+//	}
+//	solution = rScanRPY(0, 0, 0, RPY(.50 ,-.34 ,-0.02,M_PI,0,0), 0.01);
+//	if (solution.valid)
+//	{
+//		solution.Print();
+//		RPY r = rPose(0,0,0, solution);
+//		r.Print();
+//		std::cout << "error3: " << solution.error << std::endl;
+//	}
+	IkSolution T0 = IkSolution(0,0,0,0,0,0);
+	IkSolution T1 = IkSolution(1,0,0,0,0,0);
+	IkSolution T2 = IkSolution(2,0,0,0,0,0);
+	IkSolution T3 = IkSolution(3,0,0,0,0,0);
+	pPathPoints points = pPathPoints(T0, T1, 10, NoEnd);
+	int i;
+	for (i = 0 ; i< 10; i++)
 	{
-		solution.Print();
-		RPY r = rPose(0,0,0, solution);
-		r.Print();
-		std::cout << "error1: " << solution.error << std::endl;
+		std::cout<<"x:"<<points.pArray[i]._q4<<"\n";
 	}
-	solution = rScanRPY(0, 0, 0, RPY(.50 ,-.34 ,0.02,M_PI,0,0), 0.01);
-	if (solution.valid)
+	points.Update(T1, T2, NoStartEnd);
+	for (i = 0 ; i< 10; i++)
 	{
-		solution.Print();
-		RPY r = rPose(0,0,0, solution);
-		r.Print();
-		std::cout << "error2: " << solution.error << std::endl;
+		std::cout<<"x:"<<points.pArray[i]._q4<<"\n";
 	}
-	solution = rScanRPY(0, 0, 0, RPY(.50 ,-.34 ,-0.02,M_PI,0,0), 0.01);
-	if (solution.valid)
+	points.Update(T2, T3, NoStart);
+	for (i = 0 ; i< 10; i++)
 	{
-		solution.Print();
-		RPY r = rPose(0,0,0, solution);
-		r.Print();
-		std::cout << "error3: " << solution.error << std::endl;
+		std::cout<<"x:"<<points.pArray[i]._q4<<"\n";
 	}
+
+
 //	Trace Trc2 = Trace(RPY(0.3,0,0.4,1.5,0.4,0), 0.2, 0, 1.57, 5);
 //	RPY r1,r2;
 //	double A[4][4] = {{1,0,0,0},{0,1,0,0},{0,0,1,0},{0,0,0,1}};
