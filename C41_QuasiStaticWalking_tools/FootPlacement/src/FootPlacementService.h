@@ -4,7 +4,8 @@
 #include "ros/ros.h"
 #include "geometry_msgs/Point.h"
 #include "C22_CompactGroundRecognitionAndMapping/C22.h"
-#include "FootPlacement/FootPlacement.h"
+#include "C31_PathPlanner/C31_Waypoints.h"
+#include "FootPlacement/FootPlacement_Service.h"
 #include "tf/transform_listener.h"
 
 #define SQUARE_SIZE 0.25
@@ -20,16 +21,23 @@
 #define RIGHT 1
 #define NORMALIZER 100
 
+#define USE_C22 0
+
 class FootPlacementService {
 private:
 	ros::NodeHandle nh;
 	ros::ServiceClient mapClient;
 	ros::ServiceServer footServer;
+	ros::Subscriber pathSub;
 	C22_CompactGroundRecognitionAndMapping::C22 mapService;
+	C31_PathPlanner::C31_Waypoints::ConstPtr pathPoints;
 
 	//callback function when service is requested
-	bool callback(FootPlacement::FootPlacement::Request &req,
-			FootPlacement::FootPlacement::Response &res);
+	bool callback(FootPlacement::FootPlacement_Service::Request &req,
+			FootPlacement::FootPlacement_Service::Response &res);
+
+	//callback function when path has been received
+	void getPath(const C31_PathPlanner::C31_Waypoints::ConstPtr& points);
 
 	//kinamtic possibility
 	int possible(int i, int j);
@@ -61,13 +69,12 @@ private:
 			const double &directionWeight);
 
 	void calcFootMatrix(
-			std::vector<FootPlacement::Pos>& positions,
+			std::vector<FootPlacement::Foot_Placement_data>& foot_placement_path,
 			const int &useC22,
-			const int &leg,
-			const C22_CompactGroundRecognitionAndMapping::C22C0_PATH& path,
-			const geometry_msgs::Point& robotLeftLegPos,
-			const geometry_msgs::Point& robotRightLegPos,
-			const double &dirX, const double &dirY,
+			const C22_CompactGroundRecognitionAndMapping::C22C0_PATH& map,
+			const FootPlacement::Foot_Placement_data& start_pose,
+			const FootPlacement::Foot_Placement_data& other_foot_pose,
+			const std::vector<C31_PathPlanner::C31_Location>& points,
 			const double &slopeWeight,
 			const double &distanceWeight,
 			const double &heightWeight,

@@ -1,30 +1,21 @@
-provides a 2d map where each cell represents a 25 cm square
-The map now spreads on 25 meters
-The service now returns the robot's position in the world and the map offsets (minimal tracked x&y)
+provides a 2d map where each cell represents a 5cmX5cm square
+The map now spreads on 5 meters forward from the robot.
 
-the robot's position on the map can be calculated as follows:
-row=(robotPos.y-yOffset)*4
-col=(robotPos.x-xOffset)*4
+There are no planes due to us switching to use the laser, instead of using the point cloud.
 
-How to Check:
-============
-run the node with the DRC simulation, make sure C21 runs before starting
-rosrun C21_VisionAndLidar C21
-rosrun C22_GroundRecognitionAndMapping C22
-
-test with
-
-rosrun C22_GroundRecognitionAndMapping C22_test
-
-it is advised to look at the actual pointcloud using rvis in order to get a better image of the mapping
-
-Known Bugs:
-==========
+You may use the launch file included. This will operate the C22_Compact... node and will also cause the spindel to turn at a rate of 1.
 
 
+==========================
+IMPORTANT!!!!!!!!!!!!!!!!!<----------------------------------
+==========================
 
-Known Limitations:
-=================
+The service assumes that you are and have been standing still for at least 8 seconds.
+you may use 
+$ rosrun C22_CompactGroundRecognitionAndMapping C22_test 
+in order to see the output.
+--------------------------
+
 
 
 

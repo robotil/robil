@@ -29,6 +29,6 @@ rosbuild_gensrv()
 #rosbuild_add_executable(example examples/example.cpp)
 #target_link_libraries(example ${PROJECT_NAME})
 
-#rosbuild_add_executable(FakeC22 src/FakeC22.cpp)
+rosbuild_add_executable(FakePath src/FakePath.cpp)
 rosbuild_add_executable(FootTest src/FootTest.cpp)
 rosbuild_add_executable(FootPlacement src/FootPlacementService.cpp src/FootPlacementFunction.cpp)
