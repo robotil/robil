@@ -259,7 +259,7 @@ class DW_Controller(object):
         self.RS.UpdateState(msg)
 
     def Odom_cb(self,msg):
-        if 200 <= self._counter: 
+        if 1000 <= self._counter: 
             print ("Odom_cb::", self.GlobalPos)
             self._counter = 0
         self._counter += 1

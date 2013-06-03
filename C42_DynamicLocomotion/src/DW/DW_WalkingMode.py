@@ -9,6 +9,7 @@
 from Abstractions.WalkingMode import *
 from DogWormVRC3 import *
 from DW_PathPlanner import *
+import math
 
 import roslib;roslib.load_manifest('C42_DynamicLocomotion')
 from C31_PathPlanner.msg import C31_Waypoints
@@ -39,6 +40,7 @@ class DW_WalkingMode(WalkingMode):
     def Walk(self):
         WalkingMode.Walk(self)
         self._Controller.DoPath(self._LPP.GetPath())
+        self._Controller.RotateToOri( self._LPP.GetPathYaw() - math.pi/2 )
         self._Controller.DynStandUp()
         self._bDone = True
     
@@ -57,12 +59,13 @@ class DW_WalkingMode(WalkingMode):
         p = []
         i = 0
         for wp in path.points:
-            if 0 == i%2:
-                direction = "fwd"
-            else:
-                direction = "bwd"
+            if 0 < i: # ignor first way-point (current position) 
+                if 1 == i%2:
+                    direction = "fwd"
+                else:
+                    direction = "bwd"
+                p.append([wp.x,wp.y,direction])
             i = i+1
-            print p
-            p.append([wp.x,wp.y,direction])
+        print p
         self.SetPath(p)
     

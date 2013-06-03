@@ -30,6 +30,7 @@ class DW_PathPlanner(PathPlanner):
         PathPlanner.SetPath(self,waypointList)
         self._Queue.extend(waypointList)
         if(0 < len(self._Queue)):
+            self._SetPathYaw()
             self.State = DW_PathPlannerEnum.Active
         #print ("SetPath",self._Queue)
             
@@ -39,4 +40,22 @@ class DW_PathPlanner(PathPlanner):
     def Stop(self):
         PathPlanner.Stop(self)
         self.State = DW_PathPlannerEnum.Empty
+
+    def _SetPathYaw(self):
+        """
+            Returns the yaw in radians - in Front Left Up Coordinates, with the origin set at system init
+        """
+        u = [self._Queue[1][0] - self._Queue[0][0],self._Queue[1][1] - self._Queue[0][1]] # [deltaX,deltaY]
+        _u_ = math.sqrt(u[0]**2+u[1]**2)
+        if (_u_>0):
+            u = [u[0]/_u_, u[1]/_u_]
+        else:
+            u = [1,0]
+
+        #rospy.loginfo('GetYaw: u_norm = %f; u_x = %f, u_y = %f' %(_u_,u[0],u[1] ) )
+        
+        self._PathYaw = math.atan2(u[1],u[0])
+
+    def GetPathYaw(self):
+        return self._PathYaw
 
