@@ -25,7 +25,7 @@ class DrivingMonitor(RobilTask):
 		  delta_y = msg.pose.pose.position.y - DrivingMonitor.init_y
 		  elapsed_time = rospy.get_time() - DrivingMonitor.init_time
 		  
-		  if elapsed_time > 20 and (math.fabs(delta_x) < 1 or math.fabs(delta_y) < 1):
+		  if DrivingMonitor.init_x != -1 and DrivingMonitor.init_y != -1 and elapsed_time > 10 and math.fabs(delta_x) < 1 and math.fabs(delta_y) < 1:
 			  DrivingMonitor.detected_problem = True
 	
 	def __init__(self, name):
@@ -43,7 +43,7 @@ class DrivingMonitor(RobilTask):
 		DrivingMonitor.started_task = True
 		print "Driving monitor received first message."
 		while not DrivingMonitor.detected_problem:	
-			print DrivingMonitor.detected_problem
+			#print DrivingMonitor.detected_problem
 			if self.isPreepted():
 				print "Preempt driving monitoring task"
 				return RTResult_PREEPTED()
