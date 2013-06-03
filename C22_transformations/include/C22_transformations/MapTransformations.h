@@ -9,10 +9,11 @@
 
 
 class C22_transform{
+
 public:
 	class MapProperties{
 		friend class C22_transform;
-	private:
+	public:
 		Vec2d offset;
 		double resolution;
 		double rotation;
@@ -24,14 +25,24 @@ public:
 			resolution = 0.25;
 			rotation = Vec2d::d2r(-90);
 		}
+		MapProperties(){
+			resolution = 0.25;
+			rotation = Vec2d::d2r(-90);
+		}
+		MapProperties(Vec2d offset, double res=0.25, double rot= Vec2d::d2r(-90)):offset(offset),resolution(res), rotation(rot){}
 	};
 
+	C22_transform(){}
+	C22_transform(const MapProperties& prop):mapprop(prop){}
 
+private :
+
+	MapProperties mapprop;
 
 public:
 
 template< class A, class B>
-void GlobalToMap(const MapProperties& map, const A& original, B& transformed){
+void GlobalToMap(const MapProperties& map, const A& original, B& transformed)const{
 	Vec2d v(original.x, original.y);
 	Vec2d t = (v-map.offset).rotate(- map.rotation).scale(1.0/map.resolution);
 	transformed.x = t.x;
@@ -39,7 +50,7 @@ void GlobalToMap(const MapProperties& map, const A& original, B& transformed){
 }
 
 template< class A, class B>
-void MapToGlobal(const MapProperties& map, const A& original, B& transformed){
+void MapToGlobal(const MapProperties& map, const A& original, B& transformed)const{
 	Vec2d v(original.x, original.y);
 	Vec2d t = v.scale(map.resolution).rotate(map.rotation) + map.offset;
 	transformed.x = t.x;
@@ -48,7 +59,7 @@ void MapToGlobal(const MapProperties& map, const A& original, B& transformed){
 
 
 template< class A, class B>
-void MapToRelative(const MapProperties& map, double global_robot_x, double global_robot_y, double global_robot_heading, const A& original, B& transformed){
+void MapToRelative(const MapProperties& map, double global_robot_x, double global_robot_y, double global_robot_heading, const A& original, B& transformed)const{
 	Vec2d v(original.x, original.y);
 	Vec2d g;
 	MapToGlobal(map, v, g);
@@ -59,7 +70,7 @@ void MapToRelative(const MapProperties& map, double global_robot_x, double globa
 }
 
 template< class A, class B>
-void RelativeToMap(const MapProperties& map, double global_robot_x, double global_robot_y, double global_robot_heading, const A& original, B& transformed){
+void RelativeToMap(const MapProperties& map, double global_robot_x, double global_robot_y, double global_robot_heading, const A& original, B& transformed)const{
 	Vec2d v(original.x, original.y);
 	Vec2d bot(global_robot_x, global_robot_y);
 	Vec2d g = v.rotate(global_robot_heading)+bot;
@@ -67,6 +78,28 @@ void RelativeToMap(const MapProperties& map, double global_robot_x, double globa
 	GlobalToMap(map, g, t);
 	transformed.x = t.x;
 	transformed.y = t.y;
+}
+
+
+template< class A, class B>
+void GlobalToMap(const A& original, B& transformed)const{
+	GlobalToMap(mapprop, original,transformed);
+}
+
+template< class A, class B>
+void MapToGlobal(const A& original, B& transformed)const{
+	MapToGlobal(mapprop, original,transformed);
+}
+
+
+template< class A, class B>
+void MapToRelative(double global_robot_x, double global_robot_y, double global_robot_heading, const A& original, B& transformed)const{
+	MapToRelative(mapprop, global_robot_x,global_robot_y,global_robot_heading,original,transformed);
+}
+
+template< class A, class B>
+void RelativeToMap(double global_robot_x, double global_robot_y, double global_robot_heading, const A& original, B& transformed)const{
+	RelativeToMap(mapprop, global_robot_x,global_robot_y,global_robot_heading,original,transformed);
 }
 
 
