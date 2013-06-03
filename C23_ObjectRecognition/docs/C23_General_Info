@@ -1,0 +1,61 @@
+C23_General_Info
+-------------------------------------------------------
+For neck control:
+
+1. Follow instructions on Robil site
+2. ~/darpa/robil/C42_DRCSim2_tools/src$ rosrun C42_DRCSim2_tools foot_contact_filter.py
+3. ~/darpa/robil/C45_PostureControl$ roslaunch C45_PostureControl C45_PostureControl.launch
+4. ~/darpa/robil/C45_PostureControl$ rosservice call /PoseController/start "{}"
+5. rosservice call /PoseController/delta_neck_movement "neck_ay: 0.1"
+
+
+To run the robot using teleoperation
+Run: export VRC_CHEATS_ENABLE=1
+rosrun pr2_teleop teleop_pr2_keyboard cmd_vel:=atlas/cmd_vel
+
+
+Transforms
+
+Need to know the reference coordinate system and the instrinsic coordinate system to make sense of geometry_msgs/Pose
+geometry_msgs {Point position, Quaternion orientation}
+Quarternion - represents an orientation in free space in quarternion form
+
+
+To place the robot in the car
+
+rostopic pub --once /drc_world/robot_enter_car geometry_msgs/Pose '{position: {x: 0, y: 0, z: 0}, orientation: {w: 1, x: 0, y: 0, z: 0}}'
+
+To Access an element in a Mat
+---------------------------------------------------------------------------------
+OpenCV2.0 adds some new types to represent the element in the matrix,like :
+
+template<typename _Tp, int cn> class CV_EXPORTS Vec // cxcore.hpp (208)
+
+So we can use Vec<float,2> to represent CV_32FC2, or use :
+
+typedef Vec<float, 2> Vec2f; // cxcore.hpp (254)
+
+See the source code to get more type that can represent your element.
+Here we use Vec2f
+
+    access the element
+
+The easiest and efficiant way to access the element in the Mat class is Mat::at.
+It has 4 overloads :
+
+template<typename _Tp> _Tp& at(int y, int x);                // cxcore.hpp (868)
+template<typename _Tp> const _Tp& at(int y, int x) const;    // cxcore.hpp (870)
+template<typename _Tp> _Tp& at(Point pt);                    // cxcore.hpp (869)
+template<typename _Tp> const _Tp& at(Point pt) const;        // cxcore.hpp (871)
+// defineded in cxmat.hpp (454-468)
+
+// we can access the element like this :
+Mat m( Size(3,3) , CV_32FC2 );
+Vec2f& elem = m.at<Vec2f>( row , col ); // or m.at<Vec2f>( Point(col,row) );
+elem[0] = 1212.0f;
+elem[1] = 326.0f;
+float c1 = m.at<Vec2f>( row , col )[0]; // or m.at<Vec2f>( Point(col,row) );
+float c2 = m.at<Vec2f>( row , col )[1];
+m.at<Vec2f>( row, col )[0] = 1986.0f;
+m.at<Vec2f>( row, col )[1] = 326.0f;
+---------------------------------------------------------------------------------
