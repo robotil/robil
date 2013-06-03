@@ -410,7 +410,11 @@ public:
     		objectName = session.arguments.targetGoal;
     	}
     	if( objectName == msg->Object ){
-    		onNewTargetLocation( extractObjectLocation( *msg ) );
+    		GPSPoint pos = extractObjectLocation( *msg );
+    		if( fabs(pos.x) > 1000 || fabs(pos.y) > 1000 ){
+    			ROS_ERROR("WARNING: Target position is incorrect: (%f,%f)", pos.x, pos.y);
+    		}
+    		else onNewTargetLocation( pos );
     	}
 	}
     void callbackTransitPoints(const C31_PathPlanner::C31_Waypoints::ConstPtr & msg){
