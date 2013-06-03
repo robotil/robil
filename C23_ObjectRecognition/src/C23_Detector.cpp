@@ -26,6 +26,8 @@
 #include <pcl/filters/passthrough.h>
 #include <pcl/filters/statistical_outlier_removal.h>
 #include <pcl_ros/transforms.h>
+#include <pcl/io/pcd_io.h>
+#include <pcl/point_types.h>
 #include <tf/tf.h>
 #include <tf/transform_listener.h>
 #include <math.h>
@@ -41,6 +43,9 @@
 
 #define MIN(x,y) (x < y ? x : y)
 #define MAX(x,y) (x > y ? x : y)
+
+
+
 bool C23_Detector::pictureCoordinatesToGlobalPosition(int x1, int y1, int x2, int y2, int* x, int* y, int *z) {
     C21_VisionAndLidar::C21_obj c21srv;
     c21srv.request.sample.x1 = x1;
@@ -60,6 +65,78 @@ bool C23_Detector::pictureCoordinatesToGlobalPosition(int x1, int y1, int x2, in
     
 }
 
+bool C23_Detector::pointCloudCoordinatesToGlobalPosition(int x, int y, int z, int* px, int* py, int *pz) {
+    C21_VisionAndLidar::C21_obj c21srv;
+    c21srv.request.sample.x1 = x;
+    c21srv.request.sample.y1 = z;
+    c21srv.request.sample.x2 = y;
+    c21srv.request.sample.y2 = 0;
+    
+    if(c21client.call(c21srv))
+    {
+        if(px != NULL) *px = round(c21srv.response.point.x);
+        if(py != NULL) *py = round(c21srv.response.point.y);
+        if(pz != NULL) *pz = round(c21srv.response.point.z);
+        cout << "Received data: " << c21srv.response.point.x << "," << c21srv.response.point.y << "," << c21srv.response.point.z << endl;
+        return true;
+    }
+    return false;
+    
+}
+
+bool C23_Detector::averagePointCloud(int x1, int y1, int x2, int y2, const sensor_msgs::PointCloud2::ConstPtr &cloud, int* px, int* py, int *pz) {
+    
+    
+    int xMin=std::min(x1,x2);
+    int yMin=std::min(y1,y2);
+    int xMax=std::max(x1,x2);
+    int yMax=std::max(y1,y2);
+    int tmp_x,tmp_y,tmp_z;
+    pcl::PointCloud<pcl::PointXYZ>detectionCloud;
+    pcl::fromROSMsg<pcl::PointXYZ>(*cloud,detectionCloud);
+    double x=0;
+    double y=0;
+    double z=0;
+    double counter=0;
+    pcl::PointCloud<pcl::PointXYZ> t;
+    pcl::PointXYZ p;
+    pcl::io::savePCDFileASCII ("test_pcd.pcd", detectionCloud);
+    for(int i=xMin;i<=xMax;i++) {
+        for(int j=yMin;j<=yMax;j++){
+            p=detectionCloud.at(i,j);
+            if(p.x!=p.x)
+                continue;
+            //if(p.x>0.3 && p.y>0.3) {
+               
+                break;
+              //  cout << "Found a fucking point" << endl;
+          //  }
+        }
+    }
+    
+    
+  //  tmp_x=((double)x)/(counter);
+   // tmp_y=((double)y)/(counter);
+  //  tmp_z=((double)z)/(counter);
+    cout << "Point is: " << p.x << "," << p.y << "," << p.z << endl;
+    C21_VisionAndLidar::C21_obj c21srv;
+  
+    c21srv.request.sample.x1 = p.x;
+    c21srv.request.sample.y1 = p.z;
+    c21srv.request.sample.x2 = p.y;
+    c21srv.request.sample.y2 = 0;
+    
+    if(c21client.call(c21srv))
+    {
+        if(px != NULL) *px = round(c21srv.response.point.x);
+        if(py != NULL) *py = round(c21srv.response.point.y);
+        if(pz != NULL) *pz = round(c21srv.response.point.z);
+        cout << "Received data: " << c21srv.response.point.x << "," << c21srv.response.point.y << "," << c21srv.response.point.z << endl;
+        return true;
+    }
+    return false;
+}
+    
 Mat fromSensorMsg(const sensor_msgs::ImageConstPtr& msg)
 {
     cv_bridge::CvImagePtr cv_ptr;
@@ -80,6 +157,7 @@ C23_Detector::C23_Detector(const char* left_cam, const char* right_cam, const ch
 it_(nh),
 left_image_sub_( it_, left_cam, 1 ),
 pointcloud(nh,pointc,1),
+_target(NONE),
 sync( MySyncPolicy( 10 ), left_image_sub_,pointcloud)
 {
     
@@ -398,7 +476,7 @@ bool C23_Detector::detectValve(Mat srcImg, const sensor_msgs::PointCloud2::Const
             
         }
     }
-    if(biggest_size > 30 && biggest_size < 80) {
+    if(biggest_size > 30 && biggest_size < 350) {
         
         
         
@@ -1240,6 +1318,7 @@ bool C23_Detector::detectGate(Mat srcImg, const sensor_msgs::PointCloud2::ConstP
                 cout << "Got data: " << x << "," << y << endl;
                 
             }*/
+          /*
             int x1,y1,x2,y2;
             cout << "Sending left: " << mcL[biggstL].x << "," << mcL[biggstL].y << endl;
             cout << "Sending right: " << mcR[biggstR].x << "," <<mcR[biggstR].y << endl;
@@ -1271,11 +1350,20 @@ bool C23_Detector::detectGate(Mat srcImg, const sensor_msgs::PointCloud2::ConstP
             }
              x =  (x1+x2)/2.0;
              y = (y1+y2)/2.0;
-          //  Point2f a((float) (mcL[biggstL].x + mcR[biggstR].x)/2,(float)(mcL[biggstL].y + mcR[biggstR].y)/2);
-          //  circle( srcImg, a, 16, Scalar(0,0,255), -1, 8, 0 );
-            //  imshow("TESTING",srcImg);
-            // waitKey(0);
+          // 
+           
             return true;
+            */
+          Point2f a((float) (mcL[biggstL].x + mcR[biggstR].x)/2,(float)(mcL[biggstL].y + mcR[biggstR].y)/2);
+          circle( srcImg, a, 16, Scalar(0,0,255), -1, 8, 0 );
+          imshow("TESTING",srcImg);
+          waitKey(0);
+          int x1,y1,z1,x2,y2,z2;
+          averagePointCloud(mcL[biggstL].x-10, mcL[biggstL].y-100, mcL[biggstL].x+10, mcL[biggstL].y+100, cloud, &x1, &y1,&z1);
+          averagePointCloud(mcR[biggstR].x-10, mcR[biggstR].y-100, mcR[biggstR].x+10, mcR[biggstR].y+100, cloud, &x2, &y2,&z2);
+          
+          x = (x1+x2)/2.0;
+          y = (y1+y2)/2.0;
         }
     }
     

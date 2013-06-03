@@ -91,6 +91,10 @@ private:
     bool detectGear(Mat srcImg,const sensor_msgs::PointCloud2::ConstPtr &cloud,int location);
     
     bool pictureCoordinatesToGlobalPosition(int x1, int y1, int x2, int y2, int* x, int* y, int *z);
+    bool pointCloudCoordinatesToGlobalPosition(int x, int y, int z, int* px, int* py, int *pz);
+    bool averagePointCloud(int x1, int y1, int x2, int y2, const sensor_msgs::PointCloud2::ConstPtr &detectionCloud, int* px, int* py, int *pz) ;
+        
+        
 	ros::NodeHandle nh;
     bool takePictures(Mat srcImg);
     bool templateMatching( Mat img, Mat templateImage, int matching_method, cv::Point *matchLoc=NULL);
