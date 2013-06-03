@@ -149,10 +149,10 @@ public:
                 traj_vec_right_srv.request.segments_number = 1000 ;
                 traj_vec_right_srv.request.total_time = 5 ;
 		if(req.quick){
-			traj_vec_left_srv.request.segments_number = 40 ;
-			traj_vec_left_srv.request.total_time = (5.0/25);
-			traj_vec_right_srv.request.segments_number = 40 ;
-			traj_vec_right_srv.request.total_time = (5.0/25);
+			traj_vec_left_srv.request.segments_number = 100 ;
+			traj_vec_left_srv.request.total_time = 2;
+			traj_vec_right_srv.request.segments_number = 100 ;
+			traj_vec_right_srv.request.total_time = 2;
 		}
 
       /*
@@ -212,7 +212,7 @@ public:
 		atlas_command.i_effort_min.resize(n);
 		atlas_command.i_effort_max.resize(n);
 		atlas_command.k_effort.resize(n);
-		for (unsigned int i = 0; i < n; i++)
+		for (unsigned int i = 0; i < 16; i++)
 		{
 			std::vector<std::string> pieces;
 			boost::split(pieces, jointcommands.name[i], boost::is_any_of(":"));
@@ -238,8 +238,37 @@ public:
 			atlas_command.velocity[i]     = 0;
 			atlas_command.effort[i]       = 0;
 			atlas_command.kp_velocity[i]  = 0;
-			atlas_command.k_effort[i] = 255;
+			atlas_command.k_effort[i] = 0;
 		}
+
+		for (unsigned int i = 16; i < n; i++)
+				{
+					std::vector<std::string> pieces;
+					boost::split(pieces, jointcommands.name[i], boost::is_any_of(":"));
+
+					rosnode->getParam("atlas_controller/gains/" + pieces[2] + "/p",
+					                  jointcommands.kp_position[i]);
+					atlas_command.kp_position[i] = jointcommands.kp_position[i];
+					rosnode->getParam("atlas_controller/gains/" + pieces[2] + "/i",
+					                  jointcommands.ki_position[i]);
+					atlas_command.ki_position[i] = jointcommands.ki_position[i];
+					rosnode->getParam("atlas_controller/gains/" + pieces[2] + "/d",
+					                  jointcommands.kd_position[i]);
+					atlas_command.kd_position[i] = jointcommands.kd_position[i];
+					rosnode->getParam("atlas_controller/gains/" + pieces[2] + "/i_clamp",
+					                  jointcommands.i_effort_min[i]);
+					atlas_command.i_effort_min[i] = -jointcommands.i_effort_min[i];
+
+					rosnode->getParam("atlas_controller/gains/" + pieces[2] + "/i_clamp",
+					                  jointcommands.i_effort_max[i]);
+					atlas_command.i_effort_max[i] = jointcommands.i_effort_max[i];
+
+					atlas_command.kp_position[i] = jointcommands.kp_position[i];
+					atlas_command.velocity[i]     = 0;
+					atlas_command.effort[i]       = 0;
+					atlas_command.kp_velocity[i]  = 0;
+					atlas_command.k_effort[i] = 255;
+				}
 		if(traj_vector_cli_.call(traj_vec_left_srv)&&traj_vector_cli_.call(traj_vec_right_srv)){
 
 			double p0_l,p1_l,p2_l,p3_l,p4_l,p5_l;
@@ -538,6 +567,107 @@ public:
                     return true;
                   }
                   ROS_INFO("move_hand service Error");
+                  ROS_INFO("restarting hands");
+                  position1();
+                  ros::Duration(0.5).sleep();
+
+                  ROS_INFO("moving hand");
+                  ros::spinOnce();
+
+                           ROS_INFO("taking tf info");
+                           try {
+                               listener.waitForTransform("/l_clav","/pelvis",ros::Time(0),ros::Duration(0.2));
+                               listener.lookupTransform("/l_clav","/pelvis",ros::Time(0),transform_left);
+                             } catch (tf::TransformException &ex) {
+                               ROS_ERROR("%s",ex.what());
+                             }
+
+                             try {
+                                 listener.waitForTransform("/r_clav","/pelvis",ros::Time(0),ros::Duration(0.2));
+                                 listener.lookupTransform("/r_clav","/pelvis",ros::Time(0),transform_right);
+                               } catch (tf::TransformException &ex) {
+                                 ROS_ERROR("%s",ex.what());
+                               }
+
+                               try {
+                                   listener.waitForTransform("/l_clav","/left_f1_0",ros::Time(0),ros::Duration(0.2));
+                                   listener.lookupTransform("/l_clav","/left_f1_0",ros::Time(0),transform_left_finger);
+                                 } catch (tf::TransformException &ex) {
+                                   ROS_ERROR("%s",ex.what());
+                                 }
+
+                                 try {
+                                     listener.waitForTransform("/r_clav","/right_f1_0",ros::Time(0),ros::Duration(0.2));
+                                     listener.lookupTransform("/r_clav","/right_f1_0",ros::Time(0),transform_right_finger);
+                                   } catch (tf::TransformException &ex) {
+                                     ROS_ERROR("%s",ex.what());
+                                   }
+
+                               cosr_tf_left = cos(QuatToRoll(transform_left.getRotation()));
+                                 cosp_tf_left = cos(QuatToPitch(transform_left.getRotation()));
+                                 cosy_tf_left = cos(QuatToYaw(transform_left.getRotation()));
+                                 sinr_tf_left = sin(QuatToRoll(transform_left.getRotation()));
+                                 sinp_tf_left = sin(QuatToPitch(transform_left.getRotation()));
+                                 siny_tf_left = sin(QuatToYaw(transform_left.getRotation()));
+
+                                 cosr_tf_right = cos(QuatToRoll(transform_right.getRotation()));
+                                   cosp_tf_right = cos(QuatToPitch(transform_right.getRotation()));
+                                   cosy_tf_right = cos(QuatToYaw(transform_right.getRotation()));
+                                   sinr_tf_right = sin(QuatToRoll(transform_right.getRotation()));
+                                   sinp_tf_right = sin(QuatToPitch(transform_right.getRotation()));
+                                   siny_tf_right = sin(QuatToYaw(transform_right.getRotation()));
+
+                                   tf_left <<     cosp_tf_left*cosy_tf_left,     cosy_tf_left*sinp_tf_left*sinr_tf_left-cosr_tf_left*siny_tf_left,     sinr_tf_left*siny_tf_left+cosr_tf_left*cosy_tf_left*sinp_tf_left,     transform_left.getOrigin().getX(),
+                                                  cosp_tf_left*siny_tf_left,     cosr_tf_left*cosy_tf_left+cosy_tf_left*sinp_tf_left*sinr_tf_left,     cosr_tf_left*sinp_tf_left*siny_tf_left-cosy_tf_left*sinr_tf_left,     transform_left.getOrigin().getY(),
+                                                  -sinp_tf_left,                    cosp_tf_left*sinr_tf_left,                                              cosp_tf_left*cosr_tf_left,                                       transform_left.getOrigin().getZ(),
+                                                    0,                                       0,                                                                               0,                                                            1;
+
+                                   tf_right <<     cosp_tf_right*cosy_tf_right,     cosy_tf_right*sinp_tf_right*sinr_tf_right-cosr_tf_right*siny_tf_right,     sinr_tf_right*siny_tf_right+cosr_tf_right*cosy_tf_right*sinp_tf_right,     transform_right.getOrigin().getX(),
+                                                  cosp_tf_right*siny_tf_right,     cosr_tf_right*cosy_tf_right+cosy_tf_right*sinp_tf_right*sinr_tf_right,     cosr_tf_right*sinp_tf_right*siny_tf_right-cosy_tf_right*sinr_tf_right,     transform_right.getOrigin().getY(),
+                                                  -sinp_tf_right,                    cosp_tf_right*sinr_tf_right,                                              cosp_tf_right*cosr_tf_right,                                              transform_right.getOrigin().getZ(),
+                                                    0,                                       0,                                                                               0,                                                            1;
+
+
+                                   std::cout << "tf_right: " <<tf_right<< std::endl;
+                                   std::cout << "right_in: " <<tf_right<< std::endl;
+
+                                   right_mat = tf_right * right_in;
+                                   left_mat = tf_left * left_in;
+
+
+                                   if(!(req.PositionDestination_left.x==0 && req.PositionDestination_left.y==0 && req.PositionDestination_left.z==0))
+                                   {
+                                   move_hand_msg.request.PositionDestination_left.x = left_mat(0,3) - transform_left_finger.getOrigin().getX();
+                                   move_hand_msg.request.PositionDestination_left.y = left_mat(1,3) - transform_left_finger.getOrigin().getY();
+                                   move_hand_msg.request.PositionDestination_left.z = left_mat(2,3) - transform_left_finger.getOrigin().getZ();
+
+                                   move_hand_msg.request.AngleDestination_left.x = (atan2((double)left_mat(2,1),(double)left_mat(2,2))) - QuatToRoll(transform_left_finger.getRotation());
+                                   move_hand_msg.request.AngleDestination_left.y = (atan2((double)left_mat(2,0)*-1,sqrt(pow((double)left_mat(2,1),2)+pow((double)left_mat(2,2),2))))- QuatToPitch(transform_left_finger.getRotation());
+                                   move_hand_msg.request.AngleDestination_left.z = (atan2((double)left_mat(1,0),(double)left_mat(0,0)))- QuatToYaw(transform_left_finger.getRotation());
+                                   ROS_INFO("left x y z roll pitch yaw: %f %f %f %f %f %f",move_hand_msg.request.PositionDestination_left.x,move_hand_msg.request.PositionDestination_left.y,move_hand_msg.request.PositionDestination_left.z,
+                                                                                            move_hand_msg.request.AngleDestination_left.x,move_hand_msg.request.AngleDestination_left.y,move_hand_msg.request.AngleDestination_left.z);
+                                   }
+                                   if(!(req.PositionDestination_right.x==0 && req.PositionDestination_right.y==0 && req.PositionDestination_right.z==0))
+                                   {
+                                   move_hand_msg.request.PositionDestination_right.x = right_mat(0,3) - transform_right_finger.getOrigin().getX();
+                                   move_hand_msg.request.PositionDestination_right.y = right_mat(1,3) - transform_right_finger.getOrigin().getY();
+                                   move_hand_msg.request.PositionDestination_right.z = right_mat(2,3) - transform_right_finger.getOrigin().getZ();
+
+                                   move_hand_msg.request.AngleDestination_right.x = (atan2((double)right_mat(2,1),(double)right_mat(2,2))) - QuatToRoll(transform_right_finger.getRotation());
+                                   move_hand_msg.request.AngleDestination_right.y = (atan2((double)right_mat(2,0)*-1,sqrt(pow((double)right_mat(2,1),2)+pow((double)right_mat(2,2),2)))) - QuatToPitch(transform_right_finger.getRotation());
+                                   move_hand_msg.request.AngleDestination_right.z = (atan2((double)right_mat(1,0),(double)right_mat(0,0)))- QuatToYaw(transform_right_finger.getRotation());
+                                   ROS_INFO("right x y z roll pitch yaw: %f %f %f %f %f %f",move_hand_msg.request.PositionDestination_right.x,move_hand_msg.request.PositionDestination_right.y,move_hand_msg.request.PositionDestination_right.z,
+                                                                                           move_hand_msg.request.AngleDestination_right.x,move_hand_msg.request.AngleDestination_right.y,move_hand_msg.request.AngleDestination_right.z);
+                                   move_hand_msg.request.quick = req.quick;
+                                   }
+                                   ROS_INFO("moving hand");
+
+                                   if (gen_traj(move_hand_msg.request,move_hand_msg.response))
+                                   {
+                                     res.success = move_hand_msg.response.success;
+                                     return true;
+                                   }
+                                    ROS_INFO("move_hand service Error");
                   return false;
 	}
 
@@ -549,88 +679,85 @@ public:
 	            req.matrix[12],req.matrix[13],req.matrix[14],req.matrix[15];
 
 
-	  Eigen::Matrix4f TF1,TF2;
-	            TF1(0,0)=0.956958030337725;
-	            TF1(0,1)=0.187313741592912;
-	            TF1(0,2)=-0.221686468650221;
-	            TF1(0,3)=0.555000000000000;
-	            TF1(1,0)=0.226085162286393;
-	            TF1(1,1)=0.132946235442734;
-	            TF1(1,2)=0.974105103609595;
-	            TF1(1,3)=-0.289000000000000;
-	            TF1(2,0)= 0.181980294444418;
-	            TF1(2,1)=-0.982297722533646;
-	            TF1(2,2)=-0.044433734247019;
-	            TF1(2,3)=0.136000000000000;
-	            TF1(3,0)=0;
-	            TF1(3,1)=0;
-	            TF1(3,2)=0;
-	            TF1(3,3)=1;
+	  double  tx_l=req.PositionDestination_left.x,
+			  ty_l=req.PositionDestination_left.y,
+			  tz_l=req.PositionDestination_left.z,
+			  troll_l=req.AngleDestination_left.x,
+	  	  	  tpitch_l=req.AngleDestination_left.y,
+	  	  	  tyaw_l=req.AngleDestination_left.x;
+double
+	  sr_l=sin(troll_l),
+	  cr_l=cos(troll_l),
+	  sp_l=sin(tpitch_l),
+	  cp_l=cos(tpitch_l),
+	  sy_l=sin(tyaw_l),
+	  cy_l=cos(tyaw_l);
 
-                    TF2(0,0)=0.956958030337725;
-                    TF2(0,1)=0.187313741592912;
-                    TF2(0,2)=-0.221686468650221;
-                    TF2(0,3)=0.505000000000000;
-                    TF2(1,0)=0.226085162286393;
-                    TF2(1,1)=0.132946235442734;
-                    TF2(1,2)=0.974105103609595;
-                    TF2(1,3)=-0.339000000000000;
-                    TF2(2,0)= 0.181980294444418;
-                    TF2(2,1)=-0.982297722533646;
-                    TF2(2,2)=-0.044433734247019;
-                    TF2(2,3)=0.136000000000000;
-                    TF2(3,0)=0;
-                    TF2(3,1)=0;
-                    TF2(3,2)=0;
-                    TF2(3,3)=1;
+double  tx_r=req.PositionDestination_right.x,
+		  ty_r=req.PositionDestination_right.y,
+		  tz_r=req.PositionDestination_right.z,
+		  troll_r=req.AngleDestination_right.x,
+	  	  tpitch_r=req.AngleDestination_right.y,
+	  	  tyaw_r=req.AngleDestination_right.x;
+double
+sr_r=sin(troll_r),
+cr_r=cos(troll_r),
+sp_r=sin(tpitch_r),
+cp_r=cos(tpitch_r),
+sy_r=sin(tyaw_r),
+cy_r=cos(tyaw_r);
 
-	            Eigen::Matrix4f mat,mat2;
-	            mat=in_mat*TF1;
-	            double x= mat(0,3);
-	            double y= mat(1,3);
-	            double z= mat(2,3);
-	            double roll    =(std::atan2((double)mat(2,1),(double)mat(2,2)));
-	            double pitch = (std::atan2((double)-mat(2,0),std::sqrt(std::pow((double)mat(2,1),2) +std::pow((double)mat(2,2),2) )));
-	            double yaw   = (std::atan2((double)mat(1,0),(double)mat(0,0)));
+	  Eigen::Matrix4f TF_l,TF_r;
+	  TF_l<<  cp_l*cy_l,   cy_l*sp_l*sr_l-cr_l*sy_l,    sr_l*sy_l+cr_l*cy_l*sp_l,   tx_l,
+	         cp_l*sy_l,   cr_l*cy_l+cy_l*sp_l*sr_l,    cr_l*sp_l*sy_l-cy_l*sr_l,   ty_l,
+	        -sp_l,     		 	cp_l*sr_l,             cp_l*cr_l,         		   tz_l,
+	         0,   					 0,             		    0 ,           	    1;
+	  TF_r<<  cp_r*cy_r,   cy_r*sp_r*sr_r-cr_r*sy_r,    sr_r*sy_r+cr_r*cy_r*sp_r,   tx_r,
+	         cp_r*sy_r,   cr_r*cy_r+cy_r*sp_r*sr_r,    cr_r*sp_r*sy_r-cy_r*sr_r,   ty_r,
+	        -sp_r,     		 	cp_r*sr_r,             cp_r*cr_r,         		   tz_r,
+	         0,   					 0,             		    0 ,           	    1;
 
-	            mat2=in_mat*TF2;
-                    double x2= mat2(0,3);
-                    double y2= mat2(1,3);
-                    double z2= mat2(2,3);
-                    double roll2    =(std::atan2((double)mat2(2,1),(double)mat2(2,2)));
-                    double pitch2 = (std::atan2((double)-mat2(2,0),std::sqrt(std::pow((double)mat2(2,1),2) +std::pow((double)mat2(2,2),2) )));
-                    double yaw2   = (std::atan2((double)mat2(1,0),(double)mat2(0,0)));
+	            Eigen::Matrix4f mat_l,mat_r;
+	            mat_l=in_mat*TF_l;
+	            double x_l= mat_l(0,3);
+	            double y_l= mat_l(1,3);
+	            double z_l= mat_l(2,3);
+	            double roll_l=(std::atan2((double)mat_l(2,1),(double)mat_l(2,2)));
+	            double pitch_l = (std::atan2((double)-mat_l(2,0),std::sqrt(std::pow((double)mat_l(2,1),2) +std::pow((double)mat_l(2,2),2) )));
+	            double yaw_l   = (std::atan2((double)mat_l(1,0),(double)mat_l(0,0)));
 
-	            std::cout<<"x:"<<x<<"\n";
-	            std::cout<<"y:"<<y<<"\n";
-	            std::cout<<"z:"<<z<<"\n";
-	            std::cout<<"roll:"<<roll<<"\n";
-	            std::cout<<"pitch:"<<pitch<<"\n";
-	            std::cout<<"yaw:"<<yaw<<"\n";
+	            mat_r=in_mat*TF_r;
+	            double x_r= mat_r(0,3);
+	            double y_r= mat_r(1,3);
+	            double z_r= mat_r(2,3);
+	            double roll_r=(std::atan2((double)mat_r(2,1),(double)mat_r(2,2)));
+	            double pitch_r = (std::atan2((double)-mat_r(2,0),std::sqrt(std::pow((double)mat_r(2,1),2) +std::pow((double)mat_r(2,2),2) )));
+	            double yaw_r   = (std::atan2((double)mat_r(1,0),(double)mat_r(0,0)));
 
-	            move_hand::pelvis_move_hand move_msg,move_msg2;
 
-	                move_msg.request.PositionDestination_right.x =  x;
-	                move_msg.request.PositionDestination_right.y =  y;
-	                move_msg.request.PositionDestination_right.z =  z;
-	                move_msg.request.AngleDestination_right.x = roll;
-	                move_msg.request.AngleDestination_right.y = pitch;
-	                move_msg.request.AngleDestination_right.z = yaw;
+                x_l = (tx_l==0) ? 0: x_l;
+                y_l = (ty_l==0) ? 0: y_l;
+                z_l = (tz_l==0) ? 0: z_l;
 
-                        move_msg2.request.PositionDestination_right.x =  x2;
-                        move_msg2.request.PositionDestination_right.y =  y2;
-                        move_msg2.request.PositionDestination_right.z =  z2;
-                        move_msg2.request.AngleDestination_right.x = roll2;
-                        move_msg2.request.AngleDestination_right.y = pitch2;
-                        move_msg2.request.AngleDestination_right.z = yaw2;
+                x_r = (tx_r==0) ? 0: x_r;
+                y_r = (ty_r==0) ? 0: y_r;
+                z_r = (tz_r==0) ? 0: z_r;
 
-                        if (!pelvis_move_hand_CB(move_msg2.request,move_msg2.response)){
-                        ROS_INFO("error in pelvis_move_hand service");
-                        return false;
-                        }
+	            move_hand::pelvis_move_hand move_msg;
+	            move_msg.request.quick = req.quick;
+	            move_msg.request.PositionDestination_left.x =  x_l;
+                move_msg.request.PositionDestination_left.y =  y_l;
+                move_msg.request.PositionDestination_left.z =  z_l;
+                move_msg.request.AngleDestination_left.x = roll_l;
+                move_msg.request.AngleDestination_left.y = pitch_l;
+                move_msg.request.AngleDestination_left.z = yaw_l;
 
-                        ros::spinOnce();
-
+                move_msg.request.PositionDestination_right.x =  x_r;
+                move_msg.request.PositionDestination_right.y =  y_r;
+                move_msg.request.PositionDestination_right.z =  z_r;
+                move_msg.request.AngleDestination_right.x = roll_r;
+                move_msg.request.AngleDestination_right.y = pitch_r;
+                move_msg.request.AngleDestination_right.z = yaw_r;
 
           if (pelvis_move_hand_CB(move_msg.request,move_msg.response))
           {
@@ -693,6 +820,174 @@ public:
 		ROS_INFO("end steering");
 		return true;
 	}
+
+
+	void position1(){
+		ros::spinOnce();
+	          osrf_msgs::JointCommands jointcommands;
+	          atlas_msgs::AtlasCommand atlas_command;
+	          jointcommands.name.push_back("atlas::back_lbz");
+	                          jointcommands.name.push_back("atlas::back_mby");
+	                          jointcommands.name.push_back("atlas::back_ubx");
+	                          jointcommands.name.push_back("atlas::neck_ay");
+	                          jointcommands.name.push_back("atlas::l_leg_uhz");
+	                          jointcommands.name.push_back("atlas::l_leg_mhx");
+	                          jointcommands.name.push_back("atlas::l_leg_lhy");
+	                          jointcommands.name.push_back("atlas::l_leg_kny");
+	                          jointcommands.name.push_back("atlas::l_leg_uay");
+	                          jointcommands.name.push_back("atlas::l_leg_lax");
+	                          jointcommands.name.push_back("atlas::r_leg_uhz");
+	                          jointcommands.name.push_back("atlas::r_leg_mhx");
+	                          jointcommands.name.push_back("atlas::r_leg_lhy");
+	                          jointcommands.name.push_back("atlas::r_leg_kny");
+	                          jointcommands.name.push_back("atlas::r_leg_uay");
+	                          jointcommands.name.push_back("atlas::r_leg_lax");
+	                          jointcommands.name.push_back("atlas::l_arm_usy");
+	                          jointcommands.name.push_back("atlas::l_arm_shx");
+	                          jointcommands.name.push_back("atlas::l_arm_ely");
+	                          jointcommands.name.push_back("atlas::l_arm_elx");
+	                          jointcommands.name.push_back("atlas::l_arm_uwy");
+	                          jointcommands.name.push_back("atlas::l_arm_mwx");
+	                          jointcommands.name.push_back("atlas::r_arm_usy");
+	                          jointcommands.name.push_back("atlas::r_arm_shx");
+	                          jointcommands.name.push_back("atlas::r_arm_ely");
+	                          jointcommands.name.push_back("atlas::r_arm_elx");
+	                          jointcommands.name.push_back("atlas::r_arm_uwy");
+	                          jointcommands.name.push_back("atlas::r_arm_mwx");
+
+
+	                          unsigned int n = jointcommands.name.size();
+	                          jointcommands.position.resize(n);
+	                          jointcommands.velocity.resize(n);
+	                          jointcommands.effort.resize(n);
+	                          jointcommands.kp_position.resize(n);
+	                          jointcommands.ki_position.resize(n);
+	                          jointcommands.kd_position.resize(n);
+	                          jointcommands.kp_velocity.resize(n);
+	                          jointcommands.i_effort_min.resize(n);
+	                          jointcommands.i_effort_max.resize(n);
+
+	                          atlas_command.position.resize(n);
+	                          atlas_command.velocity.resize(n);
+	                          atlas_command.effort.resize(n);
+	                          atlas_command.kp_position.resize(n);
+	                          atlas_command.ki_position.resize(n);
+	                          atlas_command.kd_position.resize(n);
+	                          atlas_command.kp_velocity.resize(n);
+	                          atlas_command.i_effort_min.resize(n);
+	                          atlas_command.i_effort_max.resize(n);
+	                          atlas_command.k_effort.resize(n);
+	                  		for (unsigned int i = 0; i < 16; i++)
+	                  		{
+	                  			std::vector<std::string> pieces;
+	                  			boost::split(pieces, jointcommands.name[i], boost::is_any_of(":"));
+
+	                  			rosnode->getParam("atlas_controller/gains/" + pieces[2] + "/p",
+	                  			                  jointcommands.kp_position[i]);
+	                  			atlas_command.kp_position[i] = jointcommands.kp_position[i];
+	                  			rosnode->getParam("atlas_controller/gains/" + pieces[2] + "/i",
+	                  			                  jointcommands.ki_position[i]);
+	                  			atlas_command.ki_position[i] = jointcommands.ki_position[i];
+	                  			rosnode->getParam("atlas_controller/gains/" + pieces[2] + "/d",
+	                  			                  jointcommands.kd_position[i]);
+	                  			atlas_command.kd_position[i] = jointcommands.kd_position[i];
+	                  			rosnode->getParam("atlas_controller/gains/" + pieces[2] + "/i_clamp",
+	                  			                  jointcommands.i_effort_min[i]);
+	                  			atlas_command.i_effort_min[i] = -jointcommands.i_effort_min[i];
+
+	                  			rosnode->getParam("atlas_controller/gains/" + pieces[2] + "/i_clamp",
+	                  			                  jointcommands.i_effort_max[i]);
+	                  			atlas_command.i_effort_max[i] = jointcommands.i_effort_max[i];
+
+	                  			atlas_command.kp_position[i] = jointcommands.kp_position[i];
+	                  			atlas_command.velocity[i]     = 0;
+	                  			atlas_command.effort[i]       = 0;
+	                  			atlas_command.kp_velocity[i]  = 0;
+	                  			atlas_command.k_effort[i] = 0;
+	                  		}
+
+	                  		for (unsigned int i = 16; i < n; i++)
+	                  				{
+	                  					std::vector<std::string> pieces;
+	                  					boost::split(pieces, jointcommands.name[i], boost::is_any_of(":"));
+
+	                  					rosnode->getParam("atlas_controller/gains/" + pieces[2] + "/p",
+	                  					                  jointcommands.kp_position[i]);
+	                  					atlas_command.kp_position[i] = jointcommands.kp_position[i];
+	                  					rosnode->getParam("atlas_controller/gains/" + pieces[2] + "/i",
+	                  					                  jointcommands.ki_position[i]);
+	                  					atlas_command.ki_position[i] = jointcommands.ki_position[i];
+	                  					rosnode->getParam("atlas_controller/gains/" + pieces[2] + "/d",
+	                  					                  jointcommands.kd_position[i]);
+	                  					atlas_command.kd_position[i] = jointcommands.kd_position[i];
+	                  					rosnode->getParam("atlas_controller/gains/" + pieces[2] + "/i_clamp",
+	                  					                  jointcommands.i_effort_min[i]);
+	                  					atlas_command.i_effort_min[i] = -jointcommands.i_effort_min[i];
+
+	                  					rosnode->getParam("atlas_controller/gains/" + pieces[2] + "/i_clamp",
+	                  					                  jointcommands.i_effort_max[i]);
+	                  					atlas_command.i_effort_max[i] = jointcommands.i_effort_max[i];
+
+	                  					atlas_command.kp_position[i] = jointcommands.kp_position[i];
+	                  					atlas_command.velocity[i]     = 0;
+	                  					atlas_command.effort[i]       = 0;
+	                  					atlas_command.kp_velocity[i]  = 0;
+	                  					atlas_command.k_effort[i] = 255;
+	                  				}
+	                          double l_arm_usy = positions[joints["l_arm_usy"]],
+	                        		  l_arm_shx = positions[joints["l_arm_shx"]],
+	                        		  l_arm_ely = positions[joints["l_arm_ely"]],
+	                        		  l_arm_elx = positions[joints["l_arm_elx"]],
+	                        		  l_arm_uwy = positions[joints["l_arm_uwy"]],
+	                        		  l_arm_mwx = positions[joints["l_arm_mwx"]],
+	                        		  r_arm_usy = positions[joints["r_arm_usy"]],
+	                        		  r_arm_shx = positions[joints["r_arm_shx"]],
+	                        		  r_arm_ely = positions[joints["r_arm_ely"]],
+	                        		  r_arm_elx = positions[joints["r_arm_elx"]],
+	                        		  r_arm_uwy = positions[joints["r_arm_uwy"]],
+	                        		  r_arm_mwx = positions[joints["r_arm_mwx"]];
+
+	for(unsigned int i = 1; i < 101; i++){
+	                          atlas_command.position[joints["l_arm_usy"]] = l_arm_usy+(-0.3-l_arm_usy)*(i/100.0);
+	                          atlas_command.position[joints["l_arm_shx"]] = l_arm_shx+(-0.9-l_arm_shx)*(i/100.0);
+	                          atlas_command.position[joints["l_arm_ely"]] = l_arm_ely+(1.2-l_arm_ely)*(i/100.0);
+	                          atlas_command.position[joints["l_arm_elx"]] = l_arm_elx+(1.5-l_arm_elx)*(i/100.0);
+	                          atlas_command.position[joints["l_arm_uwy"]] = l_arm_uwy+(0.6-l_arm_uwy)*(i/100.0);
+	                          atlas_command.position[joints["l_arm_mwx"]] = l_arm_mwx+(0.1-l_arm_mwx)*(i/100.0);
+
+	                          atlas_command.position[joints["r_arm_usy"]] = r_arm_usy+(-0.3-r_arm_usy)*(i/100.0);
+	                          atlas_command.position[joints["r_arm_shx"]] = r_arm_shx+(0.9-r_arm_shx)*(i/100.0);
+	                          atlas_command.position[joints["r_arm_ely"]] = r_arm_ely+(1.2-r_arm_ely)*(i/100.0);
+	                          atlas_command.position[joints["r_arm_elx"]] = r_arm_elx+(-1.5-r_arm_elx)*(i/100.0);
+	                          atlas_command.position[joints["r_arm_uwy"]] = r_arm_uwy+(0.6-r_arm_uwy)*(i/100.0);
+	                          atlas_command.position[joints["r_arm_mwx"]] = r_arm_mwx+(0.1-r_arm_mwx)*(i/100.0);
+
+
+
+	                          atlas_command.position[joints["l_leg_uhz"]] = positions[joints["l_leg_uhz"]];
+	                          atlas_command.position[joints["l_leg_mhx"]] = positions[joints["l_leg_mhx"]];
+	                          atlas_command.position[joints["l_leg_lhy"]] = positions[joints["l_leg_lhy"]];
+	                          atlas_command.position[joints["l_leg_kny"]] = positions[joints["l_leg_kny"]];
+	                          atlas_command.position[joints["l_leg_uay"]] = positions[joints["l_leg_uay"]];
+	                          atlas_command.position[joints["l_leg_lax"]] = positions[joints["l_leg_lax"]];
+
+	                          atlas_command.position[joints["r_leg_uhz"]] = positions[joints["r_leg_uhz"]];
+	                          atlas_command.position[joints["r_leg_mhx"]] = positions[joints["r_leg_mhx"]];
+	                          atlas_command.position[joints["r_leg_lhy"]] = positions[joints["r_leg_lhy"]];
+	                          atlas_command.position[joints["r_leg_kny"]] = positions[joints["r_leg_kny"]];
+	                          atlas_command.position[joints["r_leg_uay"]] = positions[joints["r_leg_uay"]];
+	                          atlas_command.position[joints["r_leg_lax"]] = positions[joints["r_leg_lax"]];
+
+	                          atlas_command.position[joints["neck_ay"]] = positions[joints["neck_ay"]];
+	                          atlas_command.position[joints["back_lbz"]] = positions[joints["back_lbz"]];
+	                          atlas_command.position[joints["back_mby"]] = positions[joints["back_mby"]];
+	                          atlas_command.position[joints["back_ubx"]] = positions[joints["back_ubx"]];
+
+	                          pub_joint_commands_.publish(atlas_command);
+	                          ros::Duration(0.05).sleep();
+	                          ros::spinOnce();
+	}
+		}
 };
 int main(int argc, char **argv)
 {
