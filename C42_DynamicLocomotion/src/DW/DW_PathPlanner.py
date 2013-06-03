@@ -9,6 +9,8 @@
 from Abstractions.PathPlanner import *
 from collections import deque
 
+import math
+
 ###################################################################################
 #--------------------------------- QS Path Planner  -------------------------------
 ###################################################################################
@@ -25,12 +27,14 @@ class DW_PathPlanner(PathPlanner):
         PathPlanner.__init__(self)
         self._Queue = deque([])
         self.State = DW_PathPlannerEnum.Empty
-        
+        self._PathYaw = 0.0
+
     def SetPath(self,waypointList):
         PathPlanner.SetPath(self,waypointList)
         self._Queue.extend(waypointList)
         if(0 < len(self._Queue)):
             self._SetPathYaw()
+            #print ("Setting PathYaw:", self._PathYaw)
             self.State = DW_PathPlannerEnum.Active
         #print ("SetPath",self._Queue)
             
@@ -53,7 +57,6 @@ class DW_PathPlanner(PathPlanner):
             u = [1,0]
 
         #rospy.loginfo('GetYaw: u_norm = %f; u_x = %f, u_y = %f' %(_u_,u[0],u[1] ) )
-        
         self._PathYaw = math.atan2(u[1],u[0])
 
     def GetPathYaw(self):

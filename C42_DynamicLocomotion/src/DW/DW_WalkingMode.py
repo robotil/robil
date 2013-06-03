@@ -13,6 +13,7 @@ import math
 
 import roslib;roslib.load_manifest('C42_DynamicLocomotion')
 from C31_PathPlanner.msg import C31_Waypoints
+from C25_GlobalPosition.msg import C25C0_ROP
 
 class DW_WalkingMode(WalkingMode):
     def __init__(self,iTf):
@@ -25,7 +26,8 @@ class DW_WalkingMode(WalkingMode):
         self._bDone = False
         
         self._Subscribers["Path"] = rospy.Subscriber('/path',C31_Waypoints,self._path_cb)
-        self._Subscribers["Odometry"] = rospy.Subscriber('/ground_truth_odom',Odometry,self._Controller.Odom_cb)
+        self._Subscribers["Odometry"] = rospy.Subscriber('/C25/publish',C25C0_ROP,self._Controller.Odom_cb)
+        #self._Subscribers["Odometry"] = rospy.Subscriber('/ground_truth_odom',Odometry,self._Controller.Odom_cb)
         self._Subscribers["AtlasState"] = rospy.Subscriber('/atlas/atlas_state',AtlasState,self._Controller.RS_cb)
         rospy.sleep(0.3)
 

@@ -263,8 +263,11 @@ class DW_Controller(object):
             print ("Odom_cb::", self.GlobalPos)
             self._counter = 0
         self._counter += 1
-        self.GlobalPos = msg.pose.pose.position
-        self.GlobalOri = msg.pose.pose.orientation
+        self.GlobalPos = msg.pose.pose.pose.position # from C25_GlobalPosition
+        self.GlobalOri = msg.pose.pose.pose.orientation # from C25_GlobalPosition
+        # self.GlobalPos = msg.pose.pose.position    # from /ground_truth_odom
+        # self.GlobalOri = msg.pose.pose.orientation # from /ground_truth_odom
+
 
     def ResetPose(self):
         self.JC.set_all_pos([0]*28)
