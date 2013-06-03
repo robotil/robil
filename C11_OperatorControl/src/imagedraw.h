@@ -11,7 +11,7 @@
 #include "tcpConnection.h"
 #include "ui_imagedraw.h"
 
-class ImageDraw : public QMainWindow/*, public IC11_Node_Subscriber*/, public ITcpConnectionInterface
+class ImageDraw : public QMainWindow, public IC11_Node_Subscriber, public ITcpConnectionInterface
 {
 	Q_OBJECT
 
@@ -44,6 +44,7 @@ public:
 	virtual void OnPathReceived(std::vector<StructPoint> points);
 	virtual void OnExecutionStatusUpdate(int status);
 	virtual void OnHMIResponseReceived();
+	virtual void OnExecuterStackUpdate(QString strQString);
 	/*virtual*/ void OnWaitResponseFinished();
 
 protected:
@@ -51,7 +52,7 @@ protected:
 
 private:
 	Ui::ImageDrawClass ui;
-//	C11_Node C11node;
+	C11_Node C11node;
 	CTcpConnection *pCTcpConnection;
 	int ImageAreaCount;
 	QMap<int,CGraphicsView*> ImageAreas;

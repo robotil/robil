@@ -41,6 +41,7 @@ public:
         void SendPath(vector<StructPoint> path);
         void SendHMIResponse();
         void SendExecutionStatusChange(int status);
+        void SendExecuterStack(QString str);
         void SendHello();
 
 private:

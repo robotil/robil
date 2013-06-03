@@ -70,15 +70,17 @@ bool C11_Node::init() {
 
 		//status_subscriber = nh_->subscribe("c11_stt",1000,&StatusMessageCallback);
 
-		c11_push_img =	nh_->advertiseService("C11/push_img", &C11_Node::push_img_proccess, this);
-		c11_push_occupancy_grid = nh_->advertiseService("C11/push_occupancy_grid", &C11_Node::push_occupancy_grid_proccess, this);
-		c11_push_path = nh_->advertiseService("C11/push_path", &C11_Node::push_path_proccess, this);
-		c11_hmi_response = nh_->advertiseService("C11/HMIResponse", &C11_Node::hmi_response_proccess, this);
-		c11_execution_status_change = nh_->advertiseService("C11/execution_status_change", &C11_Node::execution_status_change, this);
-		LoadMissionClient = nh_->serviceClient<C10_Common::mission_selection>("MissionSelection");
-		ResumeMissionClient = nh_->serviceClient<C10_Common::resume_mission>("ResumeMission");
-		PauseMissionClient = nh_->serviceClient<C10_Common::pause_mission>("PauseMission");
-		PathUpdateClient = nh_->serviceClient<C10_Common::path_update>("PathUpdate");
+//		c11_push_img =	nh_->advertiseService("C11/push_img", &C11_Node::push_img_proccess, this);
+//		c11_push_occupancy_grid = nh_->advertiseService("C11/push_occupancy_grid", &C11_Node::push_occupancy_grid_proccess, this);
+//		c11_push_path = nh_->advertiseService("C11/push_path", &C11_Node::push_path_proccess, this);
+//		c11_hmi_response = nh_->advertiseService("C11/HMIResponse", &C11_Node::hmi_response_proccess, this);
+//		c11_execution_status_change = nh_->advertiseService("C11/execution_status_change", &C11_Node::execution_status_change, this);
+//		LoadMissionClient = nh_->serviceClient<C10_Common::mission_selection>("MissionSelection");
+//		ResumeMissionClient = nh_->serviceClient<C10_Common::resume_mission>("ResumeMission");
+//		PauseMissionClient = nh_->serviceClient<C10_Common::pause_mission>("PauseMission");
+//		PathUpdateClient = nh_->serviceClient<C10_Common::path_update>("PathUpdate");
+
+		executer_update_pub = nh_->advertise<std_msgs::String>("executer/stack_stream1",10000);
 
 
         start();
@@ -305,6 +307,14 @@ void C11_Node::SendPathUpdate(std::vector<StructPoint> points)
         {
             ROS_ERROR("Failed to call service C11_Agent::path_update");
         }
+}
+
+void C11_Node::SendExecuterUpdate(QString str)
+{
+	std::string data = str.toStdString();
+	std_msgs::String msgsStr;
+	msgsStr.data = data;
+	executer_update_pub.publish(msgsStr);
 }
 
 /*int main(int argc, char **argv)

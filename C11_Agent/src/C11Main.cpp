@@ -14,6 +14,7 @@ C11Main::C11Main(int argc, char **argv)
   connect(this,SIGNAL(SigOnPathSend(vector<StructPoint>)),this,SLOT(SltOnPathSend(vector<StructPoint>)));
   connect(this,SIGNAL(SigOnHMIResponse()),this,SLOT(SltOnHMIResponse()));
   connect(this,SIGNAL(SigOnExecutionStatusChange(int)),this,SLOT(SltOnExecutionStatusChange(int)));
+  connect(this,SIGNAL(SigOnSendExecuterStack(QString)),this,SLOT(SltOnSendExecuterStack(QString)));
 }
 
 C11Main::~C11Main()
@@ -63,6 +64,13 @@ void C11Main::ExecutionStatusChanged(int status)
   emit SigOnExecutionStatusChange(status);
 }
 
+void C11Main::SendExecuterStack(QString str)
+{
+	cout<<"C11Main::SendExecuterStack \n";
+//	QString strString(str.data());
+	emit SigOnSendExecuterStack(str);
+}
+
 void C11Main::SltOnImageSend(QImage img)
 {
   pCTcpServer->SendImage(img);
@@ -89,6 +97,13 @@ void C11Main::SltOnHMIResponse()
 void C11Main::SltOnExecutionStatusChange(int status)
 {
   pCTcpServer->SendExecutionStatusChange(status);
+}
+
+void C11Main::SltOnSendExecuterStack(QString str)
+{
+	cout<<"C11Main::SltOnSendExecuterStack \n";
+	pCTcpServer->SendExecuterStack(str);
+//	pC11Node->SetReleased();
 }
 
 void C11Main::SltHMIResponded()
