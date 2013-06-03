@@ -13,9 +13,9 @@ to test one of the following action servers: GripSteeringWheel, CalibrateWheel, 
 GripHandBrake, GripGearStick.
 use the taskTester.cpp (by Dan)
 
-for GripSteeringWheel use:(in this example wait for 1 second use target angle of 1.5 [rad]) - stub
+for GripSteeringWheel use:(in this example wait for 1 second go from angle of 0.3 to angle of 1.5 [rad]) - active
 rosrun C67_CarManipulation GripSteeringWheel 
-rosrun C67_CarManipulation task_tester GripSteeringWheel 1 args="angle=1.5"
+rosrun C67_CarManipulation task_tester GripSteeringWheel 1 args="StartAngle=0.3,EndAngle=1.5"
 
 for CalibrateWheel use:(in this example wait for 1 second use target operation 1(1-Hold, 2-Release), angle[rad]) - active
 rosrun C67_CarManipulation CalibrateWheel 
