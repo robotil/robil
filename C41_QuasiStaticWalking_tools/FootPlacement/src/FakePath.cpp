@@ -7,7 +7,7 @@ int main(int argc, char **argv) {
 	C31_PathPlanner::C31_Waypoints waypoints;
 	C31_PathPlanner::C31_Location location;
 	location.y = 0.0;
-	for (double i = 0; i < 5; i += 0.5) {
+	for (double i = 1; i < 5; i += 1) {
 		location.x = i;
 		waypoints.points.push_back(location);
 	}

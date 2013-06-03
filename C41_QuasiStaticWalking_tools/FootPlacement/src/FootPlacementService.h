@@ -5,23 +5,30 @@
 #include "geometry_msgs/Point.h"
 #include "C22_CompactGroundRecognitionAndMapping/C22.h"
 #include "C31_PathPlanner/C31_Waypoints.h"
+//#include <C22_transformations/MapTransformations.h>
 #include "FootPlacement/FootPlacement_Service.h"
 #include "tf/transform_listener.h"
 
-#define SQUARE_SIZE 0.25
-#define SIZE 19
-#define C22_SIZE 100
+#define SQUARE_SIZE 0.05
+#define C22_SIZE 40
+#define SIZE 36
+#define STEPS 3
 
-#define SLOPE_WEIGHT 0
+#define SLOPE_WEIGHT 5
 #define DISTANCE_WEIGHT 5
-#define HEIGHT_WEIGHT 0
+#define HEIGHT_WEIGHT 5
 #define DIRECTION_WEIGHT 5
+#define GROUND_TYPE_WEIGHT 5
 
 #define LEFT 0
 #define RIGHT 1
 #define NORMALIZER 100
 
 #define USE_C22 0
+
+#define PI 3.14159265
+#define MAX_ORIENTATION_CHANGE PI/4
+
 
 class FootPlacementService {
 private:
@@ -42,8 +49,9 @@ private:
 	//kinamtic possibility
 	int possible(int i, int j);
 
-	void createMatrix25(int map[SIZE][SIZE],
-		const C22_CompactGroundRecognitionAndMapping::C22C0_PATH& path);
+	void createAvgMatrix(
+			C22_CompactGroundRecognitionAndMapping::C22_PLANE_TYPE avgMap[SIZE][SIZE],
+			const C22_CompactGroundRecognitionAndMapping::C22C0_PATH& path);
 
 	//calculate point in the place i,j on plane
 	geometry_msgs::Point calcPoint(const int &i, const int &j,
