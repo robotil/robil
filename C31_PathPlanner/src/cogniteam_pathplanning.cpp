@@ -89,6 +89,36 @@ Map MapEditor::replace(const Map& source, const char from, const char to)const{
 	return res;
 }
 
+ObsMap MapEditor::	merge(const ObsMap& m1, const ObsMap& m2, MergeOperator op)const{
+	if(m1.w()!=m2.w() || m1.h()!=m2.h()){
+		cout<<"ERROR: MapEditor::merge: dimensions of maps are different"<<endl;
+		return Map(m1);
+	}
+	Map res ( m1 );
+	for( size_t y=0; y<m1.h(); y++){for( size_t x=0; x<m1.w(); x++){
+		if(
+			( m1(x,y)==Map::ST_UNCHARTED && m2(x,y)!=Map::ST_UNCHARTED ) ||
+			( m2(x,y)==Map::ST_UNCHARTED && m1(x,y)!=Map::ST_UNCHARTED ) ||
+			( m2(x,y)==Map::ST_UNCHARTED && m1(x,y)==Map::ST_UNCHARTED )
+		){
+			res(x,y) = m2(x,y)==Map::ST_UNCHARTED? m1(x,y) : m2(x,y);
+		}else{
+			switch(op){
+			case OR:
+				res(x,y) = m1(x,y)==Map::ST_BLOCKED || m2(x,y)==Map::ST_BLOCKED ? Map::ST_BLOCKED : Map::ST_AVAILABLE;
+				break;
+			case AND:
+				res(x,y) = m1(x,y)==Map::ST_BLOCKED && m2(x,y)==Map::ST_BLOCKED ? Map::ST_BLOCKED : Map::ST_AVAILABLE;
+				break;
+			case XOR:
+				res(x,y) = m1(x,y)!=Map::ST_BLOCKED != m2(x,y)!=Map::ST_BLOCKED ? Map::ST_BLOCKED : Map::ST_AVAILABLE;
+				break;
+			}
+		}
+	}}
+	return res;
+}
+
 Map MapEditor::coloring(const Map& source, size_t x, size_t y, const char av, const char bl)const{
 	//ALLOCATE MEMORY FOR COLORED MAP AND FOR VISITED/UNVISITED FLAGES
 	Map visited(source.w(), source.h());

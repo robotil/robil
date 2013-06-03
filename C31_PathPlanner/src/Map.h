@@ -163,6 +163,11 @@ public:
 	ObsMap coloring(const ObsMap& source, size_t x, size_t y, char av, char bl)const;
 	ObsMap replace(const ObsMap& source, const char from, const char to)const;
 
+	enum MergeOperator{
+		OR, AND, XOR
+	};
+	ObsMap merge(const ObsMap& m1, const ObsMap& m2, MergeOperator op)const;
+
 private:
 	void coloring(const ObsMap& source, size_t x, size_t y, char c, char av, char bl, ObsMap& visited, ObsMap& res)const;
 
