@@ -57,8 +57,9 @@ typedef enum targets {
   FIREHOSE,
   INSIDE_STEERINGWHEEL,
   OUTSIDE_STEERINGWHEEL,
-  INSIDE_HANDBRAKE,
-  OUTSIDE_HANDBRAKE,
+  HANDBRAKE,
+  GEAR,
+  PUSHBUTTON,
   NONE
 } TARGETS;
 
@@ -81,12 +82,14 @@ private:
     bool detectPath(Mat srcImg);
     bool detectCar(Mat srcImg, const sensor_msgs::PointCloud2::ConstPtr &cloud);
     //bool compareContourAreas ( vector<cv::Point> contour1, vector<cv::Point> contour2) ;
-    bool detectPassengerDriver(Mat srcImg, int x1,int y1,int x2,int y2);
+    bool detectPassengerDriver(Mat srcImg, int x1,int y1,int x2,int y2, pcl::PointXYZ minPoint, pcl::PointCloud<pcl::PointXYZ> pclcloud);
     bool detectValve(Mat srcImg, const sensor_msgs::PointCloud2::ConstPtr &cloud);
     bool detectFirehose(Mat srcImg, const sensor_msgs::PointCloud2::ConstPtr &cloud);
     
     bool detectSteeringWheel(Mat srcImg,const sensor_msgs::PointCloud2::ConstPtr &cloud,int location);
     bool detectHandbrake(Mat srcImg,const sensor_msgs::PointCloud2::ConstPtr &cloud,int location);
+    bool detectGear(Mat srcImg,const sensor_msgs::PointCloud2::ConstPtr &cloud,int location);
+    bool detectPushButton(Mat srcImg,const sensor_msgs::PointCloud2::ConstPtr &cloud,int location);
     
     bool pictureCoordinatesToGlobalPosition(int x1, int y1, int x2, int y2, int* x, int* y, int *z);
 	ros::NodeHandle nh;
