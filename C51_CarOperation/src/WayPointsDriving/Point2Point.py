@@ -89,9 +89,9 @@ class MemberFunc():
         
 #--------------------Define Membership Functions Variables ----------------------------------#
 
-OrientationMF= [ MemberFunc([-1,  -1,  -(60.0/180.0),  -(30.0/180.0)]),  MemberFunc([-(60.0/180.0),  -(30.0/180.0),  0]),  MemberFunc([30.0/180.0, 60.0/180.0,  1,  1]),  MemberFunc([-(5.0/180.0),  0,  (5.0/180.0)]),  MemberFunc([0,  30.0/180.0,  60.0/180.0])]#[VNO NO ZO PO VPO]   
+OrientationMF= [ MemberFunc([-1,  -1,  -(60.0/180.0),  -(0.0/180.0)]),  MemberFunc([-(60.0/180.0),  -(30.0/180.0),  5.0/180.0]),  MemberFunc([00.0/180.0, 60.0/180.0,  1,  1]),  MemberFunc([-(5.0/180.0),  0,  (5.0/180.0)]),  MemberFunc([-5.0/180.0,  30.0/180.0,  60.0/180.0])]#[VNO NO ZO PO VPO]   
 
-dOrientationMF= [ MemberFunc( [-180,  -180,-60,   -30]),  MemberFunc( [-10,  0,  10]),  MemberFunc( [30,  60,  180, 180]),  MemberFunc( [-50,  -30,  3]),  MemberFunc( [3,  30,  50])]#[VNO NO ZO PO VPO]   
+dOrientationMF= [ MemberFunc( [-180,  -180,-60,   0]),  MemberFunc( [-10,  0,  10]),  MemberFunc( [0,  60,  180, 180]),  MemberFunc( [-50,  -30,  5]),  MemberFunc( [-5,  30,  50])]#[VNO NO ZO PO VPO]   
 
 #Distance
 DistanceMF= [ MemberFunc([0, 0,  3.5, 7]),   MemberFunc([20,  30,  100000,  100000]),  MemberFunc([3.5,  13.5, 23.5])] #[CLOSE FAR VFAR] 
@@ -148,8 +148,8 @@ def findMin(seq):
 
         return 0
 def P2P(Distance, Orientation, dOrientation, factor):
-        SF=-1.0/90.0/360.0*Distance+19.0/(18.0*180)
-        #SF = 1/180
+        #SF=-1.0/90.0/360.0*Distance+19.0/(18.0*180)
+        SF = 1/180
         if SF<1.0/360.0:
             SF=1.0/360.0
         OrientationMFflag=[0, 0, 0, 0, 0]
