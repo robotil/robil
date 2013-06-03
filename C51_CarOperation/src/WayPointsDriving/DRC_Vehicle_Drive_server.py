@@ -30,7 +30,7 @@ import threading
 
 LEFT = -1
 RIGHT = 1
-TIME = 2
+TIME = 4
 
 
 
@@ -132,9 +132,9 @@ class Drive(object):
         t = threading.Thread(target=doGui, args =  (self.q_in, self.q_out, ) )
         t.daemon = True
         t.start()
-        MAPthread=threading.Thread(target=self.MAPPING) #, args =  (self.q_in, self.q_out, )
-        MAPthread.daemon = True
-        MAPthread.start()
+#        MAPthread=threading.Thread(target=self.MAPPING) #, args =  (self.q_in, self.q_out, )
+#        MAPthread.daemon = True
+#        MAPthread.start()
         a=RTD()
         
         self.q_out.put(a)
@@ -271,7 +271,7 @@ class Drive(object):
     
         self.C31_path = numpy.array([])
         self.sub = rospy.Subscriber('/path', C31_Waypoints,self.getPath) #get atlas location by subscribing to C25 module        
-        self.path=  [(5, -1.5), (18, -1.5),(51, -1.5), (97, -1.5), (103, 0.5), (149, 47.5), (151.44, 52.5) ]#self.C31_path#
+        self.path=  [(51,0), (97, -1.5), (103, 0.5), (149, 47.5), (151.44, 52.5) ]#self.C31_path#(5, -1.5), (18, -1.5),
         DATA=LOG()
         DATA.StartDrive = DATA.getTime()
         while not rospy.is_shutdown():
@@ -302,7 +302,7 @@ class Drive(object):
                         m1=atan2(self.path[i+1][1]-object[1], self.path[i+1][0]-object[0])*180/pi
                     except: 
                         m1=360
-                    if (abs(al-m1)>20 and self.DistanceToWP(object)>5) :
+                    if (self.DistanceToWP(object)>5) : #abs(al-m1)>20 and 
                         print "-------------------------------"
                         print "Driving to way point x=%f, y=%f" %(object[0],object[1])
                         while (self.isPassedNormal(self.xPosition,self.yPosition, m, b,flag)):
@@ -319,8 +319,16 @@ class Drive(object):
                             
 
                             factor = self.factorGenerator()
+#                            for f in range(0, len(factor)):
+#                                if not factor[f]==1:
+#                                    factor[f]=0
+                            #[dSpeed, Cspeed]=P2P(self.DistanceToWP(object), self.OE[0], self.dOE, [1, 1, 1, 1, 1])
+#                            print "without:", Cspeed                                    
                             [dSpeed, Cspeed]=P2P(self.DistanceToWP(object), self.OE[0], self.dOE, factor)
-                            #dSpeed = 10
+#                            print "with:", Cspeed
+
+                            rospy.sleep(0.05)
+
                             [  acc, brk] = self.SpeedController(dSpeed)
                             Cspeed = -Cspeed*pi
                             #print brk, acc
@@ -443,34 +451,34 @@ class Drive(object):
         DB = self.Obsticalpoints
 
         for pt in DB:
-            if pt[1]>-0.5 and pt[1]<2: #create Straight forward factor
-                print pt
-                if pt[0]<2:
+            if pt[1]>-1.5 and pt[1]<2: #create Straight forward factor
+                #print pt
+                if pt[0]<3:
                     rospy.loginfo("Will surely collide!!!")
                     return [0, 0, 0, 0, 0]
-                z=1/(15.0-2.0)*(pt[0]-2.0)
+                z=0.051*exp(0.208*pt[0])
                 if z<Z:#choose lowest
                     Z=z
-            elif pt[1]>2 and pt[1]<4:#create right factor
+            if pt[1]>1 and pt[1]<3.5:#create right factor
                 if pt[0]>0.5:
-                    r=1/(15.0-0.5)*(pt[0]-0.5)
+                    r=0.051*exp(0.208*pt[0])
                     if r<R:
                         R=r
-            elif  pt[1]>4 and pt[1]<6:#create very right factor
-                if pt[0]>2:
-                    vr=1/(15.0-2)*(pt[0]-2)
-                    if vr<VR:
-                        VR=vr
-            elif pt[1]>-2.5 and pt[1]<-0.5:#create left factor
+#            if  pt[1]>3 and pt[1]<6:#create very right factor
+#                if pt[0]>2:
+#                    vr=1/(15.0-2)*(pt[0]-2)
+#                    if vr<VR:
+#                        VR=vr
+            if pt[1]>-2.5 and pt[1]<-0.5:#create left factor
                 if pt[0]>0.5:
-                    l=1/(15.0-0.5)*(pt[0]-0.5)
+                    l=0.051*exp(0.208*pt[0])
                     if l<L:
                         L=l
-            elif  pt[1]>-4.5 and pt[1]<-2.5:#create very right factor
-                if pt[0]>2:
-                    vl=1/(15.0-2)*(pt[0]-2)
-                    if vl<VL:
-                        VL=vl                    
+#            if  pt[1]>-4.5 and pt[1]<-2:#create very right factor
+#                if pt[0]>2:
+#                    vl=1/(15.0-2)*(pt[0]-2)
+#                    if vl<VL:
+#                        VL=vl                    
         return [L, Z, R, VL, VR]# [L  ST  R HL  HR]
 #def getPath():
 #    #rospy.wait_for_service('C31_GlobalPathPlanner/getPath')
@@ -495,25 +503,6 @@ class Drive(object):
 #=========================================================================================#
 
 car='drc_vehicle'#'golf_cart'#
-
-class handB:
-
-    handbrake=1
-    pub=0
-    sub=0
-    def __init__(self):
-        self.pub = rospy.Publisher(car+'/hand_brake/cmd', Float64)
-        self.sub = rospy.Subscriber('/'+car+'/hand_brake/state', Float64, self.handbrakeCallback)
-    def handbrakeCallback(self, data):
-        self.handbrake=data.data
-
-    def releaseHB(self):
-        while self.handbrake>0.5 :
-            self.pub.publish(0.0)
-
-    def pullHB(self):
-        self.pub.publish(1.0)
-        #while self.handbrake<0.5 :
 
 
 class Gas:

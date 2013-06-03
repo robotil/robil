@@ -25,6 +25,7 @@
   <depend package="robot_mechanism_controllers"/>
   <depend package="sensor_msgs"/>
   <depend package="LidarObstacleDetection"/>
+  <depend package="C0_RobilTask"/>
 </package>
 
 
