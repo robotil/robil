@@ -9,7 +9,7 @@ from MonitorProgress import MonitorProgressServer
 
 if __name__ == '__main__':
     rospy.init_node('C35_Monitoring')
-    MonitorTimeServer("tests/simple_monitor_example.xml", "MonitorTime")
-    MonitorProgressServer("tests/simple_monitor_example_progress.xml", "MonitorProgress")
+    MonitorTimeServer("tests/simple_monitor_example2.xml", "MonitorTime")
+    MonitorProgressServer("tests/simple_monitor_example2.xml", "MonitorProgress")
     MonitorWayPointServer("MonitorWayPoint") 
     rospy.spin()
