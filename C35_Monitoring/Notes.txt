@@ -110,3 +110,11 @@ Known Limitations:
 =================
 Not related to monitoring, but stand_up module does not react to preemption.
 
+
+=======================
+Driving Monitor - monitors the driving module and makes sure it actually starts moving.
+=======================
+roslaunch C51_CarOperation iddqd.launch
+roslaunch C51_CarOperation C51_completeLuanch.launch 
+rosrun C35_Monitoring DrivingMonitor.py
+Open skill4_driving_1.xml in designer and run.
