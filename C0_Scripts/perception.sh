@@ -5,7 +5,7 @@ CURR_WD=$PWD
 PKILL=$CURR_WD'/.perception.txt'
 rm $PKILL
 echo "Starting C21"
-rosrun C21_VisionAndLidar C21 &
+roslaunch C21_VisionAndLidar C21.launch &
 C21_PID=$!
 echo $C21_PID
 sleep 3
