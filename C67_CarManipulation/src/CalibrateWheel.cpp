@@ -252,9 +252,9 @@ public:
 									as.position[q8l], as.position[q9l]);
 				//back in 5 centimeter
 				//argTarget.x -= 0.05;
-				RPY argTarget2 = TraceAngle(argTarget, RPY(-.1,.18,0,M_PI/2-M_PI/6, 0,0), angle);
-				RPY argTarget3 = TraceAngle(argTarget, RPY(-.1,.3,0,M_PI/2-M_PI/6, 0,0), angle);
-				argTarget2.Print();
+				RPY argTarget2 = TraceAngle(argTarget, RPY(-.05,.18,0,M_PI/2-M_PI/6, 0,0), angle);
+				RPY argTarget3 = TraceAngle(argTarget, RPY(-.05,.3,0,M_PI/2-M_PI/6, 0,0), angle);
+				//argTarget2.Print();
 				IkSolution IkNext = lScanRPY(as.position[q1], as.position[q2], as.position[q3], argTarget2,0.01);
 
 				//back to origin
