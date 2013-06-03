@@ -89,12 +89,11 @@ private:
     bool detectSteeringWheel(Mat srcImg,const sensor_msgs::PointCloud2::ConstPtr &cloud,int location);
     bool detectHandbrake(Mat srcImg,const sensor_msgs::PointCloud2::ConstPtr &cloud,int location);
     bool detectGear(Mat srcImg,const sensor_msgs::PointCloud2::ConstPtr &cloud,int location);
-    bool detectPushButton(Mat srcImg,const sensor_msgs::PointCloud2::ConstPtr &cloud,int location);
     
     bool pictureCoordinatesToGlobalPosition(int x1, int y1, int x2, int y2, int* x, int* y, int *z);
 	ros::NodeHandle nh;
     bool takePictures(Mat srcImg);
-    bool templateMatching( Mat img, Mat templateImage, int matching_method );
+    bool templateMatching( Mat img, Mat templateImage, int matching_method, cv::Point *matchLoc=NULL);
 
 	ros::Publisher objectDetectedPublisher;
   ros::Publisher objectDeminsionsPublisher;
