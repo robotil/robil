@@ -12,20 +12,21 @@ class DrivingMonitor(RobilTask):
 	init_x = -1
 	init_y = -1
 	init_time = -1
+	started_task = False
 	
 	def callback(self, msg):
-		if DrivingMonitor.init_x==-1:
+		if DrivingMonitor.started_task:
+		  DrivingMonitor.started_task = False
 		  DrivingMonitor.init_x = msg.pose.pose.position.x
 		  DrivingMonitor.init_y = msg.pose.pose.position.y
-		  DrivingMonitor.init_time = rospy.get_time()
-		  print "Driving monitor received first message."
+		  print "Driving monitor got first message."
+		else:  
+		  delta_x = msg.pose.pose.position.x - DrivingMonitor.init_x
+		  delta_y = msg.pose.pose.position.y - DrivingMonitor.init_y
+		  elapsed_time = rospy.get_time() - DrivingMonitor.init_time
 		  
-		delta_x = msg.pose.pose.position.x - DrivingMonitor.init_x
-		delta_y = msg.pose.pose.position.y - DrivingMonitor.init_y
-		elapsed_time = rospy.get_time() - DrivingMonitor.init_time
-		
-		if elapsed_time > 20 and (math.fabs(delta_x) < 1 or math.fabs(delta_y) < 1):
-			DrivingMonitor.detected_problem = True
+		  if elapsed_time > 20 and (math.fabs(delta_x) < 1 or math.fabs(delta_y) < 1):
+			  DrivingMonitor.detected_problem = True
 	
 	def __init__(self, name):
 		print "Initializing driving monitoring Node"
@@ -37,6 +38,10 @@ class DrivingMonitor(RobilTask):
 		print "Start Monitoring driving of the robot." 
 		#print parameters
 		d = rospy.Duration(1,0)
+		
+		DrivingMonitor.init_time = rospy.get_time()
+		DrivingMonitor.started_task = True
+		print "Driving monitor received first message."
 		while not DrivingMonitor.detected_problem:	
 			print DrivingMonitor.detected_problem
 			if self.isPreepted():
