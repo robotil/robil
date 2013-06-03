@@ -53,6 +53,7 @@
 	    if(y != NULL) *y = round(c21srv.response.point.y);
 	    if(z != NULL) *z = round(c21srv.response.point.z);
 	    cout << "Received data: " << c21srv.response.point.x << "," << c21srv.response.point.y << "," << c21srv.response.point.z << endl;
+	    
 	    return true;
 	}
 	return false;
@@ -282,8 +283,10 @@
 
       pictureCoordinatesToGlobalPosition(matchLoc.x,matchLoc.y,matchLoc.x + templ.cols,matchLoc.y + templ.rows,&x,&y,NULL);
       
-      //imshow( "Source Image", img_display );
-      //waitKey(0);
+      if(
+      
+      imshow( "Source Image", img_display );
+      waitKey(0);
       //imshow( "Result Window", result );
 
       return true;
@@ -332,7 +335,7 @@
     bool C23_Detector::detectGear(Mat srcImg,const sensor_msgs::PointCloud2::ConstPtr &cloud,int location){
      
       //Load the image template for the steering wheel
-      Mat gearTemplate = imread("template_matching_images/gear_template_qual.jpg");
+      Mat gearTemplate = imread("template_matching_images/push_button_template_qual.jpg");
       //imshow("Gear template", gearTemplate);
       //waitKey(0);
       

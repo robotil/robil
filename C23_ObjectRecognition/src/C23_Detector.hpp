@@ -94,7 +94,7 @@ private:
     bool pictureCoordinatesToGlobalPosition(int x1, int y1, int x2, int y2, int* x, int* y, int *z);
 	ros::NodeHandle nh;
     bool takePictures(Mat srcImg);
-    bool templateMatching( Mat img, Mat templateImage, int matching_method );
+    bool templateMatching( Mat img, Mat templateImage, int matching_method);
 
 	ros::Publisher objectDetectedPublisher;
   ros::Publisher objectDeminsionsPublisher;
