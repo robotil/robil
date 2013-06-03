@@ -49,7 +49,8 @@ private:
   message_filters::Subscriber<Imu> imu_sub;
   message_filters::Subscriber< geometry_msgs::PoseWithCovarianceStamped> pos_sub;
   Synchronizer<MySyncPolicy> sync;*/
-  ros::Subscriber imu_sub,pos_sub;
+  ros::Subscriber imu_sub,pos_sub,ground_truth_sub;
+  bool once;
   C25_GlobalPosition::C25C0_ROP last_msg;
   C23_ObjectRecognition::C23C0_ODIM last_obj_msg;
   bool gotObj;
@@ -64,14 +65,13 @@ public:
 		  pos_sub(nh_,"/robot_pose_ekf/odom",1),
 		  sync(MySyncPolicy(100), imu_sub, pos_sub)*/
 	  {
+		  once=true;
 		  //sync.registerCallback( boost::bind( &C25_Node::callback, this, _1, _2 ) );
 		  pos_sub=nh_.subscribe("/robot_pose_ekf/odom",1,&C25_Node::callback,this);
 		  c25_publisher=nh_.advertise<C25_GlobalPosition::C25C0_ROP>("C25/publish",100);
 		  c25_service=nh_.advertiseService("C25/service",&C25_Node::proccess,this);
+		  ground_truth_sub= nh_.subscribe("/ground_truth_odom", 1, &C25_Node::poseCallback, this);
 		  ROS_INFO("service on\n");
-		  //object_location_publisher=nh_.advertise<geometry_msgs::Point>("C23/objectLocation",100);
-		  //object_detector_subscriber=nh_.subscribe("C23/object_deminsions",1,&C25_Node::objectDimentionscallback,this);
-		  //C21_subscriber=nh_.subscribe("C21/C22",1,&C25_Node::cloudcallback,this);
 		  boost::thread mythread( &C25_Node::startActionServer,this,argc,argv);
 	  }
 
@@ -93,7 +93,22 @@ public:
 		  	  res.robotPosition=last_msg;
 	 		  return true;
 	 	  }
-	  /**
+	  
+
+
+ 	void poseCallback(const nav_msgs::Odometry::ConstPtr &msg){
+		 if(once){
+			 once=false;
+			 pos_sub.shutdown();
+		 }
+		  last_msg.pose.header=msg->header;
+		  last_msg.pose.pose=msg->pose;
+		  last_msg.pose.twist=msg->twist;
+ 	      c25_publisher.publish(last_msg);
+	  }
+
+
+	   /**
 	   * The call back function executed when a data is available
 	   */
 	  void callback(const geometry_msgs::PoseWithCovarianceStampedConstPtr& pos_msg){

@@ -254,7 +254,7 @@ public:
 				IkSolution IkCurrent = IkSolution(as.position[q4l], as.position[q5l], as.position[q6l], as.position[q7l],
 									as.position[q8l], as.position[q9l]);
 
-				int n = 20;
+				int n = 10;
 				IkSolution IkNext[n+1];
 				RPY argTarget2;
 
@@ -275,10 +275,10 @@ public:
 
 
 
-				lMove(IkCurrent, IkNext[0], 5.0/n, 20, NoEnd);
+				lMove(IkCurrent, IkNext[0], 1, 50, NoStartEnd);
 				for (int i = 0; i< n-1; i++)
-					lMove(IkNext[i], IkNext[i+1], 5.0/n, 20, NoStartEnd);
-				lMove(IkNext[n-1], IkNext[n], 5.0/n, 20, NoStart);
+					lMove(IkNext[i], IkNext[i+1], 3.0/n, 50, NoStartEnd);
+				lMove(IkNext[n-1], IkNext[n], 3.0/n, 50, NoStartEnd);
 
 
 				time -= 5200 ;
