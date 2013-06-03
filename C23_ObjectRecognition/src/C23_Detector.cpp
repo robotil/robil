@@ -282,8 +282,8 @@
 
       pictureCoordinatesToGlobalPosition(matchLoc.x,matchLoc.y,matchLoc.x + templ.cols,matchLoc.y + templ.rows,&x,&y,NULL);
       
-      imshow( "Source Image", img_display );
-      waitKey(0);
+      //imshow( "Source Image", img_display );
+      //waitKey(0);
       //imshow( "Result Window", result );
 
       return true;
@@ -292,12 +292,22 @@
     //Detect the car steering wheel
     bool C23_Detector::detectSteeringWheel(Mat srcImg,const sensor_msgs::PointCloud2::ConstPtr &cloud,int location){
      
+      bool res = false;
+      if (location==0)//Robot is inside the car
+      {
       //Load the image template for the steering wheel
       Mat steeringwheelTemplate = imread("template_matching_images/steering_wheel_template_qual.jpg");
-      imshow("Steering wheel template", steeringwheelTemplate);
-      waitKey(0);
+      res  = templateMatching(srcImg, steeringwheelTemplate, 1);
+      //imshow("Steering wheel template", steeringwheelTemplate);
+      //waitKey(0);
+      }
+      else{
+      //Robot is outside the car
       
-      bool res  = templateMatching(srcImg, steeringwheelTemplate, 1);
+	
+      }
+      
+      
       
       
       return res;
@@ -308,8 +318,8 @@
      
       //Load the image template for the steering wheel
       Mat handbrakeTemplate = imread("template_matching_images/hand_brake_template_qual.jpg");
-      imshow("Hand brake template", handbrakeTemplate);
-      waitKey(0);
+      //imshow("Hand brake template", handbrakeTemplate);
+      //waitKey(0);
       
      bool res =  templateMatching(srcImg, handbrakeTemplate, 1);
       
@@ -323,8 +333,8 @@
      
       //Load the image template for the steering wheel
       Mat gearTemplate = imread("template_matching_images/gear_template_qual.jpg");
-      imshow("Gear template", gearTemplate);
-      waitKey(0);
+      //imshow("Gear template", gearTemplate);
+      //waitKey(0);
       
       bool res  = templateMatching(srcImg, gearTemplate, 1);
       
@@ -337,8 +347,8 @@
      
       //Load the image template for the steering wheel
       Mat pushButtonTemplate = imread("template_matching_images/push_button_template_qual.jpg");
-      imshow("Push button template", pushButtonTemplate );
-      waitKey(0);
+      //imshow("Push button template", pushButtonTemplate );
+      //waitKey(0);
       
       bool res  = templateMatching(srcImg, pushButtonTemplate , 1);
       
@@ -559,10 +569,11 @@
 	_generalDetector._width = 182;
 	_generalDetector._height = 114;
 	*/
-	Rect carRect(_generalDetector._x, _generalDetector._y, _generalDetector._width, _generalDetector._height);
+	
+	/*Rect carRect(_generalDetector._x, _generalDetector._y, _generalDetector._width, _generalDetector._height);
 	Mat carImage(srcImg, carRect);
 	imshow("Car patch", carImage);
-	waitKey(0);
+	waitKey(0);*/
 	
 	Point2f minImagePoint;
 	minImagePoint.x = -1;
@@ -763,11 +774,11 @@
 	    //x = absolutePoint.x;
 	    //y = absolutePoint.y;
 	    
-	    imshow("Testing",srcImg);
-	    waitKey(0);
+	    //imshow("Testing",srcImg);
+	    //waitKey(0);
 	    
 	    //Determine if the robot is facing the driver or passenger side
-	    detectPassengerDriver(srcImg, x0, yTop, x1,  y1);
+	    detectPassengerDriver(srcImg, x0, yTop, x1,  y1, minPoint, pclcloud);
 	    
 	    
 	    
@@ -791,21 +802,21 @@
 	return ( i < j );
     }
 
-    bool C23_Detector::detectPassengerDriver(Mat srcImg, int x1,int y1,int x2,int y2){
+    bool C23_Detector::detectPassengerDriver(Mat srcImg, int x1,int y1,int x2,int y2, pcl::PointXYZ minPoint, pcl::PointCloud<pcl::PointXYZ> pclcloud){
       
       //To determine where the driver/passenger sides are using blob detection set to true.
-      bool detectBlobs = false;
+      bool detectBlobs = true;
       
       //Extract the segment of the car that has been detected
       ROS_INFO("Extracting the car");
       cout<<"X1: "<<x1<<" Y1: "<<y1<<"X2: "<<x2<<" Y2: "<<y2<<endl;
       Rect carRect(x1, y1, x2-x1, y2-y1);
       Mat carImage(srcImg, carRect);
-      //imshow("Car", carImage);
-      //waitKey(0);
+      imshow("Car", carImage);
+      waitKey(0);
       
       //Covert the image to HSV colour space
-      Mat imgHsvCar, imgThresholdedCar, imgCarOpened;
+      Mat imgHsvCar, imgThresholdedCar, imgCarOpened, imgCarDilated;
       cvtColor(carImage, imgHsvCar, CV_BGR2HSV);
       //imshow("HSV", imgHsvCar);
       //waitKey(0);
@@ -814,30 +825,37 @@
       if(detectBlobs)
       {
       
-	  //Detect the blue blobs on the car
-	  inRange(imgHsvCar, Scalar(100, 50, 40), Scalar(160, 255, 255), imgThresholdedCar);
-	  
-	  //imshow("Thresholded Image", imgThresholdedCar);
-	  //waitKey(0);
-	  
-	  //Open the image to remove noise
-	  Mat element3(5,5,CV_8U, Scalar(1));
-	  morphologyEx(imgThresholdedCar, imgCarOpened, MORPH_OPEN,element3);  
-	  
-	  //imshow("Opened Image", imgCarOpened);
-	  //waitKey(0);
-	  
+	    //Detect the blue blobs on the car
+	    inRange(imgHsvCar, Scalar(100, 100, 30), Scalar(120, 255, 150), imgThresholdedCar);
+
+	    //Open the image to remove noise
+	    Mat element3(3,3,CV_8U, Scalar(1));
+
+	    morphologyEx(imgThresholdedCar, imgCarOpened, MORPH_OPEN,element3); 
+
+	    // Apply the dilation operation
+	    dilate( imgCarOpened, imgCarDilated, element3 );
+
 	    //Now find the contours of the blobs
 	    vector<vector<cv::Point> > blobContours;
-	    findContours(imgCarOpened,blobContours,CV_RETR_EXTERNAL, CV_CHAIN_APPROX_SIMPLE);
-	    drawContours(carImage,blobContours,-1,CV_RGB(255,0,0),2); //UNCOMMENT for BLUEBLOBDETECTION
+	    findContours(imgCarDilated,blobContours,CV_RETR_EXTERNAL, CV_CHAIN_APPROX_SIMPLE);
+	    drawContours(carImage,blobContours,-1,CV_RGB(255,0,0),2); 
 	    
-	    imshow("Car Image", carImage);
-	    waitKey(0);
-	    
+	    //imshow("Thresholded Image", imgThresholdedCar);
+	    //waitKey(0);
+
+	    //imshow("Opened Image", imgCarOpened);
+	    //waitKey(0);
+
+	    //imshow("Dilated Image", imgCarDilated);
+	    //waitKey(0);
+
+	    //imshow("Car Image", carImage);
+	    //waitKey(0);
+
 	    
 	    cout<<"Number of contours found "<<blobContours.size()<<endl;
-	    if(blobContours.size()!=0)
+	    if(blobContours.size()>1)
 	    {  
 		//Sort the contours based on their area
 		sort(blobContours.begin(), blobContours.end(), compareContourAreas);
@@ -879,49 +897,111 @@
 	    
 	    }else{
 	      
-	      ROS_INFO("No contours found");
+	      ROS_INFO("Not enough contours found");
 	      
 	    }
 	
       }else
       {
+	//----------------------------Method 1-----------------------------------
+	/*
 	//Try template matching in order to determine where the passenger side is
-	Mat bootImageTemplate = imread("bootImageTemplate.jpg",1);
+	Mat bootImageTemplate = imread("template_matching_images/boot_template_right.jpg",1);
 	//imshow("Boot", bootImageTemplate);
 	//waitKey(0);
 	cout<<"Size is "<<bootImageTemplate.rows<<", "<<bootImageTemplate.cols<<endl;
 	templateMatching( carImage, bootImageTemplate, 1 );
-	
-	
-	
-	
-	
-	
-	
-	
-	
+	*/
 	
 	
       //This is an alternative algorithm to determining whether the robot is facing the passenger or driver
-      
-      /*//Get the closest point from the robot to the car
-	    float min = 10000;
-	    cout << x << "," << y << "," << width << "," << height << endl;
-	    for(int i = 1; i < carImage.width; i++) {
-		for(int j = 1; j < carImage.height; j++) {
-		    //     cout << "(" << i << "," << j << "," << pclcloud.at(i,j).z << ")" << endl;
-		    if(sqrt(pclcloud.at(i,j).x*pclcloud.at(i,j).x+pclcloud.at(i,j).y*pclcloud.at(i,j).y+pclcloud.at(i,j).z*pclcloud.at(i,j).z*10000) < min) {
-			min = sqrt(pclcloud.at(i,j).x*pclcloud.at(i,j).x+pclcloud.at(i,j).y*pclcloud.at(i,j).y+pclcloud.at(i,j).z*pclcloud.at(i,j).z*10000);
-			minPoint = pcl::PointXYZ(pclcloud.at(i,j).x,pclcloud.at(i,j).y,pclcloud.at(i,j).z);//Check
-			minImagePoint.x = i;
-			minImagePoint.y = j;
-		    }
-		}
-	    }
-      */
-      
-      
-      /*
+	
+	//--------------------Method 2----------------------------------
+	/*
+	//Find the car based on a thresholding approach
+	//Mat destImage(carImage.size(), CV_8U);
+	Point2f point;
+	
+	inRange(imgHsvCar, Scalar(0, 0, 0), Scalar(20, 255, 255), imgThresholdedCar);
+	
+	//cout<<"The image type is "<<destImage.type()<<endl;
+	//waitKey(0);
+	float depth = 0;
+	cout<<"The min depth is: "<<minPoint.x<<endl;
+	int xpos = 0;
+	int ypos = 0;
+	
+	cv::Scalar intensity;
+	
+	cout<<"Variables: "<<x1<<", "<<x2<<", "<<y1<<", "<<y2<<endl;
+	
+	for(int ii=x1; ii<x2 && xpos<imgThresholdedCar.cols; ii++){
+	  ypos = 0;
+	 for(int jj=y1; jj<y2 && ypos<imgThresholdedCar.rows;jj++){
+	   
+	   depth = pclcloud.at(ii,jj).x;
+	   //intensity = imgThresholdedCar.at<uchar>(xpos, ypos);
+	   //intensity.val[0]  =255;
+	   //cout<<"Xpos, yPos: "<<xpos<<", "<<ypos<<endl;
+	   //cout<<"The pixel value: "<<intensity.val[0]<<endl;
+	   //point.x  =xpos;
+	   //point.y = ypos;
+	   //cout<<"Depth: "<<depth<<" at X,Y "<<ii<<", "<<jj<<endl;
+	   cout<<"Depth: "<<depth<< "Min: "<<minPoint.x<<endl;
+	   if (depth < minPoint.x+2 && depth > minPoint.x-2){
+	     imgThresholdedCar.at<uchar>(ypos, xpos) = 255;
+	     intensity = imgThresholdedCar.at<uchar>(ypos, xpos);
+	     cout<<"Setting to white:   "<<intensity.val[0]<<endl;
+	     
+	   }
+	   else{
+	     imgThresholdedCar.at<uchar>(ypos, xpos) = 0;
+	     intensity = imgThresholdedCar.at<uchar>(ypos, xpos);
+	     //cout<<"Setting to black:   "<<intensity.val[0]<<endl;
+	   }
+	  
+	   
+	 
+	 
+	   ypos++;
+	 }
+	 xpos++;
+	}
+	//_detectionMutex->unlock();
+	imshow("car image", imgThresholdedCar);
+	waitKey(0);
+	
+	
+	
+	Mat dst, cdst;
+	
+	inRange(imgHsvCar, Scalar(0, 0, 0), Scalar(20, 255, 255), imgThresholdedCar);
+	
+	Canny(imgThresholdedCar, dst, 50, 300, 3);
+
+	imshow("After Canny", dst);
+	waitKey();
+	cvtColor(dst, cdst, CV_GRAY2BGR);
+
+	vector<Vec4i> lines;
+	HoughLinesP(dst, lines, 1, CV_PI/180, 50, 50, 10 );
+	for( size_t i = 0; i < lines.size(); i++ )
+	{
+	Vec4i l = lines[i];
+	line( cdst, cv::Point(l[0], l[1]), cv::Point(l[2], l[3]), Scalar(0,0,255), 3, CV_AA);
+	}
+
+	imshow("source", carImage);
+	waitKey();
+	imshow("detected lines", cdst);
+	waitKey();
+	
+	//-------------------------------------------------------
+	*/
+	
+	
+	//-------------------Method 3---------------------------------------
+	/*
 	  //Detect the car
 	  inRange(imgHsvCar, Scalar(0, 0, 0), Scalar(20, 255, 255), imgThresholdedCar);
 	  
