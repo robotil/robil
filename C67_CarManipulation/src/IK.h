@@ -92,6 +92,8 @@ public:
 
 IkSolution rIk5Dof(RPY target); 
 IkSolution lIk5Dof(RPY target); 
+IkSolution rScanRPY(double mq1, double mq2, double mq3, RPY target, double error);
+IkSolution lScanRPY(double mq1, double mq2, double mq3, RPY target, double error);
 double RpyError(RPY R1, RPY R2);
 IkSolution rSearchSolution(double mq1, double mq2, double mq3, RPY target);
 IkSolution lSearchSolution(double mq1, double mq2, double mq3, RPY target);

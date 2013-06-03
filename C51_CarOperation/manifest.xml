@@ -21,7 +21,11 @@
   <depend package="joint_state_publisher"/>
   <depend package="xacro"/>
   <depend package="C31_PathPlanner"/>
+  <depend package="C25_GlobalPosition"/>
   <depend package="robot_mechanism_controllers"/>
+  <depend package="sensor_msgs"/>
+  <depend package="LidarObstacleDetection"/>
+  <depend package="C0_RobilTask"/>
 </package>
 
 

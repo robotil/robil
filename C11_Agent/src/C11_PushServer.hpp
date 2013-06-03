@@ -45,11 +45,27 @@ public:
 	void SetPushHMIInterface(IPushHMIInterface *ipushHMIInterface)
 	{
 	  pIPushHMIInterface = ipushHMIInterface;
+	  path_subscriber = _node.subscribe("/path",1000,&PushHMIServer::PathCallback,this);
 	}
 
 	void SetReleased()
 	{
 	  IsWaitForRelease = false;
+	}
+
+	void PathCallback(const C31_PathPlanner::C31_Waypoints& path)
+	{
+	  if(!Path.empty())
+	    {
+	      Path.clear();
+	    }
+	  for(int i=0; i<path.points.size(); i++)
+            {
+                    StructPoint point;
+                    point.x = path.points[i].x;
+                    point.y = path.points[i].y;
+                    Path.push_back(point);
+            }
 	}
 
 	TaskResult panoramic_image_task()
@@ -153,16 +169,16 @@ public:
 	TaskResult path_task()
 	{
 		ROS_INFO("C11_Agent: path_task begin!\n");
-		ros::ServiceClient c31Client = _node.serviceClient<C31_PathPlanner::C31_GetPath>("C31_GlobalPathPlanner/getPath");
-		C31_PathPlanner::C31_GetPath srv31;
-		if (!c31Client.call(srv31))
-		{
-			ROS_ERROR("couldn't get a path, exiting\n");
-			return TaskResult::FAULT();
-		}
-
-		ROS_INFO("C11_Agent: path received!\n");
-		cout<<srv31.response.path<<"\n";
+//		ros::ServiceClient c31Client = _node.serviceClient<C31_PathPlanner::C31_GetPath>("C31_GlobalPathPlanner/getPath");
+//		C31_PathPlanner::C31_GetPath srv31;
+//		if (!c31Client.call(srv31))
+//		{
+//			ROS_ERROR("couldn't get a path, exiting\n");
+//			return TaskResult::FAULT();
+//		}
+//
+//		ROS_INFO("C11_Agent: path received!\n");
+//		cout<<srv31.response.path<<"\n";
 
 //		ros::ServiceClient c11Client = _node.serviceClient<C10_Common::push_path>("C11/push_path");
 //
@@ -175,18 +191,18 @@ public:
 //			return TaskResult::FAULT();
 //
 //		}
-		vector<StructPoint> path;
-		for(int i=0; i<srv31.response.path.points.size(); i++)
-                {
-                        StructPoint point;
-                        point.x = srv31.response.path.points[i].x;
-                        point.y = srv31.response.path.points[i].y;
-                        path.push_back(point);
-                }
+//		vector<StructPoint> path;
+//		for(int i=0; i<srv31.response.path.points.size(); i++)
+//                {
+//                        StructPoint point;
+//                        point.x = srv31.response.path.points[i].x;
+//                        point.y = srv31.response.path.points[i].y;
+//                        path.push_back(point);
+//                }
 		if(pIPushHMIInterface != NULL)
                 {
                   IsWaitForRelease = true;
-                  pIPushHMIInterface->PushPath(path);
+                  pIPushHMIInterface->PushPath(Path);
                   while(IsWaitForRelease)
                     {
                       sleep(100);
@@ -269,6 +285,8 @@ private:
  //   CTcpServer* pCTcpServer;
     IPushHMIInterface *pIPushHMIInterface;
     bool IsWaitForRelease;
+    ros::Subscriber path_subscriber;
+    vector<StructPoint> Path;
 };
 
 

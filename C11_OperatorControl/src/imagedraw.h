@@ -23,6 +23,7 @@ public slots:
 	void SltOnPlayPauseClick(bool);
 	void SltOnCreateClick(bool);
 	void SltOnPathClick(bool);
+	void SltOnAllowClick();
 	void SltOperatorAction();
 	void SltOnWaitTimeout();
 	void SltOnGridReceived(int grid[100][100],StructPoint robotPos,int xOffset,int yOffset,double orient);
@@ -57,6 +58,7 @@ private:
 	bool IsUpdateCurrentImg;	//don't create new image, update the current
 	EnumRunStatus ERunStatus;
 	QTimer* WaitTimer;
+	QStringList MissionsList;
 };
 
 #endif // IMAGEDRAW_H

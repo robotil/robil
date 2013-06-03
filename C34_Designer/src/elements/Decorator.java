@@ -114,7 +114,7 @@ public class Decorator extends GElement implements ArrayElement,
 		Decorator n = new Decorator();
 		cloneInit(n);
 		n.array = this.array;
-		n.text = this.text;
+		n.text = new String(this.text);
 		return n;
 	}
 

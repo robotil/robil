@@ -25,7 +25,7 @@ class walk_legs_service{
 protected:
 	ros::NodeHandle nh_, nh2_;
 	ros::NodeHandle* rosnode;
-	ros::ServiceServer walk_legs_srv_, step_down_srv_, make_step_srv_;
+	ros::ServiceServer walk_legs_srv_, step_down_srv_, make_step_srv_, walk_legs_by_pelvis_srv_, move_leg_by_pelvis_srv_;
 	ros::ServiceClient traj_vector_cli_,walking_vector_cli_,walking_position_vector_cli_;
 	ros::ServiceClient legs_val_calc_cli_,left_leg_val_calc_cli_,right_leg_val_calc_cli_;
 	ros::Publisher traj_action_pub_;
@@ -97,6 +97,8 @@ public:
 
 
 		walk_legs_srv_ = nh_.advertiseService("walk_legs", &walk_legs_service::gen_traj, this);
+		walk_legs_by_pelvis_srv_ = nh_.advertiseService("walk_legs_by_pelvis", &walk_legs_service::walk_legs_by_pelvis, this);
+		move_leg_by_pelvis_srv_ = nh_.advertiseService("move_leg_by_pelvis", &walk_legs_service::move_leg_by_pelvis, this);
 		step_down_srv_ = nh2_.advertiseService("step_down", &walk_legs_service::step_down, this);
 		make_step_srv_ = nh2_.advertiseService("make_step", &walk_legs_service::make_step, this);
 		ROS_INFO("running walk_legs service");
@@ -270,11 +272,11 @@ public:
 					tfv.request.pitch_dot = QuatToPitch(original_r_foot_transform.getRotation()) - QuatToPitch(r_foot_transform.getRotation());
 					tfv.request.yaw_dot = QuatToYaw(original_r_foot_transform.getRotation()) - QuatToYaw(r_foot_transform.getRotation());
 
-					if(!legs_val_calc_cli_.call(tfv)){
+					/*if(!legs_val_calc_cli_.call(tfv)){
 						ROS_ERROR("Could not reach gen leg velocity vector server");
 						res.success = false;
 						return false;
-					}
+					}*/
 
 					if(legs_val_calc_cli_.call(v)){
 
@@ -406,11 +408,11 @@ public:
 						tfv.request.pitch_dot = QuatToPitch(original_l_foot_transform.getRotation()) - QuatToPitch(l_foot_transform.getRotation());// - imu.y;
 						tfv.request.yaw_dot = QuatToYaw(original_l_foot_transform.getRotation()) - QuatToYaw(l_foot_transform.getRotation());// - imu.z;
 
-						if(!legs_val_calc_cli_.call(tfv)){
+						/*if(!legs_val_calc_cli_.call(tfv)){
 							ROS_ERROR("Could not reach gen leg velocity vector server");
 							res.success = false;
 							return false;
-						}
+						}*/
 
 						if(legs_val_calc_cli_.call(v)){
 							move.request.r_leg_uhz = posecontroller_positions[joints["r_leg_uhz"]] + v.response.q_right_dot[0]*traj_vec_srv.response.dt[ind];
@@ -455,12 +457,241 @@ public:
 
 	}
 
+	bool move_leg_by_pelvis(move_pelvis::move_pelvis::Request &req, move_pelvis::move_pelvis::Response &res){
+		traj_splitter_to_vector::trajectory_vector traj_vec_srv;
+		ROS_INFO("Received request to move %s to (%f,%f,%f)", req.LinkToMove.c_str(), req.PositionDestination.x, req.PositionDestination.y, req.PositionDestination.z);
+		traj_vec_srv.request.Position = req.PositionDestination;
+		traj_vec_srv.request.Angle = req.AngleDestination;
+		traj_vec_srv.request.segments_number = 50 ;
+		traj_vec_srv.request.total_time = 2 ;
+
+		tf::StampedTransform original_r_foot_transform;
+		tf::StampedTransform original_l_foot_transform;
+		try {
+			listener.waitForTransform("/pelvis","/r_foot",ros::Time(0),ros::Duration(0.2));
+			listener.lookupTransform("/pelvis","/r_foot",ros::Time(0),original_r_foot_transform);
+		} catch (tf::TransformException &ex) {
+			ROS_ERROR("%s",ex.what());
+		}
+		try {
+			listener.waitForTransform("/pelvis","/l_foot",ros::Time(0),ros::Duration(0.2));
+			listener.lookupTransform("/pelvis","/l_foot",ros::Time(0),original_l_foot_transform);
+		} catch (tf::TransformException &ex) {
+			ROS_ERROR("%s",ex.what());
+		}
+
+
+		if(!req.LinkToMove.compare("l_leg")){
+			traj_vec_srv.request.Position.x = req.PositionDestination.x;
+			traj_vec_srv.request.Position.y = req.PositionDestination.y;
+			traj_vec_srv.request.Position.z = req.PositionDestination.z;
+			traj_vec_srv.request.Angle.x = req.AngleDestination.x;
+			traj_vec_srv.request.Angle.y = req.AngleDestination.y;
+			traj_vec_srv.request.Angle.z = req.AngleDestination.z;
+
+			XYZRPY tranform = VectorTransposeTranformation(	traj_vec_srv.request.Position.x, traj_vec_srv.request.Position.y, traj_vec_srv.request.Position.z,
+					traj_vec_srv.request.Angle.x, traj_vec_srv.request.Angle.y, traj_vec_srv.request.Angle.z,
+					original_l_foot_transform.getOrigin().x(), original_l_foot_transform.getOrigin().y(), original_l_foot_transform.getOrigin().z(),
+					QuatToRoll(original_l_foot_transform.getRotation()), QuatToPitch(original_l_foot_transform.getRotation()), QuatToYaw(original_l_foot_transform.getRotation()));
+
+			traj_vec_srv.request.Position.x = tranform.x;
+			traj_vec_srv.request.Position.y = tranform.y;
+			traj_vec_srv.request.Position.z = tranform.z;
+			traj_vec_srv.request.Angle.x = tranform.roll;
+			traj_vec_srv.request.Angle.y = tranform.pitch;
+			traj_vec_srv.request.Angle.z = tranform.yaw;
+
+			if(walking_position_vector_cli_.call(traj_vec_srv)){
+				int lookahead = 3;
+
+				tf::StampedTransform first_l_foot_transform;
+				try {
+					listener.waitForTransform("/pelvis","/l_foot",ros::Time(0),ros::Duration(0.2));
+					listener.lookupTransform("/pelvis","/l_foot",ros::Time(0),first_l_foot_transform);
+				} catch (tf::TransformException &ex) {
+					ROS_ERROR("%s",ex.what());
+				}
+
+				for(unsigned int ind = 1; ind < traj_vec_srv.response.PositionArray.size()-lookahead; ind++){
+					ros::spinOnce();
+
+					XYZRPY tranform = VectorTranformation(	traj_vec_srv.response.PositionArray[std::min((unsigned int)traj_vec_srv.response.PositionArray.size(), ind+lookahead)].x, traj_vec_srv.response.PositionArray[std::min((unsigned int)traj_vec_srv.response.PositionArray.size(), ind+lookahead)].y, traj_vec_srv.response.PositionArray[std::min((unsigned int)traj_vec_srv.response.PositionArray.size(), ind+lookahead)].z,
+							traj_vec_srv.response.AngleArray[std::min((unsigned int)traj_vec_srv.response.PositionArray.size(), ind+lookahead)].x, traj_vec_srv.response.AngleArray[std::min((unsigned int)traj_vec_srv.response.PositionArray.size(), ind+lookahead)].y, traj_vec_srv.response.AngleArray[std::min((unsigned int)traj_vec_srv.response.PositionArray.size(), ind+lookahead)].z,
+							first_l_foot_transform.getOrigin().x(), first_l_foot_transform.getOrigin().y(), first_l_foot_transform.getOrigin().z(),
+							QuatToRoll(first_l_foot_transform.getRotation()), QuatToPitch(first_l_foot_transform.getRotation()), QuatToYaw(first_l_foot_transform.getRotation()));
+
+					double newx = tranform.x;
+					double newy = tranform.y;
+					double newz = tranform.z;
+					double newroll = tranform.roll;
+					double newpitch = tranform.pitch;
+					double newyaw = tranform.yaw;
+
+
+					tf::StampedTransform l_foot_transform;
+					try {
+						listener.waitForTransform("/pelvis","/l_foot",ros::Time(0),ros::Duration(0.2));
+						listener.lookupTransform("/pelvis","/l_foot",ros::Time(0),l_foot_transform);
+					} catch (tf::TransformException &ex) {
+						ROS_ERROR("%s",ex.what());
+					}
+
+					PoseController::foot_movement move;
+					ros::spinOnce();
+					legs_val_calc::legs_val_calc v;
+					v.request.x_dot = (newx - l_foot_transform.getOrigin().x())/(lookahead*traj_vec_srv.response.dt[ind]);
+					v.request.y_dot = (newy - l_foot_transform.getOrigin().y())/(lookahead*traj_vec_srv.response.dt[ind]);
+					v.request.z_dot = (newz - l_foot_transform.getOrigin().z())/(lookahead*traj_vec_srv.response.dt[ind]);
+					v.request.roll_dot = (newroll - QuatToRoll(l_foot_transform.getRotation()))/(lookahead*traj_vec_srv.response.dt[ind]);
+					v.request.pitch_dot = (newpitch - QuatToPitch(l_foot_transform.getRotation()))/(lookahead*traj_vec_srv.response.dt[ind]);
+					v.request.yaw_dot = (newyaw - QuatToYaw(l_foot_transform.getRotation()))/(lookahead*traj_vec_srv.response.dt[ind]);
+
+					if(legs_val_calc_cli_.call(v)){
+
+						move.request.l_leg_uhz = posecontroller_positions[joints["l_leg_uhz"]] + v.response.q_left_dot[0]*traj_vec_srv.response.dt[ind];
+						move.request.l_leg_mhx = posecontroller_positions[joints["l_leg_mhx"]] + v.response.q_left_dot[1]*traj_vec_srv.response.dt[ind];
+						move.request.l_leg_lhy = posecontroller_positions[joints["l_leg_lhy"]] + v.response.q_left_dot[2]*traj_vec_srv.response.dt[ind];
+						move.request.l_leg_kny = posecontroller_positions[joints["l_leg_kny"]] + v.response.q_left_dot[3]*traj_vec_srv.response.dt[ind];
+						move.request.l_leg_uay = posecontroller_positions[joints["l_leg_uay"]] + v.response.q_left_dot[4]*traj_vec_srv.response.dt[ind];
+						move.request.l_leg_lax = posecontroller_positions[joints["l_leg_lax"]] + v.response.q_left_dot[5]*traj_vec_srv.response.dt[ind];
+						move.request.r_leg_uhz = posecontroller_positions[joints["r_leg_uhz"]];// + tfv.response.q_right_dot[0]*traj_vec_srv.response.dt[ind];
+						move.request.r_leg_mhx = posecontroller_positions[joints["r_leg_mhx"]];// + tfv.response.q_right_dot[1]*traj_vec_srv.response.dt[ind];
+						move.request.r_leg_lhy = posecontroller_positions[joints["r_leg_lhy"]];// + tfv.response.q_right_dot[2]*traj_vec_srv.response.dt[ind];
+						move.request.r_leg_kny = posecontroller_positions[joints["r_leg_kny"]];// + tfv.response.q_right_dot[3]*traj_vec_srv.response.dt[ind];
+						move.request.r_leg_uay = posecontroller_positions[joints["r_leg_uay"]];// + tfv.response.q_right_dot[4]*traj_vec_srv.response.dt[ind];
+						move.request.r_leg_lax = posecontroller_positions[joints["r_leg_lax"]];// + tfv.response.q_right_dot[5]*traj_vec_srv.response.dt[ind];
+
+						if(!posecontroller_cli.call(move)){
+							ROS_ERROR("Could not reach PoseController server");
+							res.success = false;
+							return false;
+						}
+					}else{
+						ROS_ERROR("Could not reach gen leg velocity vector server");
+						res.success = false;
+						return false;
+					}
+					ros::Duration(traj_vec_srv.response.dt[ind]).sleep();
+				}
+			}else{
+				ROS_ERROR("Could not reach walking_position_vector server");
+				res.success = false;
+				return false;
+			}
+		}else{
+			if(!req.LinkToMove.compare("r_leg")){
+				traj_vec_srv.request.Position.x = req.PositionDestination.x;
+				traj_vec_srv.request.Position.y = req.PositionDestination.y;
+				traj_vec_srv.request.Position.z = req.PositionDestination.z;
+				traj_vec_srv.request.Angle.x = req.AngleDestination.x;
+				traj_vec_srv.request.Angle.y = req.AngleDestination.y;
+				traj_vec_srv.request.Angle.z = req.AngleDestination.z;
+
+				XYZRPY tranform = VectorTransposeTranformation(	traj_vec_srv.request.Position.x, traj_vec_srv.request.Position.y, traj_vec_srv.request.Position.z,
+						traj_vec_srv.request.Angle.x, traj_vec_srv.request.Angle.y, traj_vec_srv.request.Angle.z,
+						original_r_foot_transform.getOrigin().x(), original_r_foot_transform.getOrigin().y(), original_r_foot_transform.getOrigin().z(),
+						QuatToRoll(original_r_foot_transform.getRotation()), QuatToPitch(original_r_foot_transform.getRotation()), QuatToYaw(original_r_foot_transform.getRotation()));
+
+				traj_vec_srv.request.Position.x = tranform.x;
+				traj_vec_srv.request.Position.y = tranform.y;
+				traj_vec_srv.request.Position.z = tranform.z;
+				traj_vec_srv.request.Angle.x = tranform.roll;
+				traj_vec_srv.request.Angle.y = tranform.pitch;
+				traj_vec_srv.request.Angle.z = tranform.yaw;
+
+				if(walking_position_vector_cli_.call(traj_vec_srv)){
+					int lookahead = 3;
+
+					tf::StampedTransform first_r_foot_transform;
+					try {
+						listener.waitForTransform("/pelvis","/r_foot",ros::Time(0),ros::Duration(0.2));
+						listener.lookupTransform("/pelvis","/r_foot",ros::Time(0),first_r_foot_transform);
+					} catch (tf::TransformException &ex) {
+						ROS_ERROR("%s",ex.what());
+					}
+
+					for(unsigned int ind = 1; ind < traj_vec_srv.response.PositionArray.size()-lookahead; ind++){
+						ros::spinOnce();
+
+						XYZRPY tranform = VectorTranformation(	traj_vec_srv.response.PositionArray[std::min((unsigned int)traj_vec_srv.response.PositionArray.size(), ind+lookahead)].x, traj_vec_srv.response.PositionArray[std::min((unsigned int)traj_vec_srv.response.PositionArray.size(), ind+lookahead)].y, traj_vec_srv.response.PositionArray[std::min((unsigned int)traj_vec_srv.response.PositionArray.size(), ind+lookahead)].z,
+								traj_vec_srv.response.AngleArray[std::min((unsigned int)traj_vec_srv.response.PositionArray.size(), ind+lookahead)].x, traj_vec_srv.response.AngleArray[std::min((unsigned int)traj_vec_srv.response.PositionArray.size(), ind+lookahead)].y, traj_vec_srv.response.AngleArray[std::min((unsigned int)traj_vec_srv.response.PositionArray.size(), ind+lookahead)].z,
+								first_r_foot_transform.getOrigin().x(), first_r_foot_transform.getOrigin().y(), first_r_foot_transform.getOrigin().z(),
+								QuatToRoll(first_r_foot_transform.getRotation()), QuatToPitch(first_r_foot_transform.getRotation()), QuatToYaw(first_r_foot_transform.getRotation()));
+
+						double newx = tranform.x;
+						double newy = tranform.y;
+						double newz = tranform.z;
+						double newroll = tranform.roll;
+						double newpitch = tranform.pitch;
+						double newyaw = tranform.yaw;
+
+						tf::StampedTransform r_foot_transform;
+						try {
+							listener.waitForTransform("/pelvis","/r_foot",ros::Time(0),ros::Duration(0.2));
+							listener.lookupTransform("/pelvis","/r_foot",ros::Time(0),r_foot_transform);
+						} catch (tf::TransformException &ex) {
+							ROS_ERROR("%s",ex.what());
+						}
+
+						PoseController::foot_movement move;
+						ros::spinOnce();
+						legs_val_calc::legs_val_calc v;
+						v.request.x_dot = (newx - r_foot_transform.getOrigin().x())/(lookahead*traj_vec_srv.response.dt[ind]);
+						v.request.y_dot = (newy - r_foot_transform.getOrigin().y())/(lookahead*traj_vec_srv.response.dt[ind]);
+						v.request.z_dot = (newz - r_foot_transform.getOrigin().z())/(lookahead*traj_vec_srv.response.dt[ind]);
+						v.request.roll_dot = (newroll - QuatToRoll(r_foot_transform.getRotation()))/(lookahead*traj_vec_srv.response.dt[ind]);
+						v.request.pitch_dot = (newpitch - QuatToPitch(r_foot_transform.getRotation()))/(lookahead*traj_vec_srv.response.dt[ind]);
+						v.request.yaw_dot = (newyaw - QuatToYaw(r_foot_transform.getRotation()))/(lookahead*traj_vec_srv.response.dt[ind]);
+
+						if(legs_val_calc_cli_.call(v)){
+
+							move.request.r_leg_uhz = posecontroller_positions[joints["r_leg_uhz"]] + v.response.q_right_dot[0]*traj_vec_srv.response.dt[ind];
+							move.request.r_leg_mhx = posecontroller_positions[joints["r_leg_mhx"]] + v.response.q_right_dot[1]*traj_vec_srv.response.dt[ind];
+							move.request.r_leg_lhy = posecontroller_positions[joints["r_leg_lhy"]] + v.response.q_right_dot[2]*traj_vec_srv.response.dt[ind];
+							move.request.r_leg_kny = posecontroller_positions[joints["r_leg_kny"]] + v.response.q_right_dot[3]*traj_vec_srv.response.dt[ind];
+							move.request.r_leg_uay = posecontroller_positions[joints["r_leg_uay"]] + v.response.q_right_dot[4]*traj_vec_srv.response.dt[ind];
+							move.request.r_leg_lax = posecontroller_positions[joints["r_leg_lax"]] + v.response.q_right_dot[5]*traj_vec_srv.response.dt[ind];
+							move.request.l_leg_uhz = posecontroller_positions[joints["l_leg_uhz"]];// + tfv.response.q_right_dot[0]*traj_vec_srv.response.dt[ind];
+							move.request.l_leg_mhx = posecontroller_positions[joints["l_leg_mhx"]];// + tfv.response.q_right_dot[1]*traj_vec_srv.response.dt[ind];
+							move.request.l_leg_lhy = posecontroller_positions[joints["l_leg_lhy"]];// + tfv.response.q_right_dot[2]*traj_vec_srv.response.dt[ind];
+							move.request.l_leg_kny = posecontroller_positions[joints["l_leg_kny"]];// + tfv.response.q_right_dot[3]*traj_vec_srv.response.dt[ind];
+							move.request.l_leg_uay = posecontroller_positions[joints["l_leg_uay"]];// + tfv.response.q_right_dot[4]*traj_vec_srv.response.dt[ind];
+							move.request.l_leg_lax = posecontroller_positions[joints["l_leg_lax"]];// + tfv.response.q_right_dot[5]*traj_vec_srv.response.dt[ind];
+
+							if(!posecontroller_cli.call(move)){
+								ROS_ERROR("Could not reach PoseController server");
+								res.success = false;
+								return false;
+							}
+						}else{
+							ROS_ERROR("Could not reach gen leg velocity vector server");
+							res.success = false;
+							return false;
+						}
+						ros::Duration(traj_vec_srv.response.dt[ind]).sleep();
+					}
+				}else{
+					ROS_ERROR("Could not reach walking_position_vector server");
+					res.success = false;
+					return false;
+				}
+			}else{
+				ROS_ERROR("Wrong link name");
+				res.success = false;
+				return false;
+			}
+		}
+
+		res.success = true;
+		return true;
+
+	}
 
 
 	bool make_step(move_pelvis::move_pelvis::Request &req, move_pelvis::move_pelvis::Response &res){
 		if(!req.LinkToMove.compare("l_leg")){
 			std_srvs::Empty e;
-			reset_posecontroller_cli.call(e);
+			//reset_posecontroller_cli.call(e);
 
 			tf::StampedTransform l_foot_transform;
 			try {
@@ -526,9 +757,9 @@ public:
 			}
 
 			XYZRPY tranform1 = VectorTranformation(	l_foot_transform.getOrigin().x(), l_foot_transform.getOrigin().y(), l_foot_transform.getOrigin().z(),
-													QuatToRoll(l_foot_transform.getRotation()), QuatToPitch(l_foot_transform.getRotation()), QuatToYaw(l_foot_transform.getRotation()),
-													0, 0, 0,
-													imu.x, imu.y, imu.z);
+					QuatToRoll(l_foot_transform.getRotation()), QuatToPitch(l_foot_transform.getRotation()), QuatToYaw(l_foot_transform.getRotation()),
+					0, 0, 0,
+					imu.x, imu.y, imu.z);
 
 
 			move.request.PositionDestination.x = 0;
@@ -559,7 +790,7 @@ public:
 
 
 				std_srvs::Empty e;
-				reset_posecontroller_cli.call(e);
+				//reset_posecontroller_cli.call(e);
 
 				tf::StampedTransform r_foot_transform;
 				try {
@@ -625,9 +856,9 @@ public:
 				}
 
 				XYZRPY tranform1 = VectorTranformation(	r_foot_transform.getOrigin().x(), r_foot_transform.getOrigin().y(), r_foot_transform.getOrigin().z(),
-														QuatToRoll(r_foot_transform.getRotation()), QuatToPitch(r_foot_transform.getRotation()), QuatToYaw(r_foot_transform.getRotation()),
-														0, 0, 0,
-														imu.x, imu.y, imu.z);
+						QuatToRoll(r_foot_transform.getRotation()), QuatToPitch(r_foot_transform.getRotation()), QuatToYaw(r_foot_transform.getRotation()),
+						0, 0, 0,
+						imu.x, imu.y, imu.z);
 
 
 				move.request.PositionDestination.x = 0;
@@ -658,6 +889,101 @@ public:
 			}
 		}
 	}
+
+
+	bool walk_legs_by_pelvis(move_pelvis::move_pelvis::Request &req, move_pelvis::move_pelvis::Response &res){
+		if(!req.LinkToMove.compare("l_leg")){
+			std_srvs::Empty e;
+			//reset_posecontroller_cli.call(e);
+
+			tf::StampedTransform l_foot_transform;
+			try {
+				listener.waitForTransform("/l_foot","/pelvis",ros::Time(0),ros::Duration(0.2));
+				listener.lookupTransform("/l_foot","/pelvis",ros::Time(0),l_foot_transform);
+			} catch (tf::TransformException &ex) {
+				ROS_ERROR("%s",ex.what());
+			}
+
+			XYZRPY tranform = VectorTranformation(	req.PositionDestination.x, req.PositionDestination.y, req.PositionDestination.z,
+					req.AngleDestination.x, req.AngleDestination.y, req.AngleDestination.z,
+					l_foot_transform.getOrigin().x(), l_foot_transform.getOrigin().y(), l_foot_transform.getOrigin().z(),
+					QuatToRoll(l_foot_transform.getRotation()), QuatToPitch(l_foot_transform.getRotation()), QuatToYaw(l_foot_transform.getRotation()));
+
+			move_pelvis::move_pelvis move;
+
+			//ros::Duration(2.0).sleep();
+
+
+			//Move left leg forward
+			move.request.PositionDestination.x = tranform.x;
+			move.request.PositionDestination.y = tranform.y;
+			move.request.PositionDestination.z = tranform.z;
+			move.request.AngleDestination.x = tranform.roll;
+			move.request.AngleDestination.y = tranform.pitch;
+			move.request.AngleDestination.z = tranform.yaw;
+			move.request.LinkToMove = "l_leg";
+			ROS_INFO("Moving left leg forward");
+			if(!this->gen_traj(move.request, move.response)){
+				ROS_ERROR("Could not move left leg forward");
+				return false;
+			}
+
+
+			return true;
+		}else{
+			if(!req.LinkToMove.compare("r_leg")){
+
+
+				std_srvs::Empty e;
+				//reset_posecontroller_cli.call(e);
+
+				tf::StampedTransform r_foot_transform;
+				try {
+					listener.waitForTransform("/r_foot","/pelvis",ros::Time(0),ros::Duration(0.2));
+					listener.lookupTransform("/r_foot","/pelvis",ros::Time(0),r_foot_transform);
+				} catch (tf::TransformException &ex) {
+					ROS_ERROR("%s",ex.what());
+				}
+
+				XYZRPY tranform = VectorTranformation(	req.PositionDestination.x, req.PositionDestination.y, req.PositionDestination.z,
+						req.AngleDestination.x, req.AngleDestination.y, req.AngleDestination.z,
+						r_foot_transform.getOrigin().x(), r_foot_transform.getOrigin().y(), r_foot_transform.getOrigin().z(),
+						QuatToRoll(r_foot_transform.getRotation()), QuatToPitch(r_foot_transform.getRotation()), QuatToYaw(r_foot_transform.getRotation()));
+
+				move_pelvis::move_pelvis move;
+
+				//ros::Duration(2.0).sleep();
+
+
+				//Move left leg forward
+				move.request.PositionDestination.x = tranform.x;
+				move.request.PositionDestination.y = tranform.y;
+				move.request.PositionDestination.z = tranform.z;
+				move.request.AngleDestination.x = tranform.roll;
+				move.request.AngleDestination.y = tranform.pitch;
+				move.request.AngleDestination.z = tranform.yaw;
+				move.request.LinkToMove = "r_leg";
+				ROS_INFO("Moving left right forward");
+				if(!this->gen_traj(move.request, move.response)){
+					ROS_ERROR("Could not move right leg forward");
+					return false;
+				}
+
+
+				return true;
+			}else{
+				ROS_ERROR("Wrong link %s", req.LinkToMove.c_str());
+				return false;
+			}
+		}
+	}
+
+
+
+
+
+
+
 
 
 	bool step_down(std_srvs::Empty::Request &req, std_srvs::Empty::Response &res){

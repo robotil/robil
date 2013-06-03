@@ -25,7 +25,6 @@ public class StopStreamMessageParser {
 		}
 		
 		
-		
 		Matcher planIdsMatcher = _planIdsPattern.matcher(inputString);
 		ArrayList<String> planIds = new ArrayList<String>();
 		while (planIdsMatcher.find()) 

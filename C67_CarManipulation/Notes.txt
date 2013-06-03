@@ -3,35 +3,44 @@ Car Manipulation functions
 How to Check:
 ============
 run the node with the DRC simulation
+to put Atlas on Drc vehicle you can launch:
+roslaunch C67_CarManipulation C67_drc.lauch
+then to put Atlas in driver seat:
+rostopic pub --once /drc_world/robot_enter_car geometry_msgs/Pose '{position: {}}'
 ------------------------------------------------------------------------------
 
 to test one of the following action servers: GripSteeringWheel, CalibrateWheel, PlaceFeetOnPedals, CalibratePedals,
 GripHandBrake, GripGearStick.
 use the taskTester.cpp (by Dan)
 
-for GripSteeringWheel use:(in this example wait for 1 second use target angle of 1.5 [rad])
+for GripSteeringWheel use:(in this example wait for 1 second use target angle of 1.5 [rad]) - stub
 rosrun C67_CarManipulation GripSteeringWheel 
 rosrun C67_CarManipulation task_tester GripSteeringWheel 1 args="angle=1.5"
 
-for CalibrateWheel use:
+for CalibrateWheel use:(in this example wait for 1 second use target operation 1(1-Hold, 2-Release), angle[rad]) - active
 rosrun C67_CarManipulation CalibrateWheel 
-rosrun C67_CarManipulation task_tester CalibrateWheel 1 
+rosrun C67_CarManipulation task_tester CalibrateWheel 1 args="operation=1,angle=0.3"
 
-for PlaceFeetOnPedals use:(in this example wait for 1 second use target angle of 1.5 [rad])
+for PlaceFeetOnPedals use:(in this example wait for 1 second use target angle of 1.5 [rad]) - stub
 rosrun C67_CarManipulation PlaceFeetOnPedals 
 rosrun C67_CarManipulation task_tester PlaceFeetOnPedals 1 args="angle=1.5"
 
-for CalibratePedals use:
+for CalibratePedals use: - stub
 rosrun C67_CarManipulation CalibratePedals 
 rosrun C67_CarManipulation task_tester CalibratePedals 1
 
-for GripHandBrake use:(in this example wait for 1 second use target operation 1(1-Release, 2-Engage))
+for GripHandBrake use:(in this example wait for 1 second use target operation 1(1-Release, 2-Engage)) - active
 rosrun C67_CarManipulation GripHandBrake 
 rosrun C67_CarManipulation task_tester GripHandBrake 1 args="operation=1"
 
-for GripGearStick use:(in this example wait for 1 second use target operation 3(1-Drive, 2-Park, 3-Reverse))
+you can specify target position, or offset, for example  args="operation=2,dx=0.02,dy=0.01"(offset x=+2cm, y=+1cm) 
+
+for GripGearStick use:(in this example wait for 1 second use target operation 2(1-Forward, 2-Reverse)) - active
 rosrun C67_CarManipulation GripGearStick 
-rosrun C67_CarManipulation task_tester GripGearStick 1 args="operation=3"
+rosrun C67_CarManipulation task_tester GripGearStick 1 args="operation=2"
+
+you can specify target position, or offset, for example  args="operation=2,dx=0.02,dy=0.01"(offset x=+2cm, y=+1cm) 
+
 
 you can run all the servers (i.e. GripSteeringWheel, CalibrateWheel...), by 
 roslaunch C67_CarManipulation C67_servers.launch

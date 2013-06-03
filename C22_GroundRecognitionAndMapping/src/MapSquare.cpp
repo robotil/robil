@@ -1,9 +1,4 @@
-/*
- * MapSquare.cpp
- *
- *  Created on: Dec 26, 2012
- *      Author: root
- */
+
 #include <vector>
 #include <string.h>
 #include <pcl/ModelCoefficients.h>
@@ -15,6 +10,7 @@ MapSquare::MapSquare(){
 	  rating=0;
 	  ratable=true;
 	  square_Planes=new std::vector<MPlane*>();
+	scansLeft=MAXSCANS;
 }
 
 void MapSquare::clearSq(){
@@ -26,6 +22,7 @@ void MapSquare::clearSq(){
 	delete square_Planes;
 	square_Planes=new std::vector<MPlane*>();
 	square_status=UNCHARTED;
+	scansLeft=MAXSCANS;
 }
 
 MapSquare::~MapSquare(){
@@ -42,13 +39,7 @@ bool MapSquare::hasTop(double top){
 	return false;
 }
 
-bool MapSquare::hasPlane(MPlane* other){
-	  for(unsigned int i=0; i<square_Planes->size();i++){
-		  if(square_Planes->at(i)->representing_point.z<other->representing_point.z)
-			  return true;
-	  }
-	  return false;
-}
+
 
 MPlane* MapSquare::getTop(double top){
   for(unsigned int i=0; i<square_Planes->size();i++){
@@ -58,13 +49,23 @@ MPlane* MapSquare::getTop(double top){
 	  return 0;
 }
 
+bool MapSquare::hasPlane(MPlane* other){
+	  for(unsigned int i=0; i<square_Planes->size();i++){
+		  if(square_Planes->at(i)->isEqualTo(other))
+			  return true;
+	  }
+	  return false;
+}
+
 MPlane* MapSquare::getPlane(MPlane* other){
 	  for(unsigned int i=0; i<square_Planes->size();i++){
-		  if(square_Planes->at(i)->representing_point.z==other->representing_point.z)
+		  if(square_Planes->at(i)->isEqualTo(other))
 			  return square_Planes->at(i);
 	  }
 	  return 0;
 }
+
+
 
 void MapSquare::addRating(){
 	if(ratable){

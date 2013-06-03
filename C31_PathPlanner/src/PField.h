@@ -5,9 +5,11 @@
 #include "cogniteam_pathplanning.h"
 using namespace std;
 
+
 class PField{
 //------------------ types
 public:
+	typedef ObsMap Map;
 	typedef vector<Vec2d> Points;
 	
 	enum RepulsorType{RT_ERROR, RT_R1};

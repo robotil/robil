@@ -94,6 +94,7 @@ class MonitorTimeServer(RobilTask):
 
             print "Added debug info: ***[%s]***" % (str(node_success) + " " + str(nodeTime))
             #calc self._monitoredNodeId attributs (prob, sd, E) from the tree IN DEBUG MODE, AFTER UPDATING THE REAL TIME
+            #print nodeTime,node_success,node_id, self._monitoredNodeId
             (prob, sd, E) = nodeDataInDebugMode(nodeTime,node_success,node_id, self._monitoredNodeId, 100 ,PARAM )
             
             if self._monitoredNodeId:

@@ -1,0 +1,31 @@
+<plan descriptions="./plans/TaskDescriptions.xml">
+   <par name="skill4" x="459.0708607691419" y="-266.4815226769605" collapsed="false" id="38e95426-0932-40d2-aefa-270a3dcd9298"> 
+         <par name="Perception" x="315.18614898969486" y="-183.2679584633962" collapsed="false" id="0582f7d6-90d2-49f5-bc76-ddc72c55e408"> 
+               <tsk name="LocalizationTrack" x="147.1861489896944" y="-142.2679584633961" test_time="0" test_result="true" id="b8690cb3-54a3-489c-ad5f-3a50ffd60945" />
+         </par>
+         <par name="Driving" x="422.0507142489885" y="-61.40093659637637" collapsed="false" id="6207a22b-f609-4f49-9579-2e83f0c45e36"> 
+               <tsk name="PathPlanning" x="271.0507142489908" y="20.599063403623177" test_time="0" test_result="true" id="32da76e3-cd3b-456e-84d4-9dfe611b91c6" />
+            <dec name="!L!" x="520.3364285347" y="0.8847776893374544"> 
+                  <seq name="Driving" x="526.2595054577826" y="96.08257988714024" collapsed="false" id="3121acdd-f660-4d53-96b2-47029c756b6f"> 
+                        <tsk name="PathPlanningFocus(x=10,y=0)" x="246.46877864074327" y="150.65902098989568" test_time="0" test_result="true" id="5668a95a-a827-472a-bae2-b4fff00a36a7" />
+                        <seq name="OperatorRequest" x="282.81793998801766" y="288.10288896278394" collapsed="false" id="89ae85b8-590b-4dc5-9e9f-c92086e28f2d"> 
+                              <tsk name="PushHMI(data=panoramic_image)" x="23.817939988020044" y="347.1028889627855" test_time="0" test_result="true" id="4cfbdd7b-3d1e-432f-8e59-c2ada1eafd2f" />
+                              <tsk name="PushHMI(data=occupancy_grid)" x="70.8179399880189" y="386.10288896278666" test_time="0" test_result="true" id="6f1fff30-f245-4608-a822-9a4192b01493" />
+                              <tsk name="PushHMI(data=path)" x="170.81793998801868" y="428.10288896278666" test_time="0" test_result="true" id="07b29a30-1be4-4a2c-9de4-2ec9cbb6e9fb" />
+                              <tsk name="HMIResponse" x="332.8179399880179" y="425.10288896278666" test_time="0" test_result="true" id="8c95c9d2-94e3-4093-b65a-7bdae7609e59" />
+                        </seq>
+                        <seq name="@4" x="600.4908979908998" y="177.22324897324825" collapsed="false" id="70f216a5-7259-412e-a108-658b5d28d109"> 
+                              <tsk name="InitDrive" x="421.52266335251556" y="282.7066400375179" test_time="0" test_result="true" id="6e5cc7d2-bc5b-46c9-b6fc-9adb8ab9b935" />
+                              <sel name="@5" x="598.4908979908996" y="238.2232489732486" collapsed="false" id="44efb3a3-36bc-460c-a765-923a3b1d891f"> 
+                                    <tsk name="WayPointsDriving" x="508.0226633525119" y="282.7141588345212" test_time="0" test_result="true" id="398165c8-1786-4ce4-b98b-37e5282d9a26" />
+                                 <dec name="F:1" x="667.5" y="254.5"> 
+                                       <tsk name="FinishDrive" x="791.0623265623394" y="284.0803918303927" test_time="0" test_result="true" id="e69475b5-c614-47bf-89b5-def175bd06cf" />
+                                 </dec>
+                              </sel>
+                              <tsk name="FinishDrive" x="791.0623265623394" y="284.0803918303927" test_time="0" test_result="true" id="e69475b5-c614-47bf-89b5-def175bd06cf" />
+                        </seq>
+                  </seq>
+            </dec>
+         </par>
+   </par>
+</plan>
