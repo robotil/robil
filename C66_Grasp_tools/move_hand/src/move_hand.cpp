@@ -744,7 +744,7 @@ cy_r=cos(tyaw_r);
                 z_r = (tz_r==0) ? 0: z_r;
 
 	            move_hand::pelvis_move_hand move_msg;
-
+	            move_msg.request.quick = req.quick;
 	            move_msg.request.PositionDestination_left.x =  x_l;
                 move_msg.request.PositionDestination_left.y =  y_l;
                 move_msg.request.PositionDestination_left.z =  z_l;
