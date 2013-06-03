@@ -22,3 +22,11 @@ C23_ObjectRecogition TO DO
 2. Steering wheel, pedal etc...
 
 
+03/06/13
+1. Implement Cluster Extraction
+2. Implement 3D template matching
+3. Detect the steeringwheel while the robot is standing near the car (In standard position)
+4. Perform tests at different angles to see how well each detection performs
+5. For inside steeringwheel, handbrake, and gears, send robot coordinates
+
+
