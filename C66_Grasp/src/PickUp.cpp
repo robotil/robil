@@ -49,19 +49,21 @@ public:
 	void goalCB(){
 
 		ROS_INFO("Start time: %f", ros::Time::now().toSec());
-
+		hand_grasp::grasp grasp_msg;
+		C23_dFind::perceptionTransform perception_srv_msg;
+		move_hand::move_hand move_hand_msg;
 		std::string g = as_.acceptNewGoal()->parameters;
-
-		switch (g) {
-		case "pipe":
+		char c = g.at(0);
+		switch (c) {
+		case 'p':
 			/*open hand*/
 			ROS_INFO("opening right hand");
-			hand_grasp::grasp grasp_msg;
+
 			grasp_msg.strength = 0;
 			pub_hand_grasp_right.publish(grasp_msg);
 			ros::Duration(0.3).sleep();
 
-			C23_dFind::perceptionTransform perception_srv_msg;
+
 			perception_srv_msg.request.command = g;
 			ROS_INFO("requesting transformation from perception");
 			if (perception_transform_cli_.call(perception_srv_msg)){
@@ -106,7 +108,7 @@ public:
 
 			/*lifting*/
 
-			move_hand::move_hand move_hand_msg;
+
 			move_hand_msg.request.PositionDestination_right.z = 0.2;
 			if(!move_hand_cli_.call(move_hand_msg)){
                 ROS_INFO("ERROR in move_hand service");
@@ -118,22 +120,17 @@ public:
 
 
 
-		case "insert_pipe": break;
+		case 'i': break;
 
 
 
-		case "valve": break;
+		case 'v': break;
 
 
 		default: break;
 		}
 
 
-
-
-
-
-                move_hand::move_hand move_hand_msg;
                 move_hand_msg.request.PositionDestination_right.z = 0.3;
                 ROS_INFO("lifting");
                 if(move_hand_cli_.call(move_hand_msg)){
