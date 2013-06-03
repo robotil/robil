@@ -20,7 +20,6 @@
   <depend package="move_pelvis"/>
   <depend package="pelvis_leg_target"/>
   <depend package="C31_PathPlanner"/>
-  <depend package="FootPlacement"/>
 
 </package>
 
