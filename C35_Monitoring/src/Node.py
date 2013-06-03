@@ -577,9 +577,9 @@ class node:
             return None
         a[0]= randP             
         if a[0]:
-            a[1] = self.getDistSuccByIndex(index).calcProb()
+            a[1] = float(self.getDistSuccByIndex(index).calcProb())
         else:          
-            a[1] = self.getDistFailByIndex(index).calcProb()
+            a[1] = float(self.getDistFailByIndex(index).calcProb())
 
         return a
         
@@ -601,15 +601,36 @@ class node:
        self.probTable = []
        self.distTableSucc = []
        self.distTableFail = [] 
-       self.setAttrib("Successdistribution",[])
-       self.setAttrib("probability",[])
-       self.setAttrib("Failuredistribution",[])  
+       try:
+           del self.treeInst.attrib["Successdistribution"]
+       except:
+           pass
+       try:
+           del self.treeInst.attrib["probability"]
+       except:
+           pass
+       try:
+           del self.treeInst.attrib["Failuredistribution"]
+       except:
+           pass
+#       self.setAttrib("Successdistribution",[])
+#       self.setAttrib("probability",[])
+#       self.setAttrib("Failuredistribution",[])  
        self.reset = True
        
+      #clear whole tree property
+    def clearWholeTree(self):
+        childlist = self.getChildren()
+        if childlist !=None:
+            for child in childlist:
+                child.clear()
+                child.clearWholeTree()
+        
      #run plan  
     def runPlan(self, index):
       children = self.getChildren()
       children[0].run(index) 
+      
 
     #get average to success time
     def getAverageSuccTime(self, index):
