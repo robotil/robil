@@ -128,17 +128,13 @@ bool C23_Detector::detect(const string target) {
         _target = OUTSIDE_STEERINGWHEEL;
         ROS_INFO("We are looking for the steering wheel while outside the car...");
     }
-    else if (!target.compare("InsideHandbrake")) {
+    else if (!target.compare("Handbrake")) {
         _target = HANDBRAKE;
         ROS_INFO("We are looking for the handbrake while inside the car...");
     }
     else if (!target.compare("Gear")) {
         _target = GEAR;
         ROS_INFO("We are looking for the gear inside the car...");
-    }
-    else if (!target.compare("PushButton")) {
-        _target = PUSHBUTTON;
-        ROS_INFO("We are looking for the push button inside the car...");
     }
     return true;
     
@@ -228,11 +224,6 @@ void C23_Detector::callback(const sensor_msgs::ImageConstPtr& msg,const sensor_m
             res = detectGear(srcImg,cloud,1);
             publishMessage(res);
             break; 
-        case PUSHBUTTON:
-            ROS_INFO("PUSHBUTTON");
-            res = detectPushButton(srcImg,cloud,1);
-            publishMessage(res);
-            break; 
             
     }
     srcImg.release();
@@ -249,7 +240,7 @@ bool C23_Detector::takePictures(Mat srcImg){
 
 
 //Use for template matching with the car
-bool C23_Detector::templateMatching( Mat img, Mat templ, int matching_method )
+bool C23_Detector::templateMatching( Mat img, Mat templ, int matching_method, cv::Point *matchLoc)
 {
     // Source image to display
     Mat img_display;
@@ -268,21 +259,21 @@ bool C23_Detector::templateMatching( Mat img, Mat templ, int matching_method )
     
     // Localizing the best match with minMaxLoc
     double minVal; double maxVal; cv::Point minLoc; cv::Point maxLoc;
-    cv::Point matchLoc;
+    //cv::Point matchLoc;
     
     minMaxLoc( result, &minVal, &maxVal, &minLoc, &maxLoc, Mat() );
     
     // For SQDIFF and SQDIFF_NORMED, the best matches are lower values. For all the other methods, the higher the better
     if( matching_method  == 0 || matching_method == 1 )
-    { matchLoc = minLoc; }
+    { *matchLoc = minLoc; }
     else
-    { matchLoc = maxLoc; }
+    { *matchLoc = maxLoc; }
     
     // Show me what you got
-    rectangle( img_display, matchLoc, cv::Point( matchLoc.x + templ.cols , matchLoc.y + templ.rows ), Scalar::all(0), 2, 8, 0 );
+    rectangle( img_display, *matchLoc, cv::Point( matchLoc->x + templ.cols , matchLoc->y + templ.rows ), Scalar::all(0), 2, 8, 0 );
     //rectangle( result, matchLoc, cv::Point( matchLoc.x + templ.cols , matchLoc.y + templ.rows ), Scalar::all(0), 2, 8, 0 );
     
-    pictureCoordinatesToGlobalPosition(matchLoc.x,matchLoc.y,matchLoc.x + templ.cols,matchLoc.y + templ.rows,&x,&y,NULL);
+    pictureCoordinatesToGlobalPosition(matchLoc->x,matchLoc->y,matchLoc->x + templ.cols,matchLoc->y + templ.rows,&x,&y,NULL);
     
     //imshow( "Source Image", img_display );
     //waitKey(0);
@@ -293,13 +284,13 @@ bool C23_Detector::templateMatching( Mat img, Mat templ, int matching_method )
 
 //Detect the car steering wheel
 bool C23_Detector::detectSteeringWheel(Mat srcImg,const sensor_msgs::PointCloud2::ConstPtr &cloud,int location){
-    
+    cv::Point matchLoc;
     bool res = false;
     if (location==0)//Robot is inside the car
 {
     //Load the image template for the steering wheel
     Mat steeringwheelTemplate = imread("template_matching_images/steering_wheel_template_qual.jpg");
-    res  = templateMatching(srcImg, steeringwheelTemplate, 1);
+    res  = templateMatching(srcImg, steeringwheelTemplate, 1, &matchLoc);
     //imshow("Steering wheel template", steeringwheelTemplate);
     //waitKey(0);
 }
@@ -319,44 +310,50 @@ return res;
 
 //Detect the car handbrake
 bool C23_Detector::detectHandbrake(Mat srcImg,const sensor_msgs::PointCloud2::ConstPtr &cloud,int location){
-    
+    cv::Point matchLoc;
     //Load the image template for the steering wheel
-    Mat handbrakeTemplate = imread("template_matching_images/hand_brake_template_qual.jpg");
+    Mat gearTemplate = imread("template_matching_images/gear_template_qual.jpg");
     //imshow("Hand brake template", handbrakeTemplate);
     //waitKey(0);
     
-    bool res =  templateMatching(srcImg, handbrakeTemplate, 1);
+    bool res =  templateMatching(srcImg, gearTemplate, 1, &matchLoc);
+    
+    cout<<"Coordinates: "<<matchLoc.x<<", "<<matchLoc.y<<endl;
+    const int OFFSET = 100;
+    matchLoc.x = matchLoc.x - OFFSET;
+    int y1 = gearTemplate.rows;
+    matchLoc.y = matchLoc.y + y1;
+    int x1 = gearTemplate.cols;
+    
+    cout<<"Coordinates New: "<<matchLoc.x<<", "<<matchLoc.y<<", "<<x1+ OFFSET<<", "<<y1<<endl;
+    Rect rect(matchLoc.x, matchLoc.y, x1+ OFFSET, y1);
+    
+    Mat handbrakeTemplate = imread("template_matching_images/hand_brake_template_qual.jpg");
+    Mat newSrcImg(srcImg,rect);
+    //imshow("New Src Image", newSrcImg);
+    //waitKey();
+    res =  templateMatching(newSrcImg, handbrakeTemplate, 1, &matchLoc);
+    
+    
+    
     
     return res;
 }
 
 //Detect the car gear
 bool C23_Detector::detectGear(Mat srcImg,const sensor_msgs::PointCloud2::ConstPtr &cloud,int location){
-    
+    cv::Point matchLoc;
     //Load the image template for the steering wheel
     Mat gearTemplate = imread("template_matching_images/gear_template_qual.jpg");
     //imshow("Gear template", gearTemplate);
     //waitKey(0);
     
-    bool res  = templateMatching(srcImg, gearTemplate, 1);
+    bool res  = templateMatching(srcImg, gearTemplate, 1, &matchLoc);
     
     
     return res;
 }
 
-//Detect the car push button to start the engine
-bool C23_Detector::detectPushButton(Mat srcImg,const sensor_msgs::PointCloud2::ConstPtr &cloud,int location){
-    
-    //Load the image template for the steering wheel
-    Mat pushButtonTemplate = imread("template_matching_images/push_button_template_qual.jpg");
-    //imshow("Push button template", pushButtonTemplate );
-    //waitKey(0);
-    
-    bool res  = templateMatching(srcImg, pushButtonTemplate , 1);
-    
-    
-    return res;
-}
 
 
 bool C23_Detector::detectValve(Mat srcImg, const sensor_msgs::PointCloud2::ConstPtr &cloud) {
