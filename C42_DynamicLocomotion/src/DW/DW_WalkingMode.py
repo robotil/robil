@@ -62,6 +62,7 @@ class DW_WalkingMode(WalkingMode):
             else:
                 direction = "bwd"
             i = i+1
+            print p
             p.append([wp.x,wp.y,direction])
         self.SetPath(p)
     

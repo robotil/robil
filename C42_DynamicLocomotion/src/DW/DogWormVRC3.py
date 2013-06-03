@@ -225,6 +225,7 @@ class DW_Controller(object):
         print("DW::Initialize")
         self.GlobalPos = 0
         self.GlobalOri = 0
+        self._counter = 0
         
         self.reset_srv = rospy.ServiceProxy('/gazebo/reset_models', Empty)
 
@@ -258,7 +259,10 @@ class DW_Controller(object):
         self.RS.UpdateState(msg)
 
     def Odom_cb(self,msg):
-        print ("Odom_cb::", self.GlobalPos)
+        if 200 <= self._counter: 
+            print ("Odom_cb::", self.GlobalPos)
+            self._counter = 0
+        self._counter += 1
         self.GlobalPos = msg.pose.pose.position
         self.GlobalOri = msg.pose.pose.orientation
 
