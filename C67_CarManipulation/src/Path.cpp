@@ -142,6 +142,7 @@ void pPathPoints::Update(IkSolution R0, IkSolution R1, int option)
 			R1.m_q[3]-R0.m_q[3], R1.m_q[4]-R0.m_q[4], R1.m_q[5]-R0.m_q[5]);
 
 		int i;
+		std::cout<<"option:"<<option<<"/n";
 		for (i=0; i<size/4; i++)
 		{
 			if ((option != NoStart)&&(option != NoStartEnd))
