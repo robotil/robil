@@ -1,7 +1,7 @@
-V0.0.1.2
+V0.0.1.3
 ===========================================================
 C0_RobilTask     		0.5
-C0_Scripts     		        0.24
+C0_Scripts     		        0.25
 C10_Common                      0.5
 C11_Agent                       0.21
 C11_OperatorControl             0.23
@@ -17,7 +17,7 @@ C25_GlobalPosition     		0.9
 C25_ekf     			0.1
 C31_PathPlanner     		0.20
 C34_BTExecuter     		0.8
-C34_Designer     		0.35
+C34_Designer     		0.36
 C34_Executer     		0.8
 C35_Monitoring     		0.10
 C41_BodyControl     		0.1
