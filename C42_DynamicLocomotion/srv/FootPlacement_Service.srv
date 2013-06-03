@@ -1,0 +1,6 @@
+uint32                walking_mode         # 0=QuasiStatic step, 1=Dynamic foot placement
+Foot_Placement_data   start_pose           # pose of foot from where to start footplacement scan (includes foot_index L=0/R=1)   
+Foot_Placement_data   other_foot_pose      # contains pose of other foot
+---                                        # if start_pose foot_index=2 foot placement can be done from either foot 
+Foot_Placement_data[] foot_placement_path  # Array of foot placements in world frame 
+uint32                done                 # 1=reached goal, 0=task in progress
