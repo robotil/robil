@@ -1,14 +1,14 @@
-V0.0.1.1
+V0.0.1.5
 ===========================================================
 C0_RobilTask     		0.5
-C0_Scripts     		        0.24
+C0_Scripts     		        0.25
 C10_Common                      0.5
 C11_Agent                       0.21
 C11_OperatorControl             0.23
 C21_VisionAndLidar              0.16
 C22_CompactGroundRecognitionAndMapping     0.7
 C22_GroundRecognitionAndMapping     0.14
-C22_transformations     	0.1
+C22_transformations     	0.2
 C23_ObjectRecognition     	0.21
 C23_dFind     			0.5
 C24_ObstacleDetection     	0.6
@@ -17,7 +17,7 @@ C25_GlobalPosition     		0.9
 C25_ekf     			0.1
 C31_PathPlanner     		0.20
 C34_BTExecuter     		0.8
-C34_Designer     		0.35
+C34_Designer     		0.36
 C34_Executer     		0.8
 C35_Monitoring     		0.10
 C41_BodyControl     		0.1
@@ -39,7 +39,7 @@ C51_CarOperation     		0.11
 C65_CloseValve     		0.1
 C66_Grasp     			0.5
 C66_Grasp_tools     		0.4
-C67_CarManipulation     	0.16
+C67_CarManipulation     	0.18
 C67_CarManipulation_tools     	0.1
 LidarObstacleDetection     	0.1
 libviso2     			0.1

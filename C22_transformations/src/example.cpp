@@ -1,6 +1,8 @@
 #include <ros/ros.h>
-#include "trans.hpp"
+#include <C22_transformations/MapTransformations.h>
 #include <C22_GroundRecognitionAndMapping/C22.h>
+
+struct XY{public: double x,y;};
 
 int main(int argc,char**argv){
 	 ros::init(argc, argv, "c22_tester");
@@ -14,8 +16,10 @@ int main(int argc,char**argv){
 	  */
 		  if (client.call(srv))
 		  {
-			  C22_transform trans;
-			 std::cout<<"Global position in map:\n"<<trans.globalPosToMap(srv.response.drivingPath)<<"\n";
+			 C22_transform trans;
+			 XY bot;
+			 trans.GlobalToMap(srv.response.drivingPath, srv.response.drivingPath.robotPos, bot);
+			 std::cout<<"Global position in map: GLOBAL("<<srv.response.drivingPath.robotPos.x<<","<<srv.response.drivingPath.robotPos.y<<") -> MAP("<<bot.x<<","<<bot.y<<")\n";
 		  }else{
 			  std::cout<<"service fail\n";
 		  }

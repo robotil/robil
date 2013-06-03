@@ -54,3 +54,13 @@ Trace::~Trace()
 	delete [] pArray;
 	//std::cout << "after delete\n";
 }
+
+RPY TraceAngle(RPY center, RPY position, double angle)
+{
+	center.R += angle;
+	Matrix A = center.FromRPY();
+	A.Multiply(position.FromRPY());
+	RPY ans;
+	ans.ToRPY(A);
+	return ans;
+}

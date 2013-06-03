@@ -130,9 +130,11 @@ rosbuild_link_boost(dummy thread)
 
 rosbuild_add_executable(GripSteeringWheel src/GripSteeringWheel.cpp)
 rosbuild_link_boost(GripSteeringWheel thread)
+target_link_libraries(GripSteeringWheel Kinematics)
 
 rosbuild_add_executable(CalibrateWheel src/CalibrateWheel.cpp)
 rosbuild_link_boost(CalibrateWheel thread)
+target_link_libraries(CalibrateWheel Kinematics)
 
 rosbuild_add_executable(PlaceFeetOnPedals src/PlaceFeetOnPedals.cpp)
 rosbuild_link_boost(PlaceFeetOnPedals thread)
