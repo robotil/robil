@@ -10,6 +10,11 @@
 
 #define PLANNER_VERSION "2013_05_26_14_45"
 
+#define PARAMS_FROM_ROS 1
+#define PARAMS_FROM_CODE 2
+#define PARAMS_SOURCE PARAMS_FROM_ROS
+
+#if PARAMS_SOURCE==PARAMS_FROM_CODE
 /*
 #define SET_PF_PARAMETERS(potential_field)\
  	(potential_field).viewRadiusForward = 5;\
@@ -36,6 +41,35 @@
 	(AStarSearch).w_distance = 1;\
 	(AStarSearch).w_slop = 1;\
 	(AStarSearch).w_alt_delta = 1;
+
+#endif
+
+#if PARAMS_SOURCE == PARAMS_FROM_ROS
+#include <ros/ros.h>
+
+#define SET_PF_PARAMETERS(potential_field)\
+	ros::param::param<double>("/C31_GlobalPathPlanner/potential_field/viewRadiusForward", (potential_field).viewRadiusForward, 15);\
+	ros::param::param<double>("/C31_GlobalPathPlanner/potential_field/viewRadiusSide", (potential_field).viewRadiusForward, 4);\
+	ros::param::param<double>("/C31_GlobalPathPlanner/potential_field/stepRate", (potential_field).viewRadiusForward, 0.3);\
+	ros::param::param<double>("/C31_GlobalPathPlanner/potential_field/distanceBetweenPoints", (potential_field).viewRadiusForward, 2);\
+	ros::param::param<double>("/C31_GlobalPathPlanner/potential_field/maxAngleWhileReducing", (potential_field).viewRadiusForward, Vec2d::d2r(10));\
+	(potential_field).inertia=pow(1/(pf_params.viewRadiusForward*0.5),2);
+
+#define SET_WD_PARAMETERS(walls_detector)\
+	ros::param::param<double>("/C31_GlobalPathPlanner/walls_detector/max_alt", (walls_detector).max_alt, 0.45);\
+	ros::param::param<double>("/C31_GlobalPathPlanner/walls_detector/costTL", (walls_detector).costTL, 0.05);\
+	ros::param::param<double>("/C31_GlobalPathPlanner/walls_detector/costLL", (walls_detector).costLL, 0.0);
+
+#define SET_BS_PARAMETERS(AStarSearch)\
+	ros::param::param<double>("/C31_GlobalPathPlanner/a_star/w_distance", (AStarSearch).w_distance, 1);\
+	ros::param::param<double>("/C31_GlobalPathPlanner/a_star/w_slop", (AStarSearch).w_slop, 1);\
+	ros::param::param<double>("/C31_GlobalPathPlanner/a_star/w_alt_delta", (AStarSearch).w_alt_delta, 1);
+
+#endif
+
+
+
+
 
 #define DO_SMOOTHING
 
