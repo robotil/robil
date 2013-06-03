@@ -401,7 +401,7 @@ bool C23_Detector::detectValve(Mat srcImg, const sensor_msgs::PointCloud2::Const
             
         }
     }
-    if(biggest_size > 30 && biggest_size < 80) {
+    if(biggest_size > 30 && biggest_size < 350) {
         
         
         
