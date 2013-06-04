@@ -43,6 +43,8 @@ int main(int argc, char **argv)
 		  				std::cout << "\033[0;32m"<< "A  ";
 		  				else if (srv.response.drivingPath.row.at(i-1).column.at(j).status==1)
 							std::cout << "\033[0;33m"<<"B  ";
+		  				else if (srv.response.drivingPath.row.at(i-1).column.at(j).status==4)
+		  					std::cout << "\033[0;34m"<<"D  ";
 						else std::cout << "\033[0m"<< "-  ";
 		  		}
 		  		std::cout <<endl;
