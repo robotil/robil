@@ -38,7 +38,7 @@
 #include <C21_VisionAndLidar/C21_obj.h>
 #include <math.h>
 #include <std_srvs/Empty.h>
-
+#include <ros/package.h>
 
 
 #define MIN(x,y) (x < y ? x : y)
@@ -423,13 +423,25 @@ bool C23_Detector::detectSteeringWheel(Mat srcImg,const sensor_msgs::PointCloud2
     bool res = false;
     if (location==0)//Robot is inside the car
 {
+  
+      //------------------------------------------------------------------
+      // Load the object templates specified in the object_templates.txt file
+      char basePath[1000],imageName[1000];
+
+      sprintf(basePath,"%s/template_matching_images/%c",ros::package::getPath("C23_ObjectRecognition").c_str(),'\0');
+
+      sprintf(imageName,"%s/steering_wheel_template_qual.jpg%c",basePath,'\0');
+      std::cout<<imageName<<endl;
+    //-----------------------------------------------------------------
+  
+  
     //Load the image template for the steering wheel
-    Mat steeringwheelTemplate = imread("template_matching_images/steering_wheel_template_qual.jpg");
+    Mat steeringwheelTemplate = imread(imageName);
     res  = templateMatching(srcImg, steeringwheelTemplate, 1, &matchLoc, cloud);
     
     
-    //imshow("Steering wheel template", steeringwheelTemplate);
-    //waitKey(0);
+    imshow("Steering wheel template", steeringwheelTemplate);
+    waitKey(0);
 }
 else{
     //Robot is outside the car
@@ -449,22 +461,28 @@ return res;
 bool C23_Detector::detectHandbrake(Mat srcImg,const sensor_msgs::PointCloud2::ConstPtr &cloud,int location){
     cv::Point matchLoc;
     //Load the image template for the steering wheel
-    Mat gearTemplate = imread("template_matching_images/gear_template_qual.jpg");
-    
     //------------------------------------------------------------------
-//      // Load the object templates specified in the object_templates.txt file
-//  char basePath[1000],templateFiles[1000];
-// 
-//             sprintf(basePath,"%s/mod/%c",ros::package::getPath("C23_dFind").c_str(),'\0');
-// 
-//             sprintf(templateFiles,"%ste.txt%c",basePath,'\0');
-// 	    std::cout<<templateFiles<<endl;
+      // Load the object templates specified in the object_templates.txt file
+      char basePath[1000],imageName[1000];
+
+      sprintf(basePath,"%s/template_matching_images/%c",ros::package::getPath("C23_ObjectRecognition").c_str(),'\0');
+
+      sprintf(imageName,"%s/gear_template_qual.jpg%c",basePath,'\0');
+      std::cout<<imageName<<endl;
     //-----------------------------------------------------------------
+    
+    
+    Mat gearTemplate = imread(imageName);
+    
+
     
     //imshow("Hand brake template", handbrakeTemplate);
     //waitKey(0);
     
     bool res =  templateMatching(srcImg, gearTemplate, 1, &matchLoc, cloud);
+    
+    imshow("New Src Image", gearTemplate);
+    waitKey();
     
    /* cout<<"Coordinates: "<<matchLoc.x<<", "<<matchLoc.y<<endl;
     const int OFFSET = 100;
@@ -489,9 +507,19 @@ bool C23_Detector::detectHandbrake(Mat srcImg,const sensor_msgs::PointCloud2::Co
 bool C23_Detector::detectGear(Mat srcImg,const sensor_msgs::PointCloud2::ConstPtr &cloud,int location){
     cv::Point matchLoc;
     //Load the image template for the steering wheel
-    Mat gearTemplate = imread("template_matching_images/gear_template_qual.jpg");
-    //imshow("Gear template", gearTemplate);
-    //waitKey(0);
+        //------------------------------------------------------------------
+      // Load the object templates specified in the object_templates.txt file
+      char basePath[1000],imageName[1000];
+
+      sprintf(basePath,"%s/template_matching_images/%c",ros::package::getPath("C23_ObjectRecognition").c_str(),'\0');
+
+      sprintf(imageName,"%s/gear_template_qual.jpg%c",basePath,'\0');
+      std::cout<<imageName<<endl;
+    //-----------------------------------------------------------------
+    
+    Mat gearTemplate = imread(imageName);
+    imshow("Gear template", gearTemplate);
+    waitKey(0);
     
     bool res  = templateMatching(srcImg, gearTemplate, 1, &matchLoc, cloud);
     
