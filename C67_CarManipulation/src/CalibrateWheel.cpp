@@ -24,10 +24,10 @@ using namespace C0_RobilTask;
 #include <string>
 #include <vector>
 #include <boost/lexical_cast.hpp>
-#include "FK.h"
-#include "IK.h"
-#include "Path.h"
-#include "Trace.h"
+#include <C67_CarManipulation/FK.h>
+#include <C67_CarManipulation/IK.h>
+#include <C67_CarManipulation/Path.h>
+#include <C67_CarManipulation/Trace.h>
 // end added
 
 //variables added
