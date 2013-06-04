@@ -292,7 +292,8 @@ public:
 			AltMap alts(0,0);
 #endif
 			ObsMap grid = extractOccupancyGrid(c22.response, mprop);
-			Map map; map.update(grid, alts);
+			ObsMap terrain = extractTerrainGrid(c22.response, mprop);
+			Map map; map.update(grid, alts, terrain);
 
 			Gps2Grid gps_grid = extractLocation(c22.response, mprop);
 			
@@ -340,7 +341,8 @@ public:
 		AltMap alts(0,0);
 #endif
 		ObsMap grid = extractOccupancyGrid(*msg, mprop);
-		Map map; map.update(grid, alts);
+		ObsMap terrain = extractTerrainGrid(*msg, mprop);
+		Map map; map.update(grid, alts, terrain);
 
 		Gps2Grid gps_grid = extractLocation(*msg, mprop);
 
