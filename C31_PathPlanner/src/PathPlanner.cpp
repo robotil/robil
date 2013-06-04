@@ -35,7 +35,7 @@ typedef World Map;
 			_data.map.walls(_data.start.x, _data.start.y) = ObsMap::ST_AVAILABLE;
 			ObsMap printed_map = _data.map.walls;
 			SmoothedPath _path = searchPath_transitAccurate(
-					_data.map.altitudes, _data.map.slops, _data.map.costs, _data.map.walls,
+					_data.map.altitudes, _data.map.slops, _data.map.costs, _data.map.walls, _data.map.grid, _data.map.terrain,
 					_data.start, _data.finish, constraints
 			);
 #else

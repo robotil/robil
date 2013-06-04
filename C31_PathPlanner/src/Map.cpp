@@ -85,8 +85,9 @@ void ObsMap::approximate(const long cx, const long cy, long& tx, long& ty)const{
 
 #include "AltTransforms.h"
 
-void World::update(const ObsMap& grid, const AltMap &alts){
+void World::update(const ObsMap& grid, const AltMap &alts, const ObsMap& terrain){
 	this->grid = grid;
+	this->terrain = terrain;
 #if MAP_MODE == MM_ALTS
 	this->altitudes = alts;
 	AltTransforms wd1(alts, AltTransformsParameters());

@@ -195,6 +195,10 @@ public abstract class GElement {
 		return this instanceof Decorator;
 	}
 	
+	public boolean isJoint() {
+		return this instanceof Joint;
+	}
+	
 	public Task getAsTask() {
 		if (!isTask())
 			return null;

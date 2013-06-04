@@ -50,7 +50,7 @@ static ObsMap extractOccupancyGrid(const C22_GroundRecognitionAndMapping::C22C0_
 			m.w=w; m.h=h;
 			for(size_t y=0;y<h;y++)
 				for(size_t x=0;x<w;x++)
-					m.data.push_back(res.row.at(y).column.at(x).status);
+					m.data.push_back(ObsMap::filterObstacles( res.row.at(y).column.at(x).status ));
 
 			//std::cout<<"finish converting message to map ("<<w<<"x"<<h<<")\n"<<m.map()<<std::endl;
 			ROS_INFO("... new data converted");
@@ -63,7 +63,33 @@ static ObsMap extractOccupancyGrid(const C22_GroundRecognitionAndMapping::C22C0_
 	ObsMap result_map = m.map();
 	return result_map;
 };
+static ObsMap extractTerrainGrid(const C22_GroundRecognitionAndMapping::C22C0_PATH &res, const MapProperties& prop){
+	ObsMap::MapCreator m;
+	size_t h = res.row.size();
+	bool size_ok = false;
+	if(h){
+		size_t w = res.row.at(0).column.size();
+		if(w){
 
+			ROS_INFO(STR("start converting message to map ("<<w<<"x"<<h<<")"));
+
+			size_ok = true;
+			m.w=w; m.h=h;
+			for(size_t y=0;y<h;y++)
+				for(size_t x=0;x<w;x++)
+					m.data.push_back(ObsMap::filterTerrain( res.row.at(y).column.at(x).status ));
+
+			//std::cout<<"finish converting message to map ("<<w<<"x"<<h<<")\n"<<m.map()<<std::endl;
+			ROS_INFO("... new data converted");
+		}
+	}
+	if(size_ok==false){
+		std::cout<<"size of map is wrong"<<std::endl;
+		return ObsMap(0,0);
+	}
+	ObsMap result_map = m.map();
+	return result_map;
+};
 
 static Gps2Grid extractLocation(const C22_GroundRecognitionAndMapping::C22C0_PATH &res, const MapProperties& prop){
 	GPSPoint gps(0,0);
@@ -120,6 +146,9 @@ static AltMap extractMap(C22_GroundRecognitionAndMapping::C22::Response &res, co
 };
 static ObsMap extractOccupancyGrid(C22_GroundRecognitionAndMapping::C22::Response &res, const MapProperties& prop){
 	return extractOccupancyGrid(res.drivingPath, prop);
+};
+static ObsMap extractTerrainGrid(C22_GroundRecognitionAndMapping::C22::Response &res, const MapProperties& prop){
+	return extractTerrainGrid(res.drivingPath, prop);
 };
 
 

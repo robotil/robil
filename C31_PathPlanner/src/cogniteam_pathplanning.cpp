@@ -81,6 +81,14 @@ Map Inflator::inflate(const Map& source)const{
 	return m;
 }
 
+Map MapEditor::cut(const Map& source, const char s, const char o)const{
+	Map res ( source );
+	for( size_t y=0; y<source.h(); y++){for( size_t x=0; x<source.w(); x++){
+		if(res(x,y)==s) res(x,y)=s; else res(x,y)=o;
+	}}
+	return res;
+}
+
 Map MapEditor::replace(const Map& source, const char from, const char to)const{
 	Map res ( source );
 	for( size_t y=0; y<source.h(); y++){for( size_t x=0; x<source.w(); x++){
@@ -454,7 +462,7 @@ PField::Points searchPath(
 }
 
 PField::Points searchPath_transitAccurate(
-		const AltMap& alts, const AltMap& slops, const AltMap& costs, const Map& s_walls,
+		const AltMap& alts, const AltMap& slops, const AltMap& costs, const Map& s_walls, const Map& s_obstacles, const Map& s_terrain,
 		const Waypoint& start, const Waypoint& finish, const Constraints& constraints
 ){
 	using namespace std;
@@ -468,22 +476,31 @@ PField::Points searchPath_transitAccurate(
 	}
 
 	size_t rr = constraints.dimentions.radius;
-	if( rr<constraints.dimentions.radius) rr++;
+	if( rr<constraints.dimentions.radius) rr++; // Because radius is float and rr is int
 
-	Inflator i( rr , Map::ST_BLOCKED);
+	Inflator i( rr, Map::ST_BLOCKED);
+	Inflator ii( rr*0.5, Map::ST_DEBREES);
 	MapEditor e;
 
+	Map walls = e.merge(s_walls, s_obstacles, MapEditor::OR);
+
 	Map inflated_map = e.replace(
-			i.inflate(s_walls),
+			i.inflate(walls),
 			Map::ST_UNCHARTED, Map::ST_AVAILABLE
 		);
+	Map inflated_terrain = e.replace(e.cut(
+			ii.inflate(s_terrain),
+			Map::ST_DEBREES, Map::ST_AVAILABLE), Map::ST_DEBREES, Map::ST_BLOCKED
+		);
+
+	inflated_map = e.merge(inflated_map, inflated_terrain, MapEditor::OR);
 
 	if( inflated_map(start.x, start.y)==Map::ST_BLOCKED || inflated_map(finish.x, finish.y)==Map::ST_BLOCKED ){
 		cout<<"searchPath: "<<"some of interesting points are unattainable (after inflation)"<<endl;
 		return EmptyPath;
 	}
 
-	Map walls =
+	walls =
 		e.coloring(
 			inflated_map,
 			start.x, start.y, Map::ST_AVAILABLE,Map::ST_BLOCKED
