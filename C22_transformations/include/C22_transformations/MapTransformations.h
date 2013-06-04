@@ -23,13 +23,13 @@ public:
 		MapProperties(const C22_GroundRecognitionAndMapping::C22C0_PATH& c22msg){
 			offset = Vec2d(c22msg.robotPos.x, c22msg.robotPos.y);
 			resolution = 0.25;
-			rotation = Vec2d::d2r(-90);
+			rotation = Vec2d::d2r(0);
 		}
 		MapProperties(){
 			resolution = 0.25;
-			rotation = Vec2d::d2r(-90);
+			rotation = Vec2d::d2r(0);
 		}
-		MapProperties(Vec2d offset, double res=0.25, double rot= Vec2d::d2r(-90)):offset(offset),resolution(res), rotation(rot){}
+		MapProperties(Vec2d offset, double res=0.25, double rot= Vec2d::d2r(0)):offset(offset),resolution(res), rotation(rot){}
 	};
 
 	C22_transform(){}
