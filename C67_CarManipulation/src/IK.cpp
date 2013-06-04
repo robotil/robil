@@ -4,8 +4,8 @@ IK.cpp Inverse Kinematics file
 #include <math.h>
 #include <iostream>
 #include <string>
-#include "FK.h"
-#include "IK.h"
+#include <C67_CarManipulation/FK.h>
+#include <C67_CarManipulation/IK.h>
 
 // local functions
 bool IkSqrSolve(double cc, double cs, double c1, double angles[2]); 

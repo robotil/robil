@@ -18,10 +18,10 @@
 #include <string>
 #include <vector>
 #include <boost/lexical_cast.hpp>
-#include "FK.h"
-#include "IK.h"
-#include "Path.h"
-#include "Transmit.h"
+#include <C67_CarManipulation/FK.h>
+#include <C67_CarManipulation/IK.h>
+#include <C67_CarManipulation/Path.h>
+#include <C67_CarManipulation/Transmit.h>
 
 int main(int argc, char** argv)
 {

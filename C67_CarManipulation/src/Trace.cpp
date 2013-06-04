@@ -7,9 +7,9 @@
 #include <math.h>
 #include <iostream>
 #include <string>
-#include "FK.h"
-#include "IK.h"
-#include "Trace.h"
+#include <C67_CarManipulation/FK.h>
+#include <C67_CarManipulation/IK.h>
+#include <C67_CarManipulation/Trace.h>
 
 
 Trace::Trace(RPY r1, RPY r2, int pointsNum)
