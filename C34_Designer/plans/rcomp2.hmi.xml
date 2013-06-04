@@ -1,93 +1,93 @@
 <plan descriptions="./plans/TaskDescriptions.xml">
-   <seq name="event2" x="522.613325158406" y="-393.40524179534646" collapsed="false" id="dbbc9312-97cc-4618-9b28-3873381e8cc8"> 
-         <par name="@1" x="533.8514203965015" y="-341.45286084296526" collapsed="false" id="f993e5a9-7c5f-4c6b-b349-2a2f3d826c25"> 
-               <par name="Perception" x="399.7085632536441" y="-288.4528608429655" collapsed="false" id="06307b61-32b3-4659-ba91-f93cadd8784c"> 
-                     <tsk name="LocalizationTrack" x="304.7085632536441" y="-242.07786084296566" test_time="0" test_result="true" id="49810385-7853-483c-bbff-ca977cfb8e8d" />
-                     <tsk name="PathPlanning" x="459.7085632536439" y="-168.45286084296566" test_time="0" test_result="true" id="034bf188-a6f3-43ea-9372-96ba35bcaf85" />
+   <seq name="event2" x="-108.38667484159396" y="-923.4052417953465" collapsed="false" id="dbbc9312-97cc-4618-9b28-3873381e8cc8"> 
+         <par name="@1" x="-97.14857960349855" y="-871.4528608429653" collapsed="false" id="f993e5a9-7c5f-4c6b-b349-2a2f3d826c25"> 
+               <par name="Perception" x="-231.29143674635588" y="-818.4528608429655" collapsed="false" id="06307b61-32b3-4659-ba91-f93cadd8784c"> 
+                     <tsk name="LocalizationTrack" x="-326.2914367463559" y="-772.0778608429657" test_time="0" test_result="true" id="49810385-7853-483c-bbff-ca977cfb8e8d" />
+                     <tsk name="PathPlanning" x="-171.2914367463561" y="-698.4528608429657" test_time="0" test_result="true" id="034bf188-a6f3-43ea-9372-96ba35bcaf85" />
                </par>
-               <par name="MissionProgress" x="637.2150567601378" y="-286.63467902478374" collapsed="false" id="98814f84-fe2b-4c02-90c8-626e30d67eef"> 
-                  <dec name="!L!" x="729.8817234268041" y="-237.96801235811733"> 
-                        <seq name="Mission" x="717.215056760138" y="-188.19023458033928" collapsed="false" id="5205ce4c-157b-49ac-8b78-4deb75260be0"> 
-                              <tsk name="StandUp" x="560.3956123156936" y="-134.52356791367242" test_time="0" test_result="true" id="c4777a0d-9565-4c53-adc8-dfee3e4e3aed" />
-                              <par name="@3" x="780.215056760138" y="-130.85690124700568" collapsed="false" id="25164dde-fe1e-4ea8-a222-e70135619f39"> 
-                                    <tsk name="FallingMonitor" x="670.2150567601375" y="-74.85690124700528" test_time="0" test_result="true" id="7323b98c-5935-45bb-865a-8fc40963b8ac" />
-                                 <dec name="!L!" x="830.1039456490269" y="-76.74579013589471"> 
-                                       <seq name="SearchObjectAndGo" x="781.0563266014074" y="-23.174361564465812" collapsed="false" id="6de3db3d-b7da-4812-8944-11d90b3dfbf0"> 
-                                          <dec name="!L!" x="687.7604846134237" y="26.36937898702456"> 
-                                                <par name="SearchObjectWithStabilization" x="619.1695755225143" y="89.27846989611459" collapsed="false" id="ebd9612d-444c-49d5-ae38-187f7fd5db55"> 
-                                                      <sel name="OperatorObjectValidation" x="667.3397386926796" y="161.37481799246507" collapsed="false" id="05ebbd70-0e92-4cd6-b195-a1308a4b415d"> 
-                                                            <tsk name="SearchObject(target=Gate)" x="580.7939917140719" y="232.78999352488904" test_time="0" test_result="true" id="2a7668cb-1756-4f8e-9684-eaf90e3bcc40" />
-                                                            <par name="OperatorCheckPoint" x="760.3873844324621" y="285.6862222961215" collapsed="false" id="1e6fa7dc-ad74-4408-ba45-f03c35848f32"> 
-                                                               <dec name="T" x="817.7623844324627" y="372.6862222961174"> 
-                                                                     <par name="TimeControl" x="757.2623844324627" y="445.43622229611765" collapsed="false" id="f0c800db-c853-44ab-811f-e3ea0f311963"> 
-                                                                           <seq name="OperatorRequest" x="672.2623844324622" y="554.4362222961174" collapsed="false" id="6d4cd35a-6437-4fa1-8190-ff69a0907b1e"> 
-                                                                                 <tsk name="PushHMI(data=panoramic_image)" x="413.2623844324645" y="613.436222296119" test_time="0" test_result="true" id="7be2a9bf-0466-4ffa-a6f2-f5121255edf8" />
-                                                                                 <tsk name="PushHMI(data=occupancy_grid)" x="460.2623844324635" y="652.4362222961201" test_time="0" test_result="true" id="2e1a09b5-0540-4e75-8e5a-e7958f99c095" />
-                                                                                 <tsk name="PushHMI(data=path)" x="560.2623844324633" y="694.4362222961201" test_time="0" test_result="true" id="f6c4940a-f535-431c-b906-60630aaba5da" />
-                                                                                 <tsk name="HMIResponse" x="722.2623844324625" y="691.4362222961201" test_time="0" test_result="true" id="f743e514-1f76-4cc2-9e2b-bcf12410f3fe" />
+               <par name="MissionProgress" x="6.215056760137827" y="-816.6346790247837" collapsed="false" id="98814f84-fe2b-4c02-90c8-626e30d67eef"> 
+                  <dec name="!L!" x="98.88172342680411" y="-767.9680123581173"> 
+                        <seq name="Mission" x="86.21505676013805" y="-718.1902345803393" collapsed="false" id="5205ce4c-157b-49ac-8b78-4deb75260be0"> 
+                              <tsk name="StandUp" x="-70.6043876843064" y="-664.5235679136724" test_time="0" test_result="true" id="c4777a0d-9565-4c53-adc8-dfee3e4e3aed" />
+                              <par name="@3" x="149.21505676013805" y="-660.8569012470057" collapsed="false" id="25164dde-fe1e-4ea8-a222-e70135619f39"> 
+                                    <tsk name="FallingMonitor" x="39.215056760137486" y="-604.8569012470052" test_time="0" test_result="true" id="7323b98c-5935-45bb-865a-8fc40963b8ac" />
+                                 <dec name="!L!" x="199.10394564902685" y="-606.7457901358947"> 
+                                       <seq name="SearchObjectAndGo" x="150.05632660140736" y="-553.1743615644658" collapsed="false" id="6de3db3d-b7da-4812-8944-11d90b3dfbf0"> 
+                                          <dec name="!L!" x="56.76048461342373" y="-503.63062101297544"> 
+                                                <par name="SearchObjectWithStabilization" x="-11.830424477485735" y="-440.7215301038854" collapsed="false" id="ebd9612d-444c-49d5-ae38-187f7fd5db55"> 
+                                                      <sel name="OperatorObjectValidation" x="36.33973869267959" y="-368.62518200753493" collapsed="false" id="05ebbd70-0e92-4cd6-b195-a1308a4b415d"> 
+                                                            <tsk name="SearchObject(target=Gate)" x="-50.20600828592808" y="-297.21000647511096" test_time="0" test_result="true" id="2a7668cb-1756-4f8e-9684-eaf90e3bcc40" />
+                                                            <par name="OperatorCheckPoint" x="129.3873844324621" y="-244.3137777038785" collapsed="false" id="1e6fa7dc-ad74-4408-ba45-f03c35848f32"> 
+                                                               <dec name="T" x="186.76238443246268" y="-157.31377770388258"> 
+                                                                     <par name="TimeControl" x="126.26238443246268" y="-84.56377770388235" collapsed="false" id="f0c800db-c853-44ab-811f-e3ea0f311963"> 
+                                                                           <seq name="OperatorRequest" x="41.26238443246223" y="24.43622229611742" collapsed="false" id="6d4cd35a-6437-4fa1-8190-ff69a0907b1e"> 
+                                                                                 <tsk name="PushHMI(data=panoramic_image)" x="-217.7376155675355" y="83.43622229611901" test_time="0" test_result="true" id="7be2a9bf-0466-4ffa-a6f2-f5121255edf8" />
+                                                                                 <tsk name="PushHMI(data=occupancy_grid)" x="-170.73761556753652" y="122.43622229612015" test_time="0" test_result="true" id="2e1a09b5-0540-4e75-8e5a-e7958f99c095" />
+                                                                                 <tsk name="PushHMI(data=path)" x="-70.73761556753675" y="164.43622229612015" test_time="0" test_result="true" id="f6c4940a-f535-431c-b906-60630aaba5da" />
+                                                                                 <tsk name="HMIResponse" x="91.26238443246245" y="161.43622229612015" test_time="0" test_result="true" id="f743e514-1f76-4cc2-9e2b-bcf12410f3fe" />
                                                                            </seq>
-                                                                           <tsk name="TimeoutMonitor(threshold=1000)" x="830.2623844324627" y="557.436222296119" test_time="0" test_result="true" id="57ab45b7-c8f0-4fe5-9f2f-392c01edcbb6" />
+                                                                           <tsk name="TimeoutMonitor(threshold=1000)" x="199.26238443246268" y="27.436222296119013" test_time="0" test_result="true" id="57ab45b7-c8f0-4fe5-9f2f-392c01edcbb6" />
                                                                      </par>
                                                                </dec>
                                                             </par>
                                                       </sel>
                                                 </par>
                                           </dec>
-                                             <par name="TrackObjectAndGoToIt" x="954.8290538741359" y="45.73472934462529" collapsed="false" id="51bae117-224f-4876-81db-be25e27b6a21"> 
-                                                   <tsk name="TrackObject(target=Gate)" x="870.1421851872651" y="123.60341621331293" test_time="0" test_result="true" id="485d57ad-1036-48d6-ae27-02692c55021f" />
-                                                   <seq name="SearchPathAndGo" x="1079.5143685594498" y="127.34312095301766" collapsed="false" id="36a0e71d-b281-4707-955c-7aa31617d5bb"> 
-                                                         <par name="OperatorCheckPoint" x="760.3873844324621" y="285.6862222961215" collapsed="false" id="1e6fa7dc-ad74-4408-ba45-f03c35848f32"> 
-                                                            <dec name="T" x="817.7623844324627" y="372.6862222961174"> 
-                                                                  <par name="TimeControl" x="757.2623844324627" y="445.43622229611765" collapsed="false" id="f0c800db-c853-44ab-811f-e3ea0f311963"> 
-                                                                        <seq name="OperatorRequest" x="672.2623844324622" y="554.4362222961174" collapsed="false" id="6d4cd35a-6437-4fa1-8190-ff69a0907b1e"> 
-                                                                              <tsk name="PushHMI(data=panoramic_image)" x="413.2623844324645" y="613.436222296119" test_time="0" test_result="true" id="7be2a9bf-0466-4ffa-a6f2-f5121255edf8" />
-                                                                              <tsk name="PushHMI(data=occupancy_grid)" x="460.2623844324635" y="652.4362222961201" test_time="0" test_result="true" id="2e1a09b5-0540-4e75-8e5a-e7958f99c095" />
-                                                                              <tsk name="PushHMI(data=path)" x="560.2623844324633" y="694.4362222961201" test_time="0" test_result="true" id="f6c4940a-f535-431c-b906-60630aaba5da" />
-                                                                              <tsk name="HMIResponse" x="722.2623844324625" y="691.4362222961201" test_time="0" test_result="true" id="f743e514-1f76-4cc2-9e2b-bcf12410f3fe" />
+                                             <par name="TrackObjectAndGoToIt" x="323.82905387413587" y="-484.2652706553747" collapsed="false" id="51bae117-224f-4876-81db-be25e27b6a21"> 
+                                                   <tsk name="TrackObject(target=Gate)" x="239.1421851872651" y="-406.3965837866871" test_time="0" test_result="true" id="485d57ad-1036-48d6-ae27-02692c55021f" />
+                                                   <seq name="SearchPathAndGo" x="448.51436855944985" y="-402.65687904698234" collapsed="false" id="36a0e71d-b281-4707-955c-7aa31617d5bb"> 
+                                                         <par name="OperatorCheckPoint" x="129.3873844324621" y="-244.3137777038785" collapsed="false" id="1e6fa7dc-ad74-4408-ba45-f03c35848f32"> 
+                                                            <dec name="T" x="186.76238443246268" y="-157.31377770388258"> 
+                                                                  <par name="TimeControl" x="126.26238443246268" y="-84.56377770388235" collapsed="false" id="f0c800db-c853-44ab-811f-e3ea0f311963"> 
+                                                                        <seq name="OperatorRequest" x="41.26238443246223" y="24.43622229611742" collapsed="false" id="6d4cd35a-6437-4fa1-8190-ff69a0907b1e"> 
+                                                                              <tsk name="PushHMI(data=panoramic_image)" x="-217.7376155675355" y="83.43622229611901" test_time="0" test_result="true" id="7be2a9bf-0466-4ffa-a6f2-f5121255edf8" />
+                                                                              <tsk name="PushHMI(data=occupancy_grid)" x="-170.73761556753652" y="122.43622229612015" test_time="0" test_result="true" id="2e1a09b5-0540-4e75-8e5a-e7958f99c095" />
+                                                                              <tsk name="PushHMI(data=path)" x="-70.73761556753675" y="164.43622229612015" test_time="0" test_result="true" id="f6c4940a-f535-431c-b906-60630aaba5da" />
+                                                                              <tsk name="HMIResponse" x="91.26238443246245" y="161.43622229612015" test_time="0" test_result="true" id="f743e514-1f76-4cc2-9e2b-bcf12410f3fe" />
                                                                         </seq>
-                                                                        <tsk name="TimeoutMonitor(threshold=1000)" x="830.2623844324627" y="557.436222296119" test_time="0" test_result="true" id="57ab45b7-c8f0-4fe5-9f2f-392c01edcbb6" />
+                                                                        <tsk name="TimeoutMonitor(threshold=1000)" x="199.26238443246268" y="27.436222296119013" test_time="0" test_result="true" id="57ab45b7-c8f0-4fe5-9f2f-392c01edcbb6" />
                                                                   </par>
                                                             </dec>
                                                          </par>
-                                                         <tsk name="PathPlanningFocus(target=Gate)" x="1061.206676251756" y="319.6508132607112" test_time="0" test_result="true" id="90e220a7-91df-4a9f-93fa-9fe3c4e2bfde" />
-                                                      <dec name="!L!" x="1356.327623420532" y="290.0431569074017"> 
-                                                            <swi name="Move" x="1350.2790205741007" y="354.3476997075975" collapsed="false" id="7360ba74-0128-4acf-9113-6fd32ff6beb0"> 
-                                                                  <par name="AdvanceByWalkingAlongPath" x="1176.2790205740996" y="426.3476997075984" collapsed="false" id="ca7d3587-9820-4e01-86f7-26953a4782f3"> 
-                                                                     <dec name="!L!" x="1053.1785665315067" y="485.64984851749523"> 
-                                                                           <sel name="PathFollow" x="1029.8333284362698" y="551.7133405809866" collapsed="false" id="4506d28d-394f-473c-8a25-22e328fcbef4"> 
-                                                                                 <par name="Zmp" x="908.6666617696022" y="630.8800072476549" collapsed="false" id="1fd7fbeb-e6ea-43c3-bd0d-576f7e6209bb"> 
-                                                                                    <dec name="F:1" x="877.9444444444442" y="674.5"> 
-                                                                                          <tsk name="whileInZmpArea" x="817.8888839918231" y="693.2133405809848" test_time="0" test_result="true" id="f4b90051-c348-4614-bb16-993d14953922" />
+                                                         <tsk name="PathPlanningFocus(target=Gate)" x="430.2066762517561" y="-210.34918673928883" test_time="0" test_result="true" id="90e220a7-91df-4a9f-93fa-9fe3c4e2bfde" />
+                                                      <dec name="!L!" x="725.3276234205321" y="-239.95684309259832"> 
+                                                            <swi name="Move" x="719.2790205741007" y="-175.65230029240251" collapsed="false" id="7360ba74-0128-4acf-9113-6fd32ff6beb0"> 
+                                                                  <par name="AdvanceByWalkingAlongPath" x="545.2790205740996" y="-103.6523002924016" collapsed="false" id="ca7d3587-9820-4e01-86f7-26953a4782f3"> 
+                                                                     <dec name="!L!" x="422.1785665315067" y="-44.35015148250477"> 
+                                                                           <sel name="PathFollow" x="398.83332843626977" y="21.713340580986596" collapsed="false" id="4506d28d-394f-473c-8a25-22e328fcbef4"> 
+                                                                                 <par name="Zmp" x="277.66666176960223" y="100.88000724765493" collapsed="false" id="1fd7fbeb-e6ea-43c3-bd0d-576f7e6209bb"> 
+                                                                                    <dec name="F:1" x="246.94444444444423" y="144.5"> 
+                                                                                          <tsk name="whileInZmpArea" x="186.88888399182315" y="163.21334058098478" test_time="0" test_result="true" id="f4b90051-c348-4614-bb16-993d14953922" />
                                                                                     </dec>
-                                                                                       <tsk name="DynamicLocomotion" x="941.8888839918231" y="699.1022294698707" test_time="0" test_result="true" id="4675c8a2-4623-4235-b386-920a5c243e82" />
+                                                                                       <tsk name="WalkerNode_Continuous" x="310.88888399182315" y="169.10222946987074" test_time="0" test_result="true" id="4675c8a2-4623-4235-b386-920a5c243e82" />
                                                                                  </par>
-                                                                                 <par name="QS" x="1153.5555506584878" y="632.7688961365443" collapsed="false" id="67f83db9-e8ba-44dc-964c-c02a3b4b6823"> 
-                                                                                    <dec name="F:1" x="1110.9444444444443" y="676.5"> 
-                                                                                          <tsk name="whileInQSArea" x="1068.7777728807114" y="724.1022294698762" test_time="0" test_result="true" id="ab5ba76b-d9d3-4cc3-8ed7-ffc88dfaa696" />
+                                                                                 <par name="QS" x="522.5555506584878" y="102.7688961365443" collapsed="false" id="67f83db9-e8ba-44dc-964c-c02a3b4b6823"> 
+                                                                                    <dec name="F:1" x="479.94444444444434" y="146.5"> 
+                                                                                          <tsk name="whileInQSArea" x="437.7777728807114" y="194.1022294698762" test_time="0" test_result="true" id="ab5ba76b-d9d3-4cc3-8ed7-ffc88dfaa696" />
                                                                                     </dec>
-                                                                                       <tsk name="QuasiStaticWalk" x="1181.4444395473774" y="724.9911183587601" test_time="0" test_result="true" id="c9112af6-dbb8-4445-8948-59f96dacf28b" />
+                                                                                       <tsk name="QuasiStaticWalk" x="550.4444395473774" y="194.9911183587601" test_time="0" test_result="true" id="c9112af6-dbb8-4445-8948-59f96dacf28b" />
                                                                                  </par>
                                                                            </sel>
                                                                      </dec>
-                                                                        <par name="Exceptions" x="1317.463391758469" y="484.1560025158965" collapsed="false" id="6dd97d2c-1f32-4e9f-9f19-09e2dc6af104"> 
-                                                                           <dec name="F:1" x="1309.2370287495005" y="532.1321929920903"> 
-                                                                                 <tsk name="untilOperatorIntervention" x="1244.7659080827307" y="589.0797562983362" test_time="0" test_result="true" id="1fa5f951-2caf-4bf5-99ca-7327bf8956dd" />
+                                                                        <par name="Exceptions" x="686.463391758469" y="-45.84399748410351" collapsed="false" id="6dd97d2c-1f32-4e9f-9f19-09e2dc6af104"> 
+                                                                           <dec name="F:1" x="678.2370287495005" y="2.1321929920902676"> 
+                                                                                 <tsk name="untilOperatorIntervention" x="613.7659080827307" y="59.07975629833618" test_time="0" test_result="true" id="1fa5f951-2caf-4bf5-99ca-7327bf8956dd" />
                                                                            </dec>
-                                                                           <dec name="F:1" x="1361.9475187425953" y="532.9655263254215"> 
-                                                                                 <tsk name="whileSolution" x="1333.1502049452881" y="635.261871284803" test_time="0" test_result="true" id="5dcfefe7-c70f-4b93-8c0d-9ea435e00af6" />
+                                                                           <dec name="F:1" x="730.9475187425953" y="2.9655263254214788"> 
+                                                                                 <tsk name="whileSolution" x="702.1502049452881" y="105.26187128480296" test_time="0" test_result="true" id="5dcfefe7-c70f-4b93-8c0d-9ea435e00af6" />
                                                                            </dec>
                                                                         </par>
                                                                   </par>
-                                                               <jnt x="1506.2997786527187" y="420.6675252851717" > 
-                                                                     <seq name="NoSolution" x="1478.8743576042186" y="540.6094210780207" collapsed="false" id="c2ca9c7d-2e60-42f0-bee8-bd858a43d0cc"> 
-                                                                           <par name="OperatorControlPoint" x="1449.0410242708829" y="623.6094210780191" collapsed="false" id="432017cf-148f-4627-be6f-b87e6d12491d"> 
-                                                                              <dec name="T" x="1618.5410242708895" y="674.2760877446829"> 
-                                                                                    <par name="TimeControl" x="1588.8743576042227" y="772.1094210780166" collapsed="false" id="bd54a756-5d01-48ec-aeeb-4692197881d8"> 
-                                                                                          <seq name="OperatorRequest" x="1520.3743576042214" y="840.9427544113496" collapsed="false" id="cc6149ee-661b-4e6a-97d2-60ca661aad7c"> 
-                                                                                                <tsk name="PushHMI(data=panoramic_image)" x="1364.37435760422" y="906.94275441135" test_time="0" test_result="true" id="9c5cd984-fb79-43b0-a9b0-3cfad4e198a9" />
-                                                                                                <tsk name="HMIResponse" x="1627.3743576042189" y="919.94275441135" test_time="0" test_result="true" id="54b61606-63a4-40c7-802e-7ebc0e6da713" />
+                                                               <jnt x="875.2997786527187" y="-109.33247471482832" > 
+                                                                     <seq name="NoSolution" x="847.8743576042186" y="10.60942107802066" collapsed="false" id="c2ca9c7d-2e60-42f0-bee8-bd858a43d0cc"> 
+                                                                           <par name="OperatorControlPoint" x="818.0410242708829" y="93.60942107801907" collapsed="false" id="432017cf-148f-4627-be6f-b87e6d12491d"> 
+                                                                              <dec name="T" x="987.5410242708895" y="144.27608774468285"> 
+                                                                                    <par name="TimeControl" x="957.8743576042227" y="242.10942107801657" collapsed="false" id="bd54a756-5d01-48ec-aeeb-4692197881d8"> 
+                                                                                          <seq name="OperatorRequest" x="889.3743576042214" y="310.9427544113496" collapsed="false" id="cc6149ee-661b-4e6a-97d2-60ca661aad7c"> 
+                                                                                                <tsk name="PushHMI(data=panoramic_image)" x="733.37435760422" y="376.94275441135005" test_time="0" test_result="true" id="9c5cd984-fb79-43b0-a9b0-3cfad4e198a9" />
+                                                                                                <tsk name="HMIResponse" x="996.3743576042189" y="389.94275441135005" test_time="0" test_result="true" id="54b61606-63a4-40c7-802e-7ebc0e6da713" />
                                                                                           </seq>
-                                                                                          <tsk name="TimeoutMonitor(threshold=1000)" x="1680.5410242708847" y="844.6094210780184" test_time="0" test_result="true" id="fe21d8a6-8a7f-4ff9-9595-00d1a90cef50" />
+                                                                                          <tsk name="TimeoutMonitor(threshold=1000)" x="1049.5410242708847" y="314.6094210780184" test_time="0" test_result="true" id="fe21d8a6-8a7f-4ff9-9595-00d1a90cef50" />
                                                                                     </par>
                                                                               </dec>
                                                                            </par>

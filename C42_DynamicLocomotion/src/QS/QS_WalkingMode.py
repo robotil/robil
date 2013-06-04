@@ -1,33 +1,4 @@
 #!/usr/bin/env python
-import roslib
-roslib.load_manifest('C42_DynamicLocomotion')
-from Abstractions.WalkingMode import *
-import time
-from atlas_msgs.msg import AtlasCommand, AtlasSimInterfaceCommand, AtlasSimInterfaceState, AtlasState, AtlasBehaviorStepData
-from sensor_msgs.msg import Imu
-import PyKDL
-from tf_conversions import posemath
-from atlas_msgs.msg import AtlasSimInterfaceCommand, AtlasSimInterfaceState, AtlasState
-from std_msgs.msg import String
-from tf.transformations import quaternion_from_euler, euler_from_quaternion
-
-from sensor_msgs.msg import Imu
-
-from BDI_Odometer import *
-from BDI_StateMachine import *
-
-import math
-import rospy
-import sys
-import copy
-
-from nav_msgs.msg import Odometry
-
-from geometry_msgs.msg import Pose
-from BDI_Strategies import *
-from Abstractions.StepQueue import *
-from LocalPathPlanner import FootPlacement
-
 
 ###################################################################################
 # File created by David Dovrat, 2013.
@@ -35,87 +6,178 @@ from LocalPathPlanner import FootPlacement
 # The code in this file is provided "as is" and comes with no warranty whatsoever
 ###################################################################################
 
-class WalkingModeBDI(WalkingMode):
-    def __init__(self,localPathPlanner):
-        WalkingMode.__init__(self,localPathPlanner)
-        self.step_index_for_reset = 0
-        # Initialize atlas mode and atlas_sim_interface_command publishers        
-        self.asi_command = rospy.Publisher('/atlas/atlas_sim_interface_command', AtlasSimInterfaceCommand, None, False, True, None)
-        self._Odometer = BDI_Odometer()
-        ##############################
-        #self._StrategyForward = BDI_StrategyForward(self._Odometer)
-        self._stepDataInit = BDI_Strategy(self._Odometer)
-        self._StepQueue = StepQueue()
-        self._SteppingStonesQueue = PathQueue()
-        self._SteppingStonesPath = []
-        self._setStep = True 
-        self._passedSteppingStones = False
-        ##############################
-        self._BDI_StateMachine = BDI_StateMachine(self._Odometer)
-        #self._odom_position = Pose()
-        self._odom_sub = rospy.Subscriber('/ground_truth_odom',Odometry,self._odom_cb)
+import copy
+import roslib
+roslib.load_manifest('C42_DynamicLocomotion')
+
+from Abstractions.WalkingMode import *
+from Abstractions.Odometer import *
+from QS_PathPlanner import *
+
+import tf
+from tf_conversions import posemath
+from tf.transformations import quaternion_from_euler, euler_from_quaternion
+import numpy as np
+
+from atlas_msgs.msg import AtlasCommand, AtlasSimInterfaceCommand, AtlasSimInterfaceState, AtlasState, AtlasBehaviorStepData
+from sensor_msgs.msg import Imu
+from nav_msgs.msg import Odometry
+from geometry_msgs.msg import Pose, Quaternion
+from std_msgs.msg import String
+
+from C42_DynamicLocomotion.srv import *
+from C42_DynamicLocomotion.msg import Foot_Placement_data
+
+class QS_WalkingMode(WalkingMode):
+    def __init__(self,iTf):
+        self._LPP = QS_PathPlanner()
+        WalkingMode.__init__(self,self._LPP)
+        self._tf = iTf
+        # Initialize atlas atlas_sim_interface_command publisher       
+        self.asi_command = rospy.Publisher('/atlas/atlas_sim_interface_command', AtlasSimInterfaceCommand, None, False, True, None)       
+
+        self._Odometer = Odometer()
         self._bDone = False
-        self.asi_state = rospy.Subscriber('/atlas/atlas_sim_interface_state', AtlasSimInterfaceState, self.asi_state_cb)
-        self._atlas_imu_sub = rospy.Subscriber('/atlas/imu', Imu, self._get_imu)
-        rospy.sleep(0.3)
+        self._bIsSwaying = False
+        self._command = 0
 
     def Initialize(self):
         WalkingMode.Initialize(self)
-        self._bDone = False
-        # # Puts robot into freeze behavior, all joints controlled
-        # # Put the robot into a known state
-        k_effort = [0] * 28
-        # freeze = AtlasSimInterfaceCommand(None,AtlasSimInterfaceCommand.FREEZE, None, None, None, None, k_effort )
-        # self.asi_command.publish(freeze)
-        
-        # # Puts robot into stand_prep behavior, a joint configuration suitable
-        # # to go into stand mode
-        # stand_prep = AtlasSimInterfaceCommand(None,AtlasSimInterfaceCommand.STAND_PREP, None, None, None, None, k_effort)
-        # self.asi_command.publish(stand_prep)
+        self._command = 0
+        self._bRobotIsStatic = True
 
-        # rospy.sleep(2.0)
-        # self.mode.publish("nominal")
-        
-        # Put robot into stand position
-        stand = AtlasSimInterfaceCommand(None,AtlasSimInterfaceCommand.STAND, None, None, None, None, k_effort)
-                
+        rospy.wait_for_service('foot_placement_path')
+        self._foot_placement_client = rospy.ServiceProxy('foot_placement_path', FootPlacement_Service)
+        # Subscribers:
+        self._Subscribers["Odometry"] = rospy.Subscriber('/ground_truth_odom',Odometry,self._odom_cb)
+        self._Subscribers["ASI_State"]  = rospy.Subscriber('/atlas/atlas_sim_interface_state', AtlasSimInterfaceState, self.asi_state_cb)
+        self._Subscribers["IMU"]  = rospy.Subscriber('/atlas/imu', Imu, self._get_imu)
+
         rospy.sleep(0.3)
         
-        self.asi_command.publish(stand)
-        
-        # Initialize some variables before starting.
-
-        self.is_swaying = False
-        self._BDI_StateMachine.Initialize(self.step_index_for_reset)
+        self._RequestFootPlacements()
+        k_effort = [0] * 28
+        self._bDone = False
+        self._bIsSwaying = False
+        self._bRobotIsStatic = False
+        self._GetOrientationDelta0Values() # Orientation difference between BDI odom and Global
     
     def StartWalking(self):
         self._bDone = False
-        return 0.3
     
     def Walk(self):
         WalkingMode.Walk(self)
-        self._yaw = 0
-        self._Odometer.SetYaw(self._yaw)
-    
-    def Stop(self):
-        if(WalkingMode.Stop(self)):
-            self._BDI_StateMachine.Stop()
-        
+        self._command = self.GetCommand(self._BDI_state)
+        self.asi_command.publish(self._command)
+        #print(command)
+        self._WalkingModeStateMachine.PerformTransition("Go")
+        self._bIsSwaying = True
     
     def EmergencyStop(self):
-        # Puts robot into freeze behavior, all joints controlled
-        # Put the robot into a known state
-        k_effort = [0] * 28
-        # freeze = AtlasSimInterfaceCommand(None,AtlasSimInterfaceCommand.FREEZE, None, None, None, None, k_effort )
-        # self.asi_command.publish(freeze)
-        # rospy.sleep(0.3)
-        
-        # Put robot into stand position
-        stand = AtlasSimInterfaceCommand(None,AtlasSimInterfaceCommand.STAND, None, None, None, None, k_effort)
+        WalkingMode.Stop(self)
+
+    def Stop(self):
+        WalkingMode.Stop(self)
 
     def IsDone(self):
         return self._bDone
+    
+    def GetCommand(self,state):
+        command = AtlasSimInterfaceCommand()
+        command.behavior = AtlasSimInterfaceCommand.STEP
+        command.k_effort = [0] * 28
+        command.step_params.desired_step = self._LPP.GetNextStep()
+        if(0 != command.step_params.desired_step):
+            # Not sure why such a magic number
+            command.step_params.desired_step.duration = 0.63
+            # Apparently this next line is a must
+            command.step_params.desired_step.step_index = 1
+            command.step_params.desired_step = self._TransforFromGlobalToBDI(command.step_params.desired_step,state)
+        else:
+            command = 0
+        return command
+    
+    def HandleStateMsg(self,state):
+        command = 0
+        if ("Idle" == self._WalkingModeStateMachine.GetCurrentState().Name):
+            self._Odometer.SetPosition(state.pos_est.position.x,state.pos_est.position.y)
+        elif ("Wait" == self._WalkingModeStateMachine.GetCurrentState().Name):
+            self._Odometer.SetPosition(state.pos_est.position.x,state.pos_est.position.y)
+            print("Odometer Updated")
+            #print(2)
+            self._WalkingModeStateMachine.PerformTransition("Go")
+        elif ("Walking" == self._WalkingModeStateMachine.GetCurrentState().Name):
+            #print(3)
+            if (QS_PathPlannerEnum.Active == self._LPP.State):
+                command = self.GetCommand(state)
+            elif(QS_PathPlannerEnum.Waiting == self._LPP.State):
+                self._RequestFootPlacements()
+        elif ("Done" == self._WalkingModeStateMachine.GetCurrentState().Name):
+            #print(4)
+            self._bDone = True
+        else:
+            raise Exception("QS_WalkingModeStateMachine::Bad State Name")
+    
+        return command
+    
+    def _RequestFootPlacements(self):
+        print("Request Foot Placements")
+        # Perform a service request from FP
+        try:
+            # Handle preemption?
+                # if received a "End of mission" sort of message from FP
+            start_pose,other_foot_pose = self._GetStartingFootPose()
+            resp = self._foot_placement_client(0,start_pose,other_foot_pose)
+            if [] == resp.foot_placement_path: # 1 == resp.done:
+                self._WalkingModeStateMachine.PerformTransition("Finished") # if array is empty need to finish with error (didn't reach goal)
+            else:
+                listSteps = []
+                for desired in resp.foot_placement_path:
+                    command = AtlasSimInterfaceCommand()
+                    step = command.step_params.desired_step
+                    step.foot_index = desired.foot_index
+                    step.swing_height = desired.clearance_height
+                    step.pose.position.x = desired.pose.position.x
+                    step.pose.position.y = desired.pose.position.y
+                    step.pose.position.z = desired.pose.position.z
+                    Q = quaternion_from_euler(desired.pose.ang_euler.x, desired.pose.ang_euler.y, desired.pose.ang_euler.z)
+                    step.pose.orientation.x = Q[0]
+                    step.pose.orientation.y = Q[1]
+                    step.pose.orientation.z = Q[2]
+                    step.pose.orientation.w = Q[3]
+                    listSteps.append(step)
+                self._LPP.SetPath(listSteps)
+                #print(listSteps)
+        except rospy.ServiceException, e:
+            print "Foot Placement Service call failed: %s"%e
+    
+    def _GetStartingFootPose(self): #*************** NEED TO CHANGE when not static *************#
+        start_pose = Foot_Placement_data()
+        other_foot_pose = Foot_Placement_data()
+        
+        trans, rot_q = self._GetTf('World','l_foot')
+        start_pose.foot_index = 2 # both feet are static
+        start_pose.pose.position.x = trans[0]
+        start_pose.pose.position.y = trans[1]
+        start_pose.pose.position.z = trans[2]
+        rot_euler = euler_from_quaternion(rot_q)
+        start_pose.pose.ang_euler.x = rot_euler[0]
+        start_pose.pose.ang_euler.y = rot_euler[1]
+        start_pose.pose.ang_euler.z = rot_euler[2]
 
+        trans, rot_q = self._GetTf('World','r_foot')
+        other_foot_pose.foot_index = 1 # right foot
+        other_foot_pose.pose.position.x = trans[0]
+        other_foot_pose.pose.position.y = trans[1]
+        other_foot_pose.pose.position.z = trans[2]
+        rot_euler = euler_from_quaternion(rot_q)
+        other_foot_pose.pose.ang_euler.x = rot_euler[0]
+        other_foot_pose.pose.ang_euler.y = rot_euler[1]
+        other_foot_pose.pose.ang_euler.z = rot_euler[2]
+
+
+        return start_pose,other_foot_pose
+    
 ###################################################################################
 #--------------------------- CallBacks --------------------------------------------
 ###################################################################################
@@ -123,252 +185,174 @@ class WalkingModeBDI(WalkingMode):
     # /atlas/atlas_sim_interface_state callback. Before publishing a walk command, we need
     # the current robot position   
     def asi_state_cb(self, state):
-        if self._LPP.GetDoingQual() and (16.2 < self._LPP.GetPos().GetX()) and (self._LPP.GetPos().GetX() < 19.7) and not self._passedSteppingStones:
-            if (True == self._setStep): # Initialize before stepping stones
-                self.step_index = state.walk_feedback.next_step_index_needed -1
-                step1,step2,step3,step4 = self.initSteppingStoneStepData(self.step_index, state)
-                self._StepQueue.Initialize(step1,step2,step3,step4)
-                self.GetSteppingStoneStepPlan(state)
-                print("asi_state_cb:: SteppingStonesQueue length: ",self._SteppingStonesQueue.Length() )
-                self._setStep = False
-            command = self.SteppingStoneCommand(state);
-            #print(command)
-        else:
-            if self._LPP.GetDoingQual() and (False == self._setStep): # Initialize after stepping stones
-                self._passedSteppingStones = True
-                self._Odometer.SetPosition(state.pos_est.position.x,state.pos_est.position.y)
-                print("asi_state_cb:: Initialize after stepping stones. Odometer X,Y: ",self._Odometer.GetGlobalPosition() )       
-                #self.Initialize()
-                print("asi_state_cb:: Initialize after stepping stones. step index: ",self.step_index )
-                WalkingMode.Initialize(self)
-                self._BDI_StateMachine.Initialize(self.step_index)
-                # self.step_index = state.behavior_feedback.walk_feedback.next_step_index_needed -1
-                # step1,step2,step3,step4 = self.initSteppingStoneStepData(self.step_index, state)
-
+        if self._bRobotIsStatic:
+            self._BDI_Static_orientation_q = state.foot_pos_est[0].orientation
+        self._Update_tf_BDI_odom(state)
+        self._BDI_state = copy.copy(state)
+        command = 0
+        #print(state.step_feedback.status_flags)
+        # When the robot status_flags are 1 (SWAYING), you can publish the next step command.
+        if (state.step_feedback.status_flags == 1 and not self._bIsSwaying):
             command = self.HandleStateMsg(state)
-            self._bDone = self._WalkingModeStateMachine.IsDone()
-            ######################
-            self._setStep = True
-
-        # command = self._StateMachine.HandleStateMsg(state)
-        # self._bDone = self._StateMachine.IsDone()
-        if (0 !=command):
-            self.asi_command.publish(command)
+        elif (state.step_feedback.status_flags == 2 and self._bIsSwaying):
+            self._bIsSwaying = False
+            #print("step done")
+        if (0 != command):
+            self._command = command
+            self._bIsSwaying = True
+        
+        if(0 == state.current_behavior and 0 != self._command):
+            #print self._command
+            self.asi_command.publish(self._command)
+            self._command = 0
+            print("step start")
 
     def _odom_cb(self,odom):
-        # SHOULD USE:
+        if self._bRobotIsStatic:
+            self._Global_Static_orientation_q = odom.pose.pose.orientation
         self._LPP.UpdatePosition(odom.pose.pose.position.x,odom.pose.pose.position.y)
-        #self._odom_position = odom.pose.pose
+        # sendTransform(translation - tuple (x, y, z), rotation - tuple (x, y, z, w), time, child, parent)
+        self._tf.TransformBroadcaster().sendTransform(vec2tuple(odom.pose.pose.position), vec2tuple(odom.pose.pose.orientation), odom.header.stamp, "pelvis", "World") # "World", "pelvis") 
  
     def _get_imu(self,msg):  #listen to /atlas/imu/pose/pose/orientation
-        roll, pitch, self._yaw = euler_from_quaternion([msg.orientation.x, msg.orientation.y, msg.orientation.z, msg.orientation.w])
+        roll, pitch, yaw = euler_from_quaternion([msg.orientation.x, msg.orientation.y, msg.orientation.z, msg.orientation.w])
+        self._Odometer.SetYaw(yaw)
 
 
 ###############################################################################################
 
-
-    def SteppingStoneCommand(self,state):
-        command = 0 
-        nextindex = state.walk_feedback.next_step_index_needed
-        if (nextindex>self.step_index):
-            self.step_index += 1
-            command = self.GetCommand()
-            # Instead of generating new steps, just pop a predefined queue
-            stepData = self._StepQueue.Push(self._SteppingStonesQueue.Pop())
-            #print("SteppingStoneCommand:: SteppingStonesQueue length: ",self._SteppingStonesQueue.Length() )
-            #print("SteppingStoneCommand:: index: ",self.step_index)
-        return command
-
-    # def SteppingStoneCommandStatic(self, state):
-        
-    #     # When the robot status_flags are 1 (SWAYING), you can publish the next step command.
-    #     if (state.behavior_feedback.step_feedback.status_flags == 1 and self._setStep):
-    #         self.step_index += 1
-    #         self._setStep = False
-    #         print("Step " + str(self.step_index))
-    #     elif (state.behavior_feedback.step_feedback.status_flags == 2):
-    #         self._setStep = True
-    #         print("No Step")
-        
-    #     is_right_foot = self.step_index % 2
-        
-    #     command = AtlasSimInterfaceCommand()
-    #     command.behavior = AtlasSimInterfaceCommand.STEP
-
-    #     # k_effort is all 0s for full bdi control of all joints
-    #     command.k_effort = [0] * 28
-        
-    #     # step_index should always be one for a step command
-    #     command.step_params.desired_step.step_index = 1
-    #     command.step_params.desired_step.foot_index = is_right_foot
-        
-    #     # duration has far as I can tell is not observed
-    #     command.step_params.desired_step.duration = 0.63
-        
-    #     # swing_height is not observed
-    #     command.step_params.desired_step.swing_height = 0.1
-
-    #     #if self.step_index > 30:
-    #         #print(str(self.calculate_pose(self.step_index)))
-    #     # Determine pose of the next step based on the number of steps we have taken
-    #     command.step_params.desired_step.pose = self.calculate_pose(self.step_index,state)
-        
-    #     return command
-
-    # # This method is used to calculate a pose of step based on the step_index
-    # # The step poses just cause the robot to walk in a circle
-    # def calculate_pose(self, step_index,state):
-    #     # Right foot occurs on even steps, left on odd
-    #     is_right_foot = step_index % 2
-    #     is_left_foot = 1 - is_right_foot
-                      
-    #     # Calculate orientation quaternion
-    #     Q = quaternion_from_euler(0, 0, 0)
-    #     pose = Pose()
-    #     pose.position.x = state.pos_est.position.x - 3
-    #     pose.position.y = state.pos_est.position.y + 0.15*is_left_foot
-        
-    #     # The z position is observed for static walking, but the foot
-    #     # will be placed onto the ground if the ground is lower than z
-    #     pose.position.z = 0
-        
-    #     pose.orientation.x = Q[0]
-    #     pose.orientation.y = Q[1]
-    #     pose.orientation.z = Q[2]
-    #     pose.orientation.w = Q[3]
-
-    #     return pose
-
-    def GetCommand(self):
-        command = AtlasSimInterfaceCommand()
-        command.behavior = AtlasSimInterfaceCommand.WALK
-        for i in range(4):
-            command.walk_params.step_queue[i] = self._StepQueue.Peek(i)
-        return command
-
-    def initSteppingStoneStepData(self,step_index,state):
-        print("initSteppingStoneStepData - index need to match:: cmd index = ",step_index,"state first index = ",state.walk_feedback.step_queue_saturated[0].step_index)
-        stepData1 = copy.deepcopy(state.walk_feedback.step_queue_saturated[0])
-        stepData2 = copy.deepcopy(state.walk_feedback.step_queue_saturated[1])
-        stepData3 = copy.deepcopy(stepData2)
-        stepData4 = copy.deepcopy(stepData2)
-
-        # corrections to step 3 and 4: y position foot width corection +  ?alinement with stones?
-        step_width = 0.25 # [meters] 
-        stepData3.step_index = step_index + 2
-        stepData3.foot_index = stepData3.step_index%2
-        stepData4.step_index = step_index + 3
-        if 0 == stepData3.foot_index: # Left foot
-            stepData3.pose.position.y = stepData2.pose.position.y + step_width 
-        else: # Right foot
-            stepData3.pose.position.y = stepData2.pose.position.y - step_width
-        # stepData3.pose.orientation.x = 0.0
-        # stepData3.pose.orientation.y = 0.0
-        # stepData3.pose.orientation.z = 0.0
-        # stepData3.pose.orientation.w = 1.0
-
-        return stepData1,stepData2,stepData3,stepData4
-
-    def GetSteppingStoneStepPlan(self,state):
-        # foot placement path:       
-        path_start_foot_index = 1 # start stepping of SteppingStonesPath with Right foot 
-        #Stepping stones centers in world cord. [FootPlacement(16.7,8.0,0.0),FootPlacement(17.4,8.0,0.0),FootPlacement(17.9,8.5,0.0),FootPlacement(18.6,8.5,0.0),FootPlacement(19.1,8.0,0.0),FootPlacement(20.0,8.0,0.0)]
-        self._SteppingStonesPath = [FootPlacement(16.9,7.87,0.0),FootPlacement(16.9,8.13,0.0),FootPlacement(17.3,7.87,0.0),FootPlacement(17.3,8.13,0.0),\
-            FootPlacement(17.5,7.87,deg2r(30.0)),FootPlacement(17.5,8.2,deg2r(45.0)),FootPlacement(17.6,8.05,deg2r(45.0)),\
-            FootPlacement(17.8,8.55,0.0),FootPlacement(17.8,8.35,0.0),FootPlacement(17.85,8.65,0.0),FootPlacement(18.0,8.35,0.0),FootPlacement(18.1,8.6,0.0),\
-            FootPlacement(18.5,8.35,0.0),FootPlacement(18.5,8.6,0.0),FootPlacement(18.7,8.35,deg2r(-30.0)),FootPlacement(18.7,8.5,deg2r(-30.0)),\
-            FootPlacement(19.0,8.0,deg2r(-30.0)),FootPlacement(19.0,8.17,0.0),FootPlacement(19.25,7.87,0.0),FootPlacement(19.25,8.13,0.0),\
-            FootPlacement(19.65,7.87,0.0),FootPlacement(19.65,8.13,0.0),FootPlacement(19.9,7.87,0.0),FootPlacement(19.9,8.13,0.0),FootPlacement(20.0,7.87,0.0),FootPlacement(20.0,8.13,0.0),\
-            FootPlacement(20.0,7.87,0.0),FootPlacement(20.0,8.13,0.0),FootPlacement(20.0,7.87,0.0),FootPlacement(20.0,8.13,0.0),FootPlacement(20.0,7.87,0.0),FootPlacement(20.0,8.13,0.0),\
-            FootPlacement(20.0,7.87,0.0),FootPlacement(20.0,8.13,0.0),FootPlacement(20.0,7.87,0.0),FootPlacement(20.0,8.13,0.0),FootPlacement(20.0,7.87,0.0),FootPlacement(20.0,8.13,0.0)]
-        ## building SteppingStonesQueue:
-        # difference between BDI est position and LPP position (world cord.)
-        deltaX = state.pos_est.position.x - self._LPP.GetPos().GetX()
-        deltaY = state.pos_est.position.y - self._LPP.GetPos().GetY()
-        deltaYaw = 0.0
-        deltaFootPlacement = FootPlacement(deltaX,deltaY,deltaYaw)
-        # feet positions for step data = self._SteppingStonesPath + deltaFootPlacement
-
-        index = self._StepQueue.Peek(3).step_index  # + 1
-        # step in place:
-        # stepData1 = copy.deepcopy(self._StepQueue.Peek(2)) # using stepData3 to have the correct foot y position
-        # stepData1.step_index = index
-        # stepData1.foot_index = stepData1.step_index%2
-        # index += 1
-        # stepData2 = copy.deepcopy(self._StepQueue.Peek(3)) # using stepData3 to have the correct foot y position
-        # stepData2.step_index = index 
-        # stepData2.foot_index = stepData2.step_index%2
-        # self._SteppingStonesQueue.Append([stepData1, stepData2])
-        if index%2 == path_start_foot_index:
-            index += 1
-            stepData3 = copy.deepcopy(self._StepQueue.Peek(2)) # using stepData3 to have the correct foot y position
-            stepData3.step_index = index
-            stepData3.foot_index = stepData3.step_index%2
-            self._SteppingStonesQueue.Append([stepData3])
-
-        index += 1
-        for i in range(len(self._SteppingStonesPath)):
-            # need to calc. step_index and foot_index for step data
-            stepData = self._stepDataInit.GetStepData(index + i) #self._StrategyForward
-            stepData.pose.position.x = self._SteppingStonesPath[i].GetX() + deltaX
-            stepData.pose.position.y = self._SteppingStonesPath[i].GetY() + deltaY
-            step_yaw = self._SteppingStonesPath[i].GetYaw() + deltaYaw
-            # Calculate orientation quaternion
-            Q = quaternion_from_euler(0, 0, step_yaw)
-            stepData.pose.orientation.x = Q[0]
-            stepData.pose.orientation.y = Q[1]
-            stepData.pose.orientation.z = Q[2]
-            stepData.pose.orientation.w = Q[3]
-            #print("GetSteppingStoneStepPlan:: step Data: ",stepData)
-            self._SteppingStonesQueue.Append([stepData])
-
-    def HandleStateMsg(self,state):
-        command = 0
-        if ("Idle" == self._WalkingModeStateMachine.GetCurrentState().Name):
-            pass
-        elif ("Wait" == self._WalkingModeStateMachine.GetCurrentState().Name):
-            self.step_index_for_reset = state.walk_feedback.next_step_index_needed - 1
-            self._Odometer.SetPosition(state.pos_est.position.x,state.pos_est.position.y)
-            self._BDI_StateMachine.Initialize(self.step_index_for_reset)
-            self._BDI_StateMachine.GoForward()
-            self._WalkingModeStateMachine.PerformTransition("Go")
-            #yaw?
-        elif ("Walking" == self._WalkingModeStateMachine.GetCurrentState().Name):
-            if (self._LPP.IsActive()):
-                # x,y = self._Odometer.GetGlobalPosition()
-                # self._LPP.UpdatePosition(x,y)
-                self._BDI_StateMachine.SetPathError(self._LPP.GetPathError())
-              
-                targetYaw = self._LPP.GetTargetYaw()
-                delatYaw = targetYaw - self._Odometer.GetYaw()
-                  
-                debug_transition_cmd = "NoCommand"
-                if (math.sin(delatYaw) > 0.6):
-                    #print("Sin(Delta)",math.sin(delatYaw), "Left")
-                    debug_transition_cmd = "TurnLeft"
-                    self._BDI_StateMachine.TurnLeft(targetYaw)
-                elif (math.sin(delatYaw) < -0.6):
-                    #print("Sin(Delta)",math.sin(delatYaw), "Right")
-                    debug_transition_cmd = "TurnRight"
-                    self._BDI_StateMachine.TurnRight(targetYaw)
-            else:
-                debug_transition_cmd = "Stop"
-                self._BDI_StateMachine.Stop()
-                if (self._BDI_StateMachine.IsDone()):
-                    self._WalkingModeStateMachine.PerformTransition("Finished")
-                    
-            command = self._BDI_StateMachine.Step(state.walk_feedback.next_step_index_needed)
-            
-            if (0 !=command):
-                rospy.loginfo("WalkingModeBDI, asi_state_cb: State Machine Transition Cmd = %s" % (debug_transition_cmd) )
-        elif ("Done" == self._WalkingModeStateMachine.GetCurrentState().Name):
-                pass
+    def _Update_tf_BDI_odom(self,state):
+        self._tf.TransformBroadcaster().sendTransform( vec2tuple(state.pos_est.position), vec2tuple(state.foot_pos_est[0].orientation), state.header.stamp, "BDI_pelvis", "World")
+        self._tf.TransformBroadcaster().sendTransform( vec2tuple(state.foot_pos_est[0].position), vec2tuple(state.foot_pos_est[0].orientation),\
+                     state.header.stamp, "BDI_l_foot", "World")
+        self._tf.TransformBroadcaster().sendTransform( vec2tuple(state.foot_pos_est[1].position), vec2tuple(state.foot_pos_est[1].orientation),\
+                     state.header.stamp, "BDI_r_foot", "World")
+        # check foot index:
+        if AtlasSimInterfaceCommand.STEP == state.current_behavior:
+            static_foot_index = state.step_feedback.desired_step_saturated.foot_index
+        elif AtlasSimInterfaceCommand.WALK == state.current_behavior:
+            static_foot_index = state.step_feedback.desired_step_saturated.foot_index
         else:
-                raise Exception("BDI_WalkingModeStateMachine::Bad State Name")
-    
-        return command
+            static_foot_index = 2
+        # # determine static foot: ??? if needed
+        # if 0 == static_foot_index: # Left foot is static
+        #     self._tf.TransformBroadcaster().sendTransform( vec2tuple(state.foot_pos_est[0].position), vec2tuple(state.foot_pos_est[0].orientation),\
+        #              state.header.stamp, "BDI_static_foot", "World")
+        # elif 1 == static_foot_index: # Right foot is static
+        #     self._tf.TransformBroadcaster().sendTransform( vec2tuple(state.foot_pos_est[1].position) , vec2tuple(state.foot_pos_est[1].orientation),\
+        #              state.header.stamp, "BDI_static_foot", "World")
+        # elif 2 == static_foot_index: # both feet are static
+        #     self._tf.TransformBroadcaster().sendTransform( (0, 0, 0), (0, 0, 0, 1), state.header.stamp, "BDI_static_foot", "World")
+        # else: # problem
+        #     self._tf.TransformBroadcaster().sendTransform( (0, 0, -10), (0, 0, 0, 1), state.header.stamp, "BDI_static_foot", "World")
+
+    def _TransforFromGlobalToBDI(self,step_data,state):
+        foot_off_set = (0.06, 0.0, -0.085) # off-set from foot frame ('l_foot') to center of foot on ground (step_data refrence point)
+        static_foot_index = (step_data.foot_index+1) % 2 # the foot that we arn't placing
+        ## USING PELVIS AS REFRENCE:        
+        # t = self._tf.TransformListener().getLatestCommonTime('World','BDI_pelvis')
+        # trans2BDI,rot2BDI_quat = self._GetTf('World','BDI_pelvis',t)
+        # pelvis_global_position , pelvis_global_rotation_q = self._GetTf('World','pelvis',t)
+        # ## check pelvis placement error at time t, BDI Vs. Global: (the relation (position), pelvis to feet, at time t should be identical -> error=0 ) 
+        # BDI_l_foot,rot = self._GetTf('BDI_pelvis','BDI_l_foot',t)
+        # BDI_r_foot,rot = self._GetTf('BDI_pelvis','BDI_r_foot',t)
+        # global_l_foot,rot = self._GetTf('pelvis','l_foot',t)
+        # global_r_foot,rot = self._GetTf('pelvis','r_foot',t)
+        # err_l_foot = ( (global_l_foot[0]-(BDI_l_foot[0]-foot_off_set[0]))**2 + (global_l_foot[1]-(BDI_l_foot[1]-foot_off_set[1]))**2 \
+        #              + (global_l_foot[2]-(BDI_l_foot[2]-foot_off_set[2]))**2 )**0.5
+        # err_r_foot = ( (global_r_foot[0]-(BDI_r_foot[0]-foot_off_set[0]))**2 + (global_r_foot[1]-(BDI_r_foot[1]-foot_off_set[1]))**2 \
+        #              + (global_r_foot[2]-(BDI_r_foot[2]-foot_off_set[2]))**2 )**0.5
+        # pelvis_global_rotation_euler = euler_from_quaternion(pelvis_global_rotation_q)
+        
+        ## !!!---- Transformation Calculation: -------!!!:
+        ## 1) Orientation difference between Global and BDI coordinates is calculated when robot is static (on initialize).
+        ##    To determine BDI orientation we add difference (_GetOrientationDelta0Values) to Global orientation.  
+        ## 2) Translation vector from static foot to new FP is calculated in Global coordinates (glabal_trans_delta_vec).
+        ##    To determine BDI position we rotate vector to BDI coord. system and add the BDI static foot position (using one homogeneous transformations).
+        if 0 == static_foot_index:
+            static_foot_global_position , static_foot_global_rotation_q = self._GetTf('World','l_foot')
+            trans2BDI,rot2BDI_quat = self._GetTf('World','BDI_l_foot')
+        else:
+            static_foot_global_position , static_foot_global_rotation_q = self._GetTf('World','r_foot')
+            trans2BDI,rot2BDI_quat = self._GetTf('World','BDI_r_foot')
+        static_foot_global_rotation_euler = euler_from_quaternion(static_foot_global_rotation_q)
+        rot2BDI_euler = euler_from_quaternion(rot2BDI_quat) # Problem that rot2BDI_quat (foot_pos_est) doesn't return foot orientation (returns pelvis ori.?)  
+        
+        # new_BDI_foot_pose = BDI_static_foot_pose + Global_pose_delta_between_feet
+        global_X_delta = (step_data.pose.position.x-foot_off_set[0]) - static_foot_global_position[0] #pelvis_global_position[0] #
+        global_Y_delta = (step_data.pose.position.y-foot_off_set[1]) - static_foot_global_position[1] #pelvis_global_position[1] #
+        global_Z_delta = (step_data.pose.position.z-foot_off_set[2]) - static_foot_global_position[2] #pelvis_global_position[2] #
+        glabal_trans_delta_vec = np.matrix([[global_X_delta],[global_Y_delta],[global_Z_delta],[1.0]]) # numpy matrix (vector)
+        # rotation correction using euler angles:
+        des_global_roll, des_global_pitch, des_global_yaw = euler_from_quaternion([step_data.pose.orientation.x, step_data.pose.orientation.y, step_data.pose.orientation.z, step_data.pose.orientation.w])
+        global_roll_delta = des_global_roll - static_foot_global_rotation_euler[0] #pelvis_global_rotation_euler[0] #
+        global_pitch_delta = des_global_pitch - static_foot_global_rotation_euler[1] #pelvis_global_rotation_euler[0] #
+        global_yaw_delta = des_global_yaw - static_foot_global_rotation_euler[2] #pelvis_global_rotation_euler[0] #
+
+        # homogeneous transformations:                                   
+        Global2BDI_q = quaternion_from_euler(self._roll_delta0, self._pitch_delta0, self._yaw_delta0)
+        transform_world2BDI = self._tf.TransformListener().fromTranslationRotation(trans2BDI, Global2BDI_q) #state.step_feedback.desired_step_saturated.pose.orientation)# rot2BDI_quat) 
+           # homogeneous trans. of static foot to BDI coord. (Returns a Numpy 4x4 matrix for a transform)
+        # transform_static2new_FP = tf.fromTranslationRotation(glabal_trans_delta_vec, glabal_rot_delta_vec) # homogeneous trans. of static foot to new foot placement pose,
+        #   # the transform is according to relative coordinates (delta) calculated in global coordinate system (but not connected to global coord. which only a ref. system)  
+        # transform_world2new_FP = transform_world2BDI*transform_static2new_FP # homogeneous trans. of new foot placemen to BDI coord.
+        BDI_new_FP = transform_world2BDI*glabal_trans_delta_vec
+        # rospy.loginfo("_TransforFromGlobalToBDI:: BDI static foot -pos: x=%f, y=%f , z=%f; ori: roll=%f, pitch=%f , yaw=%f; \
+        #               foot_pos_est- pos: x=%f ori: x=%f, y=%f z=%f w=%f;" \
+        #      % (trans2BDI[0], trans2BDI[1], trans2BDI[2], rot2BDI_euler[0], rot2BDI_euler[1], rot2BDI_euler[2],\
+        #         state.foot_pos_est[0].position.x, state.foot_pos_est[0].orientation.x,state.foot_pos_est[0].orientation.y,\
+        #         state.foot_pos_est[0].orientation.z,state.foot_pos_est[0].orientation.w) )
+
+        step_data.pose.position.x = BDI_new_FP.item(0) #[state.foot_pos_est[static_foot_index].position.x + BDI_X_delta
+        step_data.pose.position.y = BDI_new_FP.item(1) #state.foot_pos_est[static_foot_index].position.y + BDI_Y_delta
+        step_data.pose.position.z = BDI_new_FP.item(2) #state.foot_pos_est[static_foot_index].position.z + BDI_Z_delta
+                
+        # BDI_static_foot_roll, BDI_static_foot_pitch, BDI_static_foot_yaw = euler_from_quaternion([state.foot_pos_est[static_foot_index].orientation.x,\
+        #  state.foot_pos_est[static_foot_index].orientation.y, state.foot_pos_est[static_foot_index].orientation.z, state.foot_pos_est[static_foot_index].orientation.w])        
+        #Q = quaternion_from_euler(rot2BDI_euler[0] + global_roll_delta, rot2BDI_euler[1] + global_pitch_delta, rot2BDI_euler[2] + global_yaw_delta)
+        BDI_new_FP_q = quaternion_from_euler(self._roll_delta0 + des_global_roll, self._pitch_delta0 + des_global_pitch, self._yaw_delta0 + des_global_yaw)
+        step_data.pose.orientation.x = BDI_new_FP_q[0]
+        step_data.pose.orientation.y = BDI_new_FP_q[1]
+        step_data.pose.orientation.z = BDI_new_FP_q[2]
+        step_data.pose.orientation.w = BDI_new_FP_q[3]
+
+        # rospy.loginfo("_TransforFromGlobalToBDI:: command position: x=%f, y=%f , z=%f; des Global delta: roll=%f, pitch=%f , yaw=%f; global delta : roll=%f, pitch=%f , yaw=%f" \
+        #      % (step_data.pose.position.x, step_data.pose.position.y, step_data.pose.position.z, des_global_roll, des_global_pitch, des_global_yaw,\
+        #         global_roll_delta, global_pitch_delta, global_yaw_delta) )
+        #print Q
+        rospy.loginfo("_TransforFromGlobalToBDI:: command relative to static foot: distanceXY=%f, z=%f, yaw=%f, Global FP: pitch=%f, roll=%f "\
+                     % ( (global_X_delta**2+global_Y_delta**2)**0.5, global_Z_delta, global_yaw_delta,des_global_pitch,des_global_roll) )
+        return step_data
+
+    def _GetOrientationDelta0Values(self):
+        # learn delta0 values on initialize:
+        global_euler = euler_from_quaternion([self._Global_Static_orientation_q.x,self._Global_Static_orientation_q.y,self._Global_Static_orientation_q.z,self._Global_Static_orientation_q.w])
+        BDI_euler = euler_from_quaternion([self._BDI_Static_orientation_q.x,self._BDI_Static_orientation_q.y,self._BDI_Static_orientation_q.z,self._BDI_Static_orientation_q.w])
+        self._roll_delta0 = global_euler[0] - BDI_euler[0]  # [rad] initial orientation difference between BDI odom and Global
+        self._pitch_delta0 = global_euler[1] - BDI_euler[1] # [rad] initial orientation difference between BDI odom and Global
+        self._yaw_delta0 = global_euler[2] - BDI_euler[2] # [rad] initial orientation difference between BDI odom and Global  
+
+    def _GetTf(self,base_frame,get_frames,time=rospy.Time(0)):
+        # waiting for transform to be avilable
+        time_out = rospy.Duration(2)
+        polling_sleep_duration = rospy.Duration(0.01)
+        while self._tf.TransformListener().waitForTransform (base_frame, get_frames, time, time_out, polling_sleep_duration) and not rospy.is_shutdown():
+                rospy.loginfo("QS_WalkingMode - _GetTf:: Not ready for Global To BDI transform")
+        try:
+          (translation,rotation_q) = self._tf.TransformListener().lookupTransform(base_frame, get_frames, time)  #  rospy.Time(0) to use latest availble transform 
+        except (tf.LookupException, tf.ConnectivityException, tf.ExtrapolationException) as ex:
+          print ex
+          rospy.loginfo("QS_WalkingMode - _GetTf:: tf exception")
+          translation = [0,0,0]
+          rotation_q = [0,0,0,1]
+          #continue
+        return translation,rotation_q
 
 
-def deg2r(deg):
-    return (deg*math.pi/180.0)
-
+def vec2tuple(vector):
+    res = ( vector.x, vector.y, vector.z )
+    try:
+        res = res + (vector.w,)
+    except AttributeError:
+        pass # print 'oops'
+    return res
