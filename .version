@@ -5,7 +5,7 @@ C0_Scripts     		        0.25
 C10_Common                      0.5
 C11_Agent                       0.22
 C11_OperatorControl             0.24
-C21_VisionAndLidar              0.16
+C21_VisionAndLidar              0.17
 C22_CompactGroundRecognitionAndMapping     0.7
 C22_GroundRecognitionAndMapping     0.16
 C22_transformations     	0.3
