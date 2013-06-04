@@ -100,7 +100,6 @@ bool C23_Detector::averagePointCloud(int x1, int y1, int x2, int y2, const senso
     double counter=0;
     pcl::PointCloud<pcl::PointXYZ> t;
     pcl::PointXYZ p;
-    pcl::io::savePCDFileASCII ("test_pcd.pcd", detectionCloud);
     for(int i=xMin;i<=xMax;i++) {
         for(int j=yMin;j<=yMax;j++){
             p=detectionCloud.at(i,j);
@@ -801,6 +800,9 @@ bool C23_Detector::detectStandpipe(Mat srcImg, const sensor_msgs::PointCloud2::C
 bool C23_Detector::detectTable(Mat srcImg, const sensor_msgs::PointCloud2::ConstPtr &cloud) {
     ROS_INFO("Detecting a Standpipe..");
     RNG rng(12345);
+    pcl::PointCloud<pcl::PointXYZ>detectionCloud;
+    pcl::fromROSMsg<pcl::PointXYZ>(*cloud,detectionCloud);
+    pcl::io::savePCDFileASCII ("test_pcd.pcd", detectionCloud);
     
     Mat imgHSV, imgThreshed;
     cvtColor(srcImg,imgHSV,CV_BGR2HSV);
