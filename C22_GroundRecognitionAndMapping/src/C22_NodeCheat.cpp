@@ -173,7 +173,9 @@ bool C22_Node::proccess(C22_GroundRecognitionAndMapping::C22::Request  &req,
 
 	_myMatrix->clearMatrix();
 	_myMatrix->computeMMatrix(_myPlanes,cloudRecord);
-
+	int xIndex = (lastPose.pose.pose.position.x -_myMatrix->xOffset)*(1/SIZEOFSQUARE);	//added for now instead of previous three lines
+	int yIndex = (lastPose.pose.pose.position.y-_myMatrix->yOffset) *(1/SIZEOFSQUARE);	//same as above
+	_myMatrix->data->at(xIndex)->at(yIndex)->square_status=ATLAS;
 	//ROS_INFO("received request, trying to fetch data\n");
 	res.drivingPath.row.resize(_myMatrix->data->size());
 	res.drivingPath.robotPos.x=robotPos.x;
