@@ -26,7 +26,7 @@ def Get_target_pose(req):
         FP_res.z = 0.0
         FP_res.R = 0.0
         FP_res.P = 0.0
-        FP_res.Y = math.pi/2
+        FP_res.Y = -math.pi/2
     else:
         FP_res.x = 0.3
         FP_res.y = 0.0
@@ -35,9 +35,13 @@ def Get_target_pose(req):
         FP_res.P = 0.0
         FP_res.Y = 0.0
 
-    print req.start_pose.pose.position
-    if PositionsDistance(FP_res.foot_placement_path[0].pose.position, req.start_pose.pose.position) >= 0.5 or ns._bSent_path_once: # to avoid sending the same path a few times
-    	FP_res.foot_placement_path = []
+    if ns._bSent_path_once: # to avoid sending the same target pose a few times
+        FP_res.x = 0.0
+        FP_res.y = 0.0
+        FP_res.z = 0.0
+        FP_res.R = 0.0
+        FP_res.P = 0.0
+        FP_res.Y = 0.0
 
     print "Returning target pose: %s"%(FP_res)
     ns._bSent_path_once = True
