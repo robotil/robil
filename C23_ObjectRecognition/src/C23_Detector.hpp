@@ -55,10 +55,13 @@ typedef enum targets {
   PICTURE,
   VALVE,
   FIREHOSE,
+  FIREHOSE_GRIP,
+  STANDPIPE,
   INSIDE_STEERINGWHEEL,
   OUTSIDE_STEERINGWHEEL,
   HANDBRAKE,
   GEAR,
+  TABLE,
   PUSHBUTTON,
   NONE
 } TARGETS;
@@ -85,7 +88,9 @@ private:
     bool detectPassengerDriver(Mat srcImg, int x1,int y1,int x2,int y2, pcl::PointXYZ minPoint, pcl::PointCloud<pcl::PointXYZ> pclcloud);
     bool detectValve(Mat srcImg, const sensor_msgs::PointCloud2::ConstPtr &cloud);
     bool detectFirehose(Mat srcImg, const sensor_msgs::PointCloud2::ConstPtr &cloud);
-    
+    bool detectFirehoseGrip(Mat srcImg, const sensor_msgs::PointCloud2::ConstPtr &cloud);
+    bool detectStandpipe(Mat srcImg, const sensor_msgs::PointCloud2::ConstPtr &cloud);
+    bool detectTable(Mat srcImg, const sensor_msgs::PointCloud2::ConstPtr &cloud);
     bool detectSteeringWheel(Mat srcImg,const sensor_msgs::PointCloud2::ConstPtr &cloud,int location);
     bool detectHandbrake(Mat srcImg,const sensor_msgs::PointCloud2::ConstPtr &cloud,int location);
     bool detectGear(Mat srcImg,const sensor_msgs::PointCloud2::ConstPtr &cloud,int location);
