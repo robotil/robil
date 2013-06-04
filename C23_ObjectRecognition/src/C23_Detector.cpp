@@ -444,7 +444,122 @@ bool C23_Detector::detectSteeringWheel(Mat srcImg,const sensor_msgs::PointCloud2
 }
 else{
     //Robot is outside the car
-    
+    	//Covert the image to HSV colour space
+	Mat thresholdedImg;
+	Mat imgCarOpened, imgCarClosed;
+	//imshow("New image", srcImg);
+	//waitKey();
+	//cvtColor(image, imgHsvCar, CV_BGR2HSV);
+	//imshow("HSV", imgHsvCar);
+	//waitKey(0);
+	//-------------------Method 1-----------------------------
+	inRange(srcImg, Scalar(180, 180, 180), Scalar(255, 255, 255), thresholdedImg);
+
+	//Open the image to remove noise
+	Mat element1(3, 3, CV_8U, Scalar(1));
+	morphologyEx(thresholdedImg, imgCarOpened, MORPH_OPEN, element1);
+	//imshow("New image", imgCarOpened);
+	//waitKey();
+	
+	//Remove points that are far away
+	//pcl::PointXYZ minPoint, absolutePoint;
+	pcl::PointCloud<pcl::PointXYZ> pclcloud;
+        pcl::fromROSMsg<pcl::PointXYZ>(*cloud,pclcloud);
+        //geometry_msgs::Pose pose;
+        int THRESHOLD = 1000;
+	int distance = 10000;
+        //Get the closest point from the robot to the car
+        cout << x << "," << y << "," << width << "," << height << endl;
+        for(int i = 0; i < imgCarOpened.rows; i++) {
+            for(int j = 0; j < imgCarOpened.cols; j++) {
+                //     cout << "(" << i << "," << j << "," << pclcloud.at(i,j).z << ")" << endl;
+                distance  = sqrt((pclcloud.at(i,j).x*pclcloud.at(i,j).x+pclcloud.at(i,j).y*pclcloud.at(i,j).y+pclcloud.at(i,j).z*pclcloud.at(i,j).z)*10000);
+                if( distance > THRESHOLD || distance!=distance || distance<0) {
+		    //cout<<"distance: "<<distance<<endl;
+		    imgCarOpened.at<uchar>(i,j) = 0;
+                }
+                else{
+		    //cout<<"distance: "<<distance<<endl;
+		}
+            }
+        }
+        //imshow("Source Image", imgCarOpened);
+	//waitKey(0);
+	
+	//Find the center of mass of the contours
+	//Now find the contours of the blobs
+	
+	Mat copyCarImg;
+	vector<vector<cv::Point> > blobContours;
+	imgCarOpened.copyTo(copyCarImg);
+	findContours(copyCarImg,blobContours,CV_RETR_EXTERNAL, CV_CHAIN_APPROX_SIMPLE);
+	
+
+	 drawContours(srcImg,blobContours,-1,CV_RGB(255,0,0),2);
+	imshow("blobs", srcImg);
+	 waitKey();
+	 
+	 //Close the image to remove noise
+	 Mat imgCarFinal;
+	Mat element2(20,20, CV_8U, Scalar(1));
+	dilate(imgCarOpened, imgCarClosed, element2);
+	Mat element3(5, 5, CV_8U, Scalar(1));
+	erode(imgCarClosed, imgCarFinal, element3);
+	//morphologyEx(imgCarOpened, imgCarClosed, MORPH_CLOSE, element2);
+	imshow("New image", imgCarFinal);
+	waitKey();
+	
+	//Find the area of the contours
+	double maxArea = -1;
+	int maxIndex = -1;
+	double currentArea = -1;
+	vector<double> blobAreas;
+	vector<int> blobIndices;
+	for(int ii=0; ii<blobContours.size(); ii++)
+	{
+	currentArea = contourArea(blobContours[ii], false);
+		if(currentArea >maxArea){
+			maxArea = currentArea;
+			maxIndex = ii;
+		}
+
+	}
+	
+	//Find the center of mass of the contours
+	 // Get the moments
+	 Moments mu;
+	 mu = moments( blobContours[maxIndex], false );
+
+	 //  Get the mass centers:
+	 int OFFSET_WHEEL = 150;
+	 Point2f mc;
+	  mc= Point2f( mu.m10/mu.m00 , mu.m01/mu.m00 );
+	 cout<<"CM: "<<mc.x<<", "<<mc.y<<endl;
+	 //Send the coordinates
+	 
+	 int x1 = max(0,(int)(mc.y) - OFFSET_WHEEL);
+	 int y1 = max(0,(int)(mc.x) - OFFSET_WHEEL);
+	 
+	 int width = OFFSET_WHEEL*2;
+	 int height  = OFFSET_WHEEL*2;
+	 
+	 if(x1+width>imgCarFinal.cols){
+	  width = imgCarFinal.cols - x1; 
+	 }
+	 if(y1+height>imgCarFinal.rows){
+	  height = imgCarFinal.rows - y1; 
+	 }
+	 
+	 Rect rect(x1, y1, width, height);
+	 
+	 Mat boundedSteeringWheelImg(srcImg,rect);
+	 imshow("Bounded area", boundedSteeringWheelImg);
+	 waitKey();
+	 //x = mc.x;
+	 //y  =mc.y;
+	
+	
+	
     
 }
 
@@ -521,6 +636,13 @@ bool C23_Detector::detectGear(Mat srcImg,const sensor_msgs::PointCloud2::ConstPt
     waitKey(0);
     
     bool res  = templateMatching(srcImg, gearTemplate, 1, &matchLoc, cloud);
+    
+    int xpos = matchLoc.x;
+    int ypos = matchLoc.y;
+    int width = matchLoc.x
+    
+    for(int ii=
+    
     
     
     return res;
