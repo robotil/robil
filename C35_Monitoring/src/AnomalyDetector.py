@@ -5,7 +5,9 @@ import rospy
 import C0_RobilTask.msg
 from std_msgs.msg import String
 from RobilTaskPy import *
+import numpy
 
+MIN_COUNT_FOR_ANOMALY_ALERT = 5
 		
 class AnomalyDetector(RobilTask):
 	runtimes_success = {}	#holds for every node, all the execution times when succeeded.
@@ -27,15 +29,26 @@ def callback(self, msg):
         AnomalyDetector.tasks_start_time[node_id] = current_time
     else:
         runtime = current_time-AnomalyDetector.tasks_start_time[node_id]
+
         if not AnomalyDetector.tasks_start_time.has_key(node_id):                   
             return
         else:
             if node_success:
+                #if there are enough runtimes, we create the gaussian and check if the current runtime is an anomaly        .
+                if AnomalyDetector.runtimes_success.has_key(node_id) and len(AnomalyDetector.runtimes_success) > MIN_COUNT_FOR_ANOMALY_ALERT:
+                   cur_mean = numpy.mean(AnomalyDetector.runtimes_success[node_id])  
+                   cur_stdev = numpy.std(AnomalyDetector.runtimes_success[node_id])  
+                   
+                #add runtime to statistics
                 if AnomalyDetector.runtimes_success.has_key(node_id):
                     AnomalyDetector.runtimes_success[node_id].append(runtime)
                 else:
                     AnomalyDetector.runtimes_success[node_id] = [runtime]
             else:
+                if AnomalyDetector.runtimes_failure.has_key(node_id) and len(AnomalyDetector.runtimes_failure) > MIN_COUNT_FOR_ANOMALY_ALERT:
+                   cur_mean = numpy.mean(AnomalyDetector.runtimes_failure[node_id])  
+                   cur_stdev = numpy.std(AnomalyDetector.runtimes_failure[node_id])  
+                   
                 if AnomalyDetector.runtimes_failure.has_key(node_id):
                     AnomalyDetector.runtimes_failure[node_id].append(runtime)
                 else:
