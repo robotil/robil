@@ -7,10 +7,10 @@
 #include <math.h>
 #include <iostream>
 #include <string>
-#include "FK.h"
-#include "IK.h"
-#include "Trace.h"
-#include "Path.h"
+#include <C67_CarManipulation/FK.h>
+#include <C67_CarManipulation/IK.h>
+#include <C67_CarManipulation/Path.h>
+#include <C67_CarManipulation/Trace.h>
 
 int main(int argc, char** argv)
 {

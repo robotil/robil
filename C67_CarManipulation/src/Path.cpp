@@ -4,9 +4,9 @@ Path.cpp Find Trajectory
 #include <math.h>
 #include <iostream>
 #include <string>
-#include "FK.h"
-#include "IK.h"
-#include "Path.h"
+#include <C67_CarManipulation/FK.h>
+#include <C67_CarManipulation/IK.h>
+#include <C67_CarManipulation/Path.h>
 
 PathPoints::PathPoints(IkSolution R0,IkSolution L0,IkSolution R1,IkSolution L1)
 {

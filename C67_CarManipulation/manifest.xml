@@ -21,7 +21,9 @@
   <depend package="actionlib_msgs"/>
   <depend package="C0_RobilTask"/>
 
-  
+  <export>
+    <cpp cflags="-I${prefix}/include" />
+  </export>
 </package>
 
 
