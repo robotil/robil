@@ -192,10 +192,8 @@ public:
 		if( exists(args,"operation") ){
 			operation = cast<int>(args["operation"]);
 		}
-		if (operation == 1)
-			argTarget = RPY(.48 ,-.32 ,0.04,M_PI,0,0);	//Forward
-		else
-			argTarget = RPY(.48 ,-.32 ,0.0,M_PI,0,0);	//Reverse
+
+		argTarget = RPY(0.0 ,0.0 ,0.0,M_PI,0.0,0.0);	//Reverse
 
 		if( exists(args,"x") ){
 			argTarget.x = cast<double>(args["x"]);
@@ -269,41 +267,39 @@ public:
 
 
 
-
+				//current angles of the arm
 				IkSolution IkCurrent = IkSolution(as.position[q4r], as.position[q5r], as.position[q6r], as.position[q7r],
 									as.position[q8r], as.position[q9r]);
 
 				//grasp position from perception
-				argTarget.x -= 0.05;
-				argTarget.y -= 0.05;
-				argTarget.z -= 0.05;
-				argTarget.R -= 0.05;
-				argTarget.P -= 0.05;
-				argTarget.Y -= 0.05;
+				string target = "Firehose";
+				getObjectData(target,&(argTarget.x), &(argTarget.y), &(argTarget.z), &(argTarget.R), &(argTarget.P), &(argTarget.Y));
+				//since no solution from perception yet, we override it
+				argTarget=RPY(0.46,-0.071,-0.1,-3.14,0.5,1.442);
 
+				//Back movement from current to desired:
+				double current_ubx=as.back_ubx;
+				double current_mby=as.back_mby;
+				double current_lbz=as.back_lbz;
 				double desired_ubx=0;
 				double desired_mby=0;
 				double desired_lbz=0;
 
-				double current_ubx=as.back_ubx;
-				double current_mby=as.back_mby;
-				double current_lbz=as.back_lbz;
-
-
-				// Find the IK solution
-				IkSolution IkNext = rScanRPY(desired_ubx, desired_mby, desired_lbz, argTarget,0.01);
-
-				//No need: IkSolution IkNext2 = rScanRPY(desired_lbz, desired_lbz, desired_lbz, argTarget,0.01);
-
-				if ((!IkNext.valid)||(!IkNext2.valid)){
-					ROS_INFO("%s: No Solution!", _name.c_str());
-					retValue  = NoSolution;
-					return TaskResult(retValue, "ERROR");
-				}
 				//move the back
 				IkSolution current_back=IkSolution(current_ubx,current_mby,current_lbz,0,0,0);
 				IkSolution target_back=IkSolution(desired_ubx,desired_mby,desired_lbz,0,0,0);
 				MoveBack(current_back , target_back , 2 , 100);
+
+				// Find the IK solution for the next solution of the arm
+				RPY arm_offset=RPY(0,0,0,0,0,0); //the offset between the perception point and the desired grasp point
+				// the target position for the arm
+				RPY arm_target=TraceAngle(argTarget,arm_offset,0); //Multiply the transformation matrices from argTarget to arm_offset
+				IkSolution IkNext = rScanRPY(desired_ubx, desired_mby, desired_lbz, argTarget,0.01);
+				if (!IkNext.valid){
+					ROS_INFO("%s: No Solution!", _name.c_str());
+					retValue  = NoSolution;
+					//return TaskResult(retValue, "ERROR");
+				}
 
 				// move near target
 				Move(IkCurrent, IkNext, 2.0, 100);
