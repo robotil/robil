@@ -100,8 +100,8 @@ private:
     bool detectGear(Mat srcImg,const sensor_msgs::PointCloud2::ConstPtr &cloud,int location);
     bool detectGearStatus(Mat srcImg,const sensor_msgs::PointCloud2::ConstPtr &cloud,int location);
     
-    bool pictureCoordinatesToGlobalPosition(int x1, int y1, int x2, int y2, double * x, double* y, double*z);
-    bool pointCloudCoordinatesToGlobalPosition(int x, int y, int z, double* px, double* py, double*pz);
+    bool pictureCoordinatesToGlobalPosition(double x1, double y1, double x2, double y2, double * x, double* y, double*z);
+    bool pointCloudCoordinatesToGlobalPosition(double x, double y, double z, double* px, double* py, double*pz);
     bool averagePointCloud(int x1, int y1, int x2, int y2, const sensor_msgs::PointCloud2::ConstPtr &detectionCloud, double* px, double* py, double *pz) ;
         
         
