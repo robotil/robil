@@ -154,18 +154,18 @@ class ObsMap:public MapT<char>{
 		switch((STATUS)value){
 		case ST_AVAILABLE: return ST_AVAILABLE;
 		case ST_UNCHARTED: return ST_UNCHARTED;
-		case ST_ATLAS: return ST_AVAILABLE;
 		case ST_BLOCKED: return ST_BLOCKED;
+		case ST_ATLAS: return ST_AVAILABLE;
 		case ST_MUD: return ST_AVAILABLE;
-		case ST_DEBREES: return ST_BLOCKED;
+		case ST_DEBREES: return ST_AVAILABLE;
 		}
 	}
 	static STATUS filterTerrain(int value){
 		switch((STATUS)value){
 		case ST_AVAILABLE: return ST_UNCHARTED;
 		case ST_UNCHARTED: return ST_UNCHARTED;
-		case ST_ATLAS: return ST_ATLAS;
 		case ST_BLOCKED: return ST_UNCHARTED;
+		case ST_ATLAS: return ST_ATLAS;
 		case ST_MUD: return ST_MUD;
 		case ST_DEBREES: return ST_DEBREES;
 		}
