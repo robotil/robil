@@ -46,7 +46,7 @@
 
 
 
-bool C23_Detector::pictureCoordinatesToGlobalPosition(int x1, int y1, int x2, int y2, double* x, double* y, double*z) {
+bool C23_Detector::pictureCoordinatesToGlobalPosition(double x1, double y1, double x2, double y2, double* x, double* y, double*z) {
     C21_VisionAndLidar::C21_obj c21srv;
     c21srv.request.sample.x1 = x1;
     c21srv.request.sample.y1 = y1;
@@ -65,7 +65,7 @@ bool C23_Detector::pictureCoordinatesToGlobalPosition(int x1, int y1, int x2, in
     
 }
 
-bool C23_Detector::pointCloudCoordinatesToGlobalPosition(int x, int y, int z, double* px, double* py, double *pz) {
+bool C23_Detector::pointCloudCoordinatesToGlobalPosition(double x, double y, double z, double* px, double* py, double *pz) {
     C21_VisionAndLidar::C21_obj c21srv;
     c21srv.request.sample.x1 = x;
     c21srv.request.sample.y1 = z;
@@ -1532,8 +1532,8 @@ bool C23_Detector::detectGate(Mat srcImg, const sensor_msgs::PointCloud2::ConstP
     
     Mat threshMat(imgThreshed);
     
-    imshow("Threshed",threshMat);
-    waitKey(0);
+   // imshow("Threshed red",threshMat);
+   // waitKey(0);
     //  ROS_INFO("Gate!");
     
     
@@ -1546,7 +1546,7 @@ bool C23_Detector::detectGate(Mat srcImg, const sensor_msgs::PointCloud2::ConstP
     
     vector<vector<cv::Point> > contoursR;
     findContours(bw, contoursR, CV_RETR_LIST, CV_CHAIN_APPROX_SIMPLE);
-    //cout<<"The Contour size: "<< contoursR.size()<<endl;
+    cout<<"The Contour right size: "<< contoursR.size()<<endl;
     vector<Moments> muR(contoursR.size() );
     vector<Point2f> mcR(contoursR.size() );
     int biggstR=0;
@@ -1554,8 +1554,8 @@ bool C23_Detector::detectGate(Mat srcImg, const sensor_msgs::PointCloud2::ConstP
         drawContours(srcImg, contoursR, -1, CV_RGB(255,0,0), 2);
         
         /// Get the moments and mass centers:
-        // imshow("Contours", srcImg);
-        // waitKey(0);
+       //  imshow("Contours", srcImg);
+       //   waitKey(0);
         
         
         for(unsigned int i = 0; i < contoursR.size(); i++ )
@@ -1569,6 +1569,7 @@ bool C23_Detector::detectGate(Mat srcImg, const sensor_msgs::PointCloud2::ConstP
         //Draw a circle indicating the center of mass on the right pole
         circle( srcImg, mcR[biggstR], 16, 60, -1, 8, 0 );
         right = true;
+        cout << "We found red!" << endl;
         if (pclcloud.at(mcR[biggstR].x,mcR[biggstR].y).x<50 && pclcloud.at(mcR[biggstR].x,mcR[biggstR].y).y <50 && pclcloud.at(mcR[biggstR].x,mcR[biggstR].y).x !=0)
         {
             rightC=pclcloud.at(mcR[biggstR].x,mcR[biggstR].y);
@@ -1582,7 +1583,11 @@ bool C23_Detector::detectGate(Mat srcImg, const sensor_msgs::PointCloud2::ConstP
     
     
     Mat threshMatL(imgThreshed),bwL;
+    
     threshold(threshMatL, bwL, 10, 255, CV_THRESH_BINARY);
+    
+  //  imshow("Threshed blue",threshMatL);
+  //  waitKey(0);
     vector<vector<cv::Point> > contoursL;
     //	  cout<<"next2"<<endl;
     findContours(bwL, contoursL, CV_RETR_LIST, CV_CHAIN_APPROX_SIMPLE);
@@ -1591,7 +1596,8 @@ bool C23_Detector::detectGate(Mat srcImg, const sensor_msgs::PointCloud2::ConstP
     int biggstL=0;
     if(contoursL.size() !=0) {
         drawContours(srcImg, contoursL, -1, CV_RGB(0,0,255), 2);
-        
+      //  imshow("Contours", srcImg);
+       // waitKey(0);
         
         
         for(unsigned int i = 0; i < contoursL.size(); i++ )
@@ -1603,6 +1609,7 @@ bool C23_Detector::detectGate(Mat srcImg, const sensor_msgs::PointCloud2::ConstP
             
         }
         left = true;
+        cout << "Left is true! " << endl;
         circle( srcImg, mcL[biggstL], 16, Scalar(0,0,255), -1, 8, 0 );
         if (pclcloud.at(mcL[biggstL].x,mcL[biggstL].y).x<50 && pclcloud.at(mcL[biggstL].x,mcL[biggstL].y).y <50 && pclcloud.at(mcL[biggstL].x,mcL[biggstL].y).x !=0)
         {
@@ -1627,6 +1634,7 @@ bool C23_Detector::detectGate(Mat srcImg, const sensor_msgs::PointCloud2::ConstP
             res = true;
             
         }
+        cout << "Res is: " << res << endl;
         if(!res) {
             left = leftC.z < rightC.z;
             right = leftC.z > rightC.z;
@@ -1671,8 +1679,8 @@ bool C23_Detector::detectGate(Mat srcImg, const sensor_msgs::PointCloud2::ConstP
                 cout << "Got data: " << x << "," << y << endl;
                 
             }*/
-          /*
-            int x1,y1,x2,y2;
+          
+            double x1,y1,x2,y2;
             cout << "Sending left: " << mcL[biggstL].x << "," << mcL[biggstL].y << endl;
             cout << "Sending right: " << mcR[biggstR].x << "," <<mcR[biggstR].y << endl;
             
@@ -1705,18 +1713,21 @@ bool C23_Detector::detectGate(Mat srcImg, const sensor_msgs::PointCloud2::ConstP
              y = (y1+y2)/2.0;
           // 
            
-            return true;
-            */
+         //   return true;
+          //  /
           Point2f a((float) (mcL[biggstL].x + mcR[biggstR].x)/2,(float)(mcL[biggstL].y + mcR[biggstR].y)/2);
           circle( srcImg, a, 16, Scalar(0,0,255), -1, 8, 0 );
           imshow("TESTING",srcImg);
           waitKey(0);
+          return true;
+          /*
           double x1,y1,z1,x2,y2,z2;
           averagePointCloud(mcL[biggstL].x-10, mcL[biggstL].y-100, mcL[biggstL].x+10, mcL[biggstL].y+100, cloud, &x1, &y1,&z1);
           averagePointCloud(mcR[biggstR].x-10, mcR[biggstR].y-100, mcR[biggstR].x+10, mcR[biggstR].y+100, cloud, &x2, &y2,&z2);
-          
-          x = (x1+x2)/2.0;
-          y = (y1+y2)/2.0;
+          return true;
+         // x = (x1+x2)/2.0;
+        //  y = (y1+y2)/2.0;
+          */
         }
     }
     
