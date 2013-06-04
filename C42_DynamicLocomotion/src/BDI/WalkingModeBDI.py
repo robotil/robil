@@ -1,33 +1,33 @@
 #!/usr/bin/env python
-import roslib
-roslib.load_manifest('C42_DynamicLocomotion')
-from Abstractions.WalkingMode import *
+
 import time
-from atlas_msgs.msg import AtlasCommand, AtlasSimInterfaceCommand, AtlasSimInterfaceState, AtlasState, AtlasBehaviorStepData
-from sensor_msgs.msg import Imu
-import PyKDL
-from tf_conversions import posemath
-from atlas_msgs.msg import AtlasSimInterfaceCommand, AtlasSimInterfaceState, AtlasState
-from std_msgs.msg import String
-from tf.transformations import quaternion_from_euler, euler_from_quaternion
-
-from sensor_msgs.msg import Imu
-
-from BDI_Odometer import *
-from BDI_StateMachine import *
-
 import math
 import rospy
 import sys
 import copy
+import roslib
+import PyKDL
 
-from nav_msgs.msg import Odometry
+roslib.load_manifest('C42_DynamicLocomotion')
 
-from geometry_msgs.msg import Pose
-from BDI_Strategies import *
+from Abstractions.WalkingMode import *
+from Abstractions.Odometer import *
 from Abstractions.StepQueue import *
-from LocalPathPlanner import FootPlacement
 
+from BDI_StateMachine import *
+from BDI_Strategies import *
+from LocalPathPlanner import *
+
+from atlas_msgs.msg import AtlasCommand, AtlasSimInterfaceCommand, AtlasSimInterfaceState, AtlasState, AtlasBehaviorStepData
+from sensor_msgs.msg import Imu
+from std_msgs.msg import String
+from geometry_msgs.msg import Pose
+from nav_msgs.msg import Odometry
+from C31_PathPlanner.msg import C31_Waypoints
+from C25_GlobalPosition.msg import C25C0_ROP
+
+from tf_conversions import posemath
+from tf.transformations import quaternion_from_euler, euler_from_quaternion
 
 ###################################################################################
 # File created by David Dovrat, 2013.
@@ -41,7 +41,7 @@ class WalkingModeBDI(WalkingMode):
         self.step_index_for_reset = 0
         # Initialize atlas mode and atlas_sim_interface_command publishers        
         self.asi_command = rospy.Publisher('/atlas/atlas_sim_interface_command', AtlasSimInterfaceCommand, None, False, True, None)
-        self._Odometer = BDI_Odometer()
+        self._Odometer = Odometer()
         ##############################
         #self._StrategyForward = BDI_StrategyForward(self._Odometer)
         self._stepDataInit = BDI_Strategy(self._Odometer)
@@ -53,14 +53,18 @@ class WalkingModeBDI(WalkingMode):
         ##############################
         self._BDI_StateMachine = BDI_StateMachine(self._Odometer)
         #self._odom_position = Pose()
-        self._odom_sub = rospy.Subscriber('/ground_truth_odom',Odometry,self._odom_cb)
         self._bDone = False
-        self.asi_state = rospy.Subscriber('/atlas/atlas_sim_interface_state', AtlasSimInterfaceState, self.asi_state_cb)
-        self._atlas_imu_sub = rospy.Subscriber('/atlas/imu', Imu, self._get_imu)
-        rospy.sleep(0.3)
 
     def Initialize(self):
         WalkingMode.Initialize(self)
+        # Subscriber
+        self._Subscribers["Path"] = rospy.Subscriber('/path',C31_Waypoints,self._path_cb)
+        self._Subscribers["Odometry"] = rospy.Subscriber('/C25/publish',C25C0_ROP,self._odom_cb) #
+        #self._Subscribers["Odometry"] = rospy.Subscriber('/ground_truth_odom',Odometry,self._odom_cb) 
+        self._Subscribers["ASI_State"]  = rospy.Subscriber('/atlas/atlas_sim_interface_state', AtlasSimInterfaceState, self.asi_state_cb)
+        self._Subscribers["IMU"]  = rospy.Subscriber('/atlas/imu', Imu, self._get_imu)
+        rospy.sleep(0.3)
+    
         self._bDone = False
         # # Puts robot into freeze behavior, all joints controlled
         # # Put the robot into a known state
@@ -120,6 +124,14 @@ class WalkingModeBDI(WalkingMode):
 #--------------------------- CallBacks --------------------------------------------
 ###################################################################################
 
+    def _path_cb(self,path):
+        rospy.loginfo('got path %s',path)
+        p = []
+        for wp in path.points:
+            p.append(Waypoint(wp.x,wp.y))
+        self.SetPath(p)
+
+
     # /atlas/atlas_sim_interface_state callback. Before publishing a walk command, we need
     # the current robot position   
     def asi_state_cb(self, state):
@@ -157,7 +169,8 @@ class WalkingModeBDI(WalkingMode):
 
     def _odom_cb(self,odom):
         # SHOULD USE:
-        self._LPP.UpdatePosition(odom.pose.pose.position.x,odom.pose.pose.position.y)
+        self._LPP.UpdatePosition(odom.pose.pose.pose.position.x,odom.pose.pose.pose.position.y) # from C25_GlobalPosition
+        # self._LPP.UpdatePosition(odom.pose.pose.position.x,odom.pose.pose.position.y) # from /ground_truth_odom
         #self._odom_position = odom.pose.pose
  
     def _get_imu(self,msg):  #listen to /atlas/imu/pose/pose/orientation
@@ -343,11 +356,11 @@ class WalkingModeBDI(WalkingMode):
                 delatYaw = targetYaw - self._Odometer.GetYaw()
                   
                 debug_transition_cmd = "NoCommand"
-                if (math.sin(delatYaw) > 0.6):
+                if (math.sin(delatYaw) > 0.12):
                     #print("Sin(Delta)",math.sin(delatYaw), "Left")
                     debug_transition_cmd = "TurnLeft"
                     self._BDI_StateMachine.TurnLeft(targetYaw)
-                elif (math.sin(delatYaw) < -0.6):
+                elif (math.sin(delatYaw) < -0.12):
                     #print("Sin(Delta)",math.sin(delatYaw), "Right")
                     debug_transition_cmd = "TurnRight"
                     self._BDI_StateMachine.TurnRight(targetYaw)

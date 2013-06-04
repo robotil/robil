@@ -155,10 +155,11 @@ void Kinematics::computeCOMRecurs(const KDL::SegmentMap::const_iterator& current
           if (jnt == joint_positions.end()){
               return;
               ROS_WARN("Could not find joint %s of %s in joint positions. Aborting tree branch.", current_seg->second.segment.getJoint().getName().c_str(), current_seg->first.c_str());
+            }
           jnt_p = jnt->second;
-      }
+          ROS_DEBUG("At link %s. cur jnt_p = %f",current_seg->first.c_str(), jnt_p);
+          
   }
-
   KDL::Frame current_frame = tf * current_seg->second.segment.pose(jnt_p);
   if (current_seg->first == lfoot_link_name_){
     tf_left_foot = current_frame;
@@ -183,11 +184,11 @@ void Kinematics::computeCOMRecurs(const KDL::SegmentMap::const_iterator& current
             m, com.x(), com.y(), com.z());
 
   // TODO: separate recursive fct to create markers, callable on demand
-//  if (current_m > 0.0){
-//    visualization_msgs::Marker marker;
-//    createCoGMarker(current_seg->first, "torso", 0.02, (current_frame*current_cog), marker);
-//    com_vis_markers_.markers.push_back(marker);
-//  }
+   // if (current_m > 0.0){
+   //   visualization_msgs::Marker marker;
+   //   createCoGMarker(current_seg->first, "torso", 0.02, (current_frame*current_cog), marker);
+   //   com_vis_markers_.markers.push_back(marker);
+   // }
 
   std::vector<KDL::SegmentMap::const_iterator >::const_iterator child_it;
   for (child_it = current_seg->second.children.begin(); child_it !=current_seg->second.children.end(); ++child_it){
@@ -220,7 +221,7 @@ void Kinematics::computeCOM(const std::map<std::string, double>& joint_positions
   }
 
   com = 1.0/mass * com;
-  // ROS_INFO("Total mass: %f CoG: (%f %f %f)", mass, com.x(), com.y(), com.z());
+  // ROS_INFO("Total mass: %f CoG: (%f %f %f)", mass, com.x(), com.y(), com.z());R
 
   COM.setValue(com.x(), com.y(), com.z());
   tf::TransformKDLToTF(right_foot_tf, tf_right_foot);
