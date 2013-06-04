@@ -19,6 +19,7 @@
   <depend package="atlas_msgs"/>
   <depend package="sensor_msgs"/>
   <depend package="C23_dFind"/>
+  <depend package="C67_CarManipulation"/>
 </package>
 
 
