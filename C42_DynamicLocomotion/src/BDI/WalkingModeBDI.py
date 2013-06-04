@@ -69,6 +69,7 @@ class WalkingModeBDI(WalkingMode):
         # # Puts robot into freeze behavior, all joints controlled
         # # Put the robot into a known state
         k_effort = [0] * 28
+        k_effort[3] = 255
         # freeze = AtlasSimInterfaceCommand(None,AtlasSimInterfaceCommand.FREEZE, None, None, None, None, k_effort )
         # self.asi_command.publish(freeze)
         
@@ -110,6 +111,7 @@ class WalkingModeBDI(WalkingMode):
         # Puts robot into freeze behavior, all joints controlled
         # Put the robot into a known state
         k_effort = [0] * 28
+        k_effort[3] = 255
         # freeze = AtlasSimInterfaceCommand(None,AtlasSimInterfaceCommand.FREEZE, None, None, None, None, k_effort )
         # self.asi_command.publish(freeze)
         # rospy.sleep(0.3)
