@@ -19,13 +19,13 @@ from BDI_Strategies import *
 from LocalPathPlanner import *
 
 from atlas_msgs.msg import AtlasCommand, AtlasSimInterfaceCommand, AtlasSimInterfaceState, AtlasState, AtlasBehaviorStepData
-from sensor_msgs.msg import Imu
+from sensor_msgs.msg import Imu, JointState
 from std_msgs.msg import String
 from geometry_msgs.msg import Pose
 from nav_msgs.msg import Odometry
 from C31_PathPlanner.msg import C31_Waypoints
 from C25_GlobalPosition.msg import C25C0_ROP
-
+from DW.JointController import JointCommands_msg_handler
 from tf_conversions import posemath
 from tf.transformations import quaternion_from_euler, euler_from_quaternion
 
@@ -54,7 +54,16 @@ class WalkingModeBDI(WalkingMode):
         self._BDI_StateMachine = BDI_StateMachine(self._Odometer)
         #self._odom_position = Pose()
         self._bDone = False
-
+        ############################
+        #joint controller
+        self._cur_jnt = [0]*28
+        robot_name = "atlas"
+        jnt_names = ['back_lbz', 'back_mby', 'back_ubx', 'neck_ay', #3
+                           'l_leg_uhz', 'l_leg_mhx', 'l_leg_lhy', 'l_leg_kny', 'l_leg_uay', 'l_leg_lax', #9
+                           'r_leg_uhz', 'r_leg_mhx', 'r_leg_lhy', 'r_leg_kny', 'r_leg_uay', 'r_leg_lax', #15
+                           'l_arm_usy', 'l_arm_shx', 'l_arm_ely', 'l_arm_elx', 'l_arm_uwy', 'l_arm_mwx', #21
+                           'r_arm_usy', 'r_arm_shx', 'r_arm_ely', 'r_arm_elx', 'r_arm_uwy', 'r_arm_mwx'] #27
+        self._JC = JointCommands_msg_handler(robot_name,jnt_names)
     def Initialize(self):
         WalkingMode.Initialize(self)
         # Subscriber
@@ -63,13 +72,18 @@ class WalkingModeBDI(WalkingMode):
         # self._Subscribers["Odometry"] = rospy.Subscriber('/ground_truth_odom',Odometry,self._odom_cb) 
         self._Subscribers["ASI_State"]  = rospy.Subscriber('/atlas/atlas_sim_interface_state', AtlasSimInterfaceState, self.asi_state_cb)
         self._Subscribers["IMU"]  = rospy.Subscriber('/atlas/imu', Imu, self._get_imu)
+        self._Subscribers["JointStates"] = rospy.Subscriber('/atlas/joint_states', JointState, self._get_joints)
         rospy.sleep(0.3)
     
         self._bDone = False
         # # Puts robot into freeze behavior, all joints controlled
         # # Put the robot into a known state
         k_effort = [0] * 28
-        k_effort[3] = 255
+        k_effort[0:4] = 4*[255]
+        k_effort[16:28] = 12*[255]
+        self._JC.set_k_eff(k_effort)
+        self._JC.set_all_pos(self._cur_jnt)
+        self._JC.send_command()
         # freeze = AtlasSimInterfaceCommand(None,AtlasSimInterfaceCommand.FREEZE, None, None, None, None, k_effort )
         # self.asi_command.publish(freeze)
         
@@ -132,6 +146,9 @@ class WalkingModeBDI(WalkingMode):
         for wp in path.points:
             p.append(Waypoint(wp.x,wp.y))
         self.SetPath(p)
+
+    def _get_joints(self,msg):
+        self._cur_jnt = msg.position
 
 
     # /atlas/atlas_sim_interface_state callback. Before publishing a walk command, we need

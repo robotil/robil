@@ -111,6 +111,10 @@ class JointCommands_msg_handler(object):
           self._command.i_effort_max[i] = self._default_gains[name]['i_clamp']
           self._command.i_effort_min[i] = -self._command.i_effort_max[i]
 
+    def set_k_eff(self,k_eff):
+        if len(k_eff) == len(self._command.k_effort):
+            self._command.k_effort = k_eff
+
     def bdi_control(self):
         self._command.k_effort = [0]*len(self.JointNames)
 

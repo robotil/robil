@@ -25,7 +25,7 @@ class manipulate_test(object):
         self._asi_com_pub.publish(self._asi_command)  
     def manipulate(self,joints):
         self._asi_command = AtlasSimInterfaceCommand()
-        self._asi_command.behavior = AtlasSimInterfaceCommand.MANIPULATE
+        self._asi_command.behavior = AtlasSimInterfaceCommand.WALK
         self._asi_command.k_effort = [0 for k in self._jnt_names]
         for k in joints:
             self._asi_command.k_effort[k] = 255
@@ -42,22 +42,22 @@ class manipulate_test(object):
         pos2 = -1.0 #-1 # desired position
         dt = 0.05;
         N = 50
-        self.JC.bdi_control()
-        for ratio in linspace(0, 1, N):
-            interpCommand = (1-ratio)*pos1 + ratio * pos2
-            self.JC.set_joint_command(3,1000,10,10,255,interpCommand,0.0)
-            #self.JC.set_joint_command(3+6,1000,10,10,255,interpCommand,0.0)
-            self.JC.send_command()
-            rospy.sleep(dt)
+        # self.JC.bdi_control()
+        # for ratio in linspace(0, 1, N):
+        #     interpCommand = (1-ratio)*pos1 + ratio * pos2
+        #     self.JC.set_joint_command(3,1000,10,10,255,interpCommand,0.0)
+        #     #self.JC.set_joint_command(3+6,1000,10,10,255,interpCommand,0.0)
+        self.JC.send_command()
+            # rospy.sleep(dt)
 
 if __name__ == '__main__':
     rospy.init_node('bdi_test')
     CNT = manipulate_test()
     rospy.sleep(0.5)
-    jnt = [k for k in xrange(16,28)]
-    jnt = [k for k in xrange(0,4)]
-    CNT.manipulate(jnt)
+    jnt = [k for k in xrange(15,27)]
+    jnt.extend([k for k in xrange(0,4)])
     CNT.control_joints()
+    CNT.manipulate(jnt)
 
 
 
