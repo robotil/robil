@@ -8,7 +8,7 @@
 #ifndef PATHPLANNERPARAMETERS_H_
 #define PATHPLANNERPARAMETERS_H_
 
-#define PLANNER_VERSION "2013_06_03_20_30"
+#define PLANNER_VERSION "2013_06_04_14_47"
 
 #define PARAMS_FROM_ROS 1
 #define PARAMS_FROM_CODE 2
@@ -55,21 +55,23 @@
 	ros::param::param<double>("/C31_GlobalPathPlanner/potential_field/maxAngleWhileReducing", (potential_field).viewRadiusForward, Vec2d::d2r(10));\
 	(potential_field).inertia=pow(1/(pf_params.viewRadiusForward*0.5),2);
 
+
 #define SET_WD_PARAMETERS(walls_detector)\
 	ros::param::param<double>("/C31_GlobalPathPlanner/walls_detector/max_alt", (walls_detector).max_alt, 0.45);\
 	ros::param::param<double>("/C31_GlobalPathPlanner/walls_detector/costTL", (walls_detector).costTL, 0.05);\
 	ros::param::param<double>("/C31_GlobalPathPlanner/walls_detector/costLL", (walls_detector).costLL, 0.0);
+
 
 #define SET_BS_PARAMETERS(AStarSearch)\
 	ros::param::param<double>("/C31_GlobalPathPlanner/a_star/w_distance", (AStarSearch).w_distance, 1);\
 	ros::param::param<double>("/C31_GlobalPathPlanner/a_star/w_slop", (AStarSearch).w_slop, 1);\
 	ros::param::param<double>("/C31_GlobalPathPlanner/a_star/w_alt_delta", (AStarSearch).w_alt_delta, 1);
 
+
+#define SET_MD_PARAMETERS(mud_detector)\
+	ros::param::param<int>("/C31_GlobalPathPlanner/mud_detector/wp_number", (mud_detector).wp_number, 5);
+
 #endif
-
-
-
-
 
 #define DO_SMOOTHING
 
