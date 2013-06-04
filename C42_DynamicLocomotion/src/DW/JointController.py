@@ -111,6 +111,27 @@ class JointCommands_msg_handler(object):
           self._command.i_effort_max[i] = self._default_gains[name]['i_clamp']
           self._command.i_effort_min[i] = -self._command.i_effort_max[i]
 
+    def bdi_control(self):
+        self._command.k_effort = [0]*len(self.JointNames)
+
+    def user_control(self):
+        self._command.k_effort = [255]*len(self.JointNames)
+
+    def set_joint_command(self,joint,p,i,d,pos,eff,k_eff=255):
+        self.set_gains(joint,p,i,d,set_default = False)        
+        if type(joint) == int:
+            joint_num = joint
+            joint_name = self.inv_dict[joint_num]
+        elif type(joint) == str:
+            joint_name = joint
+            joint_num = self.Joint_dict[joint]
+        else:
+            raise TypeError
+            return
+        self._command.k_effort[joint_num] = k_eff
+        self._command.position[joint_num] = pos
+        self._command.effort[joint_num] = eff
+
     def set_pos(self,joint, pos):
         if type(joint) == int:
             joint_num = int(joint)
