@@ -15,6 +15,8 @@
 #include <C31_PathPlanner/C31_GetPath.h>
 #include <C31_PathPlanner/C31_Exception.h>
 
+#include <C42_WalkType/mud.h>
+
 using namespace std;
 using namespace C0_RobilTask;
 
@@ -109,6 +111,15 @@ public:
 			c31_PathPublisher.publish(res_path);
 		}
     }
+    void check_for_mud_terrain(ros::Publisher& walk_notification){
+    	//if(walk_notification.getNumSubscribers()>0){
+			ROS_INFO("PUBLISH MUD NOTIFICATION");
+			bool is_mud_detected = check_for_mud_terrain();
+			C42_WalkType::mud mud;
+		if(walk_notification.getNumSubscribers()>0 && is_mud_detected){
+			walk_notification.publish(mud);
+		}
+    }
 
     TaskResult task(const string& name, const string& uid, Arguments& args){
     	//ros::this_node::getName()
@@ -134,6 +145,11 @@ public:
     	ros::Publisher c31_Exception =
     			_node.advertise<C31_PathPlanner::C31_Exception>("/path/exceptions", 10);
     	this->c31_Exception= &c31_Exception;
+
+    	ROS_INFO("advertise topic /walk_notification/mud <C42_WalkType::mud>");
+    	ros::Publisher C42_walk_notification_mud =
+    			_node.advertise<C42_WalkType::mud>("/walk_notification/mud", 10);
+
 
 		//TASK INPUT CHANNELS
     	ROS_INFO("subscribe to service /C22 <C22_GroundRecognitionAndMapping::C22>");
@@ -197,6 +213,7 @@ public:
 					ROS_INFO("%s: plan path", _name.c_str());
 					if( _planner.plan() ){
 						publish_new_plan(c31_PathPublisher);
+						check_for_mud_terrain(C42_walk_notification_mud);
 					}else{
 						throw_exception(C31_PathPlanner::C31_Exception::TYPE_NOSOLUTIONFORPLAN, "No solution for plan found.");
 					}
@@ -239,6 +256,19 @@ public:
 		if(c31_Exception) c31_Exception->publish(exc);
 
 		this->_planner.events().push(cast(exc));
+    }
+
+    bool check_for_mud_terrain(){
+    	struct MudDetectorParams{ int wp_number; }md;
+    	SET_MD_PARAMETERS(md);
+
+    	PathPlanning::ReadSession session = _planner.startReading();
+    	for(size_t i=0;i<session.results.path.size() && i<md.wp_number;i++){
+    		const Vec2d& wp = session.results.path[i];
+    		if( session.arguments.map.terrain((size_t)wp.x, (size_t)wp.y) == ObsMap::ST_MUD )
+    			return true;
+    	}
+    	return false;
     }
 
     //=================== NEW DATA REQUESTS ===============================================
@@ -415,6 +445,7 @@ public:
     		GPSPoint pos = extractObjectLocation( *msg );
     		if( fabs(pos.x) > 1000 || fabs(pos.y) > 1000 ){
     			ROS_ERROR("WARNING: Target position is incorrect: (%f,%f)", pos.x, pos.y);
+    			throw_exception(C31_PathPlanner::C31_Exception::TYPE_TARGETPOSITIONINCORRECT, "Target position is incorrect. use previous one.");
     		}
     		else onNewTargetLocation( pos );
     	}
