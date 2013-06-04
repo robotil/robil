@@ -491,17 +491,17 @@ public class Document extends JPanel {
 		// Arrows
 		for (GElement arrow : sourceArrows) {
 			ArrayList<GElement> clonedTargets = new ArrayList<GElement>();
+			ArrayList<GElement> clonedDecorators = new ArrayList<GElement>();
 			
 			if (!clonedElements.containsKey(arrow.getAsArrow().source))
 				continue;
-			
-			GElement decorator = null;
-			
+
 			for (GElement target : arrow.getAsArrow().targets)
 				if (clonedElements.containsKey(target))
 					clonedTargets.add(clonedElements.get(target));
-				else if (target.isDecorator())
-					decorator = target.clone();
+				else if (target.isDecorator() || target.isJoint())
+					// decorator = target.clone();
+					clonedDecorators.add(target.clone());
 				else
 					continue;
 			
@@ -509,8 +509,9 @@ public class Document extends JPanel {
 				clonedElements.get(arrow.getAsArrow().source), 
 				clonedTargets);
 			
-			if (decorator != null) {
-				clonedArrow.add(0, decorator);
+			int i = 0;
+			for (GElement decorator : clonedDecorators) {
+				clonedArrow.add(i++, decorator);
 				outElements.add(decorator);
 			}
 			
@@ -805,10 +806,10 @@ public class Document extends JPanel {
 				GElement nge = null;
 				if (Parameters.enableLinkConnection
 						&& e.hasAttribute("id")
-						&& this.loadedElements.containsKey(UUID.fromString(
-								e.getAttribute("id")).toString())) {
-					nge = this.loadedElements.get(UUID.fromString(
-							e.getAttribute("id")).toString());
+						&& this.loadedElements.containsKey(UUID.fromString(e.getAttribute("id")).toString())) {
+					
+					nge = this.loadedElements.get(UUID.fromString(e.getAttribute("id")).toString());
+					
 					if (ge == null) {
 						loadPlan(e, nge);
 					} else if (ge instanceof Arrow) {
@@ -818,6 +819,7 @@ public class Document extends JPanel {
 						se = nge;
 						loadPlan(e, se);
 					}
+					
 				} else {
 					String nodeName = e.getNodeName().toLowerCase();
 					if (ge == null) {
@@ -848,10 +850,8 @@ public class Document extends JPanel {
 							((Task) nge).text = e.getAttribute("name");
 						}
 						if (e.hasAttribute("x") && e.hasAttribute("y")) {
-							this.lastX = nge.getProperty().location.x = Double
-									.parseDouble(e.getAttribute("x"));
-							this.lastY = nge.getProperty().location.y = Double
-									.parseDouble(e.getAttribute("y"));
+							this.lastX = nge.getProperty().location.x = Double.parseDouble(e.getAttribute("x"));
+							this.lastY = nge.getProperty().location.y = Double.parseDouble(e.getAttribute("y"));
 						} else {
 							this.lastX = nge.getProperty().location.x = this.lastX + 20;
 							this.lastY = nge.getProperty().location.y = this.lastY;
@@ -886,7 +886,8 @@ public class Document extends JPanel {
 							Arrow a = (Arrow) ge;
 							nge = new Joint();
 							a.add(nge);
-							loadPlan(e, ge);
+							se = ge;
+							// loadPlan(e, ge);
 						} else if (nodeName.equals("dec")
 								|| nodeName.equals("decorator")) {
 							Arrow a = (Arrow) ge;
