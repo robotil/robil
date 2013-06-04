@@ -38,7 +38,7 @@
 #include <C21_VisionAndLidar/C21_obj.h>
 #include <math.h>
 #include <std_srvs/Empty.h>
-
+#include <ros/package.h>
 
 
 #define MIN(x,y) (x < y ? x : y)
@@ -46,7 +46,7 @@
 
 
 
-bool C23_Detector::pictureCoordinatesToGlobalPosition(int x1, int y1, int x2, int y2, int* x, int* y, int *z) {
+bool C23_Detector::pictureCoordinatesToGlobalPosition(int x1, int y1, int x2, int y2, double* x, double* y, double*z) {
     C21_VisionAndLidar::C21_obj c21srv;
     c21srv.request.sample.x1 = x1;
     c21srv.request.sample.y1 = y1;
@@ -65,7 +65,7 @@ bool C23_Detector::pictureCoordinatesToGlobalPosition(int x1, int y1, int x2, in
     
 }
 
-bool C23_Detector::pointCloudCoordinatesToGlobalPosition(int x, int y, int z, int* px, int* py, int *pz) {
+bool C23_Detector::pointCloudCoordinatesToGlobalPosition(int x, int y, int z, double* px, double* py, double *pz) {
     C21_VisionAndLidar::C21_obj c21srv;
     c21srv.request.sample.x1 = x;
     c21srv.request.sample.y1 = z;
@@ -84,20 +84,22 @@ bool C23_Detector::pointCloudCoordinatesToGlobalPosition(int x, int y, int z, in
     
 }
 
-bool C23_Detector::averagePointCloud(int x1, int y1, int x2, int y2, const sensor_msgs::PointCloud2::ConstPtr &cloud, int* px, int* py, int *pz) {
+bool C23_Detector::averagePointCloud(int x1, int y1, int x2, int y2, const sensor_msgs::PointCloud2::ConstPtr &cloud, double* px, double* py, double *pz) {
     
     
     int xMin=std::min(x1,x2);
     int yMin=std::min(y1,y2);
     int xMax=std::max(x1,x2);
     int yMax=std::max(y1,y2);
-    int tmp_x,tmp_y,tmp_z;
+    double tmp_x = 0;
+    double tmp_y =0;
+    double tmp_z  =0;
     pcl::PointCloud<pcl::PointXYZ>detectionCloud;
     pcl::fromROSMsg<pcl::PointXYZ>(*cloud,detectionCloud);
-    double x=0;
-    double y=0;
-    double z=0;
-    double counter=0;
+    double _x=0;
+    double _y=0;
+    double _z=0;
+    int counter=0;
     pcl::PointCloud<pcl::PointXYZ> t;
     pcl::PointXYZ p;
     for(int i=xMin;i<=xMax;i++) {
@@ -106,33 +108,51 @@ bool C23_Detector::averagePointCloud(int x1, int y1, int x2, int y2, const senso
             if(p.x!=p.x)
                 continue;
             //if(p.x>0.3 && p.y>0.3) {
-               
-                break;
+	      //cout<<"Here"<<endl;
+	      _x+=p.x;
+	      _y+=p.y;
+	      _z+=p.z;
+	      
+	     // cout<<"x,y,z: "<<x<<", "<<y<<", "<<z<<endl;
+	      //cout<<"px, py, pz: "<<p.x<<", "<<p.y<<", "<<p.z<<endl;
+	      counter++;   
+             //   break;
               //  cout << "Found a fucking point" << endl;
           //  }
         }
     }
-    
-    
-  //  tmp_x=((double)x)/(counter);
-   // tmp_y=((double)y)/(counter);
-  //  tmp_z=((double)z)/(counter);
-    cout << "Point is: " << p.x << "," << p.y << "," << p.z << endl;
+    cout<<"Counter: "<<counter<<endl;
+   //Calculate the average point
+   tmp_x=_x/(counter);
+   tmp_y=_y/(counter);
+   tmp_z=_z/(counter);
+   
+    cout << "Point is: " << tmp_x << "," <<tmp_y << "," << tmp_z << endl;
     C21_VisionAndLidar::C21_obj c21srv;
-  
-    c21srv.request.sample.x1 = p.x;
-    c21srv.request.sample.y1 = p.z;
-    c21srv.request.sample.x2 = p.y;
-    c21srv.request.sample.y2 = 0;
     
-    if(c21client.call(c21srv))
+    if(_target==HANDBRAKE || _target == INSIDE_STEERINGWHEEL || _target ==GEAR)
     {
-        if(px != NULL) *px = round(c21srv.response.point.x);
-        if(py != NULL) *py = round(c21srv.response.point.y);
-        if(pz != NULL) *pz = round(c21srv.response.point.z);
-        cout << "Received data: " << c21srv.response.point.x << "," << c21srv.response.point.y << "," << c21srv.response.point.z << endl;
-        return true;
+      *px = tmp_x;
+      *py = tmp_y;
+      *pz = tmp_z;
+      
     }
+    else{
+       c21srv.request.sample.x1 = tmp_x;
+      c21srv.request.sample.x2 =tmp_y;
+      c21srv.request.sample.y1 =tmp_z;
+      c21srv.request.sample.y2 = 0;
+      
+      if(c21client.call(c21srv))
+      {
+	if(px != NULL) *px = round(c21srv.response.point.x);
+	if(py != NULL) *py = round(c21srv.response.point.y);
+	if(pz != NULL) *pz = round(c21srv.response.point.z);
+	cout << "Received data: " << c21srv.response.point.x << "," << c21srv.response.point.y << "," << c21srv.response.point.z << endl;
+	return true;
+      }
+    }
+    
     return false;
 }
     
@@ -342,7 +362,7 @@ bool C23_Detector::takePictures(Mat srcImg){
 
 
 //Use for template matching with the car
-bool C23_Detector::templateMatching( Mat img, Mat templ, int matching_method, cv::Point *matchLoc)
+bool C23_Detector::templateMatching( Mat img, Mat templ, int matching_method, cv::Point *matchLoc, const sensor_msgs::PointCloud2::ConstPtr &cloud)
 {
     // Source image to display
     Mat img_display;
@@ -375,7 +395,19 @@ bool C23_Detector::templateMatching( Mat img, Mat templ, int matching_method, cv
     rectangle( img_display, *matchLoc, cv::Point( matchLoc->x + templ.cols , matchLoc->y + templ.rows ), Scalar::all(0), 2, 8, 0 );
     //rectangle( result, matchLoc, cv::Point( matchLoc.x + templ.cols , matchLoc.y + templ.rows ), Scalar::all(0), 2, 8, 0 );
     
-    pictureCoordinatesToGlobalPosition(matchLoc->x,matchLoc->y,matchLoc->x + templ.cols,matchLoc->y + templ.rows,&x,&y,NULL);
+    cout<<" Before Gear x,y,z: "<<x<<", "<<y<<", "<<z<<endl;
+    averagePointCloud(matchLoc->x, matchLoc->y, matchLoc->x + templ.cols, matchLoc->y + templ.rows, cloud, &x, &y, &z); 
+    
+    if (_target==HANDBRAKE){
+      //Offset from the gear to the handbrake
+      cout<<" Gear x,y,z: "<<x<<", "<<y<<", "<<z<<endl;
+      x = x - 0.03;
+      y = y + 0.09;
+      z = z - 0.03;
+      cout<<"Handbrake x,y,z: "<<x<<", "<<y<<", "<<z<<endl;
+    }
+      
+    //pictureCoordinatesToGlobalPosition(matchLoc->x,matchLoc->y,matchLoc->x + templ.cols,matchLoc->y + templ.rows,&x,&y,NULL);
     
     //imshow( "Source Image", img_display );
     //waitKey(0);
@@ -390,11 +422,25 @@ bool C23_Detector::detectSteeringWheel(Mat srcImg,const sensor_msgs::PointCloud2
     bool res = false;
     if (location==0)//Robot is inside the car
 {
+  
+      //------------------------------------------------------------------
+      // Load the object templates specified in the object_templates.txt file
+      char basePath[1000],imageName[1000];
+
+      sprintf(basePath,"%s/template_matching_images/%c",ros::package::getPath("C23_ObjectRecognition").c_str(),'\0');
+
+      sprintf(imageName,"%s/steering_wheel_template_qual.jpg%c",basePath,'\0');
+      std::cout<<imageName<<endl;
+    //-----------------------------------------------------------------
+  
+  
     //Load the image template for the steering wheel
-    Mat steeringwheelTemplate = imread("template_matching_images/steering_wheel_template_qual.jpg");
-    res  = templateMatching(srcImg, steeringwheelTemplate, 1, &matchLoc);
-    //imshow("Steering wheel template", steeringwheelTemplate);
-    //waitKey(0);
+    Mat steeringwheelTemplate = imread(imageName);
+    res  = templateMatching(srcImg, steeringwheelTemplate, 1, &matchLoc, cloud);
+    
+    
+    imshow("Steering wheel template", steeringwheelTemplate);
+    waitKey(0);
 }
 else{
     //Robot is outside the car
@@ -414,13 +460,30 @@ return res;
 bool C23_Detector::detectHandbrake(Mat srcImg,const sensor_msgs::PointCloud2::ConstPtr &cloud,int location){
     cv::Point matchLoc;
     //Load the image template for the steering wheel
-    Mat gearTemplate = imread("template_matching_images/gear_template_qual.jpg");
+    //------------------------------------------------------------------
+      // Load the object templates specified in the object_templates.txt file
+      char basePath[1000],imageName[1000];
+
+      sprintf(basePath,"%s/template_matching_images/%c",ros::package::getPath("C23_ObjectRecognition").c_str(),'\0');
+
+      sprintf(imageName,"%s/gear_template_qual.jpg%c",basePath,'\0');
+      std::cout<<imageName<<endl;
+    //-----------------------------------------------------------------
+    
+    
+    Mat gearTemplate = imread(imageName);
+    
+
+    
     //imshow("Hand brake template", handbrakeTemplate);
     //waitKey(0);
     
-    bool res =  templateMatching(srcImg, gearTemplate, 1, &matchLoc);
+    bool res =  templateMatching(srcImg, gearTemplate, 1, &matchLoc, cloud);
     
-    cout<<"Coordinates: "<<matchLoc.x<<", "<<matchLoc.y<<endl;
+    imshow("New Src Image", gearTemplate);
+    waitKey();
+    
+   /* cout<<"Coordinates: "<<matchLoc.x<<", "<<matchLoc.y<<endl;
     const int OFFSET = 100;
     matchLoc.x = matchLoc.x - OFFSET;
     int y1 = gearTemplate.rows;
@@ -434,11 +497,8 @@ bool C23_Detector::detectHandbrake(Mat srcImg,const sensor_msgs::PointCloud2::Co
     Mat newSrcImg(srcImg,rect);
     //imshow("New Src Image", newSrcImg);
     //waitKey();
-    res =  templateMatching(newSrcImg, handbrakeTemplate, 1, &matchLoc);
-    
-    
-    
-    
+    res =  templateMatching(newSrcImg, handbrakeTemplate, 1, &matchLoc, cloud);*/
+ 
     return res;
 }
 
@@ -446,11 +506,21 @@ bool C23_Detector::detectHandbrake(Mat srcImg,const sensor_msgs::PointCloud2::Co
 bool C23_Detector::detectGear(Mat srcImg,const sensor_msgs::PointCloud2::ConstPtr &cloud,int location){
     cv::Point matchLoc;
     //Load the image template for the steering wheel
-    Mat gearTemplate = imread("template_matching_images/gear_template_qual.jpg");
-    //imshow("Gear template", gearTemplate);
-    //waitKey(0);
+        //------------------------------------------------------------------
+      // Load the object templates specified in the object_templates.txt file
+      char basePath[1000],imageName[1000];
+
+      sprintf(basePath,"%s/template_matching_images/%c",ros::package::getPath("C23_ObjectRecognition").c_str(),'\0');
+
+      sprintf(imageName,"%s/gear_template_qual.jpg%c",basePath,'\0');
+      std::cout<<imageName<<endl;
+    //-----------------------------------------------------------------
     
-    bool res  = templateMatching(srcImg, gearTemplate, 1, &matchLoc);
+    Mat gearTemplate = imread(imageName);
+    imshow("Gear template", gearTemplate);
+    waitKey(0);
+    
+    bool res  = templateMatching(srcImg, gearTemplate, 1, &matchLoc, cloud);
     
     
     return res;
@@ -1641,7 +1711,7 @@ bool C23_Detector::detectGate(Mat srcImg, const sensor_msgs::PointCloud2::ConstP
           circle( srcImg, a, 16, Scalar(0,0,255), -1, 8, 0 );
           imshow("TESTING",srcImg);
           waitKey(0);
-          int x1,y1,z1,x2,y2,z2;
+          double x1,y1,z1,x2,y2,z2;
           averagePointCloud(mcL[biggstL].x-10, mcL[biggstL].y-100, mcL[biggstL].x+10, mcL[biggstL].y+100, cloud, &x1, &y1,&z1);
           averagePointCloud(mcR[biggstR].x-10, mcR[biggstR].y-100, mcR[biggstR].x+10, mcR[biggstR].y+100, cloud, &x2, &y2,&z2);
           
