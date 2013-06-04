@@ -59,8 +59,8 @@ class WalkingModeBDI(WalkingMode):
         WalkingMode.Initialize(self)
         # Subscriber
         self._Subscribers["Path"] = rospy.Subscriber('/path',C31_Waypoints,self._path_cb)
-        #self._Subscribers["Odometry"] = rospy.Subscriber('/C25/publish',C25C0_ROP,self._odom_cb) #
-        self._Subscribers["Odometry"] = rospy.Subscriber('/ground_truth_odom',Odometry,self._odom_cb) 
+        self._Subscribers["Odometry"] = rospy.Subscriber('/C25/publish',C25C0_ROP,self._odom_cb) #
+        # self._Subscribers["Odometry"] = rospy.Subscriber('/ground_truth_odom',Odometry,self._odom_cb) 
         self._Subscribers["ASI_State"]  = rospy.Subscriber('/atlas/atlas_sim_interface_state', AtlasSimInterfaceState, self.asi_state_cb)
         self._Subscribers["IMU"]  = rospy.Subscriber('/atlas/imu', Imu, self._get_imu)
         rospy.sleep(0.3)
@@ -169,8 +169,8 @@ class WalkingModeBDI(WalkingMode):
 
     def _odom_cb(self,odom):
         # SHOULD USE:
-        #self._LPP.UpdatePosition(odom.pose.pose.pose.position.x,odom.pose.pose.pose.position.y) # from C25_GlobalPosition
-        self._LPP.UpdatePosition(odom.pose.pose.position.x,odom.pose.pose.position.y) # from /ground_truth_odom
+        self._LPP.UpdatePosition(odom.pose.pose.pose.position.x,odom.pose.pose.pose.position.y) # from C25_GlobalPosition
+        #self._LPP.UpdatePosition(odom.pose.pose.position.x,odom.pose.pose.position.y) # from /ground_truth_odom
         #self._odom_position = odom.pose.pose
  
     def _get_imu(self,msg):  #listen to /atlas/imu/pose/pose/orientation
