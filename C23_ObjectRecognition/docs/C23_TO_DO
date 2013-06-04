@@ -28,5 +28,9 @@ C23_ObjectRecogition TO DO
 3. Detect the steeringwheel while the robot is standing near the car (In standard position)
 4. Perform tests at different angles to see how well each detection performs
 5. For inside steeringwheel, handbrake, and gears, send robot coordinates
+6. Identify pedals
+7. Make workspace paths relative
+8. Detect the state of the gears (lower)
+9. GLOBAL POSITION
 
 

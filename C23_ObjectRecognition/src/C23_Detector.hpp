@@ -59,7 +59,10 @@ typedef enum targets {
   OUTSIDE_STEERINGWHEEL,
   HANDBRAKE,
   GEAR,
-  PUSHBUTTON,
+  FORWARD_GEAR,
+  REVERSE_GEAR,
+  BRAKE_PEDAL,
+  GAS_PEDAL,  
   NONE
 } TARGETS;
 
@@ -71,8 +74,9 @@ public:
 	void callback(const sensor_msgs::ImageConstPtr& msg,const sensor_msgs::PointCloud2::ConstPtr &cloud);
 public:
 	bool is_search;
-	int x;
-	int  y;
+	double x;
+	double y;
+	double z;
 	int width;
 	int height;
 private:
@@ -89,15 +93,16 @@ private:
     bool detectSteeringWheel(Mat srcImg,const sensor_msgs::PointCloud2::ConstPtr &cloud,int location);
     bool detectHandbrake(Mat srcImg,const sensor_msgs::PointCloud2::ConstPtr &cloud,int location);
     bool detectGear(Mat srcImg,const sensor_msgs::PointCloud2::ConstPtr &cloud,int location);
+    bool detectGearStatus(Mat srcImg,const sensor_msgs::PointCloud2::ConstPtr &cloud,int location);
     
-    bool pictureCoordinatesToGlobalPosition(int x1, int y1, int x2, int y2, int* x, int* y, int *z);
-    bool pointCloudCoordinatesToGlobalPosition(int x, int y, int z, int* px, int* py, int *pz);
-    bool averagePointCloud(int x1, int y1, int x2, int y2, const sensor_msgs::PointCloud2::ConstPtr &detectionCloud, int* px, int* py, int *pz) ;
+    bool pictureCoordinatesToGlobalPosition(int x1, int y1, int x2, int y2, double * x, double* y, double*z);
+    bool pointCloudCoordinatesToGlobalPosition(int x, int y, int z, double* px, double* py, double*pz);
+    bool averagePointCloud(int x1, int y1, int x2, int y2, const sensor_msgs::PointCloud2::ConstPtr &detectionCloud, double* px, double* py, double *pz) ;
         
         
 	ros::NodeHandle nh;
     bool takePictures(Mat srcImg);
-    bool templateMatching( Mat img, Mat templateImage, int matching_method, cv::Point *matchLoc=NULL);
+    bool templateMatching( Mat img, Mat templateImage, int matching_method, cv::Point *matchLoc, const sensor_msgs::PointCloud2::ConstPtr &cloud);
 
 	ros::Publisher objectDetectedPublisher;
   ros::Publisher objectDeminsionsPublisher;
