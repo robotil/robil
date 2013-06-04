@@ -8,11 +8,40 @@ from RobilTaskPy import *
 
 		
 class AnomalyDetector(RobilTask):
-	runtimes_success = {}
-	tasks_start_time = {}
+	runtimes_success = {}	#holds for every node, all the execution times when succeeded.
+	runtimes_failure = {}	#holds for every node, all the execution times when failed.
+	tasks_start_time = {}	#holds for every node, the current start time of that node.
 	
-	def callback(self, msg):
-		runtimes_success["johny"].
+def callback(self, msg):
+    current_time = rospy.get_time()
+    finished_execution_tree = data.data.find("node=Unknown()") > -1
+    if finished_execution_tree:
+        return
+    code = data.data[data.data.find("code=")+5]
+    node_id = data.data[data.data.find("[id=")+4 : data.data.find("]", data.data.find("[id=")+4)]
+    node_success = data.data.find("OK") > -1
+    print "-------------------------------------"
+    print code, node_id, node_success        
+    print "-------------------------------------"
+    if code == "0":		#task has begun
+        AnomalyDetector.tasks_start_time[node_id] = current_time
+    else:
+        runtime = current_time-AnomalyDetector.tasks_start_time[node_id]
+        if not AnomalyDetector.tasks_start_time.has_key(node_id):                   
+            return
+        else:
+            if node_success:
+                if AnomalyDetector.runtimes_success.has_key(node_id):
+                    AnomalyDetector.runtimes_success[node_id].append(runtime)
+                else:
+                    AnomalyDetector.runtimes_success[node_id] = [runtime]
+            else:
+                if AnomalyDetector.runtimes_failure.has_key(node_id):
+                    AnomalyDetector.runtimes_failure[node_id].append(runtime)
+                else:
+                    AnomalyDetector.runtimes_failure[node_id] = [runtime]
+ 
+
 	
 	def __init__(self, name):
 		print "Initializing AnomalyDetector Node"
@@ -23,19 +52,14 @@ class AnomalyDetector(RobilTask):
 		print "Start Anomaly Detection." 
 		#print parameters
 		d = rospy.Duration(1,0)
-		
-		DrivingMonitor.init_time = rospy.get_time()
-		DrivingMonitor.started_task = True
-		while not DrivingMonitor.detected_problem:	
-			#print DrivingMonitor.detected_problem
+		while True:	
 			if self.isPreepted():
-				print "Preempt driving monitoring task"
+				print "Preempt Anomaly detector task"
 				return RTResult_PREEPTED()
 			rospy.sleep(d)
-		print "detected problem in driving module! EXITING..."
-		DrivingMonitor.detected_problem = False
+		print "EXITING anomaly detector task..."
 		error_code = RobilTask_FAULT + 1
-		return RTResult_ABORT(error_code,"Driving Monitor detected a problem. "+str(error_code));
+		return RTResult_ABORT(error_code,"Anomaly detector is exiting. "+str(error_code));
 		#return RTResult_SUCCESSED("Finished in Success")
       
 if __name__ == '__main__':
