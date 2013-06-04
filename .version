@@ -1,4 +1,4 @@
-V0.0.1.15
+V0.0.1.16
 ===========================================================
 C0_RobilTask     		0.5
 C0_Scripts     		        0.25
@@ -24,10 +24,10 @@ C41_BodyControl     		0.1
 C41_QuasiStaticWalking     	0.9
 C41_QuasiStaticWalking_tools     0.11
 C42_DRCSim2_tools     		0.2
-C42_DynamicLocomotion     	0.9
+C42_DynamicLocomotion     	0.10
 C42_Leg_IK     			0.3
 C42_ZMPWalk     		0.8
-C43_LocalBodyCOM     		0.1
+C43_LocalBodyCOM     		0.2
 C43_LocalBodyCOM_tools     	0.1
 C43_LocalBodyPVA     		0.2
 C45_PostureControl     		0.10
