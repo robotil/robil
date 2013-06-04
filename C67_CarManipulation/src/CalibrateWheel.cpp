@@ -43,6 +43,7 @@ static const unsigned int numJoints = 28;
 
 static RPY argTarget;
 static double angle = 0;
+static bool rightHand;
 static bool callBackRun = false;
 //end added
 
@@ -210,6 +211,12 @@ public:
 		if( exists(args,"Y") ){
 			argTarget.Y = cast<double>(args["Y"]);
 		}
+		rightHand = false;
+		if( exists(args,"Hand") ){
+			if (cast<string>(args["Hand"]) == "right")
+				rightHand = true;
+		}
+
 
 		if (!exists(args,"operation"))
 		{
@@ -221,11 +228,23 @@ public:
 		//open hand
 		sandia_srv.request.grasp.name = "cylindrical";
 		sandia_srv.request.grasp.closed_amount = 0.0;
-		if (!lsandia_client.call(sandia_srv))
+		if (rightHand == false)
 		{
-			ROS_INFO("%s: Sandia Hand Service Call Failed!", _name.c_str());
-			retValue  = SandiaCallFail;
-			return TaskResult(retValue, "ERROR");
+			if (!lsandia_client.call(sandia_srv))
+			{
+				ROS_INFO("%s: Sandia Hand Service Call Failed!", _name.c_str());
+				retValue  = SandiaCallFail;
+				return TaskResult(retValue, "ERROR");
+			}
+		}
+		else
+		{
+			if (!rsandia_client.call(sandia_srv))
+			{
+				ROS_INFO("%s: Sandia Hand Service Call Failed!", _name.c_str());
+				retValue  = SandiaCallFail;
+				return TaskResult(retValue, "ERROR");
+			}
 		}
 		ros::Duration(1).sleep();
 
@@ -248,19 +267,36 @@ public:
 				ROS_INFO("Call Back Entered.");
 				//IkSolution IkCurrent = IkSolution(as.position[q4r], as.position[q5r], as.position[q6r], as.position[q7r],
 				//					as.position[q8r], as.position[q9r]);
-				IkSolution IkCurrent = IkSolution(as.position[q4l], as.position[q5l], as.position[q6l], as.position[q7l],
-									as.position[q8l], as.position[q9l]);
+				IkSolution IkCurrent;
 				//back in 5 centimeter
 				//argTarget.x -= 0.05;
-				RPY argTarget2 = TraceAngle(argTarget, RPY(-.05,.18,0,M_PI/2-M_PI/6, 0,0), angle);
-				RPY argTarget3 = TraceAngle(argTarget, RPY(-.05,.3,0,M_PI/2-M_PI/6, 0,0), angle);
-				//argTarget2.Print();
-				IkSolution IkNext = lScanRPY(as.position[q1], as.position[q2], as.position[q3], argTarget2,0.01);
+				RPY argTarget2, argTarget3;
+				if (rightHand == false)
+				{
+					IkCurrent = IkSolution(as.position[q4l], as.position[q5l], as.position[q6l], as.position[q7l],
+						as.position[q8l], as.position[q9l]);
+					argTarget2 = TraceAngle(argTarget, RPY(-.05,.18,0,M_PI/2-M_PI/6, 0,0), angle);
+					argTarget3 = TraceAngle(argTarget, RPY(-.05,.3,0,M_PI/2-M_PI/6, 0,0), angle);
+				}
+				else
+				{
+					IkCurrent = IkSolution(as.position[q4r], as.position[q5r], as.position[q6r], as.position[q7r],
+						as.position[q8r], as.position[q9r]);
+					argTarget2 = TraceAngle(argTarget, RPY(-.05,.18,0,+M_PI/2 +M_PI/6, 0,0), angle);
+					argTarget3 = TraceAngle(argTarget, RPY(-.05,.3,0,+M_PI/2 +M_PI/6, 0,0), angle);
+				}
+				IkSolution IkNext, IkNext2;
+				if (rightHand == false)
+				{
+					IkNext = lScanRPY(as.position[q1], as.position[q2], as.position[q3], argTarget2,0.01);
+					IkNext2 = lScanRPY(as.position[q1], as.position[q2], as.position[q3], argTarget3,0.01);
+				}
+				else
+				{
+					IkNext = rScanRPY(as.position[q1], as.position[q2], as.position[q3], argTarget2,0.01);
+					IkNext2 = rScanRPY(as.position[q1], as.position[q2], as.position[q3], argTarget3,0.01);
 
-				//back to origin
-				//argTarget.x += 0.05;
-				IkSolution IkNext2 = lScanRPY(as.position[q1], as.position[q2], as.position[q3], argTarget3,0.01);
-
+				}
 				if ((!IkNext.valid)||(!IkNext2.valid)){
 					ROS_INFO("%s: No Solution!", _name.c_str());
 					retValue  = NoSolution;
@@ -268,16 +304,33 @@ public:
 				}
 				if (operation == 1)//Hold
 				{
-					// move near target
-					lMove(IkCurrent, IkNext2, 2.0, 100);
-					lMove(IkNext2, IkNext, 1.0, 50);
-					sandia_srv.request.grasp.name = "prismatic";
-					sandia_srv.request.grasp.closed_amount = 1.0;
-					if (!lsandia_client.call(sandia_srv))
+					if(rightHand == false)
 					{
-						ROS_INFO("%s: Sandia Hand Service Call Failed!", _name.c_str());
-						retValue  = SandiaCallFail;
-						return TaskResult(retValue, "ERROR");
+						// move near target
+						lMove(IkCurrent, IkNext2, 2.0, 100);
+						lMove(IkNext2, IkNext, 1.0, 50);
+						sandia_srv.request.grasp.name = "prismatic";
+						sandia_srv.request.grasp.closed_amount = 1.0;
+						if (!lsandia_client.call(sandia_srv))
+						{
+							ROS_INFO("%s: Sandia Hand Service Call Failed!", _name.c_str());
+							retValue  = SandiaCallFail;
+							return TaskResult(retValue, "ERROR");
+						}
+					}
+					else
+					{
+						// move near target
+						rMove(IkCurrent, IkNext2, 2.0, 100);
+						rMove(IkNext2, IkNext, 1.0, 50);
+						sandia_srv.request.grasp.name = "prismatic";
+						sandia_srv.request.grasp.closed_amount = 1.0;
+						if (!rsandia_client.call(sandia_srv))
+						{
+							ROS_INFO("%s: Sandia Hand Service Call Failed!", _name.c_str());
+							retValue  = SandiaCallFail;
+							return TaskResult(retValue, "ERROR");
+						}
 					}
 					ros::Duration(1).sleep();
 					//Move(IkNext, IkNext2, 1.0, 50);
@@ -288,7 +341,10 @@ public:
 				}
 				else
 				{
-					lMove(IkCurrent, IkNext2, 1.0, 100);
+					if(rightHand == false)
+						lMove(IkCurrent, IkNext2, 1.0, 100);
+					else
+						rMove(IkCurrent, IkNext2, 1.0, 100);
 					ros::Duration(1).sleep();
 					time -= 2000 ;
 				}
