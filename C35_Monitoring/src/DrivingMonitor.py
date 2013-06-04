@@ -4,7 +4,8 @@ import roslib; roslib.load_manifest('C35_Monitoring')
 import rospy
 from RobilTaskPy import *
 from std_msgs.msg import Bool	#Boolean value indicating the robot has fallen.
-from nav_msgs.msg import Odometry
+#from nav_msgs.msg import Odometry
+from C25_GlobalPosition.msg import C25C0_ROP
 import math
 		
 class DrivingMonitor(RobilTask):
@@ -17,12 +18,12 @@ class DrivingMonitor(RobilTask):
 	def callback(self, msg):
 		if DrivingMonitor.started_task:
 		  DrivingMonitor.started_task = False
-		  DrivingMonitor.init_x = msg.pose.pose.position.x
-		  DrivingMonitor.init_y = msg.pose.pose.position.y
+		  DrivingMonitor.init_x = msg.pose.pose.pose.position.x
+		  DrivingMonitor.init_y = msg.pose.pose.pose.position.y
 		  print "Driving monitor got first message."
 		else:  
-		  delta_x = msg.pose.pose.position.x - DrivingMonitor.init_x
-		  delta_y = msg.pose.pose.position.y - DrivingMonitor.init_y
+		  delta_x = msg.pose.pose.pose.position.x - DrivingMonitor.init_x
+		  delta_y = msg.pose.pose.pose.position.y - DrivingMonitor.init_y
 		  elapsed_time = rospy.get_time() - DrivingMonitor.init_time
 		  
 		  if DrivingMonitor.init_x != -1 and DrivingMonitor.init_y != -1 and elapsed_time > 10 and math.fabs(delta_x) < 1 and math.fabs(delta_y) < 1:
@@ -30,7 +31,8 @@ class DrivingMonitor(RobilTask):
 	
 	def __init__(self, name):
 		print "Initializing driving monitoring Node"
-		rospy.Subscriber("/ground_truth_odom", Odometry, self.callback)
+		#rospy.Subscriber("/ground_truth_odom", Odometry, self.callback)
+		rospy.Subscriber('/C25/publish',C25C0_ROP,self.callback) 
 		DrivingMonitor.detected_problem = False
 		RobilTask.__init__(self, name)
 	
