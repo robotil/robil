@@ -4,7 +4,7 @@ C23_ObjectRecogition TO DO
 23/05/2013
 
 1. Add a routine to determine where the passenger and driver sides are (Other than the colour routine)
-2. Identify the square at the back of the car and identify the steering wheel
+2. Identify the square at the back of the car and identify the steering wheel --
 3. Identify the handbreak and pedals
 4. Test identification of these objects at different angles
 5. Implement the neck movements so the robot can scan and look for an objects
@@ -33,7 +33,7 @@ C23_ObjectRecogition TO DO
 8. Detect the state of the gears (lower)
 9. GLOBAL POSITION
 10. Pedals
-
+11. Gate Std::out of range
 
 
 

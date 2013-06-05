@@ -84,6 +84,11 @@ typedef enum targets {
   NONE
 } TARGETS;
 
+typedef enum gear_status{
+ FORWARD_GEAR_STATUS,
+ REVERSE_GEAR_STATUS
+}GEAR_STATUS;
+
 class C23_Detector{
 public:
 	C23_Detector(const char* left_cam, const char* right_cam, const char* pointc);
