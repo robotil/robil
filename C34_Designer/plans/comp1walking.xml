@@ -1,0 +1,15 @@
+<plan descriptions="./plans/TaskDescriptions.xml">
+   <par name="AdvanceByWalkingAlongPath" x="472.7075920026707" y="-84.22372886383008" collapsed="false" id="edaf9a24-552b-4884-8bfb-0adf685550e5"> 
+      <dec name="!L!" x="450.6071379600778" y="17.07841994606676"> 
+            <sel name="PathFollow" x="481.26189986484087" y="180.14191200955815" collapsed="false" id="ab651e54-f6a5-48c0-902b-decac88fe581"> 
+                  <par name="Zmp" x="382.09523319817345" y="258.3085786762265" collapsed="false" id="ee4f6542-ab4d-455d-8efa-1624c30f06bd"> 
+                        <tsk name="DynamicLocomotion" x="269.1745982775375" y="383.38794375558507" test_time="0" test_result="true" id="50426d55-e825-40c1-9ad8-fcca445cd01b" />
+                        <tsk name="WalkingMonitor" x="452.21428571428555" y="388.4999999999999" test_time="0" test_result="true" id="f50b5b1a-d5fb-4a26-a3ac-8fdea5a65bd3" />
+                  </par>
+                  <par name="QS" x="604.984122087059" y="261.19746756511586" collapsed="false" id="18eb043f-9da9-4ab8-b7fe-775f77286fb0"> 
+                        <tsk name="QuasiStaticWalk" x="632.8730109759485" y="353.41968978733166" test_time="0" test_result="true" id="08f5cba1-49f5-47ef-b037-66c0dfb6fac6" />
+                  </par>
+            </sel>
+      </dec>
+   </par>
+</plan>
