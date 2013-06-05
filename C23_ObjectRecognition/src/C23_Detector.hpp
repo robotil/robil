@@ -97,6 +97,15 @@ public:
 	double z;
 	int width;
 	int height;
+    int last_x;
+    int last_y;
+    double orient_x;
+    double orient_y;
+    double orient_z;
+    double orient_P;
+    double orient_Y;
+    double orient_R;
+    pcl::PointCloud<pcl::PointXYZ> lastCloud;
 private:
 
   	bool detectGate(Mat img, const sensor_msgs::PointCloud2::ConstPtr &cloud);
@@ -125,7 +134,8 @@ private:
     bool takePictures(Mat srcImg);
     bool templateMatching( Mat img, Mat templateImage, int matching_method, cv::Point *matchLoc, const sensor_msgs::PointCloud2::ConstPtr &cloud);
     bool templateMatching3D(string templates_file, pcl::PointCloud<pcl::PointXYZ>::Ptr &cloud);
-    pcl::PointCloud<pcl::PointXYZ>::Ptr filterPointCloud(int x,int y, int width, int height, const sensor_msgs::PointCloud2::ConstPtr &cloud2);
+    pcl::PointCloud<pcl::PointXYZ>::Ptr filterPointCloud(int x,int y, int width, int height, const pcl::PointCloud<pcl::PointXYZ> &cloud);
+    void saveTemplate(int x,int y, int width, int height, const sensor_msgs::PointCloud2::ConstPtr &cloud2, string target);
         
 	ros::Publisher objectDetectedPublisher;
   ros::Publisher objectDeminsionsPublisher;
@@ -142,7 +152,7 @@ private:
 	  typedef image_transport::SubscriberFilter ImageSubscriber;
 	  ImageSubscriber left_image_sub_;
 	  message_filters::Subscriber<sensor_msgs::PointCloud2> pointcloud;
-	  tf::TransformListener listener;
+	  tf::TransformListener listener,listener2;
 	  typedef message_filters::sync_policies::ApproximateTime<
 	    sensor_msgs::Image,sensor_msgs::PointCloud2
 	    > MySyncPolicy;
