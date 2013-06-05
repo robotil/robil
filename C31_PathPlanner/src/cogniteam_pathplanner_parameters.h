@@ -49,10 +49,10 @@
 
 #define SET_PF_PARAMETERS(potential_field)\
 	ros::param::param<double>("/C31_GlobalPathPlanner/potential_field/viewRadiusForward", (potential_field).viewRadiusForward, 15);\
-	ros::param::param<double>("/C31_GlobalPathPlanner/potential_field/viewRadiusSide", (potential_field).viewRadiusForward, 4);\
-	ros::param::param<double>("/C31_GlobalPathPlanner/potential_field/stepRate", (potential_field).viewRadiusForward, 0.3);\
-	ros::param::param<double>("/C31_GlobalPathPlanner/potential_field/distanceBetweenPoints", (potential_field).viewRadiusForward, 2);\
-	ros::param::param<double>("/C31_GlobalPathPlanner/potential_field/maxAngleWhileReducing", (potential_field).viewRadiusForward, Vec2d::d2r(10));\
+	ros::param::param<double>("/C31_GlobalPathPlanner/potential_field/viewRadiusSide", (potential_field).viewRadiusSide, 4);\
+	ros::param::param<double>("/C31_GlobalPathPlanner/potential_field/stepRate", (potential_field).stepRate, 0.3);\
+	ros::param::param<double>("/C31_GlobalPathPlanner/potential_field/distanceBetweenPoints", (potential_field).distanceBetweenPoints, 2);\
+	ros::param::param<double>("/C31_GlobalPathPlanner/potential_field/maxAngleWhileReducing", (potential_field).maxAngleWhileReducing, Vec2d::d2r(10));\
 	(potential_field).inertia=pow(1/(pf_params.viewRadiusForward*0.5),2);
 
 
