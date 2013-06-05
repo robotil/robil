@@ -1,4 +1,21 @@
 C66 – Grasp and Release
+
+befor:
+add the: C66_Garsp/launch/vrc_task_3_3.launch   to   usr/share/drcsim-2.6/ros/atlas_utils/launch
+Add the: C66_Grasp/vrc_task_3_3.world           to   usr/share/drcsim-2.6/worlds
+
+
+roslaunch C66_Grasp WithCheats.launch
+
+rostopic pub /atlas/mode std_msgs/String "data: 'nominal'"
+
+python manipulate_msg.py
+
+rosrun C66_Grasp PickUp 
+
+rosrun C67_CarManipulation task_tester PickUp
+
+
 Prerequisites:
 1) None yet
 

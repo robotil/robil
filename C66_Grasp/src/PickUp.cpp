@@ -24,9 +24,10 @@ using namespace C0_RobilTask;
 #include <string>
 #include <vector>
 #include <boost/lexical_cast.hpp>
-#include <C67_CarManipulation/FK.h>
-#include <C67_CarManipulation/IK.h>
-#include <C67_CarManipulation/Path.h>
+#include "FK.h"
+#include "IK.h"
+#include "Path.h"
+#include "Trace.h"
 #include <C23_dFind/perceptionTransform.h>
 #include <C23_ObjectRecognition/C23_orient.h>
 // end added
@@ -120,7 +121,7 @@ public:
 
 	void Move(IkSolution origin, IkSolution goal, double sec, int pointsNum)
 	{
-		pPathPoints points = pPathPoints(origin, goal, pointsNum);
+		pPathPoints points(origin,goal,pointsNum,StartEnd);
 
 		for (int i=0; i<pointsNum; i++)
 		{
@@ -144,7 +145,7 @@ public:
 
 		}
 	}
-	bool getObjectData(string target, double &x, double &y, double &z, double &R, double &P, double &Y) {
+	bool getObjectData(string target, double *x, double *y, double *z, double *R, double *P, double *Y) {
 	    C23_ObjectRecognition::C23_orient c23srv;
 	    c23srv.request.target = target;
 
@@ -167,8 +168,8 @@ public:
 	//Move the three back angles
 	void MoveBack(IkSolution origin, IkSolution goal, double sec, int pointsNum)
 		{
-			pPathPoints points = pPathPoints(origin, goal, pointsNum);
-			ROS_INFO("Moving back to target");
+			pPathPoints points(origin,goal,pointsNum);
+			ROS_INFO("Moving back of the robot to target position");
 			for (int i=0; i<pointsNum; i++)
 			{
 
@@ -223,12 +224,12 @@ public:
 			argTarget.Y = cast<double>(args["Y"]);
 		}
 
-		if (!exists(args,"operation"))
-		{
-			ROS_INFO("%s: No operation Defined!", _name.c_str());
-			retValue  = NoParams;
-			return TaskResult(retValue, "ERROR");
-		}
+//		if (!exists(args,"operation"))
+//		{
+//			ROS_INFO("%s: No operation Defined!", _name.c_str());
+//			retValue  = NoParams;
+//			return TaskResult(retValue, "ERROR");
+//		}
 
 		//open hand
 		sandia_srv.request.grasp.name = "cylindrical";
@@ -275,37 +276,70 @@ public:
 				string target = "Firehose";
 				getObjectData(target,&(argTarget.x), &(argTarget.y), &(argTarget.z), &(argTarget.R), &(argTarget.P), &(argTarget.Y));
 				//since no solution from perception yet, we override it
-				argTarget=RPY(0.46,-0.071,-0.1,-3.14,0.5,1.442);
+				argTarget=RPY(0.52, -0.072657, 0.217362, -3.135264, 0, 1.460349);
+				//argTarget=RPY(0.46,-0.071,-0.2,-3.14,0.0,1.442);
 
 				//Back movement from current to desired:
-				double current_ubx=as.back_ubx;
-				double current_mby=as.back_mby;
-				double current_lbz=as.back_lbz;
-				double desired_ubx=0;
-				double desired_mby=0;
-				double desired_lbz=0;
+				double current_q1=as.position[q1];
+				double current_q2=as.position[q2];
+				double current_q3=as.position[q3];
+				double desired_q1=0.0;
+				double desired_q2=0.0;
+				double desired_q3=0.0;
 
 				//move the back
-				IkSolution current_back=IkSolution(current_ubx,current_mby,current_lbz,0,0,0);
-				IkSolution target_back=IkSolution(desired_ubx,desired_mby,desired_lbz,0,0,0);
+				IkSolution current_back=IkSolution(current_q1, current_q2, current_q3,0,0,0);
+				ROS_INFO("current_back: q1=%f, q2=%f, q3=%f", current_q1, current_q2, current_q3);
+				IkSolution target_back=IkSolution(desired_q1,desired_q2,desired_q3,0,0,0);
 				MoveBack(current_back , target_back , 2 , 100);
 
 				// Find the IK solution for the next solution of the arm
 				RPY arm_offset=RPY(0,0,0,0,0,0); //the offset between the perception point and the desired grasp point
 				// the target position for the arm
-				RPY arm_target=TraceAngle(argTarget,arm_offset,0); //Multiply the transformation matrices from argTarget to arm_offset
-				IkSolution IkNext = rScanRPY(desired_ubx, desired_mby, desired_lbz, argTarget,0.01);
-				if (!IkNext.valid){
+
+				//Multiply the transformation matrices from argTarget to arm_offset
+				RPY arm_target = TraceAngle(argTarget,arm_offset,0.0);
+				arm_target.z += 0.15;
+				IkSolution IkNext0 = rScanRPY(desired_q1,desired_q2,desired_q3, arm_target,0.01);
+				arm_target.z -= 0.18;
+				IkSolution IkNext = rScanRPY(desired_q1,desired_q2,desired_q3, arm_target,0.01);
+				arm_target.z += 0.2;
+				arm_target.x += 0.0;
+				arm_target.R += 0.5;
+				IkSolution IkNext2 = rScanRPY(desired_q1,desired_q2,desired_q3, arm_target,0.01);
+
+				if ((!IkNext0.valid)||(!IkNext.valid)||(!IkNext2.valid)){
 					ROS_INFO("%s: No Solution!", _name.c_str());
 					retValue  = NoSolution;
 					//return TaskResult(retValue, "ERROR");
 				}
+				sandia_srv.request.grasp.name = "cylindrical";
+				sandia_srv.request.grasp.closed_amount = 0.37;
+				if (!sandia_client.call(sandia_srv))
+				{
+					ROS_INFO("%s: Sandia Hand Service Call Failed!", _name.c_str());
+					retValue  = SandiaCallFail;
+					return TaskResult(retValue, "ERROR");
+				}
 
-				// move near target
-				Move(IkCurrent, IkNext, 2.0, 100);
-				//Move(IkNext, IkNext2, 1.0, 50);
 				ros::Duration(1).sleep();
-				//Move(IkNext2, IkNext, 1.0, 50);
+				Move(IkCurrent, IkNext0, 3.0, 100);
+
+				ros::Duration(1).sleep();
+				Move(IkNext0, IkNext, 3.0, 100);
+
+				ros::Duration(2).sleep();
+				//close hand
+				sandia_srv.request.grasp.name = "cylindrical";
+				sandia_srv.request.grasp.closed_amount = 1.0;
+				if (!sandia_client.call(sandia_srv))
+				{
+					ROS_INFO("%s: Sandia Hand Service Call Failed!", _name.c_str());
+					retValue  = SandiaCallFail;
+					return TaskResult(retValue, "ERROR");
+				}
+				ros::Duration(2).sleep();
+				Move(IkNext, IkNext2, 5.0, 100);
 
 				time -= 2000 ;
 				ROS_INFO("%s: Finish movement", _name.c_str());
@@ -390,7 +424,8 @@ void SetAtlasState(const atlas_msgs::AtlasState::ConstPtr &_as)
 		for (unsigned int j=0; j<numJoints; j++)
 		{
 			ac.position[j] = as.position[j];
-			ac.k_effort[j]  = 255;
+			if (((j>=q4r)&&(j<=q9r))||((j>=q4l)&&(j<=q9l))||((j>=q1)&&(j<=q3)))
+				ac.k_effort[j]  = 255;
 			//std::cout << state[j] << " ";
 		}
 	}
@@ -462,7 +497,7 @@ int main(int argc, char **argv)
 
 	//Sandia client
 	sandia_client = rosnode->serviceClient<sandia_hand_msgs::SimpleGraspSrv>("/sandia_hands/r_hand/simple_grasp");
-	perception_transform_cli_ = nh_.serviceClient<C23_dFind::perceptionTransform>("perceptionTransform");
+	//perception_transform_cli_ = nh_.serviceClient<C23_dFind::perceptionTransform>("perceptionTransform");
 
 	ROS_INFO("create task");
 

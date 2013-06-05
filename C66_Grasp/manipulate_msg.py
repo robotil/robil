@@ -37,10 +37,10 @@ if __name__ == '__main__':
     rospy.sleep(0.5)
     #CNT.stand()
     rospy.sleep(2)
-    jnt = [k for k in xrange(15,28)]
-    #jnt.append(0)
-    #jnt.append(1)
-    #jnt.append(2)
+    jnt = range(16,28)
+    jnt.append(0)
+    jnt.append(1)
+    jnt.append(2)
     jnt.append(3)
     CNT.stand(jnt)
 
