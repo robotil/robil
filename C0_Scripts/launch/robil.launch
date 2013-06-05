@@ -2,7 +2,7 @@
 
 	<include file="$(find C45_PostureControl)/launch/C45_PostureControl.launch" />
 
-	<include file="$(find C0_Scripts)/launch/perception_heavy.launch" />
+	<include file="$(find C0_Scripts)/launch/perception_light.launch" />
 	<include file="$(find C0_Scripts)/launch/dm.launch" />
 	<node pkg="C45_PostureControl" type="foot_contact_filter.py" name="C45_PostureControl_foot_contact" output="log" respawn="true" />
 
