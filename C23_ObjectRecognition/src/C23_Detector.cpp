@@ -1137,8 +1137,8 @@ bool C23_Detector::detectFirehoseGrip(Mat srcImg, const sensor_msgs::PointCloud2
     cvtColor(srcImg,imgHSV,CV_BGR2HSV);
     inRange(imgHSV,Scalar(110, 200, 80), Scalar(125, 255, 250),imgThreshed);
     //namedWindow("TESTING");
-   // imshow("TESTING",imgThreshed);
-   // waitKey(0);
+    imshow("TESTING",imgThreshed);
+    waitKey(0);
     // imwrite("test12.jpg",imgThreshed);
     Mat imgDilated;
     Mat element = getStructuringElement( MORPH_ELLIPSE,
@@ -1177,7 +1177,7 @@ bool C23_Detector::detectFirehoseGrip(Mat srcImg, const sensor_msgs::PointCloud2
             
         }
     }
-    if(biggest_size > 50 && biggest_size < 250) {
+    if(biggest_size > 50 && biggest_size < 320) {
         
         
         
@@ -1206,8 +1206,8 @@ bool C23_Detector::detectFirehoseGrip(Mat srcImg, const sensor_msgs::PointCloud2
              *                // ellipse
              *                ellipse( imgThreshed, minEllipse[i], color, 2, 8 );
     }*/
-           // imshow("TESTING",srcImg);
-           // waitKey(0);
+            imshow("TESTING",srcImg);
+            waitKey(0);
             pictureCoordinatesToGlobalPosition(minRect.center.x-100,minRect.center.y+100,minRect.center.x+100,minRect.center.y+100,&x,&y,NULL);
             int x1 = MIN(rect_points[0].x,rect_points[1].x);
             int x2 = MIN(rect_points[2].x,rect_points[3].x);
@@ -1227,8 +1227,8 @@ bool C23_Detector::detectFirehoseGrip(Mat srcImg, const sensor_msgs::PointCloud2
             int max_y = MAX(y1,y2);
             string t = "FireHoseGrip";
             cout << "Saving firehose" << endl;
-           // saveTemplate(min_x,min_y,max_x-min_x,max_y-min_y,cloud,t);
-            //templateMatching3D(t,cloud2);
+            saveTemplate(min_x,min_y,max_x-min_x,max_y-min_y,cloud,t);
+           // templateMatching3D(t,lastCloud);
             last_x = min_x;
             last_y = min_y;
             width = (max_x-min_x);
@@ -2027,14 +2027,47 @@ bool C23_Detector::detectGate(Mat srcImg, const sensor_msgs::PointCloud2::ConstP
             
         }
         //Draw a circle indicating the center of mass on the right pole
-        circle( srcImg, mcR[biggstR], 16, 60, -1, 8, 0 );
+        
         right = true;
+        circle( srcImg, mcR[biggstR], 16, 60, -1, 8, 0 );
+        
         cout << "We found red!" << endl;
-        if (pclcloud.at(mcR[biggstR].x,mcR[biggstR].y).x<50 && pclcloud.at(mcR[biggstR].x,mcR[biggstR].y).y <50 && pclcloud.at(mcR[biggstR].x,mcR[biggstR].y).x !=0)
+        double r_x = 0;
+        double r_y = 0;
+        double r_z = 0;
+        int count = 0;
+        for(int i =-15; i <= 15; i++) {
+            for(int j =-15; j <=15; j++) {
+                if(pclcloud.at(mcR[biggstR].x+i,mcR[biggstR].y+j).x != pclcloud.at(mcR[biggstR].x+i,mcR[biggstR].y+j).x)
+                    continue;
+                count++;
+                r_x+=pclcloud.at(mcR[biggstR].x+i,mcR[biggstR].y+j).x;
+                r_y+=pclcloud.at(mcR[biggstR].x+i,mcR[biggstR].y+j).y;
+                r_z+=pclcloud.at(mcR[biggstR].x+i,mcR[biggstR].y+j).z;
+            }
+        }
+        r_x/=count;
+        r_y/=count;
+        r_z/=count;
+        if (r_x<50 && r_y <50 && r_x !=0)
         {
+            cout << "Red is valid .. " << endl;
+            rightC=pclcloud.at(mcR[biggstR].x,mcR[biggstR].y);
+            rightC.x = r_x;
+            rightC.y = r_y;
+            rightC.z = r_z;
+            
+        } else {
+            cout << "Red isn't valid .. " << pclcloud.at(mcR[biggstR].x,mcR[biggstR].y).x << "," <<  pclcloud.at(mcR[biggstR].x,mcR[biggstR].y).y << "," << endl;
+        }
+       /* if (pclcloud.at(mcR[biggstR].x,mcR[biggstR].y).x<50 && pclcloud.at(mcR[biggstR].x,mcR[biggstR].y).y <50 && pclcloud.at(mcR[biggstR].x,mcR[biggstR].y).x !=0)
+        {
+            cout << "Red is valid .. " << endl;
             rightC=pclcloud.at(mcR[biggstR].x,mcR[biggstR].y);
             
-        }
+        } else {
+            cout << "Red isn't valid .. " << pclcloud.at(mcR[biggstR].x,mcR[biggstR].y).x << "," <<  pclcloud.at(mcR[biggstR].x,mcR[biggstR].y).y << "," << endl;
+        }*/
     }
     
     
@@ -2069,12 +2102,39 @@ bool C23_Detector::detectGate(Mat srcImg, const sensor_msgs::PointCloud2::ConstP
             
         }
         left = true;
-        cout << "Left is true! " << endl;
-        circle( srcImg, mcL[biggstL], 16, Scalar(0,0,255), -1, 8, 0 );
-        if (pclcloud.at(mcL[biggstL].x,mcL[biggstL].y).x<50 && pclcloud.at(mcL[biggstL].x,mcL[biggstL].y).y <50 && pclcloud.at(mcL[biggstL].x,mcL[biggstL].y).x !=0)
+      //  cout << "Left is true! " << endl;
+        double l_x = 0;
+        double l_y = 0;
+        double l_z = 0;
+       int  count = 0;
+        for(int i =-15; i <= 15; i++) {
+            for(int j =-15; j <=15; j++) {
+                if(pclcloud.at(mcR[biggstR].x+i,mcR[biggstR].y+j).x != pclcloud.at(mcR[biggstR].x+i,mcR[biggstR].y+j).x)
+                    continue;
+                count++;
+                l_x+=pclcloud.at(mcR[biggstR].x+i,mcR[biggstR].y+j).x;
+                l_y+=pclcloud.at(mcR[biggstR].x+i,mcR[biggstR].y+j).y;
+                l_z+=pclcloud.at(mcR[biggstR].x+i,mcR[biggstR].y+j).z;
+            }
+        }
+        l_x/=count;
+        l_y/=count;
+        l_z/=count;
+        if (l_x<50 && l_y <50 && l_z !=0)
+        {
+            cout << "Blue is valid .. " << endl;
+            rightC=pclcloud.at(mcR[biggstR].x,mcR[biggstR].y);
+            rightC.x = l_x;
+            rightC.y = l_y;
+            rightC.z = l_z;
+            
+        } else {
+            cout << "Blue isn't valid .. " << pclcloud.at(mcR[biggstR].x,mcR[biggstR].y).x << "," <<  pclcloud.at(mcR[biggstR].x,mcR[biggstR].y).y << "," << endl;
+        }
+      /*  if (pclcloud.at(mcL[biggstL].x,mcL[biggstL].y).x<50 && pclcloud.at(mcL[biggstL].x,mcL[biggstL].y).y <50 && pclcloud.at(mcL[biggstL].x,mcL[biggstL].y).x !=0)
         {
             leftC=pclcloud.at(mcL[biggstL].x,mcL[biggstL].y);
-        }
+        }*/
         
     }
     
@@ -2087,7 +2147,7 @@ bool C23_Detector::detectGate(Mat srcImg, const sensor_msgs::PointCloud2::ConstP
         //	cout<<"\nright :"<<rightC.x<<" ,"<<rightC.y<<endl;
         
         double gate =sqrt(pow((leftC.x-rightC.x),2)+pow((leftC.y-rightC.y),2));
-        //cout<<gate<<endl;
+        cout<< "Gate size: " << gate<<endl;
         res = false;
         if (gate > 3.5 && gate < 6.5)
         {
@@ -2100,6 +2160,9 @@ bool C23_Detector::detectGate(Mat srcImg, const sensor_msgs::PointCloud2::ConstP
             right = leftC.z > rightC.z;
             
         } else {
+            circle( srcImg, mcR[biggstR], 16, 60, -1, 8, 0 );
+            circle( srcImg, mcL[biggstL], 16, Scalar(0,0,255), -1, 8, 0 );
+            cout << "======== Left and Right " << endl;
             //find lines
             Mat dst,cdst;
             // ROS_INFO("4.4");
@@ -2120,8 +2183,8 @@ bool C23_Detector::detectGate(Mat srcImg, const sensor_msgs::PointCloud2::ConstP
           averagePointCloud(mcL[biggstL].x-5, mcL[biggstL].y-50, mcL[biggstL].x+5, mcL[biggstL].y+50, cloud, &x1, &y1,&z1);
           averagePointCloud(mcR[biggstR].x-5, mcR[biggstR].y-50, mcR[biggstR].x+5, mcR[biggstR].y+50, cloud, &x2, &y2,&z2);
        //   cout << "Middle: " <<
-          imshow("TESTING",srcImg);
-         waitKey(0);
+         // imshow("TESTING",srcImg);
+        // waitKey(0);
         //  return true;
          x = (x1+x2)/2.0;
          y = (y1+y2)/2.0;
@@ -2170,6 +2233,8 @@ bool C23_Detector::detectGate(Mat srcImg, const sensor_msgs::PointCloud2::ConstP
         double contourOffset = 0;
         
         if(right) {
+            circle( srcImg, mcR[biggstR], 16, 60, -1, 8, 0 );
+             cout << " Only right bar was detected ! " << endl;
             //Find the distance between the center of mass of green and center of mass of red gate
             gateUpperDistance =sqrt(pow((centerC.x-rightC.x),2)+pow((centerC.y-rightC.y),2));
             
@@ -2193,29 +2258,13 @@ bool C23_Detector::detectGate(Mat srcImg, const sensor_msgs::PointCloud2::ConstP
                 int x_pic = mcR[biggstR].x - (mcR[biggstR].y - minContourOffsetR);
                 int y_pic =  mcR[biggstR].y;
                 
-                c21srv.request.sample.x1 = mcR[biggstR].x-10;
-                c21srv.request.sample.y1 = mcR[biggstR].y-100;
-                c21srv.request.sample.x2 = mcR[biggstR].x+10;
-                c21srv.request.sample.y2 = mcR[biggstR].y+100;
-                
-                if(c21client.call(c21srv)){
-                    ROS_INFO("Service initiated");
-                    // minPoint.x = c21srv.response.x;
-                    //minPoint.y = c21srv.response.y;
-                    //minPoint.z = c21srv.response.z;
-                    //absolutePoint = (pcl::PointXYZ)c21srv.response.point;
-                    ROS_INFO("Before...\n");
-                    x = (float)c21srv.response.point.x-3;
-                    y = (float)c21srv.response.point.y;
-                    
-                    
-                }
+               
                 double x1,y1,z1,x2,y2,z2;
                 averagePointCloud(mcR[biggstR].x-5, mcR[biggstR].y-50, mcR[biggstR].x+5, mcR[biggstR].y+50, cloud, &x2, &y2,&z2);
                 x = x2;
                 y = y2-2.5;
                 cout<<"Point is: " <<x<<", " <<y <<endl;
-                cout << "Detected right" << endl;
+             //   cout << "Detected right" << endl;
                 circle( srcImg, Point2f(x_pic,y_pic), 16, Scalar(0,255,255), -1, 8, 0 );
             }
             
@@ -2224,6 +2273,8 @@ bool C23_Detector::detectGate(Mat srcImg, const sensor_msgs::PointCloud2::ConstP
             return mcM[biggstM].x < mcR[biggstR].x ? true : false;
             
         } else {
+            circle( srcImg, mcL[biggstL], 16, Scalar(0,0,255), -1, 8, 0 );
+            cout << "Only left bar is detected" << endl;
             //Find the distance between the cm of green and cm of blue gate
             gateUpperDistance =sqrt(pow((centerC.x-leftC.x),2)+pow((centerC.y-leftC.y),2));   
             
@@ -2245,10 +2296,10 @@ bool C23_Detector::detectGate(Mat srcImg, const sensor_msgs::PointCloud2::ConstP
                 int y_pic =  mcL[biggstL].y;
                 cout<<"Point is: " <<x<<", " <<y <<endl;
             }
-            cout << "Detected left" << endl;
+           // cout << "Detected left" << endl;
             circle( srcImg, Point2f(x,y), 16, Scalar(0,255,255), -1, 8, 0 );
-            //   imshow("Testing" , srcImg);
-            //   waitKey(0);
+            //  imshow("Testing" , srcImg);
+           //   waitKey(0);
 
             double x1,y1,z1,x2,y2,z2;
             averagePointCloud(mcL[biggstL].x-5, mcL[biggstL].y-50, mcL[biggstL].x+5, mcL[biggstL].y+50, cloud, &x2, &y2,&z2);
