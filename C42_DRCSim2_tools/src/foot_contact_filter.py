@@ -13,8 +13,7 @@ class contact_filter(control_primitives.filter):
         self.u_buffer = [ForceTorqueSensors() for k in xrange(len(self.a))]
         self.y_buffer = [ForceTorqueSensors() for k in xrange(len(self.b))]
     def update(self,u):
-        F = u
-        control_primitives.filter.update(self,F)
+        control_primitives.filter.update(self,u)
     def _filter_func(self):
         y_filt = ForceTorqueSensors()
         y_filt.l_foot.force.z = copy.copy(self.b[0]*self.u_buffer[0].l_foot.force.z)#ForceTorqueSensors()
