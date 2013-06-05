@@ -252,7 +252,7 @@ void CTcpConnection::SltReadyRead()
  //       	std::cout<<"TCP: ExecuterStack coming!\n";
         	QString str;
 		    in>>str;
-		    std::cout<<"ExecuterStatus received: "<<str.toStdString()<<std::endl;
+//		    std::cout<<"ExecuterStatus received: "<<str.toStdString()<<std::endl;
 		    pITcpConnectionInterface->OnExecuterStackUpdate(str);
 		  }
       }
