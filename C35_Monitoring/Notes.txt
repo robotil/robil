@@ -146,4 +146,22 @@ If a certain node exisited with success after X seconds, we check whether X is w
 
 When an anomaly is found in node Y, the node's id is published as a String on the topic "C35/anomaly".
 
+To run:
+Use tree "standup_with_anomaly_detection.xml". Run the relevant tasks.
+It's better to use a tree that has loops, and in which some tasks run more that 5 times.
+rosrun C35_monitoring AnomalyDetector
+Run executor and designer and some atlas.
+
+------------------------
+For Liat and Adi
+------------------------
+Marathon + Weekend
+Liat - finish (or semi-finish) mud thing.
+Adi - finish gripping thing.
+
+Next week
+HALF DAY - Timeout Monitor, Falling Monitor, and Stability Monitor (if someone publishes on the relevant topic), MONITOR WAYPOINT OF DRIVING MODULE. 1) check on example trees in the beginnning of the week. 2) Once the vrc trees are working (semi-working) check on them.
+HALF DAY - Anomaly:very little testing has been done. Must check with proper tree, as mentioned above.
+Walking and driving are done assuming cheats. Before vrc, we must check again since cheats will be disabled.
+
 
