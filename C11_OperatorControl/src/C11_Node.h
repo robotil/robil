@@ -25,6 +25,7 @@
 #include <image_transport/image_transport.h>
 #include <sensor_msgs/image_encodings.h>
 #include <sensor_msgs/Image.h>
+#include "std_msgs/String.h"
 #include <string>
 #include <QThread>
 #include <QStringListModel>
@@ -82,6 +83,8 @@ public:
           bool hmi_response_proccess(C10_Common::HMIResponse::Request  &req, C10_Common::HMIResponse::Response &res );
           bool execution_status_change(C10_Common::execution_status_change::Request  &req, C10_Common::execution_status_change::Response &res );
 
+          void SendExecuterUpdate(QString str);
+
 Q_SIGNALS:
         void loggingUpdated();
     void rosShutdown();
@@ -101,6 +104,9 @@ private:
   image_transport::ImageTransport* it_;
   image_transport::Subscriber panoramic_image;
   ros::Subscriber status_subscriber;
+
+  ros::Publisher executer_update_pub;
+
   int init_argc;
   char** init_argv;
   int img_counter;

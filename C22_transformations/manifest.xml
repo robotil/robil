@@ -1,0 +1,26 @@
+<package>
+  <description brief="C22_transformations">
+
+     C22_transformations
+
+  </description>
+  <author>danerde@gmail.com</author>
+  <license>BSD</license>
+  <review status="unreviewed" notes=""/>
+  <url>http://ros.org/wiki/C22_transformations</url>
+  <depend package="roscpp"/>
+  <depend package="rospy"/>
+  <depend package="tf"/>
+  <depend package="geometry_msgs"/>
+  <depend package="C22_GroundRecognitionAndMapping"/>
+
+
+  <export>
+    <cpp cflags="-I${prefix}/include" />
+	<python path="${prefix}/scripts" />
+	<python path="${prefix}/src" />
+  </export>
+  
+</package>
+
+

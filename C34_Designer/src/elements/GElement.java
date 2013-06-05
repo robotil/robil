@@ -104,7 +104,9 @@ public abstract class GElement {
 		n.property = this.property.clone();
 		n.view = (n.view.clone());
 		n.xmlElement = this.xmlElement;
-		n.id = new UUID(this.id.getMostSignificantBits(), this.id.getLeastSignificantBits());
+		
+		// n.id = new UUID(this.id.getMostSignificantBits(), this.id.getLeastSignificantBits());
+		n.id = UUID.randomUUID();
 		// n.property = this.property.clone();
 	}
 
@@ -191,6 +193,10 @@ public abstract class GElement {
 	
 	public boolean isDecorator() {
 		return this instanceof Decorator;
+	}
+	
+	public boolean isJoint() {
+		return this instanceof Joint;
 	}
 	
 	public Task getAsTask() {

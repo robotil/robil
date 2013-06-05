@@ -1,14 +1,11 @@
 package terminal.lineprocessors;
 
 import logger.Log;
-import terminal.communication.CompactStackStreamMessageParser;
 import terminal.communication.MessageParser;
 import terminal.communication.StackStreamMessage;
-import terminal.communication.StackStreamMessageParser;
 import terminal.communication.UniversalStackStreamMessageParser;
 import windows.designer.BTDesigner;
 import document.Document;
-import document.Parameters;
 
 public class StackStreamProcessor implements LineProcessor {
 

@@ -4,6 +4,7 @@
 
 using namespace std;
 typedef vector<Vec2d> Points;
+typedef PField::Map Map;
 
 #define DISPLAY_VIEW_FRAME 0
 #define DISPLAY_ATTRACTORS 0
@@ -133,7 +134,7 @@ namespace {
 		return e*(e-f);
 	}
 	Points frontiers( const Points& points, const Vec2d& loc ){
-		const int k = 180;
+		const size_t k = 180;
 		const double block = PI2/k;
 		Vec2d blocks[k];
 		for(size_t i=0;i<k;i++) blocks[i] = Vec2d::Null();
@@ -187,7 +188,7 @@ namespace {
 			}
 		}
 		size_t i=cWP;
-		while(i<path.size()-1){
+		while(i< (int) path.size()-1){
 			#if DISPLAY_INFO_FROM_SEARCHIP == 1
 						cout<<"ignore path["<<i<<"] dist to pos = "<<Vec2d::distance(path[i],pos.loc)<<endl;
 			#endif
@@ -230,6 +231,8 @@ namespace {
 	
 	size_t searchOnPathPosition(const Position& pos, const Points& path){
 		size_t nearest = 0;
+		if (path.size() == 0) return 0;
+
 		double min_dist = Vec2d::distance(pos.loc, path[0]);
 		for(size_t i=0;i<path.size();i++){
 			double dist = Vec2d::distance(pos.loc, path[i]);

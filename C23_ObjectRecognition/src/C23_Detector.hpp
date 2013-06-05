@@ -11,6 +11,7 @@
 #include <opencv2/highgui/highgui.hpp>
 #include <vector>
 
+#include "C23_ObjectRecognition/C23_orient.h"
 
 #include <image_transport/image_transport.h>
 #include <message_filters/synchronizer.h>
@@ -34,6 +35,20 @@
 #include <tf/transform_listener.h>
 #include <math.h>
 #include "GeneralDetector.hpp"
+
+#include <limits>
+#include <fstream>
+#include <vector>
+#include <Eigen/Core>
+#include <pcl/point_types.h>
+#include <pcl/point_cloud.h>
+#include <pcl/io/pcd_io.h>
+#include <pcl/kdtree/kdtree_flann.h>
+#include <pcl/filters/passthrough.h>
+#include <pcl/filters/voxel_grid.h>
+#include <pcl/features/normal_3d.h>
+#include <pcl/features/fpfh.h>
+#include <pcl/registration/ia_ransac.h>
 
 //#include <columnDetect/COLUMN_DETECT_GATE.h>
 //#include <columnDetect/COLUMN_DETECT_GATES.h>
@@ -101,13 +116,18 @@ private:
     
     bool pictureCoordinatesToGlobalPosition(double x1, double y1, double x2, double y2, double * x, double* y, double*z);
     bool pointCloudCoordinatesToGlobalPosition(double x, double y, double z, double* px, double* py, double*pz);
-    bool averagePointCloud(int x1, int y1, int x2, int y2, const sensor_msgs::PointCloud2::ConstPtr &detectionCloud, double* px, double* py, double *pz);
+
     bool averagePointCloudInsideCar(int x1, int y1, int x2, int y2, const sensor_msgs::PointCloud2::ConstPtr &cloud, double* px, double* py, double *pz); 
+    bool averagePointCloud(int x1, int y1, int x2, int y2, const sensor_msgs::PointCloud2::ConstPtr &detectionCloud, double* px, double* py, double *pz);
+    bool process_orientation(C23_ObjectRecognition::C23_orient::Request  &req,
+                                           C23_ObjectRecognition::C23_orient::Response &res );
         
 	ros::NodeHandle nh;
     bool takePictures(Mat srcImg);
     bool templateMatching( Mat img, Mat templateImage, int matching_method, cv::Point *matchLoc, const sensor_msgs::PointCloud2::ConstPtr &cloud);
-
+    bool templateMatching3D(string templates_file, pcl::PointCloud<pcl::PointXYZ>::Ptr &cloud);
+    pcl::PointCloud<pcl::PointXYZ>::Ptr filterPointCloud(int x,int y, int width, int height, const sensor_msgs::PointCloud2::ConstPtr &cloud2);
+        
 	ros::Publisher objectDetectedPublisher;
   ros::Publisher objectDeminsionsPublisher;
 	//vector<Gate*>* gates;
@@ -115,6 +135,7 @@ private:
 	  ros::ServiceClient c21client;
 	  ros::ServiceClient c23_start_posecontroller;
 	  ros::ServiceClient c23_stop_posecontroller;
+      ros::ServiceServer orientation_service;
 	  geometry_msgs::Point point;
 	  
   

@@ -6,6 +6,8 @@
 #include "C10_Common/resume_mission.h"
 #include "C10_Common/execution_status_change.h"
 #include "C10_Common/path_update.h"
+#include "Vec2d.hpp"
+#include "C25_GlobalPosition/C25C0_ROP.h"
 #include "ros/ros.h"
 #include "ros/package.h"
 #include "std_msgs/String.h"
@@ -26,6 +28,7 @@ public:
   virtual void PushPath(vector<StructPoint> path) = 0;
   virtual void HMIResponse() = 0;
   virtual void ExecutionStatusChanged(int status) = 0;
+  virtual void SendExecuterStack(QString) = 0;
 };
 
 class C11_Agent_Node : public QThread, public IPushHMIInterface, public IHMIResponseInterface
@@ -52,6 +55,10 @@ public:
                   C10_Common::path_update::Response& res);
   void StopExecuteMessageCallback(const std_msgs::StringConstPtr& msg);
 
+  void RobotPosUpdateCallback(const C25_GlobalPosition::C25C0_ROP& robot_pos);
+
+  void ExecuterStackSubscriber(const std_msgs::StringConstPtr& stack);
+
   void SetReleased();
 
   void Pause();
@@ -64,12 +71,22 @@ public:
 
   void PathUpdated(std::vector<StructPoint> points);
 
+  void ImageRequest();
+
+  void GridRequest();
+
+  void PathRequest();
+
   virtual void PushImage(QImage img);
   virtual void PushGrid(StructGridData grid);
   virtual void PushPath(vector<StructPoint> path);
   virtual void HMIResponse();
 
 private:
+
+  size_t searchOnPathPosition(const Vec2d& pos, const vector<Vec2d>& path);
+  void CheckPath();
+
   ros::NodeHandle *nh_;
   ros::Publisher path_update_pub;
   ros::ServiceServer service_MissionSelection;
@@ -77,6 +94,8 @@ private:
   ros::ServiceServer service_ResumeSelection;
   ros::ServiceServer service_PathUpdate;
   ros::Subscriber status_subscriber;
+  ros::Subscriber robot_pos_subscriber;
+  ros::Subscriber executer_stack_subscriber;
   ros::ServiceClient c34StopClient;
   ros::ServiceClient c11ExecutionStatusChangeClient;
   ros::ServiceClient c34RunClient;
@@ -85,12 +104,15 @@ private:
   int init_argc;
   char** init_argv;
   std::string tree_id_str;
+  std::vector<Vec2d> UpdatedPath;
 
   PushHMIServer *pushS;
   HMIResponseServer *HMIResS;
   IAgentInterface* pIAgentInterface;
   bool IsWaitForRelease;
   QStringList MissionsList;
+  Vec2d position;
+  size_t start_pos;
 };
 
 #endif // C11_AGENT_NODE_H

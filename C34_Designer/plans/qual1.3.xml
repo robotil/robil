@@ -1,35 +1,29 @@
 <plan descriptions="./plans/TaskDescriptions.xml">
-   <seq name="event2" x="138.72046801554882" y="-495.8893687794731" collapsed="false" id="dbbc9312-97cc-4618-9b28-3873381e8cc8"> 
-         <par name="@1" x="149.95856325364423" y="-443.936987827092" collapsed="false" id="f993e5a9-7c5f-4c6b-b349-2a2f3d826c25"> 
-               <par name="Perception" x="44.56570611078689" y="-339.68698782709214" collapsed="true" id="06307b61-32b3-4659-ba91-f93cadd8784c"> 
-                     <tsk name="LocalizationTrack" x="-50.43429388921311" y="-293.31198782709237" test_time="0" test_result="true" id="49810385-7853-483c-bbff-ca977cfb8e8d" />
-                     <tsk name="ObstacleDetection" x="0.33493688001766486" y="-251.6869878270924" test_time="0" test_result="true" id="868d1e14-2c48-49b3-a693-d9bde6aabc35" />
-                     <tsk name="PathPlanning" x="104.56570611078666" y="-219.6869878270924" test_time="0" test_result="true" id="034bf188-a6f3-43ea-9372-96ba35bcaf85" />
+   <seq name="event2" x="358.2204680155487" y="51.61063122052673" collapsed="false" id="dbbc9312-97cc-4618-9b28-3873381e8cc8"> 
+         <par name="@1" x="369.4585632536441" y="103.5630121729078" collapsed="false" id="f993e5a9-7c5f-4c6b-b349-2a2f3d826c25"> 
+               <par name="Perception" x="264.0657061107868" y="207.8130121729077" collapsed="false" id="06307b61-32b3-4659-ba91-f93cadd8784c"> 
+                     <tsk name="LocalizationTrack" x="169.06570611078678" y="254.18801217290746" test_time="0" test_result="true" id="49810385-7853-483c-bbff-ca977cfb8e8d" />
+                     <tsk name="PathPlanning" x="324.06570611078655" y="327.81301217290746" test_time="0" test_result="true" id="034bf188-a6f3-43ea-9372-96ba35bcaf85" />
                </par>
-               <par name="MissionProgress" x="177.07219961728055" y="-335.3688060089105" collapsed="false" id="98814f84-fe2b-4c02-90c8-626e30d67eef"> 
-                  <dec name="!L!" x="214.73886628394683" y="-280.4521393422441"> 
-                        <seq name="Mission" x="205.82219961728077" y="-223.174361564466" collapsed="false" id="5205ce4c-157b-49ac-8b78-4deb75260be0"> 
-                              <tsk name="StandUp" x="155.94719961728077" y="-159.17436156446584" test_time="0" test_result="true" id="c4777a0d-9565-4c53-adc8-dfee3e4e3aed" />
-                              <par name="@3" x="253.82219961728083" y="-129.5910282311324" collapsed="false" id="25164dde-fe1e-4ea8-a222-e70135619f39"> 
-                                    <tsk name="Monitor(target=Falling)" x="143.8221996172802" y="-73.59102823113201" test_time="0" test_result="true" id="7323b98c-5935-45bb-865a-8fc40963b8ac" />
-                                    <seq name="SearchObjectAndGo" x="289.5245805696613" y="-25.102932993036944" collapsed="false" id="6de3db3d-b7da-4812-8944-11d90b3dfbf0"> 
-                                       <dec name="!L!" x="269.051587301587" y="52.126984126984496"> 
-                                             <tsk name="PathPlanningFocus(target=Gate)" x="201.31381910889905" y="110.83335294325107" test_time="0" test_result="true" id="90e220a7-91df-4a9f-93fa-9fe3c4e2bfde" />
+               <par name="MissionProgress" x="396.5721996172805" y="212.13119399108933" collapsed="false" id="98814f84-fe2b-4c02-90c8-626e30d67eef"> 
+                  <dec name="!L!" x="434.2388662839468" y="267.04786065775573"> 
+                        <seq name="Mission" x="425.3221996172807" y="324.3256384355338" collapsed="false" id="5205ce4c-157b-49ac-8b78-4deb75260be0"> 
+                              <tsk name="StandUp" x="375.4471996172807" y="388.325638435534" test_time="0" test_result="true" id="c4777a0d-9565-4c53-adc8-dfee3e4e3aed" />
+                              <par name="@3" x="473.3221996172807" y="417.9089717688674" collapsed="false" id="25164dde-fe1e-4ea8-a222-e70135619f39"> 
+                                    <tsk name="FallingMonitor" x="363.32219961728003" y="473.90897176886784" test_time="0" test_result="true" id="7323b98c-5935-45bb-865a-8fc40963b8ac" />
+                                    <seq name="SearchObjectAndGo" x="509.0245805696612" y="522.397067006963" collapsed="false" id="6de3db3d-b7da-4812-8944-11d90b3dfbf0"> 
+                                       <dec name="!L!" x="488.5515873015869" y="599.6269841269843"> 
+                                             <tsk name="PathPlanningFocus(target=Gate)" x="420.8138191088989" y="658.3333529432509" test_time="0" test_result="true" id="90e220a7-91df-4a9f-93fa-9fe3c4e2bfde" />
                                        </dec>
-                                       <dec name="L" x="425.75000000000006" y="48.250000000000085"> 
-                                             <seq name="SearchPathAndGo" x="379.6492891943706" y="112.77566063555767" collapsed="false" id="36a0e71d-b281-4707-955c-7aa31617d5bb"> 
-                                                <dec name="!L!" x="360.8120719150109" y="183.0519186695647"> 
-                                                      <tsk name="SearchObject(target=Gate)" x="291.6233567934369" y="252.80586654076225" test_time="0" test_result="true" id="2a7668cb-1756-4f8e-9684-eaf90e3bcc40" />
+                                       <dec name="L" x="645.2499999999999" y="595.75"> 
+                                             <seq name="SearchPathAndGo" x="599.1492891943705" y="660.2756606355574" collapsed="false" id="36a0e71d-b281-4707-955c-7aa31617d5bb"> 
+                                                <dec name="!L!" x="580.3120719150107" y="730.5519186695644"> 
+                                                      <tsk name="searchObject(target=Gate)" x="511.12335679343676" y="800.305866540762" test_time="0" test_result="true" id="2a7668cb-1756-4f8e-9684-eaf90e3bcc40" />
                                                 </dec>
-                                                <dec name="!L!" x="504.2403218332343" y="181.03125214549723"> 
-                                                      <sel name="PathFollow" x="482.30158240452675" y="253.1458802635261" collapsed="false" id="4506d28d-394f-473c-8a25-22e328fcbef4"> 
-                                                            <par name="Zmp" x="430.91269351563693" y="363.97921359686217" collapsed="false" id="1fd7fbeb-e6ea-43c3-bd0d-576f7e6209bb"> 
-                                                                  <tsk name="whileInZmpArea" x="353.13491573785797" y="457.31254693019264" test_time="0" test_result="true" id="f4b90051-c348-4614-bb16-993d14953922" />
-                                                                  <tsk name="ZmpWalk" x="483.13491573785774" y="456.2014358190785" test_time="0" test_result="true" id="4675c8a2-4623-4235-b386-920a5c243e82" />
-                                                            </par>
-                                                            <par name="QS" x="612.8571379600787" y="375.36810248575074" collapsed="false" id="67f83db9-e8ba-44dc-964c-c02a3b4b6823"> 
-                                                                  <tsk name="whileInQSArea" x="575.079360182302" y="458.7014358190834" test_time="0" test_result="true" id="ab5ba76b-d9d3-4cc3-8ed7-ffc88dfaa696" />
-                                                                  <tsk name="QuasiStaticWalk" x="681.7460268489681" y="457.5903247079674" test_time="0" test_result="true" id="c9112af6-dbb8-4445-8948-59f96dacf28b" />
+                                                <dec name="!L!" x="723.7403218332341" y="728.5312521454971"> 
+                                                      <sel name="PathFollow" x="701.8015824045266" y="800.6458802635259" collapsed="false" id="4506d28d-394f-473c-8a25-22e328fcbef4"> 
+                                                            <par name="Zmp" x="751.4126935156368" y="870.4792135968619" collapsed="false" id="1fd7fbeb-e6ea-43c3-bd0d-576f7e6209bb"> 
+                                                                  <tsk name="WalkerNode_Continuous" x="702.6349157378576" y="961.7014358190784" test_time="0" test_result="true" id="4675c8a2-4623-4235-b386-920a5c243e82" />
                                                             </par>
                                                       </sel>
                                                 </dec>

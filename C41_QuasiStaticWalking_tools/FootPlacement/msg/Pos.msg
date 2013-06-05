@@ -1,3 +1,0 @@
-C22_CompactGroundRecognitionAndMapping/C22_PLANE_TYPE plane
-geometry_msgs/Point point
-float64 cost

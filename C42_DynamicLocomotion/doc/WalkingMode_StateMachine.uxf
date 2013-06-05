@@ -40,10 +40,11 @@
       <x>540</x>
       <y>180</y>
       <w>270</w>
-      <h>70</h>
+      <h>94</h>
     </coordinates>
     <panel_attributes>lt=&lt;-
-HandleInterfaceState</panel_attributes>
+Go
+(HandleInterfaceState)</panel_attributes>
     <additional_attributes>250;50;30;50</additional_attributes>
   </element>
   <element>
@@ -55,7 +56,8 @@ HandleInterfaceState</panel_attributes>
       <h>190</h>
     </coordinates>
     <panel_attributes>lt=&lt;-
-BDI_StateMachine::Done</panel_attributes>
+Finished
+(BDI_StateMachine::Done)</panel_attributes>
     <additional_attributes>30;170;280;30</additional_attributes>
   </element>
   <element>

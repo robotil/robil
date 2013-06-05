@@ -23,6 +23,9 @@ Q_SIGNALS:
         void SigResume();
         void SigLoadMission(int MissionId);
         void SigPathUpdated(std::vector<StructPoint> points);
+        void SigImageRequest();
+        void SigGridRequest();
+        void SigPathRequest();
 
 public Q_SLOTS:
         void SltOnNewConnection();
@@ -38,6 +41,7 @@ public:
         void SendPath(vector<StructPoint> path);
         void SendHMIResponse();
         void SendExecutionStatusChange(int status);
+        void SendExecuterStack(QString str);
         void SendHello();
 
 private:

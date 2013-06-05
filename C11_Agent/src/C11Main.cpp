@@ -14,6 +14,7 @@ C11Main::C11Main(int argc, char **argv)
   connect(this,SIGNAL(SigOnPathSend(vector<StructPoint>)),this,SLOT(SltOnPathSend(vector<StructPoint>)));
   connect(this,SIGNAL(SigOnHMIResponse()),this,SLOT(SltOnHMIResponse()));
   connect(this,SIGNAL(SigOnExecutionStatusChange(int)),this,SLOT(SltOnExecutionStatusChange(int)));
+  connect(this,SIGNAL(SigOnSendExecuterStack(QString)),this,SLOT(SltOnSendExecuterStack(QString)));
 }
 
 C11Main::~C11Main()
@@ -33,6 +34,9 @@ void C11Main::SetTcp(CTcpServer* ptcpServer)
   connect(pCTcpServer,SIGNAL(SigResume()),this,SLOT(SltResume()));
   connect(pCTcpServer,SIGNAL(SigLoadMission(int)),this,SLOT(SltLoadMission(int)));
   connect(pCTcpServer,SIGNAL(SigPathUpdated(std::vector<StructPoint>)),this,SLOT(SltPathUpdated(std::vector<StructPoint>)));
+  connect(pCTcpServer,SIGNAL(SigImageRequest()),this,SLOT(SltImageRequest()));
+  connect(pCTcpServer,SIGNAL(SigGridRequest()),this,SLOT(SltGridRequest()));
+  connect(pCTcpServer,SIGNAL(SigPathRequest()),this,SLOT(SltPathRequest()));
 }
 
 void C11Main::PushImage(QImage img)
@@ -58,6 +62,13 @@ void C11Main::HMIResponse()
 void C11Main::ExecutionStatusChanged(int status)
 {
   emit SigOnExecutionStatusChange(status);
+}
+
+void C11Main::SendExecuterStack(QString str)
+{
+	cout<<"C11Main::SendExecuterStack \n";
+//	QString strString(str.data());
+	emit SigOnSendExecuterStack(str);
 }
 
 void C11Main::SltOnImageSend(QImage img)
@@ -88,6 +99,13 @@ void C11Main::SltOnExecutionStatusChange(int status)
   pCTcpServer->SendExecutionStatusChange(status);
 }
 
+void C11Main::SltOnSendExecuterStack(QString str)
+{
+	cout<<"C11Main::SltOnSendExecuterStack \n";
+	pCTcpServer->SendExecuterStack(str);
+//	pC11Node->SetReleased();
+}
+
 void C11Main::SltHMIResponded()
 {
   pC11Node->HMIResponded();
@@ -111,4 +129,19 @@ void C11Main::SltLoadMission(int MissionId)
 void C11Main::SltPathUpdated(std::vector<StructPoint> points)
 {
   pC11Node->PathUpdated(points);
+}
+
+void C11Main::SltImageRequest()
+{
+  pC11Node->ImageRequest();
+}
+
+void C11Main::SltGridRequest()
+{
+  pC11Node->GridRequest();
+}
+
+void C11Main::SltPathRequest()
+{
+  pC11Node->PathRequest();
 }

@@ -13,7 +13,7 @@ class SeqNode (node):
         node.__init__(self,treeInst,mytree,"seq",parent)
     
     #seq- run
-    def run (self, index):      
+    def run (self, index):
         tmpIndex = index 
         
         if (node.debugMode):
@@ -33,7 +33,7 @@ class SeqNode (node):
         for i in self.getChildren():                     
             b = i.run(index)  
             a[0] = a[0] and b[0]
-            a[1] = a[1] + b[1]           
+            a[1] = a[1] + b[1]
             if not b[0]:	  
                 break
             
