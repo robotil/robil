@@ -7,6 +7,8 @@
 #include "C31_PathPlanner/C31_Waypoints.h"
 //#include <C22_transformations/MapTransformations.h>
 #include "FootPlacement/FootPlacement_Service.h"
+#include "FootPlacement/Foot_Placement_path.h"
+#include "C42_WalkType/extreme_slope.h"
 #include "tf/transform_listener.h"
 
 #define SQUARE_SIZE 0.05
@@ -36,6 +38,8 @@ private:
 	ros::ServiceClient mapClient;
 	ros::ServiceServer footServer;
 	ros::Subscriber pathSub;
+	ros::Publisher footPlacementPathPublisher;
+	ros::Publisher walkNotificationPublisher;
 	C22_CompactGroundRecognitionAndMapping::C22 mapService;
 	C31_PathPlanner::C31_Waypoints::ConstPtr pathPoints;
 
@@ -88,6 +92,8 @@ private:
 			const double &distanceWeight,
 			const double &heightWeight,
 			const double &directionWeight);
+
+	void publishExtremeSlopeMsg();
 
 public:
 	FootPlacementService();
