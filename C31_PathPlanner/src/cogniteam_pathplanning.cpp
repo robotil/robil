@@ -463,7 +463,7 @@ PField::Points searchPath(
 
 PField::Points searchPath_transitAccurate(
 		const AltMap& alts, const AltMap& slops, const AltMap& costs, const Map& s_walls, const Map& s_obstacles, const Map& s_terrain,
-		const Waypoint& start, const Waypoint& finish, const Constraints& constraints
+		const Waypoint& start, const Waypoint& finish, const Constraints& constraints, Map& o_obstacles
 ){
 	using namespace std;
 	PRINT_VERSION
@@ -494,6 +494,8 @@ PField::Points searchPath_transitAccurate(
 		);
 
 	inflated_map = e.merge(inflated_map, inflated_terrain, MapEditor::OR);
+
+	o_obstacles = inflated_map;
 
 	if( inflated_map(start.x, start.y)==Map::ST_BLOCKED || inflated_map(finish.x, finish.y)==Map::ST_BLOCKED ){
 		cout<<"searchPath: "<<"some of interesting points are unattainable (after inflation)"<<endl;
