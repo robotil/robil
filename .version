@@ -1,4 +1,4 @@
-V0.0.1.34
+V0.0.1.36
 ===========================================================
 C0_RobilTask     		0.5
 C0_Scripts     		        0.25
@@ -9,7 +9,7 @@ C21_VisionAndLidar              0.18
 C22_CompactGroundRecognitionAndMapping     0.7
 C22_GroundRecognitionAndMapping     0.17
 C22_transformations     	0.5
-C23_ObjectRecognition     	0.28
+C23_ObjectRecognition     	0.29
 C23_dFind     			0.5
 C24_ObstacleDetection     	0.6
 C25_AtlasFell     		0.2
@@ -17,9 +17,9 @@ C25_GlobalPosition     		0.10
 C25_ekf     			0.1
 C31_PathPlanner     		0.24
 C34_BTExecuter     		0.8
-C34_Designer     		0.38
+C34_Designer     		0.39
 C34_Executer     		0.8
-C35_Monitoring     		0.13
+C35_Monitoring     		0.14
 C41_BodyControl     		0.1
 C41_QuasiStaticWalking     	0.9
 C41_QuasiStaticWalking_tools     0.11
