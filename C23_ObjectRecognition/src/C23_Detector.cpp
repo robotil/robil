@@ -273,8 +273,16 @@ private:
 pcl::PointCloud<pcl::PointXYZ>::Ptr C23_Detector::filterPointCloud(int x,int y, int width, int height, const pcl::PointCloud<pcl::PointXYZ> &cloud) {
     int i,j;
     pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_filtered (new pcl::PointCloud<pcl::PointXYZ>);
- //   pcl::PointCloud<pcl::PointXYZ>cloud;
-  //  pcl::fromROSMsg<pcl::PointXYZ>(*cloud2,cloud);
+    static tf::StampedTransform transform;
+    while(1){ try{
+        listener2.lookupTransform("/pelvis","/left_camera_optical_frame",
+                                  ros::Time(0), transform);
+    }
+    catch (tf::TransformException ex){
+        continue;  cout<<"jajajajaj\n";
+    } break; }
+    Eigen::Matrix4f sensorTopelvis;
+    pcl_ros::transformAsMatrix(transform, sensorTopelvis);
     
     cout << "Got: " << x << "," << y << "," << width << "," << height << endl;
     for(i = x; i < x+width; i++) {
@@ -287,6 +295,15 @@ pcl::PointCloud<pcl::PointXYZ>::Ptr C23_Detector::filterPointCloud(int x,int y, 
             cloud_filtered->points.push_back(p);
         }
     }
+    while(1){ try{
+        listener2.lookupTransform("/pelvis","/left_camera_optical_frame",
+                                  ros::Time(0), transform);
+    }
+    catch (tf::TransformException ex){
+        continue;  cout<<"jajajajaj\n";
+    } break; }
+    
+    pcl::transformPointCloud(*cloud_filtered, *cloud_filtered, sensorTopelvis);
     return cloud_filtered;
     
 }
@@ -296,7 +313,7 @@ pcl::PointCloud<pcl::PointXYZ>::Ptr C23_Detector::filterPointCloud(int x,int y, 
 
 void C23_Detector::saveTemplate(int x,int y, int width, int height, const sensor_msgs::PointCloud2::ConstPtr &cloud2, string target) {
     int i,j;
-    static tf::StampedTransform transform;
+  /*  static tf::StampedTransform transform;
     while(1){ try{
         listener2.lookupTransform("/pelvis","/left_camera_optical_frame",
         ros::Time(0), transform);
@@ -307,7 +324,7 @@ void C23_Detector::saveTemplate(int x,int y, int width, int height, const sensor
     Eigen::Matrix4f sensorTopelvis;
     
     pcl_ros::transformAsMatrix(transform, sensorTopelvis);
-    
+    */
     pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_filtered (new pcl::PointCloud<pcl::PointXYZ>);
     pcl::PointCloud<pcl::PointXYZ>cloud;
     pcl::fromROSMsg<pcl::PointXYZ>(*cloud2,cloud);
@@ -324,7 +341,7 @@ void C23_Detector::saveTemplate(int x,int y, int width, int height, const sensor
     }
     cloud_filtered->width = 1;
     cloud_filtered->height = cloud_filtered->points.size();
-    pcl::transformPointCloud(*cloud_filtered, *cloud_filtered, sensorTopelvis);
+   // pcl::transformPointCloud(*cloud_filtered, *cloud_filtered, sensorTopelvis);
     pcl::io::savePCDFileASCII (target.c_str(), *cloud_filtered);
     
     
@@ -345,7 +362,7 @@ bool C23_Detector::templateMatching3D(string templates_file,  pcl::PointCloud<pc
         sprintf(basePath,"%s/3D_models/%c",ros::package::getPath("C23_ObjectRecognition").c_str(),'\0');
          string base(basePath);
          pcd_filename = basePath + pcd_filename;
-       //  pcd_filename = "/home/isl/darpa/robil/C23_ObjectRecognition/3D_models/FirehoseGrip.pcd";
+      //   pcd_filename = "/home/isl/darpa/robil/C23_ObjectRecognition/3D_models/FirehoseGrip.pcd";
          cout << "Reading pcd: " << pcd_filename << endl;
         if (pcd_filename.empty () || pcd_filename.at (0) == '#') // Skip blank lines or comments
       continue;
@@ -353,6 +370,7 @@ bool C23_Detector::templateMatching3D(string templates_file,  pcl::PointCloud<pc
       FeatureCloud template_cloud;
       template_cloud.loadInputCloud (pcd_filename);
       object_templates.push_back (template_cloud);
+      break;
     }
     input_stream.close ();
     
@@ -585,7 +603,7 @@ bool C23_Detector::process_orientation(C23_ObjectRecognition::C23_orient::Reques
         
         sprintf(basePath,"%s/3D_models/%s%c",ros::package::getPath("C23_ObjectRecognition").c_str(),"firehose.txt",'\0');
         string t = basePath;
-     //   string t = "/home/isl/darpa/robil/C23_ObjectRecognition/3D_models/firehose.txt";
+      //  string t = "/home/isl/darpa/robil/C23_ObjectRecognition/3D_models/firehose.txt";
         std::cout<<imageName<<endl;
         pcl::PointCloud<pcl::PointXYZ>::Ptr cloud2 = filterPointCloud(last_x,last_y,width,height,lastCloud);
         templateMatching3D(t,  cloud2);
@@ -1227,7 +1245,7 @@ bool C23_Detector::detectFirehoseGrip(Mat srcImg, const sensor_msgs::PointCloud2
             int max_y = MAX(y1,y2);
             string t = "FireHoseGrip";
             cout << "Saving firehose" << endl;
-            saveTemplate(min_x,min_y,max_x-min_x,max_y-min_y,cloud,t);
+         //   saveTemplate(min_x,min_y,max_x-min_x,max_y-min_y,cloud,t);
            // templateMatching3D(t,lastCloud);
             last_x = min_x;
             last_y = min_y;
