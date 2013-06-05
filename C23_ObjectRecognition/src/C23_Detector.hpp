@@ -81,6 +81,7 @@ typedef enum targets {
   BRAKE_PEDAL,
   GAS_PEDAL,  
   TABLE,
+  ARROW,
   NONE
 } TARGETS;
 
@@ -118,6 +119,7 @@ private:
     bool detectSteeringWheel(Mat srcImg,const sensor_msgs::PointCloud2::ConstPtr &cloud,int location);
     bool detectHandbrake(Mat srcImg,const sensor_msgs::PointCloud2::ConstPtr &cloud,int location);
     bool detectGear(Mat srcImg,const sensor_msgs::PointCloud2::ConstPtr &cloud,int location);
+    bool detectArrowDirection(Mat srcImg,const sensor_msgs::PointCloud2::ConstPtr &cloud);
     
     bool pictureCoordinatesToGlobalPosition(double x1, double y1, double x2, double y2, double * x, double* y, double*z);
     bool pointCloudCoordinatesToGlobalPosition(double x, double y, double z, double* px, double* py, double*pz);
@@ -129,7 +131,7 @@ private:
         
 	ros::NodeHandle nh;
     bool takePictures(Mat srcImg);
-    bool templateMatching( Mat img, Mat templateImage, int matching_method, cv::Point *matchLoc, const sensor_msgs::PointCloud2::ConstPtr &cloud);
+    bool templateMatching( Mat img, Mat templateImage, int matching_method, cv::Point *matchLoc, const sensor_msgs::PointCloud2::ConstPtr &cloud, double *value = NULL);
     bool templateMatching3D(string templates_file, pcl::PointCloud<pcl::PointXYZ>::Ptr &cloud);
     pcl::PointCloud<pcl::PointXYZ>::Ptr filterPointCloud(int x,int y, int width, int height, const sensor_msgs::PointCloud2::ConstPtr &cloud2);
         

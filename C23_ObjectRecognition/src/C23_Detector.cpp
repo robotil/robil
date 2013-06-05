@@ -406,8 +406,24 @@
 	    double tmp_x = 0;
 	    double tmp_y =0;
 	    double tmp_z  =0;
+	    tf::TransformListener listener;
+	    static tf::StampedTransform transform;
 	    pcl::PointCloud<pcl::PointXYZ>detectionCloud;
 	    pcl::fromROSMsg<pcl::PointXYZ>(*cloud,detectionCloud);
+	    while(1){
+	      try{
+	      listener.lookupTransform("/left_camera_frame","/left_camera_optical_frame",
+					  ros::Time(0), transform);
+	      }
+	      catch (tf::TransformException ex){
+		continue;  cout<<"Invalid\n";
+	      } break;}
+	      
+	      Eigen::Matrix4f sensorTopelvis;
+	      pcl_ros::transformAsMatrix(transform, sensorTopelvis);
+	      pcl::transformPointCloud(detectionCloud, detectionCloud, sensorTopelvis);
+	    
+	    
 	    double _x=0;
 	    double _y=0;
 	    double _z=0;
@@ -417,7 +433,7 @@
 	    for(int i=yMin;i<=yMax;i++) {
 		for(int j=xMin;j<=xMax;j++){
 		    p=detectionCloud.at(i,j);
-		    if(p.x!=p.x || p.x<0)
+		    if(p.x!=p.x)
 			continue;
 		    //if(p.x>0.3 && p.y>0.3) {
 		      //cout<<"Here"<<endl;
@@ -627,6 +643,10 @@
 		_target = GEAR;
 		ROS_INFO("We are looking for the gear inside the car...");
 	    }
+	    else if (!target.compare("Arrow")) {
+		_target = ARROW;
+		ROS_INFO("We are looking for the arrow...");
+	    }
 	    return true;
 	    
 	}
@@ -731,6 +751,11 @@
 		    res = detectGear(srcImg,cloud,1);
 		    publishMessage(res);
 		    break; 
+		case ARROW:
+		  ROS_INFO("ARROW");
+		  res = detectArrowDirection(srcImg, cloud);
+		  publishMessage(res);
+		  break;
 		    
 	    }
 	    srcImg.release();
@@ -747,7 +772,7 @@
 
 
 	//Use for template matching with the car
-	bool C23_Detector::templateMatching( Mat img, Mat templ, int matching_method, cv::Point *matchLoc, const sensor_msgs::PointCloud2::ConstPtr &cloud)
+	bool C23_Detector::templateMatching( Mat img, Mat templ, int matching_method, cv::Point *matchLoc, const sensor_msgs::PointCloud2::ConstPtr &cloud, double * value)
 	{
 	    // Source image to display
 	    Mat img_display;
@@ -763,7 +788,7 @@
 	    
 	    // Do the Matching and Normalize
 	    matchTemplate( img, templ, result, matching_method );
-	    normalize( result, result, 0, 1, cv::NORM_MINMAX, -1, Mat() );
+	    //normalize( result, result, 0, 1, cv::NORM_MINMAX, -1, Mat() );
 	    
 	    // Localizing the best match with minMaxLoc
 	    double minVal; double maxVal; cv::Point minLoc; cv::Point maxLoc;
@@ -773,9 +798,15 @@
 	    cout<<"Minval: "<<minVal<<endl;
 	    // For SQDIFF and SQDIFF_NORMED, the best matches are lower values. For all the other methods, the higher the better
 	    if( matching_method  == 0 || matching_method == 1 )
-	    { *matchLoc = minLoc; }
+	    { *matchLoc = minLoc; 
+	      if(value!=NULL)
+		*value  = minVal;
+	    }
 	    else
-	    { *matchLoc = maxLoc; }
+	    { *matchLoc = maxLoc; 
+	      if(value!=NULL)
+		*value  = maxVal;
+	    }
 	    
 	    // Show me what you got
 	    rectangle( img_display, *matchLoc, cv::Point( matchLoc->x + templ.cols , matchLoc->y + templ.rows ), Scalar::all(0), 2, 8, 0 );
@@ -796,7 +827,7 @@
 	      z = z - 0.03;
 	      //cout<<"Handbrake x,y,z: "<<x<<", "<<y<<", "<<z<<endl;
 	      
-	      if(x<0.5&& x>0)
+	      if(x<1&& x>0)
 	      res=true;
 	      else
 	      res = false;
@@ -804,14 +835,14 @@
 	    break;
 	    case INSIDE_STEERINGWHEEL:
 	      ROS_INFO("Steeringwheel template matching");
-	       if(x<0.5 && x>0)
+	       if(x<1 && x>0)
 	      res=true;
 	      else
 	      res = false;
 	    break;
 	    case GEAR:
 	      ROS_INFO("Gear template matching");
-	      if(x<0.5&& x>0)
+	      if(x<1&& x>0)
 	      res=true;
 	      else
 	      res = false;
@@ -823,11 +854,86 @@
 	      
 	    //pictureCoordinatesToGlobalPosition(matchLoc->x,matchLoc->y,matchLoc->x + templ.cols,matchLoc->y + templ.rows,&x,&y,NULL);
 	    
-	    imshow( "Source Image", img_display );
-	    waitKey(0);
+	    //imshow( "Source Image", img_display );
+	    //waitKey(0);
 	    //imshow( "Result Window", result );
 	    
 	    return res;
+	}
+	
+	//Detect the arrow and broadcast its directions
+	bool C23_Detector::detectArrowDirection(Mat srcImg,const sensor_msgs::PointCloud2::ConstPtr &cloud){
+	  
+	     cv::Point matchLoc;
+	     double minValLeft = 0;
+	     double minValRight = 0;
+	    //Load the image template for the steering wheel
+	    //------------------------------------------------------------------
+	      // Load the object templates specified in the object_templates.txt file
+	      char basePath[1000],imageName[1000];
+
+	      sprintf(basePath,"%s/template_matching_images/%c",ros::package::getPath("C23_ObjectRecognition").c_str(),'\0');
+
+	      sprintf(imageName,"%sarrow_template_qual_left.jpg%c",basePath,'\0');
+	      std::cout<<imageName<<endl;
+	    //-----------------------------------------------------------------
+	    
+	    
+	    Mat leftArrowTemplate = imread(imageName);
+	    
+	    //imshow("Hand brake template", handbrakeTemplate);
+	    //waitKey(0);
+	    
+	    bool res =  templateMatching(srcImg, leftArrowTemplate, 1, &matchLoc, cloud, &minValLeft);
+	    
+	    
+	    sprintf(basePath,"%s/template_matching_images/%c",ros::package::getPath("C23_ObjectRecognition").c_str(),'\0');
+
+	      sprintf(imageName,"%sarrow_template_qual_right.jpg%c",basePath,'\0');
+	      std::cout<<imageName<<endl;
+	      
+	    Mat rightArrowTemplate = imread(imageName);
+	    
+	    //imshow("Hand brake template", handbrakeTemplate);
+	    //waitKey(0);
+	    
+	    res =  templateMatching(srcImg, rightArrowTemplate, 1, &matchLoc, cloud, &minValRight);
+	   
+	    double THRESHOLD = 0.04;
+	    if(minValLeft<THRESHOLD || minValRight< THRESHOLD)
+	    {
+	      if (minValLeft >minValRight){
+		ROS_INFO("Right Arrow Detected");
+		averagePointCloud(matchLoc.x, matchLoc.y, matchLoc.x + rightArrowTemplate.rows, matchLoc.y + rightArrowTemplate.cols, cloud,&x,&y,&z);
+		x = x-1;
+		y = y+4;
+		cout<<"(x,y,z): "<<x<<y<<z<<endl;
+	      }
+	      else{
+		ROS_INFO("Left Arrow Detected");
+		averagePointCloud(matchLoc.x, matchLoc.y, matchLoc.x + leftArrowTemplate.rows, matchLoc.y + leftArrowTemplate.cols, cloud,&x,&y,&z);
+		x = x  -1;
+		y  =y-4;
+		cout<<"(x,y,z): "<<x<<y<<z<<endl;
+	      }
+	    }
+	    else{
+	     ROS_INFO("Arrow Not Detected"); 
+	    }
+	    
+	    
+	    
+	    /*imshow("New Arrow Image", leftArrowTemplate);
+	    waitKey();
+	    imshow("New Arrow Image", rightArrowTemplate);
+	    waitKey();*/
+	    
+	    
+	
+	    return res;
+	  
+	  
+	  return true;
 	}
 
 	//Detect the car steering wheel

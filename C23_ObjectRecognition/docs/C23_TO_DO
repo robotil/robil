@@ -25,15 +25,19 @@ C23_ObjectRecogition TO DO
 03/06/13
 1. Implement Cluster Extraction
 2. Implement 3D template matching
-3. Detect the steeringwheel while the robot is standing near the car (In standard position)
+3. Detect the steeringwheel while the robot is standing near the car (In standard position) - done
 4. Perform tests at different angles to see how well each detection performs
-5. For inside steeringwheel, handbrake, and gears, send robot coordinates
+5. For inside steeringwheel, handbrake, and gears, send robot coordinates -done (In robot camera coordinates)
 6. Identify pedals
-7. Make workspace paths relative
-8. Detect the state of the gears (lower)
-9. GLOBAL POSITION
+7. Make workspace paths relative - done
+8. Detect the state of the gears (lower) - done
+9. GLOBAL POSITION - done
 10. Pedals
 11. Gate Std::out of range
 
 
+05/06/13
+1. Template Matching of the arrow (both directions) -done
+2. Receive the global position from the C21 service -done
+3. Check car global position
 
