@@ -36,7 +36,7 @@ typedef World Map;
 			ObsMap printed_map = _data.map.walls;
 			SmoothedPath _path = searchPath_transitAccurate(
 					_data.map.altitudes, _data.map.slops, _data.map.costs, _data.map.walls, _data.map.grid, _data.map.terrain,
-					_data.start, _data.finish, constraints
+					_data.start, _data.finish, constraints, printed_map
 			);
 #else
 			_data.map.grid(_data.start.x, _data.start.y) = ObsMap::ST_AVAILABLE;
@@ -63,12 +63,12 @@ typedef World Map;
 			}
 
 #if MAP_MODE == MM_ALTS
-			ROS_INFO("Altitudes:");
-			cout<<_data.map.altitudes<<endl;
-			ROS_INFO("Slops:");
-			cout<<_data.map.slops<<endl;
-			ROS_INFO("Costs:");
-			cout<<_data.map.costs<<endl;
+//			ROS_INFO("Altitudes:");
+//			cout<<_data.map.altitudes<<endl;
+//			ROS_INFO("Slops:");
+//			cout<<_data.map.slops<<endl;
+//			ROS_INFO("Costs:");
+//			cout<<_data.map.costs<<endl;
 #endif
 
 			LOCK( locker_aft )
@@ -99,7 +99,7 @@ typedef World Map;
 		Vec2d v(gps,0);
 		Vec2d res;
 		trans.GlobalToMap(v, res);
-		return res.x;
+		return round(res.x);
 	}
 	long PathPlanning::castLength(double gps)const{
 		if(isMapReady()==false){
@@ -110,7 +110,7 @@ typedef World Map;
 		Vec2d tz, tv;
 		trans.GlobalToMap(v, tv);
 		trans.GlobalToMap(z, tz);
-		return (tv-tz).len();
+		return round((tv-tz).len());
 	}
 
 	double PathPlanning::cast(long cell)const{
@@ -143,8 +143,8 @@ typedef World Map;
 		CREATE_TRANSFORMATION(trans)
 		Vec2d t, v(gps.x, gps.y);
 		trans.GlobalToMap(v, t);
-		long x ( t.x );
-		long y ( t.y );
+		long x ( round(t.x) );
+		long y ( round(t.y) );
 
 		if(data.map.inRange(x, y)==false){
 			ROS_INFO(STR("x or y not in map range: "<<x<<","<<y));
@@ -220,8 +220,8 @@ typedef World Map;
 			CREATE_TRANSFORMATION(trans)
 			Vec2d t, v(gps_vector[i].x, gps_vector[i].y);
 			trans.GlobalToMap(v, t);
-			long x ( t.x );
-			long y ( t.y );
+			long x ( round(t.x) );
+			long y ( round(t.y) );
 
 
 			if(data.map.inRange(x, y)==false){
