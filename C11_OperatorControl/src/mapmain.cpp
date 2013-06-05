@@ -871,12 +871,22 @@ StructPoint CMapMain::CalculateGridPoint(StructPoint pointFromRos)
 
 StructIntPoint CMapMain::CalculateGridPoint(StructIntPoint pointFromRos)
 {
-  StructIntPoint gridPoint;
-  gridPoint.x = (pointFromRos.x-RobotGridPos.x)*sin(WorldToRobotOrientation) - (pointFromRos.y-RobotGridPos.y)*cos(WorldToRobotOrientation) + 50;
-  gridPoint.y = (pointFromRos.y-RobotGridPos.y)*sin(WorldToRobotOrientation) + (pointFromRos.x-RobotGridPos.x)*cos(WorldToRobotOrientation) + 20;
-//  std::cout<<"PointX="<<pointFromRos.x<<" PointY="<<pointFromRos.y<<" gridPoint.x = "<<gridPoint.x<<" gridPoint.y = "<<gridPoint.y<<" Orientation = "<<WorldToRobotOrientation<<"\n";
-  return gridPoint;
+	Vec2d p(pointFromRos.x, pointFromRos.y);
+	Vec2d v = (p - Vec2d(RobotGridPos.x,RobotGridPos.y)).rotate(-RobotOrientation)+Vec2d(50,20);
+	StructIntPoint gridPoint;
+	gridPoint.x = v.x;
+    gridPoint.y = v.y;
+	return gridPoint;
 }
+
+//StructIntPoint CMapMain::CalculateGridPoint(StructIntPoint pointFromRos)
+//{
+//  StructIntPoint gridPoint;
+//  gridPoint.x = (pointFromRos.x-RobotGridPos.x)*sin(WorldToRobotOrientation) - (pointFromRos.y-RobotGridPos.y)*cos(WorldToRobotOrientation) + 20;
+//  gridPoint.y = (pointFromRos.y-RobotGridPos.y)*sin(WorldToRobotOrientation) + (pointFromRos.x-RobotGridPos.x)*cos(WorldToRobotOrientation) + 50;
+////  std::cout<<"PointX="<<pointFromRos.x<<" PointY="<<pointFromRos.y<<" gridPoint.x = "<<gridPoint.x<<" gridPoint.y = "<<gridPoint.y<<" Orientation = "<<WorldToRobotOrientation<<"\n";
+//  return gridPoint;
+//}
 
 QPointF CMapMain::GetPixel(StructPoint gridcell)
 {
