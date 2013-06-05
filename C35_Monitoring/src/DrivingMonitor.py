@@ -25,7 +25,6 @@ class DrivingMonitor(RobilTask):
 		  delta_x = msg.pose.pose.pose.position.x - DrivingMonitor.init_x
 		  delta_y = msg.pose.pose.pose.position.y - DrivingMonitor.init_y
 		  elapsed_time = rospy.get_time() - DrivingMonitor.init_time
-		  
 		  if DrivingMonitor.init_x != -1 and DrivingMonitor.init_y != -1 and elapsed_time > 10 and math.fabs(delta_x) < 1 and math.fabs(delta_y) < 1:
 			  DrivingMonitor.detected_problem = True
 	
