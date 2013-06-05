@@ -28,6 +28,8 @@ class manipulate_test(object):
 
 
     def move_neck(self):
+        init_pos = self.RS.GetJointPos()
+        self.JC.set_all_pos(init_pos)
         pos1 = self.RS.GetJointPos()[3]
         pos2 = 1
         dt = 0.05;
