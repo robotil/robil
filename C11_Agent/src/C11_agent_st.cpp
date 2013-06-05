@@ -223,7 +223,7 @@ int main(int argc, char **argv)
   C11Main m(argc, argv);
 
   QApplication app(argc, argv);
-  pCTcpServer = new CTcpServer(QString("172.23.1.130"),45677);
+  pCTcpServer = new CTcpServer(QString("172.23.1.130"),45675);
   m.SetTcp(pCTcpServer);
  // C11Node.SetTcp(pCTcpServer);
 

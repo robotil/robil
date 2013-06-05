@@ -1,29 +1,29 @@
 <plan descriptions="./plans/TaskDescriptions.xml">
-   <seq name="event2" x="459.2204680155487" y="-81.38936877947327" collapsed="false" id="dbbc9312-97cc-4618-9b28-3873381e8cc8"> 
-         <par name="@1" x="470.4585632536441" y="-29.436987827092196" collapsed="false" id="f993e5a9-7c5f-4c6b-b349-2a2f3d826c25"> 
-               <par name="Perception" x="365.0657061107868" y="74.81301217290769" collapsed="false" id="06307b61-32b3-4659-ba91-f93cadd8784c"> 
-                     <tsk name="LocalizationTrack" x="270.0657061107868" y="121.18801217290746" test_time="0" test_result="true" id="49810385-7853-483c-bbff-ca977cfb8e8d" />
-                     <tsk name="PathPlanning" x="425.06570611078655" y="194.81301217290746" test_time="0" test_result="true" id="034bf188-a6f3-43ea-9372-96ba35bcaf85" />
+   <seq name="event2" x="358.2204680155487" y="51.61063122052673" collapsed="false" id="dbbc9312-97cc-4618-9b28-3873381e8cc8"> 
+         <par name="@1" x="369.4585632536441" y="103.5630121729078" collapsed="false" id="f993e5a9-7c5f-4c6b-b349-2a2f3d826c25"> 
+               <par name="Perception" x="264.0657061107868" y="207.8130121729077" collapsed="false" id="06307b61-32b3-4659-ba91-f93cadd8784c"> 
+                     <tsk name="LocalizationTrack" x="169.06570611078678" y="254.18801217290746" test_time="0" test_result="true" id="49810385-7853-483c-bbff-ca977cfb8e8d" />
+                     <tsk name="PathPlanning" x="324.06570611078655" y="327.81301217290746" test_time="0" test_result="true" id="034bf188-a6f3-43ea-9372-96ba35bcaf85" />
                </par>
-               <par name="MissionProgress" x="497.5721996172805" y="79.13119399108933" collapsed="false" id="98814f84-fe2b-4c02-90c8-626e30d67eef"> 
-                  <dec name="!L!" x="535.2388662839468" y="134.04786065775573"> 
-                        <seq name="Mission" x="526.3221996172807" y="191.3256384355338" collapsed="false" id="5205ce4c-157b-49ac-8b78-4deb75260be0"> 
-                              <tsk name="StandUp" x="476.4471996172807" y="255.32563843553402" test_time="0" test_result="true" id="c4777a0d-9565-4c53-adc8-dfee3e4e3aed" />
-                              <par name="@3" x="574.3221996172807" y="284.9089717688674" collapsed="false" id="25164dde-fe1e-4ea8-a222-e70135619f39"> 
-                                    <tsk name="FallingMonitor" x="464.32219961728003" y="340.90897176886784" test_time="0" test_result="true" id="7323b98c-5935-45bb-865a-8fc40963b8ac" />
-                                    <seq name="SearchObjectAndGo" x="610.0245805696612" y="389.3970670069629" collapsed="false" id="6de3db3d-b7da-4812-8944-11d90b3dfbf0"> 
-                                       <dec name="!L!" x="589.5515873015869" y="466.6269841269844"> 
-                                             <tsk name="PathPlanningFocus(target=Gate)" x="521.8138191088989" y="525.3333529432509" test_time="0" test_result="true" id="90e220a7-91df-4a9f-93fa-9fe3c4e2bfde" />
+               <par name="MissionProgress" x="396.5721996172805" y="212.13119399108933" collapsed="false" id="98814f84-fe2b-4c02-90c8-626e30d67eef"> 
+                  <dec name="!L!" x="434.2388662839468" y="267.04786065775573"> 
+                        <seq name="Mission" x="425.3221996172807" y="324.3256384355338" collapsed="false" id="5205ce4c-157b-49ac-8b78-4deb75260be0"> 
+                              <tsk name="StandUp" x="375.4471996172807" y="388.325638435534" test_time="0" test_result="true" id="c4777a0d-9565-4c53-adc8-dfee3e4e3aed" />
+                              <par name="@3" x="473.3221996172807" y="417.9089717688674" collapsed="false" id="25164dde-fe1e-4ea8-a222-e70135619f39"> 
+                                    <tsk name="FallingMonitor" x="363.32219961728003" y="473.90897176886784" test_time="0" test_result="true" id="7323b98c-5935-45bb-865a-8fc40963b8ac" />
+                                    <seq name="SearchObjectAndGo" x="509.0245805696612" y="522.397067006963" collapsed="false" id="6de3db3d-b7da-4812-8944-11d90b3dfbf0"> 
+                                       <dec name="!L!" x="488.5515873015869" y="599.6269841269843"> 
+                                             <tsk name="PathPlanningFocus(target=Gate)" x="420.8138191088989" y="658.3333529432509" test_time="0" test_result="true" id="90e220a7-91df-4a9f-93fa-9fe3c4e2bfde" />
                                        </dec>
-                                       <dec name="L" x="746.2499999999999" y="462.74999999999994"> 
-                                             <seq name="SearchPathAndGo" x="700.1492891943705" y="527.2756606355574" collapsed="false" id="36a0e71d-b281-4707-955c-7aa31617d5bb"> 
-                                                <dec name="!L!" x="681.3120719150107" y="597.5519186695644"> 
-                                                      <tsk name="searchObject(target=Gate)" x="612.1233567934368" y="667.305866540762" test_time="0" test_result="true" id="2a7668cb-1756-4f8e-9684-eaf90e3bcc40" />
+                                       <dec name="L" x="645.2499999999999" y="595.75"> 
+                                             <seq name="SearchPathAndGo" x="599.1492891943705" y="660.2756606355574" collapsed="false" id="36a0e71d-b281-4707-955c-7aa31617d5bb"> 
+                                                <dec name="!L!" x="580.3120719150107" y="730.5519186695644"> 
+                                                      <tsk name="searchObject(target=Gate)" x="511.12335679343676" y="800.305866540762" test_time="0" test_result="true" id="2a7668cb-1756-4f8e-9684-eaf90e3bcc40" />
                                                 </dec>
-                                                <dec name="!L!" x="824.7403218332341" y="595.5312521454971"> 
-                                                      <sel name="PathFollow" x="802.8015824045266" y="667.6458802635259" collapsed="false" id="4506d28d-394f-473c-8a25-22e328fcbef4"> 
-                                                            <par name="Zmp" x="852.4126935156368" y="737.4792135968619" collapsed="false" id="1fd7fbeb-e6ea-43c3-bd0d-576f7e6209bb"> 
-                                                                  <tsk name="DynamicLocomotion" x="803.6349157378576" y="828.7014358190784" test_time="0" test_result="true" id="4675c8a2-4623-4235-b386-920a5c243e82" />
+                                                <dec name="!L!" x="723.7403218332341" y="728.5312521454971"> 
+                                                      <sel name="PathFollow" x="701.8015824045266" y="800.6458802635259" collapsed="false" id="4506d28d-394f-473c-8a25-22e328fcbef4"> 
+                                                            <par name="Zmp" x="751.4126935156368" y="870.4792135968619" collapsed="false" id="1fd7fbeb-e6ea-43c3-bd0d-576f7e6209bb"> 
+                                                                  <tsk name="WalkerNode_Continuous" x="702.6349157378576" y="961.7014358190784" test_time="0" test_result="true" id="4675c8a2-4623-4235-b386-920a5c243e82" />
                                                             </par>
                                                       </sel>
                                                 </dec>

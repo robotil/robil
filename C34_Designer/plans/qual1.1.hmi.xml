@@ -1,0 +1,37 @@
+<plan descriptions="./plans/TaskDescriptions.xml">
+   <par name="Qualification1" x="534.5634920634913" y="-58.40909090909145" collapsed="false" id="63f81135-edae-4bc9-9ef3-9f12d8ba2c6b"> 
+         <par name="Perception" x="299.92477913985283" y="21.20787114464889" collapsed="false" id="50ae34a1-b4f6-42b9-a59e-23a1de45eaca"> 
+               <tsk name="LocalizationTrack" x="131.92477913985252" y="62.20787114464892" test_time="0" test_result="true" id="b680e465-1580-4fcd-964d-4ac78748b7d3" />
+               <tsk name="PathPlanning" x="308.9920634920629" y="66.32106782106726" test_time="0" test_result="true" id="0e442f5e-e4f4-4d44-9f36-038aa11042d8" />
+         </par>
+      <dec name="!L!" x="710.3412698412684" y="35.36868686868635"> 
+            <seq name="Mission" x="699.2777777777757" y="130.5750360750359" collapsed="false" id="e476250a-7477-4a98-a8c7-bed5aed10672"> 
+                  <seq name="UpToCliff" x="452.3571428571413" y="244.25757575757365" collapsed="false" id="63d27bf9-f56a-4c0f-8b32-583e8edd36c6"> 
+                        <tsk name="PathPlanningFocus(target=Qual1P1)" x="172.35714285714226" y="257.384559884557" test_time="0" test_result="true" id="9fe743dd-3101-4988-8e76-2f01615c6603" />
+                        <par name="OperatorCheckPoint" x="248.3873844324621" y="339.6862222961215" collapsed="false" id="51280328-4188-491d-b58b-73ff512de436"> 
+                           <dec name="T" x="374.7623844324627" y="413.6862222961174"> 
+                                 <par name="TimeControl" x="344.2623844324627" y="479.43622229611765" collapsed="false" id="6ea90c09-c8dd-461c-a97d-28309b5f39cc"> 
+                                       <seq name="OperatorRequest" x="244.26238443246223" y="561.4362222961174" collapsed="false" id="ac9894d8-e0ff-49dc-adf7-e592fa7172b8"> 
+                                             <tsk name="PushHMI(data=panoramic_image)" x="-14.7376155675355" y="620.436222296119" test_time="0" test_result="true" id="ea99ba45-d6d5-4dae-b468-f6051e77638f" />
+                                             <tsk name="PushHMI(data=occupancy_grid)" x="32.26238443246348" y="659.4362222961201" test_time="0" test_result="true" id="831ef2d6-bce3-4157-a1ea-46aabcd10975" />
+                                             <tsk name="PushHMI(data=path)" x="132.26238443246325" y="701.4362222961201" test_time="0" test_result="true" id="df88c5a3-657d-4c0d-a8d8-c62761d61e27" />
+                                             <tsk name="HMIResponse" x="294.26238443246245" y="698.4362222961201" test_time="0" test_result="true" id="ad0677e8-44e7-4a42-ad85-d5a4a85c838d" />
+                                       </seq>
+                                       <tsk name="TimeoutMonitor(threshold=1000)" x="339.2623844324627" y="607.436222296119" test_time="0" test_result="true" id="86a5a5f5-ea00-4ea8-89bc-965597dafa4d" />
+                                 </par>
+                           </dec>
+                        </par>
+                        <tsk name="WalkerNode_Continuous" x="435.3412698412686" y="361.2258297258264" test_time="0" test_result="true" id="4675c8a2-4623-4235-b386-920a1c243e82" />
+                  </seq>
+                  <seq name="OverCliff" x="771.2142857142823" y="249.01948051947818" collapsed="false" id="b668d8b3-6787-4d21-a051-17def7419d8b"> 
+                        <tsk name="PathPlanningFocus(target=Qual1P2)" x="604.4523809523782" y="370.146464646463" test_time="0" test_result="true" id="9fe743dd-3101-4988-8e76-2f01615c6604" />
+                        <tsk name="QuasiStaticWalk" x="780.7380952380912" y="347.7496392496361" test_time="0" test_result="true" id="c9112af6-dbb8-4445-8948-59f96dacf28b" />
+                  </seq>
+                  <seq name="ToFinish" x="974.9603174603162" y="219.9559884559862" collapsed="false" id="2deef5af-9445-4863-a0c5-4ce0d1a71f4d"> 
+                        <tsk name="PathPlanningFocus(target=Qual1P3)" x="925.9444444444437" y="329.09884559884335" test_time="0" test_result="true" id="9fe743dd-3101-4988-8e76-2f01615c6605" />
+                        <tsk name="DynamicLocomotion" x="1143.7857142857165" y="338.6861471861445" test_time="0" test_result="true" id="4675c8a2-4623-4235-b386-920a5c243e82" />
+                  </seq>
+            </seq>
+      </dec>
+   </par>
+</plan>

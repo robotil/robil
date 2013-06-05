@@ -196,15 +196,27 @@ void MapMatrix::computeMMatrix(std::vector<pclPlane*>* mapPlanes,pcl::PointCloud
 						newPlane->rating=20;
 						ms->square_Planes->push_back(newPlane);
 						if (p.z>(0.5+pelvisHeight-PELVIS_HEIGHT) || p.z<(-0.4+pelvisHeight-PELVIS_HEIGHT)){
-							std::cout<<"pelvis height:"<<pelvisHeight<<" point z:"<<p.z<<"\n";
+							//std::cout<<"pelvis height:"<<pelvisHeight<<" point z:"<<p.z<<"\n";
 							ms->square_status = BLOCKED;
 						}
 						else{
-							/*if (p.z>0.5+-0.83 || p.z<-0.2+-0.83){
-								ms->square_status = ;
-							}*/
 							if(ms->square_status!=BLOCKED){
-								ms->square_status = AVAILABLE;
+								if(p.z>(0.15+pelvisHeight-PELVIS_HEIGHT) || p.z<(-0.15+pelvisHeight-PELVIS_HEIGHT)){
+									ms->square_status = DEBREE;
+									//cout<<p.z<<"\n";
+								}
+							}
+							if(ms->square_status!=BLOCKED && ms->square_status!=DEBREE){
+								double a=tempPlane->coefficient_x;
+								double b=tempPlane->coefficient_y;
+								double c=tempPlane->coefficient_z;
+								double ang1 = std::acos((c)/std::sqrt(a*a+b*b+c*c))*180/M_PI;
+								double ang2 = std::acos((a)/std::sqrt(a*a+b*b+c*c))*180/M_PI;
+								double ang3 = std::acos((b)/std::sqrt(a*a+b*b+c*c))*180/M_PI;
+								if(std::abs(ang1)<6 && std::abs(ang1)>2)
+									ms->square_status = HILL;
+								else
+									ms->square_status = AVAILABLE;
 							}
 						}
 					}else{

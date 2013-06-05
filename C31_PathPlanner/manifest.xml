@@ -14,6 +14,7 @@
   <depend package="C22_transformations"/>
   <depend package="C23_ObjectRecognition"/>
   <depend package="C0_RobilTask"/>
+  <depend package="C42_WalkType"/>
 
 </package>
 

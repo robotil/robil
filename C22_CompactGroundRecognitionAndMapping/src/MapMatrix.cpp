@@ -194,14 +194,17 @@ void MapMatrix::computeMMatrix(std::vector<pclPlane*>* mapPlanes,pcl::PointCloud
 						newPlane->addRating();
 						newPlane->rating=20;
 						ms->square_Planes->push_back(newPlane);
-						if (p.z>(0.5+(-0.83)) || p.z<(-0.4+-0.83)){
+						if (p.z>(0.5+(-PELVIS_HEIGHT)) || p.z<(-0.4-PELVIS_HEIGHT)){
 							ms->square_status = BLOCKED;
 						}
 						else{
-							/*if (p.z>0.5+-0.83 || p.z<-0.2+-0.83){
-								ms->square_status = ;
-							}*/
 							if(ms->square_status!=BLOCKED){
+								if(p.z>(0.15-PELVIS_HEIGHT) || p.z<(-0.15-PELVIS_HEIGHT)){
+									ms->square_status = DEBREE;
+									cout<<p.z<<"\n";
+								}
+							}
+							if(ms->square_status!=BLOCKED && ms->square_status!=DEBREE){
 								ms->square_status = AVAILABLE;
 							}
 						}

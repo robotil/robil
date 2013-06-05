@@ -24,10 +24,10 @@ using namespace C0_RobilTask;
 #include <string>
 #include <vector>
 #include <boost/lexical_cast.hpp>
-#include "FK.h"
-#include "IK.h"
-#include "Path.h"
-#include "Trace.h"
+#include <C67_CarManipulation/FK.h>
+#include <C67_CarManipulation/IK.h>
+#include <C67_CarManipulation/Path.h>
+#include <C67_CarManipulation/Trace.h>
 // end added
 
 //variables added
@@ -43,6 +43,7 @@ static const unsigned int numJoints = 28;
 
 static RPY argTarget;
 static double startAngle, endAngle;
+static double lastAngle = 0;
 static bool callBackRun = false;
 //end added
 
@@ -186,6 +187,10 @@ public:
 		if( exists(args,"EndAngle") ){
 			endAngle = cast<double>(args["EndAngle"]);
 		}
+		if( exists(args,"angle") ){
+			endAngle = cast<double>(args["angle"]);
+			startAngle = lastAngle;
+		}
 		if( exists(args,"x") ){
 			argTarget.x = cast<double>(args["x"]);
 		}
@@ -214,7 +219,8 @@ public:
 			argTarget.Y = cast<double>(args["Y"]);
 		}
 
-		if ((!exists(args,"EndAngle"))||(!exists(args,"StartAngle")))
+		if (((!exists(args,"EndAngle"))||(!exists(args,"StartAngle")))&&
+			(!exists(args,"angle")))
 		{
 			ROS_INFO("%s: No operation Defined!", _name.c_str());
 			retValue  = NoParams;
@@ -257,6 +263,8 @@ public:
 				int n = 10;
 				IkSolution IkNext[n+1];
 				RPY argTarget2;
+				// this array is used to hold the angle position referenced to the array index.
+				double angleArray[n+1];
 
 				double delta = (endAngle-startAngle)/n;
 				double angle = startAngle;
@@ -264,6 +272,8 @@ public:
 				{
 					argTarget2 = TraceAngle(argTarget, RPY(-.05,.18,0,M_PI/2-M_PI/6, 0,0), angle);
 					IkNext[i] = lScanRPY(as.position[q1], as.position[q2], as.position[q3], argTarget2,0.01);
+					// save the angle position
+					angleArray[i] = angle;
 					if (!IkNext[i].valid){
 						ROS_INFO("%s: No Solution!", _name.c_str());
 						retValue  = NoSolution;
@@ -275,11 +285,18 @@ public:
 
 
 
-				lMove(IkCurrent, IkNext[0], 1, 50, NoStartEnd);
+				lMove(IkCurrent, IkNext[0], 1, 50, NoEnd);
+				// update lastAngle
+				lastAngle = angleArray[0];
 				for (int i = 0; i< n-1; i++)
+				{
 					lMove(IkNext[i], IkNext[i+1], 3.0/n, 50, NoStartEnd);
-				lMove(IkNext[n-1], IkNext[n], 3.0/n, 50, NoStartEnd);
-
+					// update lastAngle
+					lastAngle = angleArray[i+1];
+				}
+				lMove(IkNext[n-1], IkNext[n], 3.0/n, 50, NoStart);
+				// update lastAngle
+				lastAngle = angleArray[n];
 
 				time -= 5200 ;
 

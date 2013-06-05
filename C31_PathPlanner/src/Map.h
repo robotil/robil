@@ -45,12 +45,11 @@ public:
 template <typename Item>
 class MapT:public BaseMap{
 public:
-	enum STATUS{ST_AVAILABLE=0,ST_BLOCKED,ST_UNCHARTED};
 
 
 	MapT(int w, int h):BaseMap(w,h){
 		_data.resize(_w*_h);
-		for(size_t i=0;i<_data.size();i++) _data[i]=ST_UNCHARTED;
+		for(size_t i=0;i<_data.size();i++) _data[i]=0;
 	}
 	MapT(int w, int h, Item* cmap):BaseMap(w,h){
 		_data.resize(_w*_h);
@@ -88,14 +87,14 @@ public:
 		return *this;
 	}
 
-	char str(int x, int y)const{
-		char c = (*this)(x,y);
-		if(c==ST_AVAILABLE) return '.';
-		if(c==ST_BLOCKED) return 'B';
-		if(c==ST_UNCHARTED) return '-';
-		if(c>=32) return c;
-		return '?';
-	}
+//	char str(int x, int y)const{
+//		char c = (*this)(x,y);
+//		if(c==ST_AVAILABLE) return '.';
+//		if(c==ST_BLOCKED) return 'B';
+//		if(c==ST_UNCHARTED) return '-';
+//		if(c>=32) return c;
+//		return '?';
+//	}
 
 //	bool inRange(long x, long y)const;
 //	void approximate(const long cx, const long cy, long& x, long& y)const;
@@ -128,7 +127,14 @@ class ObsMap:public MapT<char>{
 
 	EXTENDS(char, ObsMap)
 
-	enum STATUS{ST_AVAILABLE=0,ST_BLOCKED,ST_UNCHARTED};
+	enum STATUS{
+		ST_AVAILABLE=0,
+		ST_BLOCKED=1,
+		ST_UNCHARTED=2,
+		ST_ATLAS=3,
+		ST_MUD=4,
+		ST_DEBREES=5,
+	};
 
 
 
@@ -137,8 +143,32 @@ class ObsMap:public MapT<char>{
 		if(c==ST_AVAILABLE) return '.';
 		if(c==ST_BLOCKED) return 'B';
 		if(c==ST_UNCHARTED) return '-';
+		if(c==ST_ATLAS) return 'A';
+		if(c==ST_MUD) return 'M';
+		if(c==ST_DEBREES) return 'D';
 		if(c>=32) return c;
 		return '?';
+	}
+
+	static STATUS filterObstacles(int value){
+		switch((STATUS)value){
+		case ST_AVAILABLE: return ST_AVAILABLE;
+		case ST_UNCHARTED: return ST_UNCHARTED;
+		case ST_BLOCKED: return ST_BLOCKED;
+		case ST_ATLAS: return ST_AVAILABLE;
+		case ST_MUD: return ST_AVAILABLE;
+		case ST_DEBREES: return ST_AVAILABLE;
+		}
+	}
+	static STATUS filterTerrain(int value){
+		switch((STATUS)value){
+		case ST_AVAILABLE: return ST_UNCHARTED;
+		case ST_UNCHARTED: return ST_UNCHARTED;
+		case ST_BLOCKED: return ST_UNCHARTED;
+		case ST_ATLAS: return ST_ATLAS;
+		case ST_MUD: return ST_MUD;
+		case ST_DEBREES: return ST_DEBREES;
+		}
 	}
 
 	void approximate(const long cx, const long cy, long& x, long& y)const;
@@ -162,6 +192,7 @@ public:
 	MapEditor(){};
 	ObsMap coloring(const ObsMap& source, size_t x, size_t y, char av, char bl)const;
 	ObsMap replace(const ObsMap& source, const char from, const char to)const;
+	ObsMap cut(const ObsMap& source, const char main_color, const char other_color)const;
 
 	enum MergeOperator{
 		OR, AND, XOR
@@ -176,12 +207,13 @@ private:
 class World{
 public:
 	ObsMap grid;
+	ObsMap terrain;
 	AltMap altitudes;
 	ObsMap walls;
 	AltMap slops;
 	AltMap costs;
-	World():grid(0,0),altitudes(0,0),walls(0,0),slops(0,0),costs(0,0){}
-	void update(const ObsMap& grid, const AltMap& alts);
+	World():grid(0,0),terrain(0,0),altitudes(0,0),walls(0,0),slops(0,0),costs(0,0){}
+	void update(const ObsMap& grid, const AltMap& alts, const ObsMap& terrain);
 #if MAP_MODE == MM_ALTS
 	size_t w()const{ return altitudes.w(); }
 	size_t h()const{ return altitudes.h(); }

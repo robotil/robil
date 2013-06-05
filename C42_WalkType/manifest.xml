@@ -1,0 +1,17 @@
+<package>
+  <description brief="C42_WalkType">
+
+     C42_WalkType
+
+  </description>
+  <author>dan</author>
+  <license>BSD</license>
+  <review status="unreviewed" notes=""/>
+  <url>http://ros.org/wiki/C42_WalkType</url>
+  <depend package="roscpp"/>
+  <depend package="rospy"/>
+  <depend package="C0_RobilTask"/>
+
+</package>
+
+

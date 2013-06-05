@@ -26,8 +26,8 @@
 #include <iostream>
 #include <string>
 #include <boost/lexical_cast.hpp>
-#include "FK.h"
-#include "IK.h"
+#include <C67_CarManipulation/FK.h>
+#include <C67_CarManipulation/IK.h>
 
 ros::Publisher pub_joint_commands_;
 osrf_msgs::JointCommands jointcommands;
