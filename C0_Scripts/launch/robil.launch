@@ -1,0 +1,15 @@
+<launch>
+
+	<include file="$(find C45_PostureControl)/launch/C45_PostureControl.launch" />
+
+	<include file="$(find C0_Scripts)/launch/perception_light.launch" />
+	<include file="$(find C0_Scripts)/launch/dm.launch" />
+	<node pkg="C45_PostureControl" type="foot_contact_filter.py" name="C45_PostureControl_foot_contact" output="log" respawn="true" />
+
+	<node pkg="rosservice" type="rosservice" name="global_loc1" args="call /PoseController/start '{}'"/>
+	<node pkg="rosservice" type="rosservice" name="global_loc2" args="call /PoseController/neck_movement 'neck_ay: 0.0'"/>
+	<node pkg="rosservice" type="rosservice" name="global_loc3" args="call /PoseController/stop '{}'"/>
+	<include file="$(find C0_Scripts)/launch/walking.launch" />
+	<include file="$(find C0_Scripts)/launch/driving.launch" />
+
+</launch>
