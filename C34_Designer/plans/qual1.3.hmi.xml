@@ -1,0 +1,52 @@
+<plan descriptions="./plans/TaskDescriptions.xml">
+   <seq name="event2" x="373.2204680155487" y="-471.3893687794733" collapsed="false" id="2cf34c64-413a-433e-9b7f-d5bf53c411d4"> 
+         <par name="@1" x="384.4585632536441" y="-419.4369878270922" collapsed="false" id="d4a61bf7-e77e-4285-8dd2-af8c795703ed"> 
+               <par name="Perception" x="279.0657061107868" y="-315.1869878270923" collapsed="false" id="0e33ff22-d93c-49ce-877a-e52301e84de8"> 
+                     <tsk name="LocalizationTrack" x="184.06570611078678" y="-268.81198782709254" test_time="0" test_result="true" id="3321e5f6-cb77-47ac-b1d4-5fbe421f39d7" />
+                     <tsk name="PathPlanning" x="339.06570611078655" y="-195.18698782709254" test_time="0" test_result="true" id="c06ebf4c-63f9-4af0-8c6b-b0722bc42a1e" />
+               </par>
+               <par name="MissionProgress" x="411.5721996172805" y="-310.86880600891067" collapsed="false" id="4af25bbb-748a-4474-82fb-f65a0d114321"> 
+                  <dec name="!L!" x="449.2388662839468" y="-255.95213934224427"> 
+                        <seq name="Mission" x="440.3221996172807" y="-198.6743615644662" collapsed="false" id="f364212c-5f29-4012-8867-2eb052337548"> 
+                              <tsk name="StandUp" x="390.4471996172807" y="-134.67436156446598" test_time="0" test_result="true" id="ed096adf-3fb5-4126-8e6d-8c7e192bda40" />
+                              <par name="@3" x="488.3221996172807" y="-105.09102823113261" collapsed="false" id="2d83acf4-3154-4693-93cf-4c041599a880"> 
+                                    <tsk name="FallingMonitor" x="378.32219961728003" y="-49.09102823113216" test_time="0" test_result="true" id="9a938371-52f8-43b5-8753-1eace8401984" />
+                                    <seq name="SearchObjectAndGo" x="524.0245805696612" y="-0.6029329930370295" collapsed="false" id="fbef9b78-6d76-4097-85e3-92e7ff8c971a"> 
+                                       <dec name="!L!" x="503.5515873015869" y="76.62698412698433"> 
+                                             <tsk name="PathPlanningFocus(target=Gate)" x="435.8138191088989" y="135.33335294325093" test_time="0" test_result="true" id="33cec6c8-4dc3-45e4-9513-e890d3312871" />
+                                       </dec>
+                                       <dec name="L" x="660.2499999999999" y="72.75"> 
+                                             <seq name="SearchPathAndGo" x="614.1492891943705" y="137.27566063555741" collapsed="false" id="4f7e4cc5-a5c6-4a01-b95b-97e3e375ec05"> 
+                                                <dec name="!L!" x="595.3120719150107" y="207.55191866956443"> 
+                                                      <tsk name="searchObject(target=Gate)" x="349.12335679343676" y="294.30586654076205" test_time="0" test_result="true" id="fdf29c9f-2c5d-45da-b311-d49d8e11a4e9" />
+                                                </dec>
+                                                   <par name="OperatorCheckPoint" x="548.3873844324621" y="291.6862222961215" collapsed="false" id="90bddf29-25dd-4a02-a873-503af4b3d97b"> 
+                                                      <dec name="T" x="600.7623844324627" y="367.6862222961174"> 
+                                                            <par name="TimeControl" x="519.2623844324627" y="450.43622229611765" collapsed="false" id="982e753d-bd65-4d7a-92ea-5ea3104ffac3"> 
+                                                                  <seq name="OperatorRequest" x="419.2623844324622" y="532.4362222961174" collapsed="false" id="919b625c-d7a8-41a3-a90c-9477f3681667"> 
+                                                                        <tsk name="PushHMI(data=panoramic_image)" x="160.2623844324645" y="591.436222296119" test_time="0" test_result="true" id="91052ec9-673c-49b6-8770-1777c05b07cc" />
+                                                                        <tsk name="PushHMI(data=occupancy_grid)" x="207.26238443246348" y="630.4362222961201" test_time="0" test_result="true" id="893d61ce-94e3-43ce-a9a9-fe8a24a2af04" />
+                                                                        <tsk name="PushHMI(data=path)" x="307.26238443246325" y="672.4362222961201" test_time="0" test_result="true" id="f76c9028-92de-4214-aec7-996f4db1985d" />
+                                                                        <tsk name="HMIResponse" x="469.26238443246245" y="669.4362222961201" test_time="0" test_result="true" id="853c00a4-6eb7-4232-9e2a-79af31793544" />
+                                                                  </seq>
+                                                                  <tsk name="TimeoutMonitor(threshold=1000)" x="514.2623844324627" y="578.436222296119" test_time="0" test_result="true" id="7bb895b8-5feb-4d16-8801-e2b918caf563" />
+                                                            </par>
+                                                      </dec>
+                                                   </par>
+                                                <dec name="!L!" x="738.7403218332341" y="205.5312521454971"> 
+                                                      <sel name="PathFollow" x="716.8015824045266" y="277.6458802635259" collapsed="false" id="dc355930-7961-4a11-8221-b375cc395a14"> 
+                                                            <par name="Zmp" x="766.4126935156368" y="347.4792135968619" collapsed="false" id="344e53e8-faeb-4a45-9a40-c71a8a88a550"> 
+                                                                  <tsk name="WalkerNode_Continuous" x="717.6349157378576" y="438.70143581907837" test_time="0" test_result="true" id="8137983d-3539-48ce-b687-c3ac120ba7d8" />
+                                                            </par>
+                                                      </sel>
+                                                </dec>
+                                             </seq>
+                                       </dec>
+                                    </seq>
+                              </par>
+                        </seq>
+                  </dec>
+               </par>
+         </par>
+   </seq>
+</plan>
