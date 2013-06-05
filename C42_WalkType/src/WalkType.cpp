@@ -6,22 +6,22 @@
 #include <C0_RobilTask/StringOperations.h>
 
 #include <C42_WalkType/mud.h>
-#include <C42_WalkType/extreme_slop.h>
+#include <C42_WalkType/extreme_slope.h>
 
 
 
 ros::Time last_mud_notification;
-ros::Time last_extreme_slop_notification;
+ros::Time last_extreme_slope_notification;
 
 bool isMud(){
 	ros::Time now = ros::Time::now();
 	ros::Duration maxDuration(3.0);
 	return (now - last_mud_notification) > maxDuration;
 }
-bool isExtremeSlop(){
+bool isExtremeslope(){
 	ros::Time now = ros::Time::now();
 	ros::Duration maxDuration(3.0);
-	return (now - last_extreme_slop_notification) > maxDuration;
+	return (now - last_extreme_slope_notification) > maxDuration;
 }
 
 enum WALKTYPE{
@@ -29,7 +29,7 @@ enum WALKTYPE{
 } walk_type = DYNAMIC;
 
 void update_walk_type(){
-	if(isExtremeSlop()){
+	if(isExtremeslope()){
 		if(isMud()){
 			walk_type = CRAWL;
 		}else{
@@ -48,8 +48,8 @@ void cb_mud_notifier(const C42_WalkType::mud::ConstPtr msg){
 	last_mud_notification = ros::Time::now();
 }
 
-void cb_extreme_slop_notifier(const C42_WalkType::extreme_slop::ConstPtr msg){
-	last_extreme_slop_notification = ros::Time::now();
+void cb_extreme_slope_notifier(const C42_WalkType::extreme_slope::ConstPtr msg){
+	last_extreme_slope_notification = ros::Time::now();
 }
 using namespace std;
 using namespace C0_RobilTask;
@@ -115,7 +115,7 @@ int main(int argc, char** argv){
 	ros::NodeHandle node;
 
 	ros::Subscriber mud_notifier = node.subscribe("/walk_notification/mud", 10, cb_mud_notifier);
-	ros::Subscriber extrim_slop_notifier = node.subscribe("/walk_notification/extreme_slop", 10, cb_extreme_slop_notifier);
+	ros::Subscriber extrim_slope_notifier = node.subscribe("/walk_notification/extreme_slope", 10, cb_extreme_slope_notifier);
 
 	task_WalkCrawl t_crawl;
 	task_WalkDynamic t_dynamic;
