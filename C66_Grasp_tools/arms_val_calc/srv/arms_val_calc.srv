@@ -1,0 +1,9 @@
+float64 x_dot
+float64 y_dot
+float64 z_dot
+float64 roll_dot
+float64 pitch_dot
+float64 yaw_dot
+---
+float64[6] q_left_dot
+float64[6] q_right_dot

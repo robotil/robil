@@ -1,0 +1,505 @@
+<?xml version="1.0" encoding="UTF-8"?><diagram program="umlet" version="11.3">
+  <zoom_level>8</zoom_level>
+  <element>
+    <type>com.umlet.element.custom.FinalState</type>
+    <coordinates>
+      <x>296</x>
+      <y>120</y>
+      <w>16</w>
+      <h>16</h>
+    </coordinates>
+    <panel_attributes/>
+    <additional_attributes/>
+  </element>
+  <element>
+    <type>com.umlet.element.custom.State</type>
+    <coordinates>
+      <x>800</x>
+      <y>328</y>
+      <w>80</w>
+      <h>32</h>
+    </coordinates>
+    <panel_attributes>Left Step (4)</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <type>com.umlet.element.Relation</type>
+    <coordinates>
+      <x>344</x>
+      <y>336</y>
+      <w>92</w>
+      <h>248</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;-
+Initialize
+
+</panel_attributes>
+    <additional_attributes>48;24;48;232</additional_attributes>
+  </element>
+  <element>
+    <type>com.umlet.element.custom.State</type>
+    <coordinates>
+      <x>976</x>
+      <y>328</y>
+      <w>88</w>
+      <h>32</h>
+    </coordinates>
+    <panel_attributes>Right Step (5)</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <type>com.umlet.element.Relation</type>
+    <coordinates>
+      <x>840</x>
+      <y>264</y>
+      <w>152</w>
+      <h>88</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;-
+NextState</panel_attributes>
+    <additional_attributes>136;72;80;40;24;64</additional_attributes>
+  </element>
+  <element>
+    <type>com.umlet.element.Relation</type>
+    <coordinates>
+      <x>856</x>
+      <y>328</y>
+      <w>136</w>
+      <h>82</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;-
+ 
+NextState</panel_attributes>
+    <additional_attributes>24;24;64;48;120;24</additional_attributes>
+  </element>
+  <element>
+    <type>com.umlet.element.custom.State</type>
+    <coordinates>
+      <x>376</x>
+      <y>328</y>
+      <w>96</w>
+      <h>32</h>
+    </coordinates>
+    <panel_attributes>Initializing (1)</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <type>com.umlet.element.custom.State</type>
+    <coordinates>
+      <x>504</x>
+      <y>328</y>
+      <w>80</w>
+      <h>32</h>
+    </coordinates>
+    <panel_attributes>Pre-Step (2)</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <type>com.umlet.element.Relation</type>
+    <coordinates>
+      <x>448</x>
+      <y>304</y>
+      <w>72</w>
+      <h>56</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;-
+Start
+
+</panel_attributes>
+    <additional_attributes>56;40;24;40</additional_attributes>
+  </element>
+  <element>
+    <type>com.umlet.element.custom.State</type>
+    <coordinates>
+      <x>384</x>
+      <y>192</y>
+      <w>72</w>
+      <h>32</h>
+    </coordinates>
+    <panel_attributes>Failing (-1)</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <type>com.umlet.element.Relation</type>
+    <coordinates>
+      <x>384</x>
+      <y>200</y>
+      <w>56</w>
+      <h>144</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;-
+Fail
+
+</panel_attributes>
+    <additional_attributes>32;24;32;128</additional_attributes>
+  </element>
+  <element>
+    <type>com.umlet.element.Relation</type>
+    <coordinates>
+      <x>560</x>
+      <y>304</y>
+      <w>104</w>
+      <h>56</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;-
+NextState
+</panel_attributes>
+    <additional_attributes>88;40;24;40</additional_attributes>
+  </element>
+  <element>
+    <type>com.umlet.element.custom.State</type>
+    <coordinates>
+      <x>648</x>
+      <y>328</y>
+      <w>88</w>
+      <h>32</h>
+    </coordinates>
+    <panel_attributes>First Step (3)</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <type>com.umlet.element.Relation</type>
+    <coordinates>
+      <x>712</x>
+      <y>304</y>
+      <w>104</w>
+      <h>56</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;-
+NextState
+</panel_attributes>
+    <additional_attributes>88;40;24;40</additional_attributes>
+  </element>
+  <element>
+    <type>com.umlet.element.Relation</type>
+    <coordinates>
+      <x>296</x>
+      <y>184</y>
+      <w>104</w>
+      <h>176</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;-
+Initialize</panel_attributes>
+    <additional_attributes>80;160;48;160;48;24;88;24</additional_attributes>
+  </element>
+  <element>
+    <type>com.umlet.element.custom.State</type>
+    <coordinates>
+      <x>384</x>
+      <y>568</y>
+      <w>72</w>
+      <h>32</h>
+    </coordinates>
+    <panel_attributes>Idle (0)</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <type>com.umlet.element.Relation</type>
+    <coordinates>
+      <x>280</x>
+      <y>112</y>
+      <w>120</w>
+      <h>488</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;-
+
+
+</panel_attributes>
+    <additional_attributes>104;472;24;472;24;24</additional_attributes>
+  </element>
+  <element>
+    <type>com.umlet.element.custom.State</type>
+    <coordinates>
+      <x>792</x>
+      <y>448</y>
+      <w>80</w>
+      <h>40</h>
+    </coordinates>
+    <panel_attributes>PreStop
+(9)
+</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <type>com.umlet.element.Relation</type>
+    <coordinates>
+      <x>792</x>
+      <y>336</y>
+      <w>70</w>
+      <h>128</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;-
+Stop
+</panel_attributes>
+    <additional_attributes>40;112;40;24</additional_attributes>
+  </element>
+  <element>
+    <type>com.umlet.element.Relation</type>
+    <coordinates>
+      <x>840</x>
+      <y>336</y>
+      <w>192</w>
+      <h>128</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;-
+Stop
+</panel_attributes>
+    <additional_attributes>24;112;136;88;176;24</additional_attributes>
+  </element>
+  <element>
+    <type>com.umlet.element.Class</type>
+    <coordinates>
+      <x>760</x>
+      <y>40</y>
+      <w>328</w>
+      <h>384</h>
+    </coordinates>
+    <panel_attributes>bt=.
+</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <type>com.umlet.element.Relation</type>
+    <coordinates>
+      <x>392</x>
+      <y>336</y>
+      <w>70</w>
+      <h>248</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;.
+Stop
+</panel_attributes>
+    <additional_attributes>40;232;40;24</additional_attributes>
+  </element>
+  <element>
+    <type>com.umlet.element.Relation</type>
+    <coordinates>
+      <x>280</x>
+      <y>120</y>
+      <w>152</w>
+      <h>472</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;.
+Stop
+</panel_attributes>
+    <additional_attributes>104;456;40;416;40;40;136;40;136;72</additional_attributes>
+  </element>
+  <element>
+    <type>com.umlet.element.Relation</type>
+    <coordinates>
+      <x>736</x>
+      <y>544</y>
+      <w>126</w>
+      <h>56</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;-
+Stop
+</panel_attributes>
+    <additional_attributes>24;40;96;40;96;24</additional_attributes>
+  </element>
+  <element>
+    <type>com.umlet.element.custom.State</type>
+    <coordinates>
+      <x>1160</x>
+      <y>456</y>
+      <w>80</w>
+      <h>40</h>
+    </coordinates>
+    <panel_attributes>Emergency
+Stop
+(8)</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <type>com.umlet.element.Relation</type>
+    <coordinates>
+      <x>1136</x>
+      <y>352</y>
+      <w>108</w>
+      <h>120</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;-
+Emergency
+Stop
+</panel_attributes>
+    <additional_attributes>56;104;56;24</additional_attributes>
+  </element>
+  <element>
+    <type>com.umlet.element.Relation</type>
+    <coordinates>
+      <x>376</x>
+      <y>472</y>
+      <w>832</w>
+      <h>274</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;-
+ 
+NextState
+</panel_attributes>
+    <additional_attributes>24;128;24;240;816;240;816;24</additional_attributes>
+  </element>
+  <element>
+    <type>com.umlet.element.custom.State</type>
+    <coordinates>
+      <x>976</x>
+      <y>176</y>
+      <w>88</w>
+      <h>48</h>
+    </coordinates>
+    <panel_attributes>Turn Right
+Right Step 
+(7)</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <type>com.umlet.element.Relation</type>
+    <coordinates>
+      <x>856</x>
+      <y>192</y>
+      <w>136</w>
+      <h>74</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;-
+ 
+TurnRight</panel_attributes>
+    <additional_attributes>24;24;64;40;120;24</additional_attributes>
+  </element>
+  <element>
+    <type>com.umlet.element.custom.State</type>
+    <coordinates>
+      <x>800</x>
+      <y>176</y>
+      <w>80</w>
+      <h>48</h>
+    </coordinates>
+    <panel_attributes>Turn Right
+Left Step 
+(6)</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <type>com.umlet.element.Relation</type>
+    <coordinates>
+      <x>840</x>
+      <y>120</y>
+      <w>152</w>
+      <h>80</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;-
+NextState</panel_attributes>
+    <additional_attributes>136;64;80;40;24;56</additional_attributes>
+  </element>
+  <element>
+    <type>com.umlet.element.Relation</type>
+    <coordinates>
+      <x>704</x>
+      <y>192</y>
+      <w>112</w>
+      <h>152</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;-
+TurnRight
+</panel_attributes>
+    <additional_attributes>96;24;24;136</additional_attributes>
+  </element>
+  <element>
+    <type>com.umlet.element.Relation</type>
+    <coordinates>
+      <x>808</x>
+      <y>200</y>
+      <w>200</w>
+      <h>144</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;-
+
+NextState</panel_attributes>
+    <additional_attributes>24;128;24;64;128;64;184;24</additional_attributes>
+  </element>
+  <element>
+    <type>com.umlet.element.Relation</type>
+    <coordinates>
+      <x>832</x>
+      <y>200</y>
+      <w>208</w>
+      <h>144</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;-
+ 
+TurnRight</panel_attributes>
+    <additional_attributes>24;24;136;64;192;128</additional_attributes>
+  </element>
+  <element>
+    <type>com.umlet.element.custom.State</type>
+    <coordinates>
+      <x>1152</x>
+      <y>312</y>
+      <w>88</w>
+      <h>64</h>
+    </coordinates>
+    <panel_attributes>ALL STATES</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <type>com.umlet.element.Relation</type>
+    <coordinates>
+      <x>792</x>
+      <y>464</y>
+      <w>70</w>
+      <h>80</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;-
+Stop
+</panel_attributes>
+    <additional_attributes>40;64;40;24</additional_attributes>
+  </element>
+  <element>
+    <type>com.umlet.element.custom.State</type>
+    <coordinates>
+      <x>792</x>
+      <y>528</y>
+      <w>80</w>
+      <h>40</h>
+    </coordinates>
+    <panel_attributes>Last Step
+(10)</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <type>com.umlet.element.custom.State</type>
+    <coordinates>
+      <x>680</x>
+      <y>560</y>
+      <w>80</w>
+      <h>40</h>
+    </coordinates>
+    <panel_attributes>Stopping
+(11)</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <type>com.umlet.element.Relation</type>
+    <coordinates>
+      <x>432</x>
+      <y>544</y>
+      <w>264</w>
+      <h>56</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;-
+Stop
+</panel_attributes>
+    <additional_attributes>24;40;248;40</additional_attributes>
+  </element>
+  <element>
+    <type>com.umlet.element.Relation</type>
+    <coordinates>
+      <x>424</x>
+      <y>448</y>
+      <w>384</w>
+      <h>136</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;-
+Stopped
+</panel_attributes>
+    <additional_attributes>24;120;368;24</additional_attributes>
+  </element>
+</diagram>

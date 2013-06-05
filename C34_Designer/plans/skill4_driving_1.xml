@@ -1,0 +1,25 @@
+<plan descriptions="./plans/TaskDescriptions.xml">
+   <par name="skill4" x="217.9458607691417" y="-373.7612845817225" collapsed="false" id="38e95426-0932-40d2-aefa-270a3dcd9298"> 
+         <par name="Driving" x="180.9257142489883" y="-168.6806985011384" collapsed="false" id="6207a22b-f609-4f49-9579-2e83f0c45e36"> 
+               <tsk name="PathPlanning" x="29.925714248990573" y="-86.68069850113886" test_time="0" test_result="true" id="32da76e3-cd3b-456e-84d4-9dfe611b91c6" />
+            <dec name="!L!" x="279.21142853469973" y="-106.39498421542459"> 
+                  <seq name="Driving" x="285.1345054577823" y="-11.197182017621799" collapsed="false" id="3121acdd-f660-4d53-96b2-47029c756b6f"> 
+                        <tsk name="PathPlanningFocus(x=0,y=10)" x="87.34377864074304" y="62.37925908513364" test_time="0" test_result="true" id="5668a95a-a827-472a-bae2-b4fff00a36a7" />
+                        <seq name="@4" x="359.3658979908996" y="69.9434870684862" collapsed="false" id="70f216a5-7259-412e-a108-658b5d28d109"> 
+                              <tsk name="InitDrive" x="180.39766335251534" y="175.42687813275586" test_time="0" test_result="true" id="6e5cc7d2-bc5b-46c9-b6fc-9adb8ab9b935" />
+                              <sel name="@5" x="357.3658979908994" y="130.94348706848655" collapsed="false" id="44efb3a3-36bc-460c-a765-923a3b1d891f"> 
+                                    <par name="driving_with_monitoring" x="325.2499999999999" y="184.12499999999994" collapsed="false" id="10fb710a-2a50-4b8a-8864-b78aa5593653"> 
+                                          <tsk name="WayPointsDriving" x="238.1476633525117" y="232.30939692975915" test_time="0" test_result="true" id="398165c8-1786-4ce4-b98b-37e5282d9a26" />
+                                          <tsk name="DrivingMonitor" x="383.3749999999999" y="240.37499999999994" test_time="0" test_result="true" id="835fd238-0baf-45ba-ae82-334c5a6e3a69" />
+                                    </par>
+                                 <dec name="F:1" x="426.3749999999998" y="147.22023809523796"> 
+                                       <tsk name="FinishDrive" x="549.9373265623392" y="176.8006299256307" test_time="0" test_result="true" id="e69475b5-c614-47bf-89b5-def175bd06cf" />
+                                 </dec>
+                              </sel>
+                              <tsk name="FinishDrive" x="549.9373265623392" y="176.8006299256307" test_time="0" test_result="true" id="e69475b5-c614-47bf-89b5-def175bd06cf" />
+                        </seq>
+                  </seq>
+            </dec>
+         </par>
+   </par>
+</plan>

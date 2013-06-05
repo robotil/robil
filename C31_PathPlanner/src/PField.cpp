@@ -4,13 +4,20 @@
 
 using namespace std;
 typedef vector<Vec2d> Points;
+typedef PField::Map Map;
 
 #define DISPLAY_VIEW_FRAME 0
 #define DISPLAY_ATTRACTORS 0
 #define DISPLAY_REPULSORS  0
 #define DISPLAY_FORCES  0
+#define DISPLAY_ORIGINAL_EXTENDED_PATH 0
 #define DISPLAY_SMOOTHED_PATH 0
 #define DISPLAY_SMOOTHED_REDUCED_PATH 0
+#define DISPLAY_SMOOTHED_REDUCEDFIX_PATH 0
+#define DISPLAY_INFO_FROM_SIMULATE 0
+#define DISPLAY_INFO_FROM_SEARCHIP 0
+#define DISPLAY_INFO_FROM_REDUCEPATH 0
+#define DISPLAY_INFO_FROM_ADDPOINTS 0
 
 namespace {
 	
@@ -59,9 +66,15 @@ Path PField::smoothWaypoints(const SmoothingParameters& in_params)const{
 }
 Points PField::smooth(const SmoothingParameters& in_params)const{
 	SmoothingParameters params = in_params;
+	if(opath.size()==0){
+		cout<<"WARNING: path size is zero."<<endl;
+
+		return convert(opath, map);
+	}
+
 	if(params.repulsorType==RT_ERROR)  params.repulsorType = RT_R1;
 	if(params.attractorType==AT_ERROR) params.attractorType = AT_A1;
-	if(params.maxIterationNumber==0) params.maxIterationNumber = (long)round(2*opath.size()/params.stepRate);
+	//if(params.maxIterationNumber==0) params.maxIterationNumber = (long)round(2*opath.size()/params.stepRate);
 	
 	if(params.notDefined()){
 		cout<<"WARNING: Some of Smoothing Parameters are not defined"<<endl;
@@ -78,7 +91,8 @@ Points PField::smooth(const SmoothingParameters& in_params)const{
 		}
 	#endif
 	
-	Points reduced = reducePath(points,params);
+	Points reduced = reducePath(points, params);
+	reduced = reducePath(reduced, params);
 	
 	#if DISPLAY_SMOOTHED_REDUCED_PATH == 1
 		cout<<"reduced "<<endl;
@@ -86,8 +100,17 @@ Points PField::smooth(const SmoothingParameters& in_params)const{
 			cout<<reduced[i].x<<"\t"<<reduced[i].y<<endl;
 		}
 	#endif
+
+	Points reduced_fixed = addPointsToPath(reduced, params);
+
+	#if DISPLAY_SMOOTHED_REDUCEDFIX_PATH == 1
+		cout<<"reduced fixed "<<endl;
+		for(size_t i=0;i<reduced_fixed.size();i++){
+			cout<<reduced_fixed[i].x<<"\t"<<reduced_fixed[i].y<<endl;
+		}
+	#endif
 	
-	return reduced;
+	return reduced_fixed;
 }
 
 struct Position{
@@ -111,7 +134,7 @@ namespace {
 		return e*(e-f);
 	}
 	Points frontiers( const Points& points, const Vec2d& loc ){
-		const int k = 180;
+		const size_t k = 180;
 		const double block = PI2/k;
 		Vec2d blocks[k];
 		for(size_t i=0;i<k;i++) blocks[i] = Vec2d::Null();
@@ -165,26 +188,40 @@ namespace {
 			}
 		}
 		size_t i=cWP;
-		while(i<path.size()-1){
-			//cout<<"ignore path["<<i<<"] dist to pos = "<<Vec2d::distance(path[i],pos.loc)<<endl;
+		while(i< (int) path.size()-1){
+			#if DISPLAY_INFO_FROM_SEARCHIP == 1
+						cout<<"ignore path["<<i<<"] dist to pos = "<<Vec2d::distance(path[i],pos.loc)<<endl;
+			#endif
 			if(Vec2d::distance(path[i],pos.loc)<1){ i++; continue; }
 			break;
 		}
-		//cout<<"start from path["<<i<<"]  pos = "<<pos.loc<<","<<Vec2d::r2d(pos.heading)<<"deg"<<endl;
+		#if DISPLAY_INFO_FROM_SEARCHIP == 1
+				cout<<"start from path["<<i<<"]  pos = "<<pos.loc<<","<<Vec2d::r2d(pos.heading)<<"deg"<<endl;
+		#endif
 		Vec2d vwp = (path[i]-pos.loc).rotate(-pos.heading);
-		//cout<<"vwp = "<<vwp.x<<'\t'<<vwp.y<<endl;
+		#if DISPLAY_INFO_FROM_SEARCHIP == 1
+				cout<<"vwp = "<<vwp.x<<'\t'<<vwp.y<<endl;
+		#endif
 		const double E = 0.5;
+
 		#define WAYPOINT_OUT_OF_VIEW ( fabs(vwp.x)<=viewRS+E && (vwp.y>-E && vwp.y<=viewRF+E) )
 		#define NOT_END_OF_PATH (i<path.size())
 		#define ATTRACTORS_EMPTY attractors.size()==0
+
 		while( NOT_END_OF_PATH  && ( WAYPOINT_OUT_OF_VIEW || ATTRACTORS_EMPTY ) ){
-			//cout<<"att added "<<path[i]<<endl;
+			#if DISPLAY_INFO_FROM_SEARCHIP == 1
+						cout<<"att added "<<path[i]<<endl;
+			#endif
 			attractors.push_back(path[i]);
 			i++;
 			vwp = (path[i]-pos.loc).rotate(-pos.heading);
-			//cout<<"vwp = "<<vwp.x<<'\t'<<vwp.y<<endl;
+			#if DISPLAY_INFO_FROM_SEARCHIP == 1
+						//cout<<"vwp = "<<vwp.x<<'\t'<<vwp.y<<endl;
+			#endif
 		}
-		//cout<<"finished: "<<(i<path.size())<<", "<<(fabs(vwp.x)<=viewRS)<<", "<<(vwp.y>-0.5)<<(vwp.y<=viewRF)<<endl;
+		#if DISPLAY_INFO_FROM_SEARCHIP == 1
+				cout<<"finished: "<<(i<path.size())<<", "<<(fabs(vwp.x)<=viewRS)<<", "<<(vwp.y>-0.5)<<", "<<(vwp.y<=viewRF)<<endl;
+		#endif
 		
 		repulsors = frontiers(repulsors_tmp, pos.loc);
 		#undef WAYPOINT_OUT_OF_VIEW
@@ -194,6 +231,8 @@ namespace {
 	
 	size_t searchOnPathPosition(const Position& pos, const Points& path){
 		size_t nearest = 0;
+		if (path.size() == 0) return 0;
+
 		double min_dist = Vec2d::distance(pos.loc, path[0]);
 		for(size_t i=0;i<path.size();i++){
 			double dist = Vec2d::distance(pos.loc, path[i]);
@@ -203,12 +242,33 @@ namespace {
 				nearest = i;
 			}
 		}
-		if(nearest == path.size()-1) return nearest;
-		Vec2d A = pos.loc, B = path[nearest], C = path[nearest+1];
+		if(nearest == path.size()-1 && nearest == 0){
+			return nearest;
+		}
+
+		if(nearest == path.size()-1){
+			//cout<<"... nearest == path.size()-1"<<endl;
+			Vec2d A = pos.loc, C = path[nearest], B = path[nearest-1];
+			Vec2d b = B-C, c = C-A, a = B-A;
+			//http://en.wikipedia.org/wiki/Law_of_cosines
+			double G = acos( (B-C).dot(A-C)/(b.len()*c.len()) );
+			//cout<<"... G="<<Vec2d::r2d(G)<<"deg  A="<<A<<" B="<<B<<" C="<<C<<endl;
+			if( G>PI*0.5 ){
+				//cout<<"... ... G="<<Vec2d::r2d(G)<<"deg < PI/2 => nearest = "<<(nearest+1)<<endl;
+				nearest++;
+			}
+
+			return nearest;
+		}
+		Vec2d A = pos.loc, C = path[nearest], B = path[nearest+1];
 		Vec2d b = B-C, c = C-A, a = B-A;
 		//http://en.wikipedia.org/wiki/Law_of_cosines
 		double G = acos( (B-C).dot(A-C)/(b.len()*c.len()) );
-		if( G<PI ) nearest++;
+		//cout<<"... G="<<Vec2d::r2d(G)<<"deg  A="<<A<<" B="<<B<<" C="<<C<<endl;
+		if( G<PI*0.5 ){
+			//cout<<"... ... G="<<Vec2d::r2d(G)<<"deg < PI/2 => nearest = "<<(nearest+1)<<endl;
+			nearest++;
+		}
 		return nearest;
 	}
 }
@@ -221,13 +281,30 @@ PField::Points PField::simulate(const SmoothingParameters& params) const{
 	const AttractorType at = params.attractorType;
 	
 	const double stepF = params.stepRate;
-	const int stepNumbers = params.maxIterationNumber*2;
 	const double inertia = params.inertia;
 	
 	Points opath_points = convert(opath, map);
+	size_t reduced_opath_size = opath_points.size();
+
+	opath_points = addPointsToPath(opath_points, 1);
+
+	#if DISPLAY_ORIGINAL_EXTENDED_PATH == 1
+		cout<<"originally extended path "<<endl;
+		for(size_t i=0;i<opath_points.size();i++){
+			cout<<opath_points[i].x<<"\t"<<opath_points[i].y<<endl;
+		}
+	#endif
+
+	const int stepNumbers = params.maxIterationNumber>0 ? params.maxIterationNumber : opath_points.size()*2.0/params.stepRate;
+	#if DISPLAY_INFO_FROM_SIMULATE == 1
+		cout<<"iterations : "<<stepNumbers<<endl;
+	#endif
+
 	Points smoothed_path;
-	cout<<"path size reduced from "<<opath.size()<<" to "<<opath_points.size()<<endl;
-	if(opath.size()<2) return opath_points;
+	#if DISPLAY_INFO_FROM_SIMULATE == 1
+		cout<<"path size reduced from "<<opath.size()<<" to "<<reduced_opath_size<<" and extended to "<<opath_points.size()<<endl;
+	#endif
+	if(opath_points.size()<2) return opath_points;
 	
 	Vec2d last = opath_points[opath_points.size()-1];
 	Vec2d prevlast = opath_points[opath_points.size()-2];
@@ -236,7 +313,9 @@ PField::Points PField::simulate(const SmoothingParameters& params) const{
 	
 	size_t start_pos=0;
 	
-	cout<<"start pos = "<<start_pos<<" = "<<opath_points[start_pos]<<endl;
+	#if DISPLAY_INFO_FROM_SIMULATE == 1
+		cout<<"start pos = "<<start_pos<<" = "<<opath_points[start_pos]<<endl;
+	#endif
 	
 	Position pos ( opath_points[start_pos], 
 				   (opath_points[start_pos+1]-opath_points[start_pos]).angY()
@@ -341,13 +420,19 @@ PField::Points PField::reducePath(const Points& path, const SmoothingParameters&
 	for(size_t i=1;i<path.size();i++){
 		double dist = (path[i]-path[i-1]).len();
 		double angle = (path[i]-path[i-1]).angY() - heading;
-		//cout<<">>> path["<<i<<"]="<<path[i]<<" path["<<i-1<<"]="<<path[i-1]<<" dist:ang="<<dist<<":"<<Vec2d::r2d(angle)<<"d ";
+		#if DISPLAY_INFO_FROM_REDUCEPATH == 1
+				cout<<">>> path["<<i<<"]="<<path[i]<<" path["<<i-1<<"]="<<path[i-1]<<" dist:ang="<<dist<<":"<<Vec2d::r2d(angle)<<"d ";
+		#endif
 		heading=(path[i]-path[i-1]).angY();
-		//cout<<"heading="<<Vec2d::r2d(heading)<<"d ";
+		#if DISPLAY_INFO_FROM_REDUCEPATH == 1
+				cout<<"heading="<<Vec2d::r2d(heading)<<"d ";
+		#endif
 		sum+=dist;
 		double prev_ang=ang;
 		ang+=angle;
-		//cout<<"sum="<<sum<<", sum_ang="<<Vec2d::r2d(ang)<<"d "<<endl;
+		#if DISPLAY_INFO_FROM_REDUCEPATH == 1
+				cout<<"sum="<<sum<<", sum_ang="<<Vec2d::r2d(ang)<<"d "<<endl;
+		#endif
 #if defined( RDP_MODE1 )
 		// REMOVE POINTS UP TO travel distance > TH or travel turn angles > TH
 		if(sum > params.distanceBetweenPoints || ang > params.maxAngleWhileReducing){
@@ -355,7 +440,9 @@ PField::Points PField::reducePath(const Points& path, const SmoothingParameters&
 			rpath.push_back(path[lastAdded]);
 			sum=dist;
 			ang=angle;
-			//cout<<"get "<<lastAdded<<", sum="<<sum<<", sum_ang="<<Vec2d::r2d(ang)<<"d "<<endl;
+			#if DISPLAY_INFO_FROM_REDUCEPATH == 1
+					cout<<"get "<<lastAdded<<", sum="<<sum<<", sum_ang="<<Vec2d::r2d(ang)<<"d "<<endl;
+			#endif
 		}
 #elif defined( RDP_MODE2 )
 		// REMOVE POINTS UP TO travel distance > TH, THEN RETURN POINTS UP TO travel turn angle < TH
@@ -370,7 +457,9 @@ PField::Points PField::reducePath(const Points& path, const SmoothingParameters&
 			rpath.push_back(path[lastAdded]);
 			sum=0;
 			ang=0;
-			//cout<<"get "<<lastAdded<<", sum="<<sum<<", sum_ang="<<Vec2d::r2d(ang)<<"d "<<endl;
+			#if DISPLAY_INFO_FROM_REDUCEPATH == 1
+					cout<<"get "<<lastAdded<<", sum="<<sum<<", sum_ang="<<Vec2d::r2d(ang)<<"d "<<endl;
+			#endif
 		}
 #elif defined( RDP_MODE3 )
 		// REMOVE POINTS UP TO travel distance > 2*TH, THEN insert transit point for create same (50%) travel turn angle.
@@ -387,12 +476,59 @@ PField::Points PField::reducePath(const Points& path, const SmoothingParameters&
 			rpath.push_back(path[lastAdded]);
 			sum=0;
 			ang=0;
-			//cout<<"get "<<lastAdded<<", sum="<<sum<<", sum_ang="<<Vec2d::r2d(ang)<<"d "<<endl;
+			#if DISPLAY_INFO_FROM_REDUCEPATH == 1
+					cout<<"get "<<lastAdded<<", sum="<<sum<<", sum_ang="<<Vec2d::r2d(ang)<<"d "<<endl;
+			#endif
 		}
 #endif
 	}
 	if(path.size()-1 != lastAdded) rpath.push_back(path[path.size()-1]);
 	
+	return rpath;
+}
+
+
+PField::Points PField::addPointsToPath(const Points& path, const SmoothingParameters& params) const{
+	return addPointsToPath(path, params.distanceBetweenPoints);
+}
+
+PField::Points PField::addPointsToPath(const Points& path, double distBtwPoints) const{
+	if(path.size()<2) return path;
+	Points rpath;
+	rpath.push_back(path[0]);
+	for(size_t i=0,j=1; j<path.size(); i++,j++){
+		double d = (path[j]-path[i]).len();
+		double r = distBtwPoints;
+		if(d > distBtwPoints*1.4){
+			double n = d / distBtwPoints;
+			int in1 = (int)n;
+			int in2 = in1+1;
+			double dd1 = ::fabs( d - in1*distBtwPoints);
+			double dd2 = ::fabs( d - in2*distBtwPoints);
+			bool dd1dd2 = dd1<dd2;
+			double x=0;
+			if(dd1dd2){
+				x = dd1/in1;
+				r = r+x;
+			}else{
+				x = dd2/in2;
+				r = r-x;
+			}
+
+			int nn = d/r;
+
+			#if DISPLAY_INFO_FROM_ADDPOINTS == 1
+				#define N(x) ", "#x"="<<x
+				cout<<"adding points: d="<<d<<N(n)<<N(in1)<<N(in2)<<N(dd1)<<N(dd2)<<N(dd1dd2)<<N(x)<<N(r)<<N(nn)<<endl;
+				#undef N
+			#endif
+
+			for(int e=1; e<nn; e++)
+				rpath.push_back(path[i] + (path[j]-path[i]).scale((double)e/(double)n));
+		}
+		rpath.push_back(path[j]);
+
+	}
 	return rpath;
 }
 

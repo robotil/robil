@@ -1,0 +1,21 @@
+<package>
+  <description brief="C25_AtlasFell">
+
+     C25_AtlasFell
+
+  </description>
+  <author>lar2</author>
+  <license>BSD</license>
+  <review status="unreviewed" notes=""/>
+  <url>http://ros.org/wiki/C25_AtlasFell</url>
+
+  <depend package="rospy"/>
+  <depend package="actionlib"/>
+  <depend package="roslib"/>
+  <depend package="actionlib_msgs"/>
+  <depend package="std_msgs"/>
+  <depend package="robot_mechanism_controllers"/>
+  <depend package="sensor_msgs"/>
+</package>
+
+

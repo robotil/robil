@@ -4,7 +4,7 @@
     color: rgb(255, 255, 255);
 }
 
-QFrame#line,#line_2,#line_3,#line_4,#line_5{
+QFrame#line,#line_2,#line_3,#line_4,#line_5,#line_6{
      
      background-color: white;
 }
@@ -217,6 +217,46 @@ QPushButton#btnCarInt:disabled {
      border-image: url(Resources/S5CarInt.bmp);
  }
 
+QPushButton#btnRotate {
+     border-image: url(Resources/S1axis.bmp)
+ }
+
+QPushButton#btnRotate:hover {
+     border-image: url(Resources/S2axis.bmp);
+ }
+
+QPushButton#btnRotate:checked {
+     border-image: url(Resources/S3axis.bmp);
+ }
+
+QPushButton#btnRotate:checked:hover {
+     border-image: url(Resources/S4axis.bmp);
+ }
+
+QPushButton#btnRotate:disabled {
+     border-image: url(Resources/S5axis.bmp);
+ }
+
+QPushButton#btnSteps {
+     border-image: url(Resources/S1steps.bmp)
+ }
+
+QPushButton#btnSteps:hover {
+     border-image: url(Resources/S2steps.bmp);
+ }
+
+QPushButton#btnSteps:checked {
+     border-image: url(Resources/S3steps.bmp);
+ }
+
+QPushButton#btnSteps:checked:hover {
+     border-image: url(Resources/S4steps.bmp);
+ }
+
+QPushButton#btnSteps:disabled {
+     border-image: url(Resources/S5steps.bmp);
+ }
+
 QPushButton#btnAnnotation {
      border-image: url(Resources/S1Annotations.bmp)
  }
@@ -278,3 +318,17 @@ QSlider::handle:horizontal {
      border-radius: 1px;
      margin: -11px 4px;
  }
+
+QComboBox {
+    border: 0px solid white;
+    background-color: rgb(30,30,30);
+    color: white;
+}
+
+QComboBox {
+    subcontrol-origin: padding;
+    subcontrol-position: top right;
+    width: 11px;
+    border: 0px;
+    background-color: rgb(30,30,30);
+}

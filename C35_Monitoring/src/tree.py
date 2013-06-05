@@ -9,7 +9,7 @@ from Node import node
 
 class xmlTree:
     #constructor
-    def __init__(self, fileName=None ,root=None):
+    def __init__(self, fileName=None ,root=None, tskFileName=None):
         if fileName != None:
             tree = etree.parse(fileName)
         #if we don't get a file to parse
@@ -17,13 +17,18 @@ class xmlTree:
             self.root = tree.getroot()
         else:
             self.root= root
-            
+        #init tsk map- key is the name. value is a pointer to tsk etree element.
+        self._tskMap = {}
+        if(tskFileName != None):
+            self._tskEtree = etree.parse(tskFileName)
+            self._createTskAttribMap()
         #hold the name of the file.
         self.fileName = fileName
         #create a root node- type plan
         self.rootNode = node(self.root,self,self.root.tag)
         #update the whole tree- create the wrap for the whole tree.
         self._getUpdateTree()
+        self._wrapMap = {}
                 
     #this func build the wrap for all the tree.
     def _getUpdateTree(self):
@@ -60,7 +65,35 @@ class xmlTree:
         return self.rootNode
         
     
+    def _createTskAttribMap(self):
+        #iter over tsk tree and add tsk to the tree by the tsk name. key-name, value-etree element
+        for tsk in self._tskEtree.iter(tag=etree.Element):
+            self._tskMap[tsk.get("name")] = tsk
+            
+    
+    #input: tskId- name, parm- parmeter needed
+    def getTskAttrib(self,tskId, parm):
+        attrib = None
+        #check if the map holds this key
+        if tskId in self._tskMap:
+            #return string
+            attrib = (self._tskMap[tskId].get(parm))
+            
+        return attrib
+            
+    def _createWrapperTreeMap(self,idParm,curNode):
+	if curNode.getChildren() != None:
+            for wrapnode in curNode.getChildren():
+                self._wrapMap[wrapnode.getAttrib(idParm)] = wrapnode
+                self._createWrapperTreeMap(idParm,wrapnode)
         
+    def createWrapperTreeMap(self,idParm): #input - string of the id parm, can be "name" or "id"
+        #call a recursive function        
+        self._createWrapperTreeMap(idParm,self.rootNode)
+        
+    #get a pointer to the wrapped node- by it's id / name or id unique
+    def getWrappedNode(self,nodeId):
+        return self._wrapMap[nodeId]
         
         
     

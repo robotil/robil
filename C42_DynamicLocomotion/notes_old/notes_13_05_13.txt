@@ -1,0 +1,27 @@
+Updates:
+Separated Dynamic locomotion into two tasks:
+A. DynamicLocomotion task - regular locomotion task to be used in the competition. 
+B. DynamicQual1 task - locomotion to pass qual task 1 includes a set of pre-planned steps to pass stepping stones.
+
+USING DYNAMIC WALK:
+
+Robot waits for start,then goes to path planner and asks for the path, takes points from path and walks alongside a segment of two points.
+
+To run Dynamic Walker:
+
+1. A - run DynamicLocomotion.py: 
+   $ rosrun C42_DynamicLocomotion DynamicLocomotion.py
+
+   B - run DynamicQual.py: 
+   $ rosrun C42_DynamicLocomotion DynamicQual.py
+
+
+2. run task using C0 task_tester:
+   A - $ rosrun C0_RobilTask task_tester DynamicLocomotion
+   B - $ rosrun C0_RobilTask task_tester DynamicQual1
+
+3. run C31_clone to emulate the C31PathPlanner (publish a path message): 
+   rosrun C42_ZMPWalk scripts/C31_Clone.py
+ 
+4. reset robot at initial position:
+   rosrun C42_DynamicLocomotion scripts/Reset_start_pose.py

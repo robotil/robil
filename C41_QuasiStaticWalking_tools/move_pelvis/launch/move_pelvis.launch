@@ -1,0 +1,8 @@
+<launch>
+	<include file="$(find traj_splitter_to_vector)/launch/traj_splitter_to_vector.launch" />
+
+	<node name="legs_val_calc" pkg="legs_val_calc" type="legs_val_calc" cwd="node" output="screen" />
+	<node name="move_pelvis" pkg="move_pelvis" type="move_pelvis" cwd="node" output="screen" />
+	<node name="walk_legs" pkg="move_pelvis" type="walk_legs" cwd="node" output="screen" />
+
+</launch>

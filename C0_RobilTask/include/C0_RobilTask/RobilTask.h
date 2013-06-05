@@ -8,7 +8,10 @@
 #ifndef _DEF_ROBIL_TASK
 #define _DEF_ROBIL_TASK
 
-
+//#define SINGLE_GOAL
+#ifndef SINGLE_GOAL
+	#define MULTI_GOAL
+#endif
 
 namespace C0_RobilTask{
 //	static const int32_t FAULT = 1;
@@ -16,8 +19,15 @@ namespace C0_RobilTask{
 //	static const int32_t PLAN=-1;
 }
 
+#ifdef SINGLE_GOAL
+	#include <actionlib/server/simple_action_server.h>
+#endif
+#ifdef MULTI_GOAL
+	#include <C0_RobilTask/MultiGoalActionServer.h>
+	#include <map>
+	#include <boost/thread.hpp>
+#endif
 
-#include <actionlib/server/simple_action_server.h>
 #include <C0_RobilTask/RobilTaskAction.h>
 #include <C0_RobilTask/StringOperations.h>
 #include <sstream>
@@ -35,10 +45,16 @@ namespace C0_RobilTask{
 		static const int32_t PLAN=-1;
 
 	protected:
-	    typedef RobilTaskGoalConstPtr GOAL;
 	    typedef RobilTaskFeedback FEEDBACK;
 	    typedef RobilTaskResult RESULT;
+#ifdef SINGLE_GOAL
+	    typedef RobilTaskGoalConstPtr GOAL;
 	    typedef actionlib::SimpleActionServer<RobilTaskAction> Server;
+#endif
+#ifdef MULTI_GOAL
+	    typedef actionlib::MGActionServer<RobilTaskAction>::GoalHandle GOAL;
+	    typedef actionlib::MGActionServer<RobilTaskAction> Server;
+#endif
 
 	protected:
 	    ros::NodeHandle _node;
@@ -48,6 +64,7 @@ namespace C0_RobilTask{
 	    RESULT _result;
 
 	    RobilTask(string name):
+			_node(),
 			_server(_node, name, boost::bind(&RobilTask::abstract_task, this, _1), false),
 			_name(name)
 		{
@@ -57,25 +74,35 @@ namespace C0_RobilTask{
 
 	    virtual ~RobilTask(){}
 
+#ifdef SINGLE_GOAL
 		void finish(const int32_t& success, const std::string& description, const string& plan, bool AbortForUnsuccess = true){
+		#define GOAL_SUCCESS _server.setSucceeded(_result);
+		#define GOAL_ABORT _server.setAborted(_result);
+		#define GOAL_PREEMPTED _server.setPreempted();
+#endif
+#ifdef MULTI_GOAL
+		void finish(GOAL goalH, const int32_t& success, const std::string& description, const string& plan, bool AbortForUnsuccess = true){
+		#define GOAL_SUCCESS _server.setSucceeded(goalH, _result);
+		#define GOAL_ABORT _server.setAborted(goalH, _result);
+		#define GOAL_PREEMPTED _server.setPreempted(goalH);
+#endif
 			_result.success = success;
 			_result.description = description;
 			if(success <= 0)
 			{
-				ROS_INFO("%s: Succeeded", _name.c_str());
+				ROS_INFO("%s: Succeeded. %s", _name.c_str(), description.c_str());
 				if(success == PLAN){
-					ROS_INFO("%s: New plan", _name.c_str());
+					ROS_INFO("%s: New plan. %s", _name.c_str(), description.c_str());
 					_result.plan = plan;
 				}
-				_server.setSucceeded(_result);
+				GOAL_SUCCESS
 			}else{
 				if(AbortForUnsuccess){
-					ROS_INFO("%s: Aborted", _name.c_str());
-					_server.setAborted(_result);
+					ROS_INFO("%s: Aborted. %s", _name.c_str(), description.c_str());
+					GOAL_ABORT
 				}else{
 					ROS_INFO("%s: Preempted", _name.c_str());
-					_server.setPreempted();
-					//_server.setCanceled(_result);
+					GOAL_PREEMPTED
 				}
 			}
 		}
@@ -109,15 +136,31 @@ namespace C0_RobilTask{
 
 		virtual RobilTask::TaskResult task(const string& name, const string& uid, Arguments& args)=0;
 
+#ifdef MULTI_GOAL
+		std::map<boost::thread::id,GOAL> goalsByThread;
+#endif
 		bool isPreempt(){
+#ifdef SINGLE_GOAL
 			return (_server.isPreemptRequested() || !ros::ok());
+#endif
+#ifdef MULTI_GOAL
+			GOAL goal = goalsByThread[boost::this_thread::get_id()];
+			return (_server.isPreemptRequested(goal) || !ros::ok());
+#endif
 		}
 
 		void sleep(long millisec){
 			boost::this_thread::sleep(boost::posix_time::millisec(millisec));
 		}
 
-	    void abstract_task(const GOAL &goal){
+#ifdef SINGLE_GOAL
+		void abstract_task(const GOAL &goal){
+#endif
+#ifdef MULTI_GOAL
+		void abstract_task(GOAL goal_handle){
+			goalsByThread[boost::this_thread::get_id()]=goal_handle;
+			const RobilTaskGoalConstPtr& goal = goal_handle.getGoal();
+#endif
 	        /* GET TASK PARAMETERS */
 	        ROS_INFO("%s: Start: task name = %s", _name.c_str(), goal->name.c_str());
 	        ROS_INFO("%s: Start: task id = %s", _name.c_str(), goal->uid.c_str());
@@ -133,7 +176,13 @@ namespace C0_RobilTask{
 
 	        RobilTask::TaskResult res = task(goal->name, goal->uid, args);
 
+#ifdef SINGLE_GOAL
 	        finish( res.success, res.description, res.plan, !res.preempted);
+#endif
+#ifdef MULTI_GOAL
+	        finish( goal_handle, res.success, res.description, res.plan, !res.preempted);
+			goalsByThread.erase(boost::this_thread::get_id());
+#endif
 	    }
 	};
 

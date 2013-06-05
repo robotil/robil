@@ -1,0 +1,18 @@
+<plan descriptions="./plans/TaskDescriptions.xml">
+   <seq name="skill3Mission" x="514.9999999999997" y="19.333333333333144" collapsed="false" id="5fac738d-598e-4b43-8c2e-7bc90825f18d"> 
+         <par name="Perception" x="206.5" y="134.5" collapsed="false" id="6b7404b6-5532-4d12-93de-7b73e64305e7"> 
+               <tsk name="LocalizationTrack" x="-133.52880272525596" y="272.28790234246526" test_time="0" test_result="true" id="389bbcbe-a724-4df2-a210-a58d1da1c148" />
+               <tsk name="ObstacleDetection" x="4.722222222221717" y="278.2222222222201" test_time="-1" test_result="true" id="df8d1192-7c3a-4500-ac4e-ccd2fb6edd56" />
+               <tsk name="PathPlanning" x="153.72222222222183" y="276.22222222222" test_time="-1" test_result="true" id="036930d6-7447-476f-89fb-2979f52dfe7d" />
+            <dec name="!L!" x="255.5" y="206.5"> 
+                  <tsk name="PathPlanningFocus(x=0,y=10)" x="268.5" y="281.5" test_time="0" test_result="true" id="1242d573-1d16-47bd-aa60-aae69af7f6ad" />
+            </dec>
+         </par>
+         <seq name="HMI" x="763.5" y="117.5" collapsed="false" id="74ed1e8a-0b58-4ac1-b451-c7d8db07a0f0"> 
+               <tsk name="PushHMI(data=panoramic_image)" x="491.33333333333303" y="264.9999999999998" test_time="100" test_result="true" id="d275dd65-adcf-4daa-a6d0-7f97a94f966a" />
+               <tsk name="PushHMI(data=occupancy_grid)" x="675.5" y="265.5" test_time="0" test_result="true" id="f9406cd5-96ae-4c9d-9d0f-0b7abfba8c28" />
+               <tsk name="PushHMI(data=path)" x="861.5" y="267.5" test_time="0" test_result="true" id="d673f3b4-85e8-4024-b36b-a4cc6ed1fefa" />
+               <tsk name="HMIResponse" x="1002.5" y="269.5" test_time="0" test_result="true" id="3cbf03f6-c1d2-47c2-a2e7-023ff72c8b9d" />
+         </seq>
+   </seq>
+</plan>

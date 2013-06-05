@@ -1,0 +1,33 @@
+C35_Monitoring of specific tasks
+
+# Description:
+Our group C35_Monitoring build monitors that provide essential data for the progress of the simulation.
+we provide 2 kinds of monitors:
+1. monitor time (you can read more in Notes.txt)
+2. monitor specific apspects of tasks
+This document is a general description to specify the exact parameters needed from other groups to construct a monitor task for their modules.
+We need the following:
+0. Doc of how to run your task.
+1. Message structure:
+  1.1. Names of message parameters
+  1.2. Types of message parameters
+  1.3 Name of message
+2. Name of the topic we need to listen to.
+3. Computation needed from monitoring:
+  3.1. Based on what information?
+  3.2. What do we need to do with this information? (e.g., average, max, sum etc.)
+  3.3. When do we need to raise an alert/error.
+  
+  
+FOR EXAMPLE: monitoring of waypoint distance in driving module.
+0. Given in our  Notes.txt
+1.1,1.2
+  float32[] LastWPpassed
+  float32[] MyLoc4LastWP
+1.3
+  Monitoring.msg
+2. /C51/m_feedback
+3. We compute the distance from the actual waypoint to the planned waypoint
+  3.1 the message contains two points (x,y floats values for each) which refer to the original location of the waypoint and the actual location of the car when it passed through the waypoint.
+  3.2 Calculate average of the distance between planned and actual for the last 5 waypoints.
+  3.3 When the average is > 4 meters

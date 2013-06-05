@@ -1,0 +1,7 @@
+<launch>
+	<include file="$(find move_hand)/launch/move_hand.launch" />
+	<node name="PickUp" pkg="C66_Grasp" type="PickUp" cwd="node" output="screen" />
+	<node name="hand_grasp_right" pkg="hand_grasp" type="hand_grasp" args="right" cwd="node" output="screen" />
+	<node name="hand_grasp_left" pkg="hand_grasp" type="hand_grasp" args="left" cwd="node" output="screen" />
+	<node name="drill" pkg="C23_dFind" type="drill" cwd="node" output="screen" />
+</launch>

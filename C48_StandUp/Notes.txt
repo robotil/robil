@@ -1,0 +1,24 @@
+C48_StandUp
+
+Description: 
+  * Robot stand up!
+
+Conditions:
+  * DRC version 2.0
+
+To test the module follow these steps:
+  1. roslaunch atlas_utils atlas.launch
+  2. rosrun C48_StandUp Fall.py
+  3. rosrun C48_StandUp C48_StandUp.py
+  4. Now choose one of these 2 options:
+     a. rosrun C48_StandUp TestStandUp.py
+     b. 1. Copy the file StandUp.xml from /C48_StandUp/TestTree/ to /C34_Designer/plans/
+        2. Run the executer
+        3. Run the designer
+        4. Load the file StandUp.xml
+        5. Run the tree
+
+Contains:
+  * A module for standing up
+  * A test tree to test the module
+  * A controller to publish joint commands

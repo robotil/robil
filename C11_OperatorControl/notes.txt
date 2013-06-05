@@ -1,24 +1,25 @@
 version 0.6
-Fixed: The module crashes after 1-2 pictures
 
 
-========================================================
-KNOWN BUGS:
-The module crashes after 1-2 pictures
-============================================
 To be able to make this package you should have the next packages installed beforehand:
 ros-fuerte-qt-ros
 ros-fuerte-qt-gui-core
 You may install them using: sudo apt-get install
 
-//CHECK INSTRUCTIONS:
-***Pre-run conditions:
--- C21_VisionAndLidar should run
--- C11_Agent should run
-***
-1. Run the C11.launch file from launch folder
-2. You should see the basic HMI window with black background and icons.
-3. You should see the camera image updating every few seconds.
-4. Check with rxgraph the C11 node exists.
-5. Check with rxgraph the C11 node subscribing to c11_stt message of C11_Agent node
+CONFIGURATION:
+The IP address of machine running the HMI should be updated in C11_OperatorControl/bin/C11Config.txt
+Create this file if it is not exist.
+In the C11_OperatorControl/bin create Missions.txt file, if not exist. Add to this file list of plans you want to load from HMI, one plan in line.
 
+//CHECK INSTRUCTIONS:
+1. Run Gazibo simulator - roslaunch atlas_utils atlas.launch
+2. Run perception modules - C0_Scripts/perception.sh
+3. Run C34_Executor - rosrun C34_Executer executer
+4. Run C31_PathPlanner - C0_Scripts/withPathtest.sh
+5. Run C11_Agent - rosrun C11_Agent C11_Agent
+6. Run C11_OperatorControl - roslaunch C11_OperatorControl C11.launch
+7. Push 'Play' button
+8. The icon should be cnahged to 'Pause'
+9. After few seconds image should be received.
+10. After few seconds occupancy grid should be updated.
+11. After few seconds path should be updated.

@@ -14,7 +14,9 @@
   <depend package="actionlib"/>
   <depend package="actionlib_msgs"/>
   <depend package="std_msgs"/>
-
+  <depend package="C0_RobilTask"/>
+  <depend package="C51_CarOperation"/>
+  <depend package="nav_msgs"/>
 </package>
 
 

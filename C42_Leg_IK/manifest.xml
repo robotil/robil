@@ -1,0 +1,20 @@
+<package>
+  <description brief="C42_Leg_IK">
+
+    C42_Leg_IK
+
+  </description>
+  <author>Eric</author>
+  <license>BSD</license>
+  <review status="unreviewed" notes=""/>
+  <url>http://ros.org/wiki/leg_ik</url>
+  <depend package="rospy"/>
+  <depend package="geometry_msgs"/>
+  <depend package="std_msgs"/>
+  <depend package="atlas_msgs"/>
+  <depend package="C42_ZMPWalk"/>
+  <depend package="C42_DRCSim2_tools"/>
+
+</package>
+
+

@@ -3,6 +3,7 @@
 
 @author: polak
 """
+import math
 import random
 from distribution import Distribution
 
@@ -104,8 +105,32 @@ class Computed(Distribution):
         totalOfValues = 0.0
         timeValueMap = self.map
         for key in timeValueMap:
-            numOfValues = numOfValues + timeValueMap.get(key)
-            totalOfValues = totalOfValues + (key * timeValueMap.get(key))
+            numOfValues = numOfValues + float(timeValueMap.get(key))
+            totalOfValues = totalOfValues + (float(key) * float(timeValueMap.get(key)))
         if  numOfValues==0:
             return float('Inf')
         return totalOfValues / numOfValues   
+        
+        
+    def SDTime(self):
+       avg = self.calcAverageTime()
+       timeValueMap = self.map
+       var = 0.0
+       numOfValues =0.0
+       for key in timeValueMap:
+           numOfValues = numOfValues + float(timeValueMap.get(key))
+           var = var + ((float(key) - avg)**2)*float(timeValueMap.get(key))
+       if  numOfValues==0:
+            return float(0)    
+       return math.sqrt(var/numOfValues)    
+           
+           
+           
+           
+           
+           
+           
+           
+           
+           
+           

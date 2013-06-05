@@ -1,0 +1,5 @@
+<plan descriptions="./plans/TaskDescriptions.xml">
+   <seq name="mission" x="240.5" y="81.5" collapsed="false" id="7d461976-f0e1-4ddd-83f8-e352e84739bb"> 
+         <tsk name="DismountVehicle" x="305.5" y="151.5" test_time="0" test_result="true" id="3cdc0524-ae1d-4c19-bc51-83e474d7da6a" />
+   </seq>
+</plan>

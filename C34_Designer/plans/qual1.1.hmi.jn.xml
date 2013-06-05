@@ -1,0 +1,37 @@
+<plan descriptions="./plans/TaskDescriptions.xml">
+   <par name="Qualification1"> 
+         <par name="Perception"> 
+               <tsk name="LocalizationTrack" />
+               <tsk name="PathPlanning" />
+         </par>
+      <dec name="!L!"> 
+            <seq name="Mission"> 
+                  <seq name="UpToCliff"> 
+                        <tsk name="PathPlanningFocus(target=Qual1P1)" />
+                        <par name="OperatorCheckPoint"> 
+                           <dec name="T"> 
+                                 <par name="TimeControl"> 
+                                       <seq name="OperatorRequest"> 
+                                             <tsk name="PushHMI(data=panoramic_image)" />
+                                             <tsk name="PushHMI(data=occupancy_grid)" />
+                                             <tsk name="PushHMI(data=path)" />
+                                             <tsk name="HMIResponse" />
+                                       </seq>
+                                       <tsk name="TimeoutMonitor(threshold=1000)" />
+                                 </par>
+                           </dec>
+                        </par>
+                        <tsk name="DynamicLocomotion" />
+                  </seq>
+                  <seq name="OverCliff"> 
+                        <tsk name="PathPlanningFocus(target=Qual1P2)" />
+                        <tsk name="QuasiStaticWalk" />
+                  </seq>
+                  <seq name="ToFinish"> 
+                        <tsk name="PathPlanningFocus(target=Qual1P3)" />
+                        <tsk name="DynamicLocomotion" />
+                  </seq>
+            </seq>
+      </dec>
+   </par>
+</plan>

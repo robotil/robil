@@ -11,14 +11,25 @@
 
 #include "ros/ros.h"
 #include "C11_OperatorControl/C11.h"
-#include "C11_Agent/C34C11_STT.h"
+//#include "C11_Agent/C34C11_STT.h"
+#include "C10_Common/mission_selection.h"
+#include "C10_Common/pause_mission.h"
+#include "C10_Common/resume_mission.h"
+#include "C10_Common/execution_status_change.h"
+#include "C10_Common/path_update.h"
+#include "C10_Common/push_img.h"
+#include "C10_Common/push_occupancy_grid.h"
+#include "C10_Common/push_path.h"
+#include "C10_Common/HMIResponse.h"
 #include "C11_Node_Subscriber.h"
 #include <image_transport/image_transport.h>
 #include <sensor_msgs/image_encodings.h>
 #include <sensor_msgs/Image.h>
+#include "std_msgs/String.h"
 #include <string>
 #include <QThread>
 #include <QStringListModel>
+//#include <QTimer>
 
 namespace enc=sensor_msgs::image_encodings;
 
@@ -30,6 +41,8 @@ class C11_Node : public QThread
 {
   Q_OBJECT
 
+// public Q_SLOTS:
+//         void SltOnWaitTimeout();
 
 public:
 
@@ -53,8 +66,24 @@ public:
 
           void run();
 
+          void LoadMission(int index);
+          void Resume();
+          void Pause();
+
+          void SendPathUpdate(std::vector<StructPoint> points);
+
           static void viewImage(const sensor_msgs::ImageConstPtr& msg);
-          static void StatusMessageCallback(const C11_Agent::C34C11_STTConstPtr);
+//          static void StatusMessageCallback(const C11_Agent::C34C11_STTConstPtr);
+
+          bool push_img_proccess(C10_Common::push_img::Request  &req,
+        		  C10_Common::push_img::Response &res );
+          bool push_occupancy_grid_proccess(C10_Common::push_occupancy_grid::Request  &req,
+                  		  C10_Common::push_occupancy_grid::Response &res );
+          bool push_path_proccess(C10_Common::push_path::Request  &req, C10_Common::push_path::Response &res );
+          bool hmi_response_proccess(C10_Common::HMIResponse::Request  &req, C10_Common::HMIResponse::Response &res );
+          bool execution_status_change(C10_Common::execution_status_change::Request  &req, C10_Common::execution_status_change::Response &res );
+
+          void SendExecuterUpdate(QString str);
 
 Q_SIGNALS:
         void loggingUpdated();
@@ -63,12 +92,27 @@ Q_SIGNALS:
 private:
   ros::NodeHandle *nh_;
   ros::ServiceServer service;
+  ros::ServiceServer c11_push_img;
+  ros::ServiceServer c11_push_occupancy_grid;
+  ros::ServiceServer c11_push_path;
+  ros::ServiceServer c11_hmi_response;
+  ros::ServiceServer c11_execution_status_change;
+  ros::ServiceClient LoadMissionClient;// = _node.serviceClient<C11_Agent::mission_selection>("C11/mission_selection");
+  ros::ServiceClient ResumeMissionClient;
+  ros::ServiceClient PauseMissionClient;
+  ros::ServiceClient PathUpdateClient;
   image_transport::ImageTransport* it_;
   image_transport::Subscriber panoramic_image;
   ros::Subscriber status_subscriber;
+
+  ros::Publisher executer_update_pub;
+
   int init_argc;
   char** init_argv;
+  int img_counter;
   static IC11_Node_Subscriber* pIC11_Node_Subscriber;
+  static QTimer* WaitTimer;
+  bool WaitingForResponse;
 };
 
 #endif // C11_NODE_H

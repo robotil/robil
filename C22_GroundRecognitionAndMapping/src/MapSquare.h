@@ -13,16 +13,26 @@
 #include <pcl/ModelCoefficients.h>
 #include <pcl/point_types.h>
 #include "MPlane.h"
-enum status{AVAILABLE,BLOCKED,UNCHARTED};		//AVAILABLE = 0,BLOCKED = 1,UNCHARTED = 2
+
+#define MAXSCANS 360
+enum status{AVAILABLE,BLOCKED,UNCHARTED,ATLAS,DEBREE,HILL};		//AVAILABLE = 0,BLOCKED = 1,UNCHARTED = 2
 
 class MapSquare {
 public:
+	int rating;
+	bool ratable;
 	status square_status;
 	std::vector<MPlane*> *square_Planes;
+	int scansLeft;
 	MapSquare();
 	virtual ~MapSquare();
+	void addRating();
+	void setRatable();
 	void clearSq();
 	bool hasPlane(MPlane* other);
+	bool hasTop(double top);
+	MPlane *getTop(double top);
+	MPlane* getPlane(MPlane* other);
 	std::string toString();
 };
 

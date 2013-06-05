@@ -5,9 +5,11 @@
 #include "cogniteam_pathplanning.h"
 using namespace std;
 
+
 class PField{
 //------------------ types
 public:
+	typedef ObsMap Map;
 	typedef vector<Vec2d> Points;
 	
 	enum RepulsorType{RT_ERROR, RT_R1};
@@ -39,10 +41,18 @@ public:
 		bool notDefined()const{
 			if(
 				viewRadiusForward==0 || viewRadiusSide==0 ||
-				maxIterationNumber==0 || stepRate == 0 ||
+				maxIterationNumber<0 || stepRate == 0 ||
 				distanceBetweenPoints==0 || maxAngleWhileReducing==0 ||
 				repulsorType==RT_ERROR || attractorType==AT_ERROR
-			) return true;
+			){
+				cout<<"SmoothingParameters::notDefined=true: "
+					<<(viewRadiusForward==0)<<(viewRadiusSide==0)
+					<<(maxIterationNumber==0)<<(stepRate==0)
+					<<(distanceBetweenPoints==0)<<(maxAngleWhileReducing==0)
+					<<(repulsorType==RT_ERROR)<<(attractorType==AT_ERROR)
+				<<endl;
+				return true;
+			}
 			return false;
 		}
 	};
@@ -66,10 +76,11 @@ public:
 	Path castPath(const Points& points)const;
 
 private:
-
+public://<- for testing only
 	Points simulate(const SmoothingParameters& params) const;
 	Points reducePath(const Points& path, const SmoothingParameters& params) const;
-
+	Points addPointsToPath(const Points& path, const SmoothingParameters& params) const;
+	Points addPointsToPath(const Points& path, double distBtwPoints) const;
 };
 
 #endif

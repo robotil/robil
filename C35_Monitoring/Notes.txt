@@ -1,9 +1,35 @@
+
+==============================
+monitor time
+==============================
+
+C35_Monitoring
+# Description: The monitor performs the following:
+1. On initialization, computes statistics for the given behavior tree which include success probabilities and time distributions given success/failure.
+2. During runtime, the C35 node listens to messages from executor, and maintains statistics regarding succ/fail and execution times of all nodes in the BTree.
+3. When running a Monitoring task (e.g., MonitorTime(param=563a39ca-99df-45dc-a369-73c7af2fe951)), the task monitors the node with the id given in param. If the node takes longer than (T*average_computed_time) for that node, it exists with failure, which terminates the monitored node (the monitoring node is always the monitored node's sibling in the BTree, and their parent is always a parallel node).
+
+
 How to Check:
+
 ============
-Requires python ver 2.7.3. In order to test the code, run tests.py from the src/ directory:
-python tests.py all
-This should take no more than 20 seconds to complete. Check in stdout that all tests succeeded.
-tests/ directory contains xml files used as input. distributions/ directory contains some source code. output/ directory is where test output is redirected.
+Requires python ver 2.7.3. In order to test the code run the following:
+1. Launch drc sim
+2. run designer and executer
+3. rosrun C46_MountVehicle C46_Node.py
+4. rosrun C35_Monitoring C35_Node.py, in  C35_Node, make sure that you sent the right xml file. for example: MonitorTimeServer("tests/simple_monitor_example.xml", "MonitorTime")
+5. in designer load tree located in C35_monitoring/src/tests/simple_monitoring_example.xml. IF THE DESIGNER REFUSES, MOVE FILE TO C34_Designer/plans/ )
+6. run the tree, resume
+
+How to Check (skill4) (oudated):
+============
+Requires python ver 2.7.3. In order to test the code run the following:
+1. Launch drc sim
+2. run designer and executer
+3. run all relevant nodes for skill4
+4. rosrun C35_Monitoring C35_Node.py
+5. in designer load tree located in C35_monitoring/src/tests/skill4.xml
+6. run the tree
 
 Known Bugs:
 ==========
@@ -11,4 +37,84 @@ Known Bugs:
 
 Known Limitations:
 =================
-Currently, the code runs without integration to the executor/designer packages. Input is event xml files with some additions. These additions describe the probability of success in tasks, and time distributions of these tasks given success or failure.
+xml file is hardcoded, instead of being given as cmd line argument.
+
+
+
+=======================
+Monitor specific tasks
+=======================
+
+MONITOR WAYPOINT OF DRIVING MODULE
+
+# Description: This monitor works in parallel to "WayPointsDriving" in C51_CarOperation.
+Performs the following:
+1. Saves the way points sent by the path planner and the current location passed by the vehicle.
+2. Compares the vehicle's real location to the accurate way point and calculates the gap.
+3. Check whether the current driving module run has passed the threshold, if so, produces an alert.
+
+How to Check:
+============
+Requires python ver 2.7.3. , drc-2.0 and gazebo-1.4.0 and up.
+In order to test the code run the following:
+1.C0_Scripts/clear_all.sh
+2.C0_Scripts/make_all.sh
+3. follow the instructions in: http://www.robil.org/trac_robil/wiki/WalkingdexterityPage to upload the C51_CarOperation module.
+  3.1. in C51_CarOperation: rosrun C51_CarOperation DRC_Vehicle_Init_client.py
+  3.2. continue to run C51_CarOperation in stage 9
+4. rosrun C34_Designer run.sh
+5. rosrun C35_Monitoring C35_Node.py
+6. rosrun C34_Executer executer
+7. in designer, open tree located in C35_monitoring/src/tests/plan26-02-13-131747286.xml  (IF THE DESIGNER REFUSES, MOVE FILE TO C34_Designer/plans/ )
+8. run the tree, resume.
+9. in C51_CarOperation: rosrun C51_CarOperation DRC_Vehicle_Drive_client.py
+
+Known Bugs:
+==========
+
+
+Known Limitations:
+=================
+TODO - Need to get threshold function from Oded.
+TODO - Need to formalize the alerts raised by the monitor
+
+
+
+
+=======================
+Timeout Monitor, Falling Monitor, and Stability Monitor
+=======================
+#description (Timeout Monitor): a task which receives as a parameter a threshold value, and after threshold seconds, aborts with failure, unless preempted.
+#description (Falling Monitor): a task which listens on topic /C35/falling for boolean values [0,1], and aborts with failure when 1 is heard (meaning the robot has fallen).
+#description (Stability Monitor): a task which listens on topic /C35/stability for int8 values [1-5] (5 being the most stable), and aborts with failure when 1 is heard (meaning the robot is dangerously unstable).
+in order to run test (requires stand_up module):
+roslaunch atlas_utils atlas.launch
+rosrun C34_Executer executer
+rosrun C34_Designer run.sh 
+rosrun C35_Monitoring TimeoutMonitor.py
+rosrun C35_Monitoring FallingMonitor.py
+rosrun C35_Monitoring StabilityMonitor.py
+rosrun C48_StandUp Fall.py
+rosrun C48_StandUp C48_StandUp.py
+C34_Designer/plans/MonitoredStandUp.xml
+run and resume
+threshold values can be changed in the xml files, just change the threshold parameters.
+"falling messages" can be sent from command line using: rostopic pub -1 /C35/falling std_msgs/Bool -- 1
+"stability messages" can be sent from command line using: rostopic pub -1 /C35/stability std_msgs/Int8 -- [1-5]
+
+Known Bugs:
+==========
+
+
+Known Limitations:
+=================
+Not related to monitoring, but stand_up module does not react to preemption.
+
+
+=======================
+Driving Monitor - monitors the driving module and makes sure it actually starts moving.
+=======================
+roslaunch C51_CarOperation iddqd.launch
+roslaunch C51_CarOperation C51_completeLuanch.launch 
+rosrun C35_Monitoring DrivingMonitor.py
+Open skill4_driving_1.xml in designer and run.

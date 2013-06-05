@@ -11,22 +11,25 @@
 #include "math.h"
 #include <pcl/ModelCoefficients.h>
 #include <pcl/point_types.h>
+#include <boost/thread/mutex.hpp>
 using namespace std;
 
 //c24 added includes
 MapMatrix::MapMatrix() {
-	data=new std::vector<std::vector<MapSquare*>*>();
+	data=new std::deque<std::deque<MapSquare*>*>();
 	for (int i=0;i<NUMOFSQUARES;i++){
-		data->push_back(new std::vector<MapSquare*>());
+		data->push_back(new std::deque<MapSquare*>());
 		for (int j=0;j<NUMOFSQUARES;j++){
 			data->at(i)->push_back(new MapSquare());
 		}
 	}
+	xOffset=0;
+	yOffset=-SIZEOFMAP/2;
 }
 
 MapMatrix::~MapMatrix() {
 	while(data->size()!=0){
-		std::vector<MapSquare*> *temp=data->back();
+		std::deque<MapSquare*> *temp=data->back();
 		while(temp->size()!=0){
 			MapSquare* temp1=temp->back();
 			temp->pop_back();
@@ -38,6 +41,13 @@ MapMatrix::~MapMatrix() {
 	//delete data;
 }
 
+void MapMatrix::setAtlasPos(geometry_msgs::Point pose){
+	int ax=(pose.x-xOffset)*SIZEOFSQUARE;
+	int ay=(pose.y-yOffset)*SIZEOFSQUARE;
+	//cout<<"Atlas is in "<<"("<<ax<<","<<ay<<")"<<endl;
+
+	data->at(ax)->at(ay)->square_status=ATLAS;
+}
 
 void MapMatrix::printMatrix(){
 	cout<<"About to print matrix"<<endl;
@@ -57,14 +67,17 @@ void MapMatrix::printMatrix(){
 				std::cout << "A  ";
 				else if (data->at(i-1)->at(j)->square_status==BLOCKED)
 					std::cout << "B  ";
-				else std::cout << "-  ";
+				else   if (data->at(i-1)->at(j)->square_status==ATLAS)
+					std::cout << "X  ";
+				else
+					std::cout << "-  ";
 		}
 		std::cout <<endl;
 	}
 }
 
 double MapMatrix::calcSlopeZ(float a,float b,float c){
-	double ang = 180-std::acos((c)/std::sqrt(a*a+b*b+c*c))*180/M_PI;
+	double ang = std::acos((c)/std::sqrt(a*a+b*b+c*c))*180/M_PI;
 	return ang;
 }
 
@@ -77,11 +90,83 @@ void MapMatrix::clearMatrix(){
 }
 
 bool MapMatrix::inMatrixRange(pcl::PointXYZ p){
-	if (p.x<0 || (p.x >= SIZEOFMAP)
-			||(p.z<0) || (p.z>=SIZEOFMAP))
+	if (p.x<0+xOffset || (p.x >= NUMOFSQUARES*SIZEOFSQUARE+xOffset)
+			||(p.y<0+yOffset) || (p.y>=NUMOFSQUARES*SIZEOFSQUARE+yOffset))
 		return false;
 	return true;
 }
+
+
+void MapMatrix::updateMapRelationToRobot(float movmentX,float movmentY,float yaw){
+	boost::mutex::scoped_lock l(mutex);
+	//calculate the map offsets according to the robot's global position and update bound
+	float newOffsetX=xOffset;
+	float newOffsetY=yOffset;
+	pelvisHeight=yaw;
+	if(xOffset> movmentX-BOUNDOFUPDATE)
+		newOffsetX= movmentX-BOUNDOFUPDATE;
+	if(xOffset+NUMOFSQUARES*SIZEOFSQUARE< movmentX+BOUNDOFUPDATE)
+		newOffsetX=movmentX+BOUNDOFUPDATE;
+	if(yOffset> movmentY-BOUNDOFUPDATE)
+		newOffsetY= movmentY-BOUNDOFUPDATE;
+	if(yOffset+NUMOFSQUARES*SIZEOFSQUARE< movmentY+BOUNDOFUPDATE)
+		newOffsetY=movmentY+BOUNDOFUPDATE;
+	//move the map to the right directions
+	//std::cout<<"x:"<<x<<" y:"<<y<<std::endl;
+	//std::cout<<"x offset"<<newOffsetX<<" y offset"<<newOffsetY<<std::endl;
+	/*if(std::abs(newOffsetY-yOffset)>=NUMOFSQUARES*SIZEOFSQUARE || std::abs(newOffsetX-xOffset)>=NUMOFSQUARES*SIZEOFSQUARE){
+		yOffset=newOffsetY;
+		xOffset=newOffsetX;
+		clearMatrix();
+		return;
+	}
+	moveMapHarisontaly(((int)newOffsetY-yOffset)*(1/SIZEOFSQUARE));
+	moveMapVerticaly(((int)newOffsetX-xOffset)*(1/SIZEOFSQUARE));
+	yOffset=newOffsetY;
+	xOffset=newOffsetX;
+	*/
+}
+
+void MapMatrix::moveMapHarisontaly(int times){
+	if(times<0){
+		for (int i=0;i<std::abs(times);i++){
+			data->pop_back();
+			std::deque<MapSquare*>* temp=new std::deque<MapSquare*>;
+			for (int j=0;j<NUMOFSQUARES;j++){
+				temp->push_back(new MapSquare);
+			}
+			data->push_front(temp);
+		}
+	}else{
+		for (int i=0;i<std::abs(times);i++){
+			data->pop_front();
+			std::deque<MapSquare*>* temp=new std::deque<MapSquare*>;
+			for (int j=0;j<NUMOFSQUARES;j++){
+				temp->push_back(new MapSquare);
+			}
+			data->push_back(temp);
+		}
+	}
+}
+
+void MapMatrix::moveMapVerticaly(int times){
+	if(times<0){
+		for (int i=0;i<std::abs(times);i++){
+			for (int j=0;j<NUMOFSQUARES;j++){
+				data->at(j)->pop_back();
+				data->at(j)->push_front(new MapSquare);
+			}
+		}
+	}else{
+		for (int i=0;i<std::abs(times);i++){
+			for (int j=0;j<NUMOFSQUARES;j++){
+				data->at(j)->pop_front();
+				data->at(j)->push_back(new MapSquare);
+			}
+		}
+	}
+}
+
 
 //c24 changes + need to use type of the imu message which is const OdometryConstPtr& pos_msg
 /*
@@ -91,36 +176,66 @@ bool MapMatrix::inMatrixRange(pcl::PointXYZ p){
  * this plane and going to the next plane etc.
  */
 void MapMatrix::computeMMatrix(std::vector<pclPlane*>* mapPlanes,pcl::PointCloud<pcl::PointXYZ>::Ptr map_cloud){ //update way of calculating x and y indices of mapMatrix
-	int xIndex,yIndex;
-	data->at(0)->at(SIZEOFMAP*2)->square_status=BLOCKED;
-
 	for (unsigned int i=0; i< mapPlanes->size();i++){ //goes through all planes
-		pcl::PointIndices::Ptr inliers = mapPlanes->at(i)->inliers;
-		pcl::ModelCoefficients::Ptr coff= mapPlanes->at(i)->coefficients;
-		MPlane* tempPlane=new MPlane(pcl::PointXYZ(0,0,0),coff);
-		double angle=calcSlopeZ(tempPlane->coefficient_x,tempPlane->coefficient_z,tempPlane->coefficient_y);
-		for (unsigned int j=0; j< inliers->indices.size();j++){ //goes through all indices in the plane i
-			pcl::PointXYZ p = map_cloud->points[inliers->indices[j]];
-			p.x+= (SIZEOFMAP/2);	//adapt x axis to matrix
-			//p.z+= BEHIND;	//adapt y axis to matrix
-			if (inMatrixRange(p)){
-				xIndex = p.x *4;	//added for now instead of previous three lines
-				yIndex = p.z *4;	//same as above
-				MapSquare* ms=data->at(yIndex)->at(xIndex);
-				if(!ms->hasPlane(tempPlane)){
-					MPlane* newPlane=new MPlane(pcl::PointXYZ(p.x,p.y,p.z),coff);
+			pcl::PointIndices::Ptr inliers = mapPlanes->at(i)->inliers;
+			pcl::ModelCoefficients::Ptr coff= mapPlanes->at(i)->coefficients;
+			MPlane* tempPlane=new MPlane(pcl::PointXYZ(0,0,0),coff);
+			double angle=calcSlopeZ(tempPlane->coefficient_x,tempPlane->coefficient_y,tempPlane->coefficient_z);
+			for (unsigned int j=0; j< inliers->indices.size();j++){ //goes through all indices in the plane i
+				pcl::PointXYZ p = map_cloud->points[inliers->indices[j]];
 
-					ms->square_Planes->push_back(newPlane);
-					if (angle>30){
-						ms->square_status = BLOCKED;
-					}
-					else{
-						if(ms->square_status!=BLOCKED){
-							ms->square_status = AVAILABLE;
+				if (inMatrixRange(p)){
+					int xIndex,yIndex;
+					xIndex = (p.x -xOffset)*(1/SIZEOFSQUARE);	//added for now instead of previous three lines
+					yIndex = (p.y-yOffset) *(1/SIZEOFSQUARE);	//same as above
+					MapSquare* ms=data->at(xIndex)->at(yIndex);
+					ms->addRating();
+					if(!ms->hasPlane(tempPlane)){
+						MPlane* newPlane=new MPlane(pcl::PointXYZ(p.x,p.y,p.z),coff);
+						newPlane->addRating();
+						newPlane->rating=20;
+						ms->square_Planes->push_back(newPlane);
+						if (p.z>(0.5+pelvisHeight-PELVIS_HEIGHT) || p.z<(-0.4+pelvisHeight-PELVIS_HEIGHT)){
+							//std::cout<<"pelvis height:"<<pelvisHeight<<" point z:"<<p.z<<"\n";
+							ms->square_status = BLOCKED;
 						}
+						else{
+							if(ms->square_status!=BLOCKED){
+								if(p.z>(0.15+pelvisHeight-PELVIS_HEIGHT) || p.z<(-0.15+pelvisHeight-PELVIS_HEIGHT)){
+									ms->square_status = DEBREE;
+									//cout<<p.z<<"\n";
+								}
+							}
+							if(ms->square_status!=BLOCKED && ms->square_status!=DEBREE){
+								double a=tempPlane->coefficient_x;
+								double b=tempPlane->coefficient_y;
+								double c=tempPlane->coefficient_z;
+								double ang1 = std::acos((c)/std::sqrt(a*a+b*b+c*c))*180/M_PI;
+								double ang2 = std::acos((a)/std::sqrt(a*a+b*b+c*c))*180/M_PI;
+								double ang3 = std::acos((b)/std::sqrt(a*a+b*b+c*c))*180/M_PI;
+								if(std::abs(ang1)<6 && std::abs(ang1)>2)
+									ms->square_status = HILL;
+								else
+									ms->square_status = AVAILABLE;
+							}
+						}
+					}else{
+						MPlane* temp=ms->getPlane(tempPlane);
+						 if(temp->representing_point.z<p.z){
+							 temp->representing_point.z=p.z;
+							 temp->representing_point.y=p.y;
+							 temp->representing_point.x=p.x;
+
+						 }
 					}
 				}
 			}
 		}
-	}
+		for(unsigned int i=0; i< data->size();i++){
+			for(unsigned int j=0; j< data->at(i)->size();j++){
+				 data->at(i)->at(j)->setRatable();
+			}
+		}
+
+
 }

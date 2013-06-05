@@ -1,0 +1,36 @@
+<plan descriptions="./plans/TaskDescriptions.xml">
+   <par name="Qualification1" x="469.48412698412636" y="-70.6904761904764" collapsed="false" id="63f81135-edae-4bc9-9ef3-9f12d8ba2c6b"> 
+         <par name="Perception" x="372.305731520805" y="61.466168402946295" collapsed="false" id="50ae34a1-b4f6-42b9-a59e-23a1de45eaca"> 
+               <tsk name="LocalizationTrack" x="204.30573152080467" y="102.46616840294635" test_time="0" test_result="true" id="b680e465-1580-4fcd-964d-4ac78748b7d3" />
+               <tsk name="PathPlanning" x="377.3730158730154" y="245.19841269841243" test_time="0" test_result="true" id="0e442f5e-e4f4-4d44-9f36-038aa11042d8" />
+         </par>
+      <dec name="!L!" x="645.2619047619036" y="23.08730158730137"> 
+            <seq name="Mission" x="638.4841269841264" y="115.86507936507925" collapsed="false" id="e476250a-7477-4a98-a8c7-bed5aed10672"> 
+               <dec name="!L!" x="596.9285714285713" y="162.2142857142856"> 
+                     <tsk name="PathPlanningFocus(target=Gate)" x="495.0396825396822" y="244.30952380952294" test_time="0" test_result="true" id="9fe743dd-3101-4988-8e76-2f01615c6604" />
+               </dec>
+               <dec name="L" x="725.817460317459" y="170.86507936507917"> 
+                     <seq name="FollowPath" x="699.706349206349" y="249.30952380952323" collapsed="false" id="c7ba98c9-0de4-4d06-b708-17093c741683"> 
+                           <tsk name="SearchObject(target=Gate)" x="573.0396825396816" y="342.64285714285563" test_time="0" test_result="true" id="594efb21-0c86-4334-aa42-1fa262943ec1" />
+                        <dec name="!L!" x="795.2619047619036" y="329.3095238095235"> 
+                              <sel name="SelectWalkType" x="759.7063492063502" y="401.53174603174557" collapsed="false" id="4506d28d-394f-473c-8a25-22e328fcbef4"> 
+                                    <par name="Zmp" x="693.0396825396818" y="461.5317460317466" collapsed="false" id="1fd7fbeb-e6ea-43c3-bd0d-576f7e6209bb"> 
+                                       <dec name="F:1" x="661.928571428571" y="505.97619047619037"> 
+                                             <tsk name="whileInZmpArea" x="615.2619047619029" y="554.8650793650793" test_time="0" test_result="true" id="f4b90051-c348-4614-bb16-993d14953922" />
+                                       </dec>
+                                          <tsk name="ZmpWalk" x="745.2619047619033" y="553.7539682539652" test_time="0" test_result="true" id="4675c8a2-4623-4235-b386-920a5c243e82" />
+                                    </par>
+                                    <par name="QS" x="895.2619047619036" y="470.4206349206361" collapsed="false" id="67f83db9-e8ba-44dc-964c-c02a3b4b6823"> 
+                                       <dec name="F:1" x="887.4841269841264" y="504.86507936507917"> 
+                                             <tsk name="whileInQSArea" x="857.4841269841269" y="553.7539682539693" test_time="0" test_result="true" id="ab5ba76b-d9d3-4cc3-8ed7-ffc88dfaa696" />
+                                       </dec>
+                                          <tsk name="QuasiStaticWalk" x="964.1507936507932" y="552.6428571428532" test_time="0" test_result="true" id="c9112af6-dbb8-4445-8948-59f96dacf28b" />
+                                    </par>
+                              </sel>
+                        </dec>
+                     </seq>
+               </dec>
+            </seq>
+      </dec>
+   </par>
+</plan>

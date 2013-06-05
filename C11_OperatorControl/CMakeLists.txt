@@ -16,6 +16,7 @@ find_package(Qt4 REQUIRED)
 set( QT_USE_QTGUI TRUE )
 set( QT_USE_QTOPENGL TRUE )
 set( QT_USE_QTXML TRUE )
+set( QT_USE_QTNETWORK TRUE )
 include(${QT_USE_FILE})
 
 #set the default path for built executables to the "bin" directory
@@ -27,13 +28,13 @@ set(LIBRARY_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/lib)
 rosbuild_genmsg()
 #uncomment if you have defined services
 rosbuild_gensrv()
-set(qt_hdrs src/IFigure.h src/graphicsview.h src/imagedraw.h src/cline.h src/figure.h src/cnode.h src/C11_Node.h src/PushHMIServer.hpp src/HMIResponseServer.hpp)
-set(qt_srcs src/graphicsview.cpp src/imagedraw.cpp src/main.cpp src/figure.cpp src/cnode.cpp src/cline.cpp src/C11_Node.cpp)
+set(qt_hdrs src/graphicsview.h src/imagedraw.h src/C11_Node.h src/mapmain.h src/mapwidget.h src/pixitem.h src/routeitem.h src/lineItemlist.h src/lineitem.h src/pointitem.h src/structs.h src/arcitem.h src/polygonitem.h src/traingleitem.h src/tcpConnection.h)
+set(qt_srcs src/graphicsview.cpp src/imagedraw.cpp src/main.cpp src/C11_Node.cpp src/mapmain.cpp src/mapwidget.cpp src/pixitem.cpp src/routeitem.cpp src/lineitemlist.cpp src/lineitem.cpp src/pointitem.cpp src/arcitem.cpp src/polygonitem.cpp src/traingleitem.cpp src/tcpConnection.cpp src/structs.cpp)
 
 qt4_automoc(${qt_srcs})
 QT4_WRAP_CPP(qt_moc_srcs ${qt_hdrs})
 
-QT4_WRAP_UI(uis_h src/imagedraw.ui)
+QT4_WRAP_UI(uis_h src/imagedraw.ui src/mapmain.ui)
 
 # include this for ui_h
 include_directories(${CMAKE_CURRENT_BINARY_DIR})
@@ -50,8 +51,8 @@ include_directories(srv_gen/cpp/include)
 
 
 rosbuild_add_boost_directories()
-#rosbuild_add_executable(c11 src/C11_Node.cpp)
-rosbuild_add_executable(c11 src/main.cpp
+#rosbuild_add_executable(C11 src/C11_Node.cpp)
+rosbuild_add_executable(C11 src/main.cpp
     ${uis_h} ${qt_hdrs} ${qt_srcs} ${qt_moc_srcs})
-target_link_libraries(c11 ${QT_LIBRARIES})
-rosbuild_link_boost(c11 thread signals)
+target_link_libraries(C11 ${QT_LIBRARIES})
+rosbuild_link_boost(C11 thread signals)

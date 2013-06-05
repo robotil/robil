@@ -1,0 +1,15 @@
+C31_GlobalPathPlanner:
+  potential_field:
+    viewRadiusForward: 15
+    viewRadiusSide: 4
+    stepRate: 0.3
+    distanceBetweenPoints: 2.0
+    maxAngleWhileReducing: deg(10)
+  walls_detector:
+    costTL: 0.05
+    costLL: 0.0
+    max_alt: 0.45
+  a_star:
+    w_distance: 1.0
+    w_slop: 1.0
+    w_alt_delta: 1.0

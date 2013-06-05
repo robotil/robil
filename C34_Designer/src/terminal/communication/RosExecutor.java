@@ -1,14 +1,13 @@
 package terminal.communication;
 
-import java.io.IOException;
 import java.util.ArrayList;
-import java.util.concurrent.*;
 
-import document.BTDesigner;
+import document.Parameters;
+
+import logger.Log;
 
 import terminal.commands.ServiceCaller;
-import terminal.communication.RosPipe.RosTargets;
-import terminal.lineprocessors.DummyLineProcessor;
+import windows.designer.BTDesigner;
 
 public class RosExecutor {
 
@@ -18,59 +17,66 @@ public class RosExecutor {
 	public static final String RESUME = EXECUTER + "resume";
 	public static final String STEP = EXECUTER + "step";
 	public static final String PAUSE = EXECUTER + "pause";
-	public static final String STACK_STREAM = EXECUTER + "stack_stream";
-	public static final String STOP_STREAM = EXECUTER + "stop_stream";
+	// public static final String STACK_STREAM = EXECUTER + "stack_stream";
+	// public static final String STOP_STREAM = EXECUTER + "stop_stream";
 
 	private ArrayList<Thread> workerThreads;
 
 	public RosExecutor(BTDesigner designer) {
-		
+
 		// start ROS listeners
-		workerThreads = new ArrayList<Thread>();
-		workerThreads.add(new Thread(new RosStackStreamListener(designer),
+		this.workerThreads = new ArrayList<Thread>();
+		this.workerThreads.add(new Thread(new RosStackStreamListener(designer),
 				"RosStackListener"));
-		workerThreads.add(new Thread(new RosStopStreamListener(),
+		this.workerThreads.add(new Thread(new RosStopStreamListener(designer),
 				"RosStopListener"));
 
-		for (Thread t : workerThreads) {
+		for (Thread t : this.workerThreads)
 			t.start();
-		}
-	}
-
-	public void shutDownAll() {
-		for (Thread t : workerThreads) {
-			t.interrupt();
-		}
-	}
-
-	public void runBehaviorTree(String btName, String plan) {
-		ServiceCaller caller = new ServiceCaller();
-		System.out.println("Run "+btName);
-		caller.callService(RUN, btName, plan);
-	}
-
-	public void resumeBehaviorTree(String btName) {
-		System.out.println("Resume "+btName);
-		ServiceCaller caller = new ServiceCaller();
-		caller.callService(RESUME, btName);
-	}
-
-	public void stopBehaviorTree(String btName) {
-		ServiceCaller caller = new ServiceCaller();
-		System.out.println("Stop "+btName);
-		caller.callService(STOP, btName);
 	}
 	
-	public void stepBehaviorTree(String btName) {
-		ServiceCaller caller = new ServiceCaller();
-		System.out.println("step "+btName);
-		caller.callService(STEP, btName);
+	public static String getStackStreamTopicName() {
+		return EXECUTER + Parameters.stack_stream_topic;
+	}
+
+	public static String getStopStreamTopicName() {
+		return EXECUTER + Parameters.stop_stream_topic;
 	}
 	
 	public void pauseBehaviorTree(String btName) {
 		ServiceCaller caller = new ServiceCaller();
-		System.out.println("Pause "+btName);
+		Log.i("ROSEXECUTOR", "Pause " + btName);
 		caller.callService(PAUSE, btName);
 	}
-	
+
+	public void resumeBehaviorTree(String btName) {
+		Log.i("ROSEXECUTOR", "Resume " + btName);
+		ServiceCaller caller = new ServiceCaller();
+		caller.callService(RESUME, btName);
+	}
+
+	public void runBehaviorTree(String btName, String plan) {
+		ServiceCaller caller = new ServiceCaller();
+		Log.i("ROSEXECUTOR", "Run " + btName);
+		caller.callService(RUN, btName, plan);
+	}
+
+	public void shutDownAll() {
+		for (Thread t : this.workerThreads) {
+			t.interrupt();
+		}
+	}
+
+	public void stepBehaviorTree(String btName) {
+		ServiceCaller caller = new ServiceCaller();
+		Log.i("ROSEXECUTOR", "Step " + btName);
+		caller.callService(STEP, btName);
+	}
+
+	public void stopBehaviorTree(String btName) {
+		ServiceCaller caller = new ServiceCaller();
+		Log.i("ROSEXECUTOR", "Stop " + btName);
+		caller.callService(STOP, btName);
+	}
+
 }

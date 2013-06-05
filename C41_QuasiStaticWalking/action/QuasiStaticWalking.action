@@ -1,6 +1,5 @@
 #goal definition
-float32[] map
-float32[] path
+geometry_msgs/Point objective
 ---
 #result definition
 bool success

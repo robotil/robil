@@ -1,0 +1,35 @@
+<plan descriptions="./plans/TaskDescriptions.xml">
+   <par name="skill4" x="761.416820365101" y="-7.577482272920612" collapsed="false" id="38e95426-0932-40d2-aefa-270a3dcd9298"> 
+         <par name="Perception" x="542.6273466808908" y="77.42251772707894" collapsed="false" id="50ae34a1-b4f6-42b9-a59e-23a1de45eaca"> 
+               <tsk name="LocalizationTrack" x="374.62734668089035" y="118.42251772707905" test_time="0" test_result="true" id="b680e465-1580-4fcd-964d-4ac78748b7d3" />
+               <tsk name="ObstacleDetection" x="553.6273466808908" y="139.42251772707894" test_time="0" test_result="true" id="56806741-11f0-45f8-992b-3a81f261bd49" />
+         </par>
+         <seq name="Mission" x="961.4168203651026" y="73.42251772707917" collapsed="false" id="e6b9d1db-cbf5-4efb-8b22-f2c2e6130a3e"> 
+               <seq name="DriveMission" x="1000.1549156031978" y="230.08918439374602" collapsed="false" id="19ac91a7-5f3b-47d5-a2bb-9ef59c48c5ae"> 
+                     <seq name="InCar" x="949.396673844955" y="370.23936754392764" collapsed="false" id="cee78399-ac08-4713-9a85-542b10c3e7ff"> 
+                           <par name="Driving" x="904.3966738449495" y="443.21738952194954" collapsed="false" id="6207a22b-f609-4f49-9579-2e83f0c45e36"> 
+                              <dec name="!L!" x="848.682388130661" y="493.21738952195"> 
+                                    <seq name="Driving" x="892.6054650537436" y="581.7009060054677" collapsed="false" id="3121acdd-f660-4d53-96b2-47029c756b6f"> 
+                                          <seq name="@4" x="966.8368575868604" y="662.8415750915763" collapsed="false" id="70f216a5-7259-412e-a108-658b5d28d109"> 
+                                                <tsk name="InitDrive" x="787.8686229484766" y="768.3249661558459" test_time="0" test_result="true" id="6e5cc7d2-bc5b-46c9-b6fc-9adb8ab9b935" />
+                                                <sel name="@5" x="964.8368575868602" y="723.8415750915765" collapsed="false" id="44efb3a3-36bc-460c-a765-923a3b1d891f"> 
+                                                      <tsk name="WayPointsDriving" x="874.368622948473" y="768.3324849528492" test_time="0" test_result="true" id="398165c8-1786-4ce4-b98b-37e5282d9a26" />
+                                                      <tsk name="FinishDrive" x="1061.4082861582945" y="767.6987179487207" test_time="0" test_result="true" id="e69475b5-c614-47bf-89b5-def175bd06cf" />
+                                                </sel>
+                                                <tsk name="FinishDrive" x="1061.4082861582945" y="767.6987179487207" test_time="0" test_result="true" id="e69475b5-c614-47bf-89b5-def175bd06cf" />
+                                          </seq>
+                                    </seq>
+                              </dec>
+                                 <tsk name="PathPlanning" x="924.3966738449518" y="483.21738952195" test_time="0" test_result="true" id="32da76e3-cd3b-456e-84d4-9dfe611b91c6" />
+                           </par>
+                     </seq>
+                     <par name="ForMonitoring" x="1162.8747641247596" y="321.2536630036616" collapsed="false" id="028d6796-014d-48f3-b66b-adb10c16e483"> 
+                           <seq name="ExitFromCar" x="1211.7163191119619" y="397.5121167245886" collapsed="false" id="b9e18714-4869-422c-bc38-cb2dca88c530"> 
+                                 <tsk name="DismountVechicle(param=Dismount)" x="1221.2877476833974" y="519.5560727685415" test_time="0" test_result="true" id="bf3df02a-9fe8-414b-8906-a9c8f49fbbb3" />
+                           </seq>
+                           <tsk name="MonitorTime(param=b9e18714-4869-422c-bc38-cb2dca88c530)" x="1472.2154234654197" y="475.53937728937507" test_time="0" test_result="true" id="cca761ab-b52d-43e8-a753-b4c458aea4db" />
+                     </par>
+               </seq>
+         </seq>
+   </par>
+</plan>

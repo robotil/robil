@@ -1,3 +1,57 @@
 #!/bin/bash
-function test_file { c="rosrun C31_PathPlanner planner_test $@"; f=test_result_MAP_1_FROM_$1_$2_TO_$3_$4; echo $c > $f; $c >> $f; }
-while read line;do test_file $line; done
+
+
+function run_test_planner {
+	c="rosrun C31_PathPlanner test_planner $1 $2 $3 $4 $5 $6"; 
+	f=test_result_MAP_$7_FROM_$1_$2_TO_$3_$4_RR_$6; 
+	echo $c > $f; 
+	$c >> $f; 
+}
+function run_test_planner_with_transits {
+	map=$1
+	shift
+	c="rosrun C31_PathPlanner test_planner_transit $@"; 
+	f=test_result_MAP_${map}_FROM_$1_$2_TO_$3_$4_RR_$6; 
+	shift;shift;shift;shift;shift;shift;shift
+	f=$f'_T_'$(echo $@ | tr ' ' '_')
+	#echo "$c > $f"
+	echo $c > $f; 
+	$c >> $f; 
+}
+function run_test {
+	if [[ $# -le 7 ]]
+	then
+		#echo "$@ : this this prameters for planning without transits points"
+		map=$5.grid 
+		run_test_planner $1 $2 $3 $4 $map $6 $5
+	else
+		#echo "$@ : this this prameters for planning with transits points"
+		map=$5.grid
+		n=$7
+		#echo "read $n transits"
+		transits=""
+		for i in $(seq 8 $[ $n*2+8-1 ]);do
+			transits="$transits"' '"${!i}"
+		done
+		run_test_planner_with_transits $5 $1 $2 $3 $4 $map $6 $n$transits
+	fi
+}
+
+function phelp {
+	echo "create test files"
+	echo "Syntax 1: cat points | ./create_tests"
+	echo "Syntax 2: ./create_tests points"
+	echo "Syntax of points file:"
+	echo "    from_x from_y to_x to_y map_file_name_without_extention robot_radius"
+	echo "    from_x from_y to_x to_y map_file_name_without_extention robot_radius number_of_transit_points transit1_x transit1_y transit2_x transit2_y ..."
+	exit 0
+}
+
+if [[ $@ = '-h' ]];then phelp; fi
+if [[ $@ = '--help' ]];then phelp; fi
+
+if [[ $# = '0' ]];then 
+	while read line;do if [[ $(echo $line | wc -w) = '0' ]];then continue; else run_test $line;fi; done
+else 
+	cat $1 | while read line;do if [[ $(echo $line | wc -w) = '0' ]];then continue; else run_test $line;fi; done
+fi

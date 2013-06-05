@@ -1,7 +1,3 @@
-
-
-
-
 /**
  * this class represent the C22_Node,
  * it subscribe to two camera/image topics and provide the path
@@ -12,6 +8,7 @@
 #include "MapMatrix.h"
 #include "C22_GroundRecognitionAndMapping/C22.h"
 #include "sensor_msgs/PointCloud.h"
+#include "geometry_msgs/PoseWithCovarianceStamped.h"
 #include <pcl/correspondence.h>
 #include <pcl/point_cloud.h>
 #include <pcl/common/common_headers.h>
@@ -26,14 +23,36 @@
 #include <iostream>
 #include <boost/thread/thread.hpp>
 #include <pcl/sample_consensus/sac_model_plane.h>
+#include "nav_msgs/Odometry.h"
+#include <message_filters/subscriber.h>
+#include <message_filters/synchronizer.h>
+#include <message_filters/time_synchronizer.h>
+#include <message_filters/sync_policies/approximate_time.h>
+#include <ros/callback_queue.h>
+#include <tf/transform_listener.h>
+
 class C22_Node{
 private:
   ros::NodeHandle nh_;
-  ros::Subscriber pointCloud_sub;
+  ros::NodeHandle nh2_;
+
+  typedef message_filters::sync_policies::ApproximateTime<
+		  sensor_msgs::PointCloud2, geometry_msgs::PoseWithCovarianceStamped
+    > MySyncPolicy;
+  message_filters::Subscriber<sensor_msgs::PointCloud2> pointCloud_sub;
+  message_filters::Subscriber<geometry_msgs::PoseWithCovarianceStamped> pos_sub;
+  message_filters::Synchronizer< MySyncPolicy > sync;
+  pcl::PointCloud<pcl::PointXYZ>::Ptr cloudRecord;
+  nav_msgs::Odometry lastPose;
   ros::ServiceServer service;
   ros::ServiceServer service2;
   MapMatrix * _myMatrix;
   std::vector<pclPlane*>* _myPlanes;
+  boost::shared_ptr<pcl::visualization::PCLVisualizer> viewer;
+  geometry_msgs::Point robotPos;
+  geometry_msgs::Point robotOri;
+  ros::Publisher C22_pub;
+  tf::TransformListener listener;
 public:
 
 	/**
@@ -61,6 +80,7 @@ public:
 	   * @param left_msg ROS mesage with image data from the left camera topic
 	   * @param right_msg ROS mesage with image data from the right camera topic
 	   */
-	  void callback(const sensor_msgs::PointCloud2& pclMsg);
+	  void callback(const sensor_msgs::PointCloud2::ConstPtr& pclMsg,const geometry_msgs::PoseWithCovarianceStamped::ConstPtr& pos_msg);
+
 
 };

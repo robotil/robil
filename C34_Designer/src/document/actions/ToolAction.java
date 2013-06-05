@@ -3,9 +3,9 @@ package document.actions;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
-import document.BTDesigner;
-import document.Document;
+import windows.designer.BTDesigner;
 
+import document.Document;
 import elements.GElement;
 
 public class ToolAction extends AbstractDesignerAction implements
@@ -18,10 +18,11 @@ public class ToolAction extends AbstractDesignerAction implements
 		this.c = c;
 	}
 
+	@Override
 	public void actionPerformed(ActionEvent a) {
-		Document document = getActiveTab().doc;
+		Document document = getActiveTab().document;
 		document.toolSelectionClean();
-		document.creator = c;
-		designer.toolbar.setTipText(c.toolTip());
+		document.creator = this.c;
+		this.designer.toolbar.setTipText(this.c.toolTip());
 	}
 }

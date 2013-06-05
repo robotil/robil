@@ -1,5 +1,46 @@
 C23 Object Recognition.
 ============================
+
+Version 1.0
+Please read the attached manual under docs (docs/manual.pdf)
+
+--------------
+
+
+Version: beta 0.05
+Changes:
+1. Added the new Polaris car to detection list.
+2. Now detects all objects
+3. Added Task TrackObject(object=0/1/2/3/...) for each object
+
+HOWTO:
+start atlas: $> roslaunch atlas_utils  atlas.launch
+start executer: $> rosrun C34_Executer executer
+start C23: $> rosrun C23_ObjectRecognition c23 /multisense_sl/camera/left/image_color  /multisense_sl/camera/right/image_color 
+call rosservice with the supplied plan: $> rosservice call /executer/run T plan.xml
+    $> rosservice call /executer/resume T
+
+
+Expected behaviour: if you add the polaris car, and the robot sees the passenger side, it will print and broadcast the coordination.
+
+------------------
+Version: beta 0.03
+
+Changes from beta 0.02
+1. Added tracking mode, and the car model is saved under /models
+2. The module should now detect the car, it is loaded by default.
+
+
+How to check:
+=============
+run the node with atlas,
+1. roslaunch atlas_utils atlas.launch
+2. place a Gulf car infront of the robot
+3. rosrun C23_ObjectRecognition c23 /multisense_sl/left/image_color /multisense_sl/right/image_color
+4. look at the output (ROS_INFO), you should see the position of the car, if you see -1, then it means,
+ it is not detected, try moving the car around.
+
+
 Version: beta 0.02
 
 Changes from beta 0.01:

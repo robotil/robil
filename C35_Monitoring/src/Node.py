@@ -48,12 +48,13 @@ class node:
         self.probTable = []
         # node distribution table for success and failure
         #distribution table - each entry points to a distribution
-        self.distTableSucc = self.createDistTable("Successdistribution")
-        self.distTableFail = self.createDistTable("Failuredistribution")
+        self.distTableSucc = self._createDistTable("Successdistribution")
+        self.distTableFail = self._createDistTable("Failuredistribution")
         #update probability table
         probString = self.getAttrib("probability")
         if probString !=None:
-            self.probTable= self._parseString(probString)
+           # self.probTable= self._parseString(probString)
+            self.probTable = self._createProbTable(probString)
         else:
             self.probTable= None
         
@@ -71,8 +72,15 @@ class node:
     #parseString by whiteSpace
     def _parseString(self, string):
         words = re.split('\s+',string)
-	#return a list of words seperate by whiteSpace
+	   #return a list of words seperate by whiteSpace
         return words
+    #create probtalbe- parse string to list of float
+    def _createProbTable(self,stringProbList):
+        probList = self._parseString(stringProbList)        
+       # for index in range(len(probList)):
+       #     probList[index] =float(probList[index])
+        return probList
+        
         
     #return parent. if it's the root- return None   
     def getParent(self):
@@ -175,6 +183,10 @@ class node:
         if elem.tag =="sel": 
             from selectnode import SelectNode 
             return SelectNode(elem,self.myTree,self)
+        #bool node
+        if elem.tag == "bool":
+            from boolean import BooleanNode
+            return BooleanNode(elem,self.myTree,self)
                 
                         
     #print the tree to xml- can be done from every node in the tree.       
@@ -214,6 +226,10 @@ class node:
         for char in name:        
                 #new child is the first child that replace decorator
                 if newChild == None:
+                        #if char is T/F create bool node
+                        if char == "T" or char == "F":
+                            from boolean import BooleanNode
+                            return BooleanNode(element,self.myTree,self)
                         #if char is "L"- create loop node
                         if char == "L" :
                             #addNode func- create the node by tag and appand it to self.childList
@@ -289,6 +305,7 @@ class node:
         self._updateChildForDec(newChild , len(name))
         #return the newChild created.- return the root of the list/sub-tree
         return newChild
+        
     #update the childs that we create for decorator property   
     def _updateChildForDec(self,newChild,size):      
       childToCheck = newChild
@@ -299,8 +316,8 @@ class node:
                  #update child debug
                   childToCheck._updateChildDebug()
                   #update distributions tables
-                  childToCheck.distTableSucc = self.createDistTable("Successdistribution")
-                  childToCheck.distTableFail = self.createDistTable("Failuredistribution")
+                  childToCheck.distTableSucc = self._createDistTable("Successdistribution")
+                  childToCheck.distTableFail = self._createDistTable("Failuredistribution")
                   #get the next child
                   childToCheck = childToCheck.getChild(0)
              
@@ -323,6 +340,8 @@ class node:
                     self._updateEtreeToPrintXmlFile(child)                    
             #update Debug attributes in the xml file.        
             updateNode._updateDebugAttribToXmlFile()
+            #update probability attributes in the xml file- to the etree
+            updateNode._updateProbTableToXmlFile()
      
                
    #this func update the attribute in the xml file for debug - turn DEBUG- into a string and set etree attribute
@@ -341,11 +360,13 @@ class node:
     def _setDebugFromXmlFile(self):
         #get string from xml - "True 0.1" for example.	
           debug = self.getAttrib("DEBUG")
-          if debug !=None :
+          if debug != None :
 	      #return debug
               self.DEBUG =[]
+              #print(debug)
               #parse the string by whiteSpace and returns a list
               debug = self._parseString(debug)
+              #print(debug)
               #first element in the list should be boolen- success
               if debug[0]!=None and debug[0] == "True":
                   debug[0] = True
@@ -409,6 +430,7 @@ class node:
 
     def getRandomProb(self, index):
         x = random.random()
+        #print "getRandomProb", self.getAttrib("name"),self.getProbAtIndex(index)
         p = float(self.getProbAtIndex(index))
         if p==None:
             return None
@@ -443,6 +465,7 @@ class node:
             self.setProbTable(a)
         if val:
             #if val is set to True- update another success . probTable[0]- count succ-numerator,probTable[1]-Counter of time tried-Denominator.
+            #print(type(self.probTable[index]) , type(self.probTable[index][0]))
             self.probTable[index][0] = self.probTable[index][0]+1
             self.probTable[index][1] = self.probTable[index][1]+1
             #update the new probtable in etree
@@ -516,6 +539,9 @@ class node:
                     return (float(self.probTable[index][0])/float(self.probTable[index][1]))
                 return 0
         return None
+        
+        
+        
     #node- run func 
     def run(self, index):
         a = None
@@ -551,9 +577,9 @@ class node:
             return None
         a[0]= randP             
         if a[0]:
-            a[1] = self.getDistSuccByIndex(index).calcProb()
+            a[1] = float(self.getDistSuccByIndex(index).calcProb())
         else:          
-            a[1] = self.getDistFailByIndex(index).calcProb()
+            a[1] = float(self.getDistFailByIndex(index).calcProb())
 
         return a
         
@@ -575,24 +601,53 @@ class node:
        self.probTable = []
        self.distTableSucc = []
        self.distTableFail = [] 
-       self.setAttrib("Successdistribution",[])
-       self.setAttrib("probability",[])
-       self.setAttrib("Failuredistribution",[])  
+       try:
+           del self.treeInst.attrib["Successdistribution"]
+       except:
+           pass
+       try:
+           del self.treeInst.attrib["probability"]
+       except:
+           pass
+       try:
+           del self.treeInst.attrib["Failuredistribution"]
+       except:
+           pass
+#       self.setAttrib("Successdistribution",[])
+#       self.setAttrib("probability",[])
+#       self.setAttrib("Failuredistribution",[])  
        self.reset = True
        
+      #clear whole tree property
+    def clearWholeTree(self):
+        childlist = self.getChildren()
+        if childlist !=None:
+            for child in childlist:
+                child.clear()
+                child.clearWholeTree()
+        
      #run plan  
     def runPlan(self, index):
       children = self.getChildren()
       children[0].run(index) 
+      
 
     #get average to success time
     def getAverageSuccTime(self, index):
-        return self.getDistSuccByIndex(index).calcAverageTime()
-        
+        if self.getDistSuccByIndex(index) != None:
+            return self.getDistSuccByIndex(index).calcAverageTime()
+        else:
+            return float('Inf')
 
-
+    def getSDSuccTime(self, index):
+        if self.getDistSuccByIndex(index) != None:
+            return self.getDistSuccByIndex(index).SDTime()
+        else:
+            return float(0)
+            
+            
  #table is the name of the table needed- attribute
-    def createDistTable(self,table):
+    def _createDistTable(self,table):
         string = self.getAttrib(str(table))
         
         table =[]        
@@ -689,4 +744,8 @@ class node:
                 continue
         #return distionry  
         return PairList
-            
+    
+        
+    def getTime(self):
+        if self.DEBUG !=None and len (self.DEBUG) > 1:
+            return self.DEBUG[1]

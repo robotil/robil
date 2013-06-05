@@ -1,0 +1,21 @@
+<plan descriptions="./plans/TaskDescriptions.xml">
+   <seq name="event2"> 
+         <par name="@1"> 
+               <par name="Perception"> 
+                     <tsk name="LocalizationTrack" />
+                     <tsk name="ObstacleDetection" />
+                     <tsk name="PathPlanning" />
+               </par>
+               <par name="MissionProgress"> 
+                  <dec name="!L!"> 
+                        <seq name="SearchObjectAndGo"> 
+                              <tsk name="PathPlanningFocus(x=0,y=10)" />
+                           <dec name="!L!"> 
+                                 <tsk name="ZmpWalk" />
+                           </dec>
+                        </seq>
+                  </dec>
+               </par>
+         </par>
+   </seq>
+</plan>

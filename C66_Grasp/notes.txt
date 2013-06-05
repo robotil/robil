@@ -1,6 +1,44 @@
 C66 – Grasp and Release
-C23C66_OPO: Position/COG of an object relative to the pelvis.
-C23C66_ODIM: Object dimensions [ grid of the object relative to the pelvis].
-C0C66_GRRE: Grasp or Release the Object [1 or 0].
-C66C0_GRS: Grasp/Release Success [0 or 1].
+Prerequisites:
+1) None yet
 
+To run:
+2) Launch:
+roslaunch C66_Grasp C66_Grasp.launch
+
+3) roscd position0
+
+4) python traj_yaml.py Traj_data.yaml move_hand_0
+
+5) now run pick up in the tree;
+
+
+
+
+for manual use:
+
+3) rosservice call /pelvis_move_hand "PositionDestination_left:
+  x: 0.0
+  y: 0.0
+  z: 0.0 
+AngleDestination_left:
+  x: 0.0
+  y: 0.0
+  z: 0.0 
+PositionDestination_right:
+  x: 0.0
+  y: 0.0
+  z: 0.0
+AngleDestination_right:
+  x: 0.0
+  y: 0.0
+  z: 0.0" 
+
+
+
+#if (x==0 and y==0 and z==0) hand will not move, so you can move only one hand if you want.
+
+4)for right_grasp: 	rostopic pub /hand_grasp_right hand_grasp/grasp "strength: 20.0"
+for left_grasp:	 rostopic pub /hand_grasp_left hand_grasp/grasp "strength: 20.0"
+
+if strength == 0 will open hand

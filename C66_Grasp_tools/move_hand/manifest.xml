@@ -1,0 +1,30 @@
+<package>
+  <description brief="move_hand">
+
+     move_hand
+
+  </description>
+  <author>owner</author>
+  <license>BSD</license>
+  <review status="unreviewed" notes=""/>
+  <url>http://ros.org/wiki/move_hand</url>
+  <depend package="roscpp"/>
+  <depend package="C0_RobilTask"/>
+  <depend package="geometry_msgs"/>
+  <depend package="control_msgs"/>
+  <depend package="sensor_msgs"/>
+  <depend package="trajectory_msgs"/>
+  <depend package="osrf_msgs"/>
+  <depend package="actionlib"/>
+  <depend package="kdl"/>
+  <depend package="pr2_controllers_msgs"/>
+  <depend package="arms_val_calc"/>
+  <depend package="tf"/>
+  <depend package="traj_splitter_to_vector"/>
+  <depend package="atlas_msgs"/>	
+  
+  <rosdep name="eigen"/>
+
+</package>
+
+

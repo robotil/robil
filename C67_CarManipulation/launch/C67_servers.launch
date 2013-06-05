@@ -1,0 +1,26 @@
+<launch>
+<!-- Launch the atlas & vehicle & fire hose world-->
+<!--include file="$(find atlas_utils)/launch/atlas_drc_vehicle_fire_hose.launch" /-->
+
+<!-- Start GripSteeringWheel server -->
+<node name="GripSteeringWheel" pkg="C67_CarManipulation" type="GripSteeringWheel" />
+
+<!-- Start CalibrateWheel server -->
+<node name="CalibrateWheel" pkg="C67_CarManipulation" type="CalibrateWheel" />
+
+<!-- Start PlaceFeetOnPedals server -->
+<node name="PlaceFeetOnPedals" pkg="C67_CarManipulation" type="PlaceFeetOnPedals" />
+
+<!-- Start CalibratePedals server -->
+<node name="CalibratePedals" pkg="C67_CarManipulation" type="CalibratePedals" />
+
+<!-- Start GripHandBrake server -->
+<node name="GripHandBrake" pkg="C67_CarManipulation" type="GripHandBrake" />
+
+<!-- Start GripGearStick server -->
+<node name="GripGearStick" pkg="C67_CarManipulation" type="GripGearStick" />
+
+
+</launch>
+  
+

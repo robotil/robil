@@ -1,0 +1,4 @@
+<launch>
+<env name="VRC_CHEATS_ENABLED" value="1"/>
+  <include file="$(find atlas_utils)/launch/qual_task_1.launch" />
+</launch>

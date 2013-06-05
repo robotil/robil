@@ -1,31 +1,23 @@
 package document.actions;
 
-import document.BTDesigner;
-import document.ChooseRemotePlanDialog;
-import document.Document;
-import document.Parameters;
-
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.io.File;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
 
-import javax.swing.JFileChooser;
-import javax.swing.filechooser.FileNameExtensionFilter;
-
 import terminal.commands.ServiceCaller;
-import terminal.communication.RosPipe;
-import terminal.communication.RosPipe.RosTargets;
-import terminal.lineprocessors.BatchLineProcessor;
+import windows.ChooseRemotePlanDialog;
+import windows.designer.BTDesigner;
 
-public class LoadAndOpenAction extends AbstractDesignerAction implements ActionListener {
+public class LoadAndOpenAction extends AbstractDesignerAction implements
+		ActionListener {
 
 	public LoadAndOpenAction(BTDesigner designer) {
 		super(designer);
 	}
 
+	@Override
 	public void actionPerformed(ActionEvent a) {
 
 		// get plans from executer
@@ -39,8 +31,9 @@ public class LoadAndOpenAction extends AbstractDesignerAction implements ActionL
 			String currentFile = itr.next().trim();
 			boolean flagValid = true;
 
-			if (currentFile.startsWith("content")
-					|| currentFile.contains("just_names")) {
+			if (currentFile.startsWith("content") || 
+					currentFile.contains("just_names") || 
+					currentFile.contains(".jn")) {
 				flagValid = false;
 			}
 
@@ -54,7 +47,7 @@ public class LoadAndOpenAction extends AbstractDesignerAction implements ActionL
 
 			currentFile = new String(currentFile.substring(1,
 					currentFile.length() - 1));
-			
+
 			if (!currentFile.endsWith("xml")) {
 				continue;
 			}
@@ -81,8 +74,8 @@ public class LoadAndOpenAction extends AbstractDesignerAction implements ActionL
 
 		}
 
-//		Document document = super.getActiveDocument();
-//		document.loadPlan(selectedPlan);
+		// Document document = super.getActiveDocument();
+		// document.loadPlan(selectedPlan);
 
 	}
 

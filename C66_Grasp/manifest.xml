@@ -13,8 +13,12 @@
   <depend package="roscpp"/>
   <depend package="tf"/>
   <depend package="C0_RobilTask"/>
-  <depend package="actionlib"/>
-  <depend package="actionlib_msgs"/>
+  <depend package="move_hand"/>
+  <depend package="hand_grasp"/>
+  <depend package="osrf_msgs"/>
+  <depend package="atlas_msgs"/>
+  <depend package="sensor_msgs"/>
+  <depend package="C23_dFind"/>
 </package>
 
 
