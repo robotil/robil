@@ -71,7 +71,8 @@ private:
 			const double &x2,const double &y2);
 
 	//calculate the weight of single cell
-	double singleCellWeight(const double &slope,const double &distance,
+	double singleCellWeight(const double &legDistance,
+			const double &slope,const double &distance,
 			const double &height,const double &direction,const double &slopeWeight,
 			const double &distanceWeight,const double &heightWeight,
 			const double &directionWeight);

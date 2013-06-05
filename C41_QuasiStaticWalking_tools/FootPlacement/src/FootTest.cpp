@@ -11,16 +11,16 @@ int main(int argc, char **argv) {
 	 * setting feet positions on request
 	 ***********************************************************/
 	srv.request.start_pose.foot_index = LEFT;
-	srv.request.start_pose.pose.position.x = 0.0;
-	srv.request.start_pose.pose.position.y = 0.0;
+	srv.request.start_pose.pose.position.x = -10.2;
+	srv.request.start_pose.pose.position.y = 2;
 	srv.request.start_pose.pose.position.z = 0.0;
 	srv.request.start_pose.pose.ang_euler.x = 0.0;
 	srv.request.start_pose.pose.ang_euler.y = 0.0;
 	srv.request.start_pose.pose.ang_euler.z = 0.0;
 	srv.request.other_foot_pose.foot_index = RIGHT;
-	srv.request.other_foot_pose.pose.position.x = 1.0;
-	srv.request.other_foot_pose.pose.position.y = 1.0;
-	srv.request.other_foot_pose.pose.position.z = 1.0;
+	srv.request.other_foot_pose.pose.position.x = -9.8;
+	srv.request.other_foot_pose.pose.position.y = 2;
+	srv.request.other_foot_pose.pose.position.z = 0;
 	srv.request.other_foot_pose.pose.ang_euler.x = 0.0;
 	srv.request.other_foot_pose.pose.ang_euler.y = 0.0;
 	srv.request.other_foot_pose.pose.ang_euler.z = 0.0;
