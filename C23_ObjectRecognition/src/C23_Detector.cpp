@@ -19,7 +19,24 @@
 #include <pcl/correspondence.h>
 #include <pcl/point_cloud.h>
 #include <pcl/common/common_headers.h>
+#include <pcl_ros/point_cloud.h>
+#include <pcl_ros/transforms.h>
 #include <pcl/io/pcd_io.h>
+#include <pcl/correspondence.h>
+#include <pcl/point_cloud.h>
+#include <pcl/common/common_headers.h>
+#include <pcl/io/pcd_io.h>
+#include <Eigen/Core>
+#include <pcl/point_types.h>
+#include <pcl/point_cloud.h>
+#include <pcl/io/pcd_io.h>
+#include <pcl/kdtree/kdtree_flann.h>
+#include <pcl/filters/passthrough.h>
+#include <pcl/filters/voxel_grid.h>
+#include <pcl/features/normal_3d.h>
+#include <pcl/features/fpfh.h>
+#include <pcl/registration/ia_ransac.h>
+#include <pcl/visualization/pcl_visualizer.h>
 #include <pcl/visualization/pcl_visualizer.h>
 #include <image_transport/subscriber_filter.h>
 #include <pcl_ros/point_cloud.h>
@@ -30,6 +47,7 @@
 #include <pcl/point_types.h>
 #include <tf/tf.h>
 #include <tf/transform_listener.h>
+#include "tf/message_filter.h"
 #include <math.h>
 
 #include <C23_ObjectRecognition/C23C0_OD.h>
@@ -252,8 +270,44 @@ private:
     int nr_iterations_;
 };
 
-pcl::PointCloud<pcl::PointXYZ>::Ptr C23_Detector::filterPointCloud(int x,int y, int width, int height, const sensor_msgs::PointCloud2::ConstPtr &cloud2) {
+pcl::PointCloud<pcl::PointXYZ>::Ptr C23_Detector::filterPointCloud(int x,int y, int width, int height, const pcl::PointCloud<pcl::PointXYZ> &cloud) {
     int i,j;
+    pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_filtered (new pcl::PointCloud<pcl::PointXYZ>);
+ //   pcl::PointCloud<pcl::PointXYZ>cloud;
+  //  pcl::fromROSMsg<pcl::PointXYZ>(*cloud2,cloud);
+    
+    cout << "Got: " << x << "," << y << "," << width << "," << height << endl;
+    for(i = x; i < x+width; i++) {
+        for(j= y; j < y+height; j++) {
+            pcl::PointXYZ p=cloud.at(i,j);
+            //  cout<<p<<endl;
+            if(p.x!=p.x)// || )
+                continue;
+         //   cout << "Got shosmo" << endl;
+            cloud_filtered->points.push_back(p);
+        }
+    }
+    return cloud_filtered;
+    
+}
+
+
+
+
+void C23_Detector::saveTemplate(int x,int y, int width, int height, const sensor_msgs::PointCloud2::ConstPtr &cloud2, string target) {
+    int i,j;
+    static tf::StampedTransform transform;
+    while(1){ try{
+        listener2.lookupTransform("/pelvis","/left_camera_optical_frame",
+        ros::Time(0), transform);
+    }
+    catch (tf::TransformException ex){
+        continue;  cout<<"jajajajaj\n";
+    } break; }
+    Eigen::Matrix4f sensorTopelvis;
+    
+    pcl_ros::transformAsMatrix(transform, sensorTopelvis);
+    
     pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_filtered (new pcl::PointCloud<pcl::PointXYZ>);
     pcl::PointCloud<pcl::PointXYZ>cloud;
     pcl::fromROSMsg<pcl::PointXYZ>(*cloud2,cloud);
@@ -264,11 +318,15 @@ pcl::PointCloud<pcl::PointXYZ>::Ptr C23_Detector::filterPointCloud(int x,int y, 
             //  cout<<p<<endl;
             if(p.x!=p.x)// || )
                 continue;
-            cout << "Got shosmo" << endl;
+          //  cout << "Got shosmo" << endl;
             cloud_filtered->points.push_back(p);
         }
     }
-    return cloud_filtered;
+    cloud_filtered->width = 1;
+    cloud_filtered->height = cloud_filtered->points.size();
+    pcl::transformPointCloud(*cloud_filtered, *cloud_filtered, sensorTopelvis);
+    pcl::io::savePCDFileASCII (target.c_str(), *cloud_filtered);
+    
     
 }
 bool C23_Detector::templateMatching3D(string templates_file,  pcl::PointCloud<pcl::PointXYZ>::Ptr &cloud) {
@@ -276,12 +334,19 @@ bool C23_Detector::templateMatching3D(string templates_file,  pcl::PointCloud<pc
   
     std::vector<FeatureCloud> object_templates;
     std::ifstream input_stream (templates_file.c_str());
+    cout << "Reading from: " << templates_file << endl;
     object_templates.resize (0);
     cout << "Here 2" << endl;
     std::string pcd_filename;
     while (input_stream.good ())
     {
         std::getline (input_stream, pcd_filename);
+        char basePath[10000];
+        sprintf(basePath,"%s/3D_models/%c",ros::package::getPath("C23_ObjectRecognition").c_str(),'\0');
+         string base(basePath);
+         pcd_filename = basePath + pcd_filename;
+       //  pcd_filename = "/home/isl/darpa/robil/C23_ObjectRecognition/3D_models/FirehoseGrip.pcd";
+         cout << "Reading pcd: " << pcd_filename << endl;
         if (pcd_filename.empty () || pcd_filename.at (0) == '#') // Skip blank lines or comments
       continue;
       
@@ -345,11 +410,15 @@ bool C23_Detector::templateMatching3D(string templates_file,  pcl::PointCloud<pc
     printf ("    | %6.3f %6.3f %6.3f | \n", rotation (2,0), rotation (2,1), rotation (2,2));
     printf ("\n");
     printf ("t = < %0.3f, %0.3f, %0.3f >\n", translation (0), translation (1), translation (2));
-    double R = atan2(rotation (2,1),rotation (2,2));
-    double Y = atan2(rotation (1,0),rotation (0,0));
-    double P = atan2(-rotation (2,0),cos(Y)*rotation (0,0) + sin(Y)*rotation (1,0));
+    
+    orient_x = translation(0);
+    orient_y = translation(1);
+    orient_z = translation(2);
+    orient_R = atan2(rotation (2,1),rotation (2,2));
+    orient_Y = atan2(rotation (1,0),rotation (0,0));
+    orient_P = atan2(-rotation (2,0),cos(orient_Y)*rotation (0,0) + sin(orient_Y)*rotation (1,0));
     // Save the aligned template for visualization
-    cout << "R: " << R << ", Y: " << Y << ", P: " << P << endl;
+    cout << "R: " << orient_R << ", Y: " << orient_Y << ", P: " << orient_P << endl;
     pcl::PointCloud<pcl::PointXYZ> transformed_cloud;
     pcl::transformPointCloud (*best_template.getPointCloud (), transformed_cloud, best_alignment.final_transformation);
     pcl::io::savePCDFileBinary ("output.pcd", transformed_cloud);
@@ -510,12 +579,25 @@ sync( MySyncPolicy( 10 ), left_image_sub_,pointcloud)
 bool C23_Detector::process_orientation(C23_ObjectRecognition::C23_orient::Request  &req,
                          C23_ObjectRecognition::C23_orient::Response &res )
 {
-    res.x = 0;
-    res.y = 0;
-    res.z = 0;
-    res.R = 0;
-    res.Y = 0;
-    res.P = 0;
+    string target = req.target;
+    if(!target.compare("Firehose")) {
+        char basePath[1000],imageName[1000];
+        
+        sprintf(basePath,"%s/3D_models/%s%c",ros::package::getPath("C23_ObjectRecognition").c_str(),"firehose.txt",'\0');
+        string t = basePath;
+     //   string t = "/home/isl/darpa/robil/C23_ObjectRecognition/3D_models/firehose.txt";
+        std::cout<<imageName<<endl;
+        pcl::PointCloud<pcl::PointXYZ>::Ptr cloud2 = filterPointCloud(last_x,last_y,width,height,lastCloud);
+        templateMatching3D(t,  cloud2);
+    }
+    
+    
+    res.x = orient_x;
+    res.y = orient_y;
+    res.z = orient_z;
+    res.R = orient_R;
+    res.Y = orient_Y;
+    res.P = orient_P;
     return true;
 }
   
@@ -608,6 +690,9 @@ void C23_Detector::callback(const sensor_msgs::ImageConstPtr& msg,const sensor_m
     //    ROS_INFO("Receiving image..");
     Mat srcImg = fromSensorMsg(msg);
     bool res;
+    pcl::PointCloud<pcl::PointXYZ>detectionCloud;
+    pcl::fromROSMsg<pcl::PointXYZ>(*cloud,detectionCloud);
+    lastCloud.swap(detectionCloud);
     switch (_target) {
         case PATH:
             res = detectPath(srcImg);
@@ -859,7 +944,7 @@ bool C23_Detector::detectGear(Mat srcImg,const sensor_msgs::PointCloud2::ConstPt
 bool C23_Detector::detectValve(Mat srcImg, const sensor_msgs::PointCloud2::ConstPtr &cloud) {
     ROS_INFO("Detecting a valve..");
     RNG rng(12345);
-    string t = "/home/isl/robil/C23_ObjectRecognition/template.txt";
+   // string t = "/home/isl/darpa/robil/C23_ObjectRecognition/template.txt";
    // templateMatching3D(t,cloud);
     //return true;
     Mat imgHSV, imgThreshed;
@@ -948,8 +1033,8 @@ bool C23_Detector::detectValve(Mat srcImg, const sensor_msgs::PointCloud2::Const
              y2 = MAX(rect_points[2].y,rect_points[3].y);
             int max_y = MAX(y1,y2);
             
-            pcl::PointCloud<pcl::PointXYZ>::Ptr cloud2 = filterPointCloud(min_x,min_y,max_x-min_x,max_y-min_y,cloud);
-            templateMatching3D(t,cloud2);
+           // pcl::PointCloud<pcl::PointXYZ>::Ptr cloud2 = filterPointCloud(min_x,min_y,max_x-min_x,max_y-min_y,cloud);
+          //  templateMatching3D(t,cloud2);
            
          //   pictureCoordinatesToGlobalPosition(minRect.center.x-10,minRect.center.y+10,minRect.center.x+10,minRect.center.y+10,&x,&y,NULL);
             return true;
@@ -1052,8 +1137,8 @@ bool C23_Detector::detectFirehoseGrip(Mat srcImg, const sensor_msgs::PointCloud2
     cvtColor(srcImg,imgHSV,CV_BGR2HSV);
     inRange(imgHSV,Scalar(110, 200, 80), Scalar(125, 255, 250),imgThreshed);
     //namedWindow("TESTING");
-    imshow("TESTING",imgThreshed);
-    waitKey(0);
+   // imshow("TESTING",imgThreshed);
+   // waitKey(0);
     // imwrite("test12.jpg",imgThreshed);
     Mat imgDilated;
     Mat element = getStructuringElement( MORPH_ELLIPSE,
@@ -1064,8 +1149,8 @@ bool C23_Detector::detectFirehoseGrip(Mat srcImg, const sensor_msgs::PointCloud2
     Mat bw;
     vector<vector<cv::Point> > contours;
     threshold(imgDilated,bw,10,255,CV_THRESH_BINARY);
-    imshow("TESTING",bw);
-    waitKey(0);
+   // imshow("TESTING",bw);
+   // waitKey(0);
     cv::Scalar colors[3];
     colors[0] = cv::Scalar(120, 120, 0);
     colors[1] = cv::Scalar(120, 255, 0);
@@ -1076,9 +1161,9 @@ bool C23_Detector::detectFirehoseGrip(Mat srcImg, const sensor_msgs::PointCloud2
         cv::drawContours(srcImg, contours, idx, colors[idx % 3]);
     }
     
-    //  drawContours(srcImg,contours,-1,CV_RGB(255,0,0),2);
-    // imshow("TESSTING",srcImg);
-    waitKey(0);
+      drawContours(srcImg,contours,-1,CV_RGB(255,0,0),2);
+   // imshow("TESSTING",srcImg);
+   // waitKey(0);
     vector<RotatedRect> minEllipse( contours.size() );
     int biggest_size = 0;
     int biggest = 0;
@@ -1121,9 +1206,34 @@ bool C23_Detector::detectFirehoseGrip(Mat srcImg, const sensor_msgs::PointCloud2
              *                // ellipse
              *                ellipse( imgThreshed, minEllipse[i], color, 2, 8 );
     }*/
-            imshow("TESTING",srcImg);
-            waitKey(0);
+           // imshow("TESTING",srcImg);
+           // waitKey(0);
             pictureCoordinatesToGlobalPosition(minRect.center.x-100,minRect.center.y+100,minRect.center.x+100,minRect.center.y+100,&x,&y,NULL);
+            int x1 = MIN(rect_points[0].x,rect_points[1].x);
+            int x2 = MIN(rect_points[2].x,rect_points[3].x);
+            int min_x = MIN(x1,x2);
+            
+            int y1 = MIN(rect_points[0].y,rect_points[1].y);
+            int y2 = MIN(rect_points[2].y,rect_points[3].y);
+            int min_y = MIN(y1,y2);
+            
+            
+            x1 = MAX(rect_points[0].x,rect_points[1].x);
+            x2 = MAX(rect_points[2].x,rect_points[3].x);
+            int max_x = MAX(x1,x2);
+            
+            y1 = MAX(rect_points[0].y,rect_points[1].y);
+            y2 = MAX(rect_points[2].y,rect_points[3].y);
+            int max_y = MAX(y1,y2);
+            string t = "FireHoseGrip";
+            cout << "Saving firehose" << endl;
+           // saveTemplate(min_x,min_y,max_x-min_x,max_y-min_y,cloud,t);
+            //templateMatching3D(t,cloud2);
+            last_x = min_x;
+            last_y = min_y;
+            width = (max_x-min_x);
+            height = (max_y-min_y);
+            
             return true;
     }
     return false;
@@ -2010,12 +2120,13 @@ bool C23_Detector::detectGate(Mat srcImg, const sensor_msgs::PointCloud2::ConstP
           averagePointCloud(mcL[biggstL].x-5, mcL[biggstL].y-50, mcL[biggstL].x+5, mcL[biggstL].y+50, cloud, &x1, &y1,&z1);
           averagePointCloud(mcR[biggstR].x-5, mcR[biggstR].y-50, mcR[biggstR].x+5, mcR[biggstR].y+50, cloud, &x2, &y2,&z2);
        //   cout << "Middle: " <<
-     //     imshow("TESTING",srcImg);
-       //  waitKey(0);
+          imshow("TESTING",srcImg);
+         waitKey(0);
         //  return true;
          x = (x1+x2)/2.0;
          y = (y1+y2)/2.0;
          cout << "Middle point: " << x <<"," << y << endl;
+         return true;
         }
     }
     
@@ -2101,8 +2212,8 @@ bool C23_Detector::detectGate(Mat srcImg, const sensor_msgs::PointCloud2::ConstP
                 }
                 double x1,y1,z1,x2,y2,z2;
                 averagePointCloud(mcR[biggstR].x-5, mcR[biggstR].y-50, mcR[biggstR].x+5, mcR[biggstR].y+50, cloud, &x2, &y2,&z2);
-                x = x2-3;
-                y = y2;
+                x = x2;
+                y = y2-2.5;
                 cout<<"Point is: " <<x<<", " <<y <<endl;
                 cout << "Detected right" << endl;
                 circle( srcImg, Point2f(x_pic,y_pic), 16, Scalar(0,255,255), -1, 8, 0 );
@@ -2141,8 +2252,8 @@ bool C23_Detector::detectGate(Mat srcImg, const sensor_msgs::PointCloud2::ConstP
 
             double x1,y1,z1,x2,y2,z2;
             averagePointCloud(mcL[biggstL].x-5, mcL[biggstL].y-50, mcL[biggstL].x+5, mcL[biggstL].y+50, cloud, &x2, &y2,&z2);
-            x = x2-3;
-            y = y2;
+            x = x2;
+            y = y2-2.5;
             return mcM[biggstM].x > mcL[biggstL].x ? true : false;
             
         }
