@@ -362,6 +362,7 @@ void C22_Node::callback(const sensor_msgs::PointCloud2::ConstPtr& pclMsg,const n
 	  pass.filter (*cloudRecord);
 
 	  if(cloudRecord->points.size()>120000){
+		  cloudRecord->points.resize(100);
 	  			 /*pcl::PointCloud<pcl::PointXYZ>empty;
 	  			 pcl::PointCloud<pcl::PointXYZ>::Ptr em(empty.makeShared());
 	  			 cloudRecord.swap(em);*/
