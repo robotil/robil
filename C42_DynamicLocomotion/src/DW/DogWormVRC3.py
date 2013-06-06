@@ -913,11 +913,14 @@ class DW_Controller(object):
         self.JC.send_pos_traj(self.RS.GetJointPos(),self.BasStndPose,0.5*T,0.005)
     def StandUp(self):
         RPY = self.RS.GetIMU()
-        D, R = self._iTf.TransformListener().lookupTransform('/pelvis','/l_foot',rospy.Time(0))
-        while not (abs(RPY[0])<= 0.01 and abs(RPY[1])<=0.01 and D[2] >= 0.8):
-            self.DynStandUp()
+        D, R = self._iTf.TransformListener().lookupTransform('/l_foot','/pelvis',rospy.Time(0))
+        while not (abs(RPY[0])<= 0.1 and abs(RPY[1])<=0.1 and D[2] >= 0.8):
             DW.CheckTipping()
+            self.DynStandUp()
             rospy.sleep(1)
+            RPY = self.RS.GetIMU()
+            D, R = self._iTf.TransformListener().lookupTransform('/l_foot','/pelvis',rospy.Time(0))
+            print 'roll: ',RPY[0],'pitch: ',RPY[1],'D: ',D[2]
 
 ##################################################################
 ######################### USAGE EXAMPLE ##########################
