@@ -32,7 +32,7 @@ class DW_Controller(object):
         self.CurSeqStep2 = 0
         self.Throtle = 1
         self.RotFlag = 0
-        self.FollowPath = 1
+        self.FollowPath = 0
         self.DesOri = 0
         
         ##################################################################
