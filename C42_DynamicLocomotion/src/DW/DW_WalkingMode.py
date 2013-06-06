@@ -43,7 +43,7 @@ class DW_WalkingMode(WalkingMode):
         WalkingMode.Walk(self)
         self._Controller.DoPath(self._LPP.GetPath())
         self._Controller.RotateToOri( self._LPP.GetPathYaw() - math.pi/2 )
-        self._Controller.DynStandUp()
+        self._Controller.StandUp()
         self._bDone = True
     
     def EmergencyStop(self):

@@ -915,7 +915,7 @@ class DW_Controller(object):
         RPY = self.RS.GetIMU()
         D, R = self._iTf.TransformListener().lookupTransform('/l_foot','/pelvis',rospy.Time(0))
         while not (abs(RPY[0])<= 0.1 and abs(RPY[1])<=0.1 and D[2] >= 0.8):
-            DW.CheckTipping()
+            self.CheckTipping()
             self.DynStandUp()
             rospy.sleep(1)
             RPY = self.RS.GetIMU()
