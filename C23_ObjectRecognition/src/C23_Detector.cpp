@@ -19,7 +19,24 @@
 #include <pcl/correspondence.h>
 #include <pcl/point_cloud.h>
 #include <pcl/common/common_headers.h>
+#include <pcl_ros/point_cloud.h>
+#include <pcl_ros/transforms.h>
 #include <pcl/io/pcd_io.h>
+#include <pcl/correspondence.h>
+#include <pcl/point_cloud.h>
+#include <pcl/common/common_headers.h>
+#include <pcl/io/pcd_io.h>
+#include <Eigen/Core>
+#include <pcl/point_types.h>
+#include <pcl/point_cloud.h>
+#include <pcl/io/pcd_io.h>
+#include <pcl/kdtree/kdtree_flann.h>
+#include <pcl/filters/passthrough.h>
+#include <pcl/filters/voxel_grid.h>
+#include <pcl/features/normal_3d.h>
+#include <pcl/features/fpfh.h>
+#include <pcl/registration/ia_ransac.h>
+#include <pcl/visualization/pcl_visualizer.h>
 #include <pcl/visualization/pcl_visualizer.h>
 #include <image_transport/subscriber_filter.h>
 #include <pcl_ros/point_cloud.h>
@@ -30,6 +47,7 @@
 #include <pcl/point_types.h>
 #include <tf/tf.h>
 #include <tf/transform_listener.h>
+#include "tf/message_filter.h"
 #include <math.h>
 
 #include <C23_ObjectRecognition/C23C0_OD.h>
@@ -41,10 +59,392 @@
 #include <ros/package.h>
 
 
+
 #define MIN(x,y) (x < y ? x : y)
 #define MAX(x,y) (x > y ? x : y)
 
+class FeatureCloud
+{
+public:
+    // A bit of shorthand
+    typedef pcl::PointCloud<pcl::PointXYZ> PointCloud;
+    typedef pcl::PointCloud<pcl::Normal> SurfaceNormals;
+    typedef pcl::PointCloud<pcl::FPFHSignature33> LocalFeatures;
+    typedef pcl::search::KdTree<pcl::PointXYZ> SearchMethod;
+    
+    FeatureCloud () :
+    search_method_xyz_ (new SearchMethod),
+    normal_radius_ (0.02f),
+    feature_radius_ (0.02f)
+    {}
+    
+    ~FeatureCloud () {}
+    
+    // Process the given cloud
+    void
+    setInputCloud (PointCloud::Ptr xyz)
+    {
+        xyz_ = xyz;
+        processInput ();
+    }
+    
+    // Load and process the cloud in the given PCD file
+    void
+    loadInputCloud (const std::string &pcd_file)
+    {
+        xyz_ = PointCloud::Ptr (new PointCloud);
+        pcl::io::loadPCDFile (pcd_file, *xyz_);
+        processInput ();
+    }
+    
+    // Get a pointer to the cloud 3D points
+    PointCloud::Ptr
+    getPointCloud () const
+    {
+        return (xyz_);
+    }
+    
+    // Get a pointer to the cloud of 3D surface normals
+    SurfaceNormals::Ptr
+    getSurfaceNormals () const
+    {
+        return (normals_);
+    }
+    
+    // Get a pointer to the cloud of feature descriptors
+    LocalFeatures::Ptr
+    getLocalFeatures () const
+    {
+        return (features_);
+    }
+    
+protected:
+    // Compute the surface normals and local features
+    void
+    processInput ()
+    {
+        computeSurfaceNormals ();
+        computeLocalFeatures ();
+    }
+    
+    // Compute the surface normals
+    void
+    computeSurfaceNormals ()
+    {
+        normals_ = SurfaceNormals::Ptr (new SurfaceNormals);
+        
+        pcl::NormalEstimation<pcl::PointXYZ, pcl::Normal> norm_est;
+        norm_est.setInputCloud (xyz_);
+        norm_est.setSearchMethod (search_method_xyz_);
+        norm_est.setRadiusSearch (normal_radius_);
+        norm_est.compute (*normals_);
+    }
+    
+    // Compute the local feature descriptors
+    void
+    computeLocalFeatures ()
+    {
+        features_ = LocalFeatures::Ptr (new LocalFeatures);
+        
+        pcl::FPFHEstimation<pcl::PointXYZ, pcl::Normal, pcl::FPFHSignature33> fpfh_est;
+        fpfh_est.setInputCloud (xyz_);
+        fpfh_est.setInputNormals (normals_);
+        fpfh_est.setSearchMethod (search_method_xyz_);
+        fpfh_est.setRadiusSearch (feature_radius_);
+        fpfh_est.compute (*features_);
+    }
+    
+private:
+    // Point cloud data
+    PointCloud::Ptr xyz_;
+    SurfaceNormals::Ptr normals_;
+    LocalFeatures::Ptr features_;
+    SearchMethod::Ptr search_method_xyz_;
+    
+    // Parameters
+    float normal_radius_;
+    float feature_radius_;
+};
 
+class TemplateAlignment
+{
+public:
+    
+    // A struct for storing alignment results
+    struct Result
+    {
+        float fitness_score;
+        Eigen::Matrix4f final_transformation;
+        EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+    };
+    
+    TemplateAlignment () :
+    min_sample_distance_ (0.05f),
+    max_correspondence_distance_ (0.01f*0.01f),
+    nr_iterations_ (500)
+    {
+        // Intialize the parameters in the Sample Consensus Intial Alignment (SAC-IA) algorithm
+        sac_ia_.setMinSampleDistance (min_sample_distance_);
+        sac_ia_.setMaxCorrespondenceDistance (max_correspondence_distance_);
+        sac_ia_.setMaximumIterations (nr_iterations_);
+    }
+    
+    ~TemplateAlignment () {}
+    
+    // Set the given cloud as the target to which the templates will be aligned
+    void
+    setTargetCloud (FeatureCloud &target_cloud)
+    {
+        target_ = target_cloud;
+        sac_ia_.setInputTarget (target_cloud.getPointCloud ());
+        sac_ia_.setTargetFeatures (target_cloud.getLocalFeatures ());
+    }
+    
+    // Add the given cloud to the list of template clouds
+    void
+    addTemplateCloud (FeatureCloud &template_cloud)
+    {
+        templates_.push_back (template_cloud);
+    }
+    
+    // Align the given template cloud to the target specified by setTargetCloud ()
+    void
+    align (FeatureCloud &template_cloud, TemplateAlignment::Result &result)
+    {
+        sac_ia_.setInputCloud (template_cloud.getPointCloud ());
+        sac_ia_.setSourceFeatures (template_cloud.getLocalFeatures ());
+        
+        pcl::PointCloud<pcl::PointXYZ> registration_output;
+        sac_ia_.align (registration_output);
+        
+        result.fitness_score = (float) sac_ia_.getFitnessScore (max_correspondence_distance_);
+        result.final_transformation = sac_ia_.getFinalTransformation ();
+    }
+    
+    // Align all of template clouds set by addTemplateCloud to the target specified by setTargetCloud ()
+    void
+    alignAll (std::vector<TemplateAlignment::Result, Eigen::aligned_allocator<Result> > &results)
+    {
+        results.resize (templates_.size ());
+        for (size_t i = 0; i < templates_.size (); ++i)
+        {
+            align (templates_[i], results[i]);
+        }
+    }
+    
+    // Align all of template clouds to the target cloud to find the one with best alignment score
+    int
+    findBestAlignment (TemplateAlignment::Result &result)
+    {
+        // Align all of the templates to the target cloud
+        std::vector<Result, Eigen::aligned_allocator<Result> > results;
+        alignAll (results);
+        
+        // Find the template with the best (lowest) fitness score
+        float lowest_score = std::numeric_limits<float>::infinity ();
+        int best_template = 0;
+        for (size_t i = 0; i < results.size (); ++i)
+        {
+            const Result &r = results[i];
+            if (r.fitness_score < lowest_score)
+            {
+                lowest_score = r.fitness_score;
+                best_template = (int) i;
+            }
+        }
+        
+        // Output the best alignment
+        result = results[best_template];
+        return (best_template);
+    }
+    
+private:
+    // A list of template clouds and the target to which they will be aligned
+    std::vector<FeatureCloud> templates_;
+    FeatureCloud target_;
+    
+    // The Sample Consensus Initial Alignment (SAC-IA) registration routine and its parameters
+    pcl::SampleConsensusInitialAlignment<pcl::PointXYZ, pcl::PointXYZ, pcl::FPFHSignature33> sac_ia_;
+    float min_sample_distance_;
+    float max_correspondence_distance_;
+    int nr_iterations_;
+};
+
+pcl::PointCloud<pcl::PointXYZ>::Ptr C23_Detector::filterPointCloud(int x,int y, int width, int height, const pcl::PointCloud<pcl::PointXYZ> &cloud) {
+    int i,j;
+    pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_filtered (new pcl::PointCloud<pcl::PointXYZ>);
+    static tf::StampedTransform transform;
+    while(1){ try{
+        listener2.lookupTransform("/pelvis","/left_camera_optical_frame",
+                                  ros::Time(0), transform);
+    }
+    catch (tf::TransformException ex){
+        continue;  cout<<"jajajajaj\n";
+    } break; }
+    Eigen::Matrix4f sensorTopelvis;
+    pcl_ros::transformAsMatrix(transform, sensorTopelvis);
+    
+    cout << "Got: " << x << "," << y << "," << width << "," << height << endl;
+    for(i = x; i < x+width; i++) {
+        for(j= y; j < y+height; j++) {
+            pcl::PointXYZ p=cloud.at(i,j);
+            //  cout<<p<<endl;
+            if(p.x!=p.x)// || )
+                continue;
+         //   cout << "Got shosmo" << endl;
+            cloud_filtered->points.push_back(p);
+        }
+    }
+    while(1){ try{
+        listener2.lookupTransform("/pelvis","/left_camera_optical_frame",
+                                  ros::Time(0), transform);
+    }
+    catch (tf::TransformException ex){
+        continue;  cout<<"jajajajaj\n";
+    } break; }
+    
+    pcl::transformPointCloud(*cloud_filtered, *cloud_filtered, sensorTopelvis);
+    return cloud_filtered;
+    
+}
+
+
+
+
+void C23_Detector::saveTemplate(int x,int y, int width, int height, const sensor_msgs::PointCloud2::ConstPtr &cloud2, string target) {
+    int i,j;
+  /*  static tf::StampedTransform transform;
+    while(1){ try{
+        listener2.lookupTransform("/pelvis","/left_camera_optical_frame",
+        ros::Time(0), transform);
+    }
+    catch (tf::TransformException ex){
+        continue;  cout<<"jajajajaj\n";
+    } break; }
+    Eigen::Matrix4f sensorTopelvis;
+    
+    pcl_ros::transformAsMatrix(transform, sensorTopelvis);
+    */
+    pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_filtered (new pcl::PointCloud<pcl::PointXYZ>);
+    pcl::PointCloud<pcl::PointXYZ>cloud;
+    pcl::fromROSMsg<pcl::PointXYZ>(*cloud2,cloud);
+    cout << "Got: " << x << "," << y << "," << width << "," << height << endl;
+    for(i = x; i < x+width; i++) {
+        for(j= y; j < y+height; j++) {
+            pcl::PointXYZ p=cloud.at(i,j);
+            //  cout<<p<<endl;
+            if(p.x!=p.x)// || )
+                continue;
+          //  cout << "Got shosmo" << endl;
+            cloud_filtered->points.push_back(p);
+        }
+    }
+    cloud_filtered->width = 1;
+    cloud_filtered->height = cloud_filtered->points.size();
+   // pcl::transformPointCloud(*cloud_filtered, *cloud_filtered, sensorTopelvis);
+    pcl::io::savePCDFileASCII (target.c_str(), *cloud_filtered);
+    
+    
+}
+bool C23_Detector::templateMatching3D(string templates_file,  pcl::PointCloud<pcl::PointXYZ>::Ptr &cloud) {
+    
+  
+    std::vector<FeatureCloud> object_templates;
+    std::ifstream input_stream (templates_file.c_str());
+    cout << "Reading from: " << templates_file << endl;
+    object_templates.resize (0);
+    cout << "Here 2" << endl;
+    std::string pcd_filename;
+    while (input_stream.good ())
+    {
+        std::getline (input_stream, pcd_filename);
+        char basePath[10000];
+        sprintf(basePath,"%s/3D_models/%c",ros::package::getPath("C23_ObjectRecognition").c_str(),'\0');
+         string base(basePath);
+         pcd_filename = basePath + pcd_filename;
+      //   pcd_filename = "/home/isl/darpa/robil/C23_ObjectRecognition/3D_models/FirehoseGrip.pcd";
+         cout << "Reading pcd: " << pcd_filename << endl;
+        if (pcd_filename.empty () || pcd_filename.at (0) == '#') // Skip blank lines or comments
+      continue;
+      
+      FeatureCloud template_cloud;
+      template_cloud.loadInputCloud (pcd_filename);
+      object_templates.push_back (template_cloud);
+      break;
+    }
+    input_stream.close ();
+    
+    // Load the target cloud PCD file
+  //  pcl::PointCloud<pcl::PointXYZ>::Ptr cloud (new pcl::PointCloud<pcl::PointXYZ>);
+   // pcl::io::loadPCDFile (argv[2], *cloud);
+    
+    // Preprocess the cloud by...
+    // ...removing distant points
+    cout << "Got ehre ... 1 " << endl;
+    const float depth_limit = 1.0;
+    pcl::PassThrough<pcl::PointXYZ> pass;
+    pass.setInputCloud (cloud);
+    pass.setFilterFieldName ("z");
+    pass.setFilterLimits (0, depth_limit);
+    pass.filter (*cloud);
+    cout << "Got ehre ... 2 " << endl;
+    // ... and downsampling the point cloud
+    const float voxel_grid_size = 0.005f;
+    pcl::VoxelGrid<pcl::PointXYZ> vox_grid;
+    vox_grid.setInputCloud (cloud);
+    vox_grid.setLeafSize (voxel_grid_size, voxel_grid_size, voxel_grid_size);
+    //vox_grid.filter (*cloud); // Please see this http://www.pcl-developers.org/Possible-problem-in-new-VoxelGrid-implementation-from-PCL-1-5-0-td5490361.html
+    pcl::PointCloud<pcl::PointXYZ>::Ptr tempCloud (new pcl::PointCloud<pcl::PointXYZ>); 
+    vox_grid.filter (*tempCloud);
+    cloud = tempCloud; 
+    cout << "Got ehre ... 3 " << endl;
+    // Assign to the target FeatureCloud
+    FeatureCloud target_cloud;
+    target_cloud.setInputCloud (cloud);
+    
+    // Set the TemplateAlignment inputs
+    TemplateAlignment template_align;
+    for (size_t i = 0; i < object_templates.size (); ++i)
+    {
+        template_align.addTemplateCloud (object_templates[i]);
+    }
+    template_align.setTargetCloud (target_cloud);
+    cout << "Got ehre ... 4 " << endl;
+    // Find the best template alignment
+    TemplateAlignment::Result best_alignment;
+    int best_index = template_align.findBestAlignment (best_alignment);
+    const FeatureCloud &best_template = object_templates[best_index];
+    
+    // Print the alignment fitness score (values less than 0.00002 are good)
+    printf ("Best fitness score: %f\n", best_alignment.fitness_score);
+    cout << "Got ehre ... 5 " << endl;
+    // Print the rotation matrix and translation vector
+    Eigen::Matrix3f rotation = best_alignment.final_transformation.block<3,3>(0, 0);
+    Eigen::Vector3f translation = best_alignment.final_transformation.block<3,1>(0, 3);
+    
+    printf ("\n");
+    printf ("    | %6.3f %6.3f %6.3f | \n", rotation (0,0), rotation (0,1), rotation (0,2));
+    printf ("R = | %6.3f %6.3f %6.3f | \n", rotation (1,0), rotation (1,1), rotation (1,2));
+    printf ("    | %6.3f %6.3f %6.3f | \n", rotation (2,0), rotation (2,1), rotation (2,2));
+    printf ("\n");
+    printf ("t = < %0.3f, %0.3f, %0.3f >\n", translation (0), translation (1), translation (2));
+    
+    orient_x = translation(0);
+    orient_y = translation(1);
+    orient_z = translation(2);
+    orient_R = atan2(rotation (2,1),rotation (2,2));
+    orient_Y = atan2(rotation (1,0),rotation (0,0));
+    orient_P = atan2(-rotation (2,0),cos(orient_Y)*rotation (0,0) + sin(orient_Y)*rotation (1,0));
+    // Save the aligned template for visualization
+    cout << "R: " << orient_R << ", Y: " << orient_Y << ", P: " << orient_P << endl;
+    pcl::PointCloud<pcl::PointXYZ> transformed_cloud;
+    pcl::transformPointCloud (*best_template.getPointCloud (), transformed_cloud, best_alignment.final_transformation);
+    pcl::io::savePCDFileBinary ("output.pcd", transformed_cloud);
+    
+    pcl::io::savePCDFileASCII ("test_pcd.pcd", *cloud);
+    return true;
+    
+}
 
 bool C23_Detector::pictureCoordinatesToGlobalPosition(double x1, double y1, double x2, double y2, double* x, double* y, double*z) {
     C21_VisionAndLidar::C21_obj c21srv;
@@ -121,37 +521,40 @@ bool C23_Detector::averagePointCloud(int x1, int y1, int x2, int y2, const senso
           //  }
         }
     }
-    cout<<"Counter: "<<counter<<endl;
+   // cout<<"Counter: "<<counter<<endl;
    //Calculate the average point
-   tmp_x=_x/(counter);
-   tmp_y=_y/(counter);
-   tmp_z=_z/(counter);
-   
-    cout << "Point is: " << tmp_x << "," <<tmp_y << "," << tmp_z << endl;
+   //tmp_x=_x;
+  // tmp_y=_y;
+  // tmp_z=_z/(counter);
+ //  
+    _x/=(double)counter;
+    _y/=(double)counter;
+    _z/=(double)counter;
+    cout << "Point is: " << _x << "," <<_y << "," << _z << endl;
     C21_VisionAndLidar::C21_obj c21srv;
     
-    if(_target==HANDBRAKE || _target == INSIDE_STEERINGWHEEL || _target ==GEAR)
+    /*if(_target==HANDBRAKE || _target == INSIDE_STEERINGWHEEL || _target ==GEAR)
     {
       *px = tmp_x;
       *py = tmp_y;
       *pz = tmp_z;
       
     }
-    else{
-       c21srv.request.sample.x1 = tmp_x;
-      c21srv.request.sample.x2 =tmp_y;
-      c21srv.request.sample.y1 =tmp_z;
+    else{*/
+      c21srv.request.sample.x1 = _x;
+      c21srv.request.sample.x2 =_y;
+      c21srv.request.sample.y1 =_z;
       c21srv.request.sample.y2 = 0;
       
       if(c21client.call(c21srv))
       {
-	if(px != NULL) *px = round(c21srv.response.point.x);
-	if(py != NULL) *py = round(c21srv.response.point.y);
-	if(pz != NULL) *pz = round(c21srv.response.point.z);
-	cout << "Received data: " << c21srv.response.point.x << "," << c21srv.response.point.y << "," << c21srv.response.point.z << endl;
-	return true;
+            if(px != NULL) *px = round(c21srv.response.point.x);
+            if(py != NULL) *py = round(c21srv.response.point.y);
+            if(pz != NULL) *pz = round(c21srv.response.point.z);
+            cout << "Received data: " << c21srv.response.point.x << "," << c21srv.response.point.y << "," << c21srv.response.point.z << endl;
+            return true;
       }
-    }
+  //  }
     
     return false;
 }
@@ -186,11 +589,36 @@ sync( MySyncPolicy( 10 ), left_image_sub_,pointcloud)
     c21client = nh.serviceClient<C21_VisionAndLidar::C21_obj>("C21/C23"); //Subscribe to the service node to get the absolute coordinates of a point
     c23_start_posecontroller = nh.serviceClient<std_srvs::Empty>("/PoseController/start");
     c23_stop_posecontroller = nh.serviceClient<std_srvs::Empty>("/PoseController/stop");
-    
+    orientation_service=nh.advertiseService("C23/C66", &C23_Detector::process_orientation, this);
     ROS_INFO("Started...");
     //	gates = new vector<Gate*>();
     
 }
+bool C23_Detector::process_orientation(C23_ObjectRecognition::C23_orient::Request  &req,
+                         C23_ObjectRecognition::C23_orient::Response &res )
+{
+    string target = req.target;
+    if(!target.compare("Firehose")) {
+        char basePath[1000],imageName[1000];
+        
+        sprintf(basePath,"%s/3D_models/%s%c",ros::package::getPath("C23_ObjectRecognition").c_str(),"firehose.txt",'\0');
+        string t = basePath;
+      //  string t = "/home/isl/darpa/robil/C23_ObjectRecognition/3D_models/firehose.txt";
+        std::cout<<imageName<<endl;
+        pcl::PointCloud<pcl::PointXYZ>::Ptr cloud2 = filterPointCloud(last_x,last_y,width,height,lastCloud);
+        templateMatching3D(t,  cloud2);
+    }
+    
+    
+    res.x = orient_x;
+    res.y = orient_y;
+    res.z = orient_z;
+    res.R = orient_R;
+    res.Y = orient_Y;
+    res.P = orient_P;
+    return true;
+}
+  
 
 
 bool C23_Detector::detect(const string target) {
@@ -280,6 +708,9 @@ void C23_Detector::callback(const sensor_msgs::ImageConstPtr& msg,const sensor_m
     //    ROS_INFO("Receiving image..");
     Mat srcImg = fromSensorMsg(msg);
     bool res;
+    pcl::PointCloud<pcl::PointXYZ>detectionCloud;
+    pcl::fromROSMsg<pcl::PointXYZ>(*cloud,detectionCloud);
+    lastCloud.swap(detectionCloud);
     switch (_target) {
         case PATH:
             res = detectPath(srcImg);
@@ -531,7 +962,9 @@ bool C23_Detector::detectGear(Mat srcImg,const sensor_msgs::PointCloud2::ConstPt
 bool C23_Detector::detectValve(Mat srcImg, const sensor_msgs::PointCloud2::ConstPtr &cloud) {
     ROS_INFO("Detecting a valve..");
     RNG rng(12345);
-    
+   // string t = "/home/isl/darpa/robil/C23_ObjectRecognition/template.txt";
+   // templateMatching3D(t,cloud);
+    //return true;
     Mat imgHSV, imgThreshed;
     cvtColor(srcImg,imgHSV,CV_BGR2HSV);
     inRange(imgHSV,Scalar(60,30,30),Scalar(80,255,255),imgThreshed);
@@ -556,7 +989,7 @@ bool C23_Detector::detectValve(Mat srcImg, const sensor_msgs::PointCloud2::Const
     
     //  drawContours(srcImg,contours,-1,CV_RGB(255,0,0),2);
     // imshow("TESSTING",srcImg);
-    waitKey(0);
+  //  waitKey(0);
     vector<RotatedRect> minEllipse( contours.size() );
     int biggest_size = 0;
     int biggest = 0;
@@ -601,7 +1034,27 @@ bool C23_Detector::detectValve(Mat srcImg, const sensor_msgs::PointCloud2::Const
              }*/
             imshow("TESTING",srcImg);
             waitKey(0);
-            pictureCoordinatesToGlobalPosition(minRect.center.x-10,minRect.center.y+10,minRect.center.x+10,minRect.center.y+10,&x,&y,NULL);
+            int x1 = MIN(rect_points[0].x,rect_points[1].x);
+            int x2 = MIN(rect_points[2].x,rect_points[3].x);
+            int min_x = MIN(x1,x2);
+            
+            int y1 = MIN(rect_points[0].y,rect_points[1].y);
+            int y2 = MIN(rect_points[2].y,rect_points[3].y);
+            int min_y = MIN(y1,y2);
+            
+            
+             x1 = MAX(rect_points[0].x,rect_points[1].x);
+             x2 = MAX(rect_points[2].x,rect_points[3].x);
+            int max_x = MAX(x1,x2);
+            
+             y1 = MAX(rect_points[0].y,rect_points[1].y);
+             y2 = MAX(rect_points[2].y,rect_points[3].y);
+            int max_y = MAX(y1,y2);
+            
+           // pcl::PointCloud<pcl::PointXYZ>::Ptr cloud2 = filterPointCloud(min_x,min_y,max_x-min_x,max_y-min_y,cloud);
+          //  templateMatching3D(t,cloud2);
+           
+         //   pictureCoordinatesToGlobalPosition(minRect.center.x-10,minRect.center.y+10,minRect.center.x+10,minRect.center.y+10,&x,&y,NULL);
             return true;
     }
     return false;
@@ -714,8 +1167,8 @@ bool C23_Detector::detectFirehoseGrip(Mat srcImg, const sensor_msgs::PointCloud2
     Mat bw;
     vector<vector<cv::Point> > contours;
     threshold(imgDilated,bw,10,255,CV_THRESH_BINARY);
-    imshow("TESTING",bw);
-    waitKey(0);
+   // imshow("TESTING",bw);
+   // waitKey(0);
     cv::Scalar colors[3];
     colors[0] = cv::Scalar(120, 120, 0);
     colors[1] = cv::Scalar(120, 255, 0);
@@ -726,9 +1179,9 @@ bool C23_Detector::detectFirehoseGrip(Mat srcImg, const sensor_msgs::PointCloud2
         cv::drawContours(srcImg, contours, idx, colors[idx % 3]);
     }
     
-    //  drawContours(srcImg,contours,-1,CV_RGB(255,0,0),2);
-    // imshow("TESSTING",srcImg);
-    waitKey(0);
+      drawContours(srcImg,contours,-1,CV_RGB(255,0,0),2);
+   // imshow("TESSTING",srcImg);
+   // waitKey(0);
     vector<RotatedRect> minEllipse( contours.size() );
     int biggest_size = 0;
     int biggest = 0;
@@ -742,7 +1195,7 @@ bool C23_Detector::detectFirehoseGrip(Mat srcImg, const sensor_msgs::PointCloud2
             
         }
     }
-    if(biggest_size > 50 && biggest_size < 250) {
+    if(biggest_size > 50 && biggest_size < 320) {
         
         
         
@@ -774,6 +1227,31 @@ bool C23_Detector::detectFirehoseGrip(Mat srcImg, const sensor_msgs::PointCloud2
             imshow("TESTING",srcImg);
             waitKey(0);
             pictureCoordinatesToGlobalPosition(minRect.center.x-100,minRect.center.y+100,minRect.center.x+100,minRect.center.y+100,&x,&y,NULL);
+            int x1 = MIN(rect_points[0].x,rect_points[1].x);
+            int x2 = MIN(rect_points[2].x,rect_points[3].x);
+            int min_x = MIN(x1,x2);
+            
+            int y1 = MIN(rect_points[0].y,rect_points[1].y);
+            int y2 = MIN(rect_points[2].y,rect_points[3].y);
+            int min_y = MIN(y1,y2);
+            
+            
+            x1 = MAX(rect_points[0].x,rect_points[1].x);
+            x2 = MAX(rect_points[2].x,rect_points[3].x);
+            int max_x = MAX(x1,x2);
+            
+            y1 = MAX(rect_points[0].y,rect_points[1].y);
+            y2 = MAX(rect_points[2].y,rect_points[3].y);
+            int max_y = MAX(y1,y2);
+            string t = "FireHoseGrip";
+            cout << "Saving firehose" << endl;
+         //   saveTemplate(min_x,min_y,max_x-min_x,max_y-min_y,cloud,t);
+           // templateMatching3D(t,lastCloud);
+            last_x = min_x;
+            last_y = min_y;
+            width = (max_x-min_x);
+            height = (max_y-min_y);
+            
             return true;
     }
     return false;
@@ -1567,14 +2045,47 @@ bool C23_Detector::detectGate(Mat srcImg, const sensor_msgs::PointCloud2::ConstP
             
         }
         //Draw a circle indicating the center of mass on the right pole
-        circle( srcImg, mcR[biggstR], 16, 60, -1, 8, 0 );
+        
         right = true;
+        circle( srcImg, mcR[biggstR], 16, 60, -1, 8, 0 );
+        
         cout << "We found red!" << endl;
-        if (pclcloud.at(mcR[biggstR].x,mcR[biggstR].y).x<50 && pclcloud.at(mcR[biggstR].x,mcR[biggstR].y).y <50 && pclcloud.at(mcR[biggstR].x,mcR[biggstR].y).x !=0)
+        double r_x = 0;
+        double r_y = 0;
+        double r_z = 0;
+        int count = 0;
+        for(int i =-15; i <= 15; i++) {
+            for(int j =-15; j <=15; j++) {
+                if(pclcloud.at(mcR[biggstR].x+i,mcR[biggstR].y+j).x != pclcloud.at(mcR[biggstR].x+i,mcR[biggstR].y+j).x)
+                    continue;
+                count++;
+                r_x+=pclcloud.at(mcR[biggstR].x+i,mcR[biggstR].y+j).x;
+                r_y+=pclcloud.at(mcR[biggstR].x+i,mcR[biggstR].y+j).y;
+                r_z+=pclcloud.at(mcR[biggstR].x+i,mcR[biggstR].y+j).z;
+            }
+        }
+        r_x/=count;
+        r_y/=count;
+        r_z/=count;
+        if (r_x<50 && r_y <50 && r_x !=0)
         {
+            cout << "Red is valid .. " << endl;
+            rightC=pclcloud.at(mcR[biggstR].x,mcR[biggstR].y);
+            rightC.x = r_x;
+            rightC.y = r_y;
+            rightC.z = r_z;
+            
+        } else {
+            cout << "Red isn't valid .. " << pclcloud.at(mcR[biggstR].x,mcR[biggstR].y).x << "," <<  pclcloud.at(mcR[biggstR].x,mcR[biggstR].y).y << "," << endl;
+        }
+       /* if (pclcloud.at(mcR[biggstR].x,mcR[biggstR].y).x<50 && pclcloud.at(mcR[biggstR].x,mcR[biggstR].y).y <50 && pclcloud.at(mcR[biggstR].x,mcR[biggstR].y).x !=0)
+        {
+            cout << "Red is valid .. " << endl;
             rightC=pclcloud.at(mcR[biggstR].x,mcR[biggstR].y);
             
-        }
+        } else {
+            cout << "Red isn't valid .. " << pclcloud.at(mcR[biggstR].x,mcR[biggstR].y).x << "," <<  pclcloud.at(mcR[biggstR].x,mcR[biggstR].y).y << "," << endl;
+        }*/
     }
     
     
@@ -1609,12 +2120,39 @@ bool C23_Detector::detectGate(Mat srcImg, const sensor_msgs::PointCloud2::ConstP
             
         }
         left = true;
-        cout << "Left is true! " << endl;
-        circle( srcImg, mcL[biggstL], 16, Scalar(0,0,255), -1, 8, 0 );
-        if (pclcloud.at(mcL[biggstL].x,mcL[biggstL].y).x<50 && pclcloud.at(mcL[biggstL].x,mcL[biggstL].y).y <50 && pclcloud.at(mcL[biggstL].x,mcL[biggstL].y).x !=0)
+      //  cout << "Left is true! " << endl;
+        double l_x = 0;
+        double l_y = 0;
+        double l_z = 0;
+       int  count = 0;
+        for(int i =-15; i <= 15; i++) {
+            for(int j =-15; j <=15; j++) {
+                if(pclcloud.at(mcR[biggstR].x+i,mcR[biggstR].y+j).x != pclcloud.at(mcR[biggstR].x+i,mcR[biggstR].y+j).x)
+                    continue;
+                count++;
+                l_x+=pclcloud.at(mcR[biggstR].x+i,mcR[biggstR].y+j).x;
+                l_y+=pclcloud.at(mcR[biggstR].x+i,mcR[biggstR].y+j).y;
+                l_z+=pclcloud.at(mcR[biggstR].x+i,mcR[biggstR].y+j).z;
+            }
+        }
+        l_x/=count;
+        l_y/=count;
+        l_z/=count;
+        if (l_x<50 && l_y <50 && l_z !=0)
+        {
+            cout << "Blue is valid .. " << endl;
+            rightC=pclcloud.at(mcR[biggstR].x,mcR[biggstR].y);
+            rightC.x = l_x;
+            rightC.y = l_y;
+            rightC.z = l_z;
+            
+        } else {
+            cout << "Blue isn't valid .. " << pclcloud.at(mcR[biggstR].x,mcR[biggstR].y).x << "," <<  pclcloud.at(mcR[biggstR].x,mcR[biggstR].y).y << "," << endl;
+        }
+      /*  if (pclcloud.at(mcL[biggstL].x,mcL[biggstL].y).x<50 && pclcloud.at(mcL[biggstL].x,mcL[biggstL].y).y <50 && pclcloud.at(mcL[biggstL].x,mcL[biggstL].y).x !=0)
         {
             leftC=pclcloud.at(mcL[biggstL].x,mcL[biggstL].y);
-        }
+        }*/
         
     }
     
@@ -1627,9 +2165,9 @@ bool C23_Detector::detectGate(Mat srcImg, const sensor_msgs::PointCloud2::ConstP
         //	cout<<"\nright :"<<rightC.x<<" ,"<<rightC.y<<endl;
         
         double gate =sqrt(pow((leftC.x-rightC.x),2)+pow((leftC.y-rightC.y),2));
-        //cout<<gate<<endl;
+        cout<< "Gate size: " << gate<<endl;
         res = false;
-        if (gate > 4.5 && gate < 5.8)
+        if (gate > 3.5 && gate < 6.5)
         {
             res = true;
             
@@ -1640,6 +2178,9 @@ bool C23_Detector::detectGate(Mat srcImg, const sensor_msgs::PointCloud2::ConstP
             right = leftC.z > rightC.z;
             
         } else {
+            circle( srcImg, mcR[biggstR], 16, 60, -1, 8, 0 );
+            circle( srcImg, mcL[biggstL], 16, Scalar(0,0,255), -1, 8, 0 );
+            cout << "======== Left and Right " << endl;
             //find lines
             Mat dst,cdst;
             // ROS_INFO("4.4");
@@ -1655,79 +2196,18 @@ bool C23_Detector::detectGate(Mat srcImg, const sensor_msgs::PointCloud2::ConstP
                 Vec4i l = lines[i];
                 line( cdst, cv::Point(l[0], l[1]), cv::Point(l[2], l[3]), Scalar(0,0,255), 3, CV_AA);
             }
-            //   ROS_INFO("6");
-            
-            //cout<<"left"<<mcL[biggstL]<<"right"<<mcR[biggstR]<<endl;
-            //These points are the central coordinates of the gate
-            
-            
-            //   x = (mcL[biggstL].x + mcR[biggstR].x)/2;
-            //    y = (mcL[biggstL].y + mcR[biggstR].y)/2;
-          /*  int x1,y1,x2,y2;
-            cout << "Sending left: " << mcL[biggstL].x << "," << mcL[biggstL].y << endl;
-            cout << "Sending right: " << mcR[biggstR].x << "," <<mcR[biggstR].y << endl;
-            
-            c21srv.request.sample.x1 = MIN(mcL[biggstL].x, mcR[biggstR].x);
-            c21srv.request.sample.y1 = MIN(mcL[biggstL].y, mcR[biggstR].y);
-            c21srv.request.sample.x2 = MAX(mcL[biggstL].x, mcR[biggstR].x);
-            c21srv.request.sample.y2 = MAX(mcL[biggstL].y, mcR[biggstR].y);
-            
-            if(c21client.call(c21srv)){
-                cout << "left..." << endl;
-                x= (float)c21srv.response.point.x;
-                y = (float)c21srv.response.point.y;
-                cout << "Got data: " << x << "," << y << endl;
-                
-            }*/
-          
-            double x1,y1,x2,y2;
-            cout << "Sending left: " << mcL[biggstL].x << "," << mcL[biggstL].y << endl;
-            cout << "Sending right: " << mcR[biggstR].x << "," <<mcR[biggstR].y << endl;
-            
-            c21srv.request.sample.x1 = mcL[biggstL].x-10;
-            c21srv.request.sample.y1 = mcL[biggstL].y-100;;
-            c21srv.request.sample.x2 = mcL[biggstL].x+10;
-            c21srv.request.sample.y2 = mcL[biggstL].y+100;;
-            
-            if(c21client.call(c21srv)){
-                cout << "left..." << endl;
-                x1= (float)c21srv.response.point.x;
-                y1 = (float)c21srv.response.point.y;
-                cout << "Got data: " << x << "," << y << endl;
-                
-            }
-            
-            c21srv.request.sample.x1 = mcR[biggstR].x-10;
-            c21srv.request.sample.y1 = mcR[biggstR].y-100;;
-            c21srv.request.sample.x2 = mcR[biggstR].x+10;
-            c21srv.request.sample.y2 = mcR[biggstR].y+100;;
-            
-            if(c21client.call(c21srv)){
-                cout << "left..." << endl;
-                x2= (float)c21srv.response.point.x;
-                y2 = (float)c21srv.response.point.y;
-                cout << "Got data: " << x << "," << y << endl;
-                
-            }
-             x =  (x1+x2)/2.0;
-             y = (y1+y2)/2.0;
-          // 
            
-         //   return true;
-          //  /
-          Point2f a((float) (mcL[biggstL].x + mcR[biggstR].x)/2,(float)(mcL[biggstL].y + mcR[biggstR].y)/2);
-          circle( srcImg, a, 16, Scalar(0,0,255), -1, 8, 0 );
-          imshow("TESTING",srcImg);
-          waitKey(0);
-          return true;
-          /*
           double x1,y1,z1,x2,y2,z2;
-          averagePointCloud(mcL[biggstL].x-10, mcL[biggstL].y-100, mcL[biggstL].x+10, mcL[biggstL].y+100, cloud, &x1, &y1,&z1);
-          averagePointCloud(mcR[biggstR].x-10, mcR[biggstR].y-100, mcR[biggstR].x+10, mcR[biggstR].y+100, cloud, &x2, &y2,&z2);
-          return true;
-         // x = (x1+x2)/2.0;
-        //  y = (y1+y2)/2.0;
-          */
+          averagePointCloud(mcL[biggstL].x-5, mcL[biggstL].y-50, mcL[biggstL].x+5, mcL[biggstL].y+50, cloud, &x1, &y1,&z1);
+          averagePointCloud(mcR[biggstR].x-5, mcR[biggstR].y-50, mcR[biggstR].x+5, mcR[biggstR].y+50, cloud, &x2, &y2,&z2);
+       //   cout << "Middle: " <<
+         // imshow("TESTING",srcImg);
+        // waitKey(0);
+        //  return true;
+         x = (x1+x2)/2.0;
+         y = (y1+y2)/2.0;
+         cout << "Middle point: " << x <<"," << y << endl;
+         return true;
         }
     }
     
@@ -1771,6 +2251,8 @@ bool C23_Detector::detectGate(Mat srcImg, const sensor_msgs::PointCloud2::ConstP
         double contourOffset = 0;
         
         if(right) {
+            circle( srcImg, mcR[biggstR], 16, 60, -1, 8, 0 );
+             cout << " Only right bar was detected ! " << endl;
             //Find the distance between the center of mass of green and center of mass of red gate
             gateUpperDistance =sqrt(pow((centerC.x-rightC.x),2)+pow((centerC.y-rightC.y),2));
             
@@ -1794,25 +2276,13 @@ bool C23_Detector::detectGate(Mat srcImg, const sensor_msgs::PointCloud2::ConstP
                 int x_pic = mcR[biggstR].x - (mcR[biggstR].y - minContourOffsetR);
                 int y_pic =  mcR[biggstR].y;
                 
-                c21srv.request.sample.x1 = mcR[biggstR].x-10;
-                c21srv.request.sample.y1 = mcR[biggstR].y-100;
-                c21srv.request.sample.x2 = mcR[biggstR].x+10;
-                c21srv.request.sample.y2 = mcR[biggstR].y+100;
-                
-                if(c21client.call(c21srv)){
-                    ROS_INFO("Service initiated");
-                    // minPoint.x = c21srv.response.x;
-                    //minPoint.y = c21srv.response.y;
-                    //minPoint.z = c21srv.response.z;
-                    //absolutePoint = (pcl::PointXYZ)c21srv.response.point;
-                    ROS_INFO("Before...\n");
-                    x = (float)c21srv.response.point.x-3;
-                    y = (float)c21srv.response.point.y;
-                    
-                    
-                }
+               
+                double x1,y1,z1,x2,y2,z2;
+                averagePointCloud(mcR[biggstR].x-5, mcR[biggstR].y-50, mcR[biggstR].x+5, mcR[biggstR].y+50, cloud, &x2, &y2,&z2);
+                x = x2;
+                y = y2-2.5;
                 cout<<"Point is: " <<x<<", " <<y <<endl;
-                cout << "Detected right" << endl;
+             //   cout << "Detected right" << endl;
                 circle( srcImg, Point2f(x_pic,y_pic), 16, Scalar(0,255,255), -1, 8, 0 );
             }
             
@@ -1821,6 +2291,8 @@ bool C23_Detector::detectGate(Mat srcImg, const sensor_msgs::PointCloud2::ConstP
             return mcM[biggstM].x < mcR[biggstR].x ? true : false;
             
         } else {
+            circle( srcImg, mcL[biggstL], 16, Scalar(0,0,255), -1, 8, 0 );
+            cout << "Only left bar is detected" << endl;
             //Find the distance between the cm of green and cm of blue gate
             gateUpperDistance =sqrt(pow((centerC.x-leftC.x),2)+pow((centerC.y-leftC.y),2));   
             
@@ -1842,27 +2314,15 @@ bool C23_Detector::detectGate(Mat srcImg, const sensor_msgs::PointCloud2::ConstP
                 int y_pic =  mcL[biggstL].y;
                 cout<<"Point is: " <<x<<", " <<y <<endl;
             }
-            cout << "Detected left" << endl;
+           // cout << "Detected left" << endl;
             circle( srcImg, Point2f(x,y), 16, Scalar(0,255,255), -1, 8, 0 );
-            //   imshow("Testing" , srcImg);
-            //   waitKey(0);
-            c21srv.request.sample.x1 = mcL[biggstL].x-10;
-            c21srv.request.sample.y1 = mcL[biggstL].y-100;
-            c21srv.request.sample.x2 = mcL[biggstL].x+10;
-            c21srv.request.sample.y2 = mcL[biggstL].y+100;
-            
-            if(c21client.call(c21srv)){
-                ROS_INFO("Service initiated");
-                // minPoint.x = c21srv.response.x;
-                //minPoint.y = c21srv.response.y;
-                //minPoint.z = c21srv.response.z;
-                //absolutePoint = (pcl::PointXYZ)c21srv.response.point;
-                ROS_INFO("Before...\n");
-                x = (float)c21srv.response.point.x+3;
-                y = (float)c21srv.response.point.y;
-                
-                
-            }
+            //  imshow("Testing" , srcImg);
+           //   waitKey(0);
+
+            double x1,y1,z1,x2,y2,z2;
+            averagePointCloud(mcL[biggstL].x-5, mcL[biggstL].y-50, mcL[biggstL].x+5, mcL[biggstL].y+50, cloud, &x2, &y2,&z2);
+            x = x2;
+            y = y2-2.5;
             return mcM[biggstM].x > mcL[biggstL].x ? true : false;
             
         }

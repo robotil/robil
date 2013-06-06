@@ -20,9 +20,9 @@ ns._bSent_path_once = False
 
 def Get_target_pose(req):
     FP_res = C23_orientResponse()
-    if "rotation" == req.target:
-        FP_res.x = 0.0
-        FP_res.y = 0.0
+    if "delta" == req.target:
+        FP_res.x = 0.0 # 0.89 # 0.5
+        FP_res.y = 0.0 #-0.5
         FP_res.z = 0.0
         FP_res.R = 0.0
         FP_res.P = 0.0

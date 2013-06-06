@@ -133,7 +133,7 @@ public:
 		  p.y=req.sample.x2;
 		  p.z=req.sample.y1;
 		  t.points.push_back(p);
-		  //pcl::transformPointCloud(t, t, sensorTopelvis);
+		  pcl::transformPointCloud(t, t, sensorTopelvis);
 		   pcl::transformPointCloud(t, t, pelvisToWorld);
 		  //int yMin=std::min(req.sample.y1,req.sample.y2);
 		  //int xMax=std::max(req.sample.x1,req.sample.x2);
