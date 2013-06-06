@@ -22,7 +22,7 @@ class DW_WalkingMode(WalkingMode):
         
     def Initialize(self):
         WalkingMode.Initialize(self)
-        self._Controller.Initialize()
+        self._Controller.Initialize(Terrain = "MUD") #How to get the true terrain type?
         self._bDone = False
         
         self._Subscribers["Path"] = rospy.Subscriber('/path',C31_Waypoints,self._path_cb)
