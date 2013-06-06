@@ -1,158 +1,207 @@
 import roslib; roslib.load_manifest('C42_DynamicLocomotion')
-from std_msgs.msg import Float64,Bool
-from sensor_msgs.msg import *
-import rospy, math, sys,numpy
-from IKException import IKReachException
-from geometry_msgs.msg import *
-import copy
-from atlas_msgs.msg import ForceTorqueSensors
-from foot_contact_filter import contact_filter
+import roslib; roslib.load_manifest('C42_Leg_IK')
+from atlas_msgs.msg import AtlasSimInterfaceCommand, AtlasSimInterfaceState, AtlasState, AtlasCommand
+from geometry_msgs.msg import Pose, Point
+from std_msgs.msg import *
+from sensor_msgs.msg import Imu
+from C42_DynamicLocomotion.msg import slop_m
+from tf.transformations import quaternion_from_euler, euler_from_quaternion
+from C42_DynamicLocomotion.msg import imu_contact
 from contact_reflex import contact_reflex
+from atlas_msgs.msg import ForceTorqueSensors
+import control_primitives
+from foot_contact_filter import contact_filter
+
+import math
+import rospy
+import sys
 import tf
-import pylab as pl
+
+
+
+
+
 
 class Nasmpace: pass
 ns = Nasmpace()
 
-
-ns.out = zmp_real()
-ns.listener = tf.TransformListener()
-ns.contact = contact_reflex()
-
-
-def get_foot_contact(msg):
-      
-    ns.filter.update(msg)
-
-    buf = ns.filter.get_buffer()
-   
-    ns.leg.force_z = buf[0].r_foot.force.z
-    
-    ns.leg.force_z = buf[0].l_foot.force.z
-
-    nr.contact,nl.contact = ns.contact.update(nr.force_z,nl.force_z)
-    ns.response = [nl.force_z,  nr.force_z] 
-
-    slop_calculation(ns.listener)
-
-def get_arm_contact(msg):
-      
-    ns.filter.update(msg)
-    buf = ns.filter.get_buffer()
-    
-    nr.force_z = buf[0].r_foot.force.z
-    
-    nl.force_z = buf[0].l_foot.force.z
-
-    nr.contact,nl.contact = ns.contact.update(nr.force_z,nl.force_z)
-    ns.response = [nl.force_x, nl.force_y, nl.force_z, nl.t_x, nl.t_y, nl.t_z, nr.force_x, nr.force_y, nr.force_z, nr.t_x, nr.t_y, nr.t_z] 
-
-    slop_calculation(ns.listener)
-
-def slop_calculation(listener):
-  #ns.response = [nl.force_x, nl.force_y, nl.force_z, nl.t_x, nl.t_y, nl.t_z,
-  #               nr.force_x, nr.force_y, nr.force_z, nr.t_x, nr.t_y, nr.t_z] 
-
-  if ( nl.contact == 1 ) and ( nr.contact == 0 ): 
-            # stance = left, swing = right
-            base_frame =  'l_foot' 
-            get_frame = 'r_foot' 
+class IMUCh(object):
+    def __init__(self):
         
-  elif ( nr.contact == 1 ) and ( nl.contact == 1 ):
-            # stance = left, support = right
-            base_frame = 'l_foot'
-            get_frame = 'r_foot' 
+        self.listener = tf.TransformListener()
+        rospy.sleep(3)
+        self.contact = contact_reflex()
 
- # elif ( nr.contact == 1 ) and ( nl.contact == 0 ):
-  else:
-            # stance = right, swing = left
-            base_frame = 'r_foot'
-            get_frame = 'l_foot' 
+        self.leg_force_z_r = 0
+        self.leg_force_z_l = 0
+        self.leg_force_x_r = 0
+        self.leg_force_x_l = 0
+        self.leg_force_y_r = 0
+        self.leg_force_y_l = 0
 
-  (ns.translation,ns.rotation) = listener.lookupTransform(base_frame, get_frame, rospy.Time(0))  
+        self.arm_force_z_r = 0
+        self.arm_force_z_l = 0
+        self.arm_force_x_r = 0
+        self.arm_force_x_l = 0
+        self.arm_force_y_r = 0
+        self.arm_force_y_l = 0
 
-  if ( nr.contact == 1 ) and ( nl.contact == 0 ):
-    M_tot_y = ns.response[4] + ns.response[10] + ns.response[2]*ns.translation[0]
-    F_tot_z = ns.response[2] + ns.response[8]
-    ns.zmpx_r = M_tot_y/(F_tot_z + 0.00001)#
-    M_tot_x = ns.response[3] + ns.response[9] + ns.response[2]*ns.translation[1]
-    ns.zmpy_r = M_tot_x/(F_tot_z + 0.0000001) - abs(ns.translation[1]/2)
-    zmp_x = ns.zmpx_r
-    zmp_y = ns.zmpy_r
-  elif ( nl.contact == 1 ) and ( nr.contact == 0 ): 
-    M_tot_y = ns.response[4] + ns.response[10] + ns.response[8]*ns.translation[0]
-    F_tot_z = ns.response[2] + ns.response[8]
-    ns.zmpx_l = M_tot_y/(F_tot_z + 0.00001)
-    M_tot_x = ns.response[3] + ns.response[9] + ns.response[8]*ns.translation[1]
-    ns.zmpy_l = M_tot_x/(F_tot_z + 0.0000001) + abs(ns.translation[1]/2)
-    zmp_x = ns.zmpx_l 
-    zmp_y = ns.zmpy_l 
+        # self.leg_contact_l = 0
+        # self.leg_contact_r = 0
+        # self.arm_contact_l = 0
+        # self.arm_contact_r = 0
 
-  #elif ( nr.contact == 1 ) and ( nl.contact == 1 ):
-  else:
-    M_tot_y = ns.response[4] + ns.response[10] + ns.response[8]*ns.translation[0]
-    F_tot_z = ns.response[2] + ns.response[8]
-    ns.zmpx_l = M_tot_y/(F_tot_z + 0.00001)
-    M_tot_x = ns.response[3] + ns.response[9] + ns.response[8]*ns.translation[1]
-    ns.zmpy_l = M_tot_x/(F_tot_z + 0.0000001) + abs(ns.translation[1]/2)
-    zmp_x = ns.zmpx_l 
-    zmp_y = ns.zmpy_l
+        self.arm_force_r = 0
+        self.arm_force_l = 0
+        self.leg_force_r = 0
+        self.leg_force_l = 0
 
-  ns.out.zmpx_r = ns.zmpx_r
-  ns.out.zmpy_r = ns.zmpy_r
-  ns.out.zmpx_l = ns.zmpx_l
-  ns.out.zmpy_l = ns.zmpy_l
-  ns.out.zmpx = zmp_x
-  ns.out.zmpy = zmp_y
+        self.pitch_acc = 0
+        self.roll_acc = 0
+        self.yaw_acc = 0
+        self.count = 0
+        self.pitch_avg = 0
+        self.roll_avg = 0
+        self.yaw_avg = 0
 
-  ns.Limit_R = -abs(ns.translation[1]/2)-0.062
-  ns.Limit_L =  abs(ns.translation[1]/2)+0.062
-  ns.Limit_Front = 0.1754
-  ns.Limit_Back = -0.083
-
-  ns.out.zmpyBound1 = ns.Limit_L
-  ns.out.zmpyBound2 = ns.Limit_R
-  ns.out.zmpxBound1 = ns.Limit_Front
-  ns.out.zmpxBound2 = ns.Limit_Back
-  ns.pub_zmp.publish(ns.out)
-
-  #delta Y:
-  if abs(zmp_y-ns.Limit_R) < abs(zmp_y-ns.Limit_L):
-    ns.deta_y  = zmp_y - ns.Limit_R # delata positive inside the support polygon
-  else:
-    ns.deta_y  = ns.Limit_L - zmp_y # delata positive inside the support polygon
-  ns.out.erry = ns.deta_y
-  
-  #delta X:
-  if abs(zmp_x-ns.Limit_Back) < abs(zmp_x-ns.Limit_Front):
-     ns.deta_x  = zmp_x - ns.Limit_Back # delata positive inside the support polygon
-
-  else:
-     ns.deta_x  = ns.Limit_Front - zmp_x # delata positive inside the support polygon
+        
+        self.last_start = 0
+        self.force_treshold = 1000
+        self.time_treshold = 0.3
 
 
-  ns.out.errx = ns.deta_x
-  zmp.write('%s %s %s %s %s %s %s\n'  %(str(rospy.get_time()),zmp_x,zmp_y,ns.deta_x,ns.deta_y,nr.contact,nl.contact))
+        self.roll = 0
+        self.pitch = 0
+        self.yaw = 0
 
-def imu_check():
-    rospy.init_node('zmp_check')
-    rospy.loginfo( "zmp_check node is ready" )
-    ns.pub_zmp = rospy.Publisher('zmpreal_out', zmp_real )
-    rospy.sleep(0.5)
-    contact_sub = rospy.Subscriber('/atlas/force_torque_sensors', ForceTorqueSensors, get_foot_contact)
-    contact_sub2 = rospy.Subscriber('/atlas/force_torque_sensors', ForceTorqueSensors, get_arm_contact)
-    fall_sub = rospy.Subscriber('/C35/falling', Bool, fall)
-    
-    # contact sensor filter:
-    a = [1,-3.180638548874721,3.861194348994217,-2.112155355110971,0.438265142261981]
-    b = [0.0004165992044065786,0.001666396817626,0.002499595226439,0.001666396817626,0.0004165992044065786]
-    ns.filter = contact_filter(b = b, a = a, use_internal_subscriber = False)
-    ns.out = zmp_real()
- 
+        self.F_av = 0
+        self.Sigma = 0
+
+        self.stand_up_flag = 0
+        self.turned = 0
+        self.slop = 0
+        self.count_stand = 0
+
+        self.out = imu_contact()
+
+        self.contact_sub = rospy.Subscriber('/atlas/force_torque_sensors', ForceTorqueSensors, self.get_contact)
+        self.imu_check = rospy.Subscriber('/atlas/imu',Imu, self.imu_manipulate)
+        a = [1,-3.180638548874721,3.861194348994217,-2.112155355110971,0.438265142261981]
+        b = [0.0004165992044065786,0.001666396817626,0.002499595226439,0.001666396817626,0.0004165992044065786]
+        self.filter = control_primitives.filter(b = b, a = a)
+        self.filter2 = contact_filter(b = b, a = a, use_internal_subscriber = False)
+
+    def reset_angle_acc(self):
+        self.pitch_acc = 0
+        self.roll_acc = 0
+        self.yaw_acc = 0
+        self.count = 0
+
+    def compute_angle_avg(self,pitch_acc,roll_acc,yaw_acc,count):
+        self.pitch_avg = pitch_acc/count
+        self.roll_avg = roll_acc/count
+        self.yaw_avg = yaw_acc/count
+
+    def imu_manipulate(self,msg):
+        self.roll,self.pitch,self.yaw = euler_from_quaternion([msg.orientation.x,msg.orientation.y,msg.orientation.z,msg.orientation.w])
+        self.out.roll = self.roll
+        self.out.pitch = self.pitch
+        self.out.yaw = self.yaw
+
+       
+    def get_contact(self,msg):
+
+       self.filter2.update(msg)
+       buf = self.filter2.get_buffer()
+       self.leg_force_z_r = buf[0].r_foot.force.z
+       self.leg_force_z_l = buf[0].l_foot.force.z
+       self.leg_force_y_r = buf[0].r_foot.force.y
+       self.leg_force_y_l = buf[0].l_foot.force.y
+       self.leg_force_x_r = buf[0].r_foot.force.x
+       self.leg_force_x_l = buf[0].l_foot.force.x
+
+
+       self.arm_force_z_r = buf[0].r_hand.force.z
+       self.arm_force_z_l = buf[0].l_hand.force.z      
+       self.arm_force_x_r = buf[0].r_hand.force.x
+       self.arm_force_x_l = buf[0].l_hand.force.x
+       self.arm_force_y_r = buf[0].r_hand.force.y
+       self.arm_force_y_l = buf[0].l_hand.force.y
+
+       self.arm_force_r = (self.arm_force_z_r**2 + self.arm_force_y_r**2 + self.arm_force_x_r**2)**0.5
+       self.arm_force_l = (self.arm_force_z_l**2 + self.arm_force_y_l**2 + self.arm_force_x_l**2)**0.5
+       self.leg_force_r = (self.leg_force_z_r**2 + self.leg_force_y_r**2 + self.leg_force_x_r**2)**0.5
+       self.leg_force_l = (self.leg_force_z_l**2 + self.leg_force_y_l**2 + self.leg_force_x_l**2)**0.5
+
+       self.F_av = (self.arm_force_r+self.arm_force_l+self.leg_force_r+self.leg_force_l)/4
+       self.Sigma = ( ((self.arm_force_r-self.F_av)**2 + (self.arm_force_l-self.F_av)**2 + (self.leg_force_r-self.F_av)**2 + (self.leg_force_l-self.F_av)**2)/3 )**0.5
+
+
+       if ((self.arm_force_r > self.force_treshold) or (self.arm_force_l > self.force_treshold)) and ( (rospy.get_time()-self.last_start) > self.time_treshold ):
+        self.last_start = rospy.get_time()
+        print 'last_start:',self.last_start
+
+        #compute_angle_avg(self.pitch_acc,self.roll_acc,self.yaw_acc)
+        self.pitch_avg = self.pitch_acc/self.count
+        self.roll_avg = self.roll_acc/self.count
+        self.yaw_avg = self.yaw_acc/self.count
+        print 'pitch_avg:',self.pitch_avg
+
+
+        #Check if robot stoped turning and goes with back forward and rise flag turn==1  
+        if abs(self.pitch_avg) >= 0.7 :
+           self.turned = 1
+           print 'Turn finished'
+
+        #Check if robot goes with back forward and on slop and rise flag slop==1  
+        if (self.turned == 1) and (abs(self.pitch_avg) < 0.65) :
+           self.slop = 1
+           #self.turned = 0
+           print 'Slop'
+           self.count_stand =0
+
+        #Check if robot on slop and ground slop starts to be flat self.count_stand += 1
+        if (self.slop == 1 ) and (abs(self.pitch_avg) > 0.61) :
+            print 'count_stand:',self.count_stand
+            self.count_stand += 1
+        #Check if groung is flat i.e. self. count_stand >= 2 ===> Stand up
+        if self.count_stand >=2 and (abs(self.pitch_avg)) > 0.61:
+               self.stand_up_flag = 1
+               print 'Ground is flat :',self.count_stand
+               self.slop = 0
+               print 'You can stand up!!!'
+         #reset_angle_acc()
+        self.pitch_acc = 0
+        self.roll_acc = 0
+        self.yaw_acc = 0
+        self.count = 0
+
+       self.pitch_acc += self.pitch
+       self.roll_acc += self.roll
+       self.yaw_acc += self.yaw
+       self.count += 1 
+
+
+       # self.leg_contact_r,self.leg_contact_l = self.contact.update(self.leg_force_z_r,self.leg_force_z_l)
+       # self.arm_contact_r,self.arm_contact_l = self.contact.update(self.arm_force_z_r,self.arm_force_z_l)
+       self.out.leg_r = self.leg_force_r#self.leg_force_z_r#self.leg_contact_r
+       self.out.leg_l = self.leg_force_l#self.leg_force_z_l#self.leg_contact_l
+       self.out.arm_r = self.arm_force_r#self.arm_force_z_r#self.arm_contact_r
+       self.out.arm_l = self.arm_force_l#self.arm_force_z_l#self.arm_contact_l
+       self.out.force_avg = self.F_av
+       self.out.sigma = self.Sigma
+
+       ns.pub_imu_contact.publish(self.out)
+       imu_data.write('%s %s %s %s %s %s %s %s %s %s %s %s %s %s %s\n'  %(str(rospy.get_time()),self.last_start,self.roll,self.pitch,self.yaw,self.arm_force_r,self.arm_force_l,self.leg_force_r,self.leg_force_l,self.F_av,self.Sigma,self.pitch_avg,self.roll_avg,self.yaw_avg,self.last_start))
+
+    # rospy.loginfo("Torque_RMS : torque_fitness = %f" % (torque_fitness) )
 
 if __name__ == '__main__':
-  #write to file
-    zmp =  open('zmp.txt','w')
 
-    zmp_check()
+    rospy.init_node('IMU_monitoring')
+    rospy.loginfo( "IMU monitoring node is ready" )
+    ns.pub_imu_contact = rospy.Publisher('imureal_out', imu_contact )
+    imu_data =  open('imu_data.txt','w')
+    walk = IMUCh()
+
     rospy.spin()

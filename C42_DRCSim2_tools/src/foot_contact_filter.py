@@ -23,6 +23,14 @@ class contact_filter(control_primitives.filter):
         y_filt.l_foot.force.y = copy.copy(self.b[0]*self.u_buffer[0].l_foot.force.y)#ForceTorqueSensors()
         y_filt.r_foot.force.y = copy.copy(self.b[0]*self.u_buffer[0].r_foot.force.y)#ForceTorqueSensors()
 
+        y_filt.l_hand.force.z = copy.copy(self.b[0]*self.u_buffer[0].l_hand.force.z)#ForceTorqueSensors()
+        y_filt.r_hand.force.z = copy.copy(self.b[0]*self.u_buffer[0].r_hand.force.z)#ForceTorqueSensors()
+        y_filt.l_hand.force.x = copy.copy(self.b[0]*self.u_buffer[0].l_hand.force.x)#ForceTorqueSensors()
+        y_filt.r_hand.force.x = copy.copy(self.b[0]*self.u_buffer[0].r_hand.force.x)#ForceTorqueSensors()
+        y_filt.l_hand.force.y = copy.copy(self.b[0]*self.u_buffer[0].l_hand.force.y)#ForceTorqueSensors()
+        y_filt.r_hand.force.y = copy.copy(self.b[0]*self.u_buffer[0].r_hand.force.y)#ForceTorqueSensors()
+
+
         y_filt.l_foot.torque.z = copy.copy(self.b[0]*self.u_buffer[0].l_foot.torque.z)#ForceTorqueSensors()
         y_filt.r_foot.torque.z = copy.copy(self.b[0]*self.u_buffer[0].r_foot.torque.z)#ForceTorqueSensors()
         y_filt.l_foot.torque.x = copy.copy(self.b[0]*self.u_buffer[0].l_foot.torque.x)#ForceTorqueSensors()
@@ -36,6 +44,14 @@ class contact_filter(control_primitives.filter):
             y_filt.r_foot.force.x += self.y_buffer[t-1].r_foot.force.x*(-self.a[t]) + self.u_buffer[t].r_foot.force.x*self.b[t]
             y_filt.l_foot.force.y += self.y_buffer[t-1].l_foot.force.y*(-self.a[t]) + self.u_buffer[t].l_foot.force.y*self.b[t]
             y_filt.r_foot.force.y += self.y_buffer[t-1].r_foot.force.y*(-self.a[t]) + self.u_buffer[t].r_foot.force.y*self.b[t]
+
+            y_filt.l_hand.force.z += self.y_buffer[t-1].l_hand.force.z*(-self.a[t]) + self.u_buffer[t].l_hand.force.z*self.b[t]
+            y_filt.r_hand.force.z += self.y_buffer[t-1].r_hand.force.z*(-self.a[t]) + self.u_buffer[t].r_hand.force.z*self.b[t]
+            y_filt.l_hand.force.x += self.y_buffer[t-1].l_hand.force.x*(-self.a[t]) + self.u_buffer[t].l_hand.force.x*self.b[t]
+            y_filt.r_hand.force.x += self.y_buffer[t-1].r_hand.force.x*(-self.a[t]) + self.u_buffer[t].r_hand.force.x*self.b[t]
+            y_filt.l_hand.force.y += self.y_buffer[t-1].l_hand.force.y*(-self.a[t]) + self.u_buffer[t].l_hand.force.y*self.b[t]
+            y_filt.r_hand.force.y += self.y_buffer[t-1].r_hand.force.y*(-self.a[t]) + self.u_buffer[t].r_hand.force.y*self.b[t]
+
 
             y_filt.l_foot.torque.z += self.y_buffer[t-1].l_foot.torque.z*(-self.a[t]) + self.u_buffer[t].l_foot.torque.z*self.b[t]
             y_filt.r_foot.torque.z += self.y_buffer[t-1].r_foot.torque.z*(-self.a[t]) + self.u_buffer[t].r_foot.torque.z*self.b[t]
