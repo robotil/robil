@@ -620,7 +620,13 @@ class DW_Controller(object):
             # Check tipping
             self.CheckTipping()
             # Get current orientation
-            y0,p,r = self.current_ypr()
+            y,p,r = self.current_ypr()
+            if abs(self.DeltaAngle(y,y0))<0.1:
+                # Robot isn't turning, Give up
+                return
+
+            y0 = y
+            # Angle=self.DeltaAngle(Bearing,y0)
             Angle=self.DeltaAngle(Bearing,y0)
 
         # Return to original configuration
