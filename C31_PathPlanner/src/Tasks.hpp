@@ -16,6 +16,7 @@
 #include <C31_PathPlanner/C31_Exception.h>
 
 #include <C42_WalkType/mud.h>
+#include <C42_WalkType/debrees.h>
 
 using namespace std;
 using namespace C0_RobilTask;
@@ -113,11 +114,22 @@ public:
     }
     void check_for_mud_terrain(ros::Publisher& walk_notification){
     	//if(walk_notification.getNumSubscribers()>0){
-			ROS_INFO("PUBLISH MUD NOTIFICATION");
+			ROS_INFO("Check mud terrain");
 			bool is_mud_detected = check_for_mud_terrain();
 			C42_WalkType::mud mud;
 		if(walk_notification.getNumSubscribers()>0 && is_mud_detected){
+			ROS_INFO("PUBLISH MUD NOTIFICATION");
 			walk_notification.publish(mud);
+		}
+    }
+    void check_for_debrees_terrain(ros::Publisher& walk_notification){
+    	//if(walk_notification.getNumSubscribers()>0){
+    		ROS_INFO("Check mud terrain");
+			bool is_detected = check_for_debrees_terrain();
+			C42_WalkType::debrees debrees;
+		if(walk_notification.getNumSubscribers()>0 && is_detected){
+			ROS_INFO("PUBLISH DEBREES NOTIFICATION");
+			walk_notification.publish(debrees);
 		}
     }
 
@@ -149,6 +161,9 @@ public:
     	ROS_INFO("advertise topic /walk_notification/mud <C42_WalkType::mud>");
     	ros::Publisher C42_walk_notification_mud =
     			_node.advertise<C42_WalkType::mud>("/walk_notification/mud", 10);
+    	ROS_INFO("advertise topic /walk_notification/debrees <C42_WalkType::debrees>");
+    	ros::Publisher C42_walk_notification_debrees =
+    			_node.advertise<C42_WalkType::mud>("/walk_notification/debrees", 10);
 
 
 		//TASK INPUT CHANNELS
@@ -214,6 +229,7 @@ public:
 					if( _planner.plan() ){
 						publish_new_plan(c31_PathPublisher);
 						check_for_mud_terrain(C42_walk_notification_mud);
+						check_for_debrees_terrain(C42_walk_notification_mud);
 					}else{
 						throw_exception(C31_PathPlanner::C31_Exception::TYPE_NOSOLUTIONFORPLAN, "No solution for plan found.");
 					}
@@ -267,6 +283,22 @@ public:
     		const Vec2d& wp = session.results.path[i];
     		if( session.arguments.map.terrain((size_t)wp.x, (size_t)wp.y) == ObsMap::ST_MUD )
     			return true;
+    	}
+    	return false;
+    }
+    bool check_for_debrees_terrain(){
+    	struct DebreesDetectorParams{ int wp_number; int wp_radius; }dd;
+    	SET_DD_PARAMETERS(dd);
+
+    	PathPlanning::ReadSession session = _planner.startReading();
+    	for(size_t i=0;i<session.results.path.size() && i<dd.wp_number;i++){
+    		const Vec2d& wp = session.results.path[i];
+    		size_t wpx(round(wp.x)), wpy(round(wp.y));
+    		for(int y=wpy-dd.wp_radius; y<wpy+dd.wp_radius; y++)for(int x=wpx-dd.wp_radius; x<wpx+dd.wp_radius; x++){
+    			if(session.arguments.map.terrain.inRange(x,y))
+    				if( session.arguments.map.terrain((size_t)wp.x, (size_t)wp.y) == ObsMap::ST_DEBREES )
+    					return true;
+    		}
     	}
     	return false;
     }
