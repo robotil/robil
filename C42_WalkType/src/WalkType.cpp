@@ -7,11 +7,13 @@
 
 #include <C42_WalkType/mud.h>
 #include <C42_WalkType/extreme_slope.h>
+#include <C42_WalkType/debrees.h>
 
 
 
 ros::Time last_mud_notification;
 ros::Time last_extreme_slope_notification;
+ros::Time last_debrees_notification;
 
 bool isMud(){
 	ros::Time now = ros::Time::now();
@@ -23,9 +25,14 @@ bool isExtremeslope(){
 	ros::Duration maxDuration(3.0);
 	return (now - last_extreme_slope_notification) > maxDuration;
 }
+bool isDebrees(){
+	ros::Time now = ros::Time::now();
+	ros::Duration maxDuration(3.0);
+	return (now - last_debrees_notification) > maxDuration;
+}
 
 enum WALKTYPE{
-	DYNAMIC, QUAZYSTATIC, CRAWL
+	DYNAMIC, DISCRETE, CRAWL
 } walk_type = DYNAMIC;
 
 void update_walk_type(){
@@ -33,7 +40,7 @@ void update_walk_type(){
 		if(isMud()){
 			walk_type = CRAWL;
 		}else{
-			walk_type = QUAZYSTATIC;
+			walk_type = DISCRETE;
 		}
 	}else{
 		if(isMud()){
@@ -51,6 +58,10 @@ void cb_mud_notifier(const C42_WalkType::mud::ConstPtr msg){
 void cb_extreme_slope_notifier(const C42_WalkType::extreme_slope::ConstPtr msg){
 	last_extreme_slope_notification = ros::Time::now();
 }
+void cb_debrees_notifier(const C42_WalkType::debrees::ConstPtr msg){
+	last_debrees_notification = ros::Time::now();
+}
+
 using namespace std;
 using namespace C0_RobilTask;
 
@@ -72,9 +83,9 @@ public:
       return TaskResult::FAULT();
    }
 };
-class task_WalkQS:public RobilTask{
+class task_WalkDiscrete:public RobilTask{
 public:
-	task_WalkQS(string name="/whileQSWalk"):
+	task_WalkDiscrete(string name="/whileDiscreteWalk"):
       RobilTask(name)
    {   }
    TaskResult task(const string& name, const string& uid, Arguments& args){
@@ -82,7 +93,7 @@ public:
             if (isPreempt()){
             	return TaskResult::Preempted();
             }
-            if (walk_type != QUAZYSTATIC){
+            if (walk_type != DISCRETE){
             	return TaskResult::FAULT();
             }
             sleep(1000);
@@ -92,7 +103,7 @@ public:
 };
 class task_WalkCrawl:public RobilTask{
 public:
-	task_WalkCrawl(string name="/whileCrawlWalk"):
+	task_WalkCrawl(string name="/whileQuadWalk"):
       RobilTask(name)
    {   }
    TaskResult task(const string& name, const string& uid, Arguments& args){
@@ -116,10 +127,11 @@ int main(int argc, char** argv){
 
 	ros::Subscriber mud_notifier = node.subscribe("/walk_notification/mud", 10, cb_mud_notifier);
 	ros::Subscriber extrim_slope_notifier = node.subscribe("/walk_notification/extreme_slope", 10, cb_extreme_slope_notifier);
+	ros::Subscriber debrees_notifier = node.subscribe("/walk_notification/debrees", 10, cb_debrees_notifier);
 
 	task_WalkCrawl t_crawl;
 	task_WalkDynamic t_dynamic;
-	task_WalkQS t_qs;
+	task_WalkDiscrete t_discrete;
 
 	ros::Rate rate(2);
 	while(ros::ok()){

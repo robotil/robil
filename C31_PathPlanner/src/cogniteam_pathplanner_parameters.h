@@ -8,7 +8,7 @@
 #ifndef PATHPLANNERPARAMETERS_H_
 #define PATHPLANNERPARAMETERS_H_
 
-#define PLANNER_VERSION "2013_06_05_16_11"
+#define PLANNER_VERSION "2013_06_06_12_30"
 
 #define PARAMS_FROM_ROS 1
 #define PARAMS_FROM_CODE 2
@@ -70,6 +70,9 @@
 
 #define SET_MD_PARAMETERS(mud_detector)\
 	ros::param::param<int>("/C31_GlobalPathPlanner/mud_detector/wp_number", (mud_detector).wp_number, 5);
+#define SET_DD_PARAMETERS(debrees_detector)\
+	ros::param::param<int>("/C31_GlobalPathPlanner/debrees_detector/wp_number", (debrees_detector).wp_number, 5);\
+	ros::param::param<int>("/C31_GlobalPathPlanner/debrees_detector/wp_radius", (debrees_detector).wp_number, 3);
 
 #endif
 
