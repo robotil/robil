@@ -174,114 +174,6 @@
 	// A struct for storing alignment results
 	struct Result
 	{
-	public:
-	    // A bit of shorthand
-	    typedef pcl::PointCloud<pcl::PointXYZ> PointCloud;
-	    typedef pcl::PointCloud<pcl::Normal> SurfaceNormals;
-	    typedef pcl::PointCloud<pcl::FPFHSignature33> LocalFeatures;
-	    typedef pcl::search::KdTree<pcl::PointXYZ> SearchMethod;
-	    
-	    FeatureCloud () :
-	    search_method_xyz_ (new SearchMethod),
-	    normal_radius_ (0.02f),
-	    feature_radius_ (0.02f)
-	    {}
-	    
-	    ~FeatureCloud () {}
-	    
-	    // Process the given cloud
-	    void
-	    setInputCloud (PointCloud::Ptr xyz)
-	    {
-		xyz_ = xyz;
-		processInput ();
-	    }
-	    
-	    // Load and process the cloud in the given PCD file
-	    void
-	    loadInputCloud (const std::string &pcd_file)
-	    {
-		xyz_ = PointCloud::Ptr (new PointCloud);
-		pcl::io::loadPCDFile (pcd_file, *xyz_);
-		processInput ();
-	    }
-	    
-	    // Get a pointer to the cloud 3D points
-	    PointCloud::Ptr
-	    getPointCloud () const
-	    {
-		return (xyz_);
-	    }
-	    
-	    // Get a pointer to the cloud of 3D surface normals
-	    SurfaceNormals::Ptr
-	    getSurfaceNormals () const
-	    {
-		return (normals_);
-	    }
-	    
-	    // Get a pointer to the cloud of feature descriptors
-	    LocalFeatures::Ptr
-	    getLocalFeatures () const
-	    {
-		return (features_);
-	    }
-	    
-	protected:
-	    // Compute the surface normals and local features
-	    void
-	    processInput ()
-	    {
-		computeSurfaceNormals ();
-		computeLocalFeatures ();
-	    }
-	    
-	    // Compute the surface normals
-	    void
-	    computeSurfaceNormals ()
-	    {
-		normals_ = SurfaceNormals::Ptr (new SurfaceNormals);
-		
-		pcl::NormalEstimation<pcl::PointXYZ, pcl::Normal> norm_est;
-		norm_est.setInputCloud (xyz_);
-		norm_est.setSearchMethod (search_method_xyz_);
-		norm_est.setRadiusSearch (normal_radius_);
-		norm_est.compute (*normals_);
-	    }
-	    
-	    // Compute the local feature descriptors
-	    void
-	    computeLocalFeatures ()
-	    {
-		features_ = LocalFeatures::Ptr (new LocalFeatures);
-		
-		pcl::FPFHEstimation<pcl::PointXYZ, pcl::Normal, pcl::FPFHSignature33> fpfh_est;
-		fpfh_est.setInputCloud (xyz_);
-		fpfh_est.setInputNormals (normals_);
-		fpfh_est.setSearchMethod (search_method_xyz_);
-		fpfh_est.setRadiusSearch (feature_radius_);
-		fpfh_est.compute (*features_);
-	    }
-	    
-	private:
-	    // Point cloud data
-	    PointCloud::Ptr xyz_;
-	    SurfaceNormals::Ptr normals_;
-	    LocalFeatures::Ptr features_;
-	    SearchMethod::Ptr search_method_xyz_;
-	    
-	    // Parameters
-	    float normal_radius_;
-	    float feature_radius_;
-	};
-
-	class TemplateAlignment
-	{
-	public:
-	    
-	    // A struct for storing alignment results
-	    struct Result
-	    {
 		float fitness_score;
 		Eigen::Matrix4f final_transformation;
 		EIGEN_MAKE_ALIGNED_OPERATOR_NEW
@@ -380,24 +272,6 @@
 	};
 
 
-
-	bool C23_Detector::pictureCoordinatesToGlobalPosition(double x1, double y1, double x2, double y2, double* x, double* y, double*z) {
-	    C21_VisionAndLidar::C21_obj c21srv;
-	    c21srv.request.sample.x1 = x1;
-	    c21srv.request.sample.y1 = y1;
-	    c21srv.request.sample.x2 = x2;
-	    c21srv.request.sample.y2 = y2;
-	    
-	    if(c21client.call(c21srv))
-	    {
-		if(x != NULL) *x = round(c21srv.response.point.x);
-		if(y != NULL) *y = round(c21srv.response.point.y);
-		if(z != NULL) *z = round(c21srv.response.point.z);
-		cout << "Received data: " << c21srv.response.point.x << "," << c21srv.response.point.y << "," << c21srv.response.point.z << endl;
-		return true;
-	    }
-	    return false;
-	}
 
     pcl::PointCloud<pcl::PointXYZ>::Ptr C23_Detector::filterPointCloud(int x,int y, int width, int height, const pcl::PointCloud<pcl::PointXYZ> &cloud) {
 	int i,j;
@@ -1085,8 +959,8 @@
 		  
 		//pictureCoordinatesToGlobalPosition(matchLoc->x,matchLoc->y,matchLoc->x + templ.cols,matchLoc->y + templ.rows,&x,&y,NULL);
 		
-		//imshow( "Source Image", img_display );
-		//waitKey(0);
+		imshow( "Source Image", img_display );
+		waitKey(0);
 		//imshow( "Result Window", result );
 		
 		return res;
@@ -1154,10 +1028,10 @@
 		
 		
 		
-		/*imshow("New Arrow Image", leftArrowTemplate);
+		imshow("New Arrow Image", leftArrowTemplate);
 		waitKey();
 		imshow("New Arrow Image", rightArrowTemplate);
-		waitKey();*/
+		waitKey();
 		
 		
 	    
@@ -2003,10 +1877,10 @@
 		* _generalDetector._height = 114;
 		*/
 		
-		/*Rect carRect(_generalDetector._x, _generalDetector._y, _generalDetector._width, _generalDetector._height);
-		* Mat carImage(srcImg, carRect);
-		* imshow("Car patch", carImage);
-		* waitKey(0);*/
+		Rect carRect(_generalDetector._x, _generalDetector._y, _generalDetector._width, _generalDetector._height);
+		Mat carImage(srcImg, carRect);
+		imshow("Car patch", carImage);
+		waitKey(0);
 		
 		Point2f minImagePoint;
 		minImagePoint.x = -1;
@@ -2028,14 +1902,14 @@
 		    
 		    //Get the closest point from the robot to the car
 		    cout << x << "," << y << "," << width << "," << height << endl;
-		    for(int i = x; i < x + width; i++) {
-			for(int j = y; j < y + height; j++) {
+		    for(int i = y; i < y + height; i++) {
+			for(int j = x; j < x + width; j++) {
 			    //     cout << "(" << i << "," << j << "," << pclcloud.at(i,j).z << ")" << endl;
-			    if(sqrt(pclcloud.at(i,j).x*pclcloud.at(i,j).x+pclcloud.at(i,j).y*pclcloud.at(i,j).y+pclcloud.at(i,j).z*pclcloud.at(i,j).z*10000) < min) {
-				min = sqrt(pclcloud.at(i,j).x*pclcloud.at(i,j).x+pclcloud.at(i,j).y*pclcloud.at(i,j).y+pclcloud.at(i,j).z*pclcloud.at(i,j).z*10000);
-				minPoint = pcl::PointXYZ(pclcloud.at(i,j).x,pclcloud.at(i,j).y,pclcloud.at(i,j).z);//Check
-				minImagePoint.x = i;
-				minImagePoint.y = j;
+			    if(sqrt(pclcloud.at(i,j).x*pclcloud.at(i,j).x+pclcloud.at(i,j).y*pclcloud.at(i,j).y+pclcloud.at(i,j).z*pclcloud.at(i,j).z)*10000 < min) {
+				min = sqrt(pclcloud.at(i,j).x*pclcloud.at(i,j).x+pclcloud.at(i,j).y*pclcloud.at(i,j).y+pclcloud.at(i,j).z*pclcloud.at(i,j).z)*10000;
+				minPoint = pclcloud.at(i,j);//Check
+				minImagePoint.x = j;// Col: http://docs.opencv.org/doc/user_guide/ug_mat.html --> Scalar intensity = img.at<uchar>(Point(x, y));
+				minImagePoint.y = i;// Row
 			    }
 			}
 		    }
@@ -2049,39 +1923,44 @@
 		    double THRESHOLD = 2;
 		    int nanColumnCounter = 0;
 		    bool nanColumnFlag = true;
-		    cout<<"Max depth: "<<minPoint.x<<endl;
+		    cout<<"Max depth: "<<minPoint.z<<endl;
+		    cout<<"Min Image point x,y: "<<minImagePoint.x<<", "<<minImagePoint.y<<endl;
+		    circle( srcImg, Point2f(minImagePoint.x,minImagePoint.y),10, 300, -1, 8, 0 );
+		    imshow("Min pt", srcImg);
+		    waitKey();
+		    
 		    for(int i = 1; i < 500 && i + minImagePoint.x < srcImg.cols; i +=10) {
-			flag = 0;
-			// cout << "Checking column in right direction: " << i << endl;
-			nanColumnFlag = true;
-			for(int j= 150; j >= -150 && (minImagePoint.y -j >0 && minImagePoint.y -j <srcImg.rows); j--) {
-			    depth = pclcloud.at(minImagePoint.x+i,minImagePoint.y-j).x;
-			    
-			    //cout<<"Depth: "<<depth<<endl;
-			    
-			    
-			    if (depth!=depth)//If all values are nan then it will stop
-	    {
-		//ROS_INFO("Nan values obtained. Cannot determine the distance to the car");
-		continue;
-	    }
+		    flag = 0;
+		    // cout << "Checking column in right direction: " << i << endl;
+		    nanColumnFlag = true;
+		    for(int j= 150; j >= -150 && (minImagePoint.y -j >0 && minImagePoint.y -j <srcImg.rows); j--) {
+		      depth = pclcloud.at(minImagePoint.y-j,minImagePoint.x+i).z;
+		      
+		      //cout<<"Depth: "<<depth<<endl;
+		      
+		      
+		      if (depth!=depth)//If all values are nan then it will stop
+		      {
+		      //ROS_INFO("Nan values obtained. Cannot determine the distance to the car");
+		      continue;
+		      }
 
-	    nanColumnFlag = false;
+		      nanColumnFlag = false;
 
-	    if(depth < minPoint.x+THRESHOLD && depth > minPoint.x-THRESHOLD) {
-		
-		x1 = minImagePoint.x+i;
-		//cout<<"X1: "<<x1<<endl;
-		flag = 1;
-	    }
-			}
-			if(nanColumnFlag) nanColumnCounter++;
-			
-			
-			if(!flag && nanColumnCounter>50) {
-			    break;
-			}
-			
+		      if(depth < minPoint.z+THRESHOLD && depth > minPoint.z-THRESHOLD/2) {
+		      cout<<"Depth: "<<depth<<endl;
+		      x1 = minImagePoint.x+i;
+		      //cout<<"X1: "<<x1<<endl;
+		      flag = 1;
+		      }
+		    }
+		    if(nanColumnFlag) nanColumnCounter++;
+
+
+		    if(!flag && nanColumnCounter>50) {
+		      break;
+		    }
+
 		    }
 		    cout<<"X1: "<<x1<<", Xmin: "<<minImagePoint.x<<endl;
 		    //Draw the right boundary column of the car
@@ -2095,7 +1974,7 @@
 			//cout << "Checking column in left direction: " << i << endl;
 			nanColumnFlag = true;
 			for(int j= 150; j >= -150 && (minImagePoint.y -j >0 && minImagePoint.y -j <srcImg.rows); j--) {
-			    depth = pclcloud.at(minImagePoint.x-i,minImagePoint.y-j).x;
+			    depth = pclcloud.at(minImagePoint.y-j, minImagePoint.x-i).z;
 			    
 			    if (depth!=depth)
 			    {
@@ -2106,7 +1985,8 @@
 			    nanColumnFlag = false;
 			    
 			    
-			    if(depth < minPoint.x+THRESHOLD && depth > minPoint.x-THRESHOLD) {
+			    if(depth < minPoint.z+THRESHOLD && depth > minPoint.z-THRESHOLD/2) {
+			      cout<<"Depth: "<<depth<<endl;
 				x0 = minImagePoint.x-i;
 				flag = 1;
 			    }
@@ -2168,8 +2048,8 @@
 			
 			cout << "X1: " << x0 << " X2: " << x1 <<" Y1: "<<yTop<<" Y2:"<< y1<< endl;
 			
-			
-			pictureCoordinatesToGlobalPosition(x0, yTop, x1, y1, &x, &y, NULL);
+			double z1;
+			averagePointCloud(x0, yTop, x1, y1, cloud, &x, &y, &z1);
 			
 			//imshow("Testing",srcImg);
 			//waitKey(0);
@@ -2304,67 +2184,7 @@
 		}
 		
 		return true;
-	    }
-
-
-
-
-	    bool C23_Detector::detectPath(Mat srcImg) {
-		// IplImage* img = new IplImage(srcImg);
-		Mat imgHSV, imgThreshed;
-		cvtColor(srcImg,imgHSV,CV_BGR2HSV);
-		inRange(imgHSV,Scalar(20,30,30),Scalar(40,255,255),imgThreshed);
-		//  namedWindow("TESTING");
-		// imshow("TESTING",imgThreshed);
-		//waitKey(0);
-		// imwrite("test12.jpg",imgThreshed);
-		Mat bw;
-		vector<vector<cv::Point> > contours;
-		threshold(imgThreshed,bw,10,255,CV_THRESH_BINARY);
-		findContours(bw,contours,CV_RETR_LIST,CV_CHAIN_APPROX_SIMPLE);
-		drawContours(srcImg,contours,-1,CV_RGB(255,0,0),2);
-		imshow("TESSTING",srcImg);
-		//waitKey(0);
-		Mat dst,cdst;
-		Canny(bw, dst, 50, 200, 3);
-		cvtColor(dst, cdst, CV_GRAY2BGR);
-		
-		
-		//Probabilistic Hough Line Transform
-		vector<Vec4i> lines;
-		HoughLinesP(dst, lines, 5, CV_PI/180, 50, 100, 10 );
-		int max = 0;
-		Vec4i maxVec;
-		if(lines.size() == 0) {
-		    return false;
-		}
-		for( size_t i = 0; i < lines.size(); i++ )
-		{
-		    Vec4i l = lines[i];
-		    cout << l[0] << "," << l[1] << "---" << l[2]  << "," << l[3] << endl;
-		    if(l[1] > max || l[3] > max) {
-			max = l[1] > l[3] ? l[1] : l[3];
-			maxVec = l;
-		    }
-		    // line( cdst, cv::Point(l[0], l[1]), cv::Point(l[2], l[3]), Scalar(0,0,255), 3, CV_AA);
-		}
-		line( cdst, cv::Point(maxVec[0], maxVec[1]), cv::Point(maxVec[2], maxVec[3]), Scalar(0,0,255), 3, CV_AA);
-		imshow("TESTING",cdst);
-		waitKey(0);
-		if(maxVec[1] < maxVec[3]) {
-		    x = maxVec[0];
-		    y = maxVec[1];
-		} else {
-		    x = maxVec[2];
-		    y = maxVec[3];
-		}
-		return true;
-		
-		
-	    }
-	    
-	    
-	    
+	    }   
 	
     bool C23_Detector::detectPath(Mat srcImg) {
 	// IplImage* img = new IplImage(srcImg);
