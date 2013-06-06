@@ -26,7 +26,7 @@ def Get_target_pose(req):
         FP_res.z = 0.0
         FP_res.R = 0.0
         FP_res.P = 0.0
-        FP_res.Y = -math.pi/2
+        FP_res.Y = math.pi/2
     else:
         FP_res.x = 0.3
         FP_res.y = 0.0

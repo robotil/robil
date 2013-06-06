@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 import roslib; roslib.load_manifest('C42_DynamicLocomotion')
 import roslib; roslib.load_manifest('C42_Leg_IK')
 from atlas_msgs.msg import AtlasSimInterfaceCommand, AtlasSimInterfaceState, AtlasState, AtlasCommand
