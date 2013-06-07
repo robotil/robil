@@ -8,7 +8,9 @@ import geometry_msgs.msg
 from nav_msgs.msg import Odometry
 from std_msgs.msg import  Float64
 from geometry_msgs.msg import Pose
-
+from directionClient import Switch_client
+from HBClient import HB_client
+car='drc_vehicle'#'golf_cart'#
 
 class InitDrive(object):
     _feedback = C51_CarOperation.msg.DriveFeedback()
@@ -29,16 +31,16 @@ class InitDrive(object):
             
         if success:
             #DRC Vehicles controllers online - should be replaced with C67 module
-            hb=handB()         #handbrake online
+            Switch_client(1)
+            HB_client(1)         #handbrake online
             gasP=Gas() #gas pedal online
             brakeP=Brake() #gas pedal online
             Steer=SW()      #steering wheel online
             # - Press on brake - and release handbrake
-            brakeP.brake(0)
+            brakeP.brake(1)
+            gasP.gas(0)
 
             self._feedback.complete = 50
-            hb.releaseHB()     #release handbrake
-
             self._feedback.complete = 100
             self._result.success = 0
             self._result.description = "init car"
@@ -50,33 +52,14 @@ class InitDrive(object):
             self._as.set_succeeded(self._result)
         #----------------hand brake released --------------------------#
 
-class handB:
-
-    handbrake=1
-    pub=0
-    sub=0
-    def __init__(self):
-        self.pub = rospy.Publisher('drc_vehicle/hand_brake/cmd', Float64)
-        self.sub = rospy.Subscriber('/drc_vehicle/hand_brake/state', Float64, self.handbrakeCallback)
-    def handbrakeCallback(self, data):
-        self.handbrake=data.data
-
-    def releaseHB(self):
-        while self.handbrake>0.5 :
-            self.pub.publish(0.0)
-
-    def pullHB(self):
-        self.pub.publish(1.0)
-        #while self.handbrake<0.5 :
-
 
 class Gas:
     status=-11
     pub=0
     sub=0
     def __init__(self):
-        self.pub = rospy.Publisher('drc_vehicle/gas_pedal/cmd', Float64)
-        self.sub = rospy.Subscriber('/drc_vehicle/gas_pedal/state', Float64, self.gasCallback)
+        self.pub = rospy.Publisher(car+'/gas_pedal/cmd', Float64)
+        self.sub = rospy.Subscriber('/'+car+'/gas_pedal/state', Float64, self.gasCallback)
     def gasCallback(self, data):
         self.status=data.data
 
@@ -88,8 +71,8 @@ class Brake:
     pub=0
     sub=0
     def __init__(self):
-        self.pub = rospy.Publisher('drc_vehicle/brake_pedal/cmd', Float64)
-        self.sub = rospy.Subscriber('/drc_vehicle/brake_pedal/state', Float64, self.brakeCallback)
+        self.pub = rospy.Publisher(car+'/brake_pedal/cmd', Float64)
+        self.sub = rospy.Subscriber('/'+car+'/brake_pedal/state', Float64, self.brakeCallback)
     def brakeCallback(self, data):
         self.status=data.data
 
@@ -101,8 +84,8 @@ class SW:
     pub=0
     sub=0
     def __init__(self):
-        self.pub = rospy.Publisher('drc_vehicle/hand_wheel/cmd', Float64)
-        self.sub = rospy.Subscriber('/drc_vehicle/hand_wheel/state', Float64, self.SWCallback)
+        self.pub = rospy.Publisher(car+'/hand_wheel/cmd', Float64)
+        self.sub = rospy.Subscriber('/'+car+'/hand_wheel/state', Float64, self.SWCallback)
     def SWCallback(self, data):
         self.status=data.data
 

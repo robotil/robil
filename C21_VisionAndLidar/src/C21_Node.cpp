@@ -32,6 +32,8 @@
 #include <image_transport/subscriber_filter.h>
 #include <pcl_ros/point_cloud.h>
 #include <pcl_ros/transforms.h>
+#include <opencv/cv.h>
+#include <opencv/highgui.h>
 #include "opencv2/stitching/stitcher.hpp"
 #include "std_msgs/Empty.h"
 #include <tf/tf.h>
@@ -41,6 +43,7 @@
 #include "tf/message_filter.h"
 #include <geometry_msgs/Pose.h>
 #include <nav_msgs/Odometry.h>
+
 namespace enc=sensor_msgs::image_encodings;
 
 
@@ -66,7 +69,7 @@ public:
 		//more on filters and how to use them can be found on http://www.ros.org/wiki/message_filters
 		left_image_sub_( it_, left_camera, 1 ),
 		right_image_sub_( it_, right_camera, 1 ),
-		//pointcloud(nh_,"/multisense_sl/camera/points2",1),
+		pointcloud(nh_,"/multisense_sl/camera/points2",1),
 		laser_sub_(nh_, "/multisense_sl/laser/scan", 10),
 		laser_notifier_(laser_sub_,listener_, "pelvis", 10),
 		sync( MySyncPolicy( 10 ), left_image_sub_, right_image_sub_ ,pointcloud)
@@ -77,7 +80,7 @@ public:
 		c22Lidarpub= nh_.advertise<sensor_msgs::PointCloud2>("C21/C22Lidar", 1);
 		c22Cloudsub= nh_.subscribe("/multisense_sl/camera/points2", 1, &C21_Node::cloudCallback, this);
 		laser_notifier_.registerCallback(
-		      boost::bind(&C21_Node:: LidarCallback, this, _1));
+		      boost::bind(&C21_Node::LidarCallback, this, _1));
 		    laser_notifier_.setTolerance(ros::Duration(0.01));
 		//c25Sub=nh_.subscribe("/robot_pose_ekf/odom", 1,&C21_Node::C25Callback, this);
 		ground_truth_sub= nh_.subscribe("ground_truth_odom", 1, &C21_Node::poseCallback, this);
@@ -100,55 +103,54 @@ public:
 
 	  bool obj_proccess(C21_VisionAndLidar::C21_obj::Request  &req,
 			C21_VisionAndLidar::C21_obj::Response &res )
-	  {
-		  //ROS_INFO("recived request, tying to fetch data\n");
-		  _posMutex->lock();
+	  {  static tf::StampedTransform transform;
+	    while(1){ try{
+		    listener2.lookupTransform("/pelvis","/left_camera_optical_frame",
+					     ros::Time(0), transform);
+		  }
+		  catch (tf::TransformException ex){
+		    continue;  cout<<"jajajajaj\n";
+		  } break; }
+
+		  Eigen::Matrix4f sensorTopelvis;
 		  tf::Transform trans2;
 		  trans2.setOrigin(tf::Vector3(c25msg.position.x,c25msg.position.y,c25msg.position.z));
 		  trans2.setRotation(tf::Quaternion(c25msg.orientation.x,c25msg.orientation.y,c25msg.orientation.z,c25msg.orientation.w));
-		  _posMutex->unlock();
+	pcl_ros::transformAsMatrix(transform, sensorTopelvis);
+		
 		  /*tf::Transform trans;
 		  	 	 trans.setOrigin(tf::Vector3(0.0,-0.002, 0.035 ));
 		  	 	 trans.setRotation(tf::Quaternion(-1.57,3.14,1.57));
-		  */Eigen::Matrix4f sensorToHead,pelvisToWorld;
+		  */
+			Eigen::Matrix4f sensorToHead,pelvisToWorld;
 		  //pcl_ros::transformAsMatrix(trans, sensorToHead);
+	          tf::Transform trans3;
+		  //trans3 = trans2.inverse();
 		  pcl_ros::transformAsMatrix(trans2, pelvisToWorld);
-
-
-		  int xMin=std::min(req.sample.x1,req.sample.x2);
-		  int yMin=std::min(req.sample.y1,req.sample.y2);
-		  int xMax=std::max(req.sample.x1,req.sample.x2);
-		  int yMax=std::max(req.sample.y1,req.sample.y2);
-		  _detectionMutex->lock();
-		  double x=0;
-		  double y=0;
-		  double z=0;
-		  double counter=0;
 		  pcl::PointCloud<pcl::PointXYZ> t;
-		   for(int i=xMin;i<=xMax;i++){
-			   for(int j=yMin;j<=yMax;j++){
-				   pcl::PointXYZ p=detectionCloud.at(i,j);
-				   if(p.x!=p.x)
-					   continue;
-				   if(p.x>0.3 && p.y>0.3)
-					   t.points.push_back(p);
-			   }
-		   }
-
-		   _detectionMutex->unlock();
-		   //pcl::transformPointCloud(t, t, sensorToHead);
+		  pcl::PointXYZ p;
+		  p.x=req.sample.x1;
+		  p.y=req.sample.x2;
+		  p.z=req.sample.y1;
+		  t.points.push_back(p);
+		  pcl::transformPointCloud(t, t, sensorTopelvis);
 		   pcl::transformPointCloud(t, t, pelvisToWorld);
-		   for(int i=0;i<t.points.size();i++){
-			   if(t.points.at(i).x!=t.points.at(i).x)
-				   continue;
-			   x+=t.points.at(i).x;
-			   y+=t.points.at(i).y;
-			   z+=t.points.at(i).z;
-			   counter++;
-		   }
-		   res.point.x=((double)x)/counter;
-		   res.point.y=((double)y)/counter;
-		   res.point.z=((double)z)/counter;
+		  //int yMin=std::min(req.sample.y1,req.sample.y2);
+		  //int xMax=std::max(req.sample.x1,req.sample.x2);
+		  //int yMax=std::max(req.sample.y1,req.sample.y2);
+		  //_detectionMutex->lock();
+		  //double x=0;
+		  //double y=0;
+		  //double z=0;
+		  //double counter=0;
+		  //pcl::PointCloud<pcl::PointXYZ> t;
+		  
+		   //pcl::transformPointCloud(t, t, sensorToHead);
+		  
+		   res.point.x=t.points.at(0).x;
+		   res.point.y=t.points.at(0).y;
+		   res.point.z=t.points.at(0).z;
+		  
 		  return true;
 	  }
 
@@ -267,28 +269,6 @@ public:
 
 
 	  void HMIcallback(const sensor_msgs::ImageConstPtr& left_msg,const sensor_msgs::ImageConstPtr& right_msg,const sensor_msgs::PointCloud2::ConstPtr &cloud){
-	  		/*tf::StampedTransform transform;
-	  		try{
-	  		  listener.lookupTransform("/pelvis","/head",
-	  								   ros::Time(0), transform);
-	  		}
-	  		catch (tf::TransformException ex){
-	  		   return;
-	  		}
-	  		C21_VisionAndLidar::C21_C22 msg;
-	  		msg.header=cloud->header;
-	  		msg.image=*left_msg;
-	  		msg.cloud=*cloud;
-	  		tf::Vector3 orig=transform.getOrigin();
-	  		tf::Quaternion rot=transform.getRotation();
-	  		msg.pose.position.x=orig.getX();
-	  		msg.pose.position.y=orig.getY();
-	  		msg.pose.position.z=orig.getZ();
-	  		msg.pose.orientation.x=rot.getX();
-	  		msg.pose.orientation.y=rot.getY();
-	  		msg.pose.orientation.z=rot.getZ();
-	  		msg.pose.orientation.w=rot.getW();
-	  		c22pub.publish(msg);*/
 	  		 cv_bridge::CvImagePtr left;
 	  		 cv_bridge::CvImagePtr right;
 	  		try
@@ -330,11 +310,16 @@ public:
 	   */
 	  void LidarCallback(const sensor_msgs::LaserScan::ConstPtr &scan_in){
 		  tf::StampedTransform transform;
+	  		try{
+	  		  listener.lookupTransform("/pelvis","/left_camera_frame",
+	  								   ros::Time(0), transform);
+	  		}
+	  		catch (tf::TransformException ex){
+	  		   return;
+	  		}
 		  sensor_msgs::PointCloud2 cloud;
 		try{
-		/*listener.lookupTransform("/pelvis","/head_hokuyo_frame",
-								   ros::Time(0), transform);*/
-		  projector_.transformLaserScanToPointCloud("/pelvis",*scan_in,
+		  projector_.transformLaserScanToPointCloud("/left_camera_frame",*scan_in,
 		          cloud,listener_);
 		}
 		catch (tf::TransformException ex){
@@ -343,63 +328,50 @@ public:
 
 		pcl::PointCloud<pcl::PointXYZ> temp;
 		pcl::fromROSMsg<pcl::PointXYZ>(cloud,temp);
-		pcl::PointCloud<pcl::PointXYZ> cloud2;
+		pcl::PointCloud<pcl::PointXYZRGB> cloud2;
 		for(int i=0;i<temp.points.size();i++){
 			if(scan_in->ranges.at(i)<29 && scan_in->ranges.at(i)>0.5)
-				cloud2.points.push_back(temp.points.at(i));
-		}
+				{
+					pcl::PointXYZRGB p;
+					p.x=temp.points.at(i).x;
+					p.y=temp.points.at(i).y;
+					p.z=temp.points.at(i).z;
+					int xpix,ypix;
+					xpix=400+(int)(-482*p.z/p.x);
+					ypix=400+(int)(-482*p.y/p.x);
+					//	stay in frame
+					xpix=xpix>0?xpix:-1;
+					xpix=xpix<799?xpix:800;
+					ypix=ypix>0?ypix:-1;
+					ypix=ypix<799?ypix:800;
+					
+					p.r=leftImage.at<cv::Vec3b>(xpix,ypix)[0];
+		
+				
+					p.g=leftImage.at<cv::Vec3b>(xpix,ypix)[1];
+			
+					p.b=leftImage.at<cv::Vec3b>(xpix,ypix)[2];
+
+					if(ypix>799 || ypix<0 || xpix>799 ||xpix<0)
+					  {p.r=255;p.b=255;p.g=255;}
+					cloud2.points.push_back(p);//temp.points.at(i));
+				}
+		}	
+		Eigen::Matrix4f sensorTopelvis;
+		pcl_ros::transformAsMatrix(transform, sensorTopelvis);
+		pcl::transformPointCloud(cloud2, cloud2, sensorTopelvis);
 		sensor_msgs::PointCloud2 cloud3;
 		pcl::toROSMsg(cloud2,cloud3);
 
 		//C21_VisionAndLidar::C21_C22 msg;
 		cloud3.header=scan_in->header;
 		cloud3.header.frame_id="/pelvis";
-		//msg.cloud=cloud3;
-		/*tf::Vector3 orig=transform.getOrigin();
-		tf::Quaternion rot=transform.getRotation();
-		msg.pose.position.x=orig.getX();
-		msg.pose.position.y=orig.getY();
-		msg.pose.position.z=orig.getZ();
-		msg.pose.orientation.x=rot.getX();
-		msg.pose.orientation.y=rot.getY();
-		msg.pose.orientation.z=rot.getZ();
-		msg.pose.orientation.w=rot.getW();*/
+
 		c22Lidarpub.publish(cloud3);
 		_detectionMutex->lock();
 		//detectionCloud+=cloud2;
 		_detectionMutex->unlock();
 
-		/* cv_bridge::CvImagePtr left;
-		 cv_bridge::CvImagePtr right;
-		try
-		{
-		  left = cv_bridge::toCvCopy(left_msg,enc::RGB8);
-		  right =cv_bridge::toCvCopy(right_msg,enc::RGB8);
-		}
-		catch (cv_bridge::Exception& e)
-		{
-		  ROS_ERROR("cv_bridge exception: %s", e.what());
-		  return;
-		}
-
-		//left_msg->header.stamp=ros::Time::now();
-		//right_msg->header.stamp=ros::Time::now();
-		leftpub.publish(left_msg);
-		rightpub.publish(right_msg);
-		/*
-		 *saving frames for HMI use
-		 */
-		/*_panMutex->lock();
-		left->image.copyTo(leftImage);
-		right->image.copyTo(rightImage);
-		_panMutex->unlock();
-		//pcl::PointCloud<pcl::PointXYZ> out;
-		//pcl::fromROSMsg(cloud,out);
-		_cloudMutex->lock();
-		my_answer.swap(cloud2);
-		//pcl::io::savePCDFile("cloud.pcd",out,true);
-		_cloudMutex->unlock();
-		//std::cout<<" position x:"<<msg.pose.position.x<<" y:"<<msg.pose.position.y<<" z:"<<msg.pose.position.z<<"\n";*/
 	  }
 
 private:
@@ -433,7 +405,7 @@ private:
   image_transport::Publisher smallPanoramicPublisher;
   message_filters::Subscriber<sensor_msgs::PointCloud2> pointcloud;
   message_filters::Subscriber<sensor_msgs::LaserScan> laser;
-  tf::TransformListener listener;
+  tf::TransformListener listener,listener2;
   ros::ServiceServer pcl_service;
   ros::ServiceServer object_service;
   std::vector<cv::Mat> *pan_imgs;
@@ -451,7 +423,7 @@ int main(int argc, char **argv)
   ros::init(argc, argv, "C21_VisionAndLidar");
   ros::AsyncSpinner spinner(7); // Use 7 threads
   spinner.start();
-  C21_Node my_node("/multisense_sl/camera/left/image_color","/multisense_sl/camera/right/image_color");
+  C21_Node my_node("/multisense_sl/camera/left/image_rect_color","/multisense_sl/camera/right/image_rect_color");
   ros::waitForShutdown();
   while(ros::ok()){
 	  ros::spin();

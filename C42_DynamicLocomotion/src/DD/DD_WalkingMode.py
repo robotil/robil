@@ -29,8 +29,7 @@ from C42_DynamicLocomotion.msg import Foot_Placement_data
 
 class DD_WalkingMode(WalkingMode):
     def __init__(self,iTf):
-        self._LPP = DD_PathPlanner()
-        WalkingMode.__init__(self,self._LPP)
+        WalkingMode.__init__(self,DD_PathPlanner())
         self._tf = iTf
         # Initialize atlas atlas_sim_interface_command publisher       
         self.asi_command = rospy.Publisher('/atlas/atlas_sim_interface_command', AtlasSimInterfaceCommand, None, False, True, None)       
@@ -42,8 +41,8 @@ class DD_WalkingMode(WalkingMode):
         self._StepIndex = 1
         self._command = 0
         
-    def Initialize(self):
-        WalkingMode.Initialize(self)
+    def Initialize(self,parameters):
+        WalkingMode.Initialize(self,parameters)
         self._LPP.Initialize()
         self._bRobotIsStatic = True
 
@@ -78,9 +77,6 @@ class DD_WalkingMode(WalkingMode):
         self._StepIndex = self._StepIndex + 1
     
     def EmergencyStop(self):
-        WalkingMode.Stop(self)
-
-    def Stop(self):
         WalkingMode.Stop(self)
 
     def IsDone(self):

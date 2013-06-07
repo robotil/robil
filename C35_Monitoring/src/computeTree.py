@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-
+#! /usr/bin/env python
 from tree import xmlTree
 from Node import node
 
@@ -17,33 +17,37 @@ def nodeDataInDebugMode(nodeTime, nodeSuccFail, nodeID, monitordNodeID, numOfIte
     monitorNode = None
    # print "E="+ str(Ctree.myTree.getWrappedNode(monitordNodeID).getAverageSuccTime(0))  
    # print "prob="+str(Ctree.myTree.getWrappedNode(monitordNodeID).getProbAtIndex(0))
-   
-   #check if the node monitor is the root
     
     #get pointer to the monitored node
     finished_node = newTree.getWrappedNode(nodeID)
     finished_node.setDebug(str(nodeSuccFail) + " " + str(nodeTime))
-   # finished_node.clear()
-    newTree.treeToXml("output/run_temp.xml")
+    newTree.treeToXml("output/"+Ctree.filePath[6:-4]+"_"+monitordNodeID+"_after_run_debug_true.xml")
     node.debugMode = True
-    newTree  = xmlTree("output/run_temp.xml")
+    newTree = xmlTree("output/"+Ctree.filePath[6:-4]+"_"+monitordNodeID+"_after_run_debug_true.xml")
     root = newTree.getRoot()
     for i in range(numOfIter):  
         root.runPlan(param)
     #print tree to xml file
     newTree.treeToXml("output/"+Ctree.filePath[6:-4]+"_"+monitordNodeID+"_after_run_debug_true.xml")
     newTree = xmlTree("output/"+Ctree.filePath[6:-4]+"_"+monitordNodeID+"_after_run_debug_true.xml")
-    
+    newTree.createWrapperTreeMap("id")
+    #check if the node monitor is the root
     if monitordNodeID == "":
         root = newTree.getRoot()
         monitorNode = root.getChild(0)
     else:
-        monitorNode= newTree.getWrappedNode(monitordNodeID)    
+        monitorNode = newTree.getWrappedNode(monitordNodeID)    
     
     #take E,prob and standarte deviation  from the debug node,
     E =  monitorNode.getAverageSuccTime(param)
     prob = monitorNode.getProbAtIndex(param)
     sd = monitorNode.getSDSuccTime(param)
+    #clear tree from calculations
+    root = newTree.getRoot()
+    root.clearWholeTree()
+    
+    #print update tree to xml file
+    newTree.treeToXml("output/"+Ctree.filePath[6:-4]+"_"+monitordNodeID+"_after_run_debug_true.xml")
     
     return (prob, sd, E)
 
@@ -83,9 +87,8 @@ def getNodeInfo(nodeID, param):
     
     
 #if __name__ == "__main__":
-#  constructTree("tests/skill4.xml")
-#  print nodeDataInDebugMode(50, True, "b9e18714-4869-422c-bc38-cb2dca88c530","cca761ab-b52d-43e8-a753-b4c458aea4db", 50)
-#  print getNodeInfo("")
-  
-  
+#  constructTree("tests/skill4.xml", 0)
+#  print nodeDataInDebugMode(50, True, "cca761ab-b52d-43e8-a753-b4c458aea4db","b9e18714-4869-422c-bc38-cb2dca88c530", 50,0)
+#  
+#  
   

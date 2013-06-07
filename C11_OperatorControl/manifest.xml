@@ -18,6 +18,7 @@
   <depend package="cv_bridge"/>
   <depend package="C11_Agent"/>
   <depend package="C10_Common"/>
+  <depend package="C22_transformations"/>
 </package>
 
 

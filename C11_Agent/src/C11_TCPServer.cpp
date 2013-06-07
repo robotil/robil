@@ -149,6 +149,21 @@ void CTcpServer::SltOnDataReceived()
               IsPathComing = true;
               DataSizeToContinue = dataSize;
             }
+          else if(16 == msgId)
+            {
+              emit SigImageRequest();
+              std::cout<<"TCP: ImageRequest received!\n";
+            }
+          else if(17 == msgId)
+            {
+              emit SigGridRequest();
+              std::cout<<"TCP: GridRequest received!\n";
+            }
+          else if(18 == msgId)
+            {
+              emit SigPathRequest();
+              std::cout<<"TCP: PathRequest received!\n";
+            }
         }
     }
 }
@@ -167,12 +182,14 @@ void CTcpServer::SendHello()
   QDataStream out(&block, QIODevice::WriteOnly);
   out.setByteOrder(QDataStream::LittleEndian);
   out<<msgNum;
+  QString s("HELLO");
+//  out<<s;
 //  for(int i=1; i<sizeof(msgNum);i++)
 //          {
 //                  block[i] = buff[i];
 //          }
   pClientConnection->write(block);
- // pClientConnection->write("HELLO");
+  pClientConnection->write("HELLO");
   std::cout<<"TCP: Hello sent\n";
 }
 
@@ -326,4 +343,34 @@ void CTcpServer::SendExecutionStatusChange(int status)
   pClientConnection->flush();
   pClientConnection->waitForBytesWritten();
   std::cout<<"TCP: SendExecutionStatusChange sent\n";
+}
+
+void CTcpServer::SendExecuterStack(QString str)
+{
+	std::cout<<"TCP: SendExecuterStack\n";
+//	std::cout<<"The string is: "<< str.toStdString()<<std::endl;
+	if(NULL == pClientConnection)
+	  {
+	    std::cout<<"TCP: No connection\n";
+	    return;
+	  }
+	StructHeader header;
+	  header.MessageID = 31;
+	  header.DataSize = 0;
+	  header.Counter = Counter;
+	  Counter++;
+	  QByteArray block;
+	  std::cout<<"TCP: String size = "<<header.DataSize<<"\n";
+	QDataStream out(&block, QIODevice::WriteOnly);
+	out.setByteOrder(QDataStream::LittleEndian);
+	out << header;
+	out<<str;
+//	string data = str.toStdString();
+//	std::cout<<"The string is: "<< data<<std::endl;
+//	header.DataSize = strlen(data.data());
+	pClientConnection->write(block);
+//	pClientConnection->write(data.data());
+	pClientConnection->flush();
+	pClientConnection->waitForBytesWritten();
+	std::cout<<"TCP: SendExecuterStack sent\n";
 }

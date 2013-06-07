@@ -4,8 +4,15 @@ FK.cpp Forward Kinematics file
 #include <math.h>
 #include <iostream>
 #include <string>
-#include "FK.h"
+#include <C67_CarManipulation/FK.h>
 
+Matrix::Matrix(double A[4][4])
+{
+	int i,j;
+	for(i = 0; i<4; i++)
+		for(j=0; j<4; j++)
+			T[i][j] = A[i][j];
+}
 void Matrix::RotateX(double A[4][4], double val)
 {
 	double B[3][3] = {{1,0,0},{0,cos(val),-sin(val)},{0,sin(val),cos(val)}};
@@ -308,6 +315,37 @@ void RPY::Print()
 {
 	std::cout << "RPY(" << x << " "<< y << " " << z << " " << R << " " << P << " " << Y << ")\n";
 }
+
+Quarternion::Quarternion(double m_x, double m_y, double m_z, double m_a, double m_b, double m_c, double m_d)
+{
+		double normal = sqrt(m_a*m_a + m_b*m_b + m_c*m_c + m_d*m_d);
+		a = m_a/normal; b = m_b/normal; c = m_c/normal; d = m_d/normal;
+}
+Matrix Quarternion::ToMatrix()
+{
+
+	double A[4][4] = {{a*a + b*b - c*c - d*d, 2*b*c, 2*b*d + 2*a*c, x},
+			{2*b*c + 2*a*d, a*a - b*b + c*c - d*d, 2*c*d - 2*a*b, y},
+			{2*b*d - 2*a*c, 2*c*d + 2*a*b, a*a - b*b - c*c + d*d, z},
+			{0, 0, 0, 1}};
+
+	Matrix T = Matrix(A);
+
+	return T;
+}
+
+Quarternion QuarAngle(double x, double y, double z, double angle, double ax, double ay, double az)
+{
+	double normal = sqrt(ax*ax + ay*ay + az*az);
+	Quarternion Q = Quarternion(x, y, z, cos(angle/2), sin(angle/2)*ax/normal, sin(angle/2)*ay/normal, sin(angle/2)*az/normal);
+	return Q;
+}
+
+void Quarternion::Print()
+{
+	std::cout << "Quarternion(" << x << " "<< y << " " << z << " " << a << " " << b << " " << c << " " << d << ")\n";
+}
+
 
 
 

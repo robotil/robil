@@ -149,7 +149,7 @@ class RobilTask(object):
 	
 	def task(self, name, uid, parameters):
 		#print "[dan] Empty Task"
-		return RTResult_ABORTED(1,"Empty Task")
+		return RTResult_ABORT(1,"Empty Task")
 
 
       

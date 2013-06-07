@@ -15,6 +15,7 @@ class C11Main: public QObject, public IAgentInterface
           void SigOnPathSend(vector<StructPoint> path);
           void SigOnHMIResponse();
           void SigOnExecutionStatusChange(int status);
+          void SigOnSendExecuterStack(QString);
 
   public Q_SLOTS:
     void SltOnImageSend(QImage img);
@@ -23,10 +24,14 @@ class C11Main: public QObject, public IAgentInterface
     void SltOnHMIResponse();
     void SltHMIResponded();
     void SltOnExecutionStatusChange(int status);
+    void SltOnSendExecuterStack(QString);
     void SltPause();
     void SltResume();
     void SltLoadMission(int MissionId);
     void SltPathUpdated(std::vector<StructPoint> points);
+    void SltImageRequest();
+    void SltGridRequest();
+    void SltPathRequest();
 
 public:
   C11Main(int argc, char **argv);
@@ -39,6 +44,7 @@ public:
   virtual void PushPath(vector<StructPoint> path);
   virtual void HMIResponse();
   virtual void ExecutionStatusChanged(int status);
+  virtual void SendExecuterStack(QString);
 
 private:
   C11_Agent_Node* pC11Node;

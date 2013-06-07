@@ -174,16 +174,67 @@ void MapMatrix::moveMapVerticaly(int times){
  * how similar they should be, and if they are similar (meaning also part of the ground) then "erase"
  * this plane and going to the next plane etc.
  */
-void MapMatrix::computeMMatrix(pcl::PointCloud<pcl::PointXYZ>::Ptr map_cloud,geometry_msgs::Point pose){ //update way of calculating x and y indices of mapMatrix
+void MapMatrix::computeMMatrix(std::vector<pclPlane*>* mapPlanes,pcl::PointCloud<pcl::PointXYZ>::Ptr map_cloud){ //update way of calculating x and y indices of mapMatrix
+	for (unsigned int i=0; i< mapPlanes->size();i++){ //goes through all planes
+			pcl::PointIndices::Ptr inliers = mapPlanes->at(i)->inliers;
+			pcl::ModelCoefficients::Ptr coff= mapPlanes->at(i)->coefficients;
+			MPlane* tempPlane=new MPlane(pcl::PointXYZ(0,0,0),coff);
+			double angle=calcSlopeZ(tempPlane->coefficient_x,tempPlane->coefficient_y,tempPlane->coefficient_z);
+			for (unsigned int j=0; j< inliers->indices.size();j++){ //goes through all indices in the plane i
+				pcl::PointXYZ p = map_cloud->points[inliers->indices[j]];
+
+				if (inMatrixRange(p)){
+					int xIndex,yIndex;
+					xIndex = (p.x -xOffset)*(1/SIZEOFSQUARE);	//added for now instead of previous three lines
+					yIndex = (p.y-yOffset) *(1/SIZEOFSQUARE);	//same as above
+					MapSquare* ms=data->at(xIndex)->at(yIndex);
+					ms->addRating();
+					if(!ms->hasPlane(tempPlane)){
+						MPlane* newPlane=new MPlane(pcl::PointXYZ(p.x,p.y,p.z),coff);
+						newPlane->addRating();
+						newPlane->rating=20;
+						ms->square_Planes->push_back(newPlane);
+						if (p.z>(0.5+(-PELVIS_HEIGHT)) || p.z<(-0.4-PELVIS_HEIGHT)){
+							ms->square_status = BLOCKED;
+						}
+						else{
+							if(ms->square_status!=BLOCKED){
+								if(p.z>(0.15-PELVIS_HEIGHT) || p.z<(-0.15-PELVIS_HEIGHT)){
+									ms->square_status = DEBREE;
+									cout<<p.z<<"\n";
+								}
+							}
+							if(ms->square_status!=BLOCKED && ms->square_status!=DEBREE){
+								ms->square_status = AVAILABLE;
+							}
+						}
+					}else{
+						MPlane* temp=ms->getPlane(tempPlane);
+						 if(temp->representing_point.z<p.z){
+							 temp->representing_point.z=p.z;
+							 temp->representing_point.y=p.y;
+							 temp->representing_point.x=p.x;
+
+						 }
+					}
+				}
+			}
+		}
+		for(unsigned int i=0; i< data->size();i++){
+			for(unsigned int j=0; j< data->at(i)->size();j++){
+				 data->at(i)->at(j)->setRatable();
+			}
+		}
+
 	//pcl::ModelCoefficients c;
-	for (unsigned int i=0;i<NUMOFSQUARES;i++){
+	/*for (unsigned int i=0;i<NUMOFSQUARES;i++){
 		for (unsigned int j=0;j<NUMOFSQUARES;j++){
 			data->at(i)->at(j)->square_status=UNCHARTED;
 			/*if (data->at(i)->at(j)->scansLeft-- ==0 ){
 				data->at(i)->at(j)->square_status=UNCHARTED;
 				data->at(i)->at(j)->scansLeft=MAXSCANS;
 			}*/
-		}
+/*		}
 	}
 	
 
@@ -228,12 +279,12 @@ void MapMatrix::computeMMatrix(pcl::PointCloud<pcl::PointXYZ>::Ptr map_cloud,geo
 						else{
 							ms->square_status = BLOCKED;
 						}*/
-				}
+/*				}
 	}
 
 	for(unsigned int i=0; i< data->size();i++){
 		for(unsigned int j=0; j< data->at(i)->size();j++){
 			 data->at(i)->at(j)->setRatable();
 		}
-	}
+	}*/
 }

@@ -33,6 +33,8 @@ if __name__ == '__main__':
         print " BDI for Dynamic Continuous mode"
         print " QS for Discrete Quasi-Static mode"
         print " DD for Discrete Dynamic mode"
+        print " DW for DW mode"
+        print " AP for Aline Pose mode"
         sys.exit(2)
     if walkingMode in ('BDI'):
         rospy.init_node('WalkerNode_Continuous')       
@@ -46,12 +48,26 @@ if __name__ == '__main__':
         node = DynamicLocomotion("WalkerNode_Discrete",walkingModeChooser)
         print "WalkerNode_Discrete TASK created"
         rospy.spin()
+    elif walkingMode in ('DW'):
+        rospy.init_node('WalkerNode_DW')       
+        walkingModeChooser = WalkingModeChooser(walkingMode)
+        node = DynamicLocomotion("WalkerNode_DW",walkingModeChooser)
+        print "WalkerNode walk on four TASK created"
+        rospy.spin()
+    elif walkingMode in ('AP'):
+        rospy.init_node('WalkerNode_AP')       
+        walkingModeChooser = WalkingModeChooser(walkingMode)
+        node = DynamicLocomotion("WalkerNode_AP",walkingModeChooser)
+        print "WalkerNode Discrete Aline Pose mode TASK created"
+        rospy.spin()
     else:
         print "Usage: WalkingMode.py <Option>"
         print "Options are:"
         print " BDI for Dynamic Continuous mode"
         print " QS for Discrete Quasi-Static mode"
         print " DD for Discrete Dynamic mode"
+        print " DW for DW mode"
+        print " AP for Aline Pose mode"
     print "WalkerNode Closed"
 
                

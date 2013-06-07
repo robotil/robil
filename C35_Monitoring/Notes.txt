@@ -108,5 +108,60 @@ Known Bugs:
 
 Known Limitations:
 =================
-Not related to monitoring, but stand_up module does not react to preemption.
+Enable VRC_CHEATS_ENABLED=1
+
+
+=======================
+Driving Monitor - monitors the driving module and makes sure it actually starts moving.
+=======================
+roslaunch C51_CarOperation iddqd.launch
+roslaunch C51_CarOperation C51_completeLuanch.launch 
+rosrun C35_Monitoring DrivingMonitor.py
+Open skill4_driving_1.xml in designer and run.
+
+
+
+=======================
+Walking Monitor - monitors the walking module and makes sure it actually starts moving.
+=======================
+roslaunch atlas_utils vrc_task_2.launch
+roslaunch C25_GlobalPosition C25.launch
+rosrun C42_DynamicLocomotion DynamicLocomotion.py
+rosrun C35_Monitoring WalkingMonitor.py
+rosrun C34_Designer run.sh
+rosrun C34_Executer executer
+Open comp1walking.xml in designermean+-2*stdev and run.
+
+to move the robot use:
+rosrun C42_DynamicLocomotion C31_Clone_VRC2_StartingPentoGa2.py
+
+
+=======================
+Anomaly detector - Tries to find anomalities in the behaviour of nodes in the tree.
+=======================
+Description:
+this module subscribes to the executer/stak_stream topic and maintains statistics on the runtimes and success/fail ratios of nodes in the behaviour tree. The underlying assumption is that the bahaviour in the beginning of the run is "normal", and if there is a major change in the bahaviour, this is an anomaly and should be reported.
+
+If a certain node exisited with success after X seconds, we check whether X is within the range [mean-2*stdev,mean+2*stdev], where mean and stdev are computed on the recorded running times of the node, when it succeeded. When a node fails, the same is done but mean and stdev are computed on the failed runtimes. The two cases are separated, and we rely on two separate gaussians, in order to avoid computing a mixture of gaussians (one for success and one for fail).
+
+When an anomaly is found in node Y, the node's id is published as a String on the topic "C35/anomaly".
+
+To run:
+Use tree "standup_with_anomaly_detection.xml". Run the relevant tasks.
+It's better to use a tree that has loops, and in which some tasks run more that 5 times.
+rosrun C35_monitoring AnomalyDetector
+Run executor and designer and some atlas.
+
+------------------------
+For Liat and Adi
+------------------------
+Marathon + Weekend
+Liat - finish (or semi-finish) mud thing.
+Adi - finish gripping thing.
+
+Next week
+HALF DAY - Timeout Monitor, Falling Monitor, and Stability Monitor (if someone publishes on the relevant topic), MONITOR WAYPOINT OF DRIVING MODULE. 1) check on example trees in the beginnning of the week. 2) Once the vrc trees are working (semi-working) check on them.
+HALF DAY - Anomaly:very little testing has been done. Must check with proper tree, as mentioned above.
+Walking and driving are done assuming cheats. Before vrc, we must check again since cheats will be disabled.
+
 

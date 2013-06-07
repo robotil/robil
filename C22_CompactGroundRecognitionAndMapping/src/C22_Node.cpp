@@ -10,7 +10,6 @@
 #include "MapMatrix.h"
 #include "C22_CompactGroundRecognitionAndMapping/C22.h"
 #include "C22_CompactGroundRecognitionAndMapping/C22C24.h"
-#include <C21_VisionAndLidar/C21_C22.h>
 #include "sensor_msgs/PointCloud.h"
 #include <pcl/correspondence.h>
 #include <pcl/point_cloud.h>
@@ -56,7 +55,7 @@
 boost::mutex m;
 C22_Node::C22_Node():
 	pointCloud_sub(nh_,"/C21/C22Lidar",1),
-	pos_sub(nh_,"/ground_truth_odom",1),
+	pos_sub(nh_,"/robot_pose_ekf/odom",1),
 	sync( MySyncPolicy( 10 ),pointCloud_sub, pos_sub),
 	cloudRecord(new pcl::PointCloud<pcl::PointXYZ>)
 	{
@@ -71,6 +70,10 @@ C22_Node::C22_Node():
 
 	}
 
+
+
+static tf::StampedTransform lefttransform;
+static tf::StampedTransform righttransform;
 /**
  * The call back function executed when a service is requested
  * it must return true in order to work properly
@@ -79,6 +82,98 @@ C22_Node::C22_Node():
  */
 bool C22_Node::proccess(C22_CompactGroundRecognitionAndMapping::C22::Request  &req,
 	C22_CompactGroundRecognitionAndMapping::C22::Response &res ){
+
+
+	 bool retry=true;
+		    while(retry){
+		    	retry=false;
+				try{
+				  listener.lookupTransform( "pelvis","l_foot",
+										   ros::Time(0), lefttransform);
+				}
+				catch (tf::TransformException ex){
+					retry=true;
+				  ROS_ERROR("%s",ex.what());
+				}
+				try{
+						  listener.lookupTransform("pelvis","r_foot",
+												   ros::Time(0), righttransform);
+						}
+				catch (tf::TransformException ex){
+					retry=true;
+				  ROS_ERROR("%s",ex.what());
+				}
+		    }
+
+	 pcl::PointCloud<pcl::PointXYZ>cloud;
+     pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_filtered(cloud.makeShared());
+	 //tf::Quaternion q;
+	 //tf::quaternionMsgToTF(pos_msg->pose.pose.orientation, q);
+	 tf::Quaternion oldQ;
+	 tf::quaternionMsgToTF(lastPose.pose.pose.orientation, oldQ);
+	 //oldQ.setRPY(0,0,0);
+	 tf::Transform trans2;
+	 tf::Transform trans3;
+	 trans3.setOrigin(tf::Vector3(0,0,0));
+	 trans3.setRotation(tf::Quaternion(oldQ).inverse());
+	 Eigen::Matrix4f recordToPlace,recordToRobot,sensorToFrame;
+
+	 trans2.setOrigin(tf::Vector3(-lastPose.pose.pose.position.x,-lastPose.pose.pose.position.y,-lastPose.pose.pose.position.z));
+	 tf::Quaternion oldQ2;
+	 oldQ2.setRPY(0,0,0);
+	 //tf::quaternionMsgToTF(lastPose.pose.pose.orientation, oldQ);
+
+	 trans2.setRotation(tf::Quaternion(oldQ2));
+	 pcl_ros::transformAsMatrix(trans2, recordToRobot);
+	 pcl_ros::transformAsMatrix(trans3,sensorToFrame);
+
+	 pcl::transformPointCloud(*cloudRecord, *cloud_filtered, recordToRobot);
+		 pcl::transformPointCloud(*cloud_filtered, *cloud_filtered, sensorToFrame);
+
+		 pcl::PointCloud<pcl::PointXYZ>::Ptr cloudf_backup(cloud_filtered->makeShared());
+		 while (1){
+
+				 /*
+				  * this is a definition of a segment, notice that it allows us to define its size
+				  */
+				  // Create the segmentation object for the planar model and set all the parameters
+				  pcl::SACSegmentation<pcl::PointXYZ> seg;
+				  pcl::PointIndices::Ptr inliers (new pcl::PointIndices);
+				  pcl::ModelCoefficients::Ptr coefficients (new pcl::ModelCoefficients);
+				  seg.setOptimizeCoefficients (true);
+				  seg.setModelType (pcl::SACMODEL_PLANE);
+				  seg.setMethodType (pcl::SAC_RANSAC);
+				  seg.setMaxIterations (100);
+				  seg.setDistanceThreshold (0.05);
+					  /*
+					   * once we have defined a segment, we need to create clusters
+					   */
+				  seg.setInputCloud (cloudf_backup);
+				  seg.segment (*inliers, *coefficients);
+				 // std::cout << "size " <<inliers->indices.size()<< std::endl;
+				  if(inliers->indices.size()==0)
+					  break;
+				  pclPlane *plane =new pclPlane();
+				  plane->inliers=inliers;
+				  plane->coefficients=coefficients;
+				  _myPlanes->push_back(plane);
+
+
+				  pcl::ExtractIndices<pcl::PointXYZ> extract;
+				  //now we remove the plane we found from the cloud and search again
+				  extract.setInputCloud (cloudf_backup);
+				  extract.setIndices (inliers);	//problem only in eclipse, works->ignore
+				  extract.setNegative (true);
+				  pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_temp (new pcl::PointCloud<pcl::PointXYZ>);
+				  extract.filter (*cloud_temp);
+				  cloudf_backup.swap(cloud_temp);
+				  if(cloudf_backup->points.size()<300)
+					  break;
+			  }
+
+	_myMatrix->clearMatrix();
+	_myMatrix->computeMMatrix(_myPlanes,cloud_filtered);
+
 	//ROS_INFO("received request, trying to fetch data\n");
 	res.drivingPath.row.resize(_myMatrix->data->size());
 	res.drivingPath.robotPos.x=robotPos.x;
@@ -100,9 +195,19 @@ bool C22_Node::proccess(C22_CompactGroundRecognitionAndMapping::C22::Request  &r
 				res.drivingPath.row.at(i).column.at(j).planes.at(k).y=_myMatrix->data->at(i)->at(j)->square_Planes->at(k)->coefficient_y;
 				res.drivingPath.row.at(i).column.at(j).planes.at(k).z=_myMatrix->data->at(i)->at(j)->square_Planes->at(k)->coefficient_z;
 				res.drivingPath.row.at(i).column.at(j).planes.at(k).d=_myMatrix->data->at(i)->at(j)->square_Planes->at(k)->coefficient_d;
+				res.drivingPath.row.at(i).column.at(j).planes.at(k).repPoint.x=_myMatrix->data->at(i)->at(j)->square_Planes->at(k)->representing_point.x;
+				res.drivingPath.row.at(i).column.at(j).planes.at(k).repPoint.y=_myMatrix->data->at(i)->at(j)->square_Planes->at(k)->representing_point.y;
+				res.drivingPath.row.at(i).column.at(j).planes.at(k).repPoint.z=_myMatrix->data->at(i)->at(j)->square_Planes->at(k)->representing_point.z;
 			}
 		}
 	}
+	  while(_myPlanes->size()!=0){
+		  pclPlane* temp=_myPlanes->back();
+		  _myPlanes->pop_back();
+		  delete temp;
+	  }
+	  delete _myPlanes;
+	  _myPlanes=new std::vector<pclPlane*>();
   return true;
 }
 
@@ -110,10 +215,10 @@ bool C22_Node::proccess(C22_CompactGroundRecognitionAndMapping::C22::Request  &r
 /**
  * The call back function executed when a new point cloud has arrived
  */
-void C22_Node::callback(const C21_VisionAndLidar::C21_C22::ConstPtr& pclMsg,const nav_msgs::Odometry::ConstPtr& pos_msg){
+void C22_Node::callback(const sensor_msgs::PointCloud2::ConstPtr& pclMsg,const geometry_msgs::PoseWithCovarianceStamped::ConstPtr& pos_msg){
 
 	 pcl::PointCloud<pcl::PointXYZ>cloud;
-	 pcl::fromROSMsg<pcl::PointXYZ>(pclMsg->cloud,cloud);
+	 pcl::fromROSMsg<pcl::PointXYZ>(*pclMsg,cloud);
 	 pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_filtered(cloud.makeShared());
 	 //std::cout<<"points before:"<<cloud_filtered->points.size()<<std::endl;
 	 //sor.setInputCloud (cloud_filtered);
@@ -167,12 +272,13 @@ void C22_Node::callback(const C21_VisionAndLidar::C21_C22::ConstPtr& pclMsg,cons
 	// std::cout<<"cloud record before addition:"<<cloudRecord->points.size()<<std::endl;
 	 *cloudRecord+=*cloud_filtered;
 
-	 pcl::transformPointCloud(*cloudRecord, *cloud_filtered, recordToRobot);
+	/* pcl::transformPointCloud(*cloudRecord, *cloud_filtered, recordToRobot);
 	 pcl::transformPointCloud(*cloud_filtered, *cloud_filtered, sensorToFrame);
 	 if(cloud_filtered->points.size()>60000){
-		 /*pcl::PointCloud<pcl::PointXYZ>empty;
+		 pcl::PointCloud<pcl::PointXYZ>empty;
 		 pcl::PointCloud<pcl::PointXYZ>::Ptr em(empty.makeShared());
-		 cloudRecord.swap(em);*/
+		 cloudRecord.swap(em);
+		 //pcl::io::savePCDFileASCII ("test_pcd.pcd",*cloudRecord);
 		  pcl::PointCloud<int> sampled_indices;
 		  pcl::UniformSampling<pcl::PointXYZ> uniform_sampling;
 		  uniform_sampling.setInputCloud (cloudRecord);
@@ -189,8 +295,51 @@ void C22_Node::callback(const C21_VisionAndLidar::C21_C22::ConstPtr& pclMsg,cons
 		  sor.filter (*cloudRecord);
 
 	 }
+	 pcl::PointCloud<pcl::PointXYZ>::Ptr cloudf_backup(cloud_filtered->makeShared());
+	 while (1){
 
-	_myMatrix->computeMMatrix(cloud_filtered,robotPos);
+
+			  * this is a definition of a segment, notice that it allows us to define its size
+
+			  // Create the segmentation object for the planar model and set all the parameters
+			  pcl::SACSegmentation<pcl::PointXYZ> seg;
+			  pcl::PointIndices::Ptr inliers (new pcl::PointIndices);
+			  pcl::ModelCoefficients::Ptr coefficients (new pcl::ModelCoefficients);
+			  seg.setOptimizeCoefficients (true);
+			  seg.setModelType (pcl::SACMODEL_PLANE);
+			  seg.setMethodType (pcl::SAC_RANSAC);
+			  seg.setMaxIterations (100);
+			  seg.setDistanceThreshold (0.05);
+
+				   * once we have defined a segment, we need to create clusters
+
+			  seg.setInputCloud (cloudf_backup);
+			  seg.segment (*inliers, *coefficients);
+			 // std::cout << "size " <<inliers->indices.size()<< std::endl;
+			  if(inliers->indices.size()==0)
+				  break;
+			  pclPlane *plane =new pclPlane();
+			  plane->inliers=inliers;
+			  plane->coefficients=coefficients;
+			  _myPlanes->push_back(plane);
+
+
+			  pcl::ExtractIndices<pcl::PointXYZ> extract;
+			  //now we remove the plane we found from the cloud and search again
+			  extract.setInputCloud (cloudf_backup);
+			  extract.setIndices (inliers);	//problem only in eclipse, works->ignore
+			  extract.setNegative (true);
+			  pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_temp (new pcl::PointCloud<pcl::PointXYZ>);
+			  extract.filter (*cloud_temp);
+			  cloudf_backup.swap(cloud_temp);
+			  if(cloudf_backup->points.size()<10)
+				  break;
+
+		  }
+*/
+
+
+
 	  pcl::PassThrough<pcl::PointXYZ> pass;
 	  pass.setInputCloud (cloudRecord);
 	  pass.setFilterFieldName ("y");
@@ -199,15 +348,37 @@ void C22_Node::callback(const C21_VisionAndLidar::C21_C22::ConstPtr& pclMsg,cons
 	  pass.filter (*cloudRecord);
 	  pass.setInputCloud (cloudRecord);
 	  pass.setFilterFieldName ("x");
-	  pass.setFilterLimits (pos_msg->pose.pose.position.x-5,pos_msg->pose.pose.position.x+5);
+	  pass.setFilterLimits (pos_msg->pose.pose.position.x-10,pos_msg->pose.pose.position.x+10);
 	  //pass.setFilterLimitsNegative (true);
 	  pass.filter (*cloudRecord);
 	  pass.setFilterFieldName ("z");
 	  pass.setFilterLimits (pos_msg->pose.pose.position.z-2,pos_msg->pose.pose.position.z+2);
 	  //pass.setFilterLimitsNegative (true);
 	  pass.filter (*cloudRecord);
+
+	  if(cloudRecord->points.size()>80000){
+	  			 /*pcl::PointCloud<pcl::PointXYZ>empty;
+	  			 pcl::PointCloud<pcl::PointXYZ>::Ptr em(empty.makeShared());
+	  			 cloudRecord.swap(em);*/
+	  			 //pcl::io::savePCDFileASCII ("test_pcd.pcd",*cloudRecord);
+	  			  pcl::PointCloud<int> sampled_indices;
+	  			  pcl::UniformSampling<pcl::PointXYZ> uniform_sampling;
+	  			  uniform_sampling.setInputCloud (cloudRecord);
+	  			  uniform_sampling.setRadiusSearch (0.01);
+	  			  uniform_sampling.compute (sampled_indices);
+	  			  //pcl::copyPointCloud (*scene, sampled_indices.points, *scene_keypoints);
+	  			  std::cout << "Scene total points: " << cloudRecord->points.size() ;
+	  			  pcl::copyPointCloud (*cloudRecord, sampled_indices.points, *cloudRecord);
+	  			  std::cout<< "; Selected Keypoints: " << cloudRecord->points.size() << std::endl;
+	  			  pcl::StatisticalOutlierRemoval<pcl::PointXYZ> sor;
+	  			  sor.setInputCloud (cloudRecord);
+	  			  sor.setMeanK (10);
+	  			  sor.setStddevMulThresh (1.0);
+	  			  sor.filter (*cloudRecord);
+
+	  		 }
 	  cloud_filtered.reset();
-	  C22_CompactGroundRecognitionAndMapping::C22C0_PATH outMsg;
+	  /*C22_CompactGroundRecognitionAndMapping::C22C0_PATH outMsg;
 	  outMsg.row.resize(_myMatrix->data->size());
 	  outMsg.robotPos.x=robotPos.x;
 	  outMsg.robotPos.y=robotPos.y;
@@ -233,11 +404,12 @@ void C22_Node::callback(const C21_VisionAndLidar::C21_C22::ConstPtr& pclMsg,cons
 	}
 	//_myMatrix->setAtlasPos(robotPos);
 	  C22_pub.publish(outMsg);
+	  */
 }
-void C22_Node::updateMap(pcl::PointCloud<pcl::PointXYZ>::Ptr map_cloud,geometry_msgs::Point pose){
+/*void C22_Node::updateMap(pcl::PointCloud<pcl::PointXYZ>::Ptr map_cloud,geometry_msgs::Point pose){
 	boost::mutex::scoped_lock l(_myMatrix->mutex);
 	_myMatrix->computeMMatrix(map_cloud,robotPos);
-}
+}*/
 
 C22_Node *node22;
 int main(int argc, char **argv)

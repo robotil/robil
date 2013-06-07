@@ -1,3 +1,4 @@
+#include <C22_transformations/MapTransformations.h>
 #include "mapmain.h"
 #include <QMouseEvent>
 #include <QPainter>
@@ -460,6 +461,8 @@ void CMapMain::AddPix()
 		p_j=p_j-8.0;
 	}
 	traingle = new CtraingleItem(ui.graphicsView->scene(),QPointF(pPixItem[19][49]->pos()),QPointF(pPixItem[19][49]->pos()));
+	RobotPixPos.x = pPixItem[19][49]->pos().x();
+	RobotPixPos.y = pPixItem[19][49]->pos().y();
 	ui.graphicsView->scene()->addItem(traingle);
 }
 
@@ -758,38 +761,79 @@ void CMapMain::AddPath(std::vector<StructPoint> points)
 	LastUpdatedRoute.clear();
 	IsPathChanged = false;
 	std::cout<<"Path size: "<<points.size()<<"\n";
+	std::cout<<"RobotOrientation: "<<RobotOrientation<<"\n";
 	for(int i=0; i<points.size(); i++)
 	{
 //		QPointF point = PointToPix(points[i]);
 		if(i<points.size()-1)
 		{
 			routePathReady->addPointToLine(PointToPix(points[i]),true);
+//		    StructPoint p1;
+//		    p1.x = points[i].y;
+//		    p1.y = points[i].x;
+//		    routePathReady->addPointToLine(PointToPix(p1),true);
 		}
 		else
 		{
 			routePathReady->addPointToLine(PointToPix(points[i]),true);
-			routePathReady->endPath(QPointF(0,0));
+//		    StructPoint p1;
+//                    p1.x = points[i].y;
+//                    p1.y = points[i].x;
+//                    routePathReady->addPointToLine(PointToPix(p1),true);
+//			routePathReady->endPath(QPointF(0,0));
 		}
 	}
 	setMode(E_NULL_MODE);
 }
 
+//QPointF CMapMain::PointToPix(StructPoint point)
+//{
+//	QPointF GPoint;
+//	double pointX,pointY;
+//	pointX = 50+((RobotPos.x - point.x)*(32)) + 400;
+//	pointY = 930-((point.y - RobotPos.y)*32) - 160;
+//	std::cout<<"pointX: "<<pointX<<" pointY: "<<pointY<<"\n";
+//	GPoint.setX((pointX-RobotPixPos.x)*(-sin(RobotOrientation)) - (pointY-RobotPixPos.y)*(-cos(RobotOrientation))+RobotPixPos.x);
+////	GPoint.setX((pointY-pPixItem[19][49]->pos().y())*cos(WorldToRobotOrientation) - (pointX-pPixItem[19][49]->pos().x())*sin(WorldToRobotOrientation)+pPixItem[19][49]->pos().x());
+//	GPoint.setY((pointY-RobotPixPos.y)*sin(RobotOrientation) + (pointX-RobotPixPos.x)*cos(RobotOrientation)+RobotPixPos.y);
+////	GPoint.setX(50+((RobotPos.x - point.x)*(32)) + 400);
+////	GPoint.setY(930-((point.y - RobotPos.y)*32) - 160);
+////	GPoint.setX(50 + ((point.x-RobotGridPos.x)*sin(WorldToRobotOrientation) - (point.y-RobotGridPos.y)*cos(WorldToRobotOrientation))*32 + 400);
+////	GPoint.setY(930 - ((point.y-RobotGridPos.y)*sin(WorldToRobotOrientation) + (point.x-RobotGridPos.x)*cos(WorldToRobotOrientation))*32 - 160);
+////	GPoint.setX((point.x-CornerPos.x)*sin(WorldToRobotOrientation) - (point.y-CornerPos.y)*cos(WorldToRobotOrientation) + 20);
+////	GPoint.setY((point.y-CornerPos.y)*sin(WorldToRobotOrientation) + (point.x-CornerPos.x)*cos(WorldToRobotOrientation) + 50);
+//	std::cout<<"PointX: "<<GPoint.x()<<" PointY: "<<GPoint.y()<<"\n";
+//	return GPoint;
+//}
+
 QPointF CMapMain::PointToPix(StructPoint point)
 {
-	QPointF GPoint;
-//	GPoint.setX(50+((point.x - CornerPos.y)*32) - CornerPos.y*32 + 12.5*32);
-	GPoint.setX(50+((RobotPos.x - point.x)*(32)) + 400);
-	GPoint.setY(930-((point.y - RobotPos.y)*32) - 160);
-	std::cout<<"PointX: "<<GPoint.x()<<" PointY: "<<GPoint.y()<<"\n";
-	return GPoint;
+	cout<<"PATH CALCULATION!!!"<<endl;
+	cout<<"point = "<<point.x<<","<<point.y<<endl;
+    QPointF GPoint;
+
+    C22_transform trans;
+    C22_transform::MapProperties map_prop(Vec2d(GridXOffset,GridYOffset));
+    StructPoint robot_cell;
+    trans.GlobalToMap( map_prop ,point ,robot_cell);
+    cout<<"robot_cell = "<<robot_cell.x<<","<<robot_cell.y<<endl;
+    StructPoint grid_cell = CalculateGridPoint(robot_cell);
+    cout<<"grid_cell = "<<grid_cell.x<<","<<grid_cell.y<<endl;
+    GPoint = GetPixel(grid_cell);
+    cout<<"GPoint = "<<GPoint.x()<<","<<GPoint.y()<<endl;
+
+return GPoint;
 }
 
 StructPoint CMapMain::PixToPoint(QPointF pix)
 {
         std::cout<<"pixX: "<<pix.x()<<" pixY: "<<pix.y()<<"\n";
 	StructPoint point;
-	point.x = RobotPos.x - ((pix.x() - 400 - 50)/(32));
-	point.y = RobotPos.y + ((pix.y() + 160 - 930)/(32));
+	point.x = RobotPixPos.x - (pix.x()-RobotPixPos.x)*(-sin(-RobotOrientation)) - (pix.y()-RobotPixPos.y)*(-cos(-RobotOrientation));
+	point.y = RobotPixPos.y - (pix.y()-RobotPixPos.y)*sin(-RobotOrientation) + (pix.x()-RobotPixPos.x)*cos(-RobotOrientation);
+	std::cout<<"point.x: "<<point.x<<" point.y: "<<point.y<<"\n";
+	point.x = RobotPos.x - ((point.x - 400 - 50)/(32));
+	point.y = RobotPos.y + ((point.y + 160 - 930)/(32));
 	point.y *= -1;
 	std::cout<<"WorldPosX: "<<point.x<<" WorldPosY: "<<point.y<<"\n";
 	return point;
@@ -799,10 +843,30 @@ void CMapMain::CalculateCornerPos()
 {
 	CornerPos.x = GridXOffset;
 	CornerPos.y = GridYOffset;
-	RobotGridPos.x = (RobotPos.x-GridXOffset)*4;
-	RobotGridPos.y = (RobotPos.y-GridYOffset)*4;
+//	RobotGridPos.x = (RobotPos.x-GridXOffset)*4;
+//	RobotGridPos.y = (RobotPos.y-GridYOffset)*4;
+	C22_transform trans;
+	C22_transform::MapProperties map_prop(Vec2d(GridXOffset,GridYOffset));
+//	StructPoint RobotGridPos;
+	trans.GlobalToMap( map_prop ,RobotPos ,RobotGridPos);
 	std::cout<<"CornerPos.x: "<<CornerPos.x<<" CornerPos.y: "<<CornerPos.y<<"\n";
 	std::cout<<"RobotGridPos.x: "<<RobotGridPos.x<<" RobotGridPos.y: "<<RobotGridPos.y<<"\n";
+}
+
+StructPoint CMapMain::CalculateGridPoint(StructPoint pointFromRos)
+{
+	Vec2d p(pointFromRos.x, pointFromRos.y);
+	Vec2d v = (p - Vec2d(RobotGridPos.x,RobotGridPos.y)).rotate(-RobotOrientation)+Vec2d(50,20);
+	StructPoint gridPoint;
+	gridPoint.x = v.x;
+	gridPoint.y = v.y;
+	return gridPoint;
+
+//	StructPoint gridPoint;
+//	  gridPoint.x = (pointFromRos.x-RobotGridPos.x)*sin(WorldToRobotOrientation) - (pointFromRos.y-RobotGridPos.y)*cos(WorldToRobotOrientation) + 20;
+//	  gridPoint.y = (pointFromRos.y-RobotGridPos.y)*sin(WorldToRobotOrientation) + (pointFromRos.x-RobotGridPos.x)*cos(WorldToRobotOrientation) + 50;
+//	//  std::cout<<"PointX="<<pointFromRos.x<<" PointY="<<pointFromRos.y<<" gridPoint.x = "<<gridPoint.x<<" gridPoint.y = "<<gridPoint.y<<" Orientation = "<<WorldToRobotOrientation<<"\n";
+//	  return gridPoint;
 }
 
 StructIntPoint CMapMain::CalculateGridPoint(StructIntPoint pointFromRos)
@@ -812,6 +876,14 @@ StructIntPoint CMapMain::CalculateGridPoint(StructIntPoint pointFromRos)
   gridPoint.y = (pointFromRos.y-RobotGridPos.y)*sin(WorldToRobotOrientation) + (pointFromRos.x-RobotGridPos.x)*cos(WorldToRobotOrientation) + 50;
 //  std::cout<<"PointX="<<pointFromRos.x<<" PointY="<<pointFromRos.y<<" gridPoint.x = "<<gridPoint.x<<" gridPoint.y = "<<gridPoint.y<<" Orientation = "<<WorldToRobotOrientation<<"\n";
   return gridPoint;
+}
+
+QPointF CMapMain::GetPixel(StructPoint gridcell)
+{
+	QPointF pixel;
+	pixel.setX(50 + gridcell.x*8.0f);
+	pixel.setY(930 - gridcell.y*8.0f);
+	return pixel;
 }
 
 void CMapMain::SetEditable(bool value)
@@ -829,6 +901,9 @@ std::vector<StructPoint> CMapMain::GetUpdatedRoute()
                 for(int i=0; i<vec.size(); i++)
                 {
                         p = PixToPoint(vec[i]);
+//                        StructPoint p1;
+//                        p1.x = p.y;
+//                        p1.y = p.x;
                         if(!IsPointInPath(p))
                         {
                                 LastUpdatedRoute.push_back(p);

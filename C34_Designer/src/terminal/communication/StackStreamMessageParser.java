@@ -17,7 +17,7 @@ public class StackStreamMessageParser extends MessageParser<StackStreamMessage> 
 			"(?:\\[id=([\\w\\-\\_]+)\\])?" + SUCCESS_OR_FAILURE_PATTERN;
 	
 	private static final String MESSAGE_FORMAT_PATTERN =   
-			"data: ExeStack: changed : (\\w+) code=(\\d), node=(\\w+)\\((.*?)(?:\\)\\(|\\)\\s|\\)$)\\s?" + MESSAGE_TASK_ID_PATTERN;
+			"data: ExeStack: changed : ([\\w\\-]+) code=(\\d), node=(\\w+)\\((.*?)(?:\\)\\(|\\)\\s|\\)$)\\s?" + MESSAGE_TASK_ID_PATTERN;
 	
 	private final Pattern _messageRegexPattern = Pattern.compile(MESSAGE_FORMAT_PATTERN);
 	

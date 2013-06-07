@@ -28,11 +28,14 @@ class DynamicLocomotion(RobilTask):
     def task(self, name, uid, parameters):
         #initialize values:
         self._init_values()
+
+        if({} == parameters):
+            parameters=None
         
         ## TOPIC setup:
         self._debug_cmd_sub = rospy.Subscriber('walker_command',Int32,self._debug_command)
 
-        self._Walker.Initialize()
+        self._Walker.Initialize(parameters)
 
         if (True != self.WaitForPath()):
             return RTResult_PREEPTED()
@@ -52,7 +55,7 @@ class DynamicLocomotion(RobilTask):
         
         self._debug_cmd_sub.unregister
         
-        if(WalkerResultEnum.Success == WalkerResultEnum.Success): # self._Walker.Result()):
+        if(WalkerResultEnum.Success == self._Walker.GetResult()):
             print("SUCCESS!!")
             return RTResult_SUCCESSED("Finished in Success")
         else:
