@@ -51,12 +51,15 @@ class AP_WalkingMode(WalkingMode):
                            'r_arm_usy', 'r_arm_shx', 'r_arm_ely', 'r_arm_elx', 'r_arm_uwy', 'r_arm_mwx'] #27
         self._JC = JointCommands_msg_handler(robot_name,jnt_names)
 
-    def Initialize(self):
-        WalkingMode.Initialize(self)
+    def Initialize(self,parameters):
+        WalkingMode.Initialize(self,parameters)
         self._command = 0
         self._bRobotIsStatic = True
         self._BDI_Static_pose = Pose()
-        self._DesiredObject = "delta"
+        if ((None != parameters) and ('Object' in parameters)):
+            self._DesiredObject = parameters['Object']
+        else:
+            self._DesiredObject="delta"
 
         rospy.wait_for_service('foot_aline_pose')
         self._foot_placement_client = rospy.ServiceProxy('foot_aline_pose', C23_orient)

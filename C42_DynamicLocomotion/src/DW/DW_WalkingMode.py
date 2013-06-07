@@ -20,9 +20,15 @@ class DW_WalkingMode(WalkingMode):
         WalkingMode.__init__(self,DW_PathPlanner())
         self._Controller = DW_Controller(iTf)
         
-    def Initialize(self):
-        WalkingMode.Initialize(self)
-        self._Controller.Initialize(Terrain = "MUD") #How to get the true terrain type?
+    def Initialize(self,parameters):
+        WalkingMode.Initialize(self,parameters)
+
+        if ((None != parameters) and ('Terrain' in parameters)):
+            terrain = parameters['Terrain']
+        else:
+            terrain="MUD"
+
+        self._Controller.Initialize(Terrain = terrain)
         self._bDone = False
         
         self._Subscribers["Path"] = rospy.Subscriber('/path',C31_Waypoints,self._path_cb)
