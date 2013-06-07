@@ -20,7 +20,7 @@ class DynamicLocomotion(RobilTask):
     def __init__(self,name,walkingModeChooser):
         RobilTask.__init__(self, name)
         self._Walker = Walker(walkingModeChooser)
-        self._interval = rospy.Rate(2)
+        self._interval = rospy.Rate(0.6)
     
     def _init_values(self):
         self._debug_cmd = 1 # default value, has no effect
