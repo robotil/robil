@@ -34,7 +34,7 @@ class PlaneRecognitionMonitor(RobilTask):
     def __init__(self, name):
          print "Initializing Plane Recognition Monitor Node"
          #listen to /atlas/imu/pose/pose/orientation
-         #self.subscribers  = rospy.Subscriber('/atlas/imu', Imu, self._get_imu)
+         self.subscribers  = rospy.Subscriber('/atlas/imu', Imu, self._get_imu)
          self.resultPublisher = rospy.Publisher("C35/PlaneRecognitionMonitor",Float32)
          f= open('statistics', 'r')
          for line in f:
