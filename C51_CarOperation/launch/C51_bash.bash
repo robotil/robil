@@ -2,7 +2,7 @@
 rostopic pub --once /drc_world/robot_enter_car geometry_msgs/Pose "position:
   x: 0.0
   y: 0.0
-  z: -0.1
+  z: 0
 orientation:
   x: 0.0
   y: 0.0
