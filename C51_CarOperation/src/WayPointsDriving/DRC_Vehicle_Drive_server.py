@@ -27,7 +27,8 @@ from GUI import App
 from ObsticalDetection import plotG
 import Queue
 import threading
-
+from WheelClient import Wheel_client
+from CalibrateWheel import WheelCalibrate_client, runCalibrate
 LEFT = -1
 RIGHT = 1
 TIME = 4
@@ -91,7 +92,29 @@ def task(root,app,q_in,  q_out):
         root.quit
     
 
-
+def TurnSteering(wheel_Q):
+        Init_Angle=1.57
+        Wheel_before=10
+        while 1:
+            try:
+                host=wheel_Q.get(timeout=0.1)
+            except:
+                host=0
+    
+            
+            print host
+#            if host<-0.5:
+#                host=-1
+#            elif host>0.5:
+#                host=1
+#            else:
+#                host=0
+            if abs(host)>1.5:
+                Wheel_client(Init_Angle, 1.57+host*0.5)
+            else:
+                Wheel_client(Init_Angle, 1.57+host*0.25)
+            Init_Angle=999
+            
 def doGui(q_in, q_out):
     root = Tkinter.Tk()
     
@@ -266,14 +289,25 @@ class Drive(object):
     def DriveCallback(self, goal):
         gasP=Gas() #gas pedal online
         brakeP=Brake() #gas pedal online
-        Steer=SW()      #steering wheel online        
+        #Steer=SW()      #steering wheel online        
         self._result.success = 1
-    
+        
+        
+        #rospy.sleep(5.0)
+        
+        wheel_dat=0
+        wheel_Q = Queue.Queue()
+        wheel_Q.put(wheel_dat)
+        wheel_t = threading.Thread(target=TurnSteering, args =  (wheel_Q,  ) )
+        wheel_t.daemon = True
+        wheel_t.start()
+        
         self.C31_path = numpy.array([])
         self.sub = rospy.Subscriber('/path', C31_Waypoints,self.getPath) #get atlas location by subscribing to C25 module        
-        self.path=  [(51,0), (97, -1.5), (103, 0.5), (149, 47.5), (151.44, 52.5) ]#self.C31_path#(5, -1.5), (18, -1.5),
+        self.path=  [(51,0), (97,0), (102, 5),(113, 13.5),  (146.5, 46.35), (148, 56.45), (148, 92), (160.45, 102), (198, 102) ]#self.C31_path#(5, -1.5), (18, -1.5),
         DATA=LOG()
         DATA.StartDrive = DATA.getTime()
+        
         while not rospy.is_shutdown():
             i=0
             brakeP.brake(0)
@@ -326,16 +360,22 @@ class Drive(object):
 #                            print "without:", Cspeed                                    
                             [dSpeed, Cspeed]=P2P(self.DistanceToWP(object), self.OE[0], self.dOE, factor)
 #                            print "with:", Cspeed
-
-                            rospy.sleep(0.05)
-
-                            [  acc, brk] = self.SpeedController(dSpeed)
-                            Cspeed = -Cspeed*pi
+                            
+                            #rospy.sleep(0.05)
+                            #dSpeed = 0.5
+                            [  acc, brk] = self.SpeedController(dSpeed/2.5)
+                            Cspeed = Cspeed*pi
                             #print brk, acc
                             #rospy.sleep(0.5)
+                            
                             gasP.gas(acc)
                             brakeP.brake(brk)
-                            Steer.turn(Cspeed)
+                            while not wheel_Q.empty():
+                                a = wheel_Q.get()
+                            #print "sending"
+                            wheel_Q.put(Cspeed)
+                            
+                            #Steer.turn(Cspeed)
                             self.rtd.object=object
                             self.rtd.location = [self.xPosition,self.yPosition]
                             self.rtd.speed = dSpeed
@@ -357,7 +397,6 @@ class Drive(object):
                         self._as.publish_feedback(self._feedback)
                         print "arrived at Way point"
                         print "-------------------------------"
-
                     i+=1
                     
             self.path=self.C31_path #[]#
@@ -531,18 +570,18 @@ class Brake:
     def brake(self, num):
         self.pub.publish(num)
 
-class SW:
-    status=0
-    pub=0
-    sub=0
-    def __init__(self):
-        self.pub = rospy.Publisher(car+'/hand_wheel/cmd', Float64)
-        self.sub = rospy.Subscriber('/'+car+'/hand_wheel/state', Float64, self.SWCallback)
-    def SWCallback(self, data):
-        self.status=data.data
-
-    def turn(self, num):
-        self.pub.publish(num)
+#class SW:
+#    status=0
+#    pub=0
+#    sub=0
+#    def __init__(self):
+#        self.pub = rospy.Publisher(car+'/hand_wheel/cmd', Float64)
+#        self.sub = rospy.Subscriber('/'+car+'/hand_wheel/state', Float64, self.SWCallback)
+#    def SWCallback(self, data):
+#        self.status=data.data
+#
+#    def turn(self, num):
+#        self.pub.publish(num)
 #==============================================================================================#
 #==============================================================================================#
 
