@@ -1,0 +1,12 @@
+roslaunch C21_VisionAndLidar C21.launch 
+roslaunch C22_CompactGroundRecognitionAndMapping C22_Cheats.launch 
+rosrun C25_GlobalPosition  C25
+
+#need to move neck down for C22
+
+
+rosrun FootPlacement  FootPlacement
+
+#change FakePath.cpp to include real path
+rosrun FootPlacement FakePath 
+

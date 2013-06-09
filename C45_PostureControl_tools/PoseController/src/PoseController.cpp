@@ -1,6 +1,8 @@
 #include <ros/ros.h>
 #include <atlas_msgs/AtlasCommand.h>
 #include <atlas_msgs/AtlasState.h>
+#include <atlas_msgs/AtlasSimInterfaceState.h>
+#include <atlas_msgs/AtlasSimInterfaceCommand.h>
 #include <sensor_msgs/JointState.h>
 #include <osrf_msgs/JointCommands.h>
 #include <std_msgs/Float64.h>
@@ -19,11 +21,12 @@ private:
 	std::map <std::string, int> joints;
 	std::vector<double> joint_positions, wanted_positions, kp_positions;
 	ros::Publisher pub_atlas_commands_,pub_joint_states_;
-	ros::Subscriber joint_states_sub_;
+	ros::Subscriber joint_states_sub_, atlas_sim_int_state_sub_;
 	ros::ServiceServer hand_service, foot_service, back_service, neck_service, reset_service, start_service, stop_service;
 	ros::ServiceServer delta_hand_service, delta_foot_service, delta_back_service, delta_neck_service;
 	osrf_msgs::JointCommands jointcommands;
 	atlas_msgs::AtlasCommand atlascommand;
+	atlas_msgs::AtlasSimInterfaceState atlassimintstate;
 	bool up, waitForJointStates;
 public:
 	PoseControllerClass(std::string name):action_name_(name),up(false){
@@ -58,6 +61,8 @@ public:
 			ros::spinOnce();
 			ros::Duration(0.05).sleep();
 		}
+
+		atlas_sim_int_state_sub_ = nh_.subscribe("/atlas/atlas_sim_interface_state", 100, &PoseControllerClass::atlas_sim_int_state_CB,this);
 
 		jointcommands.name.push_back("atlas::back_lbz");
 		jointcommands.name.push_back("atlas::back_mby");
@@ -153,6 +158,10 @@ public:
 			this->reset_joints_CB(e.request, e.response);
 			waitForJointStates = true;
 		}
+	}
+
+	void atlas_sim_int_state_CB(const atlas_msgs::AtlasSimInterfaceStateConstPtr& state){
+		atlassimintstate.desired_behavior = state->desired_behavior;
 	}
 
 	bool reset_joints_CB(std_srvs::Empty::Request &req, std_srvs::Empty::Response &res){
@@ -430,6 +439,54 @@ public:
 			atlascommand.kp_position[atlas_msgs::AtlasState::back_ubx] = 1000;
 			atlascommand.ki_position[atlas_msgs::AtlasState::back_ubx] = 10;
 			atlascommand.kd_position[atlas_msgs::AtlasState::back_ubx] = 50;
+
+			switch(atlassimintstate.desired_behavior){
+			case atlas_msgs::AtlasSimInterfaceCommand::USER:
+				for(int i = 0; i < (int) atlascommand.position.size(); i++){
+					atlascommand.k_effort[i] = 255;
+				}
+				break;
+
+			case atlas_msgs::AtlasSimInterfaceCommand::MANIPULATE:
+				atlascommand.k_effort[atlas_msgs::AtlasState::back_lbz] = 255;
+				atlascommand.k_effort[atlas_msgs::AtlasState::back_mby] = 255;
+				atlascommand.k_effort[atlas_msgs::AtlasState::back_ubx] = 255;
+				atlascommand.k_effort[atlas_msgs::AtlasState::neck_ay] = 255;
+
+				atlascommand.k_effort[atlas_msgs::AtlasState::l_arm_usy] = 255;
+				atlascommand.k_effort[atlas_msgs::AtlasState::l_arm_shx] = 255;
+				atlascommand.k_effort[atlas_msgs::AtlasState::l_arm_ely] = 255;
+				atlascommand.k_effort[atlas_msgs::AtlasState::l_arm_elx] = 255;
+				atlascommand.k_effort[atlas_msgs::AtlasState::l_arm_uwy] = 255;
+				atlascommand.k_effort[atlas_msgs::AtlasState::l_arm_mwx] = 255;
+				atlascommand.k_effort[atlas_msgs::AtlasState::r_arm_usy] = 255;
+				atlascommand.k_effort[atlas_msgs::AtlasState::r_arm_shx] = 255;
+				atlascommand.k_effort[atlas_msgs::AtlasState::r_arm_ely] = 255;
+				atlascommand.k_effort[atlas_msgs::AtlasState::r_arm_elx] = 255;
+				atlascommand.k_effort[atlas_msgs::AtlasState::r_arm_uwy] = 255;
+				atlascommand.k_effort[atlas_msgs::AtlasState::r_arm_mwx] = 255;
+
+				atlascommand.k_effort[atlas_msgs::AtlasState::l_leg_uhz] = 0;
+				atlascommand.k_effort[atlas_msgs::AtlasState::l_leg_mhx] = 0;
+				atlascommand.k_effort[atlas_msgs::AtlasState::l_leg_lhy] = 0;
+				atlascommand.k_effort[atlas_msgs::AtlasState::l_leg_kny] = 0;
+				atlascommand.k_effort[atlas_msgs::AtlasState::l_leg_uay] = 0;
+				atlascommand.k_effort[atlas_msgs::AtlasState::l_leg_lax] = 0;
+				atlascommand.k_effort[atlas_msgs::AtlasState::r_leg_uhz] = 0;
+				atlascommand.k_effort[atlas_msgs::AtlasState::r_leg_mhx] = 0;
+				atlascommand.k_effort[atlas_msgs::AtlasState::r_leg_lhy] = 0;
+				atlascommand.k_effort[atlas_msgs::AtlasState::r_leg_kny] = 0;
+				atlascommand.k_effort[atlas_msgs::AtlasState::r_leg_uay] = 0;
+				atlascommand.k_effort[atlas_msgs::AtlasState::r_leg_lax] = 0;
+				break;
+
+			default:
+				for(int i = 0; i < (int) atlascommand.position.size(); i++){
+					atlascommand.k_effort[i] = 0;
+				}
+				break;
+			}
+
 
 			if(up){
 				pub_atlas_commands_.publish(atlascommand);
