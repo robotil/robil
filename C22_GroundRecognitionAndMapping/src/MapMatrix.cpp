@@ -208,15 +208,6 @@ void MapMatrix::computeMMatrix(std::vector<pclPlane*>* mapPlanes,pcl::PointCloud
 								}
 							}
 							if(ms->square_status!=BLOCKED && ms->square_status!=DEBREE){
-								double a=tempPlane->coefficient_x;
-								double b=tempPlane->coefficient_y;
-								double c=tempPlane->coefficient_z;
-								double ang1 = std::acos((c)/std::sqrt(a*a+b*b+c*c))*180/M_PI;
-								double ang2 = std::acos((a)/std::sqrt(a*a+b*b+c*c))*180/M_PI;
-								double ang3 = std::acos((b)/std::sqrt(a*a+b*b+c*c))*180/M_PI;
-								if(std::abs(ang1)<6 && std::abs(ang1)>2)
-									ms->square_status = HILL;
-								else
 									ms->square_status = AVAILABLE;
 							}
 						}
@@ -226,7 +217,6 @@ void MapMatrix::computeMMatrix(std::vector<pclPlane*>* mapPlanes,pcl::PointCloud
 							 temp->representing_point.z=p.z;
 							 temp->representing_point.y=p.y;
 							 temp->representing_point.x=p.x;
-
 						 }
 					}
 				}

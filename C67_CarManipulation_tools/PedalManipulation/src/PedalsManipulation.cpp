@@ -41,7 +41,7 @@ public:
 		move_right_pedal_subcriber = n.subscribe("/PedalsManipulation/move_right_pedal", 1, &pedals_manipulation::move_right_pedal, this);
 		move_left_pedal_subcriber = n.subscribe("/PedalsManipulation/move_left_pedal", 1, &pedals_manipulation::move_left_pedal, this);
 
-		joint_states_sub_ = n2.subscribe("/PoseController/joint_states",	100, &pedals_manipulation::joint_states_CB,this);
+		joint_states_sub_ = n2.subscribe("/PoseController/joint_states", 100, &pedals_manipulation::joint_states_CB,this);
 
 		walk_legs_by_pelvis_client = n.serviceClient<move_pelvis::move_pelvis>("/move_leg_by_pelvis");
 		posecontroller_foot_client = n.serviceClient<PoseController::foot_movement>("/PoseController/delta_foot_movement");

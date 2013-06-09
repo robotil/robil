@@ -5,23 +5,18 @@
 struct XY{public: double x,y;};
 
 int main(int argc,char**argv){
-	 ros::init(argc, argv, "c22_tester");
-	 ros::NodeHandle n;
-	 ros::ServiceClient client = n.serviceClient<C22_GroundRecognitionAndMapping::C22>("C22");
-	 C22_GroundRecognitionAndMapping::C22 srv;
-	 /*
-	  *  at the moment the C22_node has no use for the data input,
-	  *  once called it will reply a with a matrix repenting the terrain status in a 25x25x25 cm^3 resolution
-	  *
-	  */
-		  if (client.call(srv))
-		  {
-			 C22_transform trans;
-			 XY bot;
-			 trans.GlobalToMap(srv.response.drivingPath, srv.response.drivingPath.robotPos, bot);
-			 std::cout<<"Global position in map: GLOBAL("<<srv.response.drivingPath.robotPos.x<<","<<srv.response.drivingPath.robotPos.y<<") -> MAP("<<bot.x<<","<<bot.y<<")\n";
-		  }else{
-			  std::cout<<"service fail\n";
-		  }
-		  return 0;
+
+	 C22_transform trans;
+	 C22_transform::MapProperties prop(Vec2d(-10,-12) , 0.25, 0, true);
+//	 Vec2d A(2,-2), B(10,10), C(0,0);
+	 Vec2d A(-0.498,0), B(6,0), C(5.5,0);
+	 Vec2d TM(0,0), TW(0,0);
+
+#define TEST(A) trans.GlobalToMap(prop, A, TM); trans.MapToGlobal(prop, TM, TW); std::cout<<" "<< #A <<"  W:"<< A << " --> M:"<< TM << " --> W:"<< TW << std::endl;
+
+	 TEST(A)
+	 TEST(B)
+	 TEST(C)
+
+	 return 0;
 }

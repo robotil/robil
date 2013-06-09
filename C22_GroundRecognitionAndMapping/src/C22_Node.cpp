@@ -190,6 +190,7 @@ bool C22_Node::proccess(C22_GroundRecognitionAndMapping::C22::Request  &req,
 		for(unsigned int j=0;j<_myMatrix->data->at(i)->size();j++){
 			res.drivingPath.row.at(i).column.at(j).status=_myMatrix->data->at(i)->at(j)->square_status;
 			res.drivingPath.row.at(i).column.at(j).planes.resize(_myMatrix->data->at(i)->at(j)->square_Planes->size());
+			res.drivingPath.row.at(i).column.at(j).height=_myMatrix->data->at(i)->at(j)->square_Planes->at(0)->representing_point.z;
 			for(unsigned int k=0;k<_myMatrix->data->at(i)->at(j)->square_Planes->size();k++){
 				res.drivingPath.row.at(i).column.at(j).planes.at(k).x=_myMatrix->data->at(i)->at(j)->square_Planes->at(k)->coefficient_x;
 				res.drivingPath.row.at(i).column.at(j).planes.at(k).y=_myMatrix->data->at(i)->at(j)->square_Planes->at(k)->coefficient_y;
@@ -198,6 +199,8 @@ bool C22_Node::proccess(C22_GroundRecognitionAndMapping::C22::Request  &req,
 				res.drivingPath.row.at(i).column.at(j).planes.at(k).repPoint.x=_myMatrix->data->at(i)->at(j)->square_Planes->at(k)->representing_point.x;
 				res.drivingPath.row.at(i).column.at(j).planes.at(k).repPoint.y=_myMatrix->data->at(i)->at(j)->square_Planes->at(k)->representing_point.y;
 				res.drivingPath.row.at(i).column.at(j).planes.at(k).repPoint.z=_myMatrix->data->at(i)->at(j)->square_Planes->at(k)->representing_point.z;
+				if(res.drivingPath.row.at(i).column.at(j).height>_myMatrix->data->at(i)->at(j)->square_Planes->at(k)->representing_point.z)
+					res.drivingPath.row.at(i).column.at(j).height=_myMatrix->data->at(i)->at(j)->square_Planes->at(k)->representing_point.z;
 			}
 		}
 	}

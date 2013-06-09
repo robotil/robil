@@ -31,8 +31,10 @@ public class DocumentMouseHandler extends MouseAdapter {
 		} else {
 			Vec d = new Vec(e.getPoint()).sub(new Vec(this._document.mousePressed)).scale(1 / this._document.view.zoom);
 			this._document.selectedElement.getProperty().location.setOffset(d);
-			for (GElement el : this._document.searchAllSubelements(this._document.selectedElement)) {
-				el.getProperty().location.setOffset(d);
+			if(this._document.selectedElement.isJoint()==false){
+				for (GElement el : this._document.searchAllSubelements(this._document.selectedElement)) {
+					el.getProperty().location.setOffset(d);
+				}
 			}
 			this._document.mousePressed = e.getPoint();
 		}

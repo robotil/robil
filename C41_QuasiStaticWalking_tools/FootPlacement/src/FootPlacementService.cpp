@@ -16,6 +16,8 @@ FootPlacementService::FootPlacementService() {
 			boost::bind( &FootPlacementService::getPath,this,_1),
 		    ros::VoidPtr(), nh.getCallbackQueue());
 	pathSub = nh.subscribe(pathSo);
+	footPlacementPathPublisher = nh.advertise<FootPlacement::Foot_Placement_path>("foot_placement", 1, true);
+	walkNotificationPublisher = nh.advertise<C42_WalkType::extreme_slope>("walk_notification/exterme_slope", 1, true);
 }
 
 /*
@@ -71,6 +73,9 @@ bool FootPlacementService::callback(FootPlacement::FootPlacement_Service::Reques
 		printf("ERROR! NO MAP SERVICE!\n");
 		return false;
 	}
+	FootPlacement::Foot_Placement_path footPlacementPath;
+	footPlacementPath.foot_placement_path = res.foot_placement_path;
+	footPlacementPathPublisher.publish(footPlacementPath);
 	return true;
 }
 
@@ -79,9 +84,17 @@ bool FootPlacementService::callback(FootPlacement::FootPlacement_Service::Reques
  */
 void FootPlacementService::getPath(const C31_PathPlanner::C31_Waypoints::ConstPtr& points) {
 	pathPoints = points;
-	printf("Receieved path:\n");
+	printf("Received path:\n");
 	for (unsigned long i = 0; i < points->points.size(); i++)
 		printf("  point %lu: %lf %lf\n", i, points->points[i].x, points->points[i].y);
+}
+
+/*
+ * publishing an empty extreme slope message
+ */
+void FootPlacementService::publishExtremeSlopeMsg() {
+	C42_WalkType::extreme_slope emptyMsg;
+	walkNotificationPublisher.publish(emptyMsg);
 }
 
 /*

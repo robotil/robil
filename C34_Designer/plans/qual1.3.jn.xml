@@ -3,7 +3,6 @@
          <par name="@1"> 
                <par name="Perception"> 
                      <tsk name="LocalizationTrack" />
-                     <tsk name="ObstacleDetection" />
                      <tsk name="PathPlanning" />
                </par>
                <par name="MissionProgress"> 
@@ -11,7 +10,7 @@
                         <seq name="Mission"> 
                               <tsk name="StandUp" />
                               <par name="@3"> 
-                                    <tsk name="Monitor(target=Falling)" />
+                                    <tsk name="FallingMonitor" />
                                     <seq name="SearchObjectAndGo"> 
                                        <dec name="!L!"> 
                                              <tsk name="PathPlanningFocus(target=Gate)" />
@@ -19,17 +18,12 @@
                                        <dec name="L"> 
                                              <seq name="SearchPathAndGo"> 
                                                 <dec name="!L!"> 
-                                                      <tsk name="SearchObject(target=Gate)" />
+                                                      <tsk name="searchObject(target=Gate)" />
                                                 </dec>
                                                 <dec name="!L!"> 
                                                       <sel name="PathFollow"> 
                                                             <par name="Zmp"> 
-                                                                  <tsk name="whileInZmpArea" />
-                                                                  <tsk name="ZmpWalk" />
-                                                            </par>
-                                                            <par name="QS"> 
-                                                                  <tsk name="whileInQSArea" />
-                                                                  <tsk name="QuasiStaticWalk" />
+                                                                  <tsk name="WalkerNode_Continuous" />
                                                             </par>
                                                       </sel>
                                                 </dec>
