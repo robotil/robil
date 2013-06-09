@@ -72,10 +72,13 @@ class CD_PhantomRobot(CD_Robot):
         pass
 
     def EndOfSegment(self):
-        pass
+        return self._LPP.EndOfSegment()
 
     def PrepareNextSegment(self):
-        pass
+        if (self._LPP.EndOfPath()):
+            pass
+        else:
+            pass
 
     def GetIndex(self):
         pass
