@@ -1,5 +1,4 @@
-<?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<diagram program="umlet" version="11.4">
+<?xml version="1.0" encoding="UTF-8"?><diagram program="umlet" version="11.3">
   <zoom_level>10</zoom_level>
   <element>
     <type>com.umlet.element.Class</type>
@@ -16,12 +15,12 @@
   <element>
     <type>com.umlet.element.Class</type>
     <coordinates>
-      <x>600</x>
+      <x>560</x>
       <y>180</y>
-      <w>100</w>
+      <w>140</w>
       <h>30</h>
     </coordinates>
-    <panel_attributes>CD Walker</panel_attributes>
+    <panel_attributes>CD WalkingMode</panel_attributes>
     <additional_attributes/>
   </element>
   <element>
@@ -50,7 +49,7 @@
     <type>com.umlet.element.Class</type>
     <coordinates>
       <x>330</x>
-      <y>500</y>
+      <y>430</y>
       <w>110</w>
       <h>30</h>
     </coordinates>
@@ -64,10 +63,10 @@
       <x>350</x>
       <y>340</y>
       <w>190</w>
-      <h>180</h>
+      <h>110</h>
     </coordinates>
     <panel_attributes>lt=&lt;&lt;&lt;&lt;-</panel_attributes>
-    <additional_attributes>170;30;30;160</additional_attributes>
+    <additional_attributes>170;30;30;90</additional_attributes>
   </element>
   <element>
     <type>com.umlet.element.Class</type>
@@ -167,5 +166,16 @@
     </coordinates>
     <panel_attributes>CD State Machine</panel_attributes>
     <additional_attributes/>
+  </element>
+  <element>
+    <type>com.umlet.element.Relation</type>
+    <coordinates>
+      <x>600</x>
+      <y>180</y>
+      <w>50</w>
+      <h>100</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;&lt;&lt;&lt;-</panel_attributes>
+    <additional_attributes>30;30;30;80</additional_attributes>
   </element>
 </diagram>

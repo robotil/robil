@@ -38,8 +38,7 @@ class CD_WalkingMode(WalkingMode):
         self.step_index_for_reset = 0
         # Initialize atlas mode and atlas_sim_interface_command publishers        
         self.asi_command = rospy.Publisher('/atlas/atlas_sim_interface_command', AtlasSimInterfaceCommand, None, False, True, None)
-        self._realRobot = CD_RealRobot(self._LPP)
-        self._phantomRobot = CD_PhantomRobot(CD_PathPlanner(),Odometer())
+        self._CD_StateMachine = _CD_StateMachine(self._LPP)
         
         self._bDone = False
 
@@ -56,9 +55,8 @@ class CD_WalkingMode(WalkingMode):
         
     def Initialize(self,parameters):
         WalkingMode.Initialize(self,parameters)
-        self._realRobot.Initialize()
-        self._phantomRobot.Initialize()
-        
+        self._CD_StateMachine.Initialize()
+                
         # Subscriber
         self._Subscribers["Path"] = rospy.Subscriber('/path',C31_Waypoints,self._path_cb)
         self._Subscribers["Odometry"] = rospy.Subscriber('/C25/publish',C25C0_ROP,self._odom_cb)
@@ -69,6 +67,7 @@ class CD_WalkingMode(WalkingMode):
         rospy.sleep(0.3)
     
         self._bDone = False
+        self._yaw = 0
         
         k_effort = [0] * 28
         k_effort[0:4] = 4*[255]
@@ -106,14 +105,15 @@ class CD_WalkingMode(WalkingMode):
     def HandleStateMsg(self,state):
         command = 0
         if ("Idle" == self._WalkingModeStateMachine.GetCurrentState().Name):
-            self._phantomRobot.SetPosition(state.pos_est.position.x,state.pos_est.position.y)
+            self._CD_StateMachine.SetPhantomPosition(state.pos_est.position.x,state.pos_est.position.y)
+            self._CD_StateMachine.SetPhantomYaw(self._yaw)
         elif ("Wait" == self._WalkingModeStateMachine.GetCurrentState().Name):
-            self._phantomRobot.SetPosition(state.pos_est.position.x,state.pos_est.position.y)
+            self._CD_StateMachine.SetPhantomPosition(state.pos_est.position.x,state.pos_est.position.y)
+            self._CD_StateMachine.SetPhantomYaw(self._yaw)
             self._WalkingModeStateMachine.PerformTransition("Go")
         elif ("Walking" == self._WalkingModeStateMachine.GetCurrentState().Name):
-            self._PhantomRobot.Step()
-            command = self._realRobot.GetCommand()
-            if (self._realRobot.IsDone()):
+            command = self._CD_StateMachine.Step()
+            if (self._CD_StateMachine.IsDone()):
                 self._WalkingModeStateMachine.PerformTransition("Finished")
         elif ("Done" == self._WalkingModeStateMachine.GetCurrentState().Name):
             self._bDone = True
@@ -132,7 +132,7 @@ class CD_WalkingMode(WalkingMode):
         for wp in path.points:
             p.append(Waypoint(wp.x,wp.y))
         self.SetPath(p)
-        self._phantomRobot.SetPath(p)
+        self._CD_StateMachine.SetPath(p)
 
     def _get_joints(self,msg):
         self._cur_jnt = msg.position
@@ -140,7 +140,7 @@ class CD_WalkingMode(WalkingMode):
     # /atlas/atlas_sim_interface_state callback. Before publishing a walk command, we need
     # the current robot position   
     def asi_state_cb(self, state):
-        if(self._phantomRobot.GetIndex() < state.walk_feedback.next_step_index_needed):
+        if(self._CD_StateMachine.GetIndex() < state.walk_feedback.next_step_index_needed):
             command = self.HandleStateMsg(state)
         self._bDone = self._WalkingModeStateMachine.IsDone()
         if (0 !=command):
@@ -148,10 +148,10 @@ class CD_WalkingMode(WalkingMode):
 
     def _odom_cb(self,odom):
         # SHOULD USE:
-        self._realRobot.UpdatePosition(odom.pose.pose.pose.position.x,odom.pose.pose.pose.position.y) # from C25_GlobalPosition
+        self._CD_StateMachine.UpdateActualPosition(odom.pose.pose.pose.position.x,odom.pose.pose.pose.position.y) # from C25_GlobalPosition
         #self._LPP.UpdatePosition(odom.pose.pose.position.x,odom.pose.pose.position.y) # from /ground_truth_odom
  
     def _get_imu(self,msg):  #listen to /atlas/imu/pose/pose/orientation
-        roll, pitch, yaw = euler_from_quaternion([msg.orientation.x, msg.orientation.y, msg.orientation.z, msg.orientation.w])
-        self._realRobot.SetYaw(yaw)
+        roll, pitch, self._yaw = euler_from_quaternion([msg.orientation.x, msg.orientation.y, msg.orientation.z, msg.orientation.w])
+        self._CD_StateMachine.UpdateActualYaw(self._yaw)
 

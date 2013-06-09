@@ -3,7 +3,6 @@
 from collections import deque
 from Abstractions.PathPlanner import *
 import math
-import rospy    # TODO - get rid of all these loginfo when done debugging
 
 ###################################################################################
 # File created by David Dovrat, 2013.
@@ -50,38 +49,6 @@ class Waypoint(object):
         res = Waypoint()
         res._fX = self._fX - otherWaypoint._fX
         res._fY = self._fY - otherWaypoint._fY
-        return res
-
-###################################################################################
-#---------------------------------- FootPlacement --------------------------------------
-###################################################################################
-
-class FootPlacement(Waypoint):
-    """
-        The FootPlacement class is the basic building block foot foot placement path
-    """   
-    def __init__(self,CoordinateX = 0.0,CoordinateY = 0.0,Yaw = 0.0):
-        Waypoint.__init__(self,CoordinateX,CoordinateY)
-        self._fYaw = Yaw
-        
-    def GetYaw(self):
-        return self._fYaw
-    
-    def SetYaw(self,Yaw):
-        self._fYaw = Yaw
-
-    def Add(self,FootPlacement):
-        res = FootPlacement()
-        res._fX = self._fX + FootPlacement._fX
-        res._fY = self._fY + FootPlacement._fY
-        res._fYaw = self._fYaw + FootPlacement._fYaw
-        return res
-
-    def Sub(self,FootPlacement):
-        res = FootPlacement()
-        res._fX = self._fX - FootPlacement._fX
-        res._fY = self._fY - FootPlacement._fY
-        res._fYaw = self._fYaw - FootPlacement._fYaw
         return res
         
 ###################################################################################
@@ -178,9 +145,7 @@ class CD_PathPlanner(PathPlanner):
         self._Position = Waypoint()
         self._CurrentSegment = Segment(self._Position,self._Position)
         self._PathReady = False
-        #self._Preview_Distance = 1.0 #1.7 # [meters], should be updated according to distance of number of step ahead 
-        self._DoingQual = False
-        
+  
     def SetPath(self,waypointList):
         self._Path = deque(waypointList)
         if (len(self._Path)<2):
@@ -262,12 +227,6 @@ class CD_PathPlanner(PathPlanner):
 
     def GetTargetDistance(self):
         return self._CurrentSegment.GetTarget().GetDistanceFrom(self._Position) - self.GetCloseEnoughToTargetDistance()
-
-    def SetDoingQual(self,DoingQual):
-        self._DoingQual = DoingQual
-
-    def GetDoingQual(self):
-        return self._DoingQual
 
 
 ###################################################################################
