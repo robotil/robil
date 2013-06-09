@@ -26,13 +26,10 @@ class CD_Robot(object):
         self._StepQueue = stepQueue
 
     def SetPosition(self,x,y):
-        pass
-
-    def SetYaw(self,yaw):
-        pass
+        self._LPP.UpdatePosition(x,y)
 
     def SetPath(self,path):
-        pass
+        self._LPP.SetPath(path)
 
 ###################################################################################
 #-------------------------------- Actual Bot --------------------------------------
@@ -44,13 +41,24 @@ class CD_ActualRobot(CD_Robot):
     """
     def __init__(self,pathPlanner,stepQueue):
         CD_Robot.__init__(self,pathPlanner,stepQueue)
+        self._Yaw = 0
 
     def Step(self):
-        pass
+        step_queue = []
+        for i in range(4):
+            step_queue.append(self._StepQueue[i])
+        self._Queue.popleft()
+        return step_queue
 
-    def EndOfPath(self):
-        pass
-
+    def IsEndOfPath(self):
+        return self._LPP.IsEndOfPath()
+    
+    def GetPathError(self):
+        return self._LPP.GetPathError()
+    
+    def SetYaw(self,yaw):
+        self._Yaw = yaw
+    
 ###################################################################################
 #-------------------------------- Phantom Bot -------------------------------------
 ###################################################################################
@@ -63,22 +71,108 @@ class CD_PhantomRobot(CD_Robot):
         CD_Robot.__init__(self,pathPlanner,stepQueue)
         self._Odometer = odometer
         self._index = 0
+        
+        # Parameters
+        self._StepLength = 0.3
+        self._StepWidth = 0.15
+        self._Duration = 0.63
+        self._SwingHeight  = 0.2
+        self._MinimalCorrection = 0.02
+        self._ErrorCorrection = self._StepWidth
 
     def Initialize(self,stepQueue,index):
         CD_Robot.Initialize(self,stepQueue)
         self._index = index
+        self._Error = 0
 
     def Step(self):
-        pass
+        step_queue.append(_ForwardStep())
 
     def EndOfSegment(self):
         return self._LPP.EndOfSegment()
 
     def PrepareNextSegment(self):
-        if (self._LPP.EndOfPath()):
-            pass
+        if (self._LPP.IsEndOfPath()):
+            self._AddIdleSteps()
         else:
-            pass
+            self._Turn()
+            self._AddIdleSteps()
+            self._LPP.PromoteSegment()
 
     def GetIndex(self):
+        self._index 
+    
+    def SetPathError(self,error):
+        self._Error = error
+
+    def SetYaw(self,yaw):
+        self._Odometer.SetYaw(yaw)
+        
+    def _ForwardStep(self):
+        self._index  += 1
+        command = AtlasSimInterfaceCommand()
+        
+        stepData = command.walk_params.step_queue[0]
+        stepData.step_index = self._index
+        stepData.foot_index = self._index%2
+
+        stepData.duration = self._Duration
+        stepData.swing_height = self._SwingHeight
+
+        stepData.pose.position.z = 0.0
+
+        # Correct Lateral Error
+        errorCorrected = 0
+        # Correct only when needed
+        if (math.fabs(self._Error) > self._MinimalCorrection):   
+            if(math.fabs(self._Error) < self._ErrorCorrection):
+                errorCorrected = -self._Error/4
+            else:
+                errorCorrected = -self._ErrorCorrection*(self._Error/math.fabs(self._Error))/4 
+
+        x = self._StepLength
+        y = self._StepWidth if (index%2==0) else -self._StepWidth
+        y += errorCorrected
+        self._Odometer.AddLocalPosition(x,y)
+        stepData.pose.position.x,stepData.pose.position.y = self._Odometer.GetGlobalPosition()
+
+        # Calculate orientation quaternion
+        Q = quaternion_from_euler(0, 0, self._Odometer.GetYaw())
+
+        stepData.pose.orientation.x = Q[0]
+        stepData.pose.orientation.y = Q[1]
+        stepData.pose.orientation.z = Q[2]
+        stepData.pose.orientation.w = Q[3]
+
+        return stepData
+    
+    def _AddIdleSteps():
+        self._index  += 1
+        command = AtlasSimInterfaceCommand()
+        
+        stepData = command.walk_params.step_queue[0]
+        stepData.step_index = self._index
+        stepData.foot_index = self._index%2
+
+        stepData.duration = self._Duration
+        stepData.swing_height = self._SwingHeight
+
+        stepData.pose.position.z = 0.0
+        x = 0
+        y = self._StepWidth if (index%2==0) else -self._StepWidth
+        self._Odometer.AddLocalPosition(x,y)
+        stepData.pose.position.x,stepData.pose.position.y = self._Odometer.GetGlobalPosition()
+
+        # Calculate orientation quaternion
+        Q = quaternion_from_euler(0, 0, self._Odometer.GetYaw())
+
+        stepData.pose.orientation.x = Q[0]
+        stepData.pose.orientation.y = Q[1]
+        stepData.pose.orientation.z = Q[2]
+        stepData.pose.orientation.w = Q[3]
+        
+        return stepData
+    
+    def _Turn(self):
         pass
+    

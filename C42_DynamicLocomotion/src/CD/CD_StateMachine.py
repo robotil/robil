@@ -58,6 +58,7 @@ class CD_StateMachine(StateMachine):
                 else:
                     raise StateMachineError("CD_StateMachine::Step() - could not perform transition 'Both'") 
         elif ('BothWalking' == self._CurrentState.Name):
+            self._phantomRobot.SetPathError(self._actualRobot.GetPathError())
             self._phantomRobot.Step()
             command = self._actualRobot.Step()
             if (self._phantomRobot.EndOfSegment()):
@@ -69,13 +70,12 @@ class CD_StateMachine(StateMachine):
         elif ('WaitingForActual' == self._CurrentState.Name):
             command = self._actualRobot.Step()
             if (5 > len(self._StepQueue)):
-                if (self._actualRobot.EndOfPath()):
+                if (self._actualRobot.IsEndOfPath()):
                     if (StateMachine.PerformTransition(self,'None')):
                         print("CD_StateMachine::Idle")
                         self._bIsDone = True
                     else:
-                        raise StateMachineError("CD_StateMachine::Step() - could not perform transition 'None'") 
-                    else:
+                        raise StateMachineError("CD_StateMachine::Step() - could not perform transition 'None'")
         else:
             raise StateMachineError("CD_StateMachine::Step() - unknown state")
         return command

@@ -145,6 +145,8 @@ class CD_PathPlanner(PathPlanner):
         self._Position = Waypoint()
         self._CurrentSegment = Segment(self._Position,self._Position)
         self._PathReady = False
+        self._EndOfPath = False
+        self._EndOfSegment = False
   
     def SetPath(self,waypointList):
         self._Path = deque(waypointList)
@@ -158,7 +160,9 @@ class CD_PathPlanner(PathPlanner):
         else:
             self._CurrentSegment.SetSource(self._Path.popleft())
             self._CurrentSegment.SetTarget(self._Path.popleft()) 
-        self._PathReady = True   
+        self._PathReady = True
+        self._EndOfPath = False
+        self._EndOfSegment = False   
         
     def GetPath(self):
         return self._Path
@@ -189,41 +193,39 @@ class CD_PathPlanner(PathPlanner):
                 result = math.fabs(turningRadius*math.tan(theta/2)) # Ask Dave
         #rospy.loginfo('GetCloseEnoughToTargetDistance: %f, theta = %f' %(result,theta))
         return result
-
-    # def GetCloseEnoughToTargetDistanceWithPreview(self):
-    #     return self.GetCloseEnoughToTargetDistance() + self._Preview_Distance
-            
+ 
     def UpdatePosition(self,CoordinateX,CoordinateY,Preview_Distance=0.0):
         """
             Updates the position, returns true if at end of current path, false otherwise
         """
         self._Position.SetX(CoordinateX)
         self._Position.SetY(CoordinateY)
-        bStop = False
         if self.IsActive():
             sagital,lateral = self._CurrentSegment.GetDistanceFrom(self._Position)
             distanceFromTarget = self._CurrentSegment.GetTarget().GetDistanceFrom(self._Position)
             #rospy.loginfo('UpdatePosition: distanceFromTarget = %f' %(distanceFromTarget))
             if ((sagital>0.0)or(distanceFromTarget < (self.GetCloseEnoughToTargetDistance()+Preview_Distance) )):
                 rospy.loginfo('UpdatePosition: distanceFromTarget = %f' %(distanceFromTarget))
+                self._EndOfSegment = True
                 if(len(self._Path)==0):
-                    bStop = True
-                    self._PathReady = False
-                    #rospy.loginfo('UpdatePosition: Stopping')
-                else:
-                    rospy.loginfo('UpdatePosition: Path next point before pop (x,y) = (%f,%f)' %(self._Path[0].GetX(),self._Path[0].GetY()))
-                    self._CurrentSegment.SetSource(self._CurrentSegment.GetTarget())
-                    self._CurrentSegment.SetTarget(self._Path.popleft())
-                #rospy.loginfo('UpdatePosition:  New Segment: Size = %s' %(self._CurrentSegment._Source.GetDistanceFrom(self._CurrentSegment._Target) ) )
-        else:
-            bStop = True
-        return bStop
+                    self._EndOfPath = True
         
+    def PromoteSegment(self):
+        self._CurrentSegment.SetSource(self._CurrentSegment.GetTarget())
+        self._CurrentSegment.SetTarget(self._Path.popleft())
+        self._EndOfSegment = False
+    
     def Stop(self):
         self._PathReady = False 
 
     def IsActive(self):
         return self._PathReady
+    
+    def IsEndOfSegment(self):
+        return self._EndOfSegment
+    
+    def IsEndOfPath(self):
+        return self._EndOfPath
 
     def GetTargetDistance(self):
         return self._CurrentSegment.GetTarget().GetDistanceFrom(self._Position) - self.GetCloseEnoughToTargetDistance()
