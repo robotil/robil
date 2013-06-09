@@ -229,7 +229,7 @@ class DW_Controller(object):
         self._counter = 0
         self._terrain = Terrain
         self._fall_count = 0
-        self._FALL_LIMIT = 3
+        self.FALL_LIMIT = 3
         # self.reset_srv = rospy.ServiceProxy('/gazebo/reset_models', Empty)
 
         ##################################################################
@@ -252,7 +252,6 @@ class DW_Controller(object):
         self.JC.set_gains("r_arm_elx",1200,0,5)
         self.JC.set_gains("l_arm_mwx",1200,0,5)
         self.JC.set_gains("r_arm_mwx",1200,0,5)
-        self.JC.send_command()
 
     ##################################################################
     ########################### FUNCTIONS ############################
@@ -286,9 +285,12 @@ class DW_Controller(object):
             rospy.sleep(1)
 
     def current_ypr(self):
+
         quat = copy(self.GlobalOri)
         (r, p, y) = tf.transformations.euler_from_quaternion([quat.x, quat.y, quat.z, quat.w])
-        return (y, p, r)
+        return (y,p,r)
+        # RPY = self.RS.GetIMU()
+        # return (RPY[2], RPY[1], RPY[0])
 
     def DeltaAngle(self,DesAngle,CurAngle):
         Delta = DesAngle - CurAngle
@@ -967,6 +969,7 @@ class DW_Controller(object):
         self.SeqWithBalance(self.RS.GetJointPos(),self.BasStndPose,3,0.005,[-0.02, 0.175])
         rospy.sleep(0.8)
         self.JC.send_pos_traj(self.RS.GetJointPos(),self.BasStndPose,0.5*T,0.005)
+
     def StandUp(self):
         RPY = self.RS.GetIMU()
         D, R = self._iTf.TransformListener().lookupTransform('/l_foot','/pelvis',rospy.Time(0))
