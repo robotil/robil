@@ -20,6 +20,7 @@
   <depend package="actionlib"/>
   <depend package="actionlib_msgs"/>
   <depend package="C0_RobilTask"/>
+  <depend package="geometry_msgs"/>
 
   <export>
     <cpp cflags="-I${prefix}/include" />

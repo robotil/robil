@@ -1,6 +1,7 @@
 <launch>
 	<include file="$(find move_hand)/launch/move_hand.launch" />
-	<node name="PickUp" pkg="C66_Grasp" type="PickUp" cwd="node" output="screen" />
+	<node name="PickUp_OLD" pkg="C66_Grasp" type="PickUp_OLD" cwd="node" output="screen" />
 	<node name="hand_grasp_right" pkg="hand_grasp" type="hand_grasp" args="right" cwd="node" output="screen" />
 	<node name="hand_grasp_left" pkg="hand_grasp" type="hand_grasp" args="left" cwd="node" output="screen" />
+<node name="rPath_srv" pkg="C67_CarManipulation" type="rPath_srv" cwd="node" output="screen" />
 </launch>

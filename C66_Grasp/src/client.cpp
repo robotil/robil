@@ -27,7 +27,7 @@ public:
 		C0_RobilTask::RobilTaskGoal goal;
 		ROS_INFO("S: %s", side.c_str());
 		std::string param;
-		param = "pipe";
+		param = "Firehose";
 		goal.parameters = param;
 		// send a goal to the action
 		ac.cancelAllGoals();
@@ -57,7 +57,7 @@ public:
 
 int main (int argc, char **argv)
 {
-	std::string s = "p";
+	std::string s = "Firehose";
 	if(argc == 2){
 		s = std::string(argv[1]);
 	}

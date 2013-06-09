@@ -37,7 +37,7 @@ link_directories(
 #uncomment if you have defined messages
 rosbuild_genmsg()
 #uncomment if you have defined services
-#rosbuild_gensrv()
+rosbuild_gensrv()
 
 include_directories (src) 
 
@@ -68,8 +68,11 @@ target_link_libraries(lPoint2 Kinematics)
 rosbuild_add_executable(rPath src/rPath.cpp)
 target_link_libraries(rPath Kinematics)
 
-#rosbuild_add_executable(rPath2 src/rPath2.cpp)
-#target_link_libraries(rPath2 Kinematics)
+rosbuild_add_executable(rPath_srv src/rPath_srv.cpp)
+target_link_libraries(rPath_srv Kinematics)
+
+rosbuild_add_executable(lPath_srv src/lPath_srv.cpp)
+target_link_libraries(lPath_srv Kinematics)
 
 rosbuild_add_executable(lPath src/lPath.cpp)
 target_link_libraries(lPath Kinematics)
