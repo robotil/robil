@@ -21,7 +21,7 @@
   <depend package="opencv2"/>
   <depend package="geometry_msgs"/>
   <depend package="opencv2"/>
-  <depend package="C23_ObjectRecognition"/>
+  <depend package="atlas_msgs"/>
   <depend package="C25_ekf"/>
 </package>
 

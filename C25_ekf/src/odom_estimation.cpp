@@ -170,11 +170,11 @@ namespace estimation
     // ------------------------
     ROS_DEBUG("Process odom meas");
     if (odom_active){
-      if (!transformer_.canTransform("pelvis","wheelodom", filter_time)){
+      if (!transformer_.canTransform("pelvis","l_foot", filter_time)){
         ROS_ERROR("filter time older than odom message buffer");
         return false;
       }
-      transformer_.lookupTransform("wheelodom", "pelvis", filter_time, odom_meas_);
+      transformer_.lookupTransform("l_foot", "pelvis", filter_time, odom_meas_);
       if (odom_initialized_){
 	// convert absolute odom measurements to relative odom measurements in horizontal plane
 	Transform odom_rel_frame =  Transform(tf::createQuaternionFromYaw(filter_estimate_old_vec_(6)), 
@@ -298,7 +298,7 @@ namespace estimation
     }
     // add measurements
     addMeasurement(meas);
-    if (meas.child_frame_id_ == "wheelodom") odom_covariance_ = covar;
+    if (meas.child_frame_id_ == "l_foot") odom_covariance_ = covar;
     else if (meas.child_frame_id_ == "imu")  imu_covariance_  = covar;
     else if (meas.child_frame_id_ == "vo")   vo_covariance_   = covar;
     else ROS_ERROR("Adding a measurement for an unknown sensor %s", meas.child_frame_id_.c_str());

@@ -92,7 +92,7 @@ namespace estimation
     // subscribe to odom messages
     if (odom_used_){
       ROS_DEBUG("Odom sensor can be used");
-      odom_sub_ = nh.subscribe("odom", 10, &OdomEstimationNode::odomCallback, this);
+      odom_sub_ = nh.subscribe("C25/bdi_stripped", 10, &OdomEstimationNode::odomCallback, this);
     }
     else ROS_DEBUG("Odom sensor will NOT be used");
 
@@ -157,12 +157,13 @@ ROS_INFO("Test");
     odom_time_  = Time::now();
     Quaternion q;
     tf::quaternionMsgToTF(odom->pose.pose.orientation, q);
-    odom_meas_  = Transform(q, Vector3(odom->pose.pose.position.x, odom->pose.pose.position.y, 0));
+    odom_meas_  = Transform(q, Vector3(odom->pose.pose.position.x, odom->pose.pose.position.y, odom->pose.pose.position.z));
+
     for (unsigned int i=0; i<6; i++)
       for (unsigned int j=0; j<6; j++)
         odom_covariance_(i+1, j+1) = odom->pose.covariance[6*i+j];
 
-    my_filter_.addMeasurement(StampedTransform(odom_meas_.inverse(), odom_stamp_, "pelvis", "wheelodom"), odom_covariance_);
+    my_filter_.addMeasurement(StampedTransform(odom_meas_.inverse(), odom_stamp_, "pelvis", "l_foot"), odom_covariance_);
     
     // activate odom
     if (!odom_active_) {
