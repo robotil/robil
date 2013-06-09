@@ -5,7 +5,7 @@ from atlas_msgs.msg import AtlasSimInterfaceCommand, AtlasSimInterfaceState, Atl
 from geometry_msgs.msg import Pose, Point
 from std_msgs.msg import *
 from sensor_msgs.msg import Imu
-from C42_DynamicLocomotion.msg import slop_m
+# from C42_DynamicLocomotion.msg import slop_m
 from tf.transformations import quaternion_from_euler, euler_from_quaternion
 from C42_DynamicLocomotion.msg import imu_contact
 from contact_reflex import contact_reflex
