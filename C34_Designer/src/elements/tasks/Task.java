@@ -426,6 +426,10 @@ public class Task extends GElement implements View.ChangesListener {
 			Log.e("Something is null");
 		}
 		
+		
+		if (_runStart == null) // Will occur when you open the designer and there is a runnin plan
+			_runStart = _runFinish;
+		
 		this._runtimeInfo.setMessage(String.format(
 				"%s[%s-%s] %s(%d):%s",
 				_runFailed ? "$RED$" : "",

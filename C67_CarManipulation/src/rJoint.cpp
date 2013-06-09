@@ -27,9 +27,9 @@
 #include <string>
 #include <vector>
 #include <boost/lexical_cast.hpp>
-#include "FK.h"
-#include "IK.h"
-#include "Path.h"
+#include <C67_CarManipulation/FK.h>
+#include <C67_CarManipulation/IK.h>
+#include <C67_CarManipulation/Path.h>
 
 ros::Publisher pubAtlasCommand;
 atlas_msgs::AtlasCommand ac;
@@ -46,20 +46,21 @@ bool callBackRun = false;
 
 void SetAtlasState(const atlas_msgs::AtlasState::ConstPtr &_as)
 {
-	static ros::Time startTime = ros::Time::now();
-	t0 = startTime;
-
-	// lock to copy incoming AtlasState
-	{
-		boost::mutex::scoped_lock lock(mutex);
-		as = *_as;
-	}
 	
-	ac.header.stamp = as.header.stamp;
-
 	if (callBackRun == false)
 	{
 		callBackRun = true;
+
+		static ros::Time startTime = ros::Time::now();
+			t0 = startTime;
+
+		// lock to copy incoming AtlasState
+		{
+			boost::mutex::scoped_lock lock(mutex);
+			as = *_as;
+		}
+
+		ac.header.stamp = as.header.stamp;
 		// set cout presentation	
 		std::cout.precision(6);
 		std::cout.setf (std::ios::fixed , std::ios::floatfield ); 
@@ -134,7 +135,7 @@ int main(int argc, char** argv)
 
   // ros topic publisher
     pubAtlasCommand = rosnode->advertise<atlas_msgs::AtlasCommand>(
-      "/atlas/atlas_command", 100, true);
+      "/atlas/atlas_command", 1, true);
 	
 	while (ros::ok())
 	{
@@ -246,15 +247,18 @@ int main(int argc, char** argv)
 			ac.k_effort[q8r]  = 255;
 			ac.k_effort[q9r]  = 255;
 			
-			for (int i=0; i<N; i++)
+			for (unsigned int i=0; i < numJoints; i++)
+			{
+				ac.position[i] = as.position[i];
+				ac.k_effort[i]  = 255;
+				//std::cout << state[j] << " ";
+			}
+
+			for (int i=0; i < pointsNum; i++)
 			{
 				// ros::spinOnce();
 				// assign current joint angles 
-				for (unsigned int j=0; j<numJoints; j++)
-				{
-					ac.position[j] = as.position[j];
-					//std::cout << state[j] << " ";
-				}
+
 
 				ac.position[q4r] = points.pArray[i]._q4;
 				ac.position[q5r] = points.pArray[i]._q5;
@@ -266,7 +270,9 @@ int main(int argc, char** argv)
 				//ROS_INFO("");
 				//std::cout << i <<": ";				
 				//points.Array[i].Print();
-				
+				//std::cout << "q8 = "<< ac.position[q8r] << "\n";
+				//ac.desired_controller_period_ms = 5;
+
 				pubAtlasCommand.publish(ac);
 					
 				ros::Duration(seconds/pointsNum).sleep();

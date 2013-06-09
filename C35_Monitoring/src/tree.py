@@ -84,9 +84,8 @@ class xmlTree:
     def _createWrapperTreeMap(self,idParm,curNode):
 	if curNode.getChildren() != None:
             for wrapnode in curNode.getChildren():
-            	self._wrapMap[wrapnode.getAttrib(idParm)] = wrapnode
-            	self._createWrapperTreeMap(idParm,wrapnode)
-        
+                self._wrapMap[wrapnode.getAttrib(idParm)] = wrapnode
+                self._createWrapperTreeMap(idParm,wrapnode)
         
     def createWrapperTreeMap(self,idParm): #input - string of the id parm, can be "name" or "id"
         #call a recursive function        

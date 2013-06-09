@@ -9,7 +9,7 @@
 
 ImageDraw::ImageDraw(int argc, char** argv, QWidget *parent, Qt::WFlags flags)
 	: QMainWindow(parent, flags)
-//        , C11node(argc,argv,this)
+        , C11node(argc,argv,this)
 {
 	ui.setupUi(this);
 
@@ -26,11 +26,12 @@ ImageDraw::ImageDraw(int argc, char** argv, QWidget *parent, Qt::WFlags flags)
 
 	connect(this,SIGNAL(SigOnNewImg(QImage)),this,SLOT(SltOnNewImg(QImage)),Qt::QueuedConnection);
 	connect(ui.btnPlayPause,SIGNAL(clicked(bool)),this,SLOT(SltOnPlayPauseClick(bool)));
+	connect(ui.btnAllow,SIGNAL(clicked()),this,SLOT(SltOnAllowClick()));
 	connect(ui.btnCreate,SIGNAL(clicked(bool)),this,SLOT(SltOnCreateClick(bool)));
 	connect(ui.btnPath,SIGNAL(clicked(bool)),this,SLOT(SltOnPathClick(bool)));
 	connect(WaitTimer,SIGNAL(timeout()),this,SLOT(SltOnWaitTimeout()));
 	connect(ui.mapWidget,SIGNAL(SigOperatorAction()),this,SLOT(SltOperatorAction()));
-//	C11node.init();
+	C11node.init();
 
 	QFile file("C11Config.txt");
 	if (!file.open(QIODevice::ReadOnly | QIODevice::Text))
@@ -52,7 +53,7 @@ ImageDraw::ImageDraw(int argc, char** argv, QWidget *parent, Qt::WFlags flags)
 	    QTextStream in(&file);
             QString line = in.readLine();
 //	    pCTcpConnection = new CTcpConnection(QString("172.23.1.130"),45671);
-            pCTcpConnection = new CTcpConnection(line,45671);
+            pCTcpConnection = new CTcpConnection(line,45675);
 
 
             connect(pCTcpConnection,SIGNAL(SigOnImgReceived(QImage)),this,SLOT(SltOnNewImg(QImage)));
@@ -194,6 +195,11 @@ void ImageDraw::OnHMIResponseReceived()
               ui.mapWidget->SetEditable(true);
               WaitTimer->setSingleShot(true);
               WaitTimer->start(10000);
+}
+
+void ImageDraw::OnExecuterStackUpdate(QString strQString)
+{
+	C11node.SendExecuterUpdate(strQString);
 }
 
 void ImageDraw::SltOnWaitTimeout()
@@ -399,6 +405,25 @@ void ImageDraw::SltOnPathClick(bool checked)
 	{
 		ui.mapWidget->setMode(E_PATH_MODE);
 	}
+}
+
+void ImageDraw::SltOnAllowClick()
+{
+  int reqType = ui.cmbRequest->currentIndex();
+  switch(reqType)
+  {
+    case 1:
+      pCTcpConnection->SendImageRequest();
+      break;
+    case 2:
+      pCTcpConnection->SendGridRequest();
+      break;
+    case 3:
+      pCTcpConnection->SendPathRequest();
+      break;
+    default:
+      break;
+  }
 }
 
 

@@ -1,32 +1,22 @@
 <plan descriptions="./plans/TaskDescriptions.xml">
-   <par name="skill4" x="626.2063919046736" y="-185.9602661557035" collapsed="false" id="38e95426-0932-40d2-aefa-270a3dcd9298"> 
-         <par name="Perception" x="407.41691822046323" y="-100.96026615570395" collapsed="false" id="50ae34a1-b4f6-42b9-a59e-23a1de45eaca"> 
-               <tsk name="LocalizationTrack" x="239.41691822046278" y="-59.960266155703835" test_time="0" test_result="true" id="b680e465-1580-4fcd-964d-4ac78748b7d3" />
-               <tsk name="ObstacleDetection" x="418.41691822046323" y="-38.96026615570395" test_time="0" test_result="true" id="56806741-11f0-45f8-992b-3a81f261bd49" />
-         </par>
-         <seq name="Mission" x="826.206391904675" y="-104.96026615570372" collapsed="false" id="e6b9d1db-cbf5-4efb-8b22-f2c2e6130a3e"> 
-               <seq name="DriveMission" x="864.9444871427704" y="51.706400510963135" collapsed="false" id="19ac91a7-5f3b-47d5-a2bb-9ef59c48c5ae"> 
-                     <seq name="EnterToCar" x="189.7051387718443" y="180.49838046083835" collapsed="false" id="6858f335-90b6-4a6f-90c6-90a5e8c43825"> 
-                           <seq name="SearchObjectsFromInside" x="284.3956598956556" y="324.5680708180669" collapsed="false" id="e3a15675-85ff-4ceb-a59a-13b98e908d6f"> 
-                                 <tsk name="searchObject(target=shaar )" x="244.2845487845425" y="405.3458485958447" test_time="0" test_result="true" id="f49d86d1-1c85-4f22-b006-e83f220eafbb" />
+   <par name="skill4" x="1130.4316666299474" y="102.73670354126537" collapsed="false" id="38e95426-0932-40d2-aefa-270a3dcd9298"> 
+         <tsk name="LocalizationTrack" x="911.4999999999999" y="186.83333333333331" test_time="0" test_result="true" id="7267f009-7019-4192-8f5a-16fea12b556e" />
+         <seq name="Mission" x="1330.4316666299485" y="183.73670354126511" collapsed="false" id="e6b9d1db-cbf5-4efb-8b22-f2c2e6130a3e"> 
+               <seq name="DriveMission" x="1369.169761868044" y="340.40337020793197" collapsed="false" id="19ac91a7-5f3b-47d5-a2bb-9ef59c48c5ae"> 
+                     <seq name="EnterToCar" x="693.9304134971179" y="469.1953501578072" collapsed="false" id="6858f335-90b6-4a6f-90c6-90a5e8c43825"> 
+                           <seq name="SearchObjectsFromInside" x="486.6209346209291" y="577.2650405150357" collapsed="false" id="e3a15675-85ff-4ceb-a59a-13b98e908d6f"> 
+                                 <tsk name="searchObject(target=Gate )" x="446.5098235098161" y="658.0428182928135" test_time="0" test_result="true" id="f49d86d1-1c85-4f22-b006-e83f220eafbb" />
                            </seq>
                      </seq>
-                     <seq name="InCar" x="814.1862453845274" y="191.85658366114478" collapsed="false" id="cee78399-ac08-4713-9a85-542b10c3e7ff"> 
-                           <par name="Driving" x="769.186245384522" y="264.83460563916674" collapsed="false" id="6207a22b-f609-4f49-9579-2e83f0c45e36"> 
-                              <dec name="!L!" x="713.4719596702334" y="314.8346056391671"> 
-                                    <seq name="Driving" x="757.395036593316" y="403.3181221226847" collapsed="false" id="3121acdd-f660-4d53-96b2-47029c756b6f"> 
-                                          <tsk name="PathPlanningFocus(target=shaar)" x="362.7709764429337" y="497.2278965587733" test_time="0" test_result="true" id="5668a95a-a827-472a-bae2-b4fff00a36a7" />
-                                          <seq name="@4" x="831.6264291264329" y="484.4587912087933" collapsed="false" id="70f216a5-7259-412e-a108-658b5d28d109"> 
-                                                <tsk name="InitDrive" x="652.658194488049" y="589.9421822730629" test_time="0" test_result="true" id="6e5cc7d2-bc5b-46c9-b6fc-9adb8ab9b935" />
-                                                <sel name="@5" x="829.6264291264329" y="545.4587912087936" collapsed="false" id="44efb3a3-36bc-460c-a765-923a3b1d891f"> 
-                                                      <tsk name="WayPointsDriving" x="739.1581944880454" y="589.9497010700662" test_time="0" test_result="true" id="398165c8-1786-4ce4-b98b-37e5282d9a26" />
-                                                      <tsk name="FinishDrive" x="926.1978576978668" y="589.3159340659378" test_time="0" test_result="true" id="e69475b5-c614-47bf-89b5-def175bd06cf" />
-                                                </sel>
-                                                <tsk name="FinishDrive" x="926.1978576978668" y="589.3159340659378" test_time="0" test_result="true" id="e69475b5-c614-47bf-89b5-def175bd06cf" />
-                                          </seq>
+                     <seq name="InCar" x="1318.411520109801" y="480.5535533581136" collapsed="false" id="cee78399-ac08-4713-9a85-542b10c3e7ff"> 
+                           <par name="Driving" x="1273.4115201097954" y="553.5315753361356" collapsed="false" id="6207a22b-f609-4f49-9579-2e83f0c45e36"> 
+                                 <tsk name="PathPlanning" x="1039.411520109798" y="787.5315753361359" test_time="0" test_result="true" id="32da76e3-cd3b-456e-84d4-9dfe611b91c6" />
+                              <dec name="!L!" x="1467.697234395507" y="643.5315753361359"> 
+                                    <seq name="Driving" x="1603.6203113185895" y="838.0150918196535" collapsed="false" id="3121acdd-f660-4d53-96b2-47029c756b6f"> 
+                                          <tsk name="PathPlanningFocus(target=Gate)" x="1208.9962511682072" y="931.9248662557421" test_time="0" test_result="true" id="5668a95a-a827-472a-bae2-b4fff00a36a7" />
+                                          <tsk name="DynamicLocomotion" x="1522.166666666666" y="1047.1666666666663" test_time="0" test_result="true" id="24952ed7-8c71-403f-9557-4e0854e3d4e2" />
                                     </seq>
                               </dec>
-                                 <tsk name="PathPlanning" x="789.1862453845242" y="304.8346056391671" test_time="0" test_result="true" id="32da76e3-cd3b-456e-84d4-9dfe611b91c6" />
                            </par>
                      </seq>
                </seq>

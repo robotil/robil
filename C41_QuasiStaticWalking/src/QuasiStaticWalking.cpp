@@ -19,7 +19,6 @@
 #include <sensor_msgs/Imu.h>
 #include <osrf_msgs/JointCommands.h>
 #include <tf/transform_listener.h>
-#include <FootPlacement/FootPlacement.h>
 
 
 
@@ -27,7 +26,7 @@ class QuasiStaticWalking{
 private:
 	ros::NodeHandle nh_, nh2_, nh3_, nh4_;
 	ros::NodeHandle* rosnode;
-	ros::ServiceClient move_pelvis_cli_, pelvis_leg_target_cli_, walk_legs_cli_, step_down_cli_, make_step_cli_, foot_placement_cli_, start_posecontroller_cli_, stop_posecontroller_cli_, reset_cli_;
+	ros::ServiceClient move_pelvis_cli_, pelvis_leg_target_cli_, walk_legs_cli_, step_down_cli_, make_step_cli_, start_posecontroller_cli_, stop_posecontroller_cli_, reset_cli_;
 	actionlib::SimpleActionServer<C0_RobilTask::RobilTaskAction> as_; // NodeHandle instance must be created before this line.
 	C0_RobilTask::RobilTaskFeedback feedback_;
 	C0_RobilTask::RobilTaskResult result_;
@@ -67,7 +66,6 @@ public:
 
 
 		pelvis_leg_target_cli_ = nh_.serviceClient<pelvis_leg_target::pelvis_leg_target>("pelvis_leg_target");
-		foot_placement_cli_ = nh_.serviceClient<FootPlacement::FootPlacement>("foot_placement");
 
 		start_posecontroller_cli_ = nh_.serviceClient<std_srvs::Empty>("/PoseController/start");
 		stop_posecontroller_cli_ = nh_.serviceClient<std_srvs::Empty>("/PoseController/stop");
@@ -93,9 +91,6 @@ public:
 			ROS_INFO("Waiting for the pelvis_leg_target server");
 		}
 
-		while(!foot_placement_cli_.waitForExistence(ros::Duration(0.1))){
-			ROS_INFO("Waiting for the foot_placement server");
-		}
 
 		make_step_cli_ = nh_.serviceClient<move_pelvis::move_pelvis>("make_step");
 

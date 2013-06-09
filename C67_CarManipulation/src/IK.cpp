@@ -4,8 +4,8 @@ IK.cpp Inverse Kinematics file
 #include <math.h>
 #include <iostream>
 #include <string>
-#include "FK.h"
-#include "IK.h"
+#include <C67_CarManipulation/FK.h>
+#include <C67_CarManipulation/IK.h>
 
 // local functions
 bool IkSqrSolve(double cc, double cs, double c1, double angles[2]); 
@@ -387,9 +387,9 @@ double RpyError(RPY R1, RPY R2)
 	err += fabs(R1.x - R2.x);
 	err += fabs(R1.y - R2.y);
 	err += fabs(R1.z - R2.z);
-	err += fabs(R1.R - R2.R);
-	err += fabs(R1.P - R2.P);
-	err += fabs(R1.Y - R2.Y);
+	err += 0.2*fabs(R1.R - R2.R);
+	err += 0.2*fabs(R1.P - R2.P);
+	err += 0.2*fabs(R1.Y - R2.Y);
 	
 	
 	return err;
@@ -601,7 +601,110 @@ void lFindAltSolution(double &mpx, double &mpy, double &mpz )
 
 }
 
+IkSolution ScanRPY(double mq1, double mq2, double mq3, RPY target, double error, bool rightSide)
+{
+	double i,j,k,R0,P0,Y0;
+	IkSolution solution;
+	bool valid = false;
+	R0 = target.R;
+	P0 = target.P;
+	Y0 = target.Y;
+	for (i = 0;i < M_PI/2; i+=0.1)
+	{
+		for (j = 0; j<M_PI/2; j+=0.1)
+		{
+			for (k = 0; k<M_PI/2; k+=0.1)
+			{
+				target.R = R0 + i;
+				target.P = P0 + j;
+				target.Y = Y0 + k;
+				solution = rightSide? rSearchSolution(mq1, mq2, mq3, target): lSearchSolution(mq1, mq2, mq3, target);
+				if (solution.error < error)
+				{
+					valid = true;
+					break;
+				}
+				target.R = R0 + i;
+				target.P = P0 + j;
+				target.Y = Y0 - k;
+				solution = rightSide? rSearchSolution(mq1, mq2, mq3, target): lSearchSolution(mq1, mq2, mq3, target);
+				if (solution.error < error)
+				{
+					valid = true;
+					break;
+				}
+				target.R = R0 + i;
+				target.P = P0 - j;
+				target.Y = Y0 + k;
+				solution = rightSide? rSearchSolution(mq1, mq2, mq3, target): lSearchSolution(mq1, mq2, mq3, target);
+				if (solution.error < error)
+				{
+					valid = true;
+					break;
+				}
+				target.R = R0 + i;
+				target.P = P0 - j;
+				target.Y = Y0 - k;
+				solution = rightSide? rSearchSolution(mq1, mq2, mq3, target): lSearchSolution(mq1, mq2, mq3, target);
+				if (solution.error < error)
+				{
+					valid = true;
+					break;
+				}
+				target.R = R0 - i;
+				target.P = P0 + j;
+				target.Y = Y0 + k;
+				solution = rightSide? rSearchSolution(mq1, mq2, mq3, target): lSearchSolution(mq1, mq2, mq3, target);
+				if (solution.error < error)
+				{
+					valid = true;
+					break;
+				}
+				target.R = R0 - i;
+				target.P = P0 + j;
+				target.Y = Y0 - k;
+				solution = rightSide? rSearchSolution(mq1, mq2, mq3, target): lSearchSolution(mq1, mq2, mq3, target);
+				if (solution.error < error)
+				{
+					valid = true;
+					break;
+				}
+				target.R = R0 - i;
+				target.P = P0 - j;
+				target.Y = Y0 + k;
+				solution = rightSide? rSearchSolution(mq1, mq2, mq3, target): lSearchSolution(mq1, mq2, mq3, target);
+				if (solution.error < error)
+				{
+					valid = true;
+					break;
+				}
+				target.R = R0 - i;
+				target.P = P0 - j;
+				target.Y = Y0 - k;
+				solution = rightSide? rSearchSolution(mq1, mq2, mq3, target): lSearchSolution(mq1, mq2, mq3, target);
+				if (solution.error < error)
+				{
+					valid = true;
+					break;
+				}
+			}
+			if (valid) break;
+		}
+		if (valid) break;
+	}
+	solution.valid = valid;
 
+	return solution;
+}
 
+IkSolution rScanRPY(double mq1, double mq2, double mq3, RPY target, double error)
+{
+	return ScanRPY(mq1, mq2, mq3, target, error, true);
+}
+
+IkSolution lScanRPY(double mq1, double mq2, double mq3, RPY target, double error)
+{
+	return ScanRPY(mq1, mq2, mq3, target, error, false);
+}
 
 

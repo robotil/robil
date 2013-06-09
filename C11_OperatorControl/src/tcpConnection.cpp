@@ -1,5 +1,6 @@
 #include <QTcpSocket>
 #include <QHostAddress>
+#include <QChar>
 #include "tcpConnection.h"
 #include "iostream"
 
@@ -11,6 +12,7 @@ CTcpConnection::CTcpConnection(QString ipAddress,int port)
   IsSendingGrid = false;
   IsSendingPath = false;
   WaitingForResponse = false;
+  IsSendingExecuterStatus = false;
   pITcpConnectionInterface = NULL;
   ImgSize = 0;
   Counter = 0;
@@ -156,6 +158,30 @@ void CTcpConnection::SltReadyRead()
                 }
             }
         }
+//      else if(IsSendingExecuterStatus)
+//      {
+//    	  if(bufSize < ImgSize*sizeof(char))
+//			{
+//			  std::cout<<"TCP: Size not big enough!\n";
+//			  std::cout<<"TCP: expected = " << ImgSize << " received = " << bufSize << "\n";
+//			  return;
+//			}
+//			else
+//			{
+//				IsSendingExecuterStatus = false;
+//			}
+//    	  if(!IsSendingExecuterStatus)
+//    	  {
+//    		  QString str;
+//    		  in>>str;
+//    		  std::cout<<"ExecuterStatus received: "<<str.toStdString()<<std::endl;
+////			char* str = new char(ImgSize);
+////			pConnection->read(str,ImgSize);
+////			QString strQString(str);
+////			std::cout<<"ExecuterStatus received: "<<strQString.toStdString()<<"\n";
+////			pITcpConnectionInterface->OnExecuterStackUpdate(strQString);
+//    	  }
+//      }
       else
       { if (pConnection->bytesAvailable() < (int)sizeof(short))
         {
@@ -164,6 +190,9 @@ void CTcpConnection::SltReadyRead()
         in >> msgId;
         if(msgId == 45)
           {
+        	char* s = new char(pConnection->bytesAvailable());
+        	pConnection->read(s,pConnection->bytesAvailable());
+        	std::cout<<"The Hello msg is: " << s << std::endl;
             std::cout<<"TCP: Hello Received!\n";
             return;
           }
@@ -216,6 +245,16 @@ void CTcpConnection::SltReadyRead()
             in >> status;
             pITcpConnectionInterface->OnExecutionStatusUpdate(status);
           }
+        else if(31 == msgId)
+		  {
+ //       	IsSendingExecuterStatus = true;
+ //       	ImgSize = dataSize;
+ //       	std::cout<<"TCP: ExecuterStack coming!\n";
+        	QString str;
+		    in>>str;
+		    std::cout<<"ExecuterStatus received: "<<str.toStdString()<<std::endl;
+		    pITcpConnectionInterface->OnExecuterStackUpdate(str);
+		  }
       }
     }
 }
@@ -349,4 +388,64 @@ void CTcpConnection::SendPathUpdate(std::vector<StructPoint> points)
   pConnection->flush();
   pConnection->waitForBytesWritten();
   std::cout<<"TCP: Pause sent\n";
+}
+
+void CTcpConnection::SendImageRequest()
+{
+  WaitingForResponse = false;
+  StructHeader header;
+  header.MessageID = 16;
+  header.DataSize = 0;
+  header.Counter = Counter;
+  Counter++;
+  QByteArray block;
+  QDataStream out(&block, QIODevice::WriteOnly);
+  out.setByteOrder(QDataStream::LittleEndian);
+  out << header.MessageID;
+  out << header.DataSize;
+  out << header.Counter;
+  pConnection->write(block);
+  pConnection->flush();
+  pConnection->waitForBytesWritten();
+  std::cout<<"TCP: SendImageRequest sent\n";
+}
+
+void CTcpConnection::SendGridRequest()
+{
+  WaitingForResponse = false;
+  StructHeader header;
+  header.MessageID = 17;
+  header.DataSize = 0;
+  header.Counter = Counter;
+  Counter++;
+  QByteArray block;
+  QDataStream out(&block, QIODevice::WriteOnly);
+  out.setByteOrder(QDataStream::LittleEndian);
+  out << header.MessageID;
+  out << header.DataSize;
+  out << header.Counter;
+  pConnection->write(block);
+  pConnection->flush();
+  pConnection->waitForBytesWritten();
+  std::cout<<"TCP: SendGridRequest sent\n";
+}
+
+void CTcpConnection::SendPathRequest()
+{
+  WaitingForResponse = false;
+  StructHeader header;
+  header.MessageID = 18;
+  header.DataSize = 0;
+  header.Counter = Counter;
+  Counter++;
+  QByteArray block;
+  QDataStream out(&block, QIODevice::WriteOnly);
+  out.setByteOrder(QDataStream::LittleEndian);
+  out << header.MessageID;
+  out << header.DataSize;
+  out << header.Counter;
+  pConnection->write(block);
+  pConnection->flush();
+  pConnection->waitForBytesWritten();
+  std::cout<<"TCP: SendPathRequest sent\n";
 }

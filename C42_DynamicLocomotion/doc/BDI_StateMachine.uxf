@@ -1,10 +1,11 @@
-<?xml version="1.0" encoding="UTF-8"?><diagram program="umlet" version="11.3">
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<diagram program="umlet" version="11.4">
   <zoom_level>8</zoom_level>
   <element>
     <type>com.umlet.element.custom.FinalState</type>
     <coordinates>
       <x>48</x>
-      <y>296</y>
+      <y>256</y>
       <w>16</w>
       <h>16</h>
     </coordinates>
@@ -15,7 +16,7 @@
     <type>com.umlet.element.custom.State</type>
     <coordinates>
       <x>224</x>
-      <y>328</y>
+      <y>288</y>
       <w>72</w>
       <h>32</h>
     </coordinates>
@@ -26,7 +27,7 @@
     <type>com.umlet.element.Relation</type>
     <coordinates>
       <x>40</x>
-      <y>280</y>
+      <y>240</y>
       <w>200</w>
       <h>80</h>
     </coordinates>
@@ -40,7 +41,7 @@
     <type>com.umlet.element.Relation</type>
     <coordinates>
       <x>216</x>
-      <y>40</y>
+      <y>0</y>
       <w>574</w>
       <h>304</h>
     </coordinates>
@@ -53,7 +54,7 @@ Stop
     <type>com.umlet.element.Relation</type>
     <coordinates>
       <x>272</x>
-      <y>296</y>
+      <y>256</y>
       <w>152</w>
       <h>56</h>
     </coordinates>
@@ -66,7 +67,7 @@ GoForward
     <type>com.umlet.element.custom.State</type>
     <coordinates>
       <x>408</x>
-      <y>328</y>
+      <y>288</y>
       <w>80</w>
       <h>32</h>
     </coordinates>
@@ -77,7 +78,7 @@ GoForward
     <type>com.umlet.element.custom.State</type>
     <coordinates>
       <x>664</x>
-      <y>192</y>
+      <y>152</y>
       <w>80</w>
       <h>32</h>
     </coordinates>
@@ -88,7 +89,7 @@ GoForward
     <type>com.umlet.element.Relation</type>
     <coordinates>
       <x>216</x>
-      <y>336</y>
+      <y>296</y>
       <w>456</w>
       <h>112</h>
     </coordinates>
@@ -101,7 +102,7 @@ TurnLeft
     <type>com.umlet.element.custom.State</type>
     <coordinates>
       <x>656</x>
-      <y>416</y>
+      <y>376</y>
       <w>80</w>
       <h>32</h>
     </coordinates>
@@ -112,7 +113,7 @@ TurnLeft
     <type>com.umlet.element.Relation</type>
     <coordinates>
       <x>208</x>
-      <y>168</y>
+      <y>128</y>
       <w>472</w>
       <h>176</h>
     </coordinates>
@@ -125,7 +126,7 @@ TurnRight
     <type>com.umlet.element.Relation</type>
     <coordinates>
       <x>272</x>
-      <y>312</y>
+      <y>272</y>
       <w>152</w>
       <h>56</h>
     </coordinates>
@@ -139,20 +140,20 @@ Stop
     <type>com.umlet.element.Relation</type>
     <coordinates>
       <x>216</x>
-      <y>336</y>
+      <y>296</y>
       <w>574</w>
-      <h>224</h>
+      <h>216</h>
     </coordinates>
     <panel_attributes>lt=&lt;-
 Stop
 </panel_attributes>
-    <additional_attributes>24;24;24;200;544;208;544;96;520;96</additional_attributes>
+    <additional_attributes>24;24;24;200;544;200;544;96;520;96</additional_attributes>
   </element>
   <element>
     <type>com.umlet.element.Relation</type>
     <coordinates>
       <x>640</x>
-      <y>200</y>
+      <y>160</y>
       <w>96</w>
       <h>144</h>
     </coordinates>
@@ -166,7 +167,7 @@ Done
     <type>com.umlet.element.Relation</type>
     <coordinates>
       <x>640</x>
-      <y>336</y>
+      <y>296</y>
       <w>80</w>
       <h>96</h>
     </coordinates>
@@ -179,7 +180,7 @@ Done
     <type>com.umlet.element.Relation</type>
     <coordinates>
       <x>408</x>
-      <y>192</y>
+      <y>152</y>
       <w>272</w>
       <h>152</h>
     </coordinates>
@@ -192,7 +193,7 @@ TurnRight
     <type>com.umlet.element.Relation</type>
     <coordinates>
       <x>408</x>
-      <y>336</y>
+      <y>296</y>
       <w>264</w>
       <h>104</h>
     </coordinates>
@@ -205,7 +206,7 @@ TurnLeft
     <type>com.umlet.element.custom.SeqDestroyMark</type>
     <coordinates>
       <x>48</x>
-      <y>368</y>
+      <y>328</y>
       <w>16</w>
       <h>16</h>
     </coordinates>
@@ -216,7 +217,7 @@ TurnLeft
     <type>com.umlet.element.Relation</type>
     <coordinates>
       <x>32</x>
-      <y>328</y>
+      <y>288</y>
       <w>208</w>
       <h>64</h>
     </coordinates>
@@ -230,7 +231,7 @@ Done
     <type>com.umlet.element.custom.State</type>
     <coordinates>
       <x>616</x>
-      <y>328</y>
+      <y>288</y>
       <w>80</w>
       <h>32</h>
     </coordinates>
@@ -241,7 +242,7 @@ Done
     <type>com.umlet.element.Relation</type>
     <coordinates>
       <x>464</x>
-      <y>304</y>
+      <y>264</y>
       <w>168</w>
       <h>56</h>
     </coordinates>
@@ -254,13 +255,13 @@ Done
     <type>com.umlet.element.Relation</type>
     <coordinates>
       <x>112</x>
-      <y>320</y>
+      <y>280</y>
       <w>712</w>
-      <h>456</h>
+      <h>296</h>
     </coordinates>
     <panel_attributes>lt=&lt;-
 Stop
 </panel_attributes>
-    <additional_attributes>120;40;24;160;48;432;696;440;696;24;584;24</additional_attributes>
+    <additional_attributes>120;40;24;160;24;280;696;280;696;24;584;24</additional_attributes>
   </element>
 </diagram>

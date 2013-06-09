@@ -151,9 +151,13 @@ class filter():
                 self.y_buffer.insert(0,y)
                 self.y_buffer.pop()
                 self.buffer_lock.release()
+                return y
 
     def _filter_func(self):
-        pass
+        y_filt = self.b[0]*self.u_buffer[0]
+        for t in xrange(1,len(self.a)):
+            y_filt += self.y_buffer[t-1]*(-self.a[t]) + self.u_buffer[t]*self.b[t]
+        return y_filt
 
     def get_buffer(self):
         self.buffer_lock.acquire()

@@ -21,7 +21,6 @@ import java.util.regex.Pattern;
  * @author blackpc
  *
  */
-
 public class CompactStackStreamMessageParser extends MessageParser<StackStreamMessage> {
 
 	private static final String MESSAGE_PATTERN =

@@ -22,6 +22,7 @@ rosbuild_genmsg()
 #rosbuild_gensrv()
 rosbuild_add_executable(hand_grasp src/hand_grasp.cpp)
 rosbuild_add_executable(finger_point src/finger_point.cpp)
+rosbuild_add_executable(wheel_push src/wheel_push.cpp)
 #common commands for building c++ executables and libraries
 #rosbuild_add_library(${PROJECT_NAME} src/example.cpp)
 #target_link_libraries(${PROJECT_NAME} another_library)

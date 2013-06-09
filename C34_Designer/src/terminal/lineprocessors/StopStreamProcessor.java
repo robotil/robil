@@ -14,7 +14,7 @@ public class StopStreamProcessor implements LineProcessor {
 	
 	private BTDesigner _designer;
 	private StringBuilder _buffer = new StringBuilder();
-	private Pattern _planIdPattern = Pattern.compile("data: ExeFinished: notification from (\\w+)");
+	private Pattern _planIdPattern = Pattern.compile("data: ExeFinished: notification from ([\\w\\-]+)");
 	private StopStreamMessageParser _messageParser = new StopStreamMessageParser();
 	
 	public StopStreamProcessor(BTDesigner designer) {

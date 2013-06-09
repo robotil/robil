@@ -352,7 +352,28 @@
               </widget>
              </item>
              <item>
-              <widget class="QComboBox" name="cmbRequest"/>
+              <widget class="QComboBox" name="cmbRequest">
+               <item>
+                <property name="text">
+                 <string/>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>Get image</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>Get occupancy grid</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>Get path</string>
+                </property>
+               </item>
+              </widget>
              </item>
             </layout>
            </widget>

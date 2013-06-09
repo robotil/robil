@@ -26,9 +26,9 @@
 #include <iostream>
 #include <string>
 #include <boost/lexical_cast.hpp>
-#include "FK.h"
-#include "IK.h"
-#include "Path.h"
+#include <C67_CarManipulation/FK.h>
+#include <C67_CarManipulation/IK.h>
+#include <C67_CarManipulation/Path.h>
 
 ros::Publisher pub_joint_commands_;
 double state[28] = {0};

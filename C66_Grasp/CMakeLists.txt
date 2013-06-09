@@ -25,8 +25,15 @@ rosbuild_genmsg()
 #uncomment if you have defined services
 #rosbuild_gensrv()
 
+rosbuild_add_library(Kinematics src/FK.cpp src/IK.cpp src/Path.cpp src/Trace.cpp)
+rosbuild_add_boost_directories()
+
 #rosbuild_add_boost_directories()
 rosbuild_add_executable(PickUp src/PickUp.cpp)
+rosbuild_link_boost(PickUp thread)
+target_link_libraries(PickUp Kinematics)
+
+
 rosbuild_add_executable(client src/client.cpp)
 #common commands for building c++ executables and libraries
 #rosbuild_add_library(${PROJECT_NAME} src/example.cpp)

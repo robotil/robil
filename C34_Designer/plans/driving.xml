@@ -1,0 +1,39 @@
+<plan descriptions="./plans/TaskDescriptions.xml">
+   <par name="event1" x="532.6944115542224" y="-330.2600220732437" collapsed="false" id="9d746c82-b87a-4162-b22a-35dd6fecef96"> 
+         <par name="Perception" x="313.9049378700122" y="-245.26002207324416" collapsed="false" id="c3f65350-843d-4b46-b2f5-277b579547e2"> 
+               <tsk name="LocalizationTrack" x="145.90493787001182" y="-204.2600220732441" test_time="0" test_result="true" id="aa18c80f-40e8-4332-ba25-7a7df5232744" />
+         </par>
+         <seq name="Mission" x="476.69441155422396" y="-204.260022073244" collapsed="false" id="4575bcb3-d78b-4907-b51c-3db42a9d0f1d"> 
+               <seq name="InCar" x="473.9325067923196" y="-145.83145064467448" collapsed="false" id="36007a39-6a19-4324-b6ea-31bb0105ace6"> 
+                  <dec name="!L!" x="403.9325067923214" y="-99.1647839780079"> 
+                        <seq name="Setting" x="392.7420306018439" y="-43.1806569938783" collapsed="false" id="6ac68c2f-eefd-45f0-b916-6cb1a3785df2"> 
+                              <seq name="TestControllers" x="350.7858902509586" y="102.08250090085801" collapsed="false" id="08e1a836-b5fa-4dd4-8f7e-5d1e79149e05"> 
+                                    <tsk name="GripSteeringWheel(angle=1.5)" x="79.83514216863057" y="219.05899516682325" test_time="0" test_result="true" id="51b6dacd-58ba-45c3-aadd-7f16014b94ed" />
+                                    <tsk name="CalibrateWheel" x="178.46548662701215" y="326.21398034619506" test_time="0" test_result="true" id="4167d66f-a234-4251-9a4a-f77682b05530" />
+                                    <tsk name="PlaceFeetOnPedals(angle=1.5)" x="233.4541138402366" y="375.5295655321231" test_time="0" test_result="true" id="8f3633dd-0c08-4dc2-a8a4-2ccbbd0754ef" />
+                                    <tsk name="CalibratePedals" x="351.95755011907625" y="319.5552501874597" test_time="0" test_result="true" id="c01e1fd5-ce92-4c31-a1bf-981de2f70851" />
+                                    <tsk name="GripHandBrake(operation=1)" x="477.3781850397123" y="365.785408917617" test_time="0" test_result="true" id="4770d2ac-361e-4c04-a9ab-c3eafcc5b966" />
+                                    <tsk name="GripGearStick(operation=1)" x="552.2670739285991" y="274.06318669539917" test_time="0" test_result="true" id="1d8db9c8-689b-4063-b37f-b2e48ec6b882" />
+                              </seq>
+                        </seq>
+                  </dec>
+                     <par name="Driving" x="563.9325067923141" y="-89.83145064467504" collapsed="false" id="34db94ed-e27b-4f7c-aecd-34b4d1eb9cfa"> 
+                           <tsk name="PathPlanning" x="486.4325067923128" y="-35.66478397800722" test_time="0" test_result="true" id="87723865-390a-46df-88dd-2704024e4842" />
+                        <dec name="!L!" x="614.05155441136" y="-36.498117311340366"> 
+                              <seq name="Driving" x="772.7182210780279" y="13.716168402944163" collapsed="false" id="d0fa4957-6092-4ed0-afa1-abf0229c8823"> 
+                                    <tsk name="PathPlanningFocus(target=Gate)" x="525.5941609276517" y="115.12594283902968" test_time="0" test_result="true" id="0bf3e0c1-6c7e-41f0-a0cc-c29fe7bccdcc" />
+                                    <seq name="@4" x="905.5607247222506" y="95.13461526682869" collapsed="false" id="7855bb1b-7f37-4c8b-9269-d2ed6a085d21"> 
+                                          <tsk name="InitDrive" x="724.7869345283169" y="167.4235618866507" test_time="0" test_result="true" id="a1f0a103-51bb-4826-9e86-8400759aaff3" />
+                                          <sel name="@5" x="903.5607247222506" y="156.13461526682647" collapsed="false" id="a0a26e65-c3c6-4c0c-8718-7ce32713c4dd"> 
+                                                <tsk name="WayPointsDriving" x="813.0924900838694" y="200.6255251280977" test_time="0" test_result="true" id="bfab5a52-2336-4c72-918f-eca5eee0ae39" />
+                                                <tsk name="FinishDrive" x="1000.1321532936788" y="199.99175812396925" test_time="0" test_result="true" id="3aa6cea3-b134-48ce-8a17-d5abdd9bed18" />
+                                          </sel>
+                                          <tsk name="FinishDrive" x="1000.1321532936788" y="199.99175812396925" test_time="0" test_result="true" id="3aa6cea3-b134-48ce-8a17-d5abdd9bed18" />
+                                    </seq>
+                              </seq>
+                        </dec>
+                     </par>
+               </seq>
+         </seq>
+   </par>
+</plan>

@@ -18,6 +18,7 @@ public:
   virtual void OnImgReceived(QImage image) = 0;
   virtual void OnHMIResponseReceived()=0;
   virtual void OnExecutionStatusUpdate(int status) = 0;
+  virtual void OnExecuterStackUpdate(QString strQString) = 0;
 };
 
 class CTcpConnection : public QObject
@@ -38,6 +39,10 @@ public Q_SLOTS:
         void Resume();
         void SendPathUpdate(std::vector<StructPoint> points);
 
+        void SendImageRequest();
+        void SendGridRequest();
+        void SendPathRequest();
+
 public:
 
         CTcpConnection(QString ipAddress,int port);
@@ -52,6 +57,7 @@ private:
         bool IsSendingImage;
         bool IsSendingGrid;
         bool IsSendingPath;
+        bool IsSendingExecuterStatus;
         int ImgSize;
         bool WaitingForResponse;
         int Counter;

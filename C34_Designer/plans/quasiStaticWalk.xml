@@ -1,6 +1,15 @@
 <plan descriptions="./plans/TaskDescriptions.xml">
-   <seq name="Walk" x="404.5" y="83.5" collapsed="false" id="84b5e1a4-56dc-464b-94d7-c660bb414075"> 
-         <tsk name="StandUp" x="228.5" y="295.5" test_time="0" test_result="true" id="48133e15-5d87-462e-9796-1030883a44bf" />
-         <tsk name="QuasiStaticWalking" x="433.5" y="299.5" test_time="0" test_result="true" id="699259ce-182d-4a16-ad83-4001975974bc" />
+   <seq name="Walk" x="969.4999999999997" y="47.69480519480514" collapsed="false" id="84b5e1a4-56dc-464b-94d7-c660bb414075"> 
+         <par name="@1" x="956.9228538649929" y="116.32622281847095" collapsed="false" id="f993e5a9-7c5f-4c6b-b349-2a2f3d826c25"> 
+               <tsk name="PathPlanning" x="689.4999999999997" y="352.69480519480516" test_time="0" test_result="true" id="c61e1c5e-8f00-41c7-ba9e-1259cd16978e" />
+            <dec name="!L!" x="977.4999999999997" y="162.69480519480516"> 
+                  <seq name="SearchObjectAndGo" x="863.1277600698987" y="307.60472209697053" collapsed="false" id="6de3db3d-b7da-4812-8944-11d90b3dfbf0"> 
+                        <seq name="OverCliff" x="889.2142857142819" y="400.21428571428333" collapsed="false" id="b668d8b3-6787-4d21-a051-17def7419d8b"> 
+                              <tsk name="PathPlanningFocus(target=Qual1P2)" x="699.4523809523779" y="476.3412698412682" test_time="0" test_result="true" id="9fe743dd-3101-4988-8e76-2f01615c6604" />
+                              <tsk name="QuasiStaticWalk" x="898.7380952380909" y="498.9444444444413" test_time="0" test_result="true" id="c9112af6-dbb8-4445-8948-59f96dacf28b" />
+                        </seq>
+                  </seq>
+            </dec>
+         </par>
    </seq>
 </plan>

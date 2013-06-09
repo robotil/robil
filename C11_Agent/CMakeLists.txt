@@ -30,8 +30,8 @@ rosbuild_genmsg()
 rosbuild_gensrv()
 
 #set(hdrs src/PushHMIServer.hpp src/HMIResponseServer.hpp)
-set(srcs src/C11_agent_st.cpp src/C11_TCPServer.cpp src/C11_structs.cpp src/C11_Agent_Node.cpp src/C11Main.cpp)
-set(hdrs src/C11_PushServer.hpp src/C11_HMIResponseServer.hpp src/C11_UntilOperatorIntervention.hpp src/C11_TCPServer.h src/C11_structs.h src/C11_Agent_Node.h src/C11Main.h)
+set(srcs src/C11_agent_st.cpp src/C11_TCPServer.cpp src/C11_structs.cpp src/C11_Agent_Node.cpp src/C11Main.cpp src/tinyxml2.cpp)
+set(hdrs src/C11_PushServer.hpp src/C11_HMIResponseServer.hpp src/C11_UntilOperatorIntervention.hpp src/C11_TCPServer.h src/C11_structs.h src/C11_Agent_Node.h src/C11Main.h src/tinyxml2.h)
 
 qt4_automoc(${srcs})
 QT4_WRAP_CPP(qt_moc_srcs ${hdrs})

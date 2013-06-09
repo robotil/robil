@@ -61,6 +61,5 @@ def plotGraph(DATA):
         plt.ylabel("Y")
         plt.title("Autonomus car drive via given way points using FLC")
         plt.legend(loc="best")
-        plt.grid
         plt.savefig("Path.png")
         #plt.show()
