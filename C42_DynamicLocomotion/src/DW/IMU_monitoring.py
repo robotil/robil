@@ -7,7 +7,7 @@ from std_msgs.msg import *
 from sensor_msgs.msg import Imu
 # from C42_DynamicLocomotion.msg import slop_m
 from tf.transformations import quaternion_from_euler, euler_from_quaternion
-from C42_DynamicLocomotion.msg import imu_contact
+# from C42_DynamicLocomotion.msg import imu_contact
 from contact_reflex import contact_reflex
 from atlas_msgs.msg import ForceTorqueSensors
 import control_primitives
@@ -28,8 +28,6 @@ ns = Nasmpace()
 
 class IMUCh(object):
     def __init__(self):
-        
-        self.listener = tf.TransformListener()
         rospy.sleep(3)
         self.contact = contact_reflex()
 
@@ -83,10 +81,10 @@ class IMUCh(object):
         self.slop = 0
         self.count_stand = 0
 
-        self.out = imu_contact()
+        # self.out = imu_contact()
 
-        self.contact_sub = rospy.Subscriber('/atlas/force_torque_sensors', ForceTorqueSensors, self.get_contact)
-        self.imu_check = rospy.Subscriber('/atlas/imu',Imu, self.imu_manipulate)
+        # self.contact_sub = rospy.Subscriber('/atlas/force_torque_sensors', ForceTorqueSensors, self.get_contact)
+        # self.imu_check = rospy.Subscriber('/atlas/imu',Imu, self.imu_manipulate)
         a = [1,-3.180638548874721,3.861194348994217,-2.112155355110971,0.438265142261981]
         b = [0.0004165992044065786,0.001666396817626,0.002499595226439,0.001666396817626,0.0004165992044065786]
         self.filter = control_primitives.filter(b = b, a = a)
@@ -105,9 +103,9 @@ class IMUCh(object):
 
     def imu_manipulate(self,msg):
         self.roll,self.pitch,self.yaw = euler_from_quaternion([msg.orientation.x,msg.orientation.y,msg.orientation.z,msg.orientation.w])
-        self.out.roll = self.roll
-        self.out.pitch = self.pitch
-        self.out.yaw = self.yaw
+        # self.out.roll = self.roll
+        # self.out.pitch = self.pitch
+        # self.out.yaw = self.yaw
 
        
     def get_contact(self,msg):
@@ -185,15 +183,15 @@ class IMUCh(object):
 
        # self.leg_contact_r,self.leg_contact_l = self.contact.update(self.leg_force_z_r,self.leg_force_z_l)
        # self.arm_contact_r,self.arm_contact_l = self.contact.update(self.arm_force_z_r,self.arm_force_z_l)
-       self.out.leg_r = self.leg_force_r#self.leg_force_z_r#self.leg_contact_r
-       self.out.leg_l = self.leg_force_l#self.leg_force_z_l#self.leg_contact_l
-       self.out.arm_r = self.arm_force_r#self.arm_force_z_r#self.arm_contact_r
-       self.out.arm_l = self.arm_force_l#self.arm_force_z_l#self.arm_contact_l
-       self.out.force_avg = self.F_av
-       self.out.sigma = self.Sigma
+       # self.out.leg_r = self.leg_force_r#self.leg_force_z_r#self.leg_contact_r
+       # self.out.leg_l = self.leg_force_l#self.leg_force_z_l#self.leg_contact_l
+       # self.out.arm_r = self.arm_force_r#self.arm_force_z_r#self.arm_contact_r
+       # self.out.arm_l = self.arm_force_l#self.arm_force_z_l#self.arm_contact_l
+       # self.out.force_avg = self.F_av
+       # self.out.sigma = self.Sigma
 
-       ns.pub_imu_contact.publish(self.out)
-       imu_data.write('%s %s %s %s %s %s %s %s %s %s %s %s %s %s %s\n'  %(str(rospy.get_time()),self.last_start,self.roll,self.pitch,self.yaw,self.arm_force_r,self.arm_force_l,self.leg_force_r,self.leg_force_l,self.F_av,self.Sigma,self.pitch_avg,self.roll_avg,self.yaw_avg,self.last_start))
+       # ns.pub_imu_contact.publish(self.out)
+       # imu_data.write('%s %s %s %s %s %s %s %s %s %s %s %s %s %s %s\n'  %(str(rospy.get_time()),self.last_start,self.roll,self.pitch,self.yaw,self.arm_force_r,self.arm_force_l,self.leg_force_r,self.leg_force_l,self.F_av,self.Sigma,self.pitch_avg,self.roll_avg,self.yaw_avg,self.last_start))
 
     # rospy.loginfo("Torque_RMS : torque_fitness = %f" % (torque_fitness) )
 
@@ -201,8 +199,8 @@ if __name__ == '__main__':
 
     rospy.init_node('IMU_monitoring')
     rospy.loginfo( "IMU monitoring node is ready" )
-    ns.pub_imu_contact = rospy.Publisher('imureal_out', imu_contact )
-    imu_data =  open('imu_data.txt','w')
+    # ns.pub_imu_contact = rospy.Publisher('imureal_out', imu_contact )
+    # imu_data =  open('imu_data.txt','w')
     walk = IMUCh()
 
     rospy.spin()

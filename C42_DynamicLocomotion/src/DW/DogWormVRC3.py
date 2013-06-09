@@ -18,6 +18,7 @@ from copy import copy
 from std_srvs.srv import Empty
 ##nedded for tests
 from C25_GlobalPosition.msg import C25C0_ROP
+from IMU_monitoring import IMUCh
 from Abstractions.Interface_tf import *
 class DW_Controller(object):
     """DW_Controller"""
@@ -223,6 +224,8 @@ class DW_Controller(object):
         self.RHC = hand_joint_controller("right")
         # Initialize robot state listener
         self.RS = robot_state(self._jnt_names)
+        self.IMU_mon = IMUCh()
+
         print("DW::Initialize")
         self.GlobalPos = 0
         self.GlobalOri = 0
@@ -259,6 +262,8 @@ class DW_Controller(object):
 
     def RS_cb(self,msg):
         self.RS.UpdateState(msg)
+        self.IMU_mon.get_contact(msg)
+        self.IMU_mon.imu_manipulate(msg)
 
     def Odom_cb(self,msg):
         if 1000 <= self._counter: 
@@ -420,8 +425,12 @@ class DW_Controller(object):
                     self.BackCrawl()
             else:
                 self.FollowPath = 0
+            if self._terrain == "MUD" and self.IMU_mon.stand_up_flag == 1:
+                print "Reached stand up zone"
+                return
 
     def Crawl(self):
+        # self.IMU_mon.turned = 0
         if self.FollowPath == 1:
             # Update sequence to correct orientation
             y,p,r = self.current_ypr()
@@ -437,6 +446,7 @@ class DW_Controller(object):
         self.RotFlag = 0
 
     def BackCrawl(self):
+        # self.IMU_mon.turned = 1
         if self.FollowPath == 1:
             # Update sequence to correct orientation
             y,p,r = self.current_ypr()
