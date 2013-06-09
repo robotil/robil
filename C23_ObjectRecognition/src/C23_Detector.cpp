@@ -1202,8 +1202,8 @@ if(depth < minPoint.x+THRESHOLD && depth > minPoint.x-THRESHOLD) {
             //x = absolutePoint.x;
             //y = absolutePoint.y;
             
-            //imshow("Testing",srcImg);
-            //waitKey(0);
+            imshow("Testing",srcImg);
+            waitKey(0);
             
             //Determine if the robot is facing the driver or passenger side
             detectPassengerDriver(srcImg, x0, yTop, x1,  y1, minPoint, pclcloud);
