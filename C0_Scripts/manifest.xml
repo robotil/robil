@@ -1,0 +1,14 @@
+<package>
+  <description brief="C0_Scripts">
+
+     C0_Scripts
+
+  </description>
+  <author>michele</author>
+  <license>BSD</license>
+  <review status="unreviewed" notes=""/>
+  <url>http://ros.org/wiki/C0_Scripts</url>
+
+</package>
+
+

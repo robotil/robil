@@ -81,7 +81,7 @@ static tf::StampedTransform righttransform;
 bool C22_Node::proccess(C22_GroundRecognitionAndMapping::C22::Request  &req,
 	C22_GroundRecognitionAndMapping::C22::Response &res ){
 
-	    bool retry=true;
+	   /*) bool retry=true;
 	    while(retry){
 	    	retry=false;
 			try{
@@ -102,7 +102,7 @@ bool C22_Node::proccess(C22_GroundRecognitionAndMapping::C22::Request  &req,
 			}
 	    }
 
-
+*/
 	 /*pcl::PointCloud<pcl::PointXYZ>cloud;
      pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_filtered(cloud.makeShared());
 	 //tf::Quaternion q;
@@ -298,11 +298,12 @@ void C22_Node::callback(const sensor_msgs::PointCloud2::ConstPtr& pclMsg,const n
 	  //pass.setFilterLimitsNegative (true);
 	  pass.filter (*cloudRecord);
 
-	  if(cloudRecord->points.size()>120000){
+	  if(cloudRecord->points.size()>420000){
+		  cloudRecord->points.resize(0);/*
 	  			  pcl::PointCloud<int> sampled_indices;
 	  			  pcl::UniformSampling<pcl::PointXYZ> uniform_sampling;
 	  			  uniform_sampling.setInputCloud (cloudRecord);
-	  			  uniform_sampling.setRadiusSearch (0.005);
+	  			  uniform_sampling.setRadiusSearch (0.25);
 	  			  uniform_sampling.compute (sampled_indices);
 	  			  //pcl::copyPointCloud (*scene, sampled_indices.points, *scene_keypoints);
 	  			  std::cout << "Scene total points: " << cloudRecord->points.size() ;
@@ -352,7 +353,7 @@ void C22_Node::callback(const sensor_msgs::PointCloud2::ConstPtr& pclMsg,const n
 C22_Node *node22;
 int main(int argc, char **argv)
 {
-  ros::init(argc, argv, "c22_compactGroundReconition_and_mapping");
+  ros::init(argc, argv, "c22_GroundReconition_and_mapping");
   node22=new C22_Node();
   ros::AsyncSpinner spinner(4); // Use 4 threads
   spinner.start();
