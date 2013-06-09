@@ -24,9 +24,9 @@ class Walker(object):
         self._Result = WalkerResultEnum.Failure
 
     # Commands:
-    def Initialize(self):
+    def Initialize(self,parameters=None):
         self._WalkingMode = self._ModeChooser.GetRecommendedMode()
-        self._WalkingMode.Initialize()
+        self._WalkingMode.Initialize(parameters)
         self._Result = WalkerResultEnum.Failure
         
     def Start(self):
