@@ -20,6 +20,19 @@
                                                 <dec name="!L!"> 
                                                       <tsk name="searchObject(target=Gate)" />
                                                 </dec>
+                                                   <par name="OperatorCheckPoint"> 
+                                                      <dec name="T"> 
+                                                            <par name="TimeControl"> 
+                                                                  <seq name="OperatorRequest"> 
+                                                                        <tsk name="PushHMI(data=panoramic_image)" />
+                                                                        <tsk name="PushHMI(data=occupancy_grid)" />
+                                                                        <tsk name="PushHMI(data=path)" />
+                                                                        <tsk name="HMIResponse" />
+                                                                  </seq>
+                                                                  <tsk name="TimeoutMonitor(threshold=1000)" />
+                                                            </par>
+                                                      </dec>
+                                                   </par>
                                                 <dec name="!L!"> 
                                                       <sel name="PathFollow"> 
                                                             <par name="Zmp"> 
