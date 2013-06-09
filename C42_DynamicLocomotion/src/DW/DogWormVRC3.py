@@ -592,6 +592,7 @@ class DW_Controller(object):
             # Return to original configuration
             self.JC.send_pos_traj(self.RS.GetJointPos(),self.RobotCnfg[0][:],0.5,0.01) 
             self.CurSeqStep = 0
+            return 1
 
     def RotateToOriInMud(self,Bearing):
         self.RotFlag = 1
@@ -625,7 +626,7 @@ class DW_Controller(object):
             y,p,r = self.current_ypr()
             if abs(self.DeltaAngle(y,y0))<0.1:
                 # Robot isn't turning, Give up
-                return
+                return 0
 
             y0 = y
             # Angle=self.DeltaAngle(Bearing,y0)
@@ -634,6 +635,7 @@ class DW_Controller(object):
         # Return to original configuration
         self.JC.send_pos_traj(self.RS.GetJointPos(),self.RobotCnfg[0][:],0.5,0.01) 
         self.CurSeqStep = 0
+        return 1
 
     def RotSpotSeq(self,Delta):
         # Delta of 1 gives a left rotation of approx. 0.75 radians
@@ -1001,7 +1003,7 @@ if __name__=='__main__':
     DW.RHC.send_command()
     # rospy.sleep(2)
     
-    # DW.Sit(1.5)       
+    DW.Sit(1.5)       
     rospy.sleep(0.5)
 
     Point1 = [1.15,-10.27,"fwd"] # Point close to right side of gate
@@ -1013,8 +1015,8 @@ if __name__=='__main__':
     Point7 = [6.76,4.98,"fwd"] # Daring option, point after cross
     Point8 = [6.08,6.77,"fwd"] # Final gate
     Path = [Point1,Point2,Point3,Point4,Point5,Point6,Point7,Point8]
-    rospy.sleep(2)
+    # rospy.sleep(2)
     # DW.DoPath(Path)
-    DW.FrontTipRecovery()
+    # DW.FrontTipRecovery()
 
     
