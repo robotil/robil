@@ -128,6 +128,7 @@ bool C22_Node::proccess(C22_GroundRecognitionAndMapping::C22::Request  &req,
 	 pcl::transformPointCloud(*cloudRecord, *cloud_filtered, recordToRobot);
 		 pcl::transformPointCloud(*cloud_filtered, *cloud_filtered, sensorToFrame);
 */
+	std::cout<<"lidar in\n";
 	    _myMatrix->updateMapRelationToRobot(lastPose.pose.pose.position.x,lastPose.pose.pose.position.y,lastPose.pose.pose.position.z);
 
 		 pcl::PointCloud<pcl::PointXYZ>::Ptr cloudf_backup(cloudRecord->makeShared());
@@ -170,9 +171,10 @@ bool C22_Node::proccess(C22_GroundRecognitionAndMapping::C22::Request  &req,
 				  if(cloudf_backup->points.size()<300)
 					  break;
 			  }
-
+    std::cout<<"pre- matrix\n";
 	_myMatrix->clearMatrix();
 	_myMatrix->computeMMatrix(_myPlanes,cloudRecord);
+    std::cout<<"post- matrix\n";
 	int xIndex = (lastPose.pose.pose.position.x -_myMatrix->xOffset)*(1/SIZEOFSQUARE);	//added for now instead of previous three lines
 	int yIndex = (lastPose.pose.pose.position.y-_myMatrix->yOffset) *(1/SIZEOFSQUARE);	//same as above
 	_myMatrix->data->at(xIndex)->at(yIndex)->square_status=ATLAS;
@@ -193,12 +195,13 @@ bool C22_Node::proccess(C22_GroundRecognitionAndMapping::C22::Request  &req,
 	res.drivingPath.right_foot.x=(int)(righttransform.getOrigin().getX()/0.05);
 	res.drivingPath.right_foot.y=-(int)(righttransform.getOrigin().getY()/0.05)+20;
 	res.drivingPath.right_foot.z=righttransform.getOrigin().getZ();
-
+    std::cout<<"pre- message\n";
 	for(unsigned int i=0;i<_myMatrix->data->size();i++){
 		res.drivingPath.row.at(i).column.resize(_myMatrix->data->at(i)->size());
 		for(unsigned int j=0;j<_myMatrix->data->at(i)->size();j++){
 			res.drivingPath.row.at(i).column.at(j).status=_myMatrix->data->at(i)->at(j)->square_status;
 			res.drivingPath.row.at(i).column.at(j).planes.resize(_myMatrix->data->at(i)->at(j)->square_Planes->size());
+			res.drivingPath.row.at(i).column.at(j).height=-9999;
 			for(unsigned int k=0;k<_myMatrix->data->at(i)->at(j)->square_Planes->size();k++){
 				res.drivingPath.row.at(i).column.at(j).planes.at(k).x=_myMatrix->data->at(i)->at(j)->square_Planes->at(k)->coefficient_x;
 				res.drivingPath.row.at(i).column.at(j).planes.at(k).y=_myMatrix->data->at(i)->at(j)->square_Planes->at(k)->coefficient_y;
@@ -207,9 +210,12 @@ bool C22_Node::proccess(C22_GroundRecognitionAndMapping::C22::Request  &req,
 				res.drivingPath.row.at(i).column.at(j).planes.at(k).repPoint.x=_myMatrix->data->at(i)->at(j)->square_Planes->at(k)->representing_point.x;
 				res.drivingPath.row.at(i).column.at(j).planes.at(k).repPoint.y=_myMatrix->data->at(i)->at(j)->square_Planes->at(k)->representing_point.y;
 				res.drivingPath.row.at(i).column.at(j).planes.at(k).repPoint.z=_myMatrix->data->at(i)->at(j)->square_Planes->at(k)->representing_point.z;
+				if(res.drivingPath.row.at(i).column.at(j).height>_myMatrix->data->at(i)->at(j)->square_Planes->at(k)->representing_point.z)
+					res.drivingPath.row.at(i).column.at(j).height=_myMatrix->data->at(i)->at(j)->square_Planes->at(k)->representing_point.z;
 			}
 		}
 	}
+	std::cout<<"post- message\n";
 	  while(_myPlanes->size()!=0){
 		  pclPlane* temp=_myPlanes->back();
 		  _myPlanes->pop_back();
@@ -299,7 +305,22 @@ void C22_Node::callback(const sensor_msgs::PointCloud2::ConstPtr& pclMsg,const n
 	  pass.filter (*cloudRecord);
 
 	  if(cloudRecord->points.size()>420000){
-		  cloudRecord->points.resize(0);/*
+		  pcl::PassThrough<pcl::PointXYZ> pass;
+		  pass.setInputCloud (cloudRecord);
+		  pass.setFilterFieldName ("y");
+		  pass.setFilterLimits (_myMatrix->yOffset,_myMatrix->yOffset+25);
+		  //pass.setFilterLimitsNegative (true);
+		  pass.filter (*cloudRecord);
+		  pass.setInputCloud (cloudRecord);
+		  pass.setFilterFieldName ("x");
+		  pass.setFilterLimits (_myMatrix->xOffset,_myMatrix->xOffset+25);
+		  //pass.setFilterLimitsNegative (true);
+		  pass.filter (*cloudRecord);
+		  pass.setFilterFieldName ("z");
+		  pass.setFilterLimits (pos_msg->pose.pose.position.z-2,pos_msg->pose.pose.position.z+2);
+		  //pass.setFilterLimitsNegative (true);
+		  pass.filter (*cloudRecord);
+		  /*
 	  			  pcl::PointCloud<int> sampled_indices;
 	  			  pcl::UniformSampling<pcl::PointXYZ> uniform_sampling;
 	  			  uniform_sampling.setInputCloud (cloudRecord);
