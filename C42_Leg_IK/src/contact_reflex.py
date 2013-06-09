@@ -14,7 +14,7 @@ def none(iterable):
 
 class contact_reflex():
     def __init__(self,buffer_len = 20):
-        self._treshold = 100;
+        self._treshold = 100;#100
         self._state = {'l':1,'r':1}
         self._states_buffer = {'l':[True for k in xrange(buffer_len)],'r':[True for k in xrange(buffer_len)]}
 
