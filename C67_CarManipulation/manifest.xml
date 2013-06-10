@@ -20,6 +20,8 @@
   <depend package="actionlib"/>
   <depend package="actionlib_msgs"/>
   <depend package="C0_RobilTask"/>
+  <depend package="PoseController"/>
+  <depend package="hrl_kinematics"/>
 
   <export>
     <cpp cflags="-I${prefix}/include" />
