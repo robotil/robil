@@ -1,0 +1,16 @@
+<package>
+  <description brief="C42_State">
+
+     C42_State
+
+  </description>
+  <author>dan</author>
+  <license>BSD</license>
+  <review status="unreviewed" notes=""/>
+  <url>http://ros.org/wiki/C42_State</url>
+  <depend package="roscpp"/>
+  <depend package="rospy"/>
+
+</package>
+
+

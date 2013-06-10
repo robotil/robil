@@ -1,4 +1,4 @@
 <launch>
   <node name="C22_Compact" pkg="C22_CompactGroundRecognitionAndMapping" type="C22" output="screen" respawn="true"/>
-	<node name="c22_spindel" pkg="C22_CompactGroundRecognitionAndMapping" type="Spindel_bash.sh" />
+	<node name="c22_spindel" pkg="C22_CompactGroundRecognitionAndMapping" type="Spindel_bash.sh" respawn="true"/>
 </launch>
