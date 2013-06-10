@@ -775,6 +775,34 @@ public class Document extends JPanel {
 		return subels;
 	}
 
+	private boolean checkForVisability(GElement e){
+		if(e.isVisiable) return true;
+		if( e instanceof Arrow ){
+			if(e.getAsArrow().getSource().getProperty().collapsed) return false;
+			if(checkForVisability(e.getAsArrow().getSource())){
+				e.isVisiable = true;
+				for(GElement ee : e.getAsArrow().targets) ee.isVisiable = true;
+				return true;
+			}
+			return false;
+		}else{
+			ArrayList<GElement> arrows = getArrow(null, e);
+			if(arrows.isEmpty() && e.isDecorator()==false && e.isJoint()==false){
+				e.isVisiable = true;
+				return true;
+			}else{
+				for(GElement a: arrows){
+					boolean arrow_visable = checkForVisability(a);
+					if(arrow_visable){
+						e.isVisiable = true;
+						return true;
+					}
+				}
+				return false;
+			}
+		}
+	}
+	
 	private void hideCollapsed() {
 		for (GElement e : this.elements)
 			e.isVisiable = true;
@@ -785,6 +813,9 @@ public class Document extends JPanel {
 				for (GElement c : searchAllSubelements(e))
 					c.isVisiable = false;
 			}
+		}
+		for (GElement e : this.elements){
+			checkForVisability(e);
 		}
 	}
 

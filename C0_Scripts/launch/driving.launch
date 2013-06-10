@@ -2,10 +2,6 @@
 
 	<include file="$(find LidarObstacleDetection)/launch/lidar.launch"/>
 
-	<node pkg="C51_CarOperation" type="DRC_Vehicle_Init_server.py" name="C51_CarOperation_Init" output="log" respawn="true" />
-	<node pkg="C51_CarOperation" type="DRC_Vehicle_Drive_server.py" name="C51_CarOperation_Drive" output="log" respawn="true" />
-	<node pkg="C51_CarOperation" type="DRC_Vehicle_Finish_server.py" name="C51_CarOperation_Finish" output="log" respawn="true" />
-
 	<node pkg="C67_CarManipulation" type="GripGearStick" name="C67_CarManipulation_GripGearSlick" output="log" respawn="true" />
 	<node pkg="C67_CarManipulation" type="GripHandBrake" name="C67_CarManipulation_GripHandbrake" output="log" respawn="true" />
 	<node pkg="C67_CarManipulation" type="GripSteeringWheel" name="C67_CarManipulation_GripSteeringW" output="log" respawn="true" />
@@ -15,5 +11,11 @@
 
 	<node pkg="C46_MountVehicle" type="C46_MountVehicle.py" name="C46_MountVehicle" output="log" respawn="true"/>
 	<node pkg="C47_DismountVehicle" type="C47_DismountVehicle.py" name="C47_DismountVehicle" output="log" respawn="true" />
+
+	<node pkg="C35_Monitoring" type="DrivingMonitor.py" name="C35_Monitoring_DrivingMonitor" output="log" respawn="true" />
+
+	<node pkg="C51_CarOperation" type="DRC_Vehicle_Init_server.py" name="C51_CarOperation_Init" output="log" respawn="true" />
+	<node pkg="C51_CarOperation" type="DRC_Vehicle_Drive_server.py" name="C51_CarOperation_Drive" output="log" respawn="true" />
+	<node pkg="C51_CarOperation" type="DRC_Vehicle_Finish_server.py" name="C51_CarOperation_Finish" output="log" respawn="true" />
 
 </launch>
