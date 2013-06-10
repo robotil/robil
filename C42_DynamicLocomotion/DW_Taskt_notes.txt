@@ -17,4 +17,4 @@ DW Stand Up:
 server:
 rosrun C42_Dynamic locomotion DWStandUp.py
 client:
-rosrun C0_RobilTask task_tester DWStandUp
+rosrun C0_RobilTask task_tester DWStand
