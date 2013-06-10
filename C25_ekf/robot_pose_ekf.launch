@@ -9,6 +9,7 @@
     <param name="vo_used" value="true"/>
     <param name="debug" value="true"/>
     <param name="self_diagnose" value="false"/>
+    <remap from="odom" to="C25/bdi_stripped"/>
     <remap from="vo" to="stereo_odometer/odometry" />
     <remap from="imu_data" to="atlas/imu" />
 </node>
