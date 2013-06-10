@@ -114,6 +114,24 @@ void CTcpConnection::SltReadyRead()
                       in>>(int &)(grid.Grid[i][j]);
                   }
                 }
+//                for(int i=99; i>=0; i--)
+//                  {
+//                          for(int j=0; j<100; j++)
+//                          {
+//                              switch ( grid.Grid[i][j] ){
+//                              case 0:
+//                                  std::cout<<'.'; break;
+//                              case 1:
+//                                  std::cout<<'*'; break;
+//                              case 2:
+//                                  std::cout<<'.'; break;
+//                              default:
+//                                  std::cout<<'?'; break;
+//                              }
+//                          }
+//                          std::cout<<std::endl;
+//                  }
+
                 std::cout<<"TCP: Grid receive completed!\n";
                 std::cout<<"Robot pos: "<<grid.RobotPos.x<<","<<grid.RobotPos.y<<"\n";
                 std::cout<<"Robot orientation: "<<grid.RobolOrientation<<"\n";

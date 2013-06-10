@@ -31,6 +31,25 @@ QDataStream & operator<< ( QDataStream & out,const StructGridData & data )
                 out<<data.Grid[i][j];
             }
           }
+
+//          std::cout<<"MAP ON TCP SENDING:"<<std::endl;
+//            for(int i=99; i>=0; i--)
+//            {
+//                    for(int j=0; j<100; j++)
+//                    {
+//                        switch ( data.Grid[i][j] ){
+//                        case 0:
+//                            std::cout<<'.'; break;
+//                        case 1:
+//                            std::cout<<'*'; break;
+//                        case 2:
+//                            std::cout<<'.'; break;
+//                        default:
+//                            std::cout<<'?'; break;
+//                        }
+//                    }
+//                    std::cout<<std::endl;
+//            }
           return out;
 }
 
