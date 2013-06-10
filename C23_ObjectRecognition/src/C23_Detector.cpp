@@ -58,6 +58,9 @@
     #include <math.h>
     #include <std_srvs/Empty.h>
     #include <ros/package.h>
+#include <boost/filesystem.hpp>
+#include <stdio.h>
+#include <stdlib.h>
 
 
 
@@ -802,6 +805,7 @@
 		break;
 	    case GATE:
 		ROS_INFO("GATE");         
+        boost::filesystem::create_directory("C23_Test");
 		res = detectGate(srcImg,cloud);
 		publishMessage(res);
 		break;
@@ -1554,8 +1558,8 @@
 	cvtColor(srcImg,imgHSV,CV_BGR2HSV);
 	inRange(imgHSV,Scalar(110, 200, 80), Scalar(125, 255, 250),imgThreshed);
 	//namedWindow("TESTING");
-	imshow("TESTING",imgThreshed);
-	waitKey(0);
+	//imshow("TESTING",imgThreshed);
+	//waitKey(0);
 	// imwrite("test12.jpg",imgThreshed);
 	Mat imgDilated;
 	Mat element = getStructuringElement( MORPH_ELLIPSE,
@@ -1623,8 +1627,8 @@
     * // ellipse
     * ellipse( imgThreshed, minEllipse[i], color, 2, 8 );
     }*/
-		imshow("TESTING",srcImg);
-		waitKey(0);
+		//imshow("TESTING",srcImg);
+	//	waitKey(0);
 		pictureCoordinatesToGlobalPosition(minRect.center.x-100,minRect.center.y+100,minRect.center.x+100,minRect.center.y+100,&x,&y,NULL);
 		int x1 = MIN(rect_points[0].x,rect_points[1].x);
 		int x2 = MIN(rect_points[2].x,rect_points[3].x);
@@ -2244,6 +2248,19 @@
 	pcl::PointCloud<pcl::PointXYZ>pclcloud;
 	C21_VisionAndLidar::C21_obj c21srv;
 	pcl::fromROSMsg<pcl::PointXYZ>(*cloud,pclcloud);
+    string imgpath="C23_Test/img_";
+    static int img_count = 0;
+    std::stringstream  number;
+    string ext = ".jpg";
+    number << img_count;
+    imgpath += number.str();
+    string org_img = imgpath;
+    imgpath +=ext;
+    
+    org_img += "_org.jpg";
+    
+    cout << "Saving at: " << imgpath << endl;
+    img_count ++;
 	static pcl::PointXYZ leftC;
 	static pcl::PointXYZ rightC;
 	static pcl::PointXYZ centerC;
@@ -2251,10 +2268,11 @@
 	bool left=false, right=false;
 	IplImage* img = new IplImage(srcImg);
 	IplImage* imgHSV = cvCreateImage(cvGetSize(img), 8, 3);
-	
+    cout << "Saving to: " << org_img.c_str() << endl;
+    imwrite(org_img.c_str(),srcImg);
 	cvCvtColor(img, imgHSV, CV_BGR2HSV);
 	IplImage* imgThreshed = cvCreateImage(cvGetSize(img), 8, 1);
-	cvInRangeS(imgHSV, cvScalar(0, 30, 20), cvScalar(5, 255, 255), imgThreshed); //filter red
+	cvInRangeS(imgHSV, cvScalar(0, 30, 20), cvScalar(1, 255, 255), imgThreshed); //filter red
 	
 	Mat threshMat(imgThreshed);
 	
@@ -2303,7 +2321,7 @@
 	    double r_z = 0;
 	    int count = 0;
 	    for(int i =-15; i <= 15; i++) {
-		for(int j =-15; j <=15; j++) {
+		for(int j =-100; j <=100; j++) {
 		    if(pclcloud.at(mcR[biggstR].x+i,mcR[biggstR].y+j).x != pclcloud.at(mcR[biggstR].x+i,mcR[biggstR].y+j).x)
 			continue;
 		    count++;
@@ -2373,7 +2391,7 @@
 	    double l_z = 0;
 	  int count = 0;
 	    for(int i =-15; i <= 15; i++) {
-		for(int j =-15; j <=15; j++) {
+		for(int j =-100; j <=100; j++) {
 		    if(pclcloud.at(mcR[biggstR].x+i,mcR[biggstR].y+j).x != pclcloud.at(mcR[biggstR].x+i,mcR[biggstR].y+j).x)
 			continue;
 		    count++;
@@ -2454,6 +2472,7 @@
 	    x = (x1+x2)/2.0;
 	    y = (y1+y2)/2.0;
 	    cout << "Middle point: " << x <<"," << y << endl;
+        imwrite(imgpath.c_str(),srcImg);
 	    return true;
 	    }
 	}
@@ -2535,6 +2554,7 @@
 		
 		// imshow("Testing" , srcImg);
 		// waitKey(0);
+		imwrite(imgpath.c_str(),srcImg);
 		return mcM[biggstM].x < mcR[biggstR].x ? true : false;
 		
 	    } else {
@@ -2570,10 +2590,12 @@
 		averagePointCloud(mcL[biggstL].x-5, mcL[biggstL].y-50, mcL[biggstL].x+5, mcL[biggstL].y+50, cloud, &x2, &y2,&z2);
 		x = x2;
 		y = y2-2.5;
+        imwrite(imgpath.c_str(),srcImg);
 		return mcM[biggstM].x > mcL[biggstL].x ? true : false;
 		
 	    }
 	}
+	imwrite(imgpath.c_str(),srcImg);
 	return false;
 	
 	
