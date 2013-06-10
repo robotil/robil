@@ -452,13 +452,15 @@
       
     }
     
-    bool C23_Detector::pictureCoordinatesToGlobalPosition(double x1, double y1, double x2, double y2, double* x, double* y, double*z) {
+    bool C23_Detector::pictureCoordinatesToGlobalPosition(double x1, double y1, double x2, double y2, double* x, double* y, double*z, double offsetx, double offsety) {
 	C21_VisionAndLidar::C21_obj c21srv;
 	c21srv.request.sample.x1 = x1;
 	c21srv.request.sample.y1 = y1;
 	c21srv.request.sample.x2 = x2;
 	c21srv.request.sample.y2 = y2;
-	
+    c21srv.request.sample.offsetx = offsetx;
+    c21srv.request.sample.offsety = offsety;
+	cout << "Sending datA: " << x1 << "," << y1 << "," <<  x2 << "," << y2 << "," << offsetx << "," << offsety << endl;
 	if(c21client.call(c21srv))
 	{
 	    if(x != NULL) *x = round(c21srv.response.point.x);
@@ -467,7 +469,7 @@
 	    cout << "Received data: " << c21srv.response.point.x << "," << c21srv.response.point.y << "," << c21srv.response.point.z << endl;
 	    return true;
 	}
-	
+	 return false;
     }
 
 	bool C23_Detector::pointCloudCoordinatesToGlobalPosition(double x, double y, double z, double* px, double* py, double *pz) {
@@ -1543,7 +1545,7 @@
     }*/
 		imshow("TESTING",srcImg);
 		waitKey(0);
-		pictureCoordinatesToGlobalPosition(minRect.center.x-100,minRect.center.y+100,minRect.center.x+100,minRect.center.y+100,&x,&y,NULL);
+	//	pictureCoordinatesToGlobalPosition(minRect.center.x-100,minRect.center.y+100,minRect.center.x+100,minRect.center.y+100,&x,&y,NULL);
 		return true;
 	}
 	return false;
@@ -1629,7 +1631,7 @@
     }*/
 		//imshow("TESTING",srcImg);
 	//	waitKey(0);
-		pictureCoordinatesToGlobalPosition(minRect.center.x-100,minRect.center.y+100,minRect.center.x+100,minRect.center.y+100,&x,&y,NULL);
+		//pictureCoordinatesToGlobalPosition(minRect.center.x-100,minRect.center.y+100,minRect.center.x+100,minRect.center.y+100,&x,&y,NULL);
 		int x1 = MIN(rect_points[0].x,rect_points[1].x);
 		int x2 = MIN(rect_points[2].x,rect_points[3].x);
 		int min_x = MIN(x1,x2);
@@ -1709,7 +1711,7 @@
 		
 	    }
 	}
-	if(biggest_size > 50 && biggest_size < 180) {
+	if(biggest_size > 50 && biggest_size < 550) {
 	    
 	    
 	    
@@ -1727,20 +1729,32 @@
 	    Point2f rect_points[4]; minRect.points( rect_points );
 	    for( int j = 0; j < 4; j++ )
 		line( srcImg, rect_points[j], rect_points[(j+1)%4], CV_RGB(255,0,0), 1, 8 );
-	    // ellipse( srcImg, fitEllipse( Mat(contours[biggest]) ), CV_RGB(255,0,0), 2, 8 );
-		/// Draw contours + rotated rects + ellipses
-		// Mat drawing = Mat::zeros( threshold_output.size(), CV_8UC3 );
-		/* for( int i = 0; i< contours.size(); i++ )
-    * {
-    * Scalar color = Scalar( rng.uniform(0, 255), rng.uniform(0,255), rng.uniform(0,255) );
-    * // contour
-    * // drawContours( bw, contours, i, color, 1, 8, vector<Vec4i>(), 0, Pointf() );
-    * // ellipse
-    * ellipse( imgThreshed, minEllipse[i], color, 2, 8 );
-    }*/
+        
+        
+        
+        int x1 = MIN(rect_points[0].x,rect_points[1].x);
+        int x2 = MIN(rect_points[2].x,rect_points[3].x);
+        int min_x = MIN(x1,x2);
+        
+        int y1 = MIN(rect_points[0].y,rect_points[1].y);
+        int y2 = MIN(rect_points[2].y,rect_points[3].y);
+        int min_y = MIN(y1,y2);
+        
+        
+        x1 = MAX(rect_points[0].x,rect_points[1].x);
+        x2 = MAX(rect_points[2].x,rect_points[3].x);
+        int max_x = MAX(x1,x2);
+        
+        y1 = MAX(rect_points[0].y,rect_points[1].y);
+        y2 = MAX(rect_points[2].y,rect_points[3].y);
+        int max_y = MAX(y1,y2);
+        string t = "Standpipe";
+        cout << "Saving standpipe" << endl;
+     //   saveTemplate(min_x,min_y,max_x-min_x,max_y-min_y,cloud,t);
+        templateMatching3D(t,lastCloud);
 		imshow("TESTING",srcImg);
 		waitKey(0);
-		pictureCoordinatesToGlobalPosition(minRect.center.x-100,minRect.center.y+100,minRect.center.x+100,minRect.center.y+100,&x,&y,NULL);
+	//	pictureCoordinatesToGlobalPosition(minRect.center.x-100,minRect.center.y+100,minRect.center.x+100,minRect.center.y+100,&x,&y,NULL);
 		return true;
 	}
 	return false;
@@ -1830,7 +1844,10 @@
 		}*/
 			imshow("TESTING",srcImg);
 			waitKey(0);
-			pictureCoordinatesToGlobalPosition(minRect.center.x-100,minRect.center.y+100,minRect.center.x+100,minRect.center.y+100,&x,&y,NULL);
+		//	pictureCoordinatesToGlobalPosition(minRect.center.x-100,minRect.center.y+100,minRect.center.x+100,minRect.center.y+100,&x,&y,NULL);
+            
+            //FIXME:
+            //  with offset 
 			return true;
 		}
 		return false;
@@ -2244,7 +2261,8 @@
 	
     }
     bool C23_Detector::detectGate(Mat srcImg, const sensor_msgs::PointCloud2::ConstPtr &cloud) {
-	
+	//FIXME:
+	// add offset .
 	pcl::PointCloud<pcl::PointXYZ>pclcloud;
 	C21_VisionAndLidar::C21_obj c21srv;
 	pcl::fromROSMsg<pcl::PointXYZ>(*cloud,pclcloud);
@@ -2343,14 +2361,9 @@
 		
 	    } else {
 		cout << "Red isn't valid .. " << pclcloud.at(mcR[biggstR].x,mcR[biggstR].y).x << "," << pclcloud.at(mcR[biggstR].x,mcR[biggstR].y).y << "," << endl;
+        
 	    }
-	  /* if (pclcloud.at(mcR[biggstR].x,mcR[biggstR].y).x<50 && pclcloud.at(mcR[biggstR].x,mcR[biggstR].y).y <50 && pclcloud.at(mcR[biggstR].x,mcR[biggstR].y).x !=0)
-    {
-    cout << "Red is valid .. " << endl;
-    rightC=pclcloud.at(mcR[biggstR].x,mcR[biggstR].y);
-    } else {
-    cout << "Red isn't valid .. " << pclcloud.at(mcR[biggstR].x,mcR[biggstR].y).x << "," << pclcloud.at(mcR[biggstR].x,mcR[biggstR].y).y << "," << endl;
-    }*/
+
 	}
 	
 	
@@ -2463,8 +2476,8 @@
 		}
 	      
 	      double x1,y1,z1,x2,y2,z2;
-	      averagePointCloud(mcL[biggstL].x-5, mcL[biggstL].y-50, mcL[biggstL].x+5, mcL[biggstL].y+50, cloud, &x1, &y1,&z1);
-	      averagePointCloud(mcR[biggstR].x-5, mcR[biggstR].y-50, mcR[biggstR].x+5, mcR[biggstR].y+50, cloud, &x2, &y2,&z2);
+	      pictureCoordinatesToGlobalPosition(mcL[biggstL].x-5, mcL[biggstL].y-50, mcL[biggstL].x+5, mcL[biggstL].y+50,  &x1, &y1,&z1, -0.5,0);
+          pictureCoordinatesToGlobalPosition(mcR[biggstR].x-5, mcR[biggstR].y-50, mcR[biggstR].x+5, mcR[biggstR].y+50, &x2, &y2,&z2,-0.5,0);
 	  // cout << "Middle: " <<
 	    // imshow("TESTING",srcImg);
 	    // waitKey(0);
