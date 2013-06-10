@@ -975,7 +975,126 @@
 	    //Detect the arrow and broadcast its directions
 	    bool C23_Detector::detectArrowDirection(Mat srcImg,const sensor_msgs::PointCloud2::ConstPtr &cloud){
 	      
-		cv::Point matchLoc;
+	      bool res = false;
+	      
+	      Mat hsvImg, thresholdedImg, imgCarOpened, imgCarClosed;
+
+	      cvtColor(srcImg, hsvImg, CV_BGR2HSV);
+	      inRange(hsvImg, Scalar(70, 0, 0), Scalar(110, 255, 255), thresholdedImg);
+
+	      imshow("Thresholded Image", thresholdedImg);
+	      waitKey();
+
+	      //Open the image to remove noise
+	      Mat element1(4, 4, CV_8U, Scalar(1));
+	      morphologyEx(thresholdedImg, imgCarOpened, MORPH_OPEN, element1);
+
+	      Mat element2(40, 40, CV_8U, Scalar(1));
+	      morphologyEx(imgCarOpened, imgCarClosed, MORPH_CLOSE, element2);
+
+	      imshow("Closed image", imgCarClosed);
+	      waitKey();
+
+	      Mat arrowImg;
+	      imgCarClosed.copyTo(arrowImg);
+	      //Now find the contours of the blobs
+	      vector<vector<cv::Point> > blobContours;
+	      findContours(arrowImg, blobContours, CV_RETR_EXTERNAL,
+			      CV_CHAIN_APPROX_SIMPLE);
+	      
+	      if(blobContours.size()==0)
+		return false;
+	      
+	      drawContours(srcImg, blobContours, -1, CV_RGB(255,0,0), 2);
+
+	      //imshow("Car Image", img);
+	      //waitKey(0);
+
+	      double currentArea;
+	      vector<int> blobIndices;
+	      RotatedRect currentArrow;
+	      vector<cv::Point> currentContour;
+	      double maxArea = -1;
+	      int maxIndex = 0;
+	      for (int ii = 0; ii < blobContours.size(); ii++) {
+
+		      currentContour = blobContours[ii];
+		      double currentContourArea = contourArea(currentContour, false);
+
+		      if (currentContourArea > maxArea) {
+			      maxArea = currentContourArea;
+			      maxIndex = ii;
+		      }
+
+		      currentArrow = minAreaRect(currentContour); //fitEllipse(currentContour);
+		      currentArea = currentArrow.size.height * currentArrow.size.width;
+
+		      if ((currentArea < 500) || (currentArea > 30000))
+			      continue;
+
+		      cout << "currentArea: " << currentArea << endl;
+
+	      }
+
+	      //Find the CM of the arrow
+	      Moments mu;
+
+	      mu = moments(blobContours[maxIndex], false);
+
+	      //  Get the mass centers:
+	      Point2f mc;
+
+	      mc = Point2f(mu.m10 / mu.m00, mu.m01 / mu.m00);
+	      cout << "CM: " << mc << endl;
+
+	      circle(srcImg, mc, 3, Scalar(255, 0, 0));
+	      //imshow("Arrow", img);
+	      //waitKey();
+
+	      int THRESHOLD = 100;
+	      Rect arrowBox = boundingRect(blobContours[maxIndex]);
+
+	      Mat finalImg(imgCarClosed, arrowBox);
+	      imshow("Arrow Image", finalImg);
+	      waitKey();
+
+	      //countNonZero(src Array);
+	      //Test the direction
+	      int leftSumCol = 10;
+	      int rightSumCol = finalImg.cols - 10;
+
+	      cv::Mat1i black_pixels(finalImg.cols, 1);
+
+	      cv::Mat leftCol = finalImg.col(leftSumCol);
+	      cv::Mat rightCol = finalImg.col(rightSumCol);
+
+	      int leftSum = countNonZero(leftCol);
+	      int rightSum  = countNonZero(rightCol);
+
+	      cout << "Black Pixels Left side: " << leftSum <<" Right side: "<<rightSum<<endl;
+
+	    
+	      
+	      pictureCoordinatesToGlobalPosition(arrowBox.x, arrowBox.y,arrowBox.x + arrowBox.height, arrowBox.y + arrowBox.width, &x, &y,&z);
+	      
+	        if(leftSum>rightSum){
+		      ROS_INFO("RIGHT ARROW");
+		      res = true;
+	      }
+	      else{
+		      ROS_INFO("LEFT ARROW");
+		      res = true;
+	      }
+	//averagePointCloud(arrowBox.x, arrowBox.y, arrowBox.width, arrowBox.height, cloud,&x,&y,&z);
+	
+	//black_pixels(leftSumCol,0) = arrowBox.height - countNonZero(col);
+
+	//cout<<"Black pixels: "<<black_pixels.<<endl;
+	      
+	      
+	      
+	      
+		/*cv::Point matchLoc;
 		double minValLeft = 0;
 		double minValRight = 0;
 		//Load the image template for the steering wheel
@@ -1037,7 +1156,7 @@
 		imshow("New Arrow Image", leftArrowTemplate);
 		waitKey();
 		imshow("New Arrow Image", rightArrowTemplate);
-		waitKey();
+		waitKey();*/
 		
 		
 	    
