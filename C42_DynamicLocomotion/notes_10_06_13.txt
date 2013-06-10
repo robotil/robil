@@ -57,7 +57,9 @@ To run Walker:
        $ rosrun C42_DynamicLocomotion Clone_C23_orient.py
 
     3. run task using C0 task_tester:
-       $ rosrun C0_RobilTask task_tester WalkerNode_AP
+       $ rosrun C0_RobilTask task_tester WalkerNode_AP args="Object=Firehose"
+     OR (operates without service)
+       $ rosrun C0_RobilTask task_tester WalkerNode_AP args="turn_in_place_Yaw=1.57"
 
 
 *  clone C25_GlobalPosition copy of ground_truth_odom:
