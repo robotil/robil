@@ -14,7 +14,7 @@
 #define SQUARE_SIZE 0.05
 #define C22_SIZE 40
 #define SIZE 36
-#define STEPS 3
+#define STEPS 5
 
 #define SLOPE_WEIGHT 5
 #define DISTANCE_WEIGHT 5
@@ -25,6 +25,9 @@
 #define LEFT 0
 #define RIGHT 1
 #define NORMALIZER 100
+#define EXTREME_SLOPE 0.174532925
+
+#define MIN_DIST_FROM_TARGET 1
 
 #define USE_C22 0
 
@@ -81,6 +84,9 @@ private:
 			const double &distanceWeight,const double &heightWeight,
 			const double &directionWeight);
 
+
+	void copyFoot(FootPlacement::Foot_Placement_data &a, FootPlacement::Foot_Placement_data &b);
+
 	void calcFootMatrix(
 			std::vector<FootPlacement::Foot_Placement_data>& foot_placement_path,
 			const int &useC22,
@@ -92,6 +98,9 @@ private:
 			const double &distanceWeight,
 			const double &heightWeight,
 			const double &directionWeight);
+
+
+
 
 	void publishExtremeSlopeMsg();
 
