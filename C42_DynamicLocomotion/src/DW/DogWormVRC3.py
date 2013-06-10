@@ -35,6 +35,9 @@ class DW_Controller(object):
         self.RotFlag = 0
         self.FollowPath = 0
         self.DesOri = 0
+
+        self.count_tottal = 0
+        self.count_tipping = 0
         
         ##################################################################
         ###################### Basic Standing Pose #######################
@@ -394,6 +397,8 @@ class DW_Controller(object):
             self.BackCrawl()
 
         while True:
+            self.count_tottal +=1
+            print 'Total_count:', self.count_tottal
             # Calculate distance and orientation to target
             DeltaPos = [Point[0]-self.GlobalPos.x,Point[1]-self.GlobalPos.y]
             Distance = math.sqrt(DeltaPos[0]**2+DeltaPos[1]**2)
@@ -412,6 +417,13 @@ class DW_Controller(object):
 
             # Rotate in place towards target
             if self._fall_count < self.FALL_LIMIT: 
+
+                # Crawl towards target
+                if Point[2] == "fwd":
+                    self.Crawl()
+                if Point[2] == "bwd":
+                    self.BackCrawl()
+
                 Drift = abs(self.DeltaAngle(T_ori,y))
                 if 0.5<Drift<1.4 and Distance>1:
                     self.RotateToOri(T_ori)
@@ -425,9 +437,9 @@ class DW_Controller(object):
                     self.BackCrawl()
             else:
                 self.FollowPath = 0
-            if self._terrain == "MUD" and self.IMU_mon.stand_up_flag == 1:
-                print "Reached stand up zone"
-                return
+            # if self._terrain == "MUD" and self.IMU_mon.stand_up_flag == 1:
+            #     print "Reached stand up zone"
+            #     return
 
     def Crawl(self):
         # self.IMU_mon.turned = 0
@@ -555,7 +567,7 @@ class DW_Controller(object):
             Bearing = Bearing % (2*math.pi)
             if Bearing > math.pi:
                 Bearing -= 2*math.pi
-            if Bearing < math.pi:
+            if Bearing < math.-pi:
                 Bearing += 2*math.pi
 
             # Get into "break-dance" configuration
@@ -746,11 +758,15 @@ class DW_Controller(object):
         self.JC.send_pos_traj(self.RS.GetJointPos(),pos,1*T,0.01)
 
     def CheckTipping(self):
+        
         result = 0
         while result == 0:
             # Get current orientation
+            
             y,p,r = self.current_ypr()
             self._fall_count += 1
+            
+
             if abs(p)>0.4*math.pi or abs(r)>0.8*math.pi:
                 # Robot tipped backwards
                 result = self.BackTipRecovery()
@@ -767,6 +783,8 @@ class DW_Controller(object):
 
 
     def TipRecovery(self,side):
+        self.count_tipping += 1
+        print 'Tipping:', self.count_tipping
         if side == "right":
             dID = 0
         sign = 1
@@ -1002,7 +1020,7 @@ if __name__=='__main__':
     # rospy.sleep(0.5)
     iTF = Interface_tf()
     DW = DW_Controller(iTF)
-    DW.Initialize(Terrain = "MUD") 
+    DW.Initialize(Terrain = "Hills") 
     rospy.Subscriber('/C25/publish',C25C0_ROP,DW.Odom_cb)
     #self._Subscribers["Odometry"] = rospy.Subscriber('/ground_truth_odom',Odometry,self._Controller.Odom_cb)
     rospy.Subscriber('/atlas/atlas_state',AtlasState,DW.RS_cb)

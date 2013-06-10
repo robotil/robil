@@ -70,7 +70,8 @@ class DW_WalkingMode(WalkingMode):
         for wp in path.points:
             if 0 < i: # ignor first way-point (current position) 
                 if 1 == i%2:
-                    direction = "fwd"
+                    direction = "bwd"
+                    #direction = "fwd"
                 else:
                     direction = "bwd"
                 p.append([wp.x,wp.y,direction])
