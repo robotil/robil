@@ -36,7 +36,8 @@ class DW_WalkingMode(WalkingMode):
         #self._Subscribers["Odometry"] = rospy.Subscriber('/ground_truth_odom',Odometry,self._Controller.Odom_cb)
         self._Subscribers["AtlasState"] = rospy.Subscriber('/atlas/atlas_state',AtlasState,self._Controller.RS_cb)
         rospy.sleep(0.3)
-
+        self._Controller.JC.set_all_pos(self._Controller.RS.GetJointPos())
+        self._Controller.JC.send_command()
     def StartWalking(self):
         self._Controller.LHC.set_all_pos(self._Controller.BaseHandPose)
         self._Controller.RHC.set_all_pos(self._Controller.BaseHandPose)

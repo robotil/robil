@@ -228,7 +228,8 @@ class DW_Controller(object):
         self.GlobalOri = 0
         self._counter = 0
         self._terrain = Terrain
-        
+        self._fall_count = 0
+        self.FALL_LIMIT = 3
         # self.reset_srv = rospy.ServiceProxy('/gazebo/reset_models', Empty)
 
         ##################################################################
@@ -251,7 +252,6 @@ class DW_Controller(object):
         self.JC.set_gains("r_arm_elx",1200,0,5)
         self.JC.set_gains("l_arm_mwx",1200,0,5)
         self.JC.set_gains("r_arm_mwx",1200,0,5)
-        self.JC.send_command()
 
     ##################################################################
     ########################### FUNCTIONS ############################
@@ -285,9 +285,12 @@ class DW_Controller(object):
             rospy.sleep(1)
 
     def current_ypr(self):
+
         quat = copy(self.GlobalOri)
         (r, p, y) = tf.transformations.euler_from_quaternion([quat.x, quat.y, quat.z, quat.w])
-        return (y, p, r)
+        return (y,p,r)
+        # RPY = self.RS.GetIMU()
+        # return (RPY[2], RPY[1], RPY[0])
 
     def DeltaAngle(self,DesAngle,CurAngle):
         Delta = DesAngle - CurAngle
@@ -401,23 +404,22 @@ class DW_Controller(object):
             y,p,r = self.current_ypr()
             # Check tipping
             self.CheckTipping()
-            # Check for tiping
-            if abs(p)>0.4*math.pi or abs(r)>0.4*math.pi:
-                # Recover from tiping
-                pass
 
             # Rotate in place towards target
-            Drift = abs(self.DeltaAngle(T_ori,y))
-            if 0.5<Drift<1.4 and Distance>1:
-                self.RotateToOri(T_ori)
-            if Drift>1.4:
-                self.RotateToOri(T_ori)
+            if self._fall_count < self.FALL_LIMIT: 
+                Drift = abs(self.DeltaAngle(T_ori,y))
+                if 0.5<Drift<1.4 and Distance>1:
+                    self.RotateToOri(T_ori)
+                if Drift>1.4:
+                    self.RotateToOri(T_ori)
 
-            # Crawl towards target
-            if Point[2] == "fwd":
-                self.Crawl()
-            if Point[2] == "bwd":
-                self.BackCrawl()
+                # Crawl towards target
+                if Point[2] == "fwd":
+                    self.Crawl()
+                if Point[2] == "bwd":
+                    self.BackCrawl()
+            else:
+                self.FollowPath = 0
 
     def Crawl(self):
         if self.FollowPath == 1:
@@ -590,6 +592,7 @@ class DW_Controller(object):
             # Return to original configuration
             self.JC.send_pos_traj(self.RS.GetJointPos(),self.RobotCnfg[0][:],0.5,0.01) 
             self.CurSeqStep = 0
+            return 1
 
     def RotateToOriInMud(self,Bearing):
         self.RotFlag = 1
@@ -620,12 +623,19 @@ class DW_Controller(object):
             # Check tipping
             self.CheckTipping()
             # Get current orientation
-            y0,p,r = self.current_ypr()
+            y,p,r = self.current_ypr()
+            if abs(self.DeltaAngle(y,y0))<0.1:
+                # Robot isn't turning, Give up
+                return 0
+
+            y0 = y
+            # Angle=self.DeltaAngle(Bearing,y0)
             Angle=self.DeltaAngle(Bearing,y0)
 
         # Return to original configuration
         self.JC.send_pos_traj(self.RS.GetJointPos(),self.RobotCnfg[0][:],0.5,0.01) 
         self.CurSeqStep = 0
+        return 1
 
     def RotSpotSeq(self,Delta):
         # Delta of 1 gives a left rotation of approx. 0.75 radians
@@ -730,7 +740,7 @@ class DW_Controller(object):
         while result == 0:
             # Get current orientation
             y,p,r = self.current_ypr()
-
+            self._fall_count += 1
             if abs(p)>0.4*math.pi or abs(r)>0.8*math.pi:
                 # Robot tipped backwards
                 result = self.BackTipRecovery()
@@ -742,6 +752,9 @@ class DW_Controller(object):
                 result = self.TipRecovery("left")
             else:
                 result = 1
+                self.FollowPath = 1
+                self._fall_count = 0
+
 
     def TipRecovery(self,side):
         if side == "right":
@@ -832,6 +845,53 @@ class DW_Controller(object):
         else:
             return 0
 
+    def FrontTipRecovery(self):
+
+        pos = [0, 0, 0, 0,
+            0, 0, -0.02, 0.04, -0.02, 0,
+            0, 0, -0.02, 0.04, -0.02, 0,
+            0, 0, 0, 0, 0, 0,
+            0, 0, 0, 0, 0, 0]
+        self.JC.send_pos_traj(self.RS.GetJointPos(),pos,0.5,0.01)
+
+        pos = [ 0, 0, 0, 0,
+            0, 0, 0, 0, -2.1, 0,
+            0, 0, 0, 0, -2.1, 0,
+            0, 0, 0, 1.5, 0, 0,
+            0, 0, 0, -1.5, 0, 0]
+        self.JC.send_pos_traj(self.RS.GetJointPos(),pos,0.5,0.01)
+
+        pos = [0, 0.8, 0, 0,
+            0, 0, -2, 2, -2.1, 0,
+            0, 0, -2, 2, -2.1, 0,
+            -1.7, -0.3, 0, 1.5, 0, 0,
+            -1.7, 0.3, 0, -1.5, 0, 0]
+        self.JC.send_pos_traj(self.RS.GetJointPos(),pos,0.2,0.01)
+
+        pos = [0, 1.1, 0, 0,
+            0, 0, -2.2, 2.8, -2.6, 0,
+            0, 0, -2.2, 2.8, -2.6, 0,
+            -1.4, -0.8, 0, 0, 0, 1.5,
+            -1.4, 0.8, 0, 0, 0, -1.5] 
+        self.JC.send_pos_traj(self.RS.GetJointPos(),pos,0.2,0.01)
+
+        pos = [0, 0.8, 0, 0,
+            0, 0, -2, 2.8, -2.6, 0,
+            0, 0, -2, 2.8, -2.6, 0,
+            -1.5, -0.8, 0, 0, 0, 0,
+            -1.5, 0.8, 0, 0, 0, 0]
+        self.JC.send_pos_traj(self.RS.GetJointPos(),pos,0.2,0.01)
+        rospy.sleep(1)
+        pos = copy(self.RobotCnfg[4][:])
+        self.JC.send_pos_traj(self.RS.GetJointPos(),pos,1,0.01)
+        # Get current orientation
+        y,p,r = self.current_ypr()
+        if abs(p)<0.4*math.pi:
+            # Success!
+            return 1
+        else:
+            return 0
+
     def DynStandUp(self):
         # Works only a small percentage of the time
         # SeqWithBalance needs to be updated to include a COM horizontal motion
@@ -911,6 +971,7 @@ class DW_Controller(object):
         self.SeqWithBalance(self.RS.GetJointPos(),self.BasStndPose,3,0.005,[-0.02, 0.175])
         rospy.sleep(0.8)
         self.JC.send_pos_traj(self.RS.GetJointPos(),self.BasStndPose,0.5*T,0.005)
+
     def StandUp(self):
         RPY = self.RS.GetIMU()
         D, R = self._iTf.TransformListener().lookupTransform('/l_foot','/pelvis',rospy.Time(0))
@@ -954,8 +1015,8 @@ if __name__=='__main__':
     Point7 = [6.76,4.98,"fwd"] # Daring option, point after cross
     Point8 = [6.08,6.77,"fwd"] # Final gate
     Path = [Point1,Point2,Point3,Point4,Point5,Point6,Point7,Point8]
-    rospy.sleep(2)
+    # rospy.sleep(2)
     # DW.DoPath(Path)
-    DW.StandUp()
+    # DW.FrontTipRecovery()
 
     
