@@ -20,9 +20,15 @@ class DW_WalkingMode(WalkingMode):
         WalkingMode.__init__(self,DW_PathPlanner())
         self._Controller = DW_Controller(iTf)
         
-    def Initialize(self):
-        WalkingMode.Initialize(self)
-        self._Controller.Initialize(Terrain = "MUD") #How to get the true terrain type?
+    def Initialize(self,parameters):
+        WalkingMode.Initialize(self,parameters)
+
+        if ((None != parameters) and ('Terrain' in parameters)):
+            terrain = parameters['Terrain']
+        else:
+            terrain="MUD"
+
+        self._Controller.Initialize(Terrain = terrain)
         self._bDone = False
         
         self._Subscribers["Path"] = rospy.Subscriber('/path',C31_Waypoints,self._path_cb)
@@ -30,7 +36,8 @@ class DW_WalkingMode(WalkingMode):
         #self._Subscribers["Odometry"] = rospy.Subscriber('/ground_truth_odom',Odometry,self._Controller.Odom_cb)
         self._Subscribers["AtlasState"] = rospy.Subscriber('/atlas/atlas_state',AtlasState,self._Controller.RS_cb)
         rospy.sleep(0.3)
-
+        self._Controller.JC.set_all_pos(self._Controller.RS.GetJointPos())
+        self._Controller.JC.send_command()
     def StartWalking(self):
         self._Controller.LHC.set_all_pos(self._Controller.BaseHandPose)
         self._Controller.RHC.set_all_pos(self._Controller.BaseHandPose)
