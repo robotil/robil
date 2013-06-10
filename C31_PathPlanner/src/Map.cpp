@@ -11,11 +11,13 @@ typedef ObsMap Map;
 
 
 ostream& operator<<(ostream& out, const Map& m){
-	out<<"  "; for(size_t x=0;x<10;x++){cout<<' '<<x<<' ';}for(size_t x=10;x<m.w();x++){cout<<x<<' ';} out<<endl;
+//	out<<"  "; for(size_t x=0;x<10;x++){cout<<' '<<x<<' ';}for(size_t x=10;x<m.w();x++){cout<<x<<' ';} out<<endl;
+	out<<"  "; for(long x=(long)m.w()-1;x>=0;x--){cout<<' '<<x<<' ';}/*for(size_t x=10;x<m.w();x++){cout<<x<<' ';}*/ out<<endl;
 	for(long y=(long)m.h()-1;y>=0;y--){
 //	for(size_t y=0;y<m.h();y++){
 		if(y<10) out<<' '; out<<y;
-		for(size_t x=0;x<m.w();x++){
+//		for(size_t x=0;x<m.w();x++){
+		for(long x=(long)m.w()-1;x>=0;x--){
 			out<<' '<<m.str(x,y)<<' ';
 		}
 		out<<endl;
@@ -23,11 +25,13 @@ ostream& operator<<(ostream& out, const Map& m){
 	return out;
 }
 ostream& operator<<(ostream& out, const AltMap& m){
-	out<<"  "; for(size_t x=0;x<10;x++){cout<<' '<<x<<' ';}for(size_t x=10;x<m.w();x++){cout<<x<<' ';} out<<endl;
+//	out<<"  "; for(size_t x=0;x<10;x++){cout<<' '<<x<<' ';}for(size_t x=10;x<m.w();x++){cout<<x<<' ';} out<<endl;
+	out<<"  "; for(long x=(long)m.w()-1;x>=0;x--){cout<<' '<<x<<' ';}/*for(size_t x=10;x<m.w();x++){cout<<x<<' ';}*/ out<<endl;
 	for(long y=(long)m.h()-1;y>=0;y--){
 //	for(size_t y=0;y<m.h();y++){
 		if(y<10) out<<' '; out<<y;
-		for(size_t x=0;x<m.w();x++){
+//		for(size_t x=0;x<m.w();x++){
+		for(long x=(long)m.w()-1;x>=0;x--){
 			out<<' '<<m(x,y)<<' ';
 		}
 		out<<endl;
