@@ -545,7 +545,7 @@ class DW_Controller(object):
 
     def RotateToOri(self,Bearing):
         if self._terrain == "MUD":
-            self.RotateToOriInMud(Bearing)
+            return self.RotateToOriInMud(Bearing)
         else:
             if self.RotFlag == 2:
                 self.GoToBackSeqStep(1)
@@ -577,6 +577,7 @@ class DW_Controller(object):
             Angle=self.DeltaAngle(Bearing,y0)
 
             while abs(Angle)>0.15: # Error of 9 degrees
+                # print 'Delta: ',Angle,'Bearing: ',Bearing, 'yaw: ',y0
                 Delta = Angle/0.75
                 if abs(Delta)>1:
                     Delta/=abs(Delta)
@@ -611,7 +612,7 @@ class DW_Controller(object):
         Bearing = Bearing % (2*math.pi)
         if Bearing > math.pi:
             Bearing -= 2*math.pi
-        if Bearing < math.pi:
+        if Bearing < -math.pi:
             Bearing += 2*math.pi
 
         self.JC.send_pos_traj(self.RS.GetJointPos(),self.RobotCnfg2[4][:],1.5,0.01)
@@ -619,8 +620,9 @@ class DW_Controller(object):
         # Get current orientation
         y0,p,r = self.current_ypr()
         Angle=self.DeltaAngle(Bearing,y0)
-
+        # print 'Angle: ',Angle
         while abs(Angle)>0.1: # Error of 3 degrees
+            # print 'MUD Delta: ',Angle,'Bearing: ',Bearing, 'yaw: ',y0
             Delta = Angle/0.45
             if abs(Delta)>1:
                 Delta/=abs(Delta)
