@@ -213,6 +213,8 @@ void FootPlacementService::calcFootMatrix(
 	double a=robotOri.z;
 	double cosa=cos(a), sina=sin(a);
 
+	printf("a cos sin: %lf %lf %lf \n",a, cosa, sina);
+
 	printf("pos: %lf %lf %lf \n",robotPos.x, robotPos.y, robotPos.z);
 	printf("startPose: %lf %lf %lf \n",startPose.pose.position.x
 			, startPose.pose.position.y, startPose.pose.position.z);
@@ -243,7 +245,7 @@ void FootPlacementService::calcFootMatrix(
 		minCost = std::numeric_limits<double>::infinity();
 		for (int i=0; i<SIZE; i++)
 		{
-			for (int j=12; j<25; j++)
+			for (int j=0; j<SIZE; j++)
 			{
 				if( !this->possible(i,j))
 				{
@@ -269,13 +271,14 @@ void FootPlacementService::calcFootMatrix(
 				squarePoint.x=plane.repPoint.y+robotPos.x;  // move to world change to transformation
 				squarePoint.y=plane.repPoint.x+robotPos.y;  // move to world change to transformation
 
-				squarePoint.x=robotPos.x+plane.repPoint.x*cosa+plane.repPoint.y*sina;
-				squarePoint.y=robotPos.y+plane.repPoint.x*(-sina)+plane.repPoint.y*cosa;
+				squarePoint.x=robotPos.x+plane.repPoint.x*cosa+plane.repPoint.y*(-sina);
+				squarePoint.y=robotPos.y+plane.repPoint.x*(sina)+plane.repPoint.y*cosa;
 
 
 
 
-				//printf("%d %d %lf %lf %lf ", i, j, squarePoint.x, squarePoint.y, squarePoint.z);
+				//printf("%d %d %lf %lf %lf %lf %lf", i, j, squarePoint.x, squarePoint.y, squarePoint.z,
+				//		plane.repPoint.x, plane.repPoint.y);
 				
 				double slope=calcSlope(plane.x,plane.y,plane.z);
 				double direction=calcAngle(points[curPoint].x,
@@ -303,7 +306,7 @@ void FootPlacementService::calcFootMatrix(
 
 				if(minCost>cost)
 				{
-					//printf("Changing minCost point for step %d at point %d, %d\n", k,i,j);
+					printf("Changing minCost point for step %d at point %d, %d\n", k,i,j);
 					//printf("%d %d %lf %lf %lf %lf\n", i, j,legDist, distance1, distance2, cost);
 
 					minCost=cost;
