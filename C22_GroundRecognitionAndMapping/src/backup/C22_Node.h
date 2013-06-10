@@ -7,6 +7,7 @@
 #include "MPlane.h"
 #include "MapMatrix.h"
 #include "C22_GroundRecognitionAndMapping/C22.h"
+#include "C25_GlobalPosition/C25C0_ROP.h"
 #include "sensor_msgs/PointCloud.h"
 #include "geometry_msgs/PoseWithCovarianceStamped.h"
 #include <pcl/correspondence.h>
@@ -23,20 +24,21 @@
 #include <iostream>
 #include <boost/thread/thread.hpp>
 #include <pcl/sample_consensus/sac_model_plane.h>
-#include "C25_GlobalPosition/C25C0_ROP.h"
+#include "nav_msgs/Odometry.h"
 #include <message_filters/subscriber.h>
 #include <message_filters/synchronizer.h>
 #include <message_filters/time_synchronizer.h>
 #include <message_filters/sync_policies/approximate_time.h>
 #include <ros/callback_queue.h>
 #include <tf/transform_listener.h>
+
 class C22_Node{
 private:
   ros::NodeHandle nh_;
   ros::NodeHandle nh2_;
 
   typedef message_filters::sync_policies::ApproximateTime<
-		  sensor_msgs::PointCloud2,C25_GlobalPosition::C25C0_ROP
+		  sensor_msgs::PointCloud2, C25_GlobalPosition::C25C0_ROP
     > MySyncPolicy;
   message_filters::Subscriber<sensor_msgs::PointCloud2> pointCloud_sub;
   message_filters::Subscriber<C25_GlobalPosition::C25C0_ROP> pos_sub;
@@ -51,8 +53,7 @@ private:
   geometry_msgs::Point robotPos;
   geometry_msgs::Point robotOri;
   ros::Publisher C22_pub;
-
- tf::TransformListener listener;
+  tf::TransformListener listener;
 public:
 
 	/**

@@ -84,7 +84,7 @@ double MapMatrix::calcSlopeZ(float a,float b,float c){
 void MapMatrix::clearMatrix(){
 	for(unsigned int i=0;i<data->size();i++){
 		for(unsigned int j=0;j<data->at(i)->size();j++){
-			data->at(i)->at(j)->clearSq();
+			data->at(i)->at(j)->ratable=true;
 		}
 	}
 }
@@ -188,7 +188,11 @@ void MapMatrix::computeMMatrix(std::vector<pclPlane*>* mapPlanes,pcl::PointCloud
 					xIndex = (p.x -xOffset)*(1/SIZEOFSQUARE);	//added for now instead of previous three lines
 					yIndex = (p.y-yOffset) *(1/SIZEOFSQUARE);	//same as above
 					MapSquare* ms=data->at(xIndex)->at(yIndex);
-					ms->addRating();
+					if(ms->ratable){
+						ms->clearSq();
+						ms->ratable=false;
+					}
+					//ms->addRating();
 					if(!ms->hasPlane(tempPlane)){
 						MPlane* newPlane=new MPlane(pcl::PointXYZ(p.x,p.y,p.z),coff);
 						newPlane->addRating();
@@ -220,11 +224,11 @@ void MapMatrix::computeMMatrix(std::vector<pclPlane*>* mapPlanes,pcl::PointCloud
 				}
 			}
 		}
-		for(unsigned int i=0; i< data->size();i++){
+		/*for(unsigned int i=0; i< data->size();i++){
 			for(unsigned int j=0; j< data->at(i)->size();j++){
 				 data->at(i)->at(j)->setRatable();
 			}
-		}
+		}*/
 
 	//pcl::ModelCoefficients c;
 	/*for (unsigned int i=0;i<NUMOFSQUARES;i++){
