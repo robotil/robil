@@ -17,7 +17,7 @@ FootPlacementService::FootPlacementService() {
 		    ros::VoidPtr(), nh.getCallbackQueue());
 	pathSub = nh.subscribe(pathSo);
 	footPlacementPathPublisher = nh.advertise<FootPlacement::Foot_Placement_path>("foot_placement", 1, true);
-	walkNotificationPublisher = nh.advertise<C42_WalkType::extreme_slope>("walk_notification/exterme_slope", 1, true);
+	walkNotificationPublisher = nh.advertise<C42_WalkType::extreme_slope>("walk_notification/extreme_slope", 1, true);
 }
 
 /*
