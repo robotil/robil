@@ -9,6 +9,8 @@
 from Abstractions.PathPlanner import *
 from Abstractions.Odometer import *
 
+from atlas_msgs.msg import AtlasSimInterfaceCommand
+
 
 ###################################################################################
 #----------------------------------- CD Bot ---------------------------------------
@@ -44,11 +46,13 @@ class CD_ActualRobot(CD_Robot):
         self._Yaw = 0
 
     def Step(self):
-        step_queue = []
+        command = AtlasSimInterfaceCommand()
+        command.behavior = AtlasSimInterfaceCommand.WALK
         for i in range(4):
-            step_queue.append(self._StepQueue[i])
+            command.walk_params.step_queue.append(self._StepQueue[i])
         self._Queue.popleft()
-        return step_queue
+        return command
+    
 
     def IsEndOfPath(self):
         return self._LPP.IsEndOfPath()
@@ -108,7 +112,7 @@ class CD_PhantomRobot(CD_Robot):
     def SetYaw(self,yaw):
         self._Odometer.SetYaw(yaw)
         
-    def _ForwardStep(self):
+    def _PrepareStepData(self):
         self._index  += 1
         command = AtlasSimInterfaceCommand()
         
@@ -120,7 +124,11 @@ class CD_PhantomRobot(CD_Robot):
         stepData.swing_height = self._SwingHeight
 
         stepData.pose.position.z = 0.0
-
+        
+        return stepData
+        
+    def _ForwardStep(self):
+        stepData = self._PrepareStepData()        
         # Correct Lateral Error
         errorCorrected = 0
         # Correct only when needed
@@ -145,19 +153,10 @@ class CD_PhantomRobot(CD_Robot):
         stepData.pose.orientation.w = Q[3]
 
         return stepData
-    
-    def _AddIdleSteps():
-        self._index  += 1
-        command = AtlasSimInterfaceCommand()
+                
+    def _IdleStep(self):
+        stepData = self._PrepareStepData()
         
-        stepData = command.walk_params.step_queue[0]
-        stepData.step_index = self._index
-        stepData.foot_index = self._index%2
-
-        stepData.duration = self._Duration
-        stepData.swing_height = self._SwingHeight
-
-        stepData.pose.position.z = 0.0
         x = 0
         y = self._StepWidth if (index%2==0) else -self._StepWidth
         self._Odometer.AddLocalPosition(x,y)
@@ -173,6 +172,10 @@ class CD_PhantomRobot(CD_Robot):
         
         return stepData
     
+    def _AddIdleSteps():
+        for i in range(4):
+            step_queue.append(self._IdleStep())
+            
     def _Turn(self):
         pass
     

@@ -8,26 +8,22 @@
 
 from Abstractions.WalkingModeChooserInterface import *
 from Abstractions.Interface_tf import *
-from BDI.WalkingModeBDI import *
 from QS.QS_WalkingMode import *
 from DD.DD_WalkingMode import *
 from DW.DW_WalkingMode import *
+from CD.CD_WalkingMode import *
 from AlinePose.AP_WalkingMode import *
 from LocalPathPlanner import *
 
 class WalkingModeChooserEnum:
-    DontCare,BDI,QS,DD = range(4)
+    DontCare,CD,QS,DD = range(4)
 
 class WalkingModeChooser(WalkingModeChooserInterface):
 
-    def __init__(self,prefferedMode,bIsDoingQual=False):
-        # Once we clean bIsDoingQual out of the code, we can allow for the lpp to be known only to the concrete walking
-        # mode
-        lpp = LocalPathPlanner()
-        lpp.SetDoingQual(bIsDoingQual)
+    def __init__(self,prefferedMode):
         iTf = Interface_tf()
         
-        self._Modes = {'BDI':WalkingModeBDI(lpp),'QS':QS_WalkingMode(iTf),'DD':DD_WalkingMode(iTf),'DW':DW_WalkingMode(iTf),'AP':AP_WalkingMode(iTf)}
+        self._Modes = {'CD':CD_WalkingMode(),'QS':QS_WalkingMode(iTf),'DD':DD_WalkingMode(iTf),'DW':DW_WalkingMode(iTf),'AP':AP_WalkingMode(iTf)}
         self._Preferred = prefferedMode
         self._CurrentMode = prefferedMode
         self._Recommended = prefferedMode
