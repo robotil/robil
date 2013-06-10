@@ -57,7 +57,7 @@ public:
 
 int main (int argc, char **argv)
 {
-	std::string s = "";
+	std::string s = "p";
 	if(argc == 2){
 		s = std::string(argv[1]);
 	}

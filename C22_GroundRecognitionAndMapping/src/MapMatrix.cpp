@@ -111,12 +111,13 @@ void MapMatrix::updateMapRelationToRobot(float movmentX,float movmentY,float yaw
 		newOffsetY= movmentY-BOUNDOFUPDATE;
 	if(yOffset+NUMOFSQUARES*SIZEOFSQUARE< movmentY+BOUNDOFUPDATE)
 		newOffsetY=movmentY+BOUNDOFUPDATE;
+	yOffset=newOffsetY;
+	xOffset=newOffsetX;
+
 	//move the map to the right directions
 	//std::cout<<"x:"<<x<<" y:"<<y<<std::endl;
 	//std::cout<<"x offset"<<newOffsetX<<" y offset"<<newOffsetY<<std::endl;
 	/*if(std::abs(newOffsetY-yOffset)>=NUMOFSQUARES*SIZEOFSQUARE || std::abs(newOffsetX-xOffset)>=NUMOFSQUARES*SIZEOFSQUARE){
-		yOffset=newOffsetY;
-		xOffset=newOffsetX;
 		clearMatrix();
 		return;
 	}

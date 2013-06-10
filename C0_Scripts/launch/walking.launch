@@ -1,0 +1,9 @@
+<launch>
+
+	<node pkg="C42_DynamicLocomotion" type="WalkerNode.py" name="C42_DynamicLocomotion_BDI" args="BDI" output="log" respawn="true" />
+	<node pkg="C42_DynamicLocomotion" type="WalkerNode.py" name="C42_DynamicLocomotion_DD" args="DD" output="log" respawn="true" />
+	<node pkg="C42_DynamicLocomotion" type="WalkerNode.py" name="C42_DynamicLocomotion_QS" args="QS" output="log" respawn="true" />
+	<node pkg="C43_LocalBodyCOM" type="computeCOM" name="C43_LocalBodyCOM" output="log" respawn="true" />
+	<node pkg="C42_DynamicLocomotion" type="WalkerNode.py" name="C42_DynamicLocomotion_DW" args="DW" output="log" respawn="true" />
+
+</launch>

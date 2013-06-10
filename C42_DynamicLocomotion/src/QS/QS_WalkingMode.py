@@ -51,8 +51,8 @@ class QS_WalkingMode(WalkingMode):
                            'l_arm_usy', 'l_arm_shx', 'l_arm_ely', 'l_arm_elx', 'l_arm_uwy', 'l_arm_mwx', #21
                            'r_arm_usy', 'r_arm_shx', 'r_arm_ely', 'r_arm_elx', 'r_arm_uwy', 'r_arm_mwx'] #27
         self._JC = JointCommands_msg_handler(robot_name,jnt_names)
-    def Initialize(self):
-        WalkingMode.Initialize(self)
+    def Initialize(self,parameters):
+        WalkingMode.Initialize(self,parameters)
         self._command = 0
         self._bRobotIsStatic = True
 

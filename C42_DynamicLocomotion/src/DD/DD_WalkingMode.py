@@ -41,8 +41,8 @@ class DD_WalkingMode(WalkingMode):
         self._StepIndex = 1
         self._command = 0
         
-    def Initialize(self):
-        WalkingMode.Initialize(self)
+    def Initialize(self,parameters):
+        WalkingMode.Initialize(self,parameters)
         self._LPP.Initialize()
         self._bRobotIsStatic = True
 
