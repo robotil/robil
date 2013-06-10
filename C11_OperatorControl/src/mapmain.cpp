@@ -400,12 +400,12 @@ void CMapMain::UpdateGrid(int grid[100][100], StructPoint robotPos, int xOffset,
         StructIntPoint newPoint;
         int i,j;
         WorldToRobotOrientation = (90.0f/RAD2DEG + orient);
-        std::cout<<"\n";
-        for(j=0; j<100; j++)
-          {
-            std::cout<<grid[50][j]<<" ";
-          }
-        std::cout<<"\n";
+//        std::cout<<"\n";
+//        for(j=0; j<100; j++)
+//          {
+//            std::cout<<grid[50][j]<<" ";
+//          }
+//        std::cout<<"\n";
 //        WorldToRobotOrientation = 90.0f/RAD2DEG;
 	for(i=0; i<100; i++)
 	{
@@ -417,23 +417,38 @@ void CMapMain::UpdateGrid(int grid[100][100], StructPoint robotPos, int xOffset,
 		    pPixItem[i][j]->SetColor(2);
 		}
 	}
-	for(i=0; i<100; i++)
+
+//	std::cout<<"MAP"<<std::endl;
+	for(i=99; i>=0; i--)
         {
                 for(j=0; j<100; j++)
                 {
 //                      PixColor[i][j] = grid[i][j];
 //                      pPixItem[i][j]->SetColor(grid[i][j]);
-                    oldPoint.x = i;
-                    oldPoint.y = j;
+                    oldPoint.y = i;
+                    oldPoint.x = j;
                     newPoint = CalculateGridPoint(oldPoint);
+//                    newPoint = oldPoint;
 //                    std::cout<<"newPoint.x="<<newPoint.x<<" newPoint.y="<<newPoint.y<<"\n";
                     if(newPoint.x>=0 && newPoint.x<=99 && newPoint.y>=0 && newPoint.y<=99)
                     {
-                        PixColor[newPoint.x][99-newPoint.y] = grid[i][j];
-                        pPixItem[newPoint.x][99-newPoint.y]->SetColor(grid[i][j]);
+                        PixColor[newPoint.y][newPoint.x] = grid[i][j];
+                        pPixItem[newPoint.y][newPoint.x]->SetColor(grid[i][j]);
                         //std::cout<<"Bingo!\n";
+
+//                        switch ( grid[i][j] ){
+//                        case 0:
+//                            std::cout<<'.'; break;
+//                        case 1:
+//                            std::cout<<'*'; break;
+//                        case 2:
+//                            std::cout<<'.'; break;
+//                        default:
+//                            std::cout<<'?'; break;
+//                        }
                     }
                 }
+//                std::cout<<std::endl;
         }
 //	std::cout<<"RobotGridPos.x="<<RobotGridPos.x<<"RobotGridPos.y="<<RobotGridPos.y<<"!\n";
 	update();
@@ -441,24 +456,29 @@ void CMapMain::UpdateGrid(int grid[100][100], StructPoint robotPos, int xOffset,
 
 void CMapMain::AddPix()
 {
-	startX = 50;//175;
+	startX = 50+8*100;//175;
 	startY = 930;//400;
-	p_i=startX;//line
-	p_j=startY;//column
+	int p_x=startX;//line
+	int p_y=startY;//column
+
+	const int xx=0;
+	const int yy=1;
 	
 	for(int i=0;i<100;i++)
 	{
-		pos[1] = p_j;
+		pos[yy] = p_y;
+		p_x = startX;
 		for(int j=0;j<100;j++)
 		{
-			pos[0] = p_i;
-			pPixItem[i][j] = new CPixItem(PixColor[i][j],ui.graphicsView->scene(),pos[0],pos[1]);
-			pPixItem[i][j]->setPos(pos[0],pos[1]);
-			ui.graphicsView->scene()->addItem(pPixItem[i][j]);
-			p_i=p_i+8.0;
+		    int &_x = j;
+		    int &_y = i;
+			pos[xx] = p_x;
+			pPixItem[_y][_x] = new CPixItem(PixColor[_y][_x],ui.graphicsView->scene(),pos[xx],pos[yy]);
+			pPixItem[_y][_x]->setPos(pos[xx],pos[yy]);
+			ui.graphicsView->scene()->addItem(pPixItem[_y][_x]);
+			p_x=p_x-8.0;
 		}
-		p_i = startX;
-		p_j=p_j-8.0;
+		p_y=p_y-8.0;
 	}
 	traingle = new CtraingleItem(ui.graphicsView->scene(),QPointF(pPixItem[19][49]->pos()),QPointF(pPixItem[19][49]->pos()));
 	RobotPixPos.x = pPixItem[19][49]->pos().x();
@@ -808,35 +828,45 @@ void CMapMain::AddPath(std::vector<StructPoint> points)
 
 QPointF CMapMain::PointToPix(StructPoint point)
 {
-	cout<<"PATH CALCULATION!!!"<<endl;
-	cout<<"point = "<<point.x<<","<<point.y<<endl;
+//	cout<<"PATH CALCULATION!!!"<<endl;
+//	cout<<"point = "<<point.x<<","<<point.y<<endl;
     QPointF GPoint;
 
     C22_transform trans;
     C22_transform::MapProperties map_prop(Vec2d(GridXOffset,GridYOffset));
     StructPoint robot_cell;
     trans.GlobalToMap( map_prop ,point ,robot_cell);
-    cout<<"robot_cell = "<<robot_cell.x<<","<<robot_cell.y<<endl;
+//    cout<<"robot_cell = "<<robot_cell.x<<","<<robot_cell.y<<endl;
     StructPoint grid_cell = CalculateGridPoint(robot_cell);
-    cout<<"grid_cell = "<<grid_cell.x<<","<<grid_cell.y<<endl;
+//    cout<<"grid_cell = "<<grid_cell.x<<","<<grid_cell.y<<endl;
     GPoint = GetPixel(grid_cell);
-    cout<<"GPoint = "<<GPoint.x()<<","<<GPoint.y()<<endl;
+//    cout<<"GPoint = "<<GPoint.x()<<","<<GPoint.y()<<endl;
 
 return GPoint;
 }
 
 StructPoint CMapMain::PixToPoint(QPointF pix)
 {
-        std::cout<<"pixX: "<<pix.x()<<" pixY: "<<pix.y()<<"\n";
-	StructPoint point;
-	point.x = RobotPixPos.x - (pix.x()-RobotPixPos.x)*(-sin(-RobotOrientation)) - (pix.y()-RobotPixPos.y)*(-cos(-RobotOrientation));
-	point.y = RobotPixPos.y - (pix.y()-RobotPixPos.y)*sin(-RobotOrientation) + (pix.x()-RobotPixPos.x)*cos(-RobotOrientation);
-	std::cout<<"point.x: "<<point.x<<" point.y: "<<point.y<<"\n";
-	point.x = RobotPos.x - ((point.x - 400 - 50)/(32));
-	point.y = RobotPos.y + ((point.y + 160 - 930)/(32));
-	point.y *= -1;
-	std::cout<<"WorldPosX: "<<point.x<<" WorldPosY: "<<point.y<<"\n";
-	return point;
+//        std::cout<<"pixX: "<<pix.x()<<" pixY: "<<pix.y()<<"\n";
+//	StructPoint point;
+//	point.x = RobotPixPos.x - (pix.x()-RobotPixPos.x)*(-sin(-RobotOrientation)) - (pix.y()-RobotPixPos.y)*(-cos(-RobotOrientation));
+//	point.y = RobotPixPos.y - (pix.y()-RobotPixPos.y)*sin(-RobotOrientation) + (pix.x()-RobotPixPos.x)*cos(-RobotOrientation);
+//	std::cout<<"point.x: "<<point.x<<" point.y: "<<point.y<<"\n";
+//	point.x = RobotPos.x - ((point.x - 400 - 50)/(32));
+//	point.y = RobotPos.y + ((point.y + 160 - 930)/(32));
+//	point.y *= -1;
+//	std::cout<<"WorldPosX: "<<point.x<<" WorldPosY: "<<point.y<<"\n";
+//	return point;
+
+  StructPoint grid_cell = GetGridCell(pix);
+  StructPoint robot_cell = CalculateRosGridPoint(grid_cell);
+  StructPoint global_point;
+
+  C22_transform trans;
+  C22_transform::MapProperties map_prop(Vec2d(GridXOffset,GridYOffset));
+
+  trans.MapToGlobal(map_prop,robot_cell,global_point);
+  return global_point;
 }
 
 void CMapMain::CalculateCornerPos()
@@ -879,6 +909,16 @@ StructIntPoint CMapMain::CalculateGridPoint(StructIntPoint pointFromRos)
 	return gridPoint;
 }
 
+StructPoint CMapMain::CalculateRosGridPoint(StructPoint pointFromGrid)
+{
+  Vec2d p(pointFromGrid.x, pointFromGrid.y);
+  Vec2d v = (p - Vec2d(50,20)).rotate(RobotOrientation) + Vec2d(RobotGridPos.x,RobotGridPos.y);
+  StructPoint rosGridPoint;
+  rosGridPoint.x = v.x;
+  rosGridPoint.y = v.y;
+  return rosGridPoint;
+}
+
 //StructIntPoint CMapMain::CalculateGridPoint(StructIntPoint pointFromRos)
 //{
 //  StructIntPoint gridPoint;
@@ -891,9 +931,17 @@ StructIntPoint CMapMain::CalculateGridPoint(StructIntPoint pointFromRos)
 QPointF CMapMain::GetPixel(StructPoint gridcell)
 {
 	QPointF pixel;
-	pixel.setX(50 + gridcell.x*8.0f);
+	pixel.setX(50+800 - gridcell.x*8.0f);
 	pixel.setY(930 - gridcell.y*8.0f);
 	return pixel;
+}
+
+StructPoint CMapMain::GetGridCell(QPointF pixel)
+{
+  StructPoint gridPoint;
+  gridPoint.x = (50+800 - pixel.x())/8.0f;
+  gridPoint.y = (930 - pixel.y())/8.0f;
+  return gridPoint;
 }
 
 void CMapMain::SetEditable(bool value)
