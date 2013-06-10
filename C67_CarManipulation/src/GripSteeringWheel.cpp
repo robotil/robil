@@ -484,8 +484,8 @@ int main(int argc, char **argv)
 	joint_start_client.call(joint_start_srv);
 	if (!joint_start_client.call(joint_start_srv))
 	{
-	ROS_INFO("Fail calling Joint Server");
-	return 1;
+		ROS_INFO("Fail calling Joint Server");
+		return 1;
 	}
 
 	ROS_INFO("create task");
