@@ -88,28 +88,34 @@ class CD_StateMachine(StateMachine):
 
     def Initialize(self,index):
         self._StepQueue = deque([])
-        self._actualRobot.Initialize(self._StepQueue)
+        self._actualRobot.Initialize(self._StepQueue,index)
         self._phantomRobot.Initialize(self._StepQueue,index)
+        print("Initialize to index ",index)
         self._bIsDone = False
 
     def IsDone(self):
         return self._bIsDone
 
-    def UpdateActualPosition(self,x,y):
+    def UpdateOdometryPosition(self,x,y):
         self._actualRobot.SetPosition(x,y)
+        self._OdomX = x
+        self._OdomY = y
 
-    def UpdateActualYaw(self,yaw):
+    def UpdateOdometryYaw(self,yaw):
         self._actualRobot.SetYaw(yaw)
+        self._OdomYaw = yaw
 
-    def SetPhantomPosition(self,x,y):
-        self._phantomRobot.SetPosition(x,y)
-
-    def SetPhantomYaw(self,yaw):
-        self._actualRobot.SetYaw(yaw)
+    def SetStatePosition(self,x,y):
+        self._phantomRobot.SetPosition(self._OdomX,self._OdomY)
+        self._phantomRobot.SetPosDelta(x-self._OdomX,y-self._OdomY)
+        
+    def SetStateYaw(self,yaw):
+        self._phantomRobot.SetYaw(self._OdomYaw)
+        self._phantomRobot.SetYawDelta(yaw-self._OdomYaw)
 
     def SetPath(self,p):
         self._phantomRobot.SetPath(p)
         self._actualRobot.SetPath(p)
 
     def GetIndex(self):
-        return self._phantomRobot.GetIndex()
+        return self._actualRobot.GetIndex()

@@ -20,21 +20,25 @@ from tf.transformations import quaternion_from_euler
 
 class CD_Robot(object):
     """
-        The CD_ActualRobot represents the real actual robot as it walks on the path
+        The CD_Robot represents an agent as it walks on the path
     """
     def __init__(self,pathPlanner,stepQueue):
         self._LPP = pathPlanner
         self._StepQueue = stepQueue
+        self._index = 0
 
-    def Initialize(self,stepQueue):
+    def Initialize(self,stepQueue,index):
         self._StepQueue = stepQueue
+        self._index = index
 
     def SetPosition(self,x,y):
         self._LPP.UpdatePosition(x,y)
 
     def SetPath(self,path):
         self._LPP.SetPath(path)
-
+        
+    def GetIndex(self):
+        return self._index 
 ###################################################################################
 #-------------------------------- Actual Bot --------------------------------------
 ###################################################################################
@@ -51,8 +55,9 @@ class CD_ActualRobot(CD_Robot):
         command = AtlasSimInterfaceCommand()
         command.behavior = AtlasSimInterfaceCommand.WALK
         for i in range(4):
-            command.walk_params.step_queue.append(self._StepQueue[i])
+            command.walk_params.step_queue[i] = self._StepQueue[i]
         self._StepQueue.popleft()
+        self._index+=1
         return command
     
 
@@ -76,7 +81,6 @@ class CD_PhantomRobot(CD_Robot):
     def __init__(self,pathPlanner,odometer,stepQueue):
         CD_Robot.__init__(self,pathPlanner,stepQueue)
         self._Odometer = odometer
-        self._index = 0
         
         # Parameters
         self._StepLength = 0.3
@@ -87,8 +91,7 @@ class CD_PhantomRobot(CD_Robot):
         self._ErrorCorrection = self._StepWidth
 
     def Initialize(self,stepQueue,index):
-        CD_Robot.Initialize(self,stepQueue)
-        self._index = index
+        CD_Robot.Initialize(self,stepQueue,index)
         self._Error = 0
 
     def Step(self):
@@ -104,15 +107,24 @@ class CD_PhantomRobot(CD_Robot):
             self._Turn()
             self._AddIdleSteps()
             self._LPP.PromoteSegment()
-
-    def GetIndex(self):
-        self._index 
     
     def SetPathError(self,error):
         self._Error = error
 
+    def SetPosition(self,x,y):
+        CD_Robot.SetPosition(self,x,y)
+        self._Odometer.SetPosition(x,y)
+
     def SetYaw(self,yaw):
         self._Odometer.SetYaw(yaw)
+        
+    def SetPosDelta(self,x,y):
+        self._Odom2Bdi_X = x
+        self._Odom2Bdi_Y = y
+        
+    def SetYawDelta(self,yaw):
+        self._Odom2Bdi_Yaw = yaw
+        print("Yaw Delta = ",yaw)
         
     def _PrepareStepData(self):
         self._index  += 1
@@ -126,6 +138,21 @@ class CD_PhantomRobot(CD_Robot):
         stepData.swing_height = self._SwingHeight
 
         stepData.pose.position.z = 0.0
+        
+        return stepData
+    
+    def TranslateStepData(self,stepData):
+        # Correction Vector
+        stepData.pose.position.x += self._Odom2Bdi_X
+        stepData.pose.position.y += self._Odom2Bdi_Y
+
+        # Calculate orientation quaternion
+        Q = quaternion_from_euler(0, 0, self._Odometer.GetYaw()+self._Odom2Bdi_Yaw)
+
+        stepData.pose.orientation.x = Q[0]
+        stepData.pose.orientation.y = Q[1]
+        stepData.pose.orientation.z = Q[2]
+        stepData.pose.orientation.w = Q[3]
         
         return stepData
         
@@ -145,16 +172,8 @@ class CD_PhantomRobot(CD_Robot):
         y += errorCorrected
         self._Odometer.AddLocalPosition(x,y)
         stepData.pose.position.x,stepData.pose.position.y = self._Odometer.GetGlobalPosition()
-
-        # Calculate orientation quaternion
-        Q = quaternion_from_euler(0, 0, self._Odometer.GetYaw())
-
-        stepData.pose.orientation.x = Q[0]
-        stepData.pose.orientation.y = Q[1]
-        stepData.pose.orientation.z = Q[2]
-        stepData.pose.orientation.w = Q[3]
-
-        return stepData
+        
+        return self.TranslateStepData(stepData)
                 
     def _IdleStep(self):
         stepData = self._PrepareStepData()
@@ -163,16 +182,8 @@ class CD_PhantomRobot(CD_Robot):
         y = self._StepWidth if (self._index%2==0) else -self._StepWidth
         self._Odometer.AddLocalPosition(x,y)
         stepData.pose.position.x,stepData.pose.position.y = self._Odometer.GetGlobalPosition()
-
-        # Calculate orientation quaternion
-        Q = quaternion_from_euler(0, 0, self._Odometer.GetYaw())
-
-        stepData.pose.orientation.x = Q[0]
-        stepData.pose.orientation.y = Q[1]
-        stepData.pose.orientation.z = Q[2]
-        stepData.pose.orientation.w = Q[3]
-        
-        return stepData
+                
+        return self.TranslateStepData(stepData)
     
     def _AddIdleSteps():
         for i in range(4):

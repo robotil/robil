@@ -64,21 +64,20 @@ class CD_WalkingMode(WalkingMode):
         # Subscriber
         self._Subscribers["Path"] = rospy.Subscriber('/path',C31_Waypoints,self._path_cb)
         self._Subscribers["Odometry"] = rospy.Subscriber('/C25/publish',C25C0_ROP,self._odom_cb)
-        # self._Subscribers["Odometry"] = rospy.Subscriber('/ground_truth_odom',Odometry,self._odom_cb) 
         self._Subscribers["ASI_State"]  = rospy.Subscriber('/atlas/atlas_sim_interface_state', AtlasSimInterfaceState, self.asi_state_cb)
         self._Subscribers["IMU"]  = rospy.Subscriber('/atlas/imu', Imu, self._get_imu)
         self._Subscribers["JointStates"] = rospy.Subscriber('/atlas/joint_states', JointState, self._get_joints)
         rospy.sleep(0.3)
             
-        k_effort = [0] * 28
-        k_effort[0:4] = 4*[255]
-        k_effort[16:28] = 12*[255]
-        self._JC.set_k_eff(k_effort)
+        self._k_effort = [0] * 28
+        self._k_effort[0:4] = 4*[255]
+        self._k_effort[16:28] = 12*[255]
+        self._JC.set_k_eff(self._k_effort)
         self._JC.set_all_pos(self._cur_jnt)
         self._JC.send_command()
 
         # Put robot into stand position
-        stand = AtlasSimInterfaceCommand(None,AtlasSimInterfaceCommand.STAND, None, None, None, None, k_effort)
+        stand = AtlasSimInterfaceCommand(None,AtlasSimInterfaceCommand.STAND, None, None, None, None, self._k_effort)
                 
         rospy.sleep(0.3)
         
@@ -107,12 +106,14 @@ class CD_WalkingMode(WalkingMode):
         command = 0
         if ("Idle" == self._WalkingModeStateMachine.GetCurrentState().Name):
             #print("CD WalkingMode - Idle")
-            self._CD_StateMachine.SetPhantomPosition(state.pos_est.position.x,state.pos_est.position.y)
-            self._CD_StateMachine.SetPhantomYaw(self._yaw)
+#            self._CD_StateMachine.SetStatePosition(state.pos_est.position.x,state.pos_est.position.y)
+#            self._CD_StateMachine.SetStateYaw(self._yaw)
+            pass
         elif ("Wait" == self._WalkingModeStateMachine.GetCurrentState().Name):
             print("CD WalkingMode - Wait")
-            self._CD_StateMachine.SetPhantomPosition(state.pos_est.position.x,state.pos_est.position.y)
-            self._CD_StateMachine.SetPhantomYaw(self._yaw)
+            #print(state)
+            self._CD_StateMachine.SetStatePosition(state.pos_est.position.x,state.pos_est.position.y)
+            self._CD_StateMachine.SetStateYaw(self._yaw)
             self.step_index_for_reset = state.walk_feedback.next_step_index_needed - 1
             self._CD_StateMachine.Initialize(self.step_index_for_reset)
             self._WalkingModeStateMachine.PerformTransition("Go")
@@ -149,18 +150,21 @@ class CD_WalkingMode(WalkingMode):
     # the current robot position   
     def asi_state_cb(self, state):
         command = 0
+        #print(self._CD_StateMachine.GetIndex()," < ",state.walk_feedback.next_step_index_needed)
         if(self._CD_StateMachine.GetIndex() < state.walk_feedback.next_step_index_needed):
             command = self.HandleStateMsg(state)
         self._bDone = self._WalkingModeStateMachine.IsDone()
         if (0 !=command):
+            command.k_effort = self._k_effort
+            print(command)
             self.asi_command.publish(command)
 
     def _odom_cb(self,odom):
         # SHOULD USE:
-        self._CD_StateMachine.UpdateActualPosition(odom.pose.pose.pose.position.x,odom.pose.pose.pose.position.y) # from C25_GlobalPosition
+        self._CD_StateMachine.UpdateOdometryPosition(odom.pose.pose.pose.position.x,odom.pose.pose.pose.position.y) # from C25_GlobalPosition
         #self._LPP.UpdatePosition(odom.pose.pose.position.x,odom.pose.pose.position.y) # from /ground_truth_odom
  
     def _get_imu(self,msg):  #listen to /atlas/imu/pose/pose/orientation
         roll, pitch, self._yaw = euler_from_quaternion([msg.orientation.x, msg.orientation.y, msg.orientation.z, msg.orientation.w])
-        self._CD_StateMachine.UpdateActualYaw(self._yaw)
+        self._CD_StateMachine.UpdateOdometryYaw(self._yaw)
 
