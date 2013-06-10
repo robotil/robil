@@ -53,6 +53,7 @@
 
     #include <C23_ObjectRecognition/C23C0_OD.h>
     #include <C23_ObjectRecognition/C23C0_ODIM.h>
+    #include <C23_ObjectRecognition/C23C0_GP.h>
     #include "C23_Detector.hpp"
     #include <C21_VisionAndLidar/C21_obj.h>
     #include <math.h>
@@ -664,7 +665,8 @@
 	
 	sync.registerCallback( boost::bind( &C23_Detector::callback, this, _1, _2 ) ); //Specifying what to do with the data
 	objectDetectedPublisher = nh.advertise<C23_ObjectRecognition::C23C0_OD>("C23/object_detected", 1);
-	objectDeminsionsPublisher = nh.advertise<C23_ObjectRecognition::C23C0_ODIM>("C23/object_deminsions", 1);
+    objectDimensionsPublisher = nh.advertise<C23_ObjectRecognition::C23C0_ODIM>("C23/object_dimensions", 1);
+    objectGlobalPositionPublisher = nh.advertise<C23_ObjectRecognition::C23C0_GP>("C23/object_globalPosition", 1);
 	c21client = nh.serviceClient<C21_VisionAndLidar::C21_obj>("C21/C23"); //Subscribe to the service node to get the absolute coordinates of a point
 	c23_start_posecontroller = nh.serviceClient<std_srvs::Empty>("/PoseController/start");
 	c23_stop_posecontroller = nh.serviceClient<std_srvs::Empty>("/PoseController/stop");
@@ -782,7 +784,7 @@
 	msg2.Object = target;
 	msg.Object = target;
 	//  ROS_INFO("Publishing message..");
-	objectDeminsionsPublisher.publish(msg2);
+	objectDimensionsPublisher.publish(msg2);
 	objectDetectedPublisher.publish(msg);
 	
 	
@@ -965,8 +967,8 @@
 		  
 		//pictureCoordinatesToGlobalPosition(matchLoc->x,matchLoc->y,matchLoc->x + templ.cols,matchLoc->y + templ.rows,&x,&y,NULL);
 		
-		imshow( "Source Image", img_display );
-		waitKey(0);
+		//imshow( "Source Image", img_display );
+		//waitKey(0);
 		//imshow( "Result Window", result );
 		
 		return res;
@@ -982,8 +984,8 @@
 	      cvtColor(srcImg, hsvImg, CV_BGR2HSV);
 	      inRange(hsvImg, Scalar(70, 0, 0), Scalar(110, 255, 255), thresholdedImg);
 
-	      imshow("Thresholded Image", thresholdedImg);
-	      waitKey();
+	    //  imshow("Thresholded Image", thresholdedImg);
+	     // waitKey();
 
 	      //Open the image to remove noise
 	      Mat element1(4, 4, CV_8U, Scalar(1));
@@ -992,8 +994,8 @@
 	      Mat element2(40, 40, CV_8U, Scalar(1));
 	      morphologyEx(imgCarOpened, imgCarClosed, MORPH_CLOSE, element2);
 
-	      imshow("Closed image", imgCarClosed);
-	      waitKey();
+	    //  imshow("Closed image", imgCarClosed);
+	    //  waitKey();
 
 	      Mat arrowImg;
 	      imgCarClosed.copyTo(arrowImg);
@@ -1055,8 +1057,8 @@
 	      Rect arrowBox = boundingRect(blobContours[maxIndex]);
 
 	      Mat finalImg(imgCarClosed, arrowBox);
-	      imshow("Arrow Image", finalImg);
-	      waitKey();
+	    //  imshow("Arrow Image", finalImg);
+	    //  waitKey();
 
 	      //countNonZero(src Array);
 	      //Test the direction
@@ -1075,15 +1077,17 @@
 
 	    
 	      
-	      pictureCoordinatesToGlobalPosition(arrowBox.x, arrowBox.y,arrowBox.x + arrowBox.height, arrowBox.y + arrowBox.width, &x, &y,&z);
+	      
 	      
 	        if(leftSum>rightSum){
 		      ROS_INFO("RIGHT ARROW");
 		      res = true;
+              pictureCoordinatesToGlobalPosition(arrowBox.x, arrowBox.y,arrowBox.x + arrowBox.height, arrowBox.y + arrowBox.width, &x, &y,&z,-1,-4);
 	      }
 	      else{
 		      ROS_INFO("LEFT ARROW");
 		      res = true;
+              pictureCoordinatesToGlobalPosition(arrowBox.x, arrowBox.y,arrowBox.x + arrowBox.height, arrowBox.y + arrowBox.width, &x, &y,&z,-1,+4);
 	      }
 	//averagePointCloud(arrowBox.x, arrowBox.y, arrowBox.width, arrowBox.height, cloud,&x,&y,&z);
 	
@@ -1870,7 +1874,7 @@
         string t = "Standpipe";
         cout << "Saving standpipe" << endl;
      //   saveTemplate(min_x,min_y,max_x-min_x,max_y-min_y,cloud,t);
-        templateMatching3D(t,lastCloud);
+     //   templateMatching3D(t,lastCloud);
 		imshow("TESTING",srcImg);
 		waitKey(0);
 	//	pictureCoordinatesToGlobalPosition(minRect.center.x-100,minRect.center.y+100,minRect.center.x+100,minRect.center.y+100,&x,&y,NULL);

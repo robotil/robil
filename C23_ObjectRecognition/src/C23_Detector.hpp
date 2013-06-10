@@ -146,7 +146,8 @@ private:
     void saveTemplate(int x,int y, int width, int height, const sensor_msgs::PointCloud2::ConstPtr &cloud2, string target);
         
 	ros::Publisher objectDetectedPublisher;
-  ros::Publisher objectDeminsionsPublisher;
+    ros::Publisher objectDimensionsPublisher;
+    ros::Publisher objectGlobalPositionPublisher;
 	//vector<Gate*>* gates;
 	  //Register a service
 	  ros::ServiceClient c21client;
