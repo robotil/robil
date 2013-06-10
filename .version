@@ -1,4 +1,4 @@
-V0.0.1.62
+V0.0.1.63
 ===========================================================
 C0_RobilTask     0.5
 C0_Scripts     0.27
@@ -16,7 +16,7 @@ C25_AtlasFell     0.2
 C25_GlobalPosition     0.8
 C25_ekf     0.2
 C27_ScorePerception     0.1
-C31_PathPlanner     0.29
+C31_PathPlanner     0.30
 C34_BTExecuter     0.8
 C34_Designer     0.41
 C34_Executer     0.8
