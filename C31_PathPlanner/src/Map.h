@@ -133,7 +133,7 @@ class ObsMap:public MapT<char>{
 		ST_UNCHARTED=2,
 		ST_ATLAS=3,
 		ST_MUD=4,
-		ST_DEBREES=5,
+		ST_DEBRIS=5,
 	};
 
 
@@ -145,7 +145,7 @@ class ObsMap:public MapT<char>{
 		if(c==ST_UNCHARTED) return '-';
 		if(c==ST_ATLAS) return 'A';
 		if(c==ST_MUD) return 'M';
-		if(c==ST_DEBREES) return 'D';
+		if(c==ST_DEBRIS) return 'D';
 		if(c>=32) return c;
 		return '?';
 	}
@@ -157,7 +157,7 @@ class ObsMap:public MapT<char>{
 		case ST_BLOCKED: return ST_BLOCKED;
 		case ST_ATLAS: return ST_AVAILABLE;
 		case ST_MUD: return ST_AVAILABLE;
-		case ST_DEBREES: return ST_AVAILABLE;
+		case ST_DEBRIS: return ST_AVAILABLE;
 		}
 	}
 	static STATUS filterTerrain(int value){
@@ -167,7 +167,7 @@ class ObsMap:public MapT<char>{
 		case ST_BLOCKED: return ST_UNCHARTED;
 		case ST_ATLAS: return ST_ATLAS;
 		case ST_MUD: return ST_MUD;
-		case ST_DEBREES: return ST_DEBREES;
+		case ST_DEBRIS: return ST_DEBRIS;
 		}
 	}
 

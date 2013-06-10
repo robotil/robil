@@ -8,7 +8,7 @@
 <include  file="$(find C21_VisionAndLidar)/launch/C21.launch" />
 
 <!-- Start C22 -->
-<node name="C22" pkg="C22_GroundRecognitionAndMapping" type="C22" />
+<include  file="$(find C22_GroundRecognitionAndMapping)/launch/C22_Cheats.launch" />
 
 <!-- Start C25 -->
 <include  file="$(find C25_GlobalPosition)/launch/C25.launch" />
@@ -24,6 +24,12 @@
 
 <!-- Start C67 - GearStick -->
 <node name="C67_GS" pkg="C67_CarManipulation" type="GripGearStick" />
+
+<!-- Start C67 - SW Calibration -->
+<node name="C67_SWC" pkg="C67_CarManipulation" type="CalibrateWheel" />
+
+<!-- Start C67 - Steering wheel -->
+<node name="C67_SW" pkg="C67_CarManipulation" type="GripSteeringWheel" />
 
 <!-- C34_Designer - on! -->
 <include  file="$(find C34_Designer)/launch/start.launch" />

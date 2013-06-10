@@ -10,6 +10,7 @@ from std_msgs.msg import  Float64
 from geometry_msgs.msg import Pose
 from directionClient import Switch_client
 from HBClient import HB_client
+from CalibrateWheel import WheelCalibrate_client, runCalibrate
 car='drc_vehicle'#'golf_cart'#
 
 class InitDrive(object):
@@ -31,14 +32,15 @@ class InitDrive(object):
             
         if success:
             #DRC Vehicles controllers online - should be replaced with C67 module
-            Switch_client(1)
-            HB_client(1)         #handbrake online
+            #Switch_client(1)
+            HB_client(1, 0)         #handbrake online
             gasP=Gas() #gas pedal online
             brakeP=Brake() #gas pedal online
-            Steer=SW()      #steering wheel online
+            result = runCalibrate() #Initialize Steering wheel  
+            #Steer=SW()      #steering wheel online
             # - Press on brake - and release handbrake
-            brakeP.brake(1)
-            gasP.gas(0)
+            #brakeP.brake(1)
+            #gasP.gas(0)
 
             self._feedback.complete = 50
             self._feedback.complete = 100

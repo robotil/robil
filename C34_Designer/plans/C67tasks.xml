@@ -1,0 +1,10 @@
+<plan descriptions="./plans/TaskDescriptions.xml">
+   <seq name="TestControllers" x="320.98033469540275" y="95.22138978974647" collapsed="false" id="4a9ab3b4-670b-4883-8acc-0490c5710b0a"> 
+         <tsk name="GripSteeringWheel(angle=1.5)" x="101.02958661307508" y="257.86455072237874" test_time="0" test_result="true" id="fec93143-4334-4184-8448-3f4716a7572f" />
+         <tsk name="PlaceFeetOnPedals(angle=1.5)" x="245.75966939579155" y="371.2240099765678" test_time="0" test_result="true" id="40255582-1d2f-411c-ab24-a871d4beffe2" />
+         <tsk name="CalibratePedals" x="378.8186612301861" y="333.8052501874596" test_time="0" test_result="true" id="850d9c7f-1dfa-4a47-85ac-5a4b7ca1d8d2" />
+         <tsk name="GripHandBrake(operation=1)" x="449.7948517063771" y="298.9242978065074" test_time="0" test_result="true" id="c11f4d8b-3134-483b-914e-afb3c24ab1ce" />
+         <tsk name="GripGearStick(operation=1)" x="515.7948517063752" y="256.09096447317734" test_time="0" test_result="true" id="88818172-7447-4a9a-b0b9-2cfdd91e3c0d" />
+         <tsk name="CalibrateWheel(operation=1,angle=0.3,Hand=right)" x="586.7710421825676" y="189.35286923508423" test_time="0" test_result="true" id="df817499-79fd-4ad7-ba96-346333b06b95" />
+   </seq>
+</plan>
