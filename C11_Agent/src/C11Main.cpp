@@ -66,7 +66,7 @@ void C11Main::ExecutionStatusChanged(int status)
 
 void C11Main::SendExecuterStack(QString str)
 {
-	cout<<"C11Main::SendExecuterStack \n";
+//	cout<<"C11Main::SendExecuterStack \n";
 //	QString strString(str.data());
 	emit SigOnSendExecuterStack(str);
 }
@@ -101,7 +101,7 @@ void C11Main::SltOnExecutionStatusChange(int status)
 
 void C11Main::SltOnSendExecuterStack(QString str)
 {
-	cout<<"C11Main::SltOnSendExecuterStack \n";
+//	cout<<"C11Main::SltOnSendExecuterStack \n";
 	pCTcpServer->SendExecuterStack(str);
 //	pC11Node->SetReleased();
 }
