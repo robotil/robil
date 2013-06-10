@@ -9,6 +9,8 @@
 from Abstractions.StateMachine import *
 from Abstractions.Odometer import *
 
+from CD_Bots import *
+
 from collections import deque
 
 ###################################################################################
@@ -49,8 +51,10 @@ class CD_StateMachine(StateMachine):
     def Step(self):
         command = 0
         if ('Idle' == self._CurrentState.Name):
+            #print("CD StateMachine - Idle")
             pass
         elif ('WaitingForPhantom' == self._CurrentState.Name):
+            #print("CD StateMachine - WaitingForPhantom")
             self._phantomRobot.Step()
             if (3 < len(self._StepQueue)):
                 if (StateMachine.PerformTransition(self,'Both')):
@@ -58,6 +62,7 @@ class CD_StateMachine(StateMachine):
                 else:
                     raise StateMachineError("CD_StateMachine::Step() - could not perform transition 'Both'") 
         elif ('BothWalking' == self._CurrentState.Name):
+            #print("CD StateMachine - BothWalking")
             self._phantomRobot.SetPathError(self._actualRobot.GetPathError())
             self._phantomRobot.Step()
             command = self._actualRobot.Step()
@@ -68,6 +73,7 @@ class CD_StateMachine(StateMachine):
                 else:
                     raise StateMachineError("CD_StateMachine::Step() - could not perform transition 'Actual'") 
         elif ('WaitingForActual' == self._CurrentState.Name):
+            print("CD StateMachine - WaitingForActual")
             command = self._actualRobot.Step()
             if (5 > len(self._StepQueue)):
                 if (self._actualRobot.IsEndOfPath()):

@@ -9,8 +9,10 @@
 from Abstractions.PathPlanner import *
 from Abstractions.Odometer import *
 
-from atlas_msgs.msg import AtlasSimInterfaceCommand
+from CD_PathPlanner import *
 
+from atlas_msgs.msg import AtlasSimInterfaceCommand
+from tf.transformations import quaternion_from_euler
 
 ###################################################################################
 #----------------------------------- CD Bot ---------------------------------------
@@ -50,7 +52,7 @@ class CD_ActualRobot(CD_Robot):
         command.behavior = AtlasSimInterfaceCommand.WALK
         for i in range(4):
             command.walk_params.step_queue.append(self._StepQueue[i])
-        self._Queue.popleft()
+        self._StepQueue.popleft()
         return command
     
 
@@ -90,10 +92,10 @@ class CD_PhantomRobot(CD_Robot):
         self._Error = 0
 
     def Step(self):
-        step_queue.append(_ForwardStep())
+        self._StepQueue.append(self._ForwardStep())
 
     def EndOfSegment(self):
-        return self._LPP.EndOfSegment()
+        return self._LPP.IsEndOfSegment()
 
     def PrepareNextSegment(self):
         if (self._LPP.IsEndOfPath()):
@@ -139,7 +141,7 @@ class CD_PhantomRobot(CD_Robot):
                 errorCorrected = -self._ErrorCorrection*(self._Error/math.fabs(self._Error))/4 
 
         x = self._StepLength
-        y = self._StepWidth if (index%2==0) else -self._StepWidth
+        y = self._StepWidth if (self._index%2==0) else -self._StepWidth
         y += errorCorrected
         self._Odometer.AddLocalPosition(x,y)
         stepData.pose.position.x,stepData.pose.position.y = self._Odometer.GetGlobalPosition()
@@ -158,7 +160,7 @@ class CD_PhantomRobot(CD_Robot):
         stepData = self._PrepareStepData()
         
         x = 0
-        y = self._StepWidth if (index%2==0) else -self._StepWidth
+        y = self._StepWidth if (self._index%2==0) else -self._StepWidth
         self._Odometer.AddLocalPosition(x,y)
         stepData.pose.position.x,stepData.pose.position.y = self._Odometer.GetGlobalPosition()
 
@@ -174,7 +176,7 @@ class CD_PhantomRobot(CD_Robot):
     
     def _AddIdleSteps():
         for i in range(4):
-            step_queue.append(self._IdleStep())
+            self._StepQueue.append(self._IdleStep())
             
     def _Turn(self):
         pass

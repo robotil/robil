@@ -20,6 +20,7 @@ from Abstractions.WalkingMode import *
 from Abstractions.Odometer import *
 
 from CD_PathPlanner import *
+from CD_StateMachine import *
 
 from atlas_msgs.msg import AtlasCommand, AtlasSimInterfaceCommand, AtlasSimInterfaceState, AtlasState, AtlasBehaviorStepData
 from sensor_msgs.msg import Imu, JointState
@@ -30,7 +31,7 @@ from C31_PathPlanner.msg import C31_Waypoints
 from C25_GlobalPosition.msg import C25C0_ROP
 from DW.JointController import JointCommands_msg_handler
 from tf_conversions import posemath
-from tf.transformations import quaternion_from_euler, euler_from_quaternion
+from tf.transformations import euler_from_quaternion
 
 class CD_WalkingMode(WalkingMode):
     def __init__(self):
@@ -38,7 +39,7 @@ class CD_WalkingMode(WalkingMode):
         self.step_index_for_reset = 0
         # Initialize atlas mode and atlas_sim_interface_command publishers        
         self.asi_command = rospy.Publisher('/atlas/atlas_sim_interface_command', AtlasSimInterfaceCommand, None, False, True, None)
-        self._CD_StateMachine = _CD_StateMachine(self._LPP)
+        self._CD_StateMachine = CD_StateMachine(self._LPP)
         
         self._bDone = False
 
@@ -55,7 +56,10 @@ class CD_WalkingMode(WalkingMode):
         
     def Initialize(self,parameters):
         WalkingMode.Initialize(self,parameters)
-        self._CD_StateMachine.Initialize()
+        self._CD_StateMachine.Initialize(self.step_index_for_reset)
+        
+        self._bDone = False
+        self._yaw = 0
                 
         # Subscriber
         self._Subscribers["Path"] = rospy.Subscriber('/path',C31_Waypoints,self._path_cb)
@@ -65,10 +69,7 @@ class CD_WalkingMode(WalkingMode):
         self._Subscribers["IMU"]  = rospy.Subscriber('/atlas/imu', Imu, self._get_imu)
         self._Subscribers["JointStates"] = rospy.Subscriber('/atlas/joint_states', JointState, self._get_joints)
         rospy.sleep(0.3)
-    
-        self._bDone = False
-        self._yaw = 0
-        
+            
         k_effort = [0] * 28
         k_effort[0:4] = 4*[255]
         k_effort[16:28] = 12*[255]
@@ -105,17 +106,24 @@ class CD_WalkingMode(WalkingMode):
     def HandleStateMsg(self,state):
         command = 0
         if ("Idle" == self._WalkingModeStateMachine.GetCurrentState().Name):
+            #print("CD WalkingMode - Idle")
             self._CD_StateMachine.SetPhantomPosition(state.pos_est.position.x,state.pos_est.position.y)
             self._CD_StateMachine.SetPhantomYaw(self._yaw)
         elif ("Wait" == self._WalkingModeStateMachine.GetCurrentState().Name):
+            print("CD WalkingMode - Wait")
             self._CD_StateMachine.SetPhantomPosition(state.pos_est.position.x,state.pos_est.position.y)
             self._CD_StateMachine.SetPhantomYaw(self._yaw)
+            self.step_index_for_reset = state.walk_feedback.next_step_index_needed - 1
+            self._CD_StateMachine.Initialize(self.step_index_for_reset)
             self._WalkingModeStateMachine.PerformTransition("Go")
+            self._CD_StateMachine.Start()
         elif ("Walking" == self._WalkingModeStateMachine.GetCurrentState().Name):
+            #print("CD WalkingMode - Walking")
             command = self._CD_StateMachine.Step()
             if (self._CD_StateMachine.IsDone()):
                 self._WalkingModeStateMachine.PerformTransition("Finished")
         elif ("Done" == self._WalkingModeStateMachine.GetCurrentState().Name):
+            print("CD WalkingMode - Done")
             self._bDone = True
         else:
             raise Exception("QS_WalkingModeStateMachine::Bad State Name")
@@ -140,6 +148,7 @@ class CD_WalkingMode(WalkingMode):
     # /atlas/atlas_sim_interface_state callback. Before publishing a walk command, we need
     # the current robot position   
     def asi_state_cb(self, state):
+        command = 0
         if(self._CD_StateMachine.GetIndex() < state.walk_feedback.next_step_index_needed):
             command = self.HandleStateMsg(state)
         self._bDone = self._WalkingModeStateMachine.IsDone()
