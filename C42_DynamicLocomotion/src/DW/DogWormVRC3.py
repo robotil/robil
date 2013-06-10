@@ -18,6 +18,7 @@ from copy import copy
 from std_srvs.srv import Empty
 ##nedded for tests
 from C25_GlobalPosition.msg import C25C0_ROP
+from IMU_monitoring import IMUCh
 from Abstractions.Interface_tf import *
 class DW_Controller(object):
     """DW_Controller"""
@@ -32,7 +33,7 @@ class DW_Controller(object):
         self.CurSeqStep2 = 0
         self.Throtle = 1
         self.RotFlag = 0
-        self.FollowPath = 1
+        self.FollowPath = 0
         self.DesOri = 0
         
         ##################################################################
@@ -223,6 +224,8 @@ class DW_Controller(object):
         self.RHC = hand_joint_controller("right")
         # Initialize robot state listener
         self.RS = robot_state(self._jnt_names)
+        self.IMU_mon = IMUCh()
+
         print("DW::Initialize")
         self.GlobalPos = 0
         self.GlobalOri = 0
@@ -259,6 +262,8 @@ class DW_Controller(object):
 
     def RS_cb(self,msg):
         self.RS.UpdateState(msg)
+        self.IMU_mon.get_contact(msg)
+        self.IMU_mon.imu_manipulate(msg)
 
     def Odom_cb(self,msg):
         if 1000 <= self._counter: 
@@ -420,8 +425,12 @@ class DW_Controller(object):
                     self.BackCrawl()
             else:
                 self.FollowPath = 0
+            if self._terrain == "MUD" and self.IMU_mon.stand_up_flag == 1:
+                print "Reached stand up zone"
+                return
 
     def Crawl(self):
+        # self.IMU_mon.turned = 0
         if self.FollowPath == 1:
             # Update sequence to correct orientation
             y,p,r = self.current_ypr()
@@ -437,6 +446,7 @@ class DW_Controller(object):
         self.RotFlag = 0
 
     def BackCrawl(self):
+        # self.IMU_mon.turned = 1
         if self.FollowPath == 1:
             # Update sequence to correct orientation
             y,p,r = self.current_ypr()
@@ -535,7 +545,7 @@ class DW_Controller(object):
 
     def RotateToOri(self,Bearing):
         if self._terrain == "MUD":
-            self.RotateToOriInMud(Bearing)
+            return self.RotateToOriInMud(Bearing)
         else:
             if self.RotFlag == 2:
                 self.GoToBackSeqStep(1)
@@ -567,6 +577,7 @@ class DW_Controller(object):
             Angle=self.DeltaAngle(Bearing,y0)
 
             while abs(Angle)>0.15: # Error of 9 degrees
+                # print 'Delta: ',Angle,'Bearing: ',Bearing, 'yaw: ',y0
                 Delta = Angle/0.75
                 if abs(Delta)>1:
                     Delta/=abs(Delta)
@@ -601,7 +612,7 @@ class DW_Controller(object):
         Bearing = Bearing % (2*math.pi)
         if Bearing > math.pi:
             Bearing -= 2*math.pi
-        if Bearing < math.pi:
+        if Bearing < -math.pi:
             Bearing += 2*math.pi
 
         self.JC.send_pos_traj(self.RS.GetJointPos(),self.RobotCnfg2[4][:],1.5,0.01)
@@ -609,8 +620,9 @@ class DW_Controller(object):
         # Get current orientation
         y0,p,r = self.current_ypr()
         Angle=self.DeltaAngle(Bearing,y0)
-
+        # print 'Angle: ',Angle
         while abs(Angle)>0.1: # Error of 3 degrees
+            # print 'MUD Delta: ',Angle,'Bearing: ',Bearing, 'yaw: ',y0
             Delta = Angle/0.45
             if abs(Delta)>1:
                 Delta/=abs(Delta)

@@ -24,9 +24,17 @@ class DWTurn(RobilTask):
         self._interval = rospy.Rate(2)
 
     def task(self, name, uid, parameters):
+        if ('Bearing' in parameters):
+            Bearing = float(parameters['Bearing'])
+        else:        
+            rospy.loginfo("Got no Bearing param, aborting...")
+            return RTResult(RobilTask_FAULT, "", "Not enough parameters", False) 
+        if  ('Terrain' in parameters):
+            terrain = parameters['Terrain']
+        else:
+            terrain="MUD"
         #initialize values:
-        Bearing = 0.5*math.pi
-        self._Controller.Initialize(Terrain = "HILLS")
+        self._Controller.Initialize(Terrain = terrain)
         ## TOPIC setup:
         odom_sub = rospy.Subscriber('/C25/publish',C25C0_ROP,self._Controller.Odom_cb)
         rs_sub = rospy.Subscriber('/atlas/atlas_state',AtlasState,self._Controller.RS_cb)
