@@ -39,6 +39,7 @@ static atlas_msgs::AtlasState as;
 static ros::ServiceClient sandia_client, perception_transform_cli_;
 static sandia_hand_msgs::SimpleGraspSrv sandia_srv;
 static C23_dFind::perceptionTransform perception_srv_msg;
+static ros::ServiceClient c23client;
 static boost::mutex mutex;
 static boost::mutex send_mutex;
 static ros::Time t0;
@@ -79,7 +80,7 @@ protected:
 	int time;
 	int retValue;
 	string outputstr;
-	ros::ServiceClient c23client;
+
 
 public:
 	PickUpServer(std::string name, std::vector<string> par):
@@ -149,6 +150,8 @@ public:
 			ac.position[q7r] = points.pArray[i]._q7;
 			ac.position[q8r] = points.pArray[i]._q8;
 			ac.position[q9r] = points.pArray[i]._q9;
+			//Move neck
+			ac.position[3]=0.7;
 
 			//ROS_INFO("");
 			//std::cout << i <<": ";
@@ -160,11 +163,39 @@ public:
 
 		}
 	}
+
+	void lMove(IkSolution origin, IkSolution goal, double sec, int pointsNum)
+		{
+			pPathPoints points(origin,goal,pointsNum,StartEnd);
+
+			for (int i=0; i<pointsNum; i++)
+			{
+				// ros::spinOnce();
+
+
+				ac.position[q4l] = points.pArray[i]._q4;
+				ac.position[q5l] = points.pArray[i]._q5;
+				ac.position[q6l] = points.pArray[i]._q6;
+				ac.position[q7l] = points.pArray[i]._q7;
+				ac.position[q8l] = points.pArray[i]._q8;
+				ac.position[q9l] = points.pArray[i]._q9;
+
+				//ROS_INFO("");
+				//std::cout << i <<": ";
+				//points.Array[i].Print();
+
+				pubAtlasCommand.publish(ac);
+
+				ros::Duration(sec/pointsNum).sleep();
+
+			}
+		}
+
 	bool getObjectData(string target, double *x, double *y, double *z, double *R, double *P, double *Y) {
 	    C23_ObjectRecognition::C23_orient c23srv;
 	    c23srv.request.target = target;
 
-
+	    ROS_INFO("Calling C23 perception service");
 	    if(c23client.call(c23srv))
 	    {
 	        *x = c23srv.response.x;
@@ -173,8 +204,15 @@ public:
 	        *R = c23srv.response.R;
 	        *P = c23srv.response.P;
 	        *Y = c23srv.response.Y;
-	       // cout << "Received data: " << c21srv.response.point.x << "," << c21srv.response.point.y << "," << c21srv.response.point.z << endl;
+
+	        ROS_INFO("Received data from majd: x= %f , y= %f , z= %f",*x ,*y ,*z );
+	        //cout << "Received data from majd: " << c23srv.response.x << "," << c23srv.response.y << "," << c23srv.response.z << endl;
 	        return true;
+	    }
+	    else
+	    {
+	    	ROS_INFO("No Message From Majd" );
+
 	    }
 	    return false;
 
@@ -285,21 +323,34 @@ public:
 
 
 
-				//current angles of the arm
+				//current angles of the right arm
 				IkSolution IkCurrent = IkSolution(as.position[q4r], as.position[q5r], as.position[q6r], as.position[q7r],
 									as.position[q8r], as.position[q9r]);
+				Move(IkCurrent,IkCurrent,1,10);
+
+				//current angles of the left arm
+				IkSolution IkCurrentL = IkSolution(as.position[q4l], as.position[q5l], as.position[q6l], as.position[q7l],
+													as.position[q8l], as.position[q9l]);
 
 				//grasp position from perception
 				string target = "Firehose";
 				getObjectData(target,&(argTarget.x), &(argTarget.y), &(argTarget.z), &(argTarget.R), &(argTarget.P), &(argTarget.Y));
 				//since no solution from perception yet, we override it
-				argTarget=RPY(0.52, -0.072657, 0.217362, -3.135264, 0, 1.460349);
+				ROS_INFO("Hose from perception: x=%f, y=%f, z=%f, R=%f, P=%f, Y=%f", argTarget.x, argTarget.y, argTarget.z, argTarget.R, argTarget.P, argTarget.Y);
+				RPY Origin=RPY(0.52, -0.072657, 0.217362, -3.135264, 0, 1.460349); //Origin=RPY(0.52, -0.072657, 0.217362, -3.135264, 0, 1.460349)
+				argTarget=TraceAB(Origin,argTarget);
+//				argTarget.x += Origin.x;
+//				argTarget.y += Origin.y;
+//				argTarget.z += Origin.z;
+//				argTarget.R += Origin.R;
+//				argTarget.P += Origin.P;
+//				argTarget.Y += Origin.Y;
 				//argTarget=RPY(0.46,-0.071,-0.2,-3.14,0.0,1.442);
-
+				ROS_INFO("Hose After Matric Multiply: x=%f, y=%f, z=%f, R=%f, P=%f, Y=%f", argTarget.x, argTarget.y, argTarget.z, argTarget.R, argTarget.P, argTarget.Y);
 				//Back movement from current to desired:
-				double current_q1=as.position[q1];
-				double current_q2=as.position[q2];
-				double current_q3=as.position[q3];
+				double current_q1=as.position[q1]; //lbz
+				double current_q2=as.position[q2]; //mby
+				double current_q3=as.position[q3]; //ubx
 				double desired_q1=0.0;
 				double desired_q2=0.0;
 				double desired_q3=0.0;
@@ -317,13 +368,21 @@ public:
 				//Multiply the transformation matrices from argTarget to arm_offset
 				RPY arm_target = TraceAngle(argTarget,arm_offset,0.0);
 				arm_target.z += 0.15;
+				ROS_INFO("here1");
 				IkSolution IkNext0 = rScanRPY(desired_q1,desired_q2,desired_q3, arm_target,0.01);
 				arm_target.z -= 0.18;
+				ROS_INFO("here2");
 				IkSolution IkNext = rScanRPY(desired_q1,desired_q2,desired_q3, arm_target,0.01);
 				arm_target.z += 0.2;
 				arm_target.x += 0.0;
 				arm_target.R += 0.5;
+				ROS_INFO("here3");
 				IkSolution IkNext2 = rScanRPY(desired_q1,desired_q2,desired_q3, arm_target,0.01);
+				ROS_INFO("here4");
+//				arm_target.z -= 0.15;
+//				arm_target.R += 1.57;
+//				arm_target.Y = -arm_target.Y;
+//				IkSolution IkNextL = lScanRPY(desired_q1,desired_q2,desired_q3, arm_target,0.01);
 
 				if ((!IkNext0.valid)||(!IkNext.valid)||(!IkNext2.valid)){
 					ROS_INFO("%s: No Solution!", _name.c_str());
@@ -337,10 +396,10 @@ public:
 
 				ros::Duration(1).sleep();
 				Move(IkCurrent, IkNext0, 3.0, 100);
-
+				ROS_INFO("here5");
 				ros::Duration(1).sleep();
 				Move(IkNext0, IkNext, 3.0, 100);
-
+				ROS_INFO("here6");
 				ros::Duration(2).sleep();
 				//close hand
 				{boost::mutex::scoped_lock l(send_mutex);
@@ -349,7 +408,20 @@ public:
 						}
 				ros::Duration(2).sleep();
 				Move(IkNext, IkNext2, 5.0, 100);
+				ROS_INFO("here7");
+/* Move left arm
+				ros::Duration(2).sleep();
+				lMove(IkCurrentL, IkNextL, 5.0, 100);
+*/
+				/*
+				ros::Duration(1).sleep();
+				IkSolution target_back1=IkSolution(2.5,desired_q2,desired_q3,0,0,0);
+				MoveBack(target_back , target_back1 , 5 , 100);
 
+				ros::Duration(1).sleep();
+				IkSolution target_back2=IkSolution(0.0,desired_q2,desired_q3,0,0,0);
+				MoveBack(target_back1 , target_back2 , 5 , 100);
+*/
 				time -= 2000 ;
 				ROS_INFO("%s: Finish movement", _name.c_str());
 				break;
@@ -415,7 +487,10 @@ void SetAtlasState(const atlas_msgs::AtlasState::ConstPtr &_as)
 //			argTarget.Print();
 //		}
 
-		for (unsigned int i = 0; i < numJoints; i++)
+		for (unsigned int i = 0; i < numJoint
+		ros::Time last_ros_time_;
+		bool wait = true;
+		ws; i++)
 		{
 			ac.kp_position[i] = as.kp_position[i];
 			ac.ki_position[i] = as.ki_position[i];
@@ -437,6 +512,7 @@ void SetAtlasState(const atlas_msgs::AtlasState::ConstPtr &_as)
 				ac.k_effort[j]  = 255;
 			//std::cout << state[j] << " ";
 		}
+		ac.k_effort[3]  = 255;
 	}
 
 
@@ -509,6 +585,9 @@ int main(int argc, char **argv)
 	//Sandia client
 	sandia_client = rosnode->serviceClient<sandia_hand_msgs::SimpleGraspSrv>("/sandia_hands/r_hand/simple_grasp");
 	//perception_transform_cli_ = nh_.serviceClient<C23_dFind::perceptionTransform>("perceptionTransform");
+
+	//Perception client
+	c23client = rosnode->serviceClient<C23_ObjectRecognition::C23_orient>("/C23/C66");
 
 	ROS_INFO("create task");
 
