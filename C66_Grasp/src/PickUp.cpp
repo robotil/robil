@@ -40,6 +40,7 @@ static ros::ServiceClient sandia_client, perception_transform_cli_;
 static sandia_hand_msgs::SimpleGraspSrv sandia_srv;
 static C23_dFind::perceptionTransform perception_srv_msg;
 static boost::mutex mutex;
+static boost::mutex send_mutex;
 static ros::Time t0;
 static const unsigned int numJoints = 28;
 
@@ -54,6 +55,20 @@ ostream& operator<<(ostream& o, std::vector<string>& s){
 		return o<<s[s.size()-1];
 	return o;
 }
+
+
+void update_comand(){
+	boost::mutex::scoped_lock l(send_mutex);
+//	sandia_srv.request.grasp.name = "cylindrical";
+//	sandia_srv.request.grasp.closed_amount = 0.0;
+	if (!sandia_client.call(sandia_srv))
+	{
+//		ROS_INFO("%s: Sandia Hand Service Call Failed!", _name.c_str());
+//		retValue  = SandiaCallFail;
+//		return TaskResult(retValue, "ERROR");
+	}
+}
+
 
 class PickUpServer: public RobilTask {
 protected:
@@ -232,14 +247,16 @@ public:
 //		}
 
 		//open hand
-		sandia_srv.request.grasp.name = "cylindrical";
-		sandia_srv.request.grasp.closed_amount = 0.0;
-		if (!sandia_client.call(sandia_srv))
-		{
-			ROS_INFO("%s: Sandia Hand Service Call Failed!", _name.c_str());
-			retValue  = SandiaCallFail;
-			return TaskResult(retValue, "ERROR");
+		{boost::mutex::scoped_lock l(send_mutex);
+			sandia_srv.request.grasp.name = "cylindrical";
+			sandia_srv.request.grasp.closed_amount = 0.0;
 		}
+//		if (!sandia_client.call(sandia_srv))
+//		{
+//			ROS_INFO("%s: Sandia Hand Service Call Failed!", _name.c_str());
+//			retValue  = SandiaCallFail;
+//			return TaskResult(retValue, "ERROR");
+//		}
 
 
 		ROS_INFO("%s: Target Operation %d - %s", _name.c_str(), operation, (operation == 1? "Forward": "Reverse"));
@@ -313,14 +330,10 @@ public:
 					retValue  = NoSolution;
 					//return TaskResult(retValue, "ERROR");
 				}
-				sandia_srv.request.grasp.name = "cylindrical";
-				sandia_srv.request.grasp.closed_amount = 0.37;
-				if (!sandia_client.call(sandia_srv))
-				{
-					ROS_INFO("%s: Sandia Hand Service Call Failed!", _name.c_str());
-					retValue  = SandiaCallFail;
-					return TaskResult(retValue, "ERROR");
-				}
+				{boost::mutex::scoped_lock l(send_mutex);
+							sandia_srv.request.grasp.name = "cylindrical";
+							sandia_srv.request.grasp.closed_amount = 0.37;
+						}
 
 				ros::Duration(1).sleep();
 				Move(IkCurrent, IkNext0, 3.0, 100);
@@ -330,14 +343,10 @@ public:
 
 				ros::Duration(2).sleep();
 				//close hand
-				sandia_srv.request.grasp.name = "cylindrical";
-				sandia_srv.request.grasp.closed_amount = 1.0;
-				if (!sandia_client.call(sandia_srv))
-				{
-					ROS_INFO("%s: Sandia Hand Service Call Failed!", _name.c_str());
-					retValue  = SandiaCallFail;
-					return TaskResult(retValue, "ERROR");
-				}
+				{boost::mutex::scoped_lock l(send_mutex);
+							sandia_srv.request.grasp.name = "cylindrical";
+							sandia_srv.request.grasp.closed_amount = 1.0;
+						}
 				ros::Duration(2).sleep();
 				Move(IkNext, IkNext2, 5.0, 100);
 
@@ -436,6 +445,8 @@ void SetAtlasState(const atlas_msgs::AtlasState::ConstPtr &_as)
 
 }
 
+
+
 int main(int argc, char **argv)
 {
 	if(argc<0) return 1;
@@ -511,7 +522,13 @@ int main(int argc, char **argv)
 	if(argc == 1) params.push_back("No Parameters");
 	PickUpServer task(tname, params);
 
-	ros::spin();
+	//ros::spin();
+	ros::Rate r(2);
+	while(ros::ok()){
+		update_comand();
+		r.sleep();
+		ros::spinOnce();
+	}
 
 	return 0;
 }
