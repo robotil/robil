@@ -14,7 +14,7 @@ import math
 import roslib;roslib.load_manifest('C42_DynamicLocomotion')
 from C31_PathPlanner.msg import C31_Waypoints
 from C25_GlobalPosition.msg import C25C0_ROP
-
+from atlas_msgs.msg import AtlasCommand, AtlasSimInterfaceCommand, AtlasSimInterfaceState, AtlasState, AtlasBehaviorStepData
 class DW_WalkingMode(WalkingMode):
     def __init__(self,iTf):
         WalkingMode.__init__(self,DW_PathPlanner())
@@ -43,7 +43,7 @@ class DW_WalkingMode(WalkingMode):
         WalkingMode.Walk(self)
         self._Controller.DoPath(self._LPP.GetPath())
         self._Controller.RotateToOri( self._LPP.GetPathYaw() - math.pi/2 )
-        self._Controller.DynStandUp()
+        # self._Controller.DynStandUp()
         self._bDone = True
     
     def EmergencyStop(self):
@@ -70,4 +70,5 @@ class DW_WalkingMode(WalkingMode):
             i = i+1
         print p
         self.SetPath(p)
+
     
