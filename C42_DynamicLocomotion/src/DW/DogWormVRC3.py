@@ -267,7 +267,7 @@ class DW_Controller(object):
 
     def Odom_cb(self,msg):
         if 1000 <= self._counter: 
-            print ("Odom_cb::", self.GlobalPos)
+            # print ("Odom_cb::", self.GlobalPos)
             self._counter = 0
         self._counter += 1
         self.GlobalPos = msg.pose.pose.pose.position # from C25_GlobalPosition
@@ -753,15 +753,22 @@ class DW_Controller(object):
             # Get current orientation
             y,p,r = self.current_ypr()
             self._fall_count += 1
-            if abs(p)>0.4*math.pi or abs(r)>0.8*math.pi:
+            print 'Check Tipping R=',r,"P=",p
+            if p >=1.25:
+                print "Front recovery"
+                result = self.FrontTipRecovery()
+            elif abs(p)>0.4*math.pi or abs(r)>0.8*math.pi:
                 # Robot tipped backwards
+                print "Back recovery"
                 result = self.BackTipRecovery()
             elif r>math.pi/4:
                 # Robot tipped to the right
                 result = self.TipRecovery("right")
+                print "Right recovery"
             elif r<-math.pi/4:
                 # Robot tipped to the left
                 result = self.TipRecovery("left")
+                print "Left recovery"
             else:
                 result = 1
                 self.FollowPath = 1
