@@ -16,7 +16,7 @@ from AlinePose.AP_WalkingMode import *
 from LocalPathPlanner import *
 
 class WalkingModeChooserEnum:
-    DontCare,CD,QS,DD = range(4)
+    DontCare,CD,QS,DD,DW,AP = range(6)
 
 class WalkingModeChooser(WalkingModeChooserInterface):
 
@@ -29,6 +29,9 @@ class WalkingModeChooser(WalkingModeChooserInterface):
         self._Recommended = prefferedMode
         self._OverRide = WalkingModeChooserEnum.DontCare
         self._bIsAppropriate = True
+        self._EnumDictionary = {'CD':WalkingModeChooserEnum.CD,'QS':WalkingModeChooserEnum.QS,\
+                                'DD':WalkingModeChooserEnum.DD,'DW':WalkingModeChooserEnum.DW,\
+                                'AP':WalkingModeChooserEnum.AP}
         
         self._debug_cmd_sub = rospy.Subscriber('walker_mode_override',Int32,self._walker_mode_handler)
         
@@ -73,6 +76,12 @@ class WalkingModeChooser(WalkingModeChooserInterface):
                 self._Modes[self._Recommended].SetPath(path)
                 result = self._Modes[self._Recommended]
         return result
+    
+    def GetCurrentModeName(self):
+        return self._CurrentMode
+    
+    def GetCurrentModeEnum(self):
+        return self._EnumDictionary[self._CurrentMode]
     
     def _walker_mode_handler(self,walker_mode):
         self._OverRide = walker_mode.data

@@ -49,6 +49,8 @@ class DynamicLocomotion(RobilTask):
             if self.isPreepted() or (3 == self._debug_cmd):
                 self._Walker.Stop()
                 return RTResult_PREEPTED()
+            eWalkingMode = self._Walker.GetWalkingModeEnum()
+            print("WalkingMode: ",eWalkingMode)
             self._interval.sleep()
 
         self._Walker.Stop()

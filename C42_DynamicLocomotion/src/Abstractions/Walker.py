@@ -62,6 +62,9 @@ class Walker(object):
                 self._WalkingMode.Walk()
         return bIsDone
 
+    def GetWalkingModeEnum(self):
+        return self._ModeChooser.GetCurrentModeEnum()
+    
     def IsReady(self):
         return self._WalkingMode.IsReady()
 
