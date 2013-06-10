@@ -121,6 +121,9 @@ ObsMap MapEditor::	merge(const ObsMap& m1, const ObsMap& m2, MergeOperator op)co
 			case XOR:
 				res(x,y) = m1(x,y)!=Map::ST_BLOCKED != m2(x,y)!=Map::ST_BLOCKED ? Map::ST_BLOCKED : Map::ST_AVAILABLE;
 				break;
+			case SUB:
+				res(x,y) = m1(x,y)==Map::ST_BLOCKED && m2(x,y)!=Map::ST_BLOCKED ? Map::ST_BLOCKED : Map::ST_AVAILABLE;
+				break;
 			}
 		}
 	}}
@@ -482,15 +485,19 @@ PField::Points searchPath_transitAccurate(
 	Inflator ii( rr*0.5, Map::ST_DEBRIS);
 	MapEditor e;
 
-	Map walls = e.merge(s_walls, s_obstacles, MapEditor::OR);
+//	Map walls = e.merge(s_walls, s_obstacles, MapEditor::OR);
+	Map walls = s_walls;
+
+	Map inflated_terrain = e.replace(e.cut(
+			ii.inflate(s_terrain),
+			Map::ST_DEBRIS, Map::ST_AVAILABLE), Map::ST_DEBRIS, Map::ST_BLOCKED
+		);
+
+	walls = e.merge(walls, inflated_terrain, MapEditor::SUB);
 
 	Map inflated_map = e.replace(
 			i.inflate(walls),
 			Map::ST_UNCHARTED, Map::ST_AVAILABLE
-		);
-	Map inflated_terrain = e.replace(e.cut(
-			ii.inflate(s_terrain),
-			Map::ST_DEBRIS, Map::ST_AVAILABLE), Map::ST_DEBRIS, Map::ST_BLOCKED
 		);
 
 	inflated_map = e.merge(inflated_map, inflated_terrain, MapEditor::OR);
