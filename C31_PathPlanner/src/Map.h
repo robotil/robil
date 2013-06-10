@@ -195,7 +195,7 @@ public:
 	ObsMap cut(const ObsMap& source, const char main_color, const char other_color)const;
 
 	enum MergeOperator{
-		OR, AND, XOR
+		OR, AND, XOR, SUB
 	};
 	ObsMap merge(const ObsMap& m1, const ObsMap& m2, MergeOperator op)const;
 
