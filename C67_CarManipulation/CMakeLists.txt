@@ -37,7 +37,7 @@ link_directories(
 #uncomment if you have defined messages
 rosbuild_genmsg()
 #uncomment if you have defined services
-#rosbuild_gensrv()
+rosbuild_gensrv()
 
 include_directories (src) 
 
@@ -49,6 +49,9 @@ rosbuild_add_boost_directories()
 
 rosbuild_add_executable(TraceTest src/TraceTest.cpp)
 target_link_libraries(TraceTest Kinematics)
+
+rosbuild_add_executable(PathServer src/PathServer.cpp)
+target_link_libraries(PathServer Kinematics)
 
 rosbuild_add_executable(rTrace src/rTrace.cpp)
 target_link_libraries(rTrace Kinematics)

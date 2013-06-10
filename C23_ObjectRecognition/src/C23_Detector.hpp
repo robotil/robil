@@ -81,8 +81,14 @@ typedef enum targets {
   BRAKE_PEDAL,
   GAS_PEDAL,  
   TABLE,
+  ARROW,
   NONE
 } TARGETS;
+
+typedef enum gear_status{
+ FORWARD_GEAR_STATUS,
+ REVERSE_GEAR_STATUS
+}GEAR_STATUS;
 
 class C23_Detector{
 public:
@@ -122,17 +128,19 @@ private:
     bool detectSteeringWheel(Mat srcImg,const sensor_msgs::PointCloud2::ConstPtr &cloud,int location);
     bool detectHandbrake(Mat srcImg,const sensor_msgs::PointCloud2::ConstPtr &cloud,int location);
     bool detectGear(Mat srcImg,const sensor_msgs::PointCloud2::ConstPtr &cloud,int location);
-    bool detectGearStatus(Mat srcImg,const sensor_msgs::PointCloud2::ConstPtr &cloud,int location);
+    bool detectArrowDirection(Mat srcImg,const sensor_msgs::PointCloud2::ConstPtr &cloud);
     
     bool pictureCoordinatesToGlobalPosition(double x1, double y1, double x2, double y2, double * x, double* y, double*z);
     bool pointCloudCoordinatesToGlobalPosition(double x, double y, double z, double* px, double* py, double*pz);
-    bool averagePointCloud(int x1, int y1, int x2, int y2, const sensor_msgs::PointCloud2::ConstPtr &detectionCloud, double* px, double* py, double *pz) ;
+
+    bool averagePointCloudInsideCar(int x1, int y1, int x2, int y2, const sensor_msgs::PointCloud2::ConstPtr &cloud, double* px, double* py, double *pz); 
+    bool averagePointCloud(int x1, int y1, int x2, int y2, const sensor_msgs::PointCloud2::ConstPtr &detectionCloud, double* px, double* py, double *pz);
     bool process_orientation(C23_ObjectRecognition::C23_orient::Request  &req,
-                                           C23_ObjectRecognition::C23_orient::Response &res )    ;
+                                           C23_ObjectRecognition::C23_orient::Response &res );
         
 	ros::NodeHandle nh;
     bool takePictures(Mat srcImg);
-    bool templateMatching( Mat img, Mat templateImage, int matching_method, cv::Point *matchLoc, const sensor_msgs::PointCloud2::ConstPtr &cloud);
+    bool templateMatching( Mat img, Mat templateImage, int matching_method, cv::Point *matchLoc, const sensor_msgs::PointCloud2::ConstPtr &cloud, double *value = NULL);
     bool templateMatching3D(string templates_file, pcl::PointCloud<pcl::PointXYZ>::Ptr &cloud);
     pcl::PointCloud<pcl::PointXYZ>::Ptr filterPointCloud(int x,int y, int width, int height, const pcl::PointCloud<pcl::PointXYZ> &cloud);
     void saveTemplate(int x,int y, int width, int height, const sensor_msgs::PointCloud2::ConstPtr &cloud2, string target);

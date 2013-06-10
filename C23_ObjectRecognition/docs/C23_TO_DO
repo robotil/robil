@@ -4,7 +4,7 @@ C23_ObjectRecogition TO DO
 23/05/2013
 
 1. Add a routine to determine where the passenger and driver sides are (Other than the colour routine)
-2. Identify the square at the back of the car and identify the steering wheel
+2. Identify the square at the back of the car and identify the steering wheel --
 3. Identify the handbreak and pedals
 4. Test identification of these objects at different angles
 5. Implement the neck movements so the robot can scan and look for an objects
@@ -25,15 +25,19 @@ C23_ObjectRecogition TO DO
 03/06/13
 1. Implement Cluster Extraction
 2. Implement 3D template matching
-3. Detect the steeringwheel while the robot is standing near the car (In standard position)
+3. Detect the steeringwheel while the robot is standing near the car (In standard position) - done
 4. Perform tests at different angles to see how well each detection performs
-5. For inside steeringwheel, handbrake, and gears, send robot coordinates
+5. For inside steeringwheel, handbrake, and gears, send robot coordinates -done (In robot camera coordinates)
 6. Identify pedals
-7. Make workspace paths relative
-8. Detect the state of the gears (lower)
-9. GLOBAL POSITION
+7. Make workspace paths relative - done
+8. Detect the state of the gears (lower) - done
+9. GLOBAL POSITION - done
 10. Pedals
+11. Gate Std::out of range
 
 
-
+05/06/13
+1. Template Matching of the arrow (both directions) -done
+2. Receive the global position from the C21 service -done
+3. Check car global position
 
