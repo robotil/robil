@@ -340,6 +340,8 @@
 	}
 	cloud_filtered->width = 1;
 	cloud_filtered->height = cloud_filtered->points.size();
+	
+	//cout<<"The number of points: "<<cloud_filtered->points.size()<<endl;
       // pcl::transformPointCloud(*cloud_filtered, *cloud_filtered, sensorTopelvis);
 	pcl::io::savePCDFileASCII (target.c_str(), *cloud_filtered);
 	
@@ -493,10 +495,12 @@
 		double tmp_x = 0;
 		double tmp_y =0;
 		double tmp_z  =0;
-		tf::TransformListener listener;
-		static tf::StampedTransform transform;
+		
 		pcl::PointCloud<pcl::PointXYZ>detectionCloud;
 		pcl::fromROSMsg<pcl::PointXYZ>(*cloud,detectionCloud);
+		
+		/*tf::TransformListener listener;
+		static tf::StampedTransform transform;
 		while(1){
 		  try{
 		  listener.lookupTransform("/left_camera_frame","/left_camera_optical_frame",
@@ -508,7 +512,7 @@
 		  
 		  Eigen::Matrix4f sensorTopelvis;
 		  pcl_ros::transformAsMatrix(transform, sensorTopelvis);
-		  pcl::transformPointCloud(detectionCloud, detectionCloud, sensorTopelvis);
+		  pcl::transformPointCloud(detectionCloud, detectionCloud, sensorTopelvis);*/
 		
 		
 		double _x=0;
@@ -681,6 +685,16 @@
 	    pcl::PointCloud<pcl::PointXYZ>::Ptr cloud2 = filterPointCloud(last_x,last_y,width,height,lastCloud);
 	    templateMatching3D(t,  cloud2);
 	}
+	if(!target.compare("Gear")) {
+	    char basePath[1000],imageName[1000];
+	    
+	    sprintf(basePath,"%s/3D_models/%s%c",ros::package::getPath("C23_ObjectRecognition").c_str(),"gear.txt",'\0');
+	    string t = basePath;
+	  //  string t = "/home/isl/darpa/robil/C23_ObjectRecognition/3D_models/firehose.txt";
+	    std::cout<<imageName<<endl;
+	    pcl::PointCloud<pcl::PointXYZ>::Ptr cloud2 = filterPointCloud(last_x,last_y,width,height,lastCloud);
+	    templateMatching3D(t,  cloud2);
+	}
 	
 	
 	res.x = orient_x;
@@ -764,6 +778,39 @@
 		break;
 	    case GATE:
 		target = "Gate";
+		break;
+	    case ARROW:
+		target = "Arrow";
+		break;
+		case GEAR:
+		target = "Gear";
+		break;
+		case HANDBRAKE:
+		target = "Handbrake";
+		break;
+		case INSIDE_STEERINGWHEEL:
+		target = "InsideSteeringWheel";
+		break;
+		case OUTSIDE_STEERINGWHEEL:
+		target = "OutsideSteeringWheel";
+		break;
+		case TABLE:
+		target = "Table";
+		break;
+		case FIREHOSE_GRIP:
+		target = "FirehoseGrip";
+		break;
+		case FIREHOSE:
+		target = "Firehose";
+		break;
+		case PATH:
+		target = "Path";
+		break;
+		case VALVE:
+		target = "Valve";
+		break;
+		case STANDPIPE:
+		target = "Standpipe";
 		break;
 	}
 	if(!isFound) {
@@ -1104,18 +1151,34 @@
 
 	    
 	      
-	      
-	      
+	      double x1,y1,z1,x2,y2,z2;
+	      bool a_res =false;
+
 	        if(leftSum>rightSum){
 		      ROS_INFO("RIGHT ARROW");
-		      res = true;
-              pictureCoordinatesToGlobalPosition(arrowBox.x, arrowBox.y,arrowBox.x + arrowBox.height, arrowBox.y + arrowBox.width, &x, &y,&z,-1,-4);
-	      }
+		      
+	      a_res = pictureCoordinatesToGlobalPosition(arrowBox.x, arrowBox.y,arrowBox.x + arrowBox.height, arrowBox.y + arrowBox.width, &x1, &y1,&z1,-1,-4);
+              a_res&= pictureCoordinatesToGlobalPosition(arrowBox.x, arrowBox.y,arrowBox.x + arrowBox.height, arrowBox.y + arrowBox.width, &x2, &y2,&z2,-1,0);
+	      res = a_res;
+	      this->x = x1;
+	      this->y = y1;
+	      this->x2 = x2;
+	      this->y2 =  y2;
+		  
+		}
 	      else{
 		      ROS_INFO("LEFT ARROW");
 		      res = true;
-              pictureCoordinatesToGlobalPosition(arrowBox.x, arrowBox.y,arrowBox.x + arrowBox.height, arrowBox.y + arrowBox.width, &x, &y,&z,-1,+4);
+              a_res = pictureCoordinatesToGlobalPosition(arrowBox.x, arrowBox.y,arrowBox.x + arrowBox.height, arrowBox.y + arrowBox.width, &x1, &y1,&z1,-1,+4);
+	      a_res&= pictureCoordinatesToGlobalPosition(arrowBox.x, arrowBox.y,arrowBox.x + arrowBox.height, arrowBox.y + arrowBox.width, &x2, &y2,&z2,-1,0);
+	      res = a_res;
+	      this->x = x1;
+	      this->y = y1;
+	      this->x2 = x2;
+	      this->y2 =  y2;
 	      }
+	      
+	      
 	//averagePointCloud(arrowBox.x, arrowBox.y, arrowBox.width, arrowBox.height, cloud,&x,&y,&z);
 	
 	//black_pixels(leftSumCol,0) = arrowBox.height - countNonZero(col);
@@ -1193,8 +1256,6 @@
 	    
 		return res;
 	      
-	      
-	      return true;
 	    }
 
 	    //Detect the car steering wheel
@@ -1426,8 +1487,8 @@
 		//-----------------------------------------------------------------
 		
 		Mat gearTemplate = imread(imageName);
-		imshow("Gear template", gearTemplate);
-		waitKey(0);
+		//imshow("Gear template", gearTemplate);
+		//waitKey(0);
 		
 	      res  = templateMatching(srcImg, gearTemplate, 0, &matchLoc, cloud);
 	      
@@ -1475,6 +1536,16 @@
 		  status = FORWARD_GEAR_STATUS;
 		  cout<<"Forward status"<<endl;
 		}
+		
+		string t = "Gear";
+		cout << "Saving Gear" << endl;
+		//saveTemplate(matchLoc.x, matchLoc.y,gearTemplate.cols/2, gearTemplate.rows,cloud,t);
+		//templateMatching3D(t,lastCloud);
+		last_x = matchLoc.x;
+		last_y = matchLoc.y;
+		width = gearTemplate.cols/2;
+		height = gearTemplate.rows;
+		
 	      }
 	    
 		if (res)
