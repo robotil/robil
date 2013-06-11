@@ -821,8 +821,8 @@
     
     msg_gp.x = x;
     msg_gp.y = y;
-    msg_gp.x2 = x;
-    msg_gp.y2 = y;
+    msg_gp.x2 = x2;
+    msg_gp.y2 = y2;
     msg_gp.Object = target;
     
     msg_odim.x0 = rect_points[0].x;
@@ -1011,6 +1011,7 @@
 		  x = x - 0.03;
 		  y = y + 0.09;
 		  z = z - 0.03;
+          
 		  //cout<<"Handbrake x,y,z: "<<x<<", "<<y<<", "<<z<<endl;
 		  
 		  if(x<1&& x>0)
@@ -2700,12 +2701,17 @@
           if(!a_res) {
               return false;
           }
+          x = (x1+x2)/2.0;
+          y = (y1+y2)/2.0;
+          
+          a_res = pictureCoordinatesToGlobalPosition(mcL[biggstL].x-5, mcL[biggstL].y-50, mcL[biggstL].x+5, mcL[biggstL].y+50,  &x1, &y1,&z1, 0.5,0);
+          a_res &= pictureCoordinatesToGlobalPosition(mcR[biggstR].x-5, mcR[biggstR].y-50, mcR[biggstR].x+5, mcR[biggstR].y+50, &x2, &y2,&z2, 0.5,0);
 	  // cout << "Middle: " <<
 	    // imshow("TESTING",srcImg);
 	    // waitKey(0);
 	    // return true;
-	    x = (x1+x2)/2.0;
-	    y = (y1+y2)/2.0;
+	    x2 = (x1+x2)/2.0;
+	    y2 = (y1+y2)/2.0;
 	    cout << "Middle point: " << x <<"," << y << endl;
         imwrite(imgpath.c_str(),srcImg);
 	    return true;
@@ -2786,6 +2792,11 @@
             } 
             x = x1;
             y = y1;
+            a_res = pictureCoordinatesToGlobalPosition(mcR[biggstR].x-5, mcR[biggstR].y-50, mcR[biggstR].x+5, mcR[biggstR].y+50, &x1, &y1,&z1,0.5,2.5);
+            
+            x2 =  x1;
+            y2 = y1;
+            
             cout << "Middle point: " << x <<"," << y << endl;
             imwrite(imgpath.c_str(),srcImg);
            // return true;
@@ -2847,6 +2858,9 @@
         } 
         x = x1;
         y = y1;
+         a_res = pictureCoordinatesToGlobalPosition(mcL[biggstL].x-5, mcL[biggstL].y-50, mcL[biggstL].x+5, mcL[biggstL].y+50, &x1, &y1,&z1,-0.5,2.5);
+        x2 = x1;
+        y2 = y1;
         cout << "Middle point: " << x <<"," << y << endl;
         imwrite(imgpath.c_str(),srcImg);
         return mcM[biggstM].x > mcL[biggstL].x ? true : false;
