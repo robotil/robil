@@ -567,7 +567,7 @@ class DW_Controller(object):
             Bearing = Bearing % (2*math.pi)
             if Bearing > math.pi:
                 Bearing -= 2*math.pi
-            if Bearing < math.-pi:
+            if Bearing < -math.pi:
                 Bearing += 2*math.pi
 
             # Get into "break-dance" configuration
