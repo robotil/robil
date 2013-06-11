@@ -17,9 +17,9 @@ set(EXECUTABLE_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/bin)
 set(LIBRARY_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/lib)
 
 #uncomment if you have defined messages
-rosbuild_genmsg()
+#rosbuild_genmsg()
 #uncomment if you have defined services
-rosbuild_gensrv()
+#rosbuild_gensrv()
 
 #common commands for building c++ executables and libraries
 #rosbuild_add_library(${PROJECT_NAME} src/example.cpp)
@@ -28,6 +28,7 @@ rosbuild_gensrv()
 #rosbuild_link_boost(${PROJECT_NAME} thread)
 #rosbuild_add_executable(example examples/example.cpp)
 #target_link_libraries(example ${PROJECT_NAME})
+
 find_package( PCL 1.5 REQUIRED )
 
 include_directories(${PCL_INCLUDE_DIRS})
@@ -35,12 +36,6 @@ link_directories(${PCL_LIBRARY_DIRS})
 add_definitions(${PCL_DEFINITIONS})
 rosbuild_add_boost_directories()
 find_package(OpenCV REQUIRED)
-
-
-rosbuild_add_boost_directories()
-find_package(OpenCV REQUIRED)
-rosbuild_add_executable(C23 src/C23.cpp src/C23_Detector.cpp src/GeneralDetector.cpp)
-#rosbuild_add_executable(Test src/test.cpp)
-
-rosbuild_link_boost(C23 thread signals)
-target_link_libraries(C23 ${OpenCV_LIBS} ${PCL_LIBRARIES})
+rosbuild_add_executable(RoadExtract src/RoadExtract.cpp)
+rosbuild_link_boost(RoadExtract thread signals)
+target_link_libraries(RoadExtract ${OpenCV_LIBS} ${PCL_LIBRARIES})

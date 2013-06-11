@@ -1,0 +1,27 @@
+<package>
+  <description brief="RoadExtract">
+
+     RoadExtract
+
+  </description>
+  <author>lar2</author>
+  <license>BSD</license>
+  <review status="unreviewed" notes=""/>
+  <url>http://ros.org/wiki/RoadExtract</url>
+  <depend package="roscpp"/>
+  <depend package="std_msgs"/>
+  <depend package="nav_msgs"/>
+  <depend package="sensor_msgs"/>
+  <depend package="opencv2"/>
+  <depend package="cv_bridge"/>
+  <depend package="message_filters"/>
+  <depend package="image_transport"/>
+  <depend package="pcl_ros"/>
+  <depend package="laser_geometry"/>
+  <depend package="pcl"/>
+  <depend package="nav_msgs"/>
+  <depend package="geometry_msgs"/>
+
+</package>
+
+
