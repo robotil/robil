@@ -8,6 +8,7 @@
 //#include <QMainWindow>
 #include <QMouseEvent>
 #include "traingleitem.h"
+#include "scaleitem.h"
 
 typedef struct
 {
@@ -62,6 +63,7 @@ private:
 	CPixItem *pPixItem[100][100];
 	CtraingleItem *traingle;
 	ModeDraw mode;
+	CScaleItem* pCScaleItem;
 	int PixColor[100][100];
 	int pos[2];
 	int startX,startY;

@@ -21,6 +21,7 @@ public slots:
 	void SltImageAreaOpened(int);
 	void SltOnNewImg(QImage img);
 	void SltOnPlayPauseClick(bool);
+	void SltOnStopClick();
 	void SltOnCreateClick(bool);
 	void SltOnPathClick(bool);
 	void SltOnAllowClick();
@@ -45,6 +46,7 @@ public:
 	virtual void OnExecutionStatusUpdate(int status);
 	virtual void OnHMIResponseReceived();
 	virtual void OnExecuterStackUpdate(QString strQString);
+	virtual void OnVRCScoreData(double timeSec, int competionScore, int falls, QString message);
 	/*virtual*/ void OnWaitResponseFinished();
 
 protected:
