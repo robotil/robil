@@ -42,6 +42,8 @@ public Q_SLOTS:
         void Resume();
         void Stop();
         void SendPathUpdate(std::vector<StructPoint> points);
+        void SendNewGoal(StructPoint goal);
+        void SendReset();
 
         void SendImageRequest();
         void SendGridRequest();

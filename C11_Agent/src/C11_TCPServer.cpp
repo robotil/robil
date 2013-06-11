@@ -53,7 +53,6 @@ void CTcpServer::SltOnNewConnection()
           connect(pClientConnection, SIGNAL(readyRead()),
                    this, SLOT(SltOnDataReceived()));
           isConnected = true;
-          SendHello();
 
 }
 
@@ -174,33 +173,21 @@ void CTcpServer::SltOnDataReceived()
               emit SigStopRequest();
               std::cout<<"TCP: Stop received!\n";
             }
+          else if(21 == msgId)
+            {
+              StructPoint goal;
+              in >> goal.x;
+              in >> goal.y;
+              emit SigNewGoalRequest(goal);
+              std::cout<<"TCP: New goal received!\n";
+            }
+          else if(22 == msgId)
+            {
+              emit SigResetRequest();
+              std::cout<<"TCP: Reset received!\n";
+            }
         }
     }
-}
-
-void CTcpServer::SendHello()
-{
-  if(NULL == pClientConnection)
-  {
-    std::cout<<"TCP: No connection\n";
-    return;
-  }
-  short msgNum = 45;
-//  char buff[100];
-//  memcpy(buff,&msgNum,sizeof(msgNum));
-  QByteArray block;
-  QDataStream out(&block, QIODevice::WriteOnly);
-  out.setByteOrder(QDataStream::LittleEndian);
-  out<<msgNum;
-  QString s("HELLO");
-//  out<<s;
-//  for(int i=1; i<sizeof(msgNum);i++)
-//          {
-//                  block[i] = buff[i];
-//          }
-  pClientConnection->write(block);
-  pClientConnection->write("HELLO");
-  std::cout<<"TCP: Hello sent\n";
 }
 
 void CTcpServer::SendImage(QImage img)

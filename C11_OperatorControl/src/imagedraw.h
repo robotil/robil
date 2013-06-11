@@ -25,7 +25,9 @@ public slots:
 	void SltOnCreateClick(bool);
 	void SltOnPathClick(bool);
 	void SltOnAllowClick();
+	void SltOnRestoreClick();
 	void SltOperatorAction();
+	void SltGoalUpdated();
 	void SltOnWaitTimeout();
 	void SltOnGridReceived(int grid[100][100],StructPoint robotPos,int xOffset,int yOffset,double orient);
 

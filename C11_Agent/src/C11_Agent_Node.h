@@ -8,6 +8,7 @@
 #include "C10_Common/path_update.h"
 #include "Vec2d.hpp"
 #include "C25_GlobalPosition/C25C0_ROP.h"
+#include "C31_PathPlanner/C31_Waypoints.h"
 #include "ros/ros.h"
 #include "ros/package.h"
 #include "std_msgs/String.h"
@@ -91,6 +92,10 @@ public:
 
   void AllRequest();
 
+  void NewGoalRequest(StructPoint goal);
+
+  void ResetRequest();
+
   virtual void PushImage(QImage img);
   virtual void PushGrid(StructGridData grid);
   virtual void PushPath(vector<StructPoint> path);
@@ -103,6 +108,8 @@ private:
 
   ros::NodeHandle *nh_;
   ros::Publisher path_update_pub;
+  ros::Publisher goal_update_pub;
+  ros::Publisher goal_reset_pub;
   ros::ServiceServer service_MissionSelection;
   ros::ServiceServer service_PauseMission;
   ros::ServiceServer service_ResumeSelection;

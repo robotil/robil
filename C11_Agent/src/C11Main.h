@@ -40,6 +40,8 @@ class C11Main: public QObject, public IAgentInterface
     void SltPathRequest();
     void SltAllRequest();
     void SltStopRequest();
+    void SltNewGoalRequest(StructPoint goal);
+    void SltResetRequest();
 
 public:
   C11Main(int argc, char **argv);

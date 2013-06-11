@@ -42,6 +42,8 @@ void C11Main::SetTcp(CTcpServer* ptcpServer)
   connect(pCTcpServer,SIGNAL(SigPathRequest()),this,SLOT(SltPathRequest()));
   connect(pCTcpServer,SIGNAL(SigAllRequest()),this,SLOT(SltAllRequest()));
   connect(pCTcpServer,SIGNAL(SigStopRequest()),this,SLOT(SltStopRequest()));
+  connect(pCTcpServer,SIGNAL(SigNewGoalRequest(StructPoint)),this,SLOT(SltNewGoalRequest(StructPoint)));
+  connect(pCTcpServer,SIGNAL(SigResetRequest()),this,SLOT(SltResetRequest()));
 }
 
 void C11Main::PushImage(QImage img)
@@ -189,4 +191,14 @@ void C11Main::SltAllRequest()
 void C11Main::SltStopRequest()
 {
   pC11Node->Stop();
+}
+
+void C11Main::SltNewGoalRequest(StructPoint goal)
+{
+  pC11Node->NewGoalRequest(goal);
+}
+
+void C11Main::SltResetRequest()
+{
+  pC11Node->ResetRequest();
 }
