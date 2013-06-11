@@ -57,6 +57,8 @@ class robot_state(object):
 		#self._r_foot_force = self._r_contact_filter.update(StateMessage.r_foot.force.z)
 		#self._r_reflex['GC'],self._l_reflex['GC'] = self._GC.update(self._r_foot_force,self._l_foot_force)
 		pass
+	def GetIMU(self):
+		return self._orientation.GetRPY()
 	def GetJointPos(self,joint='None'):
 		if joint == 'None':
 		   return self._JointPos.GetAll()

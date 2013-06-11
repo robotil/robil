@@ -14,15 +14,21 @@ import math
 import roslib;roslib.load_manifest('C42_DynamicLocomotion')
 from C31_PathPlanner.msg import C31_Waypoints
 from C25_GlobalPosition.msg import C25C0_ROP
-
+from atlas_msgs.msg import AtlasCommand, AtlasSimInterfaceCommand, AtlasSimInterfaceState, AtlasState, AtlasBehaviorStepData
 class DW_WalkingMode(WalkingMode):
     def __init__(self,iTf):
         WalkingMode.__init__(self,DW_PathPlanner())
         self._Controller = DW_Controller(iTf)
         
-    def Initialize(self):
-        WalkingMode.Initialize(self)
-        self._Controller.Initialize()
+    def Initialize(self,parameters):
+        WalkingMode.Initialize(self,parameters)
+
+        if ((None != parameters) and ('Terrain' in parameters)):
+            terrain = parameters['Terrain']
+        else:
+            terrain="MUD"
+
+        self._Controller.Initialize(Terrain = terrain)
         self._bDone = False
         
         self._Subscribers["Path"] = rospy.Subscriber('/path',C31_Waypoints,self._path_cb)
@@ -30,7 +36,8 @@ class DW_WalkingMode(WalkingMode):
         #self._Subscribers["Odometry"] = rospy.Subscriber('/ground_truth_odom',Odometry,self._Controller.Odom_cb)
         self._Subscribers["AtlasState"] = rospy.Subscriber('/atlas/atlas_state',AtlasState,self._Controller.RS_cb)
         rospy.sleep(0.3)
-
+        self._Controller.JC.set_all_pos(self._Controller.RS.GetJointPos())
+        self._Controller.JC.send_command()
     def StartWalking(self):
         self._Controller.LHC.set_all_pos(self._Controller.BaseHandPose)
         self._Controller.RHC.set_all_pos(self._Controller.BaseHandPose)
@@ -42,8 +49,8 @@ class DW_WalkingMode(WalkingMode):
     def Walk(self):
         WalkingMode.Walk(self)
         self._Controller.DoPath(self._LPP.GetPath())
-        self._Controller.RotateToOri( self._LPP.GetPathYaw() - math.pi/2 )
-        self._Controller.DynStandUp()
+        self._Controller.RotateToOri( self._LPP.GetPathYaw() ) # - math.pi )
+        # self._Controller.DynStandUp()
         self._bDone = True
     
     def EmergencyStop(self):
@@ -70,4 +77,5 @@ class DW_WalkingMode(WalkingMode):
             i = i+1
         print p
         self.SetPath(p)
+
     
