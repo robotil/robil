@@ -165,7 +165,7 @@ class DW_Controller(object):
 
         #[-0.066, 0.082 Sequence Step 2: Extend arms
         ThisRobotCnfg = copy(self.RobotCnfg2[0][:])
-        ThisRobotCnfg[16] = ThisRobotCnfg[16+6] = 1.4
+        ThisRobotCnfg[16] = ThisRobotCnfg[16+6] = 1.2#1.4
         ThisRobotCnfg[17] = -0.4
         ThisRobotCnfg[17+6] = 0.4
         ThisRobotCnfg[18] = ThisRobotCnfg[18+6] = 2.9
@@ -270,7 +270,7 @@ class DW_Controller(object):
 
     def Odom_cb(self,msg):
         if 1000 <= self._counter: 
-            print ("Odom_cb::", self.GlobalPos)
+            # print ("Odom_cb::", self.GlobalPos)
             self._counter = 0
         self._counter += 1
         self.GlobalPos = msg.pose.pose.pose.position # from C25_GlobalPosition
@@ -341,6 +341,39 @@ class DW_Controller(object):
         else:
             print 'position command legth doest fit'
 
+    # def traj_with_impedance(self,pos1,pos2,T,dt):
+    #     if len(pos1) == len(pos2) == len(self._jnt_names):
+    #         N = ceil(T/dt)
+    #         pos1 = array(pos1)
+    #         pos2 = array(pos2)
+
+    #         self.JC.set_gains('l_leg_uhz',1000,0,10)
+    #         self.JC.set_gains('r_leg_uhz',1000,0,10)
+    #         self.JC.set_gains('l_leg_mhx',1000,0,10)
+    #         self.JC.set_gains('r_leg_mhx',1000,0,10)
+    #         self.JC.set_gains('back_lbz',5000,0,10)
+    #         self.JC.set_gains('back_ubx',1000,0,10)
+    #         self.JC.set_gains('l_arm_usy',1000,0,10)
+    #         self.JC.set_gains('r_arm_usy',1000,0,10)
+    #         self.JC.set_gains('l_arm_shx',1000,0,10)
+    #         self.JC.set_gains('r_arm_shx',1000,0,10)
+    #         self.JC.set_gains('l_arm_ely',2000,0,10)
+    #         self.JC.set_gains('r_arm_ely',2000,0,10)
+    #         self.JC.set_gains("l_arm_elx",1200,0,5)
+    #         self.JC.set_gains("r_arm_elx",1200,0,5)
+    #         self.JC.set_gains("l_arm_mwx",1200,0,5)
+    #         self.JC.set_gains("r_arm_mwx",1200,0,5)
+
+         
+
+    #         for ratio in linspace(0, 1, N):
+                
+    #             interpCommand = (1-ratio)*pos1 + ratio * pos2
+                  
+    #             self.JC.set_all_pos([ float(x) for x in interpCommand ])
+
+    #             self.JC.send_command()
+    #             rospy.sleep(dt)
     def Sit(self,T):
         self.JC.set_gains("l_arm_elx",5,0,20)
         self.JC.set_gains("r_arm_elx",5,0,20)
@@ -396,6 +429,7 @@ class DW_Controller(object):
         if Point[2] == "bwd":
             self.BackCrawl()
 
+        stuck_counter = 0
         while True:
             self.count_tottal +=1
             print 'Total_count:', self.count_tottal
@@ -435,6 +469,25 @@ class DW_Controller(object):
                     self.Crawl()
                 if Point[2] == "bwd":
                     self.BackCrawl()
+                DeltaPos2 = [Point[0]-self.GlobalPos.x,Point[1]-self.GlobalPos.y]
+                Distance2 = math.sqrt(DeltaPos2[0]**2+DeltaPos2[1]**2)
+                if abs(Distance2-Distance)<0.1:
+                    stuck_counter+=1
+                    print 'stuck... D=',(Distance2-Distance)
+                    if stuck_counter >= 2:
+                        #dont follow path
+                        self.FollowPath = 0
+                        #go oposite dir
+                        if Point[2] == "bwd":
+                            self.Crawl()
+                        if Point[2] == "fwd":
+                            self.BackCrawl()
+                        self.RotSpotSeq(0.5)
+                        self.FollowPath = 1
+                        stuck_counter = 0
+                else:
+                    stuck_counter = 0
+
             else:
                 self.FollowPath = 0
             # if self._terrain == "MUD" and self.IMU_mon.stand_up_flag == 1:
@@ -499,13 +552,41 @@ class DW_Controller(object):
             while self.CurSeqStep2 != Step:
                 self.DoInvSeqStep()
 
+    
+
     def DoSeqStep(self):
+        if self.CurSeqStep == 3:
+         
+            if self.IMU_mon.second_contact == 'arm_r':
+                self.JC.set_gains('r_arm_ely',3000,0,10,set_default= False)
+                self.JC.set_gains('l_arm_ely',1000,0,10,set_default= False)
+
+            elif self.IMU_mon.second_contact == 'arm_l':
+                self.JC.set_gains('l_arm_ely',3000,0,10,set_default= False)
+                self.JC.set_gains('r_arm_ely',1000,0,10,set_default= False)
+
+            print 'second_contact:',self.IMU_mon.second_contact   
+
+        #self.traj_with_impedance(self.RS.GetJointPos(),self.RobotCnfg[self.CurSeqStep],self.StepDur[self.CurSeqStep]/self.Throtle,0.005) 
         self.JC.send_pos_traj(self.RS.GetJointPos(),self.RobotCnfg[self.CurSeqStep],self.StepDur[self.CurSeqStep]/self.Throtle,0.005) 
+        self.JC.reset_gains()
         self.CurSeqStep += 1
         if self.CurSeqStep > 4:
             self.CurSeqStep = 0
-
+    
     def DoInvSeqStep(self):
+        if self.CurSeqStep2 == 3:
+         
+            if self.IMU_mon.second_contact == 'arm_r':
+                self.JC.set_gains('r_arm_ely',3000,0,10,set_default= False)
+                self.JC.set_gains('l_arm_ely',1000,0,10,set_default= False)
+
+            elif self.IMU_mon.second_contact == 'arm_l':
+                self.JC.set_gains('l_arm_ely',3000,0,10,set_default= False)
+                self.JC.set_gains('r_arm_ely',1000,0,10,set_default= False)
+
+            print 'second_contact:',self.IMU_mon.second_contact   
+
         self.JC.send_pos_traj(self.RS.GetJointPos(),self.RobotCnfg2[self.CurSeqStep2],self.StepDur2[self.CurSeqStep2]/self.Throtle,0.005) 
         self.CurSeqStep2 += 1
         if self.CurSeqStep2 > 4:

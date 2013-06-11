@@ -59,6 +59,11 @@ class IMUCh(object):
         self.last_start = 0
         self.force_treshold = 1000
         self.time_treshold = 0.3
+        self.time_treshold_contact = 0.03
+        self.time_contact_r = 0.0
+        self.time_contact_l = 0.0
+        self.second_contact = ''
+        self.first_contact = ''
 
 
         self.roll = 0
@@ -126,6 +131,29 @@ class IMUCh(object):
 
        self.F_av = (self.arm_force_r+self.arm_force_l+self.leg_force_r+self.leg_force_l)/4
        self.Sigma = ( ((self.arm_force_r-self.F_av)**2 + (self.arm_force_l-self.F_av)**2 + (self.leg_force_r-self.F_av)**2 + (self.leg_force_l-self.F_av)**2)/3 )**0.5
+      # Check  tipping with contact forces:
+
+       if (self.arm_force_r > self.force_treshold): 
+        self.time_contact_r = rospy.get_time()
+
+       if (self.arm_force_l > self.force_treshold): 
+        self.time_contact_l = rospy.get_time()
+
+       delta_t = self.time_contact_r - self.time_contact_l
+
+       if 1 >= abs(delta_t) >= self.time_treshold_contact :
+        if delta_t > 0:
+          self.first_contact = 'arm_r'
+          self.second_contact = 'arm_l'
+        else:
+          self.first_contact = 'arm_l'
+          self.second_contact = 'arm_r'
+
+        print 'first_contact:' ,self.first_contact
+        print 'second_contact:',self.second_contact
+       
+
+
 
 
        if ((self.arm_force_r > self.force_treshold) or (self.arm_force_l > self.force_treshold)) and ( (rospy.get_time()-self.last_start) > self.time_treshold ):
