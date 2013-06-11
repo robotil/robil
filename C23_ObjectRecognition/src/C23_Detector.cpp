@@ -779,6 +779,39 @@
 	    case GATE:
 		target = "Gate";
 		break;
+	    case ARROW:
+		target = "Arrow";
+		break;
+		case GEAR:
+		target = "Gear";
+		break;
+		case HANDBRAKE:
+		target = "Handbrake";
+		break;
+		case INSIDE_STEERINGWHEEL:
+		target = "InsideSteeringWheel";
+		break;
+		case OUTSIDE_STEERINGWHEEL:
+		target = "OutsideSteeringWheel";
+		break;
+		case TABLE:
+		target = "Table";
+		break;
+		case FIREHOSE_GRIP:
+		target = "FirehoseGrip";
+		break;
+		case FIREHOSE:
+		target = "Firehose";
+		break;
+		case PATH:
+		target = "Path";
+		break;
+		case VALVE:
+		target = "Valve";
+		break;
+		case STANDPIPE:
+		target = "Standpipe";
+		break;
 	}
 	if(!isFound) {
 	    x= - 1;
