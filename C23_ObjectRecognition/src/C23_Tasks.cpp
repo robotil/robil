@@ -58,10 +58,10 @@ public:
                 std_srvs::Empty e;
                 PoseController::neck_movement msg;
                 PoseController::back_movement msg2;
-                if(angle > 0.7 && state == 2) {
+                if(angle > 0.7 && state == 4) {
                         return TaskResult(FAULT, "Object isn't detected");
                 }
-                if(angle > 0.7 && state != 2) {
+                if(angle > 0.7 && state != 4) {
                         angle = -0.3;
                         state++;
                     
@@ -71,9 +71,15 @@ public:
                         back_angle = 0;
                         break;
                     case 1:
-                        back_angle = 0.61;
+                        back_angle = 0.3;
                         break;
                     case 2:
+                        back_angle = -0.3;
+                        break;
+                    case 3:
+                        back_angle = 0.61;
+                        break;
+                    case 4:
                         back_angle = -0.61;
                         break;
                 }
@@ -95,7 +101,7 @@ public:
                 }         
               //  return TaskResult(FAULT, "Object isn't detected");
             }   
-            loop_rate.sleep();
+           loop_rate.sleep();
 		}
 	  return TaskResult(SUCCESS, "OK");
 	}
