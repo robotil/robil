@@ -1,0 +1,20 @@
+DW requires odometry topic 
+for testing use our C25_Clone (cheats must be ON):
+rosrun C42_DynamicLocomotion C25_Globalsition_Clone.py
+
+It also requres COM calculation:
+rosrun C43_LocalBodyCOM computeCOM 
+
+DW tasks:
+
+DW Turn:
+server:
+rosrun C42_Dynamic locomotion DWturn.py
+client:
+rosrun C0_RobilTask task_tester DWTurn args=Bearing=<desired yaw (global)>,Terrain=<MUD or HILLS>
+
+DW Stand Up:
+server:
+rosrun C42_Dynamic locomotion DWStandUp.py
+client:
+rosrun C0_RobilTask task_tester DWStand

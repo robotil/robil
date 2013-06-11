@@ -164,6 +164,16 @@ void CTcpServer::SltOnDataReceived()
               emit SigPathRequest();
               std::cout<<"TCP: PathRequest received!\n";
             }
+          else if(19 == msgId)
+            {
+              emit SigAllRequest();
+              std::cout<<"TCP: AllRequest received!\n";
+            }
+          else if(20 == msgId)
+            {
+              emit SigStopRequest();
+              std::cout<<"TCP: Stop received!\n";
+            }
         }
     }
 }
@@ -373,4 +383,28 @@ void CTcpServer::SendExecuterStack(QString str)
 	pClientConnection->flush();
 	pClientConnection->waitForBytesWritten();
 	std::cout<<"TCP: SendExecuterStack sent\n";
+}
+
+void CTcpServer::SendVRCScoreData(double timeSec, int competionScore, int falls, QString message)
+{
+//  std::cout<<"TCP: SendVRCScoreData\n";
+  if(NULL == pClientConnection)
+  {
+    std::cout<<"TCP: No connection\n";
+    return;
+  }
+  StructHeader header;
+  header.MessageID = 6;
+  header.DataSize = 0;
+  header.Counter = Counter;
+  Counter++;
+  QByteArray block;
+  QDataStream out(&block, QIODevice::WriteOnly);
+  out.setByteOrder(QDataStream::LittleEndian);
+  out << header;
+  out << timeSec << competionScore << falls << message;
+  pClientConnection->write(block);
+  pClientConnection->flush();
+  pClientConnection->waitForBytesWritten();
+//  std::cout<<"TCP: SendVRCScoreData sent\n";
 }

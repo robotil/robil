@@ -28,7 +28,7 @@
 #include "C31_PathPlanner/C31_Waypoints.h"
 #include <sstream>
 #include <stdlib.h>
-#include <QApplication>
+#include <QCoreApplication>
 
 ros::NodeHandle* pn;
 ros::Subscriber status_subscriber;
@@ -222,7 +222,7 @@ int main(int argc, char **argv)
 
   C11Main m(argc, argv);
 
-  QApplication app(argc, argv);
+  QCoreApplication app(argc, argv);
   pCTcpServer = new CTcpServer(QString("172.23.1.130"),45675);
   m.SetTcp(pCTcpServer);
  // C11Node.SetTcp(pCTcpServer);

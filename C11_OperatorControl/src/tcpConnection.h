@@ -19,6 +19,7 @@ public:
   virtual void OnHMIResponseReceived()=0;
   virtual void OnExecutionStatusUpdate(int status) = 0;
   virtual void OnExecuterStackUpdate(QString strQString) = 0;
+  virtual void OnVRCScoreData(double timeSec, int competionScore, int falls, QString message) = 0;
 };
 
 class CTcpConnection : public QObject
@@ -37,11 +38,13 @@ public Q_SLOTS:
         void LoadMission(int index);
         void Pause();
         void Resume();
+        void Stop();
         void SendPathUpdate(std::vector<StructPoint> points);
 
         void SendImageRequest();
         void SendGridRequest();
         void SendPathRequest();
+        void SendAllRequest();
 
 public:
 

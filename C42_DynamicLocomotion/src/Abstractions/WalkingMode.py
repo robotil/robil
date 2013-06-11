@@ -15,7 +15,7 @@ class WalkingMode(object):
         self._WalkingModeStateMachine = WalkingModeStateMachine()
         self._Subscribers = dict()
         
-    def Initialize(self):
+    def Initialize(self,parameters):
         self._WalkingModeStateMachine = WalkingModeStateMachine()
         self._LPP.Stop()
 

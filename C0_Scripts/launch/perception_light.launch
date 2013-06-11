@@ -1,7 +1,7 @@
 <launch>
 
 	<include file="$(find C21_VisionAndLidar)/launch/C21.launch"/>
-   <include file="$(find C22_GroundRecognitionAndMapping)/launch/C22_Cheats.launch"/>
+        <include file="$(find C22_GroundRecognitionAndMapping)/launch/C22.launch"/>
 	<!-- node pkg="C22_GroundRecognitionAndMapping" type="C22_Cheats" name="C22_GroundRecognitionAndMapping" output="log" respawn="true" / -->
 	<node pkg="C24_ObstacleDetection" type="C24" name="C24_ObstacleDetection" output="log" respawn="true" />
 	<include file="$(find C25_GlobalPosition)/launch/C25.launch"/>
