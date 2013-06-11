@@ -263,6 +263,18 @@ void CTcpConnection::SltReadyRead()
             in >> status;
             pITcpConnectionInterface->OnExecutionStatusUpdate(status);
           }
+        else if(6 == msgId)
+          {
+            double timeSec;
+            int completionScore;
+            int falls;
+            QString message;
+            in >> timeSec;
+            in >> completionScore;
+            in >> falls;
+            in >> message;
+            pITcpConnectionInterface->OnVRCScoreData(timeSec,completionScore,falls,message);
+          }
         else if(31 == msgId)
 		  {
  //       	IsSendingExecuterStatus = true;
@@ -382,6 +394,25 @@ void CTcpConnection::Resume()
     }
 }
 
+void CTcpConnection::Stop()
+{
+  StructHeader header;
+  header.MessageID = 20;
+  header.DataSize = 0;
+  header.Counter = Counter;
+  Counter++;
+  QByteArray block;
+  QDataStream out(&block, QIODevice::WriteOnly);
+  out.setByteOrder(QDataStream::LittleEndian);
+  out << header.MessageID;
+  out << header.DataSize;
+  out << header.Counter;
+  pConnection->write(block);
+  pConnection->flush();
+  pConnection->waitForBytesWritten();
+  std::cout<<"TCP: Stop sent\n";
+}
+
 void CTcpConnection::SendPathUpdate(std::vector<StructPoint> points)
 {
   StructHeader header;
@@ -466,4 +497,24 @@ void CTcpConnection::SendPathRequest()
   pConnection->flush();
   pConnection->waitForBytesWritten();
   std::cout<<"TCP: SendPathRequest sent\n";
+}
+
+void CTcpConnection::SendAllRequest()
+{
+  WaitingForResponse = false;
+  StructHeader header;
+  header.MessageID = 19;
+  header.DataSize = 0;
+  header.Counter = Counter;
+  Counter++;
+  QByteArray block;
+  QDataStream out(&block, QIODevice::WriteOnly);
+  out.setByteOrder(QDataStream::LittleEndian);
+  out << header.MessageID;
+  out << header.DataSize;
+  out << header.Counter;
+  pConnection->write(block);
+  pConnection->flush();
+  pConnection->waitForBytesWritten();
+  std::cout<<"TCP: SendAllRequest sent\n";
 }
