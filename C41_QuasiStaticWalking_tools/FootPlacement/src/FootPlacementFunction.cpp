@@ -138,8 +138,8 @@ double FootPlacementService::calcSlope(const double &a,const double &b,const dou
 	double slope=fabs(asin(c/sqrt(a*a+b*b+c*c)));
 	if(1000==a)
 		return 1000;
-    if(slope>EXTREME_SLOPE)  // GalK:  Was "<" for some reason. Gal and Gal think it should be >
-		publishExtremeSlopeMsg();
+// 	if(slope<EXTREME_SLOPE)
+// 		publishExtremeSlopeMsg();
 	return slope;
 }
 
@@ -278,6 +278,11 @@ void FootPlacementService::calcFootMatrix(
 				//		plane.repPoint.x, plane.repPoint.y);
 				
 				double slope=calcSlope(plane.x,plane.y,plane.z);
+				
+				if( fabs(20.0*0.05-j*0.05) < EXTREME_SLOPE_COR )
+					if(slope<EXTREME_SLOPE)
+						publishExtremeSlopeMsg();
+				
 				double direction=calcAngle(points[curPoint].x,
 						points[curPoint].y,
 						squarePoint.x,squarePoint.y);
