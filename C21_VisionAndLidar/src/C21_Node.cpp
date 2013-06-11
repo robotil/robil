@@ -172,6 +172,18 @@ public:
 		   cout<<"traversing newcloud\n";
 
 		   pcl::transformPointCloud(t, t, sensorToPelvis);
+		   for(int i=0;i<t.points.size();i++){
+			   if(t.points.at(i).x!=t.points.at(i).x)
+				   continue;
+			   t.points.at(i).x+=req.sample.offsetx;
+			   t.points.at(i).y+=req.sample.offsety;
+			   /*if(x_ret==t.points.at(i).x && y_ret==t.points.at(i).y && z_ret==t.points.at(i).z)
+				   break;
+			   x_ret=t.points.at(i).x;
+			   y_ret=t.points.at(i).y;
+			   z_ret=t.points.at(i).z;*/
+		   }
+
 		   pcl::transformPointCloud(t, t, pelvisToWorld);
 
 		  /* pcl::PointCloud<pcl::PointXYZRGB>::Ptr cloud(t.makeShared());
@@ -198,6 +210,7 @@ public:
 			   if(x_ret==t.points.at(i).x && y_ret==t.points.at(i).y && z_ret==t.points.at(i).z)
 				   continue;
 
+			   cout<<"dfsf :x"<<t.points.at(i).x<<" y:"<<t.points.at(i).y<<" z:"<<t.points.at(i).z<<" counter:"<<counter<<"\n";
 
 			   x+=t.points.at(i).x;
 			   y+=t.points.at(i).y;
