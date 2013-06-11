@@ -59,10 +59,10 @@
     #include <math.h>
     #include <std_srvs/Empty.h>
     #include <ros/package.h>
-#include <boost/filesystem.hpp>
-#include <stdio.h>
-#include <stdlib.h>
-
+    #include <boost/filesystem.hpp>
+    #include <stdio.h>
+    #include <stdlib.h>
+    #define IMG_LIMITS(c) (c > 800 ? false : (c < 0 ? false : true))
 
 
     #define MIN(x,y) (x < y ? x : y)
@@ -302,14 +302,6 @@
 		cloud_filtered->points.push_back(p);
 	    }
 	}
-	while(1){ try{
-	    listener2.lookupTransform("/pelvis","/left_camera_optical_frame",
-				      ros::Time(0), transform);
-	}
-	catch (tf::TransformException ex){
-	    continue;  cout<<"jajajajaj\n";
-	} break; }
-	
 	pcl::transformPointCloud(*cloud_filtered, *cloud_filtered, sensorTopelvis);
 	return cloud_filtered;
 	
@@ -796,6 +788,22 @@
 	bool res;
 	pcl::PointCloud<pcl::PointXYZ>detectionCloud;
 	pcl::fromROSMsg<pcl::PointXYZ>(*cloud,detectionCloud);
+    
+    static tf::StampedTransform transform;
+
+    while(1){ try{
+        listener2.lookupTransform("/pelvis","/left_camera_optical_frame",
+                                  ros::Time(0), transform);
+    }
+    catch (tf::TransformException ex){
+        continue;  cout<<"jajajajaj\n";
+    } break; }
+    Eigen::Matrix4f sensorTopelvis;
+    pcl_ros::transformAsMatrix(transform, sensorTopelvis);
+    pcl::transformPointCloud(detectionCloud, detectionCloud, sensorTopelvis);
+    
+    
+    
 	lastCloud.swap(detectionCloud);
 	switch (_target) {
 	    case PATH:
@@ -2463,7 +2471,9 @@
 	    int count = 0;
 	    for(int i =-15; i <= 15; i++) {
 		for(int j =-100; j <=100; j++) {
-		    if(pclcloud.at(mcR[biggstR].x+i,mcR[biggstR].y+j).x != pclcloud.at(mcR[biggstR].x+i,mcR[biggstR].y+j).x)
+            if(! (IMG_LIMITS(mcR[biggstR].x+i))  || !(IMG_LIMITS(mcR[biggstR].y+j)) ) continue;
+	 
+            if(pclcloud.at(mcR[biggstR].x+i,mcR[biggstR].y+j).x != pclcloud.at(mcR[biggstR].x+i,mcR[biggstR].y+j).x)
 			continue;
 		    count++;
 		    r_x+=pclcloud.at(mcR[biggstR].x+i,mcR[biggstR].y+j).x;
@@ -2525,15 +2535,16 @@
 	    double l_x = 0;
 	    double l_y = 0;
 	    double l_z = 0;
-	  int count = 0;
+	    int count = 0;
 	    for(int i =-15; i <= 15; i++) {
 		for(int j =-100; j <=100; j++) {
-		    if(pclcloud.at(mcR[biggstR].x+i,mcR[biggstR].y+j).x != pclcloud.at(mcR[biggstR].x+i,mcR[biggstR].y+j).x)
+            if(! (IMG_LIMITS(mcL[biggstL].x+i))  || !(IMG_LIMITS(mcL[biggstL].y+j)) ) continue;    
+            if(pclcloud.at(mcL[biggstL].x+i,mcL[biggstL].y+j).x != pclcloud.at(mcL[biggstL].x+i,mcL[biggstL].y+j).x)
 			continue;
 		    count++;
-		    l_x+=pclcloud.at(mcR[biggstR].x+i,mcR[biggstR].y+j).x;
-		    l_y+=pclcloud.at(mcR[biggstR].x+i,mcR[biggstR].y+j).y;
-		    l_z+=pclcloud.at(mcR[biggstR].x+i,mcR[biggstR].y+j).z;
+            l_x+=pclcloud.at(mcL[biggstL].x+i,mcL[biggstL].y+j).x;
+            l_y+=pclcloud.at(mcL[biggstL].x+i,mcL[biggstL].y+j).y;
+            l_z+=pclcloud.at(mcL[biggstL].x+i,mcL[biggstL].y+j).z;
 		}
 	    }
 	    l_x/=count;
@@ -2542,13 +2553,13 @@
 	    if (l_x<50 && l_y <50 && l_z !=0)
 	    {
 		cout << "Blue is valid .. " << endl;
-		rightC=pclcloud.at(mcR[biggstR].x,mcR[biggstR].y);
-		rightC.x = l_x;
-		rightC.y = l_y;
-		rightC.z = l_z;
+        leftC=pclcloud.at(mcL[biggstL].x,mcL[biggstL].y);
+        leftC.x = l_x;
+        leftC.y = l_y;
+        leftC.z = l_z;
 		
 	    } else {
-		cout << "Blue isn't valid .. " << pclcloud.at(mcR[biggstR].x,mcR[biggstR].y).x << "," << pclcloud.at(mcR[biggstR].x,mcR[biggstR].y).y << "," << endl;
+            cout << "Blue isn't valid .. " << pclcloud.at(mcL[biggstL].x,mcL[biggstL].y).x << "," << pclcloud.at(mcL[biggstL].x,mcL[biggstL].y).y << "," << endl;
 	    }
 	  /* if (pclcloud.at(mcL[biggstL].x,mcL[biggstL].y).x<50 && pclcloud.at(mcL[biggstL].x,mcL[biggstL].y).y <50 && pclcloud.at(mcL[biggstL].x,mcL[biggstL].y).x !=0)
     {
