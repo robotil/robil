@@ -44,8 +44,8 @@ class DW_Controller(object):
         ##################################################################
 
         self.BasStndPose = zeros(28)
-        self.BasStndPose[5] = 0.1
-        self.BasStndPose[5+6] = -0.1
+        self.BasStndPose[5] = 0.4
+        self.BasStndPose[5+6] = -0.4
         self.BasStndPose[6] = self.BasStndPose[6+6] = -0.2
         self.BasStndPose[7] = self.BasStndPose[7+6] = 0.4
         self.BasStndPose[8] = self.BasStndPose[8+6] = -0.2
@@ -636,8 +636,8 @@ class DW_Controller(object):
             y0,p,r = self.current_ypr()
             Angle=self.DeltaAngle(Bearing,y0)
 
-            while abs(Angle)>0.15: # Error of 9 degrees
-                # print 'Delta: ',Angle,'Bearing: ',Bearing, 'yaw: ',y0
+            while abs(Angle)>0.3:#0.15: # Error of 9 degrees
+                print 'Delta: ',Angle,'Bearing: ',Bearing, 'yaw: ',y0
                 Delta = Angle/0.75
                 if abs(Delta)>1:
                     Delta/=abs(Delta)
@@ -682,7 +682,7 @@ class DW_Controller(object):
         Angle=self.DeltaAngle(Bearing,y0)
         # print 'Angle: ',Angle
         while abs(Angle)>0.1: # Error of 3 degrees
-            # print 'MUD Delta: ',Angle,'Bearing: ',Bearing, 'yaw: ',y0
+            print 'MUD Delta: ',Angle,'Bearing: ',Bearing, 'yaw: ',y0
             Delta = Angle/0.45
             if abs(Delta)>1:
                 Delta/=abs(Delta)
