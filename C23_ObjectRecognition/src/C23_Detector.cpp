@@ -340,6 +340,8 @@
 	}
 	cloud_filtered->width = 1;
 	cloud_filtered->height = cloud_filtered->points.size();
+	
+	//cout<<"The number of points: "<<cloud_filtered->points.size()<<endl;
       // pcl::transformPointCloud(*cloud_filtered, *cloud_filtered, sensorTopelvis);
 	pcl::io::savePCDFileASCII (target.c_str(), *cloud_filtered);
 	
@@ -493,10 +495,12 @@
 		double tmp_x = 0;
 		double tmp_y =0;
 		double tmp_z  =0;
-		tf::TransformListener listener;
-		static tf::StampedTransform transform;
+		
 		pcl::PointCloud<pcl::PointXYZ>detectionCloud;
 		pcl::fromROSMsg<pcl::PointXYZ>(*cloud,detectionCloud);
+		
+		/*tf::TransformListener listener;
+		static tf::StampedTransform transform;
 		while(1){
 		  try{
 		  listener.lookupTransform("/left_camera_frame","/left_camera_optical_frame",
@@ -508,7 +512,7 @@
 		  
 		  Eigen::Matrix4f sensorTopelvis;
 		  pcl_ros::transformAsMatrix(transform, sensorTopelvis);
-		  pcl::transformPointCloud(detectionCloud, detectionCloud, sensorTopelvis);
+		  pcl::transformPointCloud(detectionCloud, detectionCloud, sensorTopelvis);*/
 		
 		
 		double _x=0;
@@ -681,6 +685,16 @@
 	    pcl::PointCloud<pcl::PointXYZ>::Ptr cloud2 = filterPointCloud(last_x,last_y,width,height,lastCloud);
 	    templateMatching3D(t,  cloud2);
 	}
+	if(!target.compare("Gear")) {
+	    char basePath[1000],imageName[1000];
+	    
+	    sprintf(basePath,"%s/3D_models/%s%c",ros::package::getPath("C23_ObjectRecognition").c_str(),"gear.txt",'\0');
+	    string t = basePath;
+	  //  string t = "/home/isl/darpa/robil/C23_ObjectRecognition/3D_models/firehose.txt";
+	    std::cout<<imageName<<endl;
+	    pcl::PointCloud<pcl::PointXYZ>::Ptr cloud2 = filterPointCloud(last_x,last_y,width,height,lastCloud);
+	    templateMatching3D(t,  cloud2);
+	}
 	
 	
 	res.x = orient_x;
@@ -753,9 +767,9 @@
     }
     void C23_Detector::publishMessage(bool isFound) {
 	//   ROS_INFO("Publishing message..");
-	C23_ObjectRecognition::C23C0_OD msg;
-	C23_ObjectRecognition::C23C0_ODIM msg2;
-    C23_ObjectRecognition::C23C0_GP msg3;
+	C23_ObjectRecognition::C23C0_OD msg_detected;
+	C23_ObjectRecognition::C23C0_ODIM msg_odim;
+    C23_ObjectRecognition::C23C0_GP msg_gp;
 	string target;
 	switch (_target) {
 	    
@@ -765,25 +779,70 @@
 	    case GATE:
 		target = "Gate";
 		break;
+	    case ARROW:
+		target = "Arrow";
+		break;
+		case GEAR:
+		target = "Gear";
+		break;
+		case HANDBRAKE:
+		target = "Handbrake";
+		break;
+		case INSIDE_STEERINGWHEEL:
+		target = "InsideSteeringWheel";
+		break;
+		case OUTSIDE_STEERINGWHEEL:
+		target = "OutsideSteeringWheel";
+		break;
+		case TABLE:
+		target = "Table";
+		break;
+		case FIREHOSE_GRIP:
+		target = "FirehoseGrip";
+		break;
+		case FIREHOSE:
+		target = "Firehose";
+		break;
+		case PATH:
+		target = "Path";
+		break;
+		case VALVE:
+		target = "Valve";
+		break;
+		case STANDPIPE:
+		target = "Standpipe";
+		break;
 	}
 	if(!isFound) {
 	    x= - 1;
 	}
-	msg.ObjectDetected = isFound ? 1 : 0;
-	msg2.x = x;
-	msg2.y = y;
-	msg2.width = width;
-	msg2.height = height;
-	msg2.Object = target;
-	msg.Object = target;
+	msg_detected.ObjectDetected = isFound ? 1 : 0;
+    msg_detected.Object = target;
     
-    msg3.x = x;
-    msg3.y = y;
-    msg3.Object = target;
+    msg_gp.x = x;
+    msg_gp.y = y;
+    msg_gp.x2 = x2;
+    msg_gp.y2 = y2;
+    msg_gp.Object = target;
+    
+    msg_odim.x0 = rect_points[0].x;
+    msg_odim.y0 = rect_points[0].y;
+    msg_odim.x1 = rect_points[1].x;
+    msg_odim.y1 = rect_points[1].y;
+    msg_odim.x2 = rect_points[2].x;
+    msg_odim.y2 = rect_points[2].y;
+    msg_odim.x3 = rect_points[3].x;
+    msg_odim.y3 = rect_points[3].y;
+    msg_odim.Object = target;
+
+    
+
+    
+   
 	//  ROS_INFO("Publishing message..");
-	objectDimensionsPublisher.publish(msg2);
-	objectDetectedPublisher.publish(msg);
-    objectGlobalPositionPublisher.publish(msg3);
+    objectDimensionsPublisher.publish(msg_odim);
+    objectDetectedPublisher.publish(msg_detected);
+    objectGlobalPositionPublisher.publish(msg_gp);
 	
 	
     }
@@ -952,6 +1011,7 @@
 		  x = x - 0.03;
 		  y = y + 0.09;
 		  z = z - 0.03;
+          
 		  //cout<<"Handbrake x,y,z: "<<x<<", "<<y<<", "<<z<<endl;
 		  
 		  if(x<1&& x>0)
@@ -1091,18 +1151,34 @@
 
 	    
 	      
-	      
-	      
+	      double x1,y1,z1,x2,y2,z2;
+	      bool a_res =false;
+
 	        if(leftSum>rightSum){
 		      ROS_INFO("RIGHT ARROW");
-		      res = true;
-              pictureCoordinatesToGlobalPosition(arrowBox.x, arrowBox.y,arrowBox.x + arrowBox.height, arrowBox.y + arrowBox.width, &x, &y,&z,-1,-4);
-	      }
+		      
+	      a_res = pictureCoordinatesToGlobalPosition(arrowBox.x, arrowBox.y,arrowBox.x + arrowBox.height, arrowBox.y + arrowBox.width, &x1, &y1,&z1,-1,-4);
+              a_res&= pictureCoordinatesToGlobalPosition(arrowBox.x, arrowBox.y,arrowBox.x + arrowBox.height, arrowBox.y + arrowBox.width, &x2, &y2,&z2,-1,0);
+	      res = a_res;
+	      this->x = x1;
+	      this->y = y1;
+	      this->x2 = x2;
+	      this->y2 =  y2;
+		  
+		}
 	      else{
 		      ROS_INFO("LEFT ARROW");
 		      res = true;
-              pictureCoordinatesToGlobalPosition(arrowBox.x, arrowBox.y,arrowBox.x + arrowBox.height, arrowBox.y + arrowBox.width, &x, &y,&z,-1,+4);
+              a_res = pictureCoordinatesToGlobalPosition(arrowBox.x, arrowBox.y,arrowBox.x + arrowBox.height, arrowBox.y + arrowBox.width, &x1, &y1,&z1,-1,+4);
+	      a_res&= pictureCoordinatesToGlobalPosition(arrowBox.x, arrowBox.y,arrowBox.x + arrowBox.height, arrowBox.y + arrowBox.width, &x2, &y2,&z2,-1,0);
+	      res = a_res;
+	      this->x = x1;
+	      this->y = y1;
+	      this->x2 = x2;
+	      this->y2 =  y2;
 	      }
+	      
+	      
 	//averagePointCloud(arrowBox.x, arrowBox.y, arrowBox.width, arrowBox.height, cloud,&x,&y,&z);
 	
 	//black_pixels(leftSumCol,0) = arrowBox.height - countNonZero(col);
@@ -1180,8 +1256,6 @@
 	    
 		return res;
 	      
-	      
-	      return true;
 	    }
 
 	    //Detect the car steering wheel
@@ -1413,8 +1487,8 @@
 		//-----------------------------------------------------------------
 		
 		Mat gearTemplate = imread(imageName);
-		imshow("Gear template", gearTemplate);
-		waitKey(0);
+		//imshow("Gear template", gearTemplate);
+		//waitKey(0);
 		
 	      res  = templateMatching(srcImg, gearTemplate, 0, &matchLoc, cloud);
 	      
@@ -1462,6 +1536,16 @@
 		  status = FORWARD_GEAR_STATUS;
 		  cout<<"Forward status"<<endl;
 		}
+		
+		string t = "Gear";
+		cout << "Saving Gear" << endl;
+		//saveTemplate(matchLoc.x, matchLoc.y,gearTemplate.cols/2, gearTemplate.rows,cloud,t);
+		//templateMatching3D(t,lastCloud);
+		last_x = matchLoc.x;
+		last_y = matchLoc.y;
+		width = gearTemplate.cols/2;
+		height = gearTemplate.rows;
+		
 	      }
 	    
 		if (res)
@@ -1559,7 +1643,7 @@
   }
   }*/
 	  RotatedRect minRect = minAreaRect( Mat(contours[biggest]));
-	  Point2f rect_points[4]; minRect.points( rect_points );
+	   minRect.points( rect_points );
 	  for( int j = 0; j < 4; j++ )
 	      line( srcImg, rect_points[j], rect_points[(j+1)%4], CV_RGB(255,0,0), 1, 8 );
 	  // ellipse( srcImg, fitEllipse( Mat(contours[biggest]) ), CV_RGB(255,0,0), 2, 8 );
@@ -1666,7 +1750,7 @@
     }
     }*/
 	    RotatedRect minRect = minAreaRect( Mat(contours[biggest]));
-	    Point2f rect_points[4]; minRect.points( rect_points );
+	    minRect.points( rect_points );
 	    for( int j = 0; j < 4; j++ )
 		line( srcImg, rect_points[j], rect_points[(j+1)%4], CV_RGB(255,0,0), 1, 8 );
 	    // ellipse( srcImg, fitEllipse( Mat(contours[biggest]) ), CV_RGB(255,0,0), 2, 8 );
@@ -1752,7 +1836,7 @@
     }
     }*/
 	    RotatedRect minRect = minAreaRect( Mat(contours[biggest]));
-	    Point2f rect_points[4]; minRect.points( rect_points );
+	    minRect.points( rect_points );
 	    for( int j = 0; j < 4; j++ )
 		line( srcImg, rect_points[j], rect_points[(j+1)%4], CV_RGB(255,0,0), 1, 8 );
 	    // ellipse( srcImg, fitEllipse( Mat(contours[biggest]) ), CV_RGB(255,0,0), 2, 8 );
@@ -1863,7 +1947,7 @@
     }
     }*/
 	    RotatedRect minRect = minAreaRect( Mat(contours[biggest]));
-	    Point2f rect_points[4]; minRect.points( rect_points );
+	    minRect.points( rect_points );
 	    for( int j = 0; j < 4; j++ )
 		line( srcImg, rect_points[j], rect_points[(j+1)%4], CV_RGB(255,0,0), 1, 8 );
         
@@ -1965,7 +2049,7 @@
 		}
 		}*/
 		    RotatedRect minRect =  minAreaRect( Mat(contours[biggest]));
-		    Point2f rect_points[4]; minRect.points( rect_points );
+		    minRect.points( rect_points );
 		    for( int j = 0; j < 4; j++ )
 			line( srcImg, rect_points[j], rect_points[(j+1)%4], CV_RGB(255,0,0), 1, 8 );
 		    // ellipse( srcImg, fitEllipse( Mat(contours[biggest]) ), CV_RGB(255,0,0), 2, 8 );
@@ -2616,14 +2700,22 @@
 		}
 	      
 	      double x1,y1,z1,x2,y2,z2;
-	      pictureCoordinatesToGlobalPosition(mcL[biggstL].x-5, mcL[biggstL].y-50, mcL[biggstL].x+5, mcL[biggstL].y+50,  &x1, &y1,&z1, -0.5,0);
-          pictureCoordinatesToGlobalPosition(mcR[biggstR].x-5, mcR[biggstR].y-50, mcR[biggstR].x+5, mcR[biggstR].y+50, &x2, &y2,&z2,-0.5,0);
+	      bool a_res = pictureCoordinatesToGlobalPosition(mcL[biggstL].x-5, mcL[biggstL].y-50, mcL[biggstL].x+5, mcL[biggstL].y+50,  &x1, &y1,&z1, -0.5,0);
+          a_res &= pictureCoordinatesToGlobalPosition(mcR[biggstR].x-5, mcR[biggstR].y-50, mcR[biggstR].x+5, mcR[biggstR].y+50, &x2, &y2,&z2,-0.5,0);
+          if(!a_res) {
+              return false;
+          }
+          x = (x1+x2)/2.0;
+          y = (y1+y2)/2.0;
+          
+          a_res = pictureCoordinatesToGlobalPosition(mcL[biggstL].x-5, mcL[biggstL].y-50, mcL[biggstL].x+5, mcL[biggstL].y+50,  &x1, &y1,&z1, 0.5,0);
+          a_res &= pictureCoordinatesToGlobalPosition(mcR[biggstR].x-5, mcR[biggstR].y-50, mcR[biggstR].x+5, mcR[biggstR].y+50, &x2, &y2,&z2, 0.5,0);
 	  // cout << "Middle: " <<
 	    // imshow("TESTING",srcImg);
 	    // waitKey(0);
 	    // return true;
-	    x = (x1+x2)/2.0;
-	    y = (y1+y2)/2.0;
+	    this->x2 = (x1+x2)/2.0;
+	    this->y2 = (y1+y2)/2.0;
 	    cout << "Middle point: " << x <<"," << y << endl;
         imwrite(imgpath.c_str(),srcImg);
 	    return true;
@@ -2696,13 +2788,29 @@
 		    int y_pic = mcR[biggstR].y;
 		    
 		  
-		    double x1,y1,z1,x2,y2,z2;
-		    averagePointCloud(mcR[biggstR].x-5, mcR[biggstR].y-50, mcR[biggstR].x+5, mcR[biggstR].y+50, cloud, &x2, &y2,&z2);
-		    x = x2;
-		    y = y2-2.5;
-		    cout<<"Point is: " <<x<<", " <<y <<endl;
+		  //  double x1,y1,z1,x2,y2,z2;
+            double x1,y1,z1,x2,y2,z2;
+            bool a_res = pictureCoordinatesToGlobalPosition(mcR[biggstR].x-5, mcR[biggstR].y-50, mcR[biggstR].x+5, mcR[biggstR].y+50, &x1, &y1,&z1,-0.5,2.5);
+            if(!a_res) {
+                return false;
+            } 
+            x = x1;
+            y = y1;
+            a_res = pictureCoordinatesToGlobalPosition(mcR[biggstR].x-5, mcR[biggstR].y-50, mcR[biggstR].x+5, mcR[biggstR].y+50, &x1, &y1,&z1,0.5,2.5);
+            
+            this->x2 =  x1;
+            this->y2 = y1;
+            
+            cout << "Middle point: " << x <<"," << y << endl;
+            imwrite(imgpath.c_str(),srcImg);
+           // return true;
+            return mcM[biggstM].x > mcR[biggstR].x ? true : false;
+		   // averagePointCloud(mcR[biggstR].x-5, mcR[biggstR].y-50, mcR[biggstR].x+5, mcR[biggstR].y+50, cloud, &x2, &y2,&z2);
+		  //  x = x2;
+		  //  y = y2-2.5;
+		  //  cout<<"Point is: " <<x<<", " <<y <<endl;
 		// cout << "Detected right" << endl;
-		    circle( srcImg, Point2f(x_pic,y_pic), 16, Scalar(0,255,255), -1, 8, 0 );
+		  //  circle( srcImg, Point2f(x_pic,y_pic), 16, Scalar(0,255,255), -1, 8, 0 );
 		}
 		
 		// imshow("Testing" , srcImg);
@@ -2739,13 +2847,27 @@
 		// imshow("Testing" , srcImg);
 	      // waitKey(0);
 
-		double x1,y1,z1,x2,y2,z2;
+		/*double x1,y1,z1,x2,y2,z2;
 		averagePointCloud(mcL[biggstL].x-5, mcL[biggstL].y-50, mcL[biggstL].x+5, mcL[biggstL].y+50, cloud, &x2, &y2,&z2);
 		x = x2;
 		y = y2-2.5;
         imwrite(imgpath.c_str(),srcImg);
 		return mcM[biggstM].x > mcL[biggstL].x ? true : false;
-		
+		*/
+        
+        double x1,y1,z1,x2,y2,z2;
+        bool a_res = pictureCoordinatesToGlobalPosition(mcL[biggstL].x-5, mcL[biggstL].y-50, mcL[biggstL].x+5, mcL[biggstL].y+50, &x1, &y1,&z1,-0.5,2.5);
+        if(!a_res) {
+            return false;
+        } 
+        x = x1;
+        y = y1;
+         a_res = pictureCoordinatesToGlobalPosition(mcL[biggstL].x-5, mcL[biggstL].y-50, mcL[biggstL].x+5, mcL[biggstL].y+50, &x1, &y1,&z1,-0.5,2.5);
+        this->x2 = x1;
+        this->y2 = y1;
+        cout << "Middle point: " << x <<"," << y << endl;
+        imwrite(imgpath.c_str(),srcImg);
+        return mcM[biggstM].x > mcL[biggstL].x ? true : false;
 	    }
 	}
 	imwrite(imgpath.c_str(),srcImg);
