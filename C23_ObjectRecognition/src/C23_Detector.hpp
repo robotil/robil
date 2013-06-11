@@ -155,6 +155,7 @@ private:
 	  ros::ServiceClient c23_stop_posecontroller;
       ros::ServiceServer orientation_service;
 	  geometry_msgs::Point point;
+      Point2f rect_points[4];
 	  
   
 	  image_transport::ImageTransport it_;

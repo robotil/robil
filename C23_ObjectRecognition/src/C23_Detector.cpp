@@ -753,9 +753,9 @@
     }
     void C23_Detector::publishMessage(bool isFound) {
 	//   ROS_INFO("Publishing message..");
-	C23_ObjectRecognition::C23C0_OD msg;
-	C23_ObjectRecognition::C23C0_ODIM msg2;
-    C23_ObjectRecognition::C23C0_GP msg3;
+	C23_ObjectRecognition::C23C0_OD msg_detected;
+	C23_ObjectRecognition::C23C0_ODIM msg_odim;
+    C23_ObjectRecognition::C23C0_GP msg_gp;
 	string target;
 	switch (_target) {
 	    
@@ -769,21 +769,31 @@
 	if(!isFound) {
 	    x= - 1;
 	}
-	msg.ObjectDetected = isFound ? 1 : 0;
-	msg2.x = x;
-	msg2.y = y;
-	msg2.width = width;
-	msg2.height = height;
-	msg2.Object = target;
-	msg.Object = target;
+	msg_detected.ObjectDetected = isFound ? 1 : 0;
+    msg_detected.Object = target;
     
-    msg3.x = x;
-    msg3.y = y;
-    msg3.Object = target;
+    msg_gp.x = x;
+    msg_gp.y = y;
+    msg_gp.Object = target;
+    
+    msg_odim.x0 = rect_points[0].x;
+    msg_odim.y0 = rect_points[0].y;
+    msg_odim.x1 = rect_points[1].x;
+    msg_odim.y1 = rect_points[1].y;
+    msg_odim.x2 = rect_points[2].x;
+    msg_odim.y2 = rect_points[2].y;
+    msg_odim.x3 = rect_points[3].x;
+    msg_odim.y3 = rect_points[3].y;
+    msg_odim.Object = target;
+
+    
+
+    
+   
 	//  ROS_INFO("Publishing message..");
-	objectDimensionsPublisher.publish(msg2);
-	objectDetectedPublisher.publish(msg);
-    objectGlobalPositionPublisher.publish(msg3);
+    objectDimensionsPublisher.publish(msg_odim);
+    objectDetectedPublisher.publish(msg_detected);
+    objectGlobalPositionPublisher.publish(msg_gp);
 	
 	
     }
@@ -1559,7 +1569,7 @@
   }
   }*/
 	  RotatedRect minRect = minAreaRect( Mat(contours[biggest]));
-	  Point2f rect_points[4]; minRect.points( rect_points );
+	   minRect.points( rect_points );
 	  for( int j = 0; j < 4; j++ )
 	      line( srcImg, rect_points[j], rect_points[(j+1)%4], CV_RGB(255,0,0), 1, 8 );
 	  // ellipse( srcImg, fitEllipse( Mat(contours[biggest]) ), CV_RGB(255,0,0), 2, 8 );
@@ -1666,7 +1676,7 @@
     }
     }*/
 	    RotatedRect minRect = minAreaRect( Mat(contours[biggest]));
-	    Point2f rect_points[4]; minRect.points( rect_points );
+	    minRect.points( rect_points );
 	    for( int j = 0; j < 4; j++ )
 		line( srcImg, rect_points[j], rect_points[(j+1)%4], CV_RGB(255,0,0), 1, 8 );
 	    // ellipse( srcImg, fitEllipse( Mat(contours[biggest]) ), CV_RGB(255,0,0), 2, 8 );
@@ -1752,7 +1762,7 @@
     }
     }*/
 	    RotatedRect minRect = minAreaRect( Mat(contours[biggest]));
-	    Point2f rect_points[4]; minRect.points( rect_points );
+	    minRect.points( rect_points );
 	    for( int j = 0; j < 4; j++ )
 		line( srcImg, rect_points[j], rect_points[(j+1)%4], CV_RGB(255,0,0), 1, 8 );
 	    // ellipse( srcImg, fitEllipse( Mat(contours[biggest]) ), CV_RGB(255,0,0), 2, 8 );
@@ -1863,7 +1873,7 @@
     }
     }*/
 	    RotatedRect minRect = minAreaRect( Mat(contours[biggest]));
-	    Point2f rect_points[4]; minRect.points( rect_points );
+	    minRect.points( rect_points );
 	    for( int j = 0; j < 4; j++ )
 		line( srcImg, rect_points[j], rect_points[(j+1)%4], CV_RGB(255,0,0), 1, 8 );
         
@@ -1965,7 +1975,7 @@
 		}
 		}*/
 		    RotatedRect minRect =  minAreaRect( Mat(contours[biggest]));
-		    Point2f rect_points[4]; minRect.points( rect_points );
+		    minRect.points( rect_points );
 		    for( int j = 0; j < 4; j++ )
 			line( srcImg, rect_points[j], rect_points[(j+1)%4], CV_RGB(255,0,0), 1, 8 );
 		    // ellipse( srcImg, fitEllipse( Mat(contours[biggest]) ), CV_RGB(255,0,0), 2, 8 );
