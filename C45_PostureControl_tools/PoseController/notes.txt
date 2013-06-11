@@ -34,3 +34,5 @@ You need to call /PoseController/start (with message of type std_srvs/Empty) to 
 /PoseController/delta_*_movement services add the inputs as deltas to the joints' values.
 
 This module automatically detects the BDI controller desired behavior (e.g. "Manipulate", "User") and sends the correct k_effort values accordingly.
+
+Update: /PoseController/back_lbz_neck_ay service was added for back_lbz and neck_ay manipulation.
