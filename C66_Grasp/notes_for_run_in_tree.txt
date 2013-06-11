@@ -1,0 +1,6 @@
+roslaunch C66_Grasp C66_Grasp_no_dFind.launch
+
+in tree:
+Firehose task - goal.parameters = "Firehose"
+Valve task - 
+connect  - 
