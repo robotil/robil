@@ -86,7 +86,7 @@ def parseParameters(params):
 			arg = params[com_s:com_e]
 			args.append(arg.strip())
 			com_s = com_e+1
-		arg = params[com_s:len(params)-1]
+		arg = params[com_s:len(params)]
 		args.append(arg.strip())	
 	vmap={}
 	for a in args:
