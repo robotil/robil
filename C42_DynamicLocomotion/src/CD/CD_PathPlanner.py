@@ -208,7 +208,7 @@ class CD_PathPlanner(PathPlanner):
             distanceFromTarget = self._CurrentSegment.GetTarget().GetDistanceFrom(self._Position)
             #rospy.loginfo('UpdatePosition: distanceFromTarget = %f' %(distanceFromTarget))
             if ((sagital>0.0)or(distanceFromTarget < (self.GetCloseEnoughToTargetDistance()+Preview_Distance) )):
-                rospy.loginfo('UpdatePosition: distanceFromTarget = %f' %(distanceFromTarget))
+                #rospy.loginfo('UpdatePosition: distanceFromTarget = %f' %(distanceFromTarget))
                 self._EndOfSegment = True
                 if(len(self._Path)==0):
                     self._EndOfPath = True

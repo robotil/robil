@@ -110,9 +110,10 @@ class CD_PhantomRobot(CD_Robot):
             self._AddIdleSteps()
         else:
             self._Turn()
-            self._AddIdleSteps()
             self._LPP.PromoteSegment()
-        self._LPP.UpdatePosition(self._Odometer.GetGlobalPosition())
+            self._AddIdleSteps()
+        x,y = self._Odometer.GetGlobalPosition()
+        self._LPP.UpdatePosition(x,y)
     
     def SetPathError(self,error):
         self._Error = error
@@ -188,10 +189,12 @@ class CD_PhantomRobot(CD_Robot):
         y = self._StepWidth if (self._index%2==0) else -self._StepWidth
         self._Odometer.AddLocalPosition(x,y)
         stepData.pose.position.x,stepData.pose.position.y = self._Odometer.GetGlobalPosition()
+        
+        self._Odometer.SetYaw(self._LPP.GetTargetYaw())
                 
         return self._TranslateStepData(stepData)
     
-    def _AddIdleSteps():
+    def _AddIdleSteps(self):
         for i in range(4):
             self._StepQueue.append(self._IdleStep())
             

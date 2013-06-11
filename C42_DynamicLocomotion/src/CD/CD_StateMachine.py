@@ -82,6 +82,11 @@ class CD_StateMachine(StateMachine):
                         self._bIsDone = True
                     else:
                         raise StateMachineError("CD_StateMachine::Step() - could not perform transition 'None'")
+                else:
+                    if (StateMachine.PerformTransition(self,'Both')):
+                        print("CD_StateMachine::BothWalking")
+                    else:
+                        raise StateMachineError("CD_StateMachine::Step() - could not perform transition 'Both'")    
         else:
             raise StateMachineError("CD_StateMachine::Step() - unknown state")
         return command
