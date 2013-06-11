@@ -13,6 +13,9 @@ public:
 	GPSPoint(double x, double y, double h):x(x),y(y),heaidng(h),defined(true){
 
 	}
+	GPSPoint():x(0),y(0),heaidng(0),defined(true){
+
+	}
 	void undef(){defined=false;}
 };
 
