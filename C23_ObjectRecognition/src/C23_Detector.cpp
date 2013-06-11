@@ -755,6 +755,7 @@
 	//   ROS_INFO("Publishing message..");
 	C23_ObjectRecognition::C23C0_OD msg;
 	C23_ObjectRecognition::C23C0_ODIM msg2;
+    C23_ObjectRecognition::C23C0_GP msg3;
 	string target;
 	switch (_target) {
 	    
@@ -775,9 +776,14 @@
 	msg2.height = height;
 	msg2.Object = target;
 	msg.Object = target;
+    
+    msg3.x = x;
+    msg3.y = y;
+    msg3.Object = target;
 	//  ROS_INFO("Publishing message..");
 	objectDimensionsPublisher.publish(msg2);
 	objectDetectedPublisher.publish(msg);
+    objectGlobalPositionPublisher.publish(msg3);
 	
 	
     }
