@@ -1,0 +1,5 @@
+<plan descriptions="./plans/TaskDescriptions.xml">
+   <seq name="turnMission" x="277.5" y="129.38888888888886" collapsed="false" id="ad73733a-b503-45af-ade9-74db83ad71dc"> 
+         <tsk name="WalkerNode_AP(turn_in_place_Yaw=-1.57)" x="218.49999999999997" y="207.38888888888886" test_time="0" test_result="true" id="688fa7c6-6583-41c9-aa49-76df22fcab0d" />
+   </seq>
+</plan>

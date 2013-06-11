@@ -27,7 +27,7 @@ int main(int a, char** c){
 	ros::init(a, c, "C42_State");
 	ROS_INFO("Node C42_State is started");
 
-	motion_type.motion = C42_State::MotionType::motion_dynamicwalk;
+	motion_type.motion = C42_State::MotionType::motion_continuous_walk;
 	standing_position.state=C42_State::StandingPosition::state_standing;
 
 	ros::NodeHandle node;
