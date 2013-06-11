@@ -69,6 +69,9 @@ class CD_ActualRobot(CD_Robot):
     
     def SetYaw(self,yaw):
         self._Yaw = yaw
+        
+    def PrepareNextSegment(self):
+        self._LPP.PromoteSegment()
     
 ###################################################################################
 #-------------------------------- Phantom Bot -------------------------------------
@@ -98,11 +101,11 @@ class CD_PhantomRobot(CD_Robot):
         self._StepQueue.append(self._ForwardStep())
         x,y = self._Odometer.GetGlobalPosition()
         self._LPP.UpdatePosition(x,y)
-        print("Phantom Location: ",x,y)
-        print("Phantom target Distance: ",self._LPP.GetTargetDistance())
+        #print("Phantom Location: ",x,y)
+        #print("Phantom target Distance: ",self._LPP.GetTargetDistance())
         
 
-    def EndOfSegment(self):
+    def IsEndOfSegment(self):
         return self._LPP.IsEndOfSegment()
 
     def PrepareNextSegment(self):
@@ -177,6 +180,9 @@ class CD_PhantomRobot(CD_Robot):
         x = self._StepLength
         y = self._StepWidth if (self._index%2==0) else -self._StepWidth
         y += errorCorrected
+        #print("****************")
+        #print("Phantom Error: ",self._Error)
+        #print("Phantom Error Correction: ",errorCorrected)
         self._Odometer.AddLocalPosition(x,y)
         stepData.pose.position.x,stepData.pose.position.y = self._Odometer.GetGlobalPosition()
         

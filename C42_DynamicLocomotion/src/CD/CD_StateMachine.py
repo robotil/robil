@@ -66,7 +66,7 @@ class CD_StateMachine(StateMachine):
             self._phantomRobot.SetPathError(self._actualRobot.GetPathError())
             self._phantomRobot.Step()
             command = self._actualRobot.Step()
-            if (self._phantomRobot.EndOfSegment()):
+            if (self._phantomRobot.IsEndOfSegment()):
                 self._phantomRobot.PrepareNextSegment()
                 if (StateMachine.PerformTransition(self,'Actual')):
                     print("CD_StateMachine::WaitingForActual")
@@ -74,7 +74,6 @@ class CD_StateMachine(StateMachine):
                     raise StateMachineError("CD_StateMachine::Step() - could not perform transition 'Actual'") 
         elif ('WaitingForActual' == self._CurrentState.Name):
             print("CD StateMachine - WaitingForActual")
-            command = self._actualRobot.Step()
             if (5 > len(self._StepQueue)):
                 if (self._actualRobot.IsEndOfPath()):
                     if (StateMachine.PerformTransition(self,'None')):
@@ -83,10 +82,13 @@ class CD_StateMachine(StateMachine):
                     else:
                         raise StateMachineError("CD_StateMachine::Step() - could not perform transition 'None'")
                 else:
+                    self._actualRobot.PrepareNextSegment()
                     if (StateMachine.PerformTransition(self,'Both')):
                         print("CD_StateMachine::BothWalking")
                     else:
-                        raise StateMachineError("CD_StateMachine::Step() - could not perform transition 'Both'")    
+                        raise StateMachineError("CD_StateMachine::Step() - could not perform transition 'Both'")
+            else:
+                command = self._actualRobot.Step()
         else:
             raise StateMachineError("CD_StateMachine::Step() - unknown state")
         return command

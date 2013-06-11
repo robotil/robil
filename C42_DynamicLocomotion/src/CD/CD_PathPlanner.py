@@ -182,20 +182,7 @@ class CD_PathPlanner(PathPlanner):
         return NextSegment.GetYaw()-self._CurrentSegment.GetYaw()
     
     def GetCloseEnoughToTargetDistance(self):
-        turningRadius = 0.20#1.5
-        theta = 0.0
-        if(0 == len(self._Path)):
-            # Last segment
-            result = 0.4
-        else:
-            theta = self.GetAngleToNextSegment()
-            if(0 == math.sin(theta)):
-                # If theta is 0 or 180, then it would be better to reach the point than to throw an exception...
-                result = 0.1
-            else:
-                result = math.fabs(turningRadius*math.tan(theta/2)) # Ask Dave
-        #rospy.loginfo('GetCloseEnoughToTargetDistance: %f, theta = %f' %(result,theta))
-        return result
+        return 0.4
  
     def UpdatePosition(self,CoordinateX,CoordinateY,Preview_Distance=0.0):
         """
@@ -214,9 +201,10 @@ class CD_PathPlanner(PathPlanner):
                     self._EndOfPath = True
         
     def PromoteSegment(self):
-        self._CurrentSegment.SetSource(self._CurrentSegment.GetTarget())
-        self._CurrentSegment.SetTarget(self._Path.popleft())
-        self._EndOfSegment = False
+        if (0<len(self._Path)):
+            self._CurrentSegment.SetSource(self._CurrentSegment.GetTarget())
+            self._CurrentSegment.SetTarget(self._Path.popleft())
+            self._EndOfSegment = False
     
     def Stop(self):
         self._PathReady = False 

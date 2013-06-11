@@ -124,7 +124,7 @@ class CD_WalkingMode(WalkingMode):
             if (self._CD_StateMachine.IsDone()):
                 self._WalkingModeStateMachine.PerformTransition("Finished")
         elif ("Done" == self._WalkingModeStateMachine.GetCurrentState().Name):
-            print("CD WalkingMode - Done")
+            #print("CD WalkingMode - Done")
             self._bDone = True
         else:
             raise Exception("QS_WalkingModeStateMachine::Bad State Name")
