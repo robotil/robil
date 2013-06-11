@@ -53,15 +53,16 @@
 
     #include <C23_ObjectRecognition/C23C0_OD.h>
     #include <C23_ObjectRecognition/C23C0_ODIM.h>
+    #include <C23_ObjectRecognition/C23C0_GP.h>
     #include "C23_Detector.hpp"
     #include <C21_VisionAndLidar/C21_obj.h>
     #include <math.h>
     #include <std_srvs/Empty.h>
     #include <ros/package.h>
-#include <boost/filesystem.hpp>
-#include <stdio.h>
-#include <stdlib.h>
-
+    #include <boost/filesystem.hpp>
+    #include <stdio.h>
+    #include <stdlib.h>
+    #define IMG_LIMITS(c) (c > 800 ? false : (c < 0 ? false : true))
 
 
     #define MIN(x,y) (x < y ? x : y)
@@ -301,14 +302,6 @@
 		cloud_filtered->points.push_back(p);
 	    }
 	}
-	while(1){ try{
-	    listener2.lookupTransform("/pelvis","/left_camera_optical_frame",
-				      ros::Time(0), transform);
-	}
-	catch (tf::TransformException ex){
-	    continue;  cout<<"jajajajaj\n";
-	} break; }
-	
 	pcl::transformPointCloud(*cloud_filtered, *cloud_filtered, sensorTopelvis);
 	return cloud_filtered;
 	
@@ -452,13 +445,15 @@
       
     }
     
-    bool C23_Detector::pictureCoordinatesToGlobalPosition(double x1, double y1, double x2, double y2, double* x, double* y, double*z) {
+    bool C23_Detector::pictureCoordinatesToGlobalPosition(double x1, double y1, double x2, double y2, double* x, double* y, double*z, double offsetx, double offsety) {
 	C21_VisionAndLidar::C21_obj c21srv;
 	c21srv.request.sample.x1 = x1;
 	c21srv.request.sample.y1 = y1;
 	c21srv.request.sample.x2 = x2;
 	c21srv.request.sample.y2 = y2;
-	
+    c21srv.request.sample.offsetx = offsetx;
+    c21srv.request.sample.offsety = offsety;
+	cout << "Sending datA: " << x1 << "," << y1 << "," <<  x2 << "," << y2 << "," << offsetx << "," << offsety << endl;
 	if(c21client.call(c21srv))
 	{
 	    if(x != NULL) *x = round(c21srv.response.point.x);
@@ -467,7 +462,7 @@
 	    cout << "Received data: " << c21srv.response.point.x << "," << c21srv.response.point.y << "," << c21srv.response.point.z << endl;
 	    return true;
 	}
-	
+	 return false;
     }
 
 	bool C23_Detector::pointCloudCoordinatesToGlobalPosition(double x, double y, double z, double* px, double* py, double *pz) {
@@ -662,7 +657,8 @@
 	
 	sync.registerCallback( boost::bind( &C23_Detector::callback, this, _1, _2 ) ); //Specifying what to do with the data
 	objectDetectedPublisher = nh.advertise<C23_ObjectRecognition::C23C0_OD>("C23/object_detected", 1);
-	objectDeminsionsPublisher = nh.advertise<C23_ObjectRecognition::C23C0_ODIM>("C23/object_deminsions", 1);
+    objectDimensionsPublisher = nh.advertise<C23_ObjectRecognition::C23C0_ODIM>("C23/object_dimensions", 1);
+    objectGlobalPositionPublisher = nh.advertise<C23_ObjectRecognition::C23C0_GP>("C23/object_globalPosition", 1);
 	c21client = nh.serviceClient<C21_VisionAndLidar::C21_obj>("C21/C23"); //Subscribe to the service node to get the absolute coordinates of a point
 	c23_start_posecontroller = nh.serviceClient<std_srvs::Empty>("/PoseController/start");
 	c23_stop_posecontroller = nh.serviceClient<std_srvs::Empty>("/PoseController/stop");
@@ -759,6 +755,7 @@
 	//   ROS_INFO("Publishing message..");
 	C23_ObjectRecognition::C23C0_OD msg;
 	C23_ObjectRecognition::C23C0_ODIM msg2;
+    C23_ObjectRecognition::C23C0_GP msg3;
 	string target;
 	switch (_target) {
 	    
@@ -779,9 +776,14 @@
 	msg2.height = height;
 	msg2.Object = target;
 	msg.Object = target;
+    
+    msg3.x = x;
+    msg3.y = y;
+    msg3.Object = target;
 	//  ROS_INFO("Publishing message..");
-	objectDeminsionsPublisher.publish(msg2);
+	objectDimensionsPublisher.publish(msg2);
 	objectDetectedPublisher.publish(msg);
+    objectGlobalPositionPublisher.publish(msg3);
 	
 	
     }
@@ -792,6 +794,22 @@
 	bool res;
 	pcl::PointCloud<pcl::PointXYZ>detectionCloud;
 	pcl::fromROSMsg<pcl::PointXYZ>(*cloud,detectionCloud);
+    
+    static tf::StampedTransform transform;
+
+    while(1){ try{
+        listener2.lookupTransform("/pelvis","/left_camera_optical_frame",
+                                  ros::Time(0), transform);
+    }
+    catch (tf::TransformException ex){
+        continue;  cout<<"jajajajaj\n";
+    } break; }
+    Eigen::Matrix4f sensorTopelvis;
+    pcl_ros::transformAsMatrix(transform, sensorTopelvis);
+    pcl::transformPointCloud(detectionCloud, detectionCloud, sensorTopelvis);
+    
+    
+    
 	lastCloud.swap(detectionCloud);
 	switch (_target) {
 	    case PATH:
@@ -963,8 +981,8 @@
 		  
 		//pictureCoordinatesToGlobalPosition(matchLoc->x,matchLoc->y,matchLoc->x + templ.cols,matchLoc->y + templ.rows,&x,&y,NULL);
 		
-		imshow( "Source Image", img_display );
-		waitKey(0);
+		//imshow( "Source Image", img_display );
+		//waitKey(0);
 		//imshow( "Result Window", result );
 		
 		return res;
@@ -973,7 +991,128 @@
 	    //Detect the arrow and broadcast its directions
 	    bool C23_Detector::detectArrowDirection(Mat srcImg,const sensor_msgs::PointCloud2::ConstPtr &cloud){
 	      
-		cv::Point matchLoc;
+	      bool res = false;
+	      
+	      Mat hsvImg, thresholdedImg, imgCarOpened, imgCarClosed;
+
+	      cvtColor(srcImg, hsvImg, CV_BGR2HSV);
+	      inRange(hsvImg, Scalar(70, 0, 0), Scalar(110, 255, 255), thresholdedImg);
+
+	    //  imshow("Thresholded Image", thresholdedImg);
+	     // waitKey();
+
+	      //Open the image to remove noise
+	      Mat element1(4, 4, CV_8U, Scalar(1));
+	      morphologyEx(thresholdedImg, imgCarOpened, MORPH_OPEN, element1);
+
+	      Mat element2(40, 40, CV_8U, Scalar(1));
+	      morphologyEx(imgCarOpened, imgCarClosed, MORPH_CLOSE, element2);
+
+	    //  imshow("Closed image", imgCarClosed);
+	    //  waitKey();
+
+	      Mat arrowImg;
+	      imgCarClosed.copyTo(arrowImg);
+	      //Now find the contours of the blobs
+	      vector<vector<cv::Point> > blobContours;
+	      findContours(arrowImg, blobContours, CV_RETR_EXTERNAL,
+			      CV_CHAIN_APPROX_SIMPLE);
+	      
+	      if(blobContours.size()==0)
+		return false;
+	      
+	      drawContours(srcImg, blobContours, -1, CV_RGB(255,0,0), 2);
+
+	      //imshow("Car Image", img);
+	      //waitKey(0);
+
+	      double currentArea;
+	      vector<int> blobIndices;
+	      RotatedRect currentArrow;
+	      vector<cv::Point> currentContour;
+	      double maxArea = -1;
+	      int maxIndex = 0;
+	      for (int ii = 0; ii < blobContours.size(); ii++) {
+
+		      currentContour = blobContours[ii];
+		      double currentContourArea = contourArea(currentContour, false);
+
+		      if (currentContourArea > maxArea) {
+			      maxArea = currentContourArea;
+			      maxIndex = ii;
+		      }
+
+		      currentArrow = minAreaRect(currentContour); //fitEllipse(currentContour);
+		      currentArea = currentArrow.size.height * currentArrow.size.width;
+
+		      if ((currentArea < 500) || (currentArea > 30000))
+			      continue;
+
+		      cout << "currentArea: " << currentArea << endl;
+
+	      }
+
+	      //Find the CM of the arrow
+	      Moments mu;
+
+	      mu = moments(blobContours[maxIndex], false);
+
+	      //  Get the mass centers:
+	      Point2f mc;
+
+	      mc = Point2f(mu.m10 / mu.m00, mu.m01 / mu.m00);
+	      cout << "CM: " << mc << endl;
+
+	      circle(srcImg, mc, 3, Scalar(255, 0, 0));
+	      //imshow("Arrow", img);
+	      //waitKey();
+
+	      int THRESHOLD = 100;
+	      Rect arrowBox = boundingRect(blobContours[maxIndex]);
+
+	      Mat finalImg(imgCarClosed, arrowBox);
+	    //  imshow("Arrow Image", finalImg);
+	    //  waitKey();
+
+	      //countNonZero(src Array);
+	      //Test the direction
+	      int leftSumCol = 10;
+	      int rightSumCol = finalImg.cols - 10;
+
+	      cv::Mat1i black_pixels(finalImg.cols, 1);
+
+	      cv::Mat leftCol = finalImg.col(leftSumCol);
+	      cv::Mat rightCol = finalImg.col(rightSumCol);
+
+	      int leftSum = countNonZero(leftCol);
+	      int rightSum  = countNonZero(rightCol);
+
+	      cout << "Black Pixels Left side: " << leftSum <<" Right side: "<<rightSum<<endl;
+
+	    
+	      
+	      
+	      
+	        if(leftSum>rightSum){
+		      ROS_INFO("RIGHT ARROW");
+		      res = true;
+              pictureCoordinatesToGlobalPosition(arrowBox.x, arrowBox.y,arrowBox.x + arrowBox.height, arrowBox.y + arrowBox.width, &x, &y,&z,-1,-4);
+	      }
+	      else{
+		      ROS_INFO("LEFT ARROW");
+		      res = true;
+              pictureCoordinatesToGlobalPosition(arrowBox.x, arrowBox.y,arrowBox.x + arrowBox.height, arrowBox.y + arrowBox.width, &x, &y,&z,-1,+4);
+	      }
+	//averagePointCloud(arrowBox.x, arrowBox.y, arrowBox.width, arrowBox.height, cloud,&x,&y,&z);
+	
+	//black_pixels(leftSumCol,0) = arrowBox.height - countNonZero(col);
+
+	//cout<<"Black pixels: "<<black_pixels.<<endl;
+	      
+	      
+	      
+	      
+		/*cv::Point matchLoc;
 		double minValLeft = 0;
 		double minValRight = 0;
 		//Load the image template for the steering wheel
@@ -1035,7 +1174,7 @@
 		imshow("New Arrow Image", leftArrowTemplate);
 		waitKey();
 		imshow("New Arrow Image", rightArrowTemplate);
-		waitKey();
+		waitKey();*/
 		
 		
 	    
@@ -1543,7 +1682,7 @@
     }*/
 		imshow("TESTING",srcImg);
 		waitKey(0);
-		pictureCoordinatesToGlobalPosition(minRect.center.x-100,minRect.center.y+100,minRect.center.x+100,minRect.center.y+100,&x,&y,NULL);
+	//	pictureCoordinatesToGlobalPosition(minRect.center.x-100,minRect.center.y+100,minRect.center.x+100,minRect.center.y+100,&x,&y,NULL);
 		return true;
 	}
 	return false;
@@ -1629,7 +1768,7 @@
     }*/
 		//imshow("TESTING",srcImg);
 	//	waitKey(0);
-		pictureCoordinatesToGlobalPosition(minRect.center.x-100,minRect.center.y+100,minRect.center.x+100,minRect.center.y+100,&x,&y,NULL);
+		//pictureCoordinatesToGlobalPosition(minRect.center.x-100,minRect.center.y+100,minRect.center.x+100,minRect.center.y+100,&x,&y,NULL);
 		int x1 = MIN(rect_points[0].x,rect_points[1].x);
 		int x2 = MIN(rect_points[2].x,rect_points[3].x);
 		int min_x = MIN(x1,x2);
@@ -1709,7 +1848,7 @@
 		
 	    }
 	}
-	if(biggest_size > 50 && biggest_size < 180) {
+	if(biggest_size > 50 && biggest_size < 550) {
 	    
 	    
 	    
@@ -1727,20 +1866,32 @@
 	    Point2f rect_points[4]; minRect.points( rect_points );
 	    for( int j = 0; j < 4; j++ )
 		line( srcImg, rect_points[j], rect_points[(j+1)%4], CV_RGB(255,0,0), 1, 8 );
-	    // ellipse( srcImg, fitEllipse( Mat(contours[biggest]) ), CV_RGB(255,0,0), 2, 8 );
-		/// Draw contours + rotated rects + ellipses
-		// Mat drawing = Mat::zeros( threshold_output.size(), CV_8UC3 );
-		/* for( int i = 0; i< contours.size(); i++ )
-    * {
-    * Scalar color = Scalar( rng.uniform(0, 255), rng.uniform(0,255), rng.uniform(0,255) );
-    * // contour
-    * // drawContours( bw, contours, i, color, 1, 8, vector<Vec4i>(), 0, Pointf() );
-    * // ellipse
-    * ellipse( imgThreshed, minEllipse[i], color, 2, 8 );
-    }*/
+        
+        
+        
+        int x1 = MIN(rect_points[0].x,rect_points[1].x);
+        int x2 = MIN(rect_points[2].x,rect_points[3].x);
+        int min_x = MIN(x1,x2);
+        
+        int y1 = MIN(rect_points[0].y,rect_points[1].y);
+        int y2 = MIN(rect_points[2].y,rect_points[3].y);
+        int min_y = MIN(y1,y2);
+        
+        
+        x1 = MAX(rect_points[0].x,rect_points[1].x);
+        x2 = MAX(rect_points[2].x,rect_points[3].x);
+        int max_x = MAX(x1,x2);
+        
+        y1 = MAX(rect_points[0].y,rect_points[1].y);
+        y2 = MAX(rect_points[2].y,rect_points[3].y);
+        int max_y = MAX(y1,y2);
+        string t = "Standpipe";
+        cout << "Saving standpipe" << endl;
+     //   saveTemplate(min_x,min_y,max_x-min_x,max_y-min_y,cloud,t);
+     //   templateMatching3D(t,lastCloud);
 		imshow("TESTING",srcImg);
 		waitKey(0);
-		pictureCoordinatesToGlobalPosition(minRect.center.x-100,minRect.center.y+100,minRect.center.x+100,minRect.center.y+100,&x,&y,NULL);
+	//	pictureCoordinatesToGlobalPosition(minRect.center.x-100,minRect.center.y+100,minRect.center.x+100,minRect.center.y+100,&x,&y,NULL);
 		return true;
 	}
 	return false;
@@ -1830,7 +1981,10 @@
 		}*/
 			imshow("TESTING",srcImg);
 			waitKey(0);
-			pictureCoordinatesToGlobalPosition(minRect.center.x-100,minRect.center.y+100,minRect.center.x+100,minRect.center.y+100,&x,&y,NULL);
+		//	pictureCoordinatesToGlobalPosition(minRect.center.x-100,minRect.center.y+100,minRect.center.x+100,minRect.center.y+100,&x,&y,NULL);
+            
+            //FIXME:
+            //  with offset 
 			return true;
 		}
 		return false;
@@ -2244,7 +2398,8 @@
 	
     }
     bool C23_Detector::detectGate(Mat srcImg, const sensor_msgs::PointCloud2::ConstPtr &cloud) {
-	
+	//FIXME:
+	// add offset .
 	pcl::PointCloud<pcl::PointXYZ>pclcloud;
 	C21_VisionAndLidar::C21_obj c21srv;
 	pcl::fromROSMsg<pcl::PointXYZ>(*cloud,pclcloud);
@@ -2322,7 +2477,9 @@
 	    int count = 0;
 	    for(int i =-15; i <= 15; i++) {
 		for(int j =-100; j <=100; j++) {
-		    if(pclcloud.at(mcR[biggstR].x+i,mcR[biggstR].y+j).x != pclcloud.at(mcR[biggstR].x+i,mcR[biggstR].y+j).x)
+            if(! (IMG_LIMITS(mcR[biggstR].x+i))  || !(IMG_LIMITS(mcR[biggstR].y+j)) ) continue;
+	 
+            if(pclcloud.at(mcR[biggstR].x+i,mcR[biggstR].y+j).x != pclcloud.at(mcR[biggstR].x+i,mcR[biggstR].y+j).x)
 			continue;
 		    count++;
 		    r_x+=pclcloud.at(mcR[biggstR].x+i,mcR[biggstR].y+j).x;
@@ -2343,14 +2500,9 @@
 		
 	    } else {
 		cout << "Red isn't valid .. " << pclcloud.at(mcR[biggstR].x,mcR[biggstR].y).x << "," << pclcloud.at(mcR[biggstR].x,mcR[biggstR].y).y << "," << endl;
+        
 	    }
-	  /* if (pclcloud.at(mcR[biggstR].x,mcR[biggstR].y).x<50 && pclcloud.at(mcR[biggstR].x,mcR[biggstR].y).y <50 && pclcloud.at(mcR[biggstR].x,mcR[biggstR].y).x !=0)
-    {
-    cout << "Red is valid .. " << endl;
-    rightC=pclcloud.at(mcR[biggstR].x,mcR[biggstR].y);
-    } else {
-    cout << "Red isn't valid .. " << pclcloud.at(mcR[biggstR].x,mcR[biggstR].y).x << "," << pclcloud.at(mcR[biggstR].x,mcR[biggstR].y).y << "," << endl;
-    }*/
+
 	}
 	
 	
@@ -2389,15 +2541,16 @@
 	    double l_x = 0;
 	    double l_y = 0;
 	    double l_z = 0;
-	  int count = 0;
+	    int count = 0;
 	    for(int i =-15; i <= 15; i++) {
 		for(int j =-100; j <=100; j++) {
-		    if(pclcloud.at(mcR[biggstR].x+i,mcR[biggstR].y+j).x != pclcloud.at(mcR[biggstR].x+i,mcR[biggstR].y+j).x)
+            if(! (IMG_LIMITS(mcL[biggstL].x+i))  || !(IMG_LIMITS(mcL[biggstL].y+j)) ) continue;    
+            if(pclcloud.at(mcL[biggstL].x+i,mcL[biggstL].y+j).x != pclcloud.at(mcL[biggstL].x+i,mcL[biggstL].y+j).x)
 			continue;
 		    count++;
-		    l_x+=pclcloud.at(mcR[biggstR].x+i,mcR[biggstR].y+j).x;
-		    l_y+=pclcloud.at(mcR[biggstR].x+i,mcR[biggstR].y+j).y;
-		    l_z+=pclcloud.at(mcR[biggstR].x+i,mcR[biggstR].y+j).z;
+            l_x+=pclcloud.at(mcL[biggstL].x+i,mcL[biggstL].y+j).x;
+            l_y+=pclcloud.at(mcL[biggstL].x+i,mcL[biggstL].y+j).y;
+            l_z+=pclcloud.at(mcL[biggstL].x+i,mcL[biggstL].y+j).z;
 		}
 	    }
 	    l_x/=count;
@@ -2406,13 +2559,13 @@
 	    if (l_x<50 && l_y <50 && l_z !=0)
 	    {
 		cout << "Blue is valid .. " << endl;
-		rightC=pclcloud.at(mcR[biggstR].x,mcR[biggstR].y);
-		rightC.x = l_x;
-		rightC.y = l_y;
-		rightC.z = l_z;
+        leftC=pclcloud.at(mcL[biggstL].x,mcL[biggstL].y);
+        leftC.x = l_x;
+        leftC.y = l_y;
+        leftC.z = l_z;
 		
 	    } else {
-		cout << "Blue isn't valid .. " << pclcloud.at(mcR[biggstR].x,mcR[biggstR].y).x << "," << pclcloud.at(mcR[biggstR].x,mcR[biggstR].y).y << "," << endl;
+            cout << "Blue isn't valid .. " << pclcloud.at(mcL[biggstL].x,mcL[biggstL].y).x << "," << pclcloud.at(mcL[biggstL].x,mcL[biggstL].y).y << "," << endl;
 	    }
 	  /* if (pclcloud.at(mcL[biggstL].x,mcL[biggstL].y).x<50 && pclcloud.at(mcL[biggstL].x,mcL[biggstL].y).y <50 && pclcloud.at(mcL[biggstL].x,mcL[biggstL].y).x !=0)
     {
@@ -2463,8 +2616,8 @@
 		}
 	      
 	      double x1,y1,z1,x2,y2,z2;
-	      averagePointCloud(mcL[biggstL].x-5, mcL[biggstL].y-50, mcL[biggstL].x+5, mcL[biggstL].y+50, cloud, &x1, &y1,&z1);
-	      averagePointCloud(mcR[biggstR].x-5, mcR[biggstR].y-50, mcR[biggstR].x+5, mcR[biggstR].y+50, cloud, &x2, &y2,&z2);
+	      pictureCoordinatesToGlobalPosition(mcL[biggstL].x-5, mcL[biggstL].y-50, mcL[biggstL].x+5, mcL[biggstL].y+50,  &x1, &y1,&z1, -0.5,0);
+          pictureCoordinatesToGlobalPosition(mcR[biggstR].x-5, mcR[biggstR].y-50, mcR[biggstR].x+5, mcR[biggstR].y+50, &x2, &y2,&z2,-0.5,0);
 	  // cout << "Middle: " <<
 	    // imshow("TESTING",srcImg);
 	    // waitKey(0);
