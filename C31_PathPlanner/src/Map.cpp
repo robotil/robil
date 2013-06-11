@@ -95,9 +95,9 @@ void World::update(const ObsMap& grid, const AltMap &alts, const ObsMap& terrain
 #if MAP_MODE == MM_ALTS
 	this->altitudes = alts;
 	AltTransforms wd1(alts, AltTransformsParameters());
-	this->walls = wd1.walls();
-	this->slops = wd1.slops();
+	this->walls = wd1.walls(grid);
+	this->slops = wd1.slops(grid);
 	AltTransforms wd2(slops, AltTransformsParameters());
-	this->costs = wd2.costs();
+	this->costs = wd2.costs(grid);
 #endif
 }
