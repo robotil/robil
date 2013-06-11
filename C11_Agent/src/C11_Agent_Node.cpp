@@ -3,6 +3,7 @@
 #include "C34_Executer/stop.h"
 #include "C34_Executer/resume.h"
 #include "C34_Executer/pause.h"
+#include "C31_PathPlanner/C31_HMIReset.h"
 #include <sstream>
 #include <stdlib.h>
 #include "tinyxml2.h"
@@ -73,6 +74,7 @@ bool C11_Agent_Node::init()
 
     path_update_pub = nh_->advertise<C31_PathPlanner::C31_Waypoints>("c11_path_update",10000);
     goal_update_pub = nh_->advertise<C31_PathPlanner::C31_Location>("planner/goal/point",1000);
+    goal_reset_pub = nh_->advertise<C31_PathPlanner::C31_HMIReset>("planner/reset",1000);
     service_MissionSelection = nh_->advertiseService("MissionSelection", &C11_Agent_Node::MissionSelection,this);
     service_PauseMission = nh_->advertiseService("PauseMission", &C11_Agent_Node::PauseMission,this);
     service_ResumeSelection = nh_->advertiseService("ResumeMission", &C11_Agent_Node::ResumeMission,this);
@@ -519,11 +521,14 @@ void C11_Agent_Node::NewGoalRequest(StructPoint goal)
   loc.x = goal.x;
   loc.y = goal.y;
   goal_update_pub.publish(loc);
+  cout<<"New goal sent: "<<goal.x<<","<<goal.y<<endl;
 }
 
 void C11_Agent_Node::ResetRequest()
 {
-
+  C31_PathPlanner::C31_HMIReset reset;
+  goal_reset_pub.publish(reset);
+  cout<<"ResetRequest sent!"<<endl;
 }
 
 void C11_Agent_Node::CheckPath()
