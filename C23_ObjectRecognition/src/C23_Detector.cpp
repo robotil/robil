@@ -1160,10 +1160,10 @@
 	      a_res = pictureCoordinatesToGlobalPosition(arrowBox.x, arrowBox.y,arrowBox.x + arrowBox.height, arrowBox.y + arrowBox.width, &x1, &y1,&z1,-1,-4);
               a_res&= pictureCoordinatesToGlobalPosition(arrowBox.x, arrowBox.y,arrowBox.x + arrowBox.height, arrowBox.y + arrowBox.width, &x2, &y2,&z2,-1,0);
 	      res = a_res;
-	      x = x1;
-	      y = y1;
-	      x2 = x2;
-	      y2 = y2;
+	      this->x = x1;
+	      this->y = y1;
+	      this->x2 = x2;
+	      this->y2 =  y2;
 		  
 		}
 	      else{
@@ -1172,6 +1172,10 @@
               a_res = pictureCoordinatesToGlobalPosition(arrowBox.x, arrowBox.y,arrowBox.x + arrowBox.height, arrowBox.y + arrowBox.width, &x1, &y1,&z1,-1,+4);
 	      a_res&= pictureCoordinatesToGlobalPosition(arrowBox.x, arrowBox.y,arrowBox.x + arrowBox.height, arrowBox.y + arrowBox.width, &x2, &y2,&z2,-1,0);
 	      res = a_res;
+	      this->x = x1;
+	      this->y = y1;
+	      this->x2 = x2;
+	      this->y2 =  y2;
 	      }
 	      
 	      
