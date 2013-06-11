@@ -81,7 +81,7 @@ static tf::StampedTransform righttransform;
 bool C22_Node::proccess(C22_GroundRecognitionAndMapping::C22::Request  &req,
 	C22_GroundRecognitionAndMapping::C22::Response &res ){
 
-	   /*) bool retry=true;
+	    bool retry=true;
 	    while(retry){
 	    	retry=false;
 			try{
@@ -101,8 +101,8 @@ bool C22_Node::proccess(C22_GroundRecognitionAndMapping::C22::Request  &req,
 			  ROS_ERROR("%s",ex.what());
 			}
 	    }
-
-*/
+	    _myMatrix->pelvisHeight=-(righttransform.getOrigin().getZ()+lefttransform.getOrigin().getZ())/2;
+	    //cout<<"pelvis"<<_myMatrix->pelvisHeight<<endl;
 	 /*pcl::PointCloud<pcl::PointXYZ>cloud;
      pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_filtered(cloud.makeShared());
 	 //tf::Quaternion q;
@@ -210,7 +210,7 @@ bool C22_Node::proccess(C22_GroundRecognitionAndMapping::C22::Request  &req,
 				res.drivingPath.row.at(i).column.at(j).planes.at(k).repPoint.x=_myMatrix->data->at(i)->at(j)->square_Planes->at(k)->representing_point.x;
 				res.drivingPath.row.at(i).column.at(j).planes.at(k).repPoint.y=_myMatrix->data->at(i)->at(j)->square_Planes->at(k)->representing_point.y;
 				res.drivingPath.row.at(i).column.at(j).planes.at(k).repPoint.z=_myMatrix->data->at(i)->at(j)->square_Planes->at(k)->representing_point.z;
-				if(res.drivingPath.row.at(i).column.at(j).height>_myMatrix->data->at(i)->at(j)->square_Planes->at(k)->representing_point.z)
+				if(res.drivingPath.row.at(i).column.at(j).height<_myMatrix->data->at(i)->at(j)->square_Planes->at(k)->representing_point.z)
 					res.drivingPath.row.at(i).column.at(j).height=_myMatrix->data->at(i)->at(j)->square_Planes->at(k)->representing_point.z;
 			}
 		}

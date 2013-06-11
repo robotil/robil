@@ -47,6 +47,7 @@ private:
   ros::ServiceServer service;
   ros::ServiceServer service2;
   MapMatrix * _myMatrix;
+  double pelvisHieth
   std::vector<pclPlane*>* _myPlanes;
   boost::shared_ptr<pcl::visualization::PCLVisualizer> viewer;
   geometry_msgs::Point robotPos;
