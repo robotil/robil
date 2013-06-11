@@ -20,13 +20,14 @@ ns._bSent_path_once = False
 
 def Get_target_pose(req):
     FP_res = C23_orientResponse()
+    print "service req.target", req.target
     if "delta" == req.target:
-        FP_res.x = 0.0 # 0.89 # 0.5
-        FP_res.y = 0.0 #-0.5
+        FP_res.x = -0.5 # 0.89 # 0.5
+        FP_res.y = 0.0
         FP_res.z = 0.0
         FP_res.R = 0.0
         FP_res.P = 0.0
-        FP_res.Y = math.pi/2
+        FP_res.Y = -math.pi/4
     else:
         FP_res.x = 0.3
         FP_res.y = 0.0
@@ -54,7 +55,7 @@ def deg2r(deg):
 
 def C23_orient_server():
     rospy.init_node('foot_AlinePose_server')
-    s = rospy.Service('foot_aline_pose', C23_orient, Get_target_pose)
+    s = rospy.Service('C23/C66', C23_orient, Get_target_pose)
     print "Ready to get target pose."
     rospy.spin()
 
