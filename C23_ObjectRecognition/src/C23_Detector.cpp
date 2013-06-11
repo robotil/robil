@@ -2643,8 +2643,8 @@
 	    // imshow("TESTING",srcImg);
 	    // waitKey(0);
 	    // return true;
-	    x2 = (x1+x2)/2.0;
-	    y2 = (y1+y2)/2.0;
+	    this->x2 = (x1+x2)/2.0;
+	    this->y2 = (y1+y2)/2.0;
 	    cout << "Middle point: " << x <<"," << y << endl;
         imwrite(imgpath.c_str(),srcImg);
 	    return true;
@@ -2727,8 +2727,8 @@
             y = y1;
             a_res = pictureCoordinatesToGlobalPosition(mcR[biggstR].x-5, mcR[biggstR].y-50, mcR[biggstR].x+5, mcR[biggstR].y+50, &x1, &y1,&z1,0.5,2.5);
             
-            x2 =  x1;
-            y2 = y1;
+            this->x2 =  x1;
+            this->y2 = y1;
             
             cout << "Middle point: " << x <<"," << y << endl;
             imwrite(imgpath.c_str(),srcImg);
@@ -2792,8 +2792,8 @@
         x = x1;
         y = y1;
          a_res = pictureCoordinatesToGlobalPosition(mcL[biggstL].x-5, mcL[biggstL].y-50, mcL[biggstL].x+5, mcL[biggstL].y+50, &x1, &y1,&z1,-0.5,2.5);
-        x2 = x1;
-        y2 = y1;
+        this->x2 = x1;
+        this->y2 = y1;
         cout << "Middle point: " << x <<"," << y << endl;
         imwrite(imgpath.c_str(),srcImg);
         return mcM[biggstM].x > mcL[biggstL].x ? true : false;
