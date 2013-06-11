@@ -1,4 +1,4 @@
-V0.0.1.75
+V0.0.1.76
 ===========================================================
 C0_RobilTask     0.5
 C0_Scripts     0.27
@@ -16,9 +16,9 @@ C25_AtlasFell     0.2
 C25_GlobalPosition     0.8
 C25_ekf     0.2
 C27_ScorePerception     0.1
-C31_PathPlanner     0.31
+C31_PathPlanner     0.32
 C34_BTExecuter     0.8
-C34_Designer     0.41
+C34_Designer     0.42
 C34_Executer     0.8
 C35_Monitoring     0.15
 C41_BodyControl     0.1
@@ -28,7 +28,7 @@ C42_DRCSim2_tools     0.2
 C42_DynamicLocomotion     0.12
 C42_Leg_IK     0.4
 C42_State     0.2
-C42_WalkType     0.4
+C42_WalkType     0.5
 C42_ZMPWalk     0.8
 C43_LocalBodyCOM     0.2
 C43_LocalBodyCOM_tools     0.1
