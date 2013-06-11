@@ -165,7 +165,7 @@ class DW_Controller(object):
 
         #[-0.066, 0.082 Sequence Step 2: Extend arms
         ThisRobotCnfg = copy(self.RobotCnfg2[0][:])
-        ThisRobotCnfg[16] = ThisRobotCnfg[16+6] = 1.2#1.4
+        ThisRobotCnfg[16] = ThisRobotCnfg[16+6] = 1.4
         ThisRobotCnfg[17] = -0.4
         ThisRobotCnfg[17+6] = 0.4
         ThisRobotCnfg[18] = ThisRobotCnfg[18+6] = 2.9
@@ -341,39 +341,6 @@ class DW_Controller(object):
         else:
             print 'position command legth doest fit'
 
-    # def traj_with_impedance(self,pos1,pos2,T,dt):
-    #     if len(pos1) == len(pos2) == len(self._jnt_names):
-    #         N = ceil(T/dt)
-    #         pos1 = array(pos1)
-    #         pos2 = array(pos2)
-
-    #         self.JC.set_gains('l_leg_uhz',1000,0,10)
-    #         self.JC.set_gains('r_leg_uhz',1000,0,10)
-    #         self.JC.set_gains('l_leg_mhx',1000,0,10)
-    #         self.JC.set_gains('r_leg_mhx',1000,0,10)
-    #         self.JC.set_gains('back_lbz',5000,0,10)
-    #         self.JC.set_gains('back_ubx',1000,0,10)
-    #         self.JC.set_gains('l_arm_usy',1000,0,10)
-    #         self.JC.set_gains('r_arm_usy',1000,0,10)
-    #         self.JC.set_gains('l_arm_shx',1000,0,10)
-    #         self.JC.set_gains('r_arm_shx',1000,0,10)
-    #         self.JC.set_gains('l_arm_ely',2000,0,10)
-    #         self.JC.set_gains('r_arm_ely',2000,0,10)
-    #         self.JC.set_gains("l_arm_elx",1200,0,5)
-    #         self.JC.set_gains("r_arm_elx",1200,0,5)
-    #         self.JC.set_gains("l_arm_mwx",1200,0,5)
-    #         self.JC.set_gains("r_arm_mwx",1200,0,5)
-
-         
-
-    #         for ratio in linspace(0, 1, N):
-                
-    #             interpCommand = (1-ratio)*pos1 + ratio * pos2
-                  
-    #             self.JC.set_all_pos([ float(x) for x in interpCommand ])
-
-    #             self.JC.send_command()
-    #             rospy.sleep(dt)
     def Sit(self,T):
         self.JC.set_gains("l_arm_elx",5,0,20)
         self.JC.set_gains("r_arm_elx",5,0,20)
@@ -490,9 +457,9 @@ class DW_Controller(object):
 
             else:
                 self.FollowPath = 0
-            # if self._terrain == "MUD" and self.IMU_mon.stand_up_flag == 1:
-            #     print "Reached stand up zone"
-            #     return
+            if self._terrain == "MUD" and self.IMU_mon.stand_up_flag == 1:
+                print "Reached stand up zone"
+                return
 
     def Crawl(self):
         # self.IMU_mon.turned = 0
@@ -851,14 +818,22 @@ class DW_Controller(object):
             
 
             if abs(p)>0.4*math.pi or abs(r)>0.8*math.pi:
+            	print 'Check Tipping R=',r,"P=",p
+            if p >=1.25:
+                # print "Front recovery"
+                result = self.FrontTipRecovery()
+            elif abs(p)>0.4*math.pi or abs(r)>0.8*math.pi:
                 # Robot tipped backwards
+                # print "Back recovery"
                 result = self.BackTipRecovery()
             elif r>math.pi/4:
                 # Robot tipped to the right
                 result = self.TipRecovery("right")
+                # print "Right recovery"
             elif r<-math.pi/4:
                 # Robot tipped to the left
                 result = self.TipRecovery("left")
+                # print "Left recovery"
             else:
                 result = 1
                 self.FollowPath = 1
