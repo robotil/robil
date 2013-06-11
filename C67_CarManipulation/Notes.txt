@@ -111,7 +111,11 @@ angle q9: 0.200000 Limits(-1.571000, 0.436000)
 q4-q9:0.019041, 0.109008, 1.856177, -1.485410, -1.571013, 0.200000
 RPY(0.528851 -0.547337 0.235189 -1.455533 0.777741 0.164615)
  
-
+----------------------------------------------------------------------------------------
+C67_Path server is a service to give Inverse Kinematics result
+to run service 
+rosrun C67_CarManipulation PathServer
+use answer only if valid == true
 ---------------------------------------------------------------------------------------
 *RPY parameters are x,y,z,R,P,Y: x,y,z - position, R,P,Y - orientation.
 The Orientation is pelvis to middle finger base (right_f1_base/left_f1_base)

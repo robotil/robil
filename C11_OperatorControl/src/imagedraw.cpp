@@ -157,10 +157,10 @@ void ImageDraw::SltImageAreaOpened(int id)
 
 void ImageDraw::OnImgReceived(QImage image)
 {
-	std::cout << "Step2" << std::endl;
+//	std::cout << "Step2" << std::endl;
 	QImage myImage(image);
 	emit SigOnNewImg(myImage);
-	std::cout << "Step3" << std::endl;
+//	std::cout << "Step3" << std::endl;
 
 }
 
@@ -254,10 +254,10 @@ void ImageDraw::SltOnNewImg(QImage image)
 	if(!IsUpdateCurrentImg)
 	{
 //		IsUpdateCurrentImg = true;
-		std::cout << "Step4" << std::endl;
+//		std::cout << "Step4" << std::endl;
 		CloseOpenedImages();
 
-		std::cout << "Step5" << std::endl;
+//		std::cout << "Step5" << std::endl;
 		QRectF rect(0,0,image.size().width(),image.size().height());
 		QGraphicsScene* pScene = new QGraphicsScene(rect,this);
 
@@ -266,10 +266,10 @@ void ImageDraw::SltOnNewImg(QImage image)
 		QString timeStr = dateTime.toString("hh:mm:ss");
 		QString DateTimeStr = dateStr + " " + timeStr;
 
-		std::cout << "Step6" << std::endl;
+//		std::cout << "Step6" << std::endl;
 		CGraphicsView* pCGraphicsView = new CGraphicsView(ImageAreaCount,image,DateTimeStr,this);
 		ImageAreaCount++;
-		std::cout << "Step7" << std::endl;
+//		std::cout << "Step7" << std::endl;
 
 		pCGraphicsView->setScene(pScene);
 		pCGraphicsView->setSceneRect(rect);
@@ -288,7 +288,7 @@ void ImageDraw::SltOnNewImg(QImage image)
 		}
 
 		connect(pCGraphicsView,SIGNAL(SigOpened(int)),this,SLOT(SltImageAreaOpened(int)));
-		std::cout << "Step8" << std::endl;
+//		std::cout << "Step8" << std::endl;
 	}
 	else
 	{

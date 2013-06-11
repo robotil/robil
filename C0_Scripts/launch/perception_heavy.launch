@@ -5,8 +5,9 @@
 
 	<!-- Heavy -->
 	<!--node pkg="C22_CompactGroundRecognitionAndMapping" type="C22" name="C22_GroundRecognitionAndMapping" output="log" respawn="true" / -->
+	<node pkg="C22_CompactGroundRecognitionAndMapping" type="C22_Compact" name="C22_CompactGroundRecognitionAndMapping" output="log" respawn="true" />
 
-	<include file="$(find C22_CompactGroundRecognitionAndMapping)/launch/C22_compact.launch"/>
+	<!-- include file="$(find C22_CompactGroundRecognitionAndMapping)/launch/C22_compact.launch"/ -->
 
 	<!-- node pkg="C23_ObjectRecognition" type="C23" name="C23_ObjectRecognition" args="/multisense_sl/camera/left/image_color /multisense_sl/camera/right/image_color /multisense_sl/camera/points2" output="log" respawn="true"/ -->
 
