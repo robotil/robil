@@ -441,6 +441,7 @@ public:
 			atlascommand.kp_position[atlas_msgs::AtlasState::back_lbz] = 1000;
 			atlascommand.ki_position[atlas_msgs::AtlasState::back_lbz] = 10;
 			atlascommand.kd_position[atlas_msgs::AtlasState::back_lbz] = 100;
+			atlascommand.velocity[atlas_msgs::AtlasState::back_lbz] = 0.002;
 			atlascommand.position[atlas_msgs::AtlasState::back_mby] = wanted_positions[atlas_msgs::AtlasState::back_mby];
 			atlascommand.kp_position[atlas_msgs::AtlasState::back_mby] = 1000;
 			atlascommand.ki_position[atlas_msgs::AtlasState::back_mby] = 10;
