@@ -44,7 +44,7 @@ Rect box;
 bool drawing_box = false;
 bool box_chosen = false;
 int x1,y2;
-double posx,posy,posz;
+static double posx,posy,posz;
 double minx,maxx,miny,maxy;
 
 bool first=true;
@@ -134,14 +134,26 @@ public:
 			if(service.call(msg)){
 				std::stringstream s;
 				s<<"global position\n:"<<" x:"<<msg.response.point.x<<" y:"<<msg.response.point.y<<" z:"<<msg.response.point.z;
+				posx=msg.response.point.x;
+				posy=msg.response.point.y;
+				posz=msg.response.point.z;
 				cv::Point org;
 				org.x=10;
 				org.y=10;
+std::cout<<"global position\n:"<<" x:"<<msg.response.point.x<<" y:"<<msg.response.point.y<<" z:"<<msg.response.point.z<<std::endl;
 				cv::putText(*myImage, s.str(), cvPoint(30,30),
 				FONT_HERSHEY_COMPLEX_SMALL, 1.2, cvScalar(0,200,250), 1, CV_AA);
 			}
 			box_chosen=false;
 		}
+				std::stringstream s;
+				s<<"global position:"<<" x:"<<posx<<" y:"<<posy<<" z:"<<posz;
+				cv::Point org;
+				org.x=10;
+				org.y=10;
+				cv::putText(*myImage, s.str(), cvPoint(30,30),
+				FONT_HERSHEY_COMPLEX_SMALL, 1.2, cvScalar(0,200,250), 1, CV_AA);
+
 
 			imshow("Window",*myImage);
 
