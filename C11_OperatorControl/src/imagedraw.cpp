@@ -29,10 +29,12 @@ ImageDraw::ImageDraw(int argc, char** argv, QWidget *parent, Qt::WFlags flags)
 	connect(ui.btnPlayPause,SIGNAL(clicked(bool)),this,SLOT(SltOnPlayPauseClick(bool)));
 	connect(ui.btnStop,SIGNAL(clicked()),this,SLOT(SltOnStopClick()));
 	connect(ui.btnAllow,SIGNAL(clicked()),this,SLOT(SltOnAllowClick()));
+	connect(ui.btnRestore,SIGNAL(clicked()),this,SLOT(SltOnRestoreClick()));
 	connect(ui.btnCreate,SIGNAL(clicked(bool)),this,SLOT(SltOnCreateClick(bool)));
 	connect(ui.btnPath,SIGNAL(clicked(bool)),this,SLOT(SltOnPathClick(bool)));
 	connect(WaitTimer,SIGNAL(timeout()),this,SLOT(SltOnWaitTimeout()));
 	connect(ui.mapWidget,SIGNAL(SigOperatorAction()),this,SLOT(SltOperatorAction()));
+	connect(ui.mapWidget,SIGNAL(SigGoalUpdated()),this,SLOT(SltGoalUpdated()));
 	C11node.init();
 
 	QFile file("C11Config.txt");
@@ -215,6 +217,16 @@ void ImageDraw::OnVRCScoreData(double timeSec, int competionScore, int falls, QS
   ui.lblScoreData->setText(QString::number(competionScore));
   ui.lblFallsData->setText(QString::number(falls));
   update();
+}
+
+void ImageDraw::OnDownlinkUpdate(QString down)
+{
+  ui.lblDownlinkData->setText(down);
+}
+
+void ImageDraw::OnUplinkUpdate(QString up)
+{
+  ui.lblUplinkData->setText(up);
 }
 
 void ImageDraw::SltOnWaitTimeout()
@@ -440,6 +452,7 @@ void ImageDraw::SltOnAllowClick()
       break;
     case 3:
       pCTcpConnection->SendPathRequest();
+      break;
     case 4:
       pCTcpConnection->SendAllRequest();
       break;
@@ -448,6 +461,10 @@ void ImageDraw::SltOnAllowClick()
   }
 }
 
+void ImageDraw::SltOnRestoreClick()
+{
+
+}
 
 void ImageDraw::SltOperatorAction()
 {
@@ -455,4 +472,9 @@ void ImageDraw::SltOperatorAction()
           {
             WaitTimer->stop();
           }
+}
+
+void ImageDraw::SltGoalUpdated()
+{
+  pCTcpConnection->SendNewGoal(ui.mapWidget->GetGoal());
 }

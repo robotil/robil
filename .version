@@ -1,12 +1,12 @@
-V0.0.1.78
+V0.0.1.81
 ===========================================================
 C0_RobilTask     0.5
 C0_Scripts     0.27
 C10_Common     0.5
-C11_Agent     0.24
-C11_OperatorControl     0.29
-C21_VisionAndLidar     0.21
-C22_CompactGroundRecognitionAndMapping     0.10
+C11_Agent     0.25
+C11_OperatorControl     0.30
+C21_VisionAndLidar     0.22
+C22_CompactGroundRecognitionAndMapping     0.11
 C22_GroundRecognitionAndMapping     0.19
 C22_transformations     0.7
 C23_ObjectRecognition     0.33
@@ -23,7 +23,7 @@ C34_Executer     0.8
 C35_Monitoring     0.15
 C41_BodyControl     0.1
 C41_QuasiStaticWalking     0.9
-C41_QuasiStaticWalking_tools     0.15
+C41_QuasiStaticWalking_tools     0.16
 C42_DRCSim2_tools     0.2
 C42_DynamicLocomotion     0.12
 C42_Leg_IK     0.4

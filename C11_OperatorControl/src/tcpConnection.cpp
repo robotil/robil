@@ -206,18 +206,7 @@ void CTcpConnection::SltReadyRead()
                 return;
         }
         in >> msgId;
-        if(msgId == 45)
-          {
-        	char* s = new char(pConnection->bytesAvailable());
-        	pConnection->read(s,pConnection->bytesAvailable());
-        	std::cout<<"The Hello msg is: " << s << std::endl;
-            std::cout<<"TCP: Hello Received!\n";
-            return;
-          }
-        else
-          {
-   //         std::cout<<"TCP: msg id: " << msgId << "\n";
-          }
+
         bufSize = pConnection->bytesAvailable();
         if (pConnection->bytesAvailable() < (int)sizeof(unsigned int))
         {
@@ -275,6 +264,18 @@ void CTcpConnection::SltReadyRead()
             in >> message;
             pITcpConnectionInterface->OnVRCScoreData(timeSec,completionScore,falls,message);
           }
+        else if(7 == msgId)
+        {
+          QString down;
+          in >> down;
+          pITcpConnectionInterface->OnDownlinkUpdate(down);
+        }
+        else if(8 == msgId)
+        {
+          QString up;
+          in >> up;
+          pITcpConnectionInterface->OnUplinkUpdate(up);
+        }
         else if(31 == msgId)
 		  {
  //       	IsSendingExecuterStatus = true;
@@ -517,4 +518,46 @@ void CTcpConnection::SendAllRequest()
   pConnection->flush();
   pConnection->waitForBytesWritten();
   std::cout<<"TCP: SendAllRequest sent\n";
+}
+
+void CTcpConnection::SendNewGoal(StructPoint goal)
+{
+  WaitingForResponse = false;
+  StructHeader header;
+  header.MessageID = 21;
+  header.DataSize = 0;
+  header.Counter = Counter;
+  Counter++;
+  QByteArray block;
+  QDataStream out(&block, QIODevice::WriteOnly);
+  out.setByteOrder(QDataStream::LittleEndian);
+  out << header.MessageID;
+  out << header.DataSize;
+  out << header.Counter;
+  out << goal.x;
+  out << goal.y;
+  pConnection->write(block);
+  pConnection->flush();
+  pConnection->waitForBytesWritten();
+  std::cout<<"TCP: SendNewGoal sent\n";
+}
+
+void CTcpConnection::SendReset()
+{
+  WaitingForResponse = false;
+  StructHeader header;
+  header.MessageID = 22;
+  header.DataSize = 0;
+  header.Counter = Counter;
+  Counter++;
+  QByteArray block;
+  QDataStream out(&block, QIODevice::WriteOnly);
+  out.setByteOrder(QDataStream::LittleEndian);
+  out << header.MessageID;
+  out << header.DataSize;
+  out << header.Counter;
+  pConnection->write(block);
+  pConnection->flush();
+  pConnection->waitForBytesWritten();
+  std::cout<<"TCP: SendReset sent\n";
 }

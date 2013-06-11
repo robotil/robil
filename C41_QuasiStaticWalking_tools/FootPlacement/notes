@@ -1,12 +1,35 @@
-roslaunch C21_VisionAndLidar C21.launch 
-roslaunch C22_CompactGroundRecognitionAndMapping C22_Cheats.launch 
-rosrun C25_GlobalPosition  C25
+Testing the footplacement
+-------------------------
+run:
+roslaunch atlas_utils vrc_task_2.launch
+
+Then
+rosrun C42_DynamicLocomotion WalkerNode.py BDI
+rosrun C0_RobilTask task_tester WalkerNode_Continuous
+
+After both are running, kill after a few seconds (both)
 
 #need to move neck down for C22
+# Yuvals' script
+rosrun C42_DynamicLocomotion manipulate_msg.py
 
+rosrun C25_GlobalPosition    C25.launch
+roslaunch C22_CompactGroundRecognitionAndMapping C22_compact.launch
+roslaunch C21_VisionAndLidar C21.launch 
 
 rosrun FootPlacement  FootPlacement
 
+Now, either run a fake path
 #change FakePath.cpp to include real path
 rosrun FootPlacement FakePath 
 
+
+Or (better -- a different fake path within the pen)
+rosrun C42_DynamicLocomotion C31_Clone_VRC2_StartingPentoGate2.py
+
+
+Then
+rosrun C42_DynamicLocomotion WalkerNode.py DD
+
+Then
+rosrun C0_RobilTask task_tester WalkerNode_Discrete
