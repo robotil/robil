@@ -103,6 +103,7 @@ public:
     double y2;
 	double y;
 	double z;
+    bool _found;
 	int width;
 	int height;
     int last_x;

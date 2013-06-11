@@ -4,6 +4,9 @@
 #include <C23_ObjectRecognition/C23C0_OD.h>
 #include <C23_ObjectRecognition/C23C0_ODIM.h>
 #include "C23_Detector.hpp"
+#include <PoseController/neck_movement.h>
+#include <PoseController/back_movement.h>
+#include <std_srvs/Empty.h>
 
 
 using namespace std;
@@ -26,6 +29,9 @@ public:
 	C23_SearchObject(C23_Detector *detector) :
 			RobilTask("/searchObject"), _detector(detector) {
 		ROS_INFO("Instance of SearchObjectServer has started.");
+        c23_start_posecontroller = nh.serviceClient<std_srvs::Empty>("/PoseController/start");
+        c23_move_neck = nh.serviceClient<PoseController::neck_movement>("/PoseController/neck_movement");
+        c23_move_back = nh.serviceClient<PoseController::back_movement>("/PoseController/back_movement");
 		_detector->is_search = true;
 	}
 
@@ -38,19 +44,74 @@ public:
 		}
 		string target = getValueFromArgument(args, "target");
 		bool res;
+        int state =0;
+        double back_angle = 0;
+        double angle = -0.3;
 		while (!isPreempt()) {
-      res = _detector->detect(target);
-      if (_detector->x != -1) {
-          return TaskResult(SUCCESS, "OK");
-			} else {
-          return TaskResult(FAULT, "Object isn't detected");
-			}
+            ros::Rate loop_rate(1);
+            res = _detector->detect(target);
+            
+           if (_detector->_found) {
+          //   if (false) {
+                return TaskResult(SUCCESS, "OK");
+            } else {
+                std_srvs::Empty e;
+                PoseController::neck_movement msg;
+                PoseController::back_movement msg2;
+                if(angle > 0.7 && state == 4) {
+                        return TaskResult(FAULT, "Object isn't detected");
+                }
+                if(angle > 0.7 && state != 4) {
+                        angle = -0.3;
+                        state++;
+                    
+                } 
+                switch (state) {
+                    case 0:
+                        back_angle = 0;
+                        break;
+                    case 1:
+                        back_angle = 0.3;
+                        break;
+                    case 2:
+                        back_angle = -0.3;
+                        break;
+                    case 3:
+                        back_angle = 0.61;
+                        break;
+                    case 4:
+                        back_angle = -0.61;
+                        break;
+                }
+              
+                msg.request.neck_ay = angle;
+                angle+=0.1;
+                msg2.request.back_lbz = back_angle;
+                
+                c23_start_posecontroller.call(e);
+                if(c23_move_neck.call(msg))
+                {
+                
+                   // return TaskResult(SUCCESS, "OK");;
+                }         
+                if(c23_move_back.call(msg2))
+                {
+                    
+                   
+                }         
+              //  return TaskResult(FAULT, "Object isn't detected");
+            }   
+           loop_rate.sleep();
 		}
 	  return TaskResult(SUCCESS, "OK");
 	}
 
 private:
 	C23_Detector *_detector;
+    ros::ServiceClient  c23_start_posecontroller;
+    ros::ServiceClient  c23_move_neck,c23_move_back;
+    ros::NodeHandle nh;
+    
 
 };
 

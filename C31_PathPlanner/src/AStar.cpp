@@ -210,8 +210,13 @@ BStar::Path BStar::search(size_t sx, size_t sy, size_t gx, size_t gy){
 		 Point current  =  openset.top(); 						// the node in openset having the lowest f_score[] value
 		 P("openset -> "<<current)
 		 if( current == goal ){
-			 P("reconstruct_path")
-			 return reconstruct_path(came_from, goal);
+			 if(f_score[goal] > 100000){
+				 cout<<cout<<"WARNING: A*: path throw walls"<<std::endl;
+				 return Path();
+			 }else{
+				 P("reconstruct_path")
+				 return reconstruct_path(came_from, goal);
+			 }
 		 }
 
 		 openset.pop(); 										// remove current from openset
