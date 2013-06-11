@@ -6,3 +6,4 @@ float64 z
 float64 R
 float64 P
 float64 Y
+string status

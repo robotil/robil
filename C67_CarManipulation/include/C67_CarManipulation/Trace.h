@@ -19,6 +19,8 @@ public:
 
 };
 RPY TraceAngle(RPY center, RPY position, double angle);
+RPY TraceInverse(RPY A);
+RPY TraceAB(RPY A, RPY B);
 
 
 #endif /* TRACE_H_ */

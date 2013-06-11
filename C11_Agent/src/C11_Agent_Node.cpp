@@ -100,7 +100,7 @@ void C11_Agent_Node::run()
           loop_rate.sleep();
           ++count;
   }
-  std::cout << "Ros shutdown, proceeding to close the gui." << std::endl;
+  std::cout << "Ros shutdown, proceeding to close the agent." << std::endl;
 }
 
 bool C11_Agent_Node::MissionSelection(C10_Common::mission_selection::Request& req,
@@ -435,6 +435,7 @@ void C11_Agent_Node::PathUpdated(std::vector<StructPoint> points)
   }
   start_pos = 0;
   path_update_pub.publish(waypoints);
+  cout << "Path update sent with " <<  waypoints.points.size() << "points!" << endl;
 }
 
 void C11_Agent_Node::ImageRequest()
@@ -480,6 +481,7 @@ void C11_Agent_Node::CheckPath()
               waypoints.points.push_back(loc);
             }
             path_update_pub.publish(waypoints);
+            cout << "Path update sent with " <<  waypoints.points.size() << "points!" << endl;
           }
      }
 }

@@ -180,8 +180,9 @@ public:
 			  tf::Matrix3x3 mNew(newQ);
 			  mOld.getRPY(r1,p1,y1);
 
+			  last_msg.header=bdi_last_msg.header;
 			  last_msg.pose.header=bdi_last_msg.header;
-			  last_msg.pose.pose.pose.position.x=+bdi_delta_x;
+			  last_msg.pose.pose.pose.position.x+=bdi_delta_x;
 			  last_msg.pose.pose.pose.position.y+=bdi_delta_y;
 			  last_msg.pose.pose.pose.position.z+=bdi_delta_z;
 			  last_msg.pose.pose.pose.orientation.x=imu_last_msg.orientation.x;
@@ -228,9 +229,9 @@ public:
 			  tf::quaternionMsgToTF(pos_msg->pose.pose.orientation, newQ);
 			  tf::Matrix3x3 mNew(newQ);
 			  mOld.getRPY(r1,p1,y1);
-
+			  last_msg.header=pos_msg->header;
 			  last_msg.pose.header=pos_msg->header;
-			  last_msg.pose.pose.pose.position.x=+kalman_delta_x;
+			  last_msg.pose.pose.pose.position.x+=kalman_delta_x;
 			  last_msg.pose.pose.pose.position.y+=kalman_delta_y;
 			  last_msg.pose.pose.pose.position.z+=kalman_delta_z;
 			  last_msg.pose.pose.pose.orientation.x=pos_msg->pose.pose.orientation.x;

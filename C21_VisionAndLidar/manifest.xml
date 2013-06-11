@@ -13,6 +13,7 @@
   <depend package="nav_msgs"/>
   <depend package="sensor_msgs"/>
   <depend package="rospy"/>
+  <depend package="C25_GlobalPosition"/>
   <depend package="opencv2"/>
   <depend package="cv_bridge"/>
   <depend package="message_filters"/>
