@@ -47,6 +47,8 @@ public:
 	virtual void OnHMIResponseReceived();
 	virtual void OnExecuterStackUpdate(QString strQString);
 	virtual void OnVRCScoreData(double timeSec, int competionScore, int falls, QString message);
+	virtual void OnDownlinkUpdate(QString down);
+	virtual void OnUplinkUpdate(QString up);
 	/*virtual*/ void OnWaitResponseFinished();
 
 protected:

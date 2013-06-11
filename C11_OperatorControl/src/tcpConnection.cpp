@@ -275,6 +275,18 @@ void CTcpConnection::SltReadyRead()
             in >> message;
             pITcpConnectionInterface->OnVRCScoreData(timeSec,completionScore,falls,message);
           }
+        else if(7 == msgId)
+        {
+          QString down;
+          in >> down;
+          pITcpConnectionInterface->OnDownlinkUpdate(down);
+        }
+        else if(8 == msgId)
+        {
+          QString up;
+          in >> up;
+          pITcpConnectionInterface->OnUplinkUpdate(up);
+        }
         else if(31 == msgId)
 		  {
  //       	IsSendingExecuterStatus = true;

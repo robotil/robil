@@ -16,6 +16,8 @@ C11Main::C11Main(int argc, char **argv)
   connect(this,SIGNAL(SigOnExecutionStatusChange(int)),this,SLOT(SltOnExecutionStatusChange(int)));
   connect(this,SIGNAL(SigOnSendExecuterStack(QString)),this,SLOT(SltOnSendExecuterStack(QString)));
   connect(this,SIGNAL(SigOnVRCScoreData(double,int,int,QString)),this,SLOT(SltOnVRCScoreData(double,int,int,QString)));
+  connect(this,SIGNAL(SigOnSendDownlink(QString)),this,SLOT(SltOnSendDownlink(QString)));
+  connect(this,SIGNAL(SigOnSendUplink(QString)),this,SLOT(SltOnSendUplink(QString)));
 }
 
 C11Main::~C11Main()
@@ -79,6 +81,16 @@ void C11Main::SendVRCScoreData(double timeSec, int competionScore, int falls, QS
   emit SigOnVRCScoreData(timeSec,competionScore,falls,message);
 }
 
+void C11Main::SendDownlink(QString down)
+{
+  emit SigOnSendDownlink(down);
+}
+
+void C11Main::SendUplink(QString up)
+{
+  emit SigOnSendUplink(up);
+}
+
 void C11Main::SltOnImageSend(QImage img)
 {
   pCTcpServer->SendImage(img);
@@ -117,6 +129,16 @@ void C11Main::SltOnSendExecuterStack(QString str)
 void C11Main::SltOnVRCScoreData(double timeSec, int competionScore, int falls, QString message)
 {
   pCTcpServer->SendVRCScoreData(timeSec,competionScore,falls,message);
+}
+
+void C11Main::SltOnSendDownlink(QString down)
+{
+  pCTcpServer->SendDownlink(down);
+}
+
+void C11Main::SltOnSendUplink(QString up)
+{
+  pCTcpServer->SendUplink(up);
 }
 
 void C11Main::SltHMIResponded()

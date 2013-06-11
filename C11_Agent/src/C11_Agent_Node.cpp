@@ -80,6 +80,8 @@ bool C11_Agent_Node::init()
     robot_pos_subscriber = nh_->subscribe("C25/publish",1000,&C11_Agent_Node::RobotPosUpdateCallback,this);
     robot_pos_subscriber = nh_->subscribe("executer/stack_stream",1000,&C11_Agent_Node::ExecuterStackSubscriber,this);
     vrc_score_subscriber = nh_->subscribe("vrc_score",1000,&C11_Agent_Node::VRCScoreSubscriber,this);
+    downlink_subscriber = nh_->subscribe("vrc/bytes/remaining/downlink",1000,&C11_Agent_Node::DownlinkSubscriber,this);
+    uplink_subscriber = nh_->subscribe("vrc/bytes/remaining/uplink",1000,&C11_Agent_Node::UplinkSubscriber,this);
 
 
     pushS = new PushHMIServer();
@@ -497,6 +499,18 @@ void C11_Agent_Node::VRCScoreSubscriber(const atlas_msgs::VRCScore& vrcScore)
 //  cout<<vrcScore<<endl;
   QString str(vrcScore.message.data());
   pIAgentInterface->SendVRCScoreData(vrcScore.sim_time.toSec(),vrcScore.completion_score,vrcScore.falls,str);
+}
+
+void C11_Agent_Node::DownlinkSubscriber(const std_msgs::StringConstPtr& down)
+{
+  QString str(down->data.data());
+  pIAgentInterface->SendDownlink(str);
+}
+
+void C11_Agent_Node::UplinkSubscriber(const std_msgs::StringConstPtr& up)
+{
+  QString str(up->data.data());
+  pIAgentInterface->SendUplink(str);
 }
 
 void C11_Agent_Node::CheckPath()

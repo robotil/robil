@@ -408,3 +408,47 @@ void CTcpServer::SendVRCScoreData(double timeSec, int competionScore, int falls,
   pClientConnection->waitForBytesWritten();
 //  std::cout<<"TCP: SendVRCScoreData sent\n";
 }
+
+void CTcpServer::SendDownlink(QString down)
+{
+  if(NULL == pClientConnection)
+  {
+    std::cout<<"TCP: No connection\n";
+    return;
+  }
+  StructHeader header;
+  header.MessageID = 7;
+  header.DataSize = 0;
+  header.Counter = Counter;
+  Counter++;
+  QByteArray block;
+  QDataStream out(&block, QIODevice::WriteOnly);
+  out.setByteOrder(QDataStream::LittleEndian);
+  out << header;
+  out << down;
+  pClientConnection->write(block);
+  pClientConnection->flush();
+  pClientConnection->waitForBytesWritten();
+}
+
+void CTcpServer::SendUplink(QString up)
+{
+  if(NULL == pClientConnection)
+  {
+    std::cout<<"TCP: No connection\n";
+    return;
+  }
+  StructHeader header;
+  header.MessageID = 8;
+  header.DataSize = 0;
+  header.Counter = Counter;
+  Counter++;
+  QByteArray block;
+  QDataStream out(&block, QIODevice::WriteOnly);
+  out.setByteOrder(QDataStream::LittleEndian);
+  out << header;
+  out << up;
+  pClientConnection->write(block);
+  pClientConnection->flush();
+  pClientConnection->waitForBytesWritten();
+}

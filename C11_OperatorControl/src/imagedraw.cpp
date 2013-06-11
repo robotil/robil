@@ -217,6 +217,16 @@ void ImageDraw::OnVRCScoreData(double timeSec, int competionScore, int falls, QS
   update();
 }
 
+void ImageDraw::OnDownlinkUpdate(QString down)
+{
+  ui.lblDownlinkData->setText(down);
+}
+
+void ImageDraw::OnUplinkUpdate(QString up)
+{
+  ui.lblUplinkData->setText(up);
+}
+
 void ImageDraw::SltOnWaitTimeout()
 {
   std::cout << "SltOnWaitTimeout" << std::endl;

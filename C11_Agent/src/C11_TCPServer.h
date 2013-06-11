@@ -45,6 +45,8 @@ public:
         void SendExecutionStatusChange(int status);
         void SendExecuterStack(QString str);
         void SendVRCScoreData(double timeSec, int competionScore, int falls, QString message);
+        void SendDownlink(QString str);
+        void SendUplink(QString str);
         void SendHello();
 
 private:
