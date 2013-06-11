@@ -57,13 +57,25 @@ class AP_WalkingMode(WalkingMode):
         self._bRobotIsStatic = True
         self._bGotStaticPose = False
         self._BDI_Static_pose = Pose()
+        self._started_to_walk = False
+        self._target_pose = None
+        ## USING parameters:
+        # parameter 'Object' uses service to get delta alignment to target object 
         if ((None != parameters) and ('Object' in parameters)):
             self._DesiredObject = parameters['Object']
         else:
             self._DesiredObject="delta"
-
-        rospy.wait_for_service('C23/C66')
-        self._foot_placement_client = rospy.ServiceProxy('C23/C66', C23_orient) # object recognition service
+        # parameter 'turn_in_place_Yaw' uses the parameter of the Yaw angle to turn in place 
+        if ((None != parameters) and ('turn_in_place_Yaw' in parameters)):
+            self._target_pose = "Rotate_in_Place"
+            self._delta_yaw = float(parameters['turn_in_place_Yaw'])
+            self._delta_trans = Point()
+            self._delta_trans.x = 0.0
+            self._delta_trans.y = 0.0
+            self._delta_trans.z = 0.0
+        else:
+            rospy.wait_for_service('C23/C66')
+            self._foot_placement_client = rospy.ServiceProxy('C23/C66', C23_orient) # object recognition service
         # rospy.wait_for_service('foot_aline_pose')
         # self._foot_placement_client = rospy.ServiceProxy('foot_aline_pose', C23_orient) # clone_service
         # Subscribers:
@@ -156,30 +168,46 @@ class AP_WalkingMode(WalkingMode):
         self._stepWidth = 0.3 # Width of stride
         self._R = self._stepWidth/2 # Radius of turn, turn in place
 
-        print("Request Target Pose to ",desired_object)
         # Perform a service request from FP
         try:
             # Handle preemption?
                 # if received a "End of mission" sort of message from FP
             #start_pose,other_foot_pose = self._GetStartingFootPose()
-            resp_target_pose = self._foot_placement_client(desired_object) # "target: 'Firehose'") # 
-            print("Got from C23/C66 service the following Pose:",resp_target_pose)
-            delta_yaw, delta_trans = self._GetDeltaToObject(desired_object,resp_target_pose)
+            if None == self._target_pose:
+                print("Request Target Pose to ",desired_object)
+                self._target_pose = self._foot_placement_client(desired_object) # "target: 'Firehose'") # 
+                print("Got from C23/C66 service the following Pose:",self._target_pose)
+                delta_yaw, delta_trans = self._GetDeltaToObject(desired_object,self._target_pose)
+            elif "Rotate_in_Place" == self._target_pose and not self._started_to_walk:
+                delta_yaw = self._delta_yaw
+                delta_trans = self._delta_trans
+            else:
+                delta_yaw = 0.0
+                delta_trans = Point()
+                delta_trans.x = 0.0
+                delta_trans.y = 0.0
+                delta_trans.z = 0.0
                         
             start_position = copy.copy(self._BDI_Static_pose.position)
             start_orientation = euler_from_quaternion([self._BDI_Static_pose.orientation.x, self._BDI_Static_pose.orientation.y, self._BDI_Static_pose.orientation.z, self._BDI_Static_pose.orientation.w])
             self._foot_placement_path = []
             if math.fabs(delta_yaw) > err_rot:
                 self._foot_placement_path = self._foot_placement_path + self._GetRotationDeltaFP_Path(delta_yaw,start_position,start_orientation)
+                self._started_to_walk = True
             if self._DistanceXY(delta_trans) > err_trans:
                 self._foot_placement_path = self._foot_placement_path + self._GetTranslationDeltaFP_Path(delta_yaw,delta_trans,start_position,start_orientation)
+                self._started_to_walk = True
 
             #listSteps = []
             # if (math.fabs(delta_yaw) <= err_rot) and (self._DistanceXY(delta_trans) <= err_trans): # finished task
-            if [] == self._foot_placement_path: # 1 == resp.done:
+            if [] == self._foot_placement_path and self._started_to_walk: # 1 == resp.done:
                 self._WalkingModeStateMachine.PerformTransition("Finished")
                 # if big error need to finish with error (didn't reach goal)
             else:
+                if not self._started_to_walk:
+                    self._started_to_walk = True
+                    ## Step in place: two first steps
+                    self._foot_placement_path = self._GetTwoFirstStepFP_Path(start_position,start_orientation,False)
                 listSteps = []
                 for desired in self._foot_placement_path:
                     command = AtlasSimInterfaceCommand()
