@@ -48,5 +48,5 @@ C23_ObjectRecogition TO DO
 3. Add 3D models to each of the objects inside the car
 4. SVM?
 5. Check cases not working
-6. Add transformations to pelvis function
-7. Make sure all transformations work
+6. Add transformations to pelvis function done
+7. Make sure all transformations work ??
