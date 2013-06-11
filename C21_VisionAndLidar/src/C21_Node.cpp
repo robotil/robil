@@ -162,10 +162,10 @@ public:
 		  //grab the cloud frame from the sensor
 		  for(int i=yMin;i<=yMax;i++){
 			  for(int j=xMin;j<=xMax;j++){
-                                  if(i * t.width + j<t.points.size()){
+                                  //if(i * t.width + j<t.points.size()){
 					pcl::PointXYZRGB p=faker.at(i,j);
 					t.push_back(p);
-				  }
+				  //}
 			  }
 		  }
 
