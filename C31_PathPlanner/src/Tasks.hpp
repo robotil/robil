@@ -265,8 +265,8 @@ public:
 		ROS_INFO("subscribe to topic /C22_pub <C22_GroundRecognitionAndMapping::C22C0_PATH>");
     	ros::Subscriber c22c0Client = _node.subscribe("C22_pub", 1000, &PathPlanningServer::callbackNewMap, this );
     	
-		ROS_INFO("subscribe to topic /C23/object_deminsions <C23_ObjectRecognition::C23C0_ODIM>");
-		ros::Subscriber c23Client = _node.subscribe("C23/object_deminsions", 1000, &PathPlanningServer::callbackNewTargetLocation, this );
+		ROS_INFO("subscribe to topic /C23/object_globalPosition <C23_ObjectRecognition::C23C0_GP>");
+		ros::Subscriber c23Client = _node.subscribe("C23/object_globalPosition", 1000, &PathPlanningServer::callbackNewTargetLocation, this );
 
 		ROS_INFO("subscribe to topic /c11_path_update <C31_PathPlanner/C31_Waypoints>");
 		ros::Subscriber c11Client = _node.subscribe("/c11_path_update", 1000, &PathPlanningServer::callbackTransitPoints, this );
@@ -564,19 +564,48 @@ public:
     	SYNCH(SET_CURRENT_TIME(statistic.time_targetLocation_lastRequest));
     	//onNewTargetLocation(NEW_TARGET_LOCATION_GPS)
     }
-    void callbackNewTargetLocation(const C23_ObjectRecognition::C23C0_ODIM::ConstPtr & msg){
+//    void callbackNewTargetLocation(const C23_ObjectRecognition::C23C0_ODIM::ConstPtr & msg){
+//    	std::string objectName = "";
+//    	{
+//    		PathPlanning::ReadSession session = _planner.startReading();
+//    		objectName = session.arguments.targetGoal;
+//    	}
+//    	if( objectName == msg->Object ){
+//    		GPSPoint pos = extractObjectLocation( *msg );
+//    		if( fabs(pos.x) > 1000 || fabs(pos.y) > 1000 ){
+//    			ROS_ERROR("WARNING: Target position is incorrect: (%f,%f)", pos.x, pos.y);
+//    			throw_exception(C31_PathPlanner::C31_Exception::TYPE_TARGETPOSITIONINCORRECT, "Target position is incorrect. use previous one.");
+//    		}
+//    		else onNewTargetLocation( pos );
+//    	}
+//	}
+    void callbackNewTargetLocation(const C23_ObjectRecognition::C23C0_GP::ConstPtr & msg){
     	std::string objectName = "";
     	{
     		PathPlanning::ReadSession session = _planner.startReading();
     		objectName = session.arguments.targetGoal;
     	}
     	if( objectName == msg->Object ){
-    		GPSPoint pos = extractObjectLocation( *msg );
-    		if( fabs(pos.x) > 1000 || fabs(pos.y) > 1000 ){
-    			ROS_ERROR("WARNING: Target position is incorrect: (%f,%f)", pos.x, pos.y);
-    			throw_exception(C31_PathPlanner::C31_Exception::TYPE_TARGETPOSITIONINCORRECT, "Target position is incorrect. use previous one.");
+    		std::vector<GPSPoint> poses = extractObjectLocation( *msg );
+    		bool ok = true;
+    		{
+    			GPSPoint& pos = poses[0];
+				if( fabs(pos.x) > 1000 || fabs(pos.y) > 1000 ){
+					ROS_ERROR("WARNING: Target position is incorrect: (%f,%f)", pos.x, pos.y);
+					throw_exception(C31_PathPlanner::C31_Exception::TYPE_TARGETPOSITIONINCORRECT, "Target position is incorrect. use previous one.");
+					ok=false;
+				}
     		}
-    		else onNewTargetLocation( pos );
+    		{
+    			GPSPoint& pos = poses[1];
+				if( fabs(pos.x) > 1000 || fabs(pos.y) > 1000 ){
+					ROS_ERROR("WARNING: Target Direction position is incorrect: (%f,%f)", pos.x, pos.y);
+					throw_exception(C31_PathPlanner::C31_Exception::TYPE_TARGETPOSITIONINCORRECT, "Target position is incorrect. use previous one.");
+					//ok=false;
+					pos.undef();
+				}
+    		}
+    		if(ok) onNewTargetLocation( poses );
     	}
 	}
     void callbackTransitPoints(const C31_PathPlanner::C31_Waypoints::ConstPtr & msg){
@@ -602,8 +631,14 @@ public:
     	session.arguments.map = map;
     	session.arguments.mapProperties = prop;
     	session.arguments.start = _planner.cast(session.arguments.selfLocation);
-    	if(session.arguments.targetDefined)
+    	if(session.arguments.targetDefined){
     		session.arguments.finish = _planner.cast(session.arguments.targetPosition);
+    		if(session.arguments.targetDirPosition.defined)
+				session.arguments.finishDir = _planner.castWP(session.arguments.targetDirPosition);
+			else{
+				ROS_INFO("GPS_GRID_CASTING: targetDirPosition is undefined (from newMap)");
+			}
+    	}
     	session.constraints.dimentions.radius = _planner.castLength(session.constraints.dimentions.gps_radius);
     	session.constraints.transits = _planner.castToTransits(session.constraints.gps_transits);
 		ROS_INFO("GPS_GRID_CASTING: start=*(%f,%f)->(%i,%i), finish=*(%f,%f)->(%i,%i), robot.R=*%f->%i (from onNewMap)",
@@ -630,10 +665,28 @@ public:
 		);
     }
     void onNewTargetLocation(const GPSPoint& pos){
+    	struct FUNCTION_NOT_IN_USE{};  	throw FUNCTION_NOT_IN_USE();
+//    	PathPlanning::EditSession session = _planner.startEdit();
+//    	session.arguments.defineTarget( pos );
+//    	if(session.arguments.targetDefined)
+//    		session.arguments.finish = _planner.cast(session.arguments.targetPosition);
+//		ROS_INFO("GPS_GRID_CASTING: start=(%f,%f)->(%i,%i), finish=#(%f,%f)->(%i,%i), robot.R=%f->%i (from onNewTargetLocation)",
+//			(float) session.arguments.selfLocation.x, (float) session.arguments.selfLocation.y, (int) session.arguments.start.x, (int) session.arguments.start.y,
+//			(float) session.arguments.targetPosition.x,(float)  session.arguments.targetPosition.y, (int) session.arguments.finish.x,(int) session.arguments.finish.y,
+//			(float) session.constraints.dimentions.gps_radius, (int) session.constraints.dimentions.radius
+//		);
+    }
+    void onNewTargetLocation(const vector<GPSPoint>& poses){
     	PathPlanning::EditSession session = _planner.startEdit();
-    	session.arguments.defineTarget( pos );
-    	if(session.arguments.targetDefined)
+    	session.arguments.defineTarget( poses[0], poses[1] );
+    	if(session.arguments.targetDefined){
     		session.arguments.finish = _planner.cast(session.arguments.targetPosition);
+    		if(session.arguments.targetDirPosition.defined)
+    			session.arguments.finishDir = _planner.castWP(session.arguments.targetDirPosition);
+    		else{
+    			ROS_INFO("GPS_GRID_CASTING: targetDirPosition is undefined (from newTarget)");
+    		}
+    	}
 		ROS_INFO("GPS_GRID_CASTING: start=(%f,%f)->(%i,%i), finish=#(%f,%f)->(%i,%i), robot.R=%f->%i (from onNewTargetLocation)",
 			(float) session.arguments.selfLocation.x, (float) session.arguments.selfLocation.y, (int) session.arguments.start.x, (int) session.arguments.start.y,
 			(float) session.arguments.targetPosition.x,(float)  session.arguments.targetPosition.y, (int) session.arguments.finish.x,(int) session.arguments.finish.y,
@@ -693,7 +746,8 @@ public:
 				return TaskResult(FAULT, "Map is not ready");
 			}
 
-			session.arguments.defineTarget(TargetPosition(x,y));
+			TargetPosition tar(x,y);
+			session.arguments.defineTarget(tar,tar);
 			if(session.arguments.targetDefined)
 				session.arguments.finish = _planner.cast(session.arguments.targetPosition);
 

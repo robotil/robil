@@ -39,8 +39,10 @@ public:
 	const Map& map;
 	const Waypoint& start;
 	const Waypoint& finish;
+	const Vec2d& finishDir;
 	const bool& targetDefined;
 	const TargetPosition& targetPosition;
+	const TargetPosition& targetDirPosition;
 	const TargetGoal& targetGoal;
 	const GPSPoint& selfLocation;
 	const MapProperties& mapProperties;
@@ -48,17 +50,19 @@ public:
 		const Map& map, 
 		const Waypoint& start, 
 		const Waypoint& finish,
+		const Vec2d& finishDir,
 		const bool& targetDef,
 		const TargetPosition& targetPos, 
+		const TargetPosition& targetDirPos,
 		const TargetGoal& targetGoal, 
 		const GPSPoint& sloc, 
 		const MapProperties& mapProperties)
 	:
 		map(map), 
 		start(start), 
-		finish(finish), 
+		finish(finish),finishDir(finishDir),
 		targetDefined(targetDef),
-		targetPosition(targetPos), 
+		targetPosition(targetPos),targetDirPosition(targetDirPos),
 		targetGoal(targetGoal), 
 		selfLocation(sloc), 
 		mapProperties(mapProperties)
@@ -69,9 +73,11 @@ public:
 	Map& map;
 	Waypoint& start;
 	Waypoint& finish;
+	Vec2d& finishDir;
 public:
 	bool& targetDefined;
 	TargetPosition& targetPosition;
+	TargetPosition& targetDirPosition;
 	TargetGoal& targetGoal;
 public:
 	GPSPoint& selfLocation;
@@ -79,9 +85,9 @@ public:
 	Editable_PlanningArguments(
 		Map& map, 
 		Waypoint& start, 
-		Waypoint& finish,
+		Waypoint& finish, Vec2d& finishDir,
 		bool& targetDef,
-		TargetPosition& targetPos, 
+		TargetPosition& targetPos, TargetPosition& targetDirPos,
 		TargetGoal& targetGoal,
 		GPSPoint& sloc, 
 		MapProperties& mapProperties
@@ -89,9 +95,9 @@ public:
 	:
 		map(map), 
 		start(start), 
-		finish(finish), 
+		finish(finish), finishDir(finishDir),
 		targetDefined(targetDef),
-		targetPosition(targetPos), 
+		targetPosition(targetPos), targetDirPosition(targetDirPos),
 		targetGoal(targetGoal),
 		selfLocation(sloc), 
 		mapProperties(mapProperties)
@@ -101,9 +107,11 @@ public:
 		targetDefined = false;
 		targetGoal = goal;
 	}
-	void defineTarget(const TargetPosition& pos){
+	void defineTarget(const TargetPosition& pos, const TargetPosition& posDir ){
 		targetDefined = true;
 		targetPosition = pos;
+		targetDirPosition = posDir;
+		if(&pos==&posDir) targetDirPosition.undef();
 	}
 //	bool getTargetDefined()const{ return targetDefined; }
 //	const TargetGoal& getTargetGoal()const{ return targetGoal; }
@@ -160,6 +168,8 @@ class PathPlanning{
 	//-------------- DATA ------------------------------
 	bool targetDefined;
 	TargetPosition targetPosition;
+	Vec2d finishDir;
+	TargetPosition targetDirPosition;
 	TargetGoal targetGoal;
 	GPSPoint selfLocation;
 	MapProperties mapProperties;
@@ -189,6 +199,7 @@ public:
 		//temporal data
 		targetDefined(false),
 		targetPosition(0,0), 
+		finishDir(0,0),targetDirPosition(0,0),
 		targetGoal(""),
 		selfLocation(0,0), 
 		mapProperties(0.25, GPSPoint(0,0), Waypoint(0,0)),
@@ -199,10 +210,10 @@ public:
 		path(),
 		//parameters interfaces
 		//...read-only
-		   arguments(data.map, data.start, data.finish, targetDefined, targetPosition, targetGoal, selfLocation, mapProperties),
+		   arguments(data.map, data.start, data.finish, finishDir, targetDefined, targetPosition, targetDirPosition, targetGoal, selfLocation, mapProperties),
 		   constraints(data.dimentions, data.transits, data.attractors), results(path),
 		//...read-write
-		ed_arguments(data.map, data.start, data.finish, targetDefined, targetPosition, targetGoal, selfLocation, mapProperties),
+		ed_arguments(data.map, data.start, data.finish, finishDir, targetDefined, targetPosition, targetDirPosition, targetGoal, selfLocation, mapProperties),
 		ed_constraints(data.dimentions, data.transits, gps_transits, data.attractors)
 	{
 
@@ -265,6 +276,7 @@ public:
 	double castWPLength(double cell)const;
 	Waypoint cast(const GPSPoint& gps)const;
 	GPSPoint cast(const Waypoint& wp)const;
+	Vec2d castWP(const GPSPoint& gps)const;
 	GPSPoint cast(const Vec2d& wp)const;
 	std::vector<Waypoint> cast(const std::vector<GPSPoint>& gps_vector)const;
 	std::vector<TransitWaypoint> castToTransits(const std::vector<GPSPoint>& gps_vector)const;

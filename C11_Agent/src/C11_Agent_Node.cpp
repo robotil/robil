@@ -78,7 +78,8 @@ bool C11_Agent_Node::init()
     service_ResumeSelection = nh_->advertiseService("ResumeMission", &C11_Agent_Node::ResumeMission,this);
     service_PathUpdate = nh_->advertiseService("PathUpdate", &C11_Agent_Node::PathUpdate,this);
     robot_pos_subscriber = nh_->subscribe("C25/publish",1000,&C11_Agent_Node::RobotPosUpdateCallback,this);
-    robot_pos_subscriber = nh_->subscribe("executer/stack_stream",1000,&C11_Agent_Node::ExecuterStackSubscriber,this);;
+    robot_pos_subscriber = nh_->subscribe("executer/stack_stream",1000,&C11_Agent_Node::ExecuterStackSubscriber,this);
+    vrc_score_subscriber = nh_->subscribe("vrc_score",1000,&C11_Agent_Node::VRCScoreSubscriber,this);
 
 
     pushS = new PushHMIServer();
@@ -219,6 +220,26 @@ bool C11_Agent_Node::ResumeMission(C10_Common::resume_mission::Request& req,
     }
 }
 
+void C11_Agent_Node::Stop()
+{
+  if(!tree_id_str.empty())
+     c34StopClient = nh_->serviceClient<C34_Executer::stop>("executer/stop");
+  C34_Executer::stop srv34Stop;
+  srv34Stop.request.tree_id = tree_id_str;
+  if (!c34StopClient.call(srv34Stop))
+  {
+          ROS_ERROR("stop of mission error, exiting\n");
+  }
+  else
+  {
+          ROS_INFO("Stop request sent\n");
+  }
+  if(pIAgentInterface != NULL)
+  {
+    pIAgentInterface->ExecutionStatusChanged(2);
+  }
+}
+
 bool C11_Agent_Node::PathUpdate(C10_Common::path_update::Request& req,
                 C10_Common::path_update::Response& res)
 {
@@ -232,7 +253,7 @@ void C11_Agent_Node::StopExecuteMessageCallback(const std_msgs::StringConstPtr& 
 {
   ROS_INFO(msg->data.data());
   if(!tree_id_str.empty())
-  c34StopClient = nh_->serviceClient<C34_Executer::stop>("executer/stop");
+   c34StopClient = nh_->serviceClient<C34_Executer::stop>("executer/stop");
   C34_Executer::stop srv34Stop;
   srv34Stop.request.tree_id = tree_id_str;
   if (!c34StopClient.call(srv34Stop))
@@ -453,15 +474,29 @@ void C11_Agent_Node::PathRequest()
   pushS->path_task();
 }
 
+void C11_Agent_Node::AllRequest()
+{
+  pushS->panoramic_image_task();
+  pushS->occupancy_grid_task();
+  pushS->path_task();
+}
+
 void C11_Agent_Node::ExecuterStackSubscriber(const std_msgs::StringConstPtr& stack)
 {
-	cout<<"ExecuterStackSubscriber received data"<< endl;
+//	cout<<"ExecuterStackSubscriber received data"<< endl;
 //	cout<<"ExecuterStackUpdate: "<< stack << "\n";
 //	cout<<endl<<endl<<endl<<endl<<endl<<endl;
 	QString str(stack->data.data());
 	pIAgentInterface->SendExecuterStack(str);
 //	cout<<"ExecuterStackUpdate: "<< str.toStdString() << "\n";
 
+}
+
+void C11_Agent_Node::VRCScoreSubscriber(const atlas_msgs::VRCScore& vrcScore)
+{
+//  cout<<vrcScore<<endl;
+  QString str(vrcScore.message.data());
+  pIAgentInterface->SendVRCScoreData(vrcScore.sim_time.toSec(),vrcScore.completion_score,vrcScore.falls,str);
 }
 
 void C11_Agent_Node::CheckPath()

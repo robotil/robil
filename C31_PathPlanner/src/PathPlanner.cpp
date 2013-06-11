@@ -74,6 +74,10 @@ typedef World Map;
 			LOCK( locker_aft )
 				path = _path;
 				plan_created = path.size()>0;
+				if(plan_created && targetDirPosition.defined){
+					ROS_INFO("PathPlanning::plan : target dir point appended to path");
+					path.push_back(finishDir);
+				}
 			UNLOCK( locker_aft )
 		}else{
 			ROS_INFO("PathPlanning::plan : %s","map is not ready => can not calculate path");
@@ -151,8 +155,29 @@ typedef World Map;
 			data.map.approximate(arguments.start.x, arguments.start.y, x, y);
 		}
 
-		return Waypoint((size_t)x, (size_t)y);
+		Waypoint wp((size_t)x, (size_t)y);
+		if(gps.defined==false) wp.undef();
+		return wp;
+	}
+	Vec2d PathPlanning::castWP(const GPSPoint& gps)const{
 
+		if(isMapReady()==false){
+			return Vec2d(0,0);
+		}
+
+		CREATE_TRANSFORMATION(trans)
+		Vec2d t, v(gps.x, gps.y);
+		trans.GlobalToMap(v, t);
+		long x ( round(t.x) );
+		long y ( round(t.y) );
+
+		if(data.map.inRange(x, y)==false){
+			ROS_INFO(STR("x or y not in map range: "<<x<<","<<y));
+			data.map.approximate(arguments.start.x, arguments.start.y, x, y);
+			return Vec2d(x,y);
+		}
+
+		return Vec2d(t.x, t.y);
 	}
 	GPSPoint PathPlanning::cast(const Waypoint& wp)const{
 
@@ -166,8 +191,9 @@ typedef World Map;
 		double x ( t.x );
 		double y ( t.y );
 
-		return GPSPoint(x, y);
-
+		GPSPoint gps(x, y);
+		if(wp.defined==false) gps.undef();
+		return gps;
 	}
 
 	double PathPlanning::castWP(double cell)const{
@@ -228,7 +254,8 @@ typedef World Map;
 				ROS_INFO(STR("x or y not in map range: "<<x<<","<<y));
 				data.map.approximate(arguments.start.x, arguments.start.y, x, y);
 			}
-
+			Waypoint wp((size_t)x, (size_t)y);
+			if(gps_vector[i].defined==false) wp.undef();
 			wp_vector.push_back( Waypoint((size_t)x, (size_t)y) );
 
 		}

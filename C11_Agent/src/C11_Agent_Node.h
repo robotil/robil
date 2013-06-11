@@ -11,6 +11,7 @@
 #include "ros/ros.h"
 #include "ros/package.h"
 #include "std_msgs/String.h"
+#include "atlas_msgs/VRCScore.h"
 #include "C11_PushServer.hpp"
 #include "C11_HMIResponseServer.hpp"
 #include "C11_UntilOperatorIntervention.hpp"
@@ -29,6 +30,7 @@ public:
   virtual void HMIResponse() = 0;
   virtual void ExecutionStatusChanged(int status) = 0;
   virtual void SendExecuterStack(QString) = 0;
+  virtual void SendVRCScoreData(double timeSec, int competionScore, int falls, QString message) = 0;
 };
 
 class C11_Agent_Node : public QThread, public IPushHMIInterface, public IHMIResponseInterface
@@ -59,11 +61,15 @@ public:
 
   void ExecuterStackSubscriber(const std_msgs::StringConstPtr& stack);
 
+  void VRCScoreSubscriber(const atlas_msgs::VRCScore& vrcScore);
+
   void SetReleased();
 
   void Pause();
 
   void Resume();
+
+  void Stop();
 
   void HMIResponded();
 
@@ -76,6 +82,8 @@ public:
   void GridRequest();
 
   void PathRequest();
+
+  void AllRequest();
 
   virtual void PushImage(QImage img);
   virtual void PushGrid(StructGridData grid);
@@ -96,6 +104,7 @@ private:
   ros::Subscriber status_subscriber;
   ros::Subscriber robot_pos_subscriber;
   ros::Subscriber executer_stack_subscriber;
+  ros::Subscriber vrc_score_subscriber;
   ros::ServiceClient c34StopClient;
   ros::ServiceClient c11ExecutionStatusChangeClient;
   ros::ServiceClient c34RunClient;

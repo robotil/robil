@@ -16,6 +16,7 @@ class C11Main: public QObject, public IAgentInterface
           void SigOnHMIResponse();
           void SigOnExecutionStatusChange(int status);
           void SigOnSendExecuterStack(QString);
+          void SigOnVRCScoreData(double timeSec, int competionScore, int falls, QString message);
 
   public Q_SLOTS:
     void SltOnImageSend(QImage img);
@@ -25,6 +26,7 @@ class C11Main: public QObject, public IAgentInterface
     void SltHMIResponded();
     void SltOnExecutionStatusChange(int status);
     void SltOnSendExecuterStack(QString);
+    void SltOnVRCScoreData(double timeSec, int competionScore, int falls, QString message);
     void SltPause();
     void SltResume();
     void SltLoadMission(int MissionId);
@@ -32,6 +34,8 @@ class C11Main: public QObject, public IAgentInterface
     void SltImageRequest();
     void SltGridRequest();
     void SltPathRequest();
+    void SltAllRequest();
+    void SltStopRequest();
 
 public:
   C11Main(int argc, char **argv);
@@ -45,6 +49,7 @@ public:
   virtual void HMIResponse();
   virtual void ExecutionStatusChanged(int status);
   virtual void SendExecuterStack(QString);
+  virtual void SendVRCScoreData(double timeSec, int competionScore, int falls, QString message);
 
 private:
   C11_Agent_Node* pC11Node;

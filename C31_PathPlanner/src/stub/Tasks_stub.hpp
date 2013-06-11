@@ -14,8 +14,8 @@
 
 #include "C22_GroundRecognitionAndMapping/C22C0_PATH.h"
 
-#include <C23_ObjectRecognition/C23C0_OD.h>
-#include <C23_ObjectRecognition/C23C0_ODIM.h>
+//#include <C23_ObjectRecognition/C23C0_OD.h>
+//#include <C23_ObjectRecognition/C23C0_ODIM.h>
 
 #include <vector>
 
@@ -428,8 +428,8 @@ public:
 		ROS_INFO("subscribe to topic /C22_pub_stub <C31_PathPlanner::C31_Location>");
     	ros::Subscriber c22c0TestClient = _node.subscribe("C22_pub_stub", 1000, &ObjectRecognition::callbackTestPosition, this );
 
-    	ROS_INFO("advertise topic /C23/object_deminsions <C23_ObjectRecognition::C23C0_ODIM>");
-    	ros::Publisher c23_dim = _node.advertise<C23_ObjectRecognition::C23C0_ODIM>("/C23/object_deminsions", 10);
+//    	ROS_INFO("advertise topic /C23/object_deminsions <C23_ObjectRecognition::C23C0_ODIM>");
+//    	ros::Publisher c23_dim = _node.advertise<C23_ObjectRecognition::C23C0_ODIM>("/C23/object_deminsions", 10);
 
     	if(args.find("target")!=args.end()){
     		objectName = args["target"];
@@ -440,7 +440,7 @@ public:
     			return TaskResult::Preempted();
     		}
 
-    		publishObjectLocation(c23_dim);
+    		//publishObjectLocation(c23_dim);
 
     		sleep(1000); //millisec
     	}
@@ -455,15 +455,15 @@ public:
 	}
 
     void publishObjectLocation(ros::Publisher& topic){
-    	C23_ObjectRecognition::C23C0_ODIM msg;
-    	msg.Object = objectName;
-
-    	size_t i = searchOnPathPosition(position, p);
-    	if(i<=p.size()){
-    		msg.x = p[i].x;
-    		msg.y = p[i].y;
-    		topic.publish(msg);
-    	}
+//    	C23_ObjectRecognition::C23C0_ODIM msg;
+//    	msg.Object = objectName;
+//
+//    	size_t i = searchOnPathPosition(position, p);
+//    	if(i<=p.size()){
+//    		msg.x = p[i].x;
+//    		msg.y = p[i].y;
+//    		topic.publish(msg);
+//    	}
     }
 
 };

@@ -26,6 +26,8 @@ Q_SIGNALS:
         void SigImageRequest();
         void SigGridRequest();
         void SigPathRequest();
+        void SigAllRequest();
+        void SigStopRequest();
 
 public Q_SLOTS:
         void SltOnNewConnection();
@@ -42,6 +44,7 @@ public:
         void SendHMIResponse();
         void SendExecutionStatusChange(int status);
         void SendExecuterStack(QString str);
+        void SendVRCScoreData(double timeSec, int competionScore, int falls, QString message);
         void SendHello();
 
 private:

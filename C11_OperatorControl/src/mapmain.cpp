@@ -55,6 +55,8 @@ CMapMain::CMapMain(QWidget *parent, Qt::WFlags flags)
 	pos[1] = p_j;
 
 	AddPix();
+	pCScaleItem = new CScaleItem(ui.graphicsView->scene());
+	ui.graphicsView->scene()->addItem(pCScaleItem);
 	setMode(E_NULL_MODE);
 
 	routePathReady = NULL;;
@@ -107,6 +109,8 @@ CMapMain::CMapMain(int arr[100][100],QWidget *parent, Qt::WFlags flags)
 		pos[1] = p_j;
 
 		AddPix();
+		pCScaleItem = new CScaleItem(ui.graphicsView->scene());
+		ui.graphicsView->scene()->addItem(pCScaleItem);
 		setMode(E_NULL_MODE);
 
 		routePathReady = NULL;;
