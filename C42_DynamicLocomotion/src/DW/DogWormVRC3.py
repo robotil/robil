@@ -555,7 +555,7 @@ class DW_Controller(object):
             Bearing = Bearing % (2*math.pi)
             if Bearing > math.pi:
                 Bearing -= 2*math.pi
-            if Bearing < math.pi:
+            if Bearing < -math.pi:
                 Bearing += 2*math.pi
 
             # Get into "break-dance" configuration
@@ -755,20 +755,20 @@ class DW_Controller(object):
             self._fall_count += 1
             print 'Check Tipping R=',r,"P=",p
             if p >=1.25:
-                print "Front recovery"
+                # print "Front recovery"
                 result = self.FrontTipRecovery()
             elif abs(p)>0.4*math.pi or abs(r)>0.8*math.pi:
                 # Robot tipped backwards
-                print "Back recovery"
+                # print "Back recovery"
                 result = self.BackTipRecovery()
             elif r>math.pi/4:
                 # Robot tipped to the right
                 result = self.TipRecovery("right")
-                print "Right recovery"
+                # print "Right recovery"
             elif r<-math.pi/4:
                 # Robot tipped to the left
                 result = self.TipRecovery("left")
-                print "Left recovery"
+                # print "Left recovery"
             else:
                 result = 1
                 self.FollowPath = 1
