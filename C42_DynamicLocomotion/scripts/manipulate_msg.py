@@ -28,23 +28,30 @@ class manipulate_test(object):
 
 
     def move_neck(self):
+        init_pos = self.RS.GetJointPos()
+        self.JC.set_all_pos(init_pos)
         pos1 = self.RS.GetJointPos()[3]
-        pos2 = 1
+        pos2 = 0.7 # 0.4
         dt = 0.05;
         N = 50
-        for k in xrange(5):
-            for ratio in linspace(0, 1, N):
-                interpCommand = (1-ratio)*pos1 + ratio * pos2
-                self.JC.set_pos(3,interpCommand)
-                self.JC.send_command()
-                rospy.sleep(dt)
-            pos2 = -1
-            for ratio in linspace(0, 1, N):
-                interpCommand = (1-ratio)*pos1 + ratio * pos2
-                self.JC.set_pos(3,interpCommand)
-                self.JC.send_command()
-                rospy.sleep(dt)
-            pos2 = 1
+        for ratio in linspace(0, 1, N):
+            interpCommand = (1-ratio)*pos1 + ratio * pos2
+            self.JC.set_pos(3,interpCommand)
+            self.JC.send_command()
+            rospy.sleep(dt)
+        # for k in xrange(5):
+        #     for ratio in linspace(0, 1, N):
+        #         interpCommand = (1-ratio)*pos1 + ratio * pos2
+        #         self.JC.set_pos(3,interpCommand)
+        #         self.JC.send_command()
+        #         rospy.sleep(dt)
+        #     pos2 = -1
+        #     for ratio in linspace(0, 1, N):
+        #         interpCommand = (1-ratio)*pos1 + ratio * pos2
+        #         self.JC.set_pos(3,interpCommand)
+        #         self.JC.send_command()
+        #         rospy.sleep(dt)
+        #     pos2 = 1
 
 if __name__ == '__main__':
     rospy.init_node('bdi_test')
