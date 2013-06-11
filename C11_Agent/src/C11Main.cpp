@@ -16,6 +16,8 @@ C11Main::C11Main(int argc, char **argv)
   connect(this,SIGNAL(SigOnExecutionStatusChange(int)),this,SLOT(SltOnExecutionStatusChange(int)));
   connect(this,SIGNAL(SigOnSendExecuterStack(QString)),this,SLOT(SltOnSendExecuterStack(QString)));
   connect(this,SIGNAL(SigOnVRCScoreData(double,int,int,QString)),this,SLOT(SltOnVRCScoreData(double,int,int,QString)));
+  connect(this,SIGNAL(SigOnSendDownlink(QString)),this,SLOT(SltOnSendDownlink(QString)));
+  connect(this,SIGNAL(SigOnSendUplink(QString)),this,SLOT(SltOnSendUplink(QString)));
 }
 
 C11Main::~C11Main()
@@ -40,6 +42,8 @@ void C11Main::SetTcp(CTcpServer* ptcpServer)
   connect(pCTcpServer,SIGNAL(SigPathRequest()),this,SLOT(SltPathRequest()));
   connect(pCTcpServer,SIGNAL(SigAllRequest()),this,SLOT(SltAllRequest()));
   connect(pCTcpServer,SIGNAL(SigStopRequest()),this,SLOT(SltStopRequest()));
+  connect(pCTcpServer,SIGNAL(SigNewGoalRequest(StructPoint)),this,SLOT(SltNewGoalRequest(StructPoint)));
+  connect(pCTcpServer,SIGNAL(SigResetRequest()),this,SLOT(SltResetRequest()));
 }
 
 void C11Main::PushImage(QImage img)
@@ -77,6 +81,16 @@ void C11Main::SendExecuterStack(QString str)
 void C11Main::SendVRCScoreData(double timeSec, int competionScore, int falls, QString message)
 {
   emit SigOnVRCScoreData(timeSec,competionScore,falls,message);
+}
+
+void C11Main::SendDownlink(QString down)
+{
+  emit SigOnSendDownlink(down);
+}
+
+void C11Main::SendUplink(QString up)
+{
+  emit SigOnSendUplink(up);
 }
 
 void C11Main::SltOnImageSend(QImage img)
@@ -117,6 +131,16 @@ void C11Main::SltOnSendExecuterStack(QString str)
 void C11Main::SltOnVRCScoreData(double timeSec, int competionScore, int falls, QString message)
 {
   pCTcpServer->SendVRCScoreData(timeSec,competionScore,falls,message);
+}
+
+void C11Main::SltOnSendDownlink(QString down)
+{
+  pCTcpServer->SendDownlink(down);
+}
+
+void C11Main::SltOnSendUplink(QString up)
+{
+  pCTcpServer->SendUplink(up);
 }
 
 void C11Main::SltHMIResponded()
@@ -167,4 +191,14 @@ void C11Main::SltAllRequest()
 void C11Main::SltStopRequest()
 {
   pC11Node->Stop();
+}
+
+void C11Main::SltNewGoalRequest(StructPoint goal)
+{
+  pC11Node->NewGoalRequest(goal);
+}
+
+void C11Main::SltResetRequest()
+{
+  pC11Node->ResetRequest();
 }

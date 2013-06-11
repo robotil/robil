@@ -3,7 +3,7 @@
 #include "C34_Executer/stop.h"
 #include "C34_Executer/resume.h"
 #include "C34_Executer/pause.h"
-#include "C31_PathPlanner/C31_Waypoints.h"
+#include "C31_PathPlanner/C31_HMIReset.h"
 #include <sstream>
 #include <stdlib.h>
 #include "tinyxml2.h"
@@ -73,6 +73,8 @@ bool C11_Agent_Node::init()
     nh_ = new ros::NodeHandle();
 
     path_update_pub = nh_->advertise<C31_PathPlanner::C31_Waypoints>("c11_path_update",10000);
+    goal_update_pub = nh_->advertise<C31_PathPlanner::C31_Location>("planner/goal/point",1000);
+    goal_reset_pub = nh_->advertise<C31_PathPlanner::C31_HMIReset>("planner/reset",1000);
     service_MissionSelection = nh_->advertiseService("MissionSelection", &C11_Agent_Node::MissionSelection,this);
     service_PauseMission = nh_->advertiseService("PauseMission", &C11_Agent_Node::PauseMission,this);
     service_ResumeSelection = nh_->advertiseService("ResumeMission", &C11_Agent_Node::ResumeMission,this);
@@ -80,6 +82,8 @@ bool C11_Agent_Node::init()
     robot_pos_subscriber = nh_->subscribe("C25/publish",1000,&C11_Agent_Node::RobotPosUpdateCallback,this);
     robot_pos_subscriber = nh_->subscribe("executer/stack_stream",1000,&C11_Agent_Node::ExecuterStackSubscriber,this);
     vrc_score_subscriber = nh_->subscribe("vrc_score",1000,&C11_Agent_Node::VRCScoreSubscriber,this);
+    downlink_subscriber = nh_->subscribe("vrc/bytes/remaining/downlink",1000,&C11_Agent_Node::DownlinkSubscriber,this);
+    uplink_subscriber = nh_->subscribe("vrc/bytes/remaining/uplink",1000,&C11_Agent_Node::UplinkSubscriber,this);
 
 
     pushS = new PushHMIServer();
@@ -497,6 +501,34 @@ void C11_Agent_Node::VRCScoreSubscriber(const atlas_msgs::VRCScore& vrcScore)
 //  cout<<vrcScore<<endl;
   QString str(vrcScore.message.data());
   pIAgentInterface->SendVRCScoreData(vrcScore.sim_time.toSec(),vrcScore.completion_score,vrcScore.falls,str);
+}
+
+void C11_Agent_Node::DownlinkSubscriber(const std_msgs::StringConstPtr& down)
+{
+  QString str(down->data.data());
+  pIAgentInterface->SendDownlink(str);
+}
+
+void C11_Agent_Node::UplinkSubscriber(const std_msgs::StringConstPtr& up)
+{
+  QString str(up->data.data());
+  pIAgentInterface->SendUplink(str);
+}
+
+void C11_Agent_Node::NewGoalRequest(StructPoint goal)
+{
+  C31_PathPlanner::C31_Location loc;
+  loc.x = goal.x;
+  loc.y = goal.y;
+  goal_update_pub.publish(loc);
+  cout<<"New goal sent: "<<goal.x<<","<<goal.y<<endl;
+}
+
+void C11_Agent_Node::ResetRequest()
+{
+  C31_PathPlanner::C31_HMIReset reset;
+  goal_reset_pub.publish(reset);
+  cout<<"ResetRequest sent!"<<endl;
 }
 
 void C11_Agent_Node::CheckPath()

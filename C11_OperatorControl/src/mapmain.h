@@ -36,6 +36,7 @@ class CMapMain : public QWidget
 signals:
 
 	void SigOperatorAction();
+	void SigGoalUpdated();
 
 public:
 	CMapMain(QWidget *parent = 0, Qt::WFlags flags = 0);
@@ -55,6 +56,7 @@ public:
 	void deleteRoute(ModeDraw m);
 	void SetEditable(bool value);
 	std::vector<StructPoint> GetUpdatedRoute();
+	StructPoint GetGoal();
 	QVector<QPointF> getRoutePath();
 	QVector<QPointF> getRoute(ModeDraw route);
 
@@ -76,6 +78,7 @@ private:
 	bool IsPathChanged;
 	std::vector<StructPoint> LastReceivedRoute;
 	std::vector<StructPoint> LastUpdatedRoute;
+	StructPoint GoalPoint;
 
 	CRouteItem *routeSelected;
 

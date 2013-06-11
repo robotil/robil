@@ -8,6 +8,7 @@
 #include "C10_Common/path_update.h"
 #include "Vec2d.hpp"
 #include "C25_GlobalPosition/C25C0_ROP.h"
+#include "C31_PathPlanner/C31_Waypoints.h"
 #include "ros/ros.h"
 #include "ros/package.h"
 #include "std_msgs/String.h"
@@ -31,6 +32,8 @@ public:
   virtual void ExecutionStatusChanged(int status) = 0;
   virtual void SendExecuterStack(QString) = 0;
   virtual void SendVRCScoreData(double timeSec, int competionScore, int falls, QString message) = 0;
+  virtual void SendDownlink(QString) = 0;
+  virtual void SendUplink(QString) = 0;
 };
 
 class C11_Agent_Node : public QThread, public IPushHMIInterface, public IHMIResponseInterface
@@ -63,6 +66,10 @@ public:
 
   void VRCScoreSubscriber(const atlas_msgs::VRCScore& vrcScore);
 
+  void DownlinkSubscriber(const std_msgs::StringConstPtr& down);
+
+  void UplinkSubscriber(const std_msgs::StringConstPtr& up);
+
   void SetReleased();
 
   void Pause();
@@ -85,6 +92,10 @@ public:
 
   void AllRequest();
 
+  void NewGoalRequest(StructPoint goal);
+
+  void ResetRequest();
+
   virtual void PushImage(QImage img);
   virtual void PushGrid(StructGridData grid);
   virtual void PushPath(vector<StructPoint> path);
@@ -97,6 +108,8 @@ private:
 
   ros::NodeHandle *nh_;
   ros::Publisher path_update_pub;
+  ros::Publisher goal_update_pub;
+  ros::Publisher goal_reset_pub;
   ros::ServiceServer service_MissionSelection;
   ros::ServiceServer service_PauseMission;
   ros::ServiceServer service_ResumeSelection;
@@ -105,6 +118,8 @@ private:
   ros::Subscriber robot_pos_subscriber;
   ros::Subscriber executer_stack_subscriber;
   ros::Subscriber vrc_score_subscriber;
+  ros::Subscriber uplink_subscriber;
+  ros::Subscriber downlink_subscriber;
   ros::ServiceClient c34StopClient;
   ros::ServiceClient c11ExecutionStatusChangeClient;
   ros::ServiceClient c34RunClient;
