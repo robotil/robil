@@ -774,6 +774,8 @@
     
     msg_gp.x = x;
     msg_gp.y = y;
+    msg_gp.x2 = x;
+    msg_gp.y2 = y;
     msg_gp.Object = target;
     
     msg_odim.x0 = rect_points[0].x;

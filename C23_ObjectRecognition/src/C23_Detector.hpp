@@ -99,6 +99,8 @@ public:
 public:
 	bool is_search;
 	double x;
+    double x2;
+    double y2;
 	double y;
 	double z;
 	int width;
