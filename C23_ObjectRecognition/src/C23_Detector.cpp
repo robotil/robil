@@ -2683,8 +2683,11 @@
 		}
 	      
 	      double x1,y1,z1,x2,y2,z2;
-	      pictureCoordinatesToGlobalPosition(mcL[biggstL].x-5, mcL[biggstL].y-50, mcL[biggstL].x+5, mcL[biggstL].y+50,  &x1, &y1,&z1, -0.5,0);
-          pictureCoordinatesToGlobalPosition(mcR[biggstR].x-5, mcR[biggstR].y-50, mcR[biggstR].x+5, mcR[biggstR].y+50, &x2, &y2,&z2,-0.5,0);
+	      bool a_res = pictureCoordinatesToGlobalPosition(mcL[biggstL].x-5, mcL[biggstL].y-50, mcL[biggstL].x+5, mcL[biggstL].y+50,  &x1, &y1,&z1, -0.5,0);
+          a_res &= pictureCoordinatesToGlobalPosition(mcR[biggstR].x-5, mcR[biggstR].y-50, mcR[biggstR].x+5, mcR[biggstR].y+50, &x2, &y2,&z2,-0.5,0);
+          if(!a_res) {
+              return false;
+          }
 	  // cout << "Middle: " <<
 	    // imshow("TESTING",srcImg);
 	    // waitKey(0);
@@ -2763,13 +2766,24 @@
 		    int y_pic = mcR[biggstR].y;
 		    
 		  
-		    double x1,y1,z1,x2,y2,z2;
-		    averagePointCloud(mcR[biggstR].x-5, mcR[biggstR].y-50, mcR[biggstR].x+5, mcR[biggstR].y+50, cloud, &x2, &y2,&z2);
-		    x = x2;
-		    y = y2-2.5;
-		    cout<<"Point is: " <<x<<", " <<y <<endl;
+		  //  double x1,y1,z1,x2,y2,z2;
+            double x1,y1,z1,x2,y2,z2;
+            bool a_res = pictureCoordinatesToGlobalPosition(mcR[biggstR].x-5, mcR[biggstR].y-50, mcR[biggstR].x+5, mcR[biggstR].y+50, &x1, &y1,&z1,-0.5,2.5);
+            if(!a_res) {
+                return false;
+            } 
+            x = x1;
+            y = y1;
+            cout << "Middle point: " << x <<"," << y << endl;
+            imwrite(imgpath.c_str(),srcImg);
+           // return true;
+            return mcM[biggstM].x > mcR[biggstR].x ? true : false;
+		   // averagePointCloud(mcR[biggstR].x-5, mcR[biggstR].y-50, mcR[biggstR].x+5, mcR[biggstR].y+50, cloud, &x2, &y2,&z2);
+		  //  x = x2;
+		  //  y = y2-2.5;
+		  //  cout<<"Point is: " <<x<<", " <<y <<endl;
 		// cout << "Detected right" << endl;
-		    circle( srcImg, Point2f(x_pic,y_pic), 16, Scalar(0,255,255), -1, 8, 0 );
+		  //  circle( srcImg, Point2f(x_pic,y_pic), 16, Scalar(0,255,255), -1, 8, 0 );
 		}
 		
 		// imshow("Testing" , srcImg);
@@ -2806,13 +2820,24 @@
 		// imshow("Testing" , srcImg);
 	      // waitKey(0);
 
-		double x1,y1,z1,x2,y2,z2;
+		/*double x1,y1,z1,x2,y2,z2;
 		averagePointCloud(mcL[biggstL].x-5, mcL[biggstL].y-50, mcL[biggstL].x+5, mcL[biggstL].y+50, cloud, &x2, &y2,&z2);
 		x = x2;
 		y = y2-2.5;
         imwrite(imgpath.c_str(),srcImg);
 		return mcM[biggstM].x > mcL[biggstL].x ? true : false;
-		
+		*/
+        
+        double x1,y1,z1,x2,y2,z2;
+        bool a_res = pictureCoordinatesToGlobalPosition(mcL[biggstL].x-5, mcL[biggstL].y-50, mcL[biggstL].x+5, mcL[biggstL].y+50, &x1, &y1,&z1,-0.5,2.5);
+        if(!a_res) {
+            return false;
+        } 
+        x = x1;
+        y = y1;
+        cout << "Middle point: " << x <<"," << y << endl;
+        imwrite(imgpath.c_str(),srcImg);
+        return mcM[biggstM].x > mcL[biggstL].x ? true : false;
 	    }
 	}
 	imwrite(imgpath.c_str(),srcImg);
