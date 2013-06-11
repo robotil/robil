@@ -68,6 +68,10 @@ bool FootPlacementService::callback(FootPlacement::FootPlacement_Service::Reques
 				req.start_pose, req.other_foot_pose,
 				pathPoints->points,
 				SLOPE_WEIGHT, DISTANCE_WEIGHT, HEIGHT_WEIGHT, DIRECTION_WEIGHT);
+
+        // FIXME: Now needs to transform points to global coordinates.
+
+
 	}
 	else {
 		printf("ERROR! NO MAP SERVICE!\n");
@@ -75,6 +79,7 @@ bool FootPlacementService::callback(FootPlacement::FootPlacement_Service::Reques
 	}
 	FootPlacement::Foot_Placement_path footPlacementPath;
 	footPlacementPath.foot_placement_path = res.foot_placement_path;
+
 	footPlacementPathPublisher.publish(footPlacementPath);
 	return true;
 }
