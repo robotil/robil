@@ -177,6 +177,10 @@ class CD_PathPlanner(PathPlanner):
     def GetTargetYaw(self):
         return self._CurrentSegment.GetYaw()
 
+    def GetAngleToNextSegment(self):
+        NextSegment = Segment(self._CurrentSegment.GetTarget(),self._Path[0])
+        return NextSegment.GetYaw()-self._CurrentSegment.GetYaw()
+    
     def GetCloseEnoughToTargetDistance(self):
         turningRadius = 0.20#1.5
         theta = 0.0
@@ -184,8 +188,7 @@ class CD_PathPlanner(PathPlanner):
             # Last segment
             result = 0.4
         else:
-            NextSegment = Segment(self._CurrentSegment.GetTarget(),self._Path[0])
-            theta = NextSegment.GetYaw()-self._CurrentSegment.GetYaw()
+            theta = self.GetAngleToNextSegment()
             if(0 == math.sin(theta)):
                 # If theta is 0 or 180, then it would be better to reach the point than to throw an exception...
                 result = 0.1

@@ -141,7 +141,7 @@ class CD_PhantomRobot(CD_Robot):
         
         return stepData
     
-    def TranslateStepData(self,stepData):
+    def _TranslateStepData(self,stepData):
         # Correction Vector
         stepData.pose.position.x += self._Odom2Bdi_X
         stepData.pose.position.y += self._Odom2Bdi_Y
@@ -173,7 +173,7 @@ class CD_PhantomRobot(CD_Robot):
         self._Odometer.AddLocalPosition(x,y)
         stepData.pose.position.x,stepData.pose.position.y = self._Odometer.GetGlobalPosition()
         
-        return self.TranslateStepData(stepData)
+        return self._TranslateStepData(stepData)
                 
     def _IdleStep(self):
         stepData = self._PrepareStepData()
@@ -183,12 +183,37 @@ class CD_PhantomRobot(CD_Robot):
         self._Odometer.AddLocalPosition(x,y)
         stepData.pose.position.x,stepData.pose.position.y = self._Odometer.GetGlobalPosition()
                 
-        return self.TranslateStepData(stepData)
+        return self._TranslateStepData(stepData)
     
     def _AddIdleSteps():
         for i in range(4):
             self._StepQueue.append(self._IdleStep())
             
+    def _TurnStep(self,yaw):
+        stepData = self._PrepareStepData()
+        
+        x = 0
+        y = self._StepWidth if (self._index%2==0) else -self._StepWidth
+        self._Odometer.AddLocalPosition(x,y)
+        stepData.pose.position.x,stepData.pose.position.y = self._Odometer.GetGlobalPosition()
+                
+        self._Odometer.AddYaw(yaw)
+        
+        return self._TranslateStepData(stepData)
+            
     def _Turn(self):
-        pass
+        turningAngle = self._LPP.GetAngleToNextSegment()
+        theta_max = 0.4 # max turning angle per step
+        ### Turn in place (pivot):
+        Num_seq = int(math.floor(math.fabs(turningAngle)/theta_max))
+        for i in range(Num_seq):
+            self._StepQueue.append(self._TurnStep(theta_max*(turningAngle/math.fabs(turningAngle))))
+#            if (turningAngle>0):
+#                # Turning left
+#                self._StepQueue.append(self._LeftStep(theta_max))
+#            else:
+#                # Turning right
+#                self._StepQueue.append(self._RightStep(-theta_max))
+            
+        
     
