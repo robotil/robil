@@ -14,6 +14,8 @@
 #include <C31_PathPlanner/C31_PlanPath.h>
 #include <C31_PathPlanner/C31_GetPath.h>
 #include <C31_PathPlanner/C31_Exception.h>
+#include <C31_PathPlanner/C31_HMIReset.h>
+#include <C31_PathPlanner/C31_Object.h>
 
 #include <C42_WalkType/mud.h>
 #include <C42_WalkType/debris.h>
@@ -270,6 +272,15 @@ public:
 
 		ROS_INFO("subscribe to topic /c11_path_update <C31_PathPlanner/C31_Waypoints>");
 		ros::Subscriber c11Client = _node.subscribe("/c11_path_update", 1000, &PathPlanningServer::callbackTransitPoints, this );
+
+		ROS_INFO("subscribe to topic /planner/goal/point <C31_PathPlanner/C31_Location>");
+		ros::Subscriber planner_goal_point = _node.subscribe("/planner/goal/point", 1000, &PathPlanningServer::callbackNewGoalPoint, this );
+
+		ROS_INFO("subscribe to topic /planner/goal/object <C31_PathPlanner/C31_Object>");
+		ros::Subscriber planner_goal_object = _node.subscribe("/planner/goal/object", 1000, &PathPlanningServer::callbackNewGoalObject, this );
+
+		ROS_INFO("subscribe to topic /planner/reset <C31_PathPlanner/C31_HMIReset>");
+		ros::Subscriber planner_reset = _node.subscribe("/planner/reset", 1000, &PathPlanningServer::callbackNewReset, this );
 
 		#define TURNON_REQUEST_MAP
 		//#define TURNON_REQUEST_TARGET_LOCATION
@@ -610,6 +621,70 @@ public:
 	}
     void callbackTransitPoints(const C31_PathPlanner::C31_Waypoints::ConstPtr & msg){
 		onNewTransitPoints( extractPoints( *msg ) );
+	}
+
+    struct TargetStock{
+    	bool defined;
+    	Waypoint finish;
+    	Vec2d finishDir;
+    	GPSPoint targetPos;
+    	GPSPoint targetDirPos;
+    	bool targetDefined;
+    } targetStock;
+    void callbackNewGoalPoint(const C31_PathPlanner::C31_Location::ConstPtr & msg){
+    	PathPlanning::EditSession session = _planner.startEdit();
+		if(_planner.isMapReady()==false){
+			session.aborted();
+			ROS_INFO("NewGoalPoint from topic: Map is not ready");
+			return;
+		}
+
+		targetStock.finish = session.arguments.finish;
+		targetStock.finishDir = session.arguments.finishDir;
+		targetStock.targetPos = session.arguments.targetPosition;
+		targetStock.targetDirPos = session.arguments.targetDirPosition;
+		targetStock.targetDefined = session.arguments.targetDefined;
+		targetStock.defined = true;
+
+		TargetPosition tar(msg->x,msg->y);
+		session.arguments.defineTarget(tar,tar);
+		if(session.arguments.targetDefined)
+			session.arguments.finish = _planner.cast(session.arguments.targetPosition);
+
+		stringstream info;
+		info<<"CONVERT "
+				<<session.arguments.targetPosition.x<<","<<session.arguments.targetPosition.y
+				<<" -> "
+				<<session.arguments.finish.x<<","<<session.arguments.finish.y<<endl;
+		ROS_INFO(info.str().c_str());
+
+	}
+    void callbackNewGoalObject(const C31_PathPlanner::C31_Object::ConstPtr & msg){
+    	PathPlanning::EditSession session = _planner.startEdit();
+
+		targetStock.finish = session.arguments.finish;
+		targetStock.finishDir = session.arguments.finishDir;
+		targetStock.targetPos = session.arguments.targetPosition;
+		targetStock.targetDirPos = session.arguments.targetDirPosition;
+		targetStock.targetDefined = session.arguments.targetDefined;
+		targetStock.defined = true;
+
+		session.arguments.defineTarget( msg->name );
+		if(session.arguments.targetDefined)
+			session.arguments.finish = _planner.cast(session.arguments.targetPosition);
+	}
+    void callbackNewReset(const C31_PathPlanner::C31_HMIReset::ConstPtr & msg){
+    	PathPlanning::EditSession session = _planner.startEdit();
+    	if(targetStock.defined){
+			session.arguments.finish=targetStock.finish;
+			session.arguments.finishDir=targetStock.finishDir;
+			session.arguments.targetPosition=targetStock.targetPos;
+			session.arguments.targetDirPosition=targetStock.targetDirPos;
+			session.arguments.targetDefined=targetStock.targetDefined;
+    	}
+    	targetStock.defined = false;
+   		session.constraints.gps_transits.clear();
+    	session.constraints.transits.clear();
 	}
 
     //=================== NEW DATA INPUT ==================================================
