@@ -1150,18 +1150,30 @@
 
 	    
 	      
-	      
-	      
+	      double x1,y1,z1,x2,y2,z2;
+	      bool a_res =false;
+
 	        if(leftSum>rightSum){
 		      ROS_INFO("RIGHT ARROW");
-		      res = true;
-              pictureCoordinatesToGlobalPosition(arrowBox.x, arrowBox.y,arrowBox.x + arrowBox.height, arrowBox.y + arrowBox.width, &x, &y,&z,-1,-4);
-	      }
+		      
+	      a_res = pictureCoordinatesToGlobalPosition(arrowBox.x, arrowBox.y,arrowBox.x + arrowBox.height, arrowBox.y + arrowBox.width, &x1, &y1,&z1,-1,-4);
+              a_res&= pictureCoordinatesToGlobalPosition(arrowBox.x, arrowBox.y,arrowBox.x + arrowBox.height, arrowBox.y + arrowBox.width, &x2, &y2,&z2,-1,0);
+	      res = a_res;
+	      x = x1;
+	      y = y1;
+	      x2 = x2;
+	      y2 = y2;
+		  
+		}
 	      else{
 		      ROS_INFO("LEFT ARROW");
 		      res = true;
-              pictureCoordinatesToGlobalPosition(arrowBox.x, arrowBox.y,arrowBox.x + arrowBox.height, arrowBox.y + arrowBox.width, &x, &y,&z,-1,+4);
+              a_res = pictureCoordinatesToGlobalPosition(arrowBox.x, arrowBox.y,arrowBox.x + arrowBox.height, arrowBox.y + arrowBox.width, &x1, &y1,&z1,-1,+4);
+	      a_res&= pictureCoordinatesToGlobalPosition(arrowBox.x, arrowBox.y,arrowBox.x + arrowBox.height, arrowBox.y + arrowBox.width, &x2, &y2,&z2,-1,0);
+	      res = a_res;
 	      }
+	      
+	      
 	//averagePointCloud(arrowBox.x, arrowBox.y, arrowBox.width, arrowBox.height, cloud,&x,&y,&z);
 	
 	//black_pixels(leftSumCol,0) = arrowBox.height - countNonZero(col);
@@ -1239,8 +1251,6 @@
 	    
 		return res;
 	      
-	      
-	      return true;
 	    }
 
 	    //Detect the car steering wheel
