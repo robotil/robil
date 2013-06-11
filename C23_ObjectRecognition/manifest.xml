@@ -21,8 +21,8 @@
   <depend package="message_filters"/>
   <depend package="image_transport"/>
   <depend package="tf"/>
-
-
+  <depend package="PoseController"/>
+  <depend package="hrl_kinematics"/>
 </package>
 
 
