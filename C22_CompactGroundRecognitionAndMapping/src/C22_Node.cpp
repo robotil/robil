@@ -101,6 +101,7 @@ bool C22_Node::proccess(C22_CompactGroundRecognitionAndMapping::C22::Request  &r
 			  ROS_ERROR("%s",ex.what());
 			}
 	    }
+	    _myMatrix->pelvisHeight=(righttransform.getOrigin().getZ()+lefttransform.getOrigin().getZ())/2;
 
 
 	 pcl::PointCloud<pcl::PointXYZ>cloud;

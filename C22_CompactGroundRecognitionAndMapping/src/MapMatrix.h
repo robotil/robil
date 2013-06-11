@@ -36,6 +36,7 @@ public:
 	void moveMapHarisontaly(int times);
 	void moveMapVerticaly(int times);
 	int xOffset,yOffset;
+	double pelvisHeight;
 	void computeMMatrix(std::vector<pclPlane*>* mapPlanes,pcl::PointCloud<pcl::PointXYZ>::Ptr map_cloud);
 private:
 	double calcSlopeZ(float a,float b,float c);
