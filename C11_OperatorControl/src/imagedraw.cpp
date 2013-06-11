@@ -440,6 +440,7 @@ void ImageDraw::SltOnAllowClick()
       break;
     case 3:
       pCTcpConnection->SendPathRequest();
+      break;
     case 4:
       pCTcpConnection->SendAllRequest();
       break;
