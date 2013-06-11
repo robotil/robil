@@ -40,6 +40,8 @@ CMapMain::CMapMain(QWidget *parent, Qt::WFlags flags)
 	IsPathChanged = false;
 	PixPressed.i = 0;
 	PixPressed.j = 0;
+	GoalPoint.x = 0;
+	GoalPoint.y = 0;
 	for(int i=0; i<100; i++)
 	{
 		for(int j=0; j<100; j++)
@@ -969,6 +971,11 @@ std::vector<StructPoint> CMapMain::GetUpdatedRoute()
                         if(!IsPointInPath(p))
                         {
                                 LastUpdatedRoute.push_back(p);
+                                if(i == vec.size()-1)
+                                  {
+                                    GoalPoint = p;
+                                    emit SigGoalUpdated();
+                                  }
                         }
                 }
                 if(!LastUpdatedRoute.empty())
@@ -977,6 +984,11 @@ std::vector<StructPoint> CMapMain::GetUpdatedRoute()
                 }
         }
         return LastUpdatedRoute;
+}
+
+StructPoint CMapMain::GetGoal()
+{
+  return GoalPoint;
 }
 
 bool CMapMain::IsPointsEqual(StructPoint p1, StructPoint p2)
