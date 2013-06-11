@@ -1,5 +1,5 @@
 <launch>
   <node name="C21" pkg="C21_VisionAndLidar" type="C21" respawn="true"/>
-<node name="foo" pkg="C21_VisionAndLidar" type="Spindel_bash.sh" />
+<node name="foo" pkg="C21_VisionAndLidar" type="Spindel_bash.sh" respawn="true" />
 <!--include file="$(find C21_VisionAndLidar)/launch/laser.launch" /-->
 </launch>

@@ -4,7 +4,7 @@ import rospy
 import actionlib
 import C0_RobilTask.msg
 
-def HB_client(dir):
+def HB_client(dir, dz):
     # Creates the SimpleActionClient, passing the type of the action
     # (FibonacciAction) to the constructor.
     client = actionlib.SimpleActionClient('GripHandBrake', C0_RobilTask.msg.RobilTaskAction)
@@ -14,7 +14,7 @@ def HB_client(dir):
     client.wait_for_server()
 
     # Creates a goal to send to the action server.
-    goal = C0_RobilTask.msg.RobilTaskGoal(name='Switch',uid='dz=0.1',parameters='operation=%d,dz=0.1'%dir)#
+    goal = C0_RobilTask.msg.RobilTaskGoal(name='Switch',uid='dz=0.1',parameters='operation=%d,dz=%f'%(dir, dz))#
 
     # Sends the goal to the action server.
     client.send_goal(goal)

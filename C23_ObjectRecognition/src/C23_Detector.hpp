@@ -130,7 +130,7 @@ private:
     bool detectGear(Mat srcImg,const sensor_msgs::PointCloud2::ConstPtr &cloud,int location);
     bool detectArrowDirection(Mat srcImg,const sensor_msgs::PointCloud2::ConstPtr &cloud);
     
-    bool pictureCoordinatesToGlobalPosition(double x1, double y1, double x2, double y2, double * x, double* y, double*z);
+    bool pictureCoordinatesToGlobalPosition(double x1, double y1, double x2, double y2, double * x, double* y, double*z,double offsetx = 0, double offsety = 0);
     bool pointCloudCoordinatesToGlobalPosition(double x, double y, double z, double* px, double* py, double*pz);
 
     bool averagePointCloudInsideCar(int x1, int y1, int x2, int y2, const sensor_msgs::PointCloud2::ConstPtr &cloud, double* px, double* py, double *pz); 
@@ -146,7 +146,8 @@ private:
     void saveTemplate(int x,int y, int width, int height, const sensor_msgs::PointCloud2::ConstPtr &cloud2, string target);
         
 	ros::Publisher objectDetectedPublisher;
-  ros::Publisher objectDeminsionsPublisher;
+    ros::Publisher objectDimensionsPublisher;
+    ros::Publisher objectGlobalPositionPublisher;
 	//vector<Gate*>* gates;
 	  //Register a service
 	  ros::ServiceClient c21client;
@@ -154,6 +155,7 @@ private:
 	  ros::ServiceClient c23_stop_posecontroller;
       ros::ServiceServer orientation_service;
 	  geometry_msgs::Point point;
+      Point2f rect_points[4];
 	  
   
 	  image_transport::ImageTransport it_;

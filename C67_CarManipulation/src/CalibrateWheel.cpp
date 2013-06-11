@@ -28,6 +28,8 @@ using namespace C0_RobilTask;
 #include <C67_CarManipulation/IK.h>
 #include <C67_CarManipulation/Path.h>
 #include <C67_CarManipulation/Trace.h>
+#include <PoseController/hand_movement.h>
+#include <std_srvs/Empty.h>
 // end added
 
 //variables added
@@ -36,7 +38,14 @@ static atlas_msgs::AtlasCommand ac;
 static atlas_msgs::AtlasState as;
 static ros::ServiceClient rsandia_client;
 static ros::ServiceClient lsandia_client;
+static ros::ServiceClient joint_client;
+static ros::ServiceClient joint_start_client;
+static ros::ServiceClient joint_stop_client;
+
 static sandia_hand_msgs::SimpleGraspSrv sandia_srv;
+static PoseController::hand_movement joint_srv;
+static std_srvs::Empty joint_start_srv;
+static std_srvs::Empty joint_stop_srv;
 static boost::mutex mutex;
 static ros::Time t0;
 static const unsigned int numJoints = 28;
@@ -58,7 +67,7 @@ ostream& operator<<(ostream& o, std::vector<string>& s){
 class CalibrateWheelServer: public RobilTask {
 protected:
 	enum Consts { Time = 7 };
-	enum Errors { NoParams = 1, NoSolution = 2 , SandiaCallFail = 3};
+	enum Errors { NoParams = 1, NoSolution = 2 , SandiaCallFail = 3, JointCallFail = 4};
 	std::vector<string> params;
 	int operation;
 	int time;
@@ -122,34 +131,52 @@ public:
 	{
 		pPathPoints points = pPathPoints(origin, goal, pointsNum);
 
+
+
+
 		for (int i=0; i<pointsNum; i++)
 		{
 			// ros::spinOnce();
 
 			if (rightSide)
 			{
-				ac.position[q4r] = points.pArray[i]._q4;
-				ac.position[q5r] = points.pArray[i]._q5;
-				ac.position[q6r] = points.pArray[i]._q6;
-				ac.position[q7r] = points.pArray[i]._q7;
-				ac.position[q8r] = points.pArray[i]._q8;
-				ac.position[q9r] = points.pArray[i]._q9;
+				joint_srv.request.l_arm_usy = ac.position[q4l];
+				joint_srv.request.l_arm_shx = ac.position[q5l];
+				joint_srv.request.l_arm_ely = ac.position[q6l];
+				joint_srv.request.l_arm_elx = ac.position[q7l];
+				joint_srv.request.l_arm_uwy = ac.position[q8l];
+				joint_srv.request.l_arm_mwx = ac.position[q9l];
+				joint_srv.request.r_arm_usy = points.pArray[i]._q4;
+				joint_srv.request.r_arm_shx = points.pArray[i]._q5;
+				joint_srv.request.r_arm_ely = points.pArray[i]._q6;
+				joint_srv.request.r_arm_elx = points.pArray[i]._q7;
+				joint_srv.request.r_arm_uwy = points.pArray[i]._q8;
+				joint_srv.request.r_arm_mwx = points.pArray[i]._q9;
 			}
 			else
 			{
-				ac.position[q4l] = points.pArray[i]._q4;
-				ac.position[q5l] = points.pArray[i]._q5;
-				ac.position[q6l] = points.pArray[i]._q6;
-				ac.position[q7l] = points.pArray[i]._q7;
-				ac.position[q8l] = points.pArray[i]._q8;
-				ac.position[q9l] = points.pArray[i]._q9;
+				joint_srv.request.r_arm_usy = ac.position[q4r];
+				joint_srv.request.r_arm_shx = ac.position[q5r];
+				joint_srv.request.r_arm_ely = ac.position[q6r];
+				joint_srv.request.r_arm_elx = ac.position[q7r];
+				joint_srv.request.r_arm_uwy = ac.position[q8r];
+				joint_srv.request.r_arm_mwx = ac.position[q9r];
+				joint_srv.request.l_arm_usy = points.pArray[i]._q4;
+				joint_srv.request.l_arm_shx = points.pArray[i]._q5;
+				joint_srv.request.l_arm_ely = points.pArray[i]._q6;
+				joint_srv.request.l_arm_elx = points.pArray[i]._q7;
+				joint_srv.request.l_arm_uwy = points.pArray[i]._q8;
+				joint_srv.request.l_arm_mwx = points.pArray[i]._q9;
 			}
 
-			//ROS_INFO("");
-			//std::cout << i <<": ";
-			//points.Array[i].Print();
+			if (!joint_client.call(joint_srv))
+			{
+				ROS_INFO("%s: Joint Service Call Failed!", _name.c_str());
+				retValue  = JointCallFail;
+				//return TaskResult(retValue, "ERROR");
+			}
 
-			pubAtlasCommand.publish(ac);
+			//pubAtlasCommand.publish(ac);
 
 			ros::Duration(sec/pointsNum).sleep();
 
@@ -503,6 +530,15 @@ int main(int argc, char **argv)
 	//Sandia client
 	rsandia_client = rosnode->serviceClient<sandia_hand_msgs::SimpleGraspSrv>("/sandia_hands/r_hand/simple_grasp");
 	lsandia_client = rosnode->serviceClient<sandia_hand_msgs::SimpleGraspSrv>("/sandia_hands/l_hand/simple_grasp");
+
+	joint_start_client = rosnode->serviceClient<std_srvs::Empty>("/PoseController/start");
+	joint_client = rosnode->serviceClient<PoseController::hand_movement>("/PoseController/hand_movement");
+	joint_start_client.call(joint_start_srv);
+	if (!joint_start_client.call(joint_start_srv))
+	{
+		ROS_INFO("Fail calling Joint Server");
+		return 1;
+	}
 
 
 	ROS_INFO("create task");
