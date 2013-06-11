@@ -152,16 +152,29 @@ It's better to use a tree that has loops, and in which some tasks run more that 
 rosrun C35_monitoring AnomalyDetector
 Run executor and designer and some atlas.
 
-------------------------
-For Liat and Adi
-------------------------
-Marathon + Weekend
-Liat - finish (or semi-finish) mud thing.
-Adi - finish gripping thing.
+=======================
+Grasping monitor for left and right palm
+=======================
+#description (Grasping monitor for left and right palm): a task which listens on topic "/sandia_hands/l_hand/tactile_raw", for palm force values on left hand, or "/sandia_hands/r_hand/tactile_raw" for right hand.
+publish on topic - "C35/grasp_force_l" for left palm or "C35/grasp_force_r" for right arm , publish message only if power greater the minumum was detected.
+message structure:
+f0:index_finger force;f1:middle_finger force;f2:little_finger force;f3:thumb force;palm:palm force;
 
-Next week
-HALF DAY - Timeout Monitor, Falling Monitor, and Stability Monitor (if someone publishes on the relevant topic), MONITOR WAYPOINT OF DRIVING MODULE. 1) check on example trees in the beginnning of the week. 2) Once the vrc trees are working (semi-working) check on them.
-HALF DAY - Anomaly:very little testing has been done. Must check with proper tree, as mentioned above.
-Walking and driving are done assuming cheats. Before vrc, we must check again since cheats will be disabled.
+
+In order to run left palm monitor:
+rosrun C35_Monitoring GraspingMonitorLeft.py
+
+In order to run right palm monitor:
+rosrun C35_Monitoring GraspingMonitorRight.py
+
+
+Known Bugs:
+==========
+
+
+Known Limitations:
+=================
+Very little change in force has been witnessed during debugging.
+if sandia_hands(drc sim) changes, the code won't work properly.
 
 

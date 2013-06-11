@@ -479,7 +479,7 @@ PField::Points searchPath_transitAccurate(
 	if( rr<constraints.dimentions.radius) rr++; // Because radius is float and rr is int
 
 	Inflator i( rr, Map::ST_BLOCKED);
-	Inflator ii( rr*0.5, Map::ST_DEBREES);
+	Inflator ii( rr*0.5, Map::ST_DEBRIS);
 	MapEditor e;
 
 	Map walls = e.merge(s_walls, s_obstacles, MapEditor::OR);
@@ -490,7 +490,7 @@ PField::Points searchPath_transitAccurate(
 		);
 	Map inflated_terrain = e.replace(e.cut(
 			ii.inflate(s_terrain),
-			Map::ST_DEBREES, Map::ST_AVAILABLE), Map::ST_DEBREES, Map::ST_BLOCKED
+			Map::ST_DEBRIS, Map::ST_AVAILABLE), Map::ST_DEBRIS, Map::ST_BLOCKED
 		);
 
 	inflated_map = e.merge(inflated_map, inflated_terrain, MapEditor::OR);

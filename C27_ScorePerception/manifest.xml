@@ -1,0 +1,17 @@
+<package>
+  <description brief="C27_ScorePerception">
+
+     C27_ScorePerception
+
+  </description>
+  <author>dan</author>
+  <license>BSD</license>
+  <review status="unreviewed" notes=""/>
+  <url>http://ros.org/wiki/C27_ScorePerception</url>
+  <depend package="roscpp"/>
+  <depend package="rospy"/>
+  <depend package="C0_RobilTask"/>
+  
+</package>
+
+

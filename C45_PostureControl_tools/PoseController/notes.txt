@@ -1,0 +1,36 @@
+Usage of PoseController:
+------------------------
+
+Prerequisites:
+--------------
+1) C45 must be running.
+
+Running:
+--------
+1) Running C45 launch file will start this module.
+
+Usage:
+------
+This module creates the following services:
+/PoseController/hand_movement
+/PoseController/delta_hand_movement
+/PoseController/foot_movement
+/PoseController/delta_foot_movement
+/PoseController/back_movement
+/PoseController/delta_back_movement
+/PoseController/neck_movement
+/PoseController/delta_neck_movement
+/PoseController/start
+/PoseController/reset_joints
+/PoseController/stop
+
+and advertises to the following topic:
+/PoseController/joint_states
+
+You need to call /PoseController/start (with message of type std_srvs/Empty) to enable this module.
+/PoseController/stop will stop it and /PoseController/reset_joints will reset the saved joints to the current real values of the robot's joints.
+
+/PoseController/*_movement services set the values of the joints with the inputs.
+/PoseController/delta_*_movement services add the inputs as deltas to the joints' values.
+
+This module automatically detects the BDI controller desired behavior (e.g. "Manipulate", "User") and sends the correct k_effort values accordingly.

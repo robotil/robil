@@ -16,6 +16,7 @@
 #include <C31_PathPlanner/C31_Exception.h>
 
 #include <C42_WalkType/mud.h>
+#include <C42_WalkType/debris.h>
 
 using namespace std;
 using namespace C0_RobilTask;
@@ -111,14 +112,105 @@ public:
 			c31_PathPublisher.publish(res_path);
 		}
     }
-    void check_for_mud_terrain(ros::Publisher& walk_notification){
+    void publish_special_plan_firstAndLast(ros::Publisher& output_path){
+    	//if(output_path.getNumSubscribers()>0){
+			ROS_INFO("PUBLISH SPECIAL PATH ( just first and last points )");
+			GPSPath path = get_calculated_path();
+			C31_PathPlanner::C31_Waypoints res_path;
+			if(path.size()!=0){
+				{size_t i=0;
+				  C31_PathPlanner::C31_Location loc; loc.x=path[i].x; loc.y=path[i].y;
+				  res_path.points.push_back(loc);
+				}
+				{size_t i=path.size()-1;
+				  C31_PathPlanner::C31_Location loc; loc.x=path[i].x; loc.y=path[i].y;
+				  res_path.points.push_back(loc);
+				}
+			}
+		if(output_path.getNumSubscribers()>0){
+			output_path.publish(res_path);
+		}
+    }
+    void publish_special_plan_mud(ros::Publisher& output_path){
+    	//if(output_path.getNumSubscribers()>0){
+			ROS_INFO("PUBLISH CALCULATED GLOBAL PATH");
+			int mud_start=-1, mud_end=-1;
+			C31_PathPlanner::C31_Waypoints res_path;
+		   	PathPlanning::ReadSession session = _planner.startReading();
+		   	int last_path_point = session.results.path.size()-1;
+		    	for(size_t i=0;i<session.results.path.size();i++){
+		    		const Vec2d& wp = session.results.path[i];
+		    		if( session.arguments.map.terrain((size_t)wp.x, (size_t)wp.y) == ObsMap::ST_MUD ){
+		    			if(mud_start<0) mud_start = i;
+		    		}else{
+		    			if(mud_start>=0 && mud_end<0){ mud_end=i; break; }
+		    		}
+		    	}
+		    mud_end = (mud_end>0 ? mud_end-1 : last_path_point);
+		    if( mud_start>=0 && (mud_end - mud_start) >= 3 ){
+		    	{int i=mud_start;
+					const Vec2d& wp = session.results.path[i];
+					GPSPoint gpsp = _planner.cast(wp);
+					C31_PathPlanner::C31_Location loc; loc.x=gpsp.x; loc.y=gpsp.y;
+					res_path.points.push_back(loc);
+		    	}
+		    	{int i= (mud_end+mud_start)/2;
+					const Vec2d& wp = session.results.path[i];
+					GPSPoint gpsp = _planner.cast(wp);
+					C31_PathPlanner::C31_Location loc; loc.x=gpsp.x; loc.y=gpsp.y;
+					res_path.points.push_back(loc);
+		    	}
+		    	{int i=mud_end;
+					const Vec2d& wp = session.results.path[i];
+					GPSPoint gpsp = _planner.cast(wp);
+					C31_PathPlanner::C31_Location loc; loc.x=gpsp.x; loc.y=gpsp.y;
+					res_path.points.push_back(loc);
+		    	}
+		    }
+
+		if(output_path.getNumSubscribers()>0){
+			output_path.publish(res_path);
+		}
+    }
+
+    void check_terrain(
+    		ros::Publisher& mud_notify,
+    		ros::Publisher& debris_notify,
+
+    		ros::Publisher& quad_path_mud,
+    		ros::Publisher& quad_path_debris,
+    		ros::Publisher& quad_path_hills
+    ){
+		check_for_mud_terrain(mud_notify,quad_path_mud);
+		check_for_debris_terrain(debris_notify,quad_path_debris);
+		check_for_hills_terrain(quad_path_hills);
+    }
+
+    void check_for_mud_terrain(ros::Publisher& walk_notification, ros::Publisher& spec_path){
     	//if(walk_notification.getNumSubscribers()>0){
-			ROS_INFO("PUBLISH MUD NOTIFICATION");
+			ROS_INFO("Check mud terrain");
 			bool is_mud_detected = check_for_mud_terrain();
 			C42_WalkType::mud mud;
 		if(walk_notification.getNumSubscribers()>0 && is_mud_detected){
+			ROS_INFO("PUBLISH MUD NOTIFICATION");
 			walk_notification.publish(mud);
+			publish_special_plan_mud(spec_path);
 		}
+    }
+    void check_for_debris_terrain(ros::Publisher& walk_notification, ros::Publisher& spec_path){
+    	//if(walk_notification.getNumSubscribers()>0){
+    		ROS_INFO("Check mud terrain");
+			bool is_detected = check_for_debris_terrain();
+			C42_WalkType::debris debris;
+		if(walk_notification.getNumSubscribers()>0 && is_detected){
+			ROS_INFO("PUBLISH debris NOTIFICATION");
+			walk_notification.publish(debris);
+			publish_special_plan_firstAndLast(spec_path);
+		}
+    }
+    void check_for_hills_terrain(ros::Publisher& spec_path){
+		ROS_INFO("Check mud terrain");
+		publish_special_plan_firstAndLast(spec_path);
     }
 
     TaskResult task(const string& name, const string& uid, Arguments& args){
@@ -149,6 +241,21 @@ public:
     	ROS_INFO("advertise topic /walk_notification/mud <C42_WalkType::mud>");
     	ros::Publisher C42_walk_notification_mud =
     			_node.advertise<C42_WalkType::mud>("/walk_notification/mud", 10);
+    	ROS_INFO("advertise topic /walk_notification/debris <C42_WalkType::debris>");
+    	ros::Publisher C42_walk_notification_debris =
+    			_node.advertise<C42_WalkType::mud>("/walk_notification/debris", 10);
+
+    	ROS_INFO("advertise topic /path_quad/mud <C31_PathPlanner::C31_Waypoints>");
+    	ros::Publisher c42_Quadruped_path_mud =
+    			_node.advertise<C31_PathPlanner::C31_Waypoints>("/path_quad/mud", 10);
+
+    	ROS_INFO("advertise topic /path_quad/debris <C31_PathPlanner::C31_Waypoints>");
+    	ros::Publisher c42_Quadruped_path_debris =
+    			_node.advertise<C31_PathPlanner::C31_Waypoints>("/path_quad/debris", 10);
+
+    	ROS_INFO("advertise topic /path_quad/hills <C31_PathPlanner::C31_Waypoints>");
+    	ros::Publisher c42_Quadruped_path_hills =
+    			_node.advertise<C31_PathPlanner::C31_Waypoints>("/path_quad/hills", 10);
 
 
 		//TASK INPUT CHANNELS
@@ -213,7 +320,13 @@ public:
 					ROS_INFO("%s: plan path", _name.c_str());
 					if( _planner.plan() ){
 						publish_new_plan(c31_PathPublisher);
-						check_for_mud_terrain(C42_walk_notification_mud);
+						check_terrain(
+								C42_walk_notification_mud,
+								C42_walk_notification_debris,
+								c42_Quadruped_path_mud,
+								c42_Quadruped_path_debris,
+								c42_Quadruped_path_hills
+						);
 					}else{
 						throw_exception(C31_PathPlanner::C31_Exception::TYPE_NOSOLUTIONFORPLAN, "No solution for plan found.");
 					}
@@ -267,6 +380,22 @@ public:
     		const Vec2d& wp = session.results.path[i];
     		if( session.arguments.map.terrain((size_t)wp.x, (size_t)wp.y) == ObsMap::ST_MUD )
     			return true;
+    	}
+    	return false;
+    }
+    bool check_for_debris_terrain(){
+    	struct debrisDetectorParams{ int wp_number; int wp_radius; }dd;
+    	SET_DD_PARAMETERS(dd);
+
+    	PathPlanning::ReadSession session = _planner.startReading();
+    	for(size_t i=0;i<session.results.path.size() && i<dd.wp_number;i++){
+    		const Vec2d& wp = session.results.path[i];
+    		size_t wpx(round(wp.x)), wpy(round(wp.y));
+    		for(int y=wpy-dd.wp_radius; y<wpy+dd.wp_radius; y++)for(int x=wpx-dd.wp_radius; x<wpx+dd.wp_radius; x++){
+    			if(session.arguments.map.terrain.inRange(x,y))
+    				if( session.arguments.map.terrain((size_t)wp.x, (size_t)wp.y) == ObsMap::ST_DEBRIS )
+    					return true;
+    		}
     	}
     	return false;
     }

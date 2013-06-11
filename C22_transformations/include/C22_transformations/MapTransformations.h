@@ -27,7 +27,7 @@ public:
 		MapProperties(const MapProperties& o):offset(o.offset),resolution(o.resolution),rotation(o.rotation),swapXY(o.swapXY){}
 
 		MapProperties(const C22_GroundRecognitionAndMapping::C22C0_PATH& c22msg){
-			offset = Vec2d(c22msg.robotPos.x, c22msg.robotPos.y);
+			offset = Vec2d(c22msg.xOffset, c22msg.yOffset);
 			resolution = D_RESOLUTION;
 			rotation = D_ROTATION;
 			swapXY=D_SWAPXY;

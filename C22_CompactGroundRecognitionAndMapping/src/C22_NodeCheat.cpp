@@ -362,25 +362,21 @@ void C22_Node::callback(const sensor_msgs::PointCloud2::ConstPtr& pclMsg,const n
 	  pass.filter (*cloudRecord);
 
 	  if(cloudRecord->points.size()>120000){
-		  cloudRecord->points.resize(100);
-	  			 /*pcl::PointCloud<pcl::PointXYZ>empty;
-	  			 pcl::PointCloud<pcl::PointXYZ>::Ptr em(empty.makeShared());
-	  			 cloudRecord.swap(em);*/
-	  			 //pcl::io::savePCDFileASCII ("test_pcd.pcd",*cloudRecord);
-	  			  pcl::PointCloud<int> sampled_indices;
-	  			  pcl::UniformSampling<pcl::PointXYZ> uniform_sampling;
-	  			  uniform_sampling.setInputCloud (cloudRecord);
-	  			  uniform_sampling.setRadiusSearch (0.005);
-	  			  uniform_sampling.compute (sampled_indices);
-	  			  //pcl::copyPointCloud (*scene, sampled_indices.points, *scene_keypoints);
-	  			  std::cout << "Scene total points: " << cloudRecord->points.size() ;
-	  			  pcl::copyPointCloud (*cloudRecord, sampled_indices.points, *cloudRecord);
-	  			  std::cout<< "; Selected Keypoints: " << cloudRecord->points.size() << std::endl;
-	  			  /*pcl::StatisticalOutlierRemoval<pcl::PointXYZ> sor;
-	  			  sor.setInputCloud (cloudRecord);
-	  			  sor.setMeanK (10);
-	  			  sor.setStddevMulThresh (1.0);
-	  			  sor.filter (*cloudRecord);*/
+		  pcl::PassThrough<pcl::PointXYZ> pass;
+		  pass.setInputCloud (cloudRecord);
+		  pass.setFilterFieldName ("y");
+		  pass.setFilterLimits (_myMatrix->yOffset,_myMatrix->yOffset+2);
+		  //pass.setFilterLimitsNegative (true);
+		  pass.filter (*cloudRecord);
+		  pass.setInputCloud (cloudRecord);
+		  pass.setFilterFieldName ("x");
+		  pass.setFilterLimits (_myMatrix->xOffset,_myMatrix->xOffset+2);
+		  //pass.setFilterLimitsNegative (true);
+		  pass.filter (*cloudRecord);
+		  pass.setFilterFieldName ("z");
+		  pass.setFilterLimits (pos_msg->pose.pose.position.z-2,pos_msg->pose.pose.position.z+2);
+		  //pass.setFilterLimitsNegative (true);
+		  pass.filter (*cloudRecord);
 
 	  		 }
 	  cloud_filtered.reset();
