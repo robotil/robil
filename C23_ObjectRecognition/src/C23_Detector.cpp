@@ -534,7 +534,7 @@
 			  
 			// cout<<"x,y,z: "<<x<<", "<<y<<", "<<z<<endl;
 			  if(p.x<0){
-			  cout<<"px, py, pz: "<<p.x<<", "<<p.y<<", "<<p.z<<" (i,j): "<<i<<", "<<j<<endl;
+			  //cout<<"px, py, pz: "<<p.x<<", "<<p.y<<", "<<p.z<<" (i,j): "<<i<<", "<<j<<endl;
 			  
 			  }
 			  
@@ -551,7 +551,7 @@
 	      tmp_y=_y/(counter);
 	      tmp_z=_z/(counter);
 	      
-		cout << "Point is: " << tmp_x << "," <<tmp_y << "," << tmp_z << endl;
+		cout << "Average X,Y,Z Point is: " << tmp_x << "," <<tmp_y << "," << tmp_z << endl;
 		
 		
 		*px = tmp_x;
@@ -689,6 +689,26 @@
 	    char basePath[1000],imageName[1000];
 	    
 	    sprintf(basePath,"%s/3D_models/%s%c",ros::package::getPath("C23_ObjectRecognition").c_str(),"gear.txt",'\0');
+	    string t = basePath;
+	  //  string t = "/home/isl/darpa/robil/C23_ObjectRecognition/3D_models/firehose.txt";
+	    std::cout<<imageName<<endl;
+	    pcl::PointCloud<pcl::PointXYZ>::Ptr cloud2 = filterPointCloud(last_x,last_y,width,height,lastCloud);
+	    templateMatching3D(t,  cloud2);
+	}
+	if(!target.compare("InsideSteeringWheel")) {
+	    char basePath[1000],imageName[1000];
+	    
+	    sprintf(basePath,"%s/3D_models/%s%c",ros::package::getPath("C23_ObjectRecognition").c_str(),"insideSteeringWheel.txt",'\0');
+	    string t = basePath;
+	  //  string t = "/home/isl/darpa/robil/C23_ObjectRecognition/3D_models/firehose.txt";
+	    std::cout<<imageName<<endl;
+	    pcl::PointCloud<pcl::PointXYZ>::Ptr cloud2 = filterPointCloud(last_x,last_y,width,height,lastCloud);
+	    templateMatching3D(t,  cloud2);
+	}
+	if(!target.compare("OutsideSteeringWheel")) {
+	    char basePath[1000],imageName[1000];
+	    
+	    sprintf(basePath,"%s/3D_models/%s%c",ros::package::getPath("C23_ObjectRecognition").c_str(),"outsideSteeringWheel.txt",'\0');
 	    string t = basePath;
 	  //  string t = "/home/isl/darpa/robil/C23_ObjectRecognition/3D_models/firehose.txt";
 	    std::cout<<imageName<<endl;
@@ -1008,9 +1028,9 @@
 		case HANDBRAKE:
 		  ROS_INFO("Handbrake template matching");
 		  //cout<<" Gear x,y,z: "<<x<<", "<<y<<", "<<z<<endl;
-		  x = x - 0.03;
-		  y = y + 0.09;
-		  z = z - 0.03;
+		  this->x = x - 0.03;
+		  this->y = y + 0.09;
+		  this->z = z - 0.03;
           
 		  //cout<<"Handbrake x,y,z: "<<x<<", "<<y<<", "<<z<<endl;
 		  
@@ -1022,7 +1042,7 @@
 		break;
 		case INSIDE_STEERINGWHEEL:
 		  ROS_INFO("Steeringwheel template matching");
-		  if(x<1 && x>0)
+		  if(x<1.5 && x>0)
 		  res=true;
 		  else
 		  res = false;
@@ -1271,18 +1291,25 @@
 
 		  sprintf(basePath,"%s/template_matching_images/%c",ros::package::getPath("C23_ObjectRecognition").c_str(),'\0');
 
-		  sprintf(imageName,"%ssteering_wheel_template_qual.jpg%c",basePath,'\0');
+		  sprintf(imageName,"%ssteering_wheel_template_qual_half.jpg%c",basePath,'\0');
 		  std::cout<<imageName<<endl;
 		//-----------------------------------------------------------------
 	      
-	      
+		
 		//Load the image template for the steering wheel
 		Mat steeringwheelTemplate = imread(imageName);
 		res  = templateMatching(srcImg, steeringwheelTemplate, 1, &matchLoc, cloud);
 		
+		string t = "InsideSteeringWheel";
+		//saveTemplate(matchLoc.x, matchLoc.y,steeringwheelTemplate.cols, steeringwheelTemplate.rows,cloud,t);
 		
-		imshow("Steering wheel template", steeringwheelTemplate);
-		waitKey(0);
+		last_x = matchLoc.x;
+		last_y = matchLoc.y;
+		width = steeringwheelTemplate.cols;
+		height = steeringwheelTemplate.rows;
+		
+		//imshow("Steering wheel template", steeringwheelTemplate);
+		//waitKey(0);
 	    }
 	    else{
 		//Robot is outside the car
@@ -1300,21 +1327,21 @@
 		    //Open the image to remove noise
 		    Mat element1(3, 3, CV_8U, Scalar(1));
 		    morphologyEx(thresholdedImg, imgCarOpened, MORPH_OPEN, element1);
-		    //imshow("New image", imgCarOpened);
-		    //waitKey();
+		   // imshow("New image", imgCarOpened);
+		   // waitKey();
 		    
 		    //Remove points that are far away
 		    //pcl::PointXYZ minPoint, absolutePoint;
 		    pcl::PointCloud<pcl::PointXYZ> pclcloud;
 		    pcl::fromROSMsg<pcl::PointXYZ>(*cloud,pclcloud);
 		    //geometry_msgs::Pose pose;
-		    int THRESHOLD = 1000;
+		    int THRESHOLD = 10000;
 		    int distance = 10000;
 		    //Get the closest point from the robot to the car
 		    cout << x << "," << y << "," << width << "," << height << endl;
 		    for(int i = 0; i < imgCarOpened.rows; i++) {
 			for(int j = 0; j < imgCarOpened.cols; j++) {
-			    //     cout << "(" << i << "," << j << "," << pclcloud.at(i,j).z << ")" << endl;
+			        // cout << "(" << i << "," << j << "," << pclcloud.at(i,j).z << ")" << endl;
 			    distance  = sqrt((pclcloud.at(i,j).x*pclcloud.at(i,j).x+pclcloud.at(i,j).y*pclcloud.at(i,j).y+pclcloud.at(i,j).z*pclcloud.at(i,j).z)*10000);
 			    if( distance > THRESHOLD || distance!=distance || distance<0) {
 				//cout<<"distance: "<<distance<<endl;
@@ -1338,8 +1365,8 @@
 		    
 
 		    drawContours(srcImg,blobContours,-1,CV_RGB(255,0,0),2);
-		    imshow("blobs", srcImg);
-		    waitKey();
+		    //imshow("blobs", srcImg);
+		    //waitKey();
 		    
 		    if(blobContours.size()>0){
 		      
@@ -1352,8 +1379,8 @@
 		    Mat element3(5, 5, CV_8U, Scalar(1));
 		    erode(imgCarClosed, imgCarFinal, element3);
 		    //morphologyEx(imgCarOpened, imgCarClosed, MORPH_CLOSE, element2);
-		    imshow("New image", imgCarFinal);
-		    waitKey();
+		    //imshow("New image", imgCarFinal);
+		    //waitKey();
 		    
 		    //Find the area of the contours
 		    double maxArea = -1;
@@ -1383,27 +1410,41 @@
 		      mc= Point2f( mu.m10/mu.m00 , mu.m01/mu.m00 );
 		    cout<<"CM: "<<mc.x<<", "<<mc.y<<endl;
 		    //Send the coordinates
+		    circle(srcImg, mc, 3, Scalar(255,0,0));
+		    //imshow("CM", srcImg);
+		   // waitKey();
 		    
-		    int x1 = max(0,(int)(mc.y) - OFFSET_WHEEL);
-		    int y1 = max(0,(int)(mc.x) - OFFSET_WHEEL);
+		    int row = max(0,(int)(mc.y) - OFFSET_WHEEL);
+		    int col = max(0,(int)(mc.x) - OFFSET_WHEEL);
 		    
 		    int width = OFFSET_WHEEL*2;
 		    int height  = OFFSET_WHEEL*2;
 		    
-		    if(x1+width>imgCarFinal.cols){
-		      width = imgCarFinal.cols - x1; 
+		    if(col+width>imgCarFinal.cols){
+		      width = imgCarFinal.cols - col; 
 		    }
-		    if(y1+height>imgCarFinal.rows){
-		      height = imgCarFinal.rows - y1; 
+		    if(row+height>imgCarFinal.rows){
+		      height = imgCarFinal.rows - row; 
 		    }
 		    
-		    Rect rect(x1, y1, width, height);
+		    Rect rect(col, row, width, height);
 		    
 		    Mat boundedSteeringWheelImg(srcImg,rect);
-		    imshow("Bounded area", boundedSteeringWheelImg);
-		    waitKey();
+		    cout<<"X1,Y1, W, H: "<<col<<", "<<row<<", "<<width<<", "<<height<<endl;
+		    
+		    
+		    //imshow("Bounded area", boundedSteeringWheelImg);
+		    //waitKey();
 		    //x = mc.x;
 		    //y  =mc.y;
+		    string t = "OutsideSteeringWheel";
+		    //saveTemplate(col, row,width, height,cloud,t);
+		    averagePointCloudInsideCar(col,row,col + width, row + height, cloud, &x, &y, &z);
+		    
+		    last_x = col;
+		    last_y = row;
+		    this->width = width;
+		    this->height = height;
 		    }
 		    
 		    
@@ -1412,8 +1453,10 @@
 		
 	    }
 	    
-	    if (res)
+	    if (res){
 		  ROS_INFO("Steeringwheel detected");
+		 
+	    }
 		else
 		  ROS_INFO("Steeringwheel NOT detected");
 	    return res;
