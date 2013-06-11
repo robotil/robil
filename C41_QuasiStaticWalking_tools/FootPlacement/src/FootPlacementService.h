@@ -16,6 +16,10 @@
 #define SIZE 36
 #define STEPS 5
 
+#define MAX_STEP_SIZE 0.3
+#define MIN_STEP_SIZE 0.1
+#define MAX_STEP_HEIGHT 0.1
+
 #define SLOPE_WEIGHT 5
 #define DISTANCE_WEIGHT 5
 #define HEIGHT_WEIGHT 5
