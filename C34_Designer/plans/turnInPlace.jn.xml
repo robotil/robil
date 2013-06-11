@@ -1,0 +1,5 @@
+<plan descriptions="./plans/TaskDescriptions.xml">
+   <seq name="turnMission"> 
+         <tsk name="WalkerNode_AP(turn_in_place_Yaw=-1.57)" />
+   </seq>
+</plan>
