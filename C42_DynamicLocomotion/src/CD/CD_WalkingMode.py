@@ -156,7 +156,7 @@ class CD_WalkingMode(WalkingMode):
         self._bDone = self._WalkingModeStateMachine.IsDone()
         if (0 !=command):
             command.k_effort = self._k_effort
-            print(command)
+            #print(command)
             self.asi_command.publish(command)
 
     def _odom_cb(self,odom):

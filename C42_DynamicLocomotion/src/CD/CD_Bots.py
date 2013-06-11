@@ -96,6 +96,11 @@ class CD_PhantomRobot(CD_Robot):
 
     def Step(self):
         self._StepQueue.append(self._ForwardStep())
+        x,y = self._Odometer.GetGlobalPosition()
+        self._LPP.UpdatePosition(x,y)
+        print("Phantom Location: ",x,y)
+        print("Phantom target Distance: ",self._LPP.GetTargetDistance())
+        
 
     def EndOfSegment(self):
         return self._LPP.IsEndOfSegment()
@@ -107,6 +112,7 @@ class CD_PhantomRobot(CD_Robot):
             self._Turn()
             self._AddIdleSteps()
             self._LPP.PromoteSegment()
+        self._LPP.UpdatePosition(self._Odometer.GetGlobalPosition())
     
     def SetPathError(self,error):
         self._Error = error
