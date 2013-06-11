@@ -1,4 +1,5 @@
 #include "ros/ros.h"
+#include "C21_VisionAndLidar/C21_obj.h"
 #include <image_transport/image_transport.h>
 #include <message_filters/synchronizer.h>
 #include <message_filters/subscriber.h>
@@ -102,6 +103,7 @@ public:
 		sync( MySyncPolicy( 10 ), left_image_sub_,pointcloud)
 		{
 			cloudpub= nh_.advertise<geometry_msgs::Polygon>("fetchedCloud", 1000);
+			service= nh_.serviceClient<C21_VisionAndLidar::C21_obj>("C21/C23");
 			sync.registerCallback( boost::bind( &CloudFetch::callback, this, _1, _2 ) ); //Specifying what to do with the data
 
 		}
@@ -121,22 +123,24 @@ public:
 		}
 		myImage=&left->image;
 
-		Rect box1;
-		box1.x=162;
-		box1.y=114;
-		box1.height=367-114;
-		box1.width=261-162;
-		draw_box( myImage, box1 );
+
 		if(box_chosen){
 			draw_box( myImage, box );
-
-			std::stringstream s;
-			s<<"Values to call service\n:"<<" x1:"<<minx<<" y1:"<<miny<<" x2:"<<maxx<<" y2:"<<maxy;
-			cv::Point org;
-			org.x=10;
-			org.y=10;
-			cv::putText(*myImage, s.str(), cvPoint(30,30),
-			 FONT_HERSHEY_COMPLEX_SMALL, 1.2, cvScalar(0,200,250), 1, CV_AA);
+			C21_VisionAndLidar::C21_obj msg;
+			msg.request.sample.x1=minx;
+			msg.request.sample.y1=miny;
+			msg.request.sample.x2=maxx;
+			msg.request.sample.y1=maxy;
+			if(service.call(msg)){
+				std::stringstream s;
+				s<<"global position\n:"<<" x:"<<msg.response.point.x<<" y:"<<msg.response.point.y<<" z:"<<msg.response.point.z;
+				cv::Point org;
+				org.x=10;
+				org.y=10;
+				cv::putText(*myImage, s.str(), cvPoint(30,30),
+				FONT_HERSHEY_COMPLEX_SMALL, 1.2, cvScalar(0,200,250), 1, CV_AA);
+			}
+			box_chosen=false;
 		}
 
 			imshow("Window",*myImage);
@@ -158,6 +162,7 @@ private:
   message_filters::Synchronizer< MySyncPolicy > sync;
   ros::Publisher cloudpub;
   boost::shared_ptr<pcl::visualization::PCLVisualizer> viewer;
+  ros::ServiceClient service;
 };
 
 
