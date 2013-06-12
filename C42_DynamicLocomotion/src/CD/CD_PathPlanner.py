@@ -3,7 +3,6 @@
 from collections import deque
 from Abstractions.PathPlanner import *
 import math
-import rospy    # TODO - get rid of all these loginfo when done debugging
 
 ###################################################################################
 # File created by David Dovrat, 2013.
@@ -50,38 +49,6 @@ class Waypoint(object):
         res = Waypoint()
         res._fX = self._fX - otherWaypoint._fX
         res._fY = self._fY - otherWaypoint._fY
-        return res
-
-###################################################################################
-#---------------------------------- FootPlacement --------------------------------------
-###################################################################################
-
-class FootPlacement(Waypoint):
-    """
-        The FootPlacement class is the basic building block foot foot placement path
-    """   
-    def __init__(self,CoordinateX = 0.0,CoordinateY = 0.0,Yaw = 0.0):
-        Waypoint.__init__(self,CoordinateX,CoordinateY)
-        self._fYaw = Yaw
-        
-    def GetYaw(self):
-        return self._fYaw
-    
-    def SetYaw(self,Yaw):
-        self._fYaw = Yaw
-
-    def Add(self,FootPlacement):
-        res = FootPlacement()
-        res._fX = self._fX + FootPlacement._fX
-        res._fY = self._fY + FootPlacement._fY
-        res._fYaw = self._fYaw + FootPlacement._fYaw
-        return res
-
-    def Sub(self,FootPlacement):
-        res = FootPlacement()
-        res._fX = self._fX - FootPlacement._fX
-        res._fY = self._fY - FootPlacement._fY
-        res._fYaw = self._fYaw - FootPlacement._fYaw
         return res
         
 ###################################################################################
@@ -168,7 +135,7 @@ class Segment(object):
 #--------------------------- Local Path Planner -----------------------------------
 ###################################################################################
 
-class LocalPathPlanner(PathPlanner):
+class CD_PathPlanner(PathPlanner):
     """
         The LocalPathPlanner class plans the next few steps for the ZMP module
     """
@@ -178,9 +145,9 @@ class LocalPathPlanner(PathPlanner):
         self._Position = Waypoint()
         self._CurrentSegment = Segment(self._Position,self._Position)
         self._PathReady = False
-        #self._Preview_Distance = 1.0 #1.7 # [meters], should be updated according to distance of number of step ahead 
-        self._DoingQual = False
-        
+        self._EndOfPath = False
+        self._EndOfSegment = False
+  
     def SetPath(self,waypointList):
         self._Path = deque(waypointList)
         if (len(self._Path)<2):
@@ -193,7 +160,9 @@ class LocalPathPlanner(PathPlanner):
         else:
             self._CurrentSegment.SetSource(self._Path.popleft())
             self._CurrentSegment.SetTarget(self._Path.popleft()) 
-        self._PathReady = True   
+        self._PathReady = True
+        self._EndOfPath = False
+        self._EndOfSegment = False   
         
     def GetPath(self):
         return self._Path
@@ -208,66 +177,49 @@ class LocalPathPlanner(PathPlanner):
     def GetTargetYaw(self):
         return self._CurrentSegment.GetYaw()
 
+    def GetAngleToNextSegment(self):
+        NextSegment = Segment(self._CurrentSegment.GetTarget(),self._Path[0])
+        return NextSegment.GetYaw()-self._CurrentSegment.GetYaw()
+    
     def GetCloseEnoughToTargetDistance(self):
-        turningRadius = 0.20#1.5
-        theta = 0.0
-        if(0 == len(self._Path)):
-            # Last segment
-            result = 0.4
-        else:
-            NextSegment = Segment(self._CurrentSegment.GetTarget(),self._Path[0])
-            theta = NextSegment.GetYaw()-self._CurrentSegment.GetYaw()
-            if(0 == math.sin(theta)):
-                # If theta is 0 or 180, then it would be better to reach the point than to throw an exception...
-                result = 0.1
-            else:
-                result = math.fabs(turningRadius*math.tan(theta/2)) # Ask Dave
-        #rospy.loginfo('GetCloseEnoughToTargetDistance: %f, theta = %f' %(result,theta))
-        return result
-
-    # def GetCloseEnoughToTargetDistanceWithPreview(self):
-    #     return self.GetCloseEnoughToTargetDistance() + self._Preview_Distance
-            
+        return 0.4
+ 
     def UpdatePosition(self,CoordinateX,CoordinateY,Preview_Distance=0.0):
         """
             Updates the position, returns true if at end of current path, false otherwise
         """
         self._Position.SetX(CoordinateX)
         self._Position.SetY(CoordinateY)
-        bStop = False
         if self.IsActive():
             sagital,lateral = self._CurrentSegment.GetDistanceFrom(self._Position)
             distanceFromTarget = self._CurrentSegment.GetTarget().GetDistanceFrom(self._Position)
             #rospy.loginfo('UpdatePosition: distanceFromTarget = %f' %(distanceFromTarget))
             if ((sagital>0.0)or(distanceFromTarget < (self.GetCloseEnoughToTargetDistance()+Preview_Distance) )):
-                rospy.loginfo('UpdatePosition: distanceFromTarget = %f' %(distanceFromTarget))
+                #rospy.loginfo('UpdatePosition: distanceFromTarget = %f' %(distanceFromTarget))
+                self._EndOfSegment = True
                 if(len(self._Path)==0):
-                    bStop = True
-                    self._PathReady = False
-                    #rospy.loginfo('UpdatePosition: Stopping')
-                else:
-                    rospy.loginfo('UpdatePosition: Path next point before pop (x,y) = (%f,%f)' %(self._Path[0].GetX(),self._Path[0].GetY()))
-                    self._CurrentSegment.SetSource(self._CurrentSegment.GetTarget())
-                    self._CurrentSegment.SetTarget(self._Path.popleft())
-                #rospy.loginfo('UpdatePosition:  New Segment: Size = %s' %(self._CurrentSegment._Source.GetDistanceFrom(self._CurrentSegment._Target) ) )
-        else:
-            bStop = True
-        return bStop
+                    self._EndOfPath = True
         
+    def PromoteSegment(self):
+        if (0<len(self._Path)):
+            self._CurrentSegment.SetSource(self._CurrentSegment.GetTarget())
+            self._CurrentSegment.SetTarget(self._Path.popleft())
+            self._EndOfSegment = False
+    
     def Stop(self):
         self._PathReady = False 
 
     def IsActive(self):
         return self._PathReady
+    
+    def IsEndOfSegment(self):
+        return self._EndOfSegment
+    
+    def IsEndOfPath(self):
+        return self._EndOfPath
 
     def GetTargetDistance(self):
         return self._CurrentSegment.GetTarget().GetDistanceFrom(self._Position) - self.GetCloseEnoughToTargetDistance()
-
-    def SetDoingQual(self,DoingQual):
-        self._DoingQual = DoingQual
-
-    def GetDoingQual(self):
-        return self._DoingQual
 
 
 ###################################################################################
