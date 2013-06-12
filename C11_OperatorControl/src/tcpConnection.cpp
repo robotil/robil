@@ -13,6 +13,7 @@ CTcpConnection::CTcpConnection(QString ipAddress,int port)
   IsSendingPath = false;
   WaitingForResponse = false;
   IsSendingExecuterStatus = false;
+  ResetImgReceive = false;
   pITcpConnectionInterface = NULL;
   ImgSize = 0;
   Counter = 0;
@@ -66,6 +67,14 @@ void CTcpConnection::SltReadyRead()
             {
               std::cout<<"TCP: Size not big enough!\n";
               std::cout<<"TCP: expected = " << ImgSize << " received = " << bufSize << "\n";
+              if(ResetImgReceive)
+                {
+                  ResetImgReceive = false;
+                  ImgSize = 0;
+                  QByteArray bfr;
+                  IsSendingImage = false;
+                  bfr = pConnection->read(bufSize);
+                }
               return;
             }
           else
@@ -225,6 +234,7 @@ void CTcpConnection::SltReadyRead()
             IsSendingImage = true;
             ImgSize = dataSize;
             std::cout<<"TCP: image coming!\n";
+ //           pTimer->start(5000);
           }
         else if(2 == msgId)
           {
@@ -313,6 +323,9 @@ void CTcpConnection::SltOnTimer()
 {
 //  std::cout<<"TCP: Bytes avaliable: "<< pConnection->bytesAvailable() <<"\n";
 //  std::cout<<"TCP: The socket is: "<< pConnection->state() <<"\n";
+  std::cout<<"TCP: Image receive timeout"<<std::endl;
+  ResetImgReceive = true;
+  pTimer->stop();
 }
 
 void CTcpConnection::LoadMission(int index)

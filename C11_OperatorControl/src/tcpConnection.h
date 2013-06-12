@@ -68,6 +68,7 @@ private:
         int ImgSize;
         bool WaitingForResponse;
         int Counter;
+        bool ResetImgReceive;
         ITcpConnectionInterface* pITcpConnectionInterface;
 };
 
