@@ -90,7 +90,7 @@ public:
 		ros::Duration(0.1).sleep();
 		cm.behavior = atlas_msgs::AtlasSimInterfaceCommand::STAND;
 
-		pub_atlas_commands_.publish(cm);
+		//pub_atlas_commands_.publish(cm);
 
 		res.success = true;
 		return true;
