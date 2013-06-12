@@ -1,5 +1,5 @@
 <plan descriptions="./plans/TaskDescriptions.xml">
    <seq name="mission" x="470.5" y="112.5" collapsed="false" id="6006f6c7-0e3f-4ac5-bc07-3ab15200678e"> 
-         <tsk name="searchObject(target=FirehoseGrip)" x="442.9999999999999" y="224.99999999999994" test_time="0" test_result="true" id="2e38e143-fe05-4c53-9634-5b55cde61077" />
+         <tsk name="searchObject(target=Arrow)" x="442.9999999999999" y="224.99999999999994" test_time="0" test_result="true" id="2e38e143-fe05-4c53-9634-5b55cde61077" />
    </seq>
 </plan>
