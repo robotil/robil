@@ -218,7 +218,7 @@ class CD_PhantomRobot(CD_Robot):
             
     def _Turn(self):
         turningAngle = self._LPP.GetAngleToNextSegment()
-        theta_max = 0.4 # max turning angle per step
+        theta_max = 0.25 # max turning angle per step
         ### Turn in place (pivot):
         Num_seq = int(math.floor(math.fabs(turningAngle)/theta_max))
         for i in range(Num_seq):
