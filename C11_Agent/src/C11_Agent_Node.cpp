@@ -540,7 +540,7 @@ void C11_Agent_Node::UplinkSubscriber(const std_msgs::StringConstPtr& up)
 
 void C11_Agent_Node::ObjectsSubscriber(const C23_ObjectRecognition::C23C0_ODIMConstPtr& obj)
 {
-  cout<<obj;
+//  cout<<obj;
 }
 
 void C11_Agent_Node::NewGoalRequest(StructPoint goal)

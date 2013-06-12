@@ -46,6 +46,11 @@ void C11Main::SetTcp(CTcpServer* ptcpServer)
   connect(pCTcpServer,SIGNAL(SigResetRequest()),this,SLOT(SltResetRequest()));
 }
 
+void C11Main::SetImgTcp(CTcpServer* ptcpServer)
+{
+  pImageCTcpServer = ptcpServer;
+}
+
 void C11Main::PushImage(QImage img)
 {
   emit SigOnImageSend(img);
@@ -95,7 +100,7 @@ void C11Main::SendUplink(QString up)
 
 void C11Main::SltOnImageSend(QImage img)
 {
-  pCTcpServer->SendImage(img);
+  pImageCTcpServer->SendImage(img);
   pC11Node->SetReleased();
 }
 

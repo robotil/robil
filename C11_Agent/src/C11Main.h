@@ -48,6 +48,7 @@ public:
   ~C11Main();
 
   void SetTcp(CTcpServer* ptcpServer);
+  void SetImgTcp(CTcpServer* ptcpServer);
 
   virtual void PushImage(QImage img);
   virtual void PushGrid(StructGridData grid);
@@ -62,6 +63,7 @@ public:
 private:
   C11_Agent_Node* pC11Node;
   CTcpServer* pCTcpServer;
+  CTcpServer* pImageCTcpServer;
 };
 
 #endif // C11_MAIN_H

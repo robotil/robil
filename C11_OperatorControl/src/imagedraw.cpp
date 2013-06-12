@@ -58,12 +58,14 @@ ImageDraw::ImageDraw(int argc, char** argv, QWidget *parent, Qt::WFlags flags)
             QString line = in.readLine();
 //	    pCTcpConnection = new CTcpConnection(QString("172.23.1.130"),45671);
             pCTcpConnection = new CTcpConnection(line,45675);
+            pImageCTcpConnection = new  CTcpConnection(line,45676);
 
 
-            connect(pCTcpConnection,SIGNAL(SigOnImgReceived(QImage)),this,SLOT(SltOnNewImg(QImage)));
+            connect(pImageCTcpConnection,SIGNAL(SigOnImgReceived(QImage)),this,SLOT(SltOnNewImg(QImage)));
             connect(pCTcpConnection,SIGNAL(SigOnGridReceived(int[100][100],StructPoint,int,int,double)),this,SLOT(SltOnGridReceived(int[100][100],StructPoint,int,int,double)));
 
             pCTcpConnection->SetSubscriber(this);
+            pImageCTcpConnection->SetSubscriber(this);
 	  }
 
 	QFile missfile("Missions.txt");
@@ -100,6 +102,11 @@ ImageDraw::~ImageDraw()
     {
       delete pCTcpConnection;
       pCTcpConnection = NULL;
+    }
+  if(pImageCTcpConnection != NULL)
+    {
+      delete pImageCTcpConnection;
+      pImageCTcpConnection = NULL;
     }
 }
 
