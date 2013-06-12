@@ -8,31 +8,30 @@
 
 from Abstractions.WalkingModeChooserInterface import *
 from Abstractions.Interface_tf import *
-from BDI.WalkingModeBDI import *
 from QS.QS_WalkingMode import *
 from DD.DD_WalkingMode import *
 from DW.DW_WalkingMode import *
+from CD.CD_WalkingMode import *
 from AlinePose.AP_WalkingMode import *
 from LocalPathPlanner import *
 
 class WalkingModeChooserEnum:
-    DontCare,BDI,QS,DD = range(4)
+    DontCare,CD,QS,DD,DW,AP = range(6)
 
 class WalkingModeChooser(WalkingModeChooserInterface):
 
-    def __init__(self,prefferedMode,bIsDoingQual=False):
-        # Once we clean bIsDoingQual out of the code, we can allow for the lpp to be known only to the concrete walking
-        # mode
-        lpp = LocalPathPlanner()
-        lpp.SetDoingQual(bIsDoingQual)
+    def __init__(self,prefferedMode):
         iTf = Interface_tf()
         
-        self._Modes = {'BDI':WalkingModeBDI(lpp),'QS':QS_WalkingMode(iTf),'DD':DD_WalkingMode(iTf),'DW':DW_WalkingMode(iTf),'AP':AP_WalkingMode(iTf)}
+        self._Modes = {'CD':CD_WalkingMode(),'QS':QS_WalkingMode(iTf),'DD':DD_WalkingMode(iTf),'DW':DW_WalkingMode(iTf),'AP':AP_WalkingMode(iTf)}
         self._Preferred = prefferedMode
         self._CurrentMode = prefferedMode
         self._Recommended = prefferedMode
         self._OverRide = WalkingModeChooserEnum.DontCare
         self._bIsAppropriate = True
+        self._EnumDictionary = {'CD':WalkingModeChooserEnum.CD,'QS':WalkingModeChooserEnum.QS,\
+                                'DD':WalkingModeChooserEnum.DD,'DW':WalkingModeChooserEnum.DW,\
+                                'AP':WalkingModeChooserEnum.AP}
         
         self._debug_cmd_sub = rospy.Subscriber('walker_mode_override',Int32,self._walker_mode_handler)
         
@@ -77,6 +76,12 @@ class WalkingModeChooser(WalkingModeChooserInterface):
                 self._Modes[self._Recommended].SetPath(path)
                 result = self._Modes[self._Recommended]
         return result
+    
+    def GetCurrentModeName(self):
+        return self._CurrentMode
+    
+    def GetCurrentModeEnum(self):
+        return self._EnumDictionary[self._CurrentMode]
     
     def _walker_mode_handler(self,walker_mode):
         self._OverRide = walker_mode.data
