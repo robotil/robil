@@ -502,18 +502,22 @@ PField::Points searchPath_transitAccurate(
 
 	inflated_map = e.merge(inflated_map, inflated_terrain, MapEditor::OR);
 
-	o_obstacles = inflated_map;
+	//o_obstacles = inflated_map;
 
 	if( inflated_map(start.x, start.y)==Map::ST_BLOCKED || inflated_map(finish.x, finish.y)==Map::ST_BLOCKED ){
 		cout<<"searchPath: "<<"some of interesting points are unattainable (after inflation)"<<endl;
 		return EmptyPath;
 	}
+//TODO: [DAN]: CHECK WHY THIS DOES NOT WARK
+//	walls =
+//		e.coloring(
+//			inflated_map,
+//			start.x, start.y, Map::ST_AVAILABLE,Map::ST_BLOCKED
+//		);
 
-	walls =
-		e.coloring(
-			inflated_map,
-			start.x, start.y, Map::ST_AVAILABLE,Map::ST_BLOCKED
-		);
+	walls = inflated_map;
+
+	o_obstacles = walls;
 
 	AltMap map = costs;
 
@@ -567,7 +571,7 @@ PField::Points searchPath_transitAccurate(
 		}
 
 		#undef SEGMENT
-
+//#undef DO_SMOOTHING
 #ifdef DO_SMOOTHING
 		PField::SmoothingParameters pf_params;
 		SET_PF_PARAMETERS(pf_params)
