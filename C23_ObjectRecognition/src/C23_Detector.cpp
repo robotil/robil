@@ -2536,24 +2536,24 @@ if(depth < minPoint.z+THRESHOLD && depth > minPoint.z-THRESHOLD/2) {
              findContours(bw, contoursR, CV_RETR_LIST, CV_CHAIN_APPROX_SIMPLE);
              cout<<"The Contour right size: "<< contoursR.size()<<endl;
              
-             cout << "Here 1" << endl;
+        //     cout << "Here 1" << endl;
              
-             cout << "Here 1.1" << endl;
+           //  cout << "Here 1.1" << endl;
              int biggstR=0;
              int size = contoursR.size() > 0 ? contoursR.size()  : 1;
              
              vector<Moments> muR(size );
              vector<Point2f> mcR(size );
-             cout << "Here 1.2" << endl;
+           //  cout << "Here 1.2" << endl;
              if(contoursR.size() != 0) {
                 
                  drawContours(srcImg, contoursR, -1, CV_RGB(255,0,0), 2);
-                 cout << "Here 2" << endl;
+                // cout << "Here 2" << endl;
                  /// Get the moments and mass centers:
                  // imshow("Contours", srcImg);
                  // waitKey(0);
                  
-                 cout << "Here 3" << endl;
+                // cout << "Here 3" << endl;
                  for(unsigned int i = 0; i < contoursR.size(); i++ )
                  {
                      muR[i] = moments( contoursR[i], false );
@@ -2562,7 +2562,7 @@ if(depth < minPoint.z+THRESHOLD && depth > minPoint.z-THRESHOLD/2) {
                          biggstR=i;
                      
                  }
-                 cout << "Here 4" << endl;
+               //  cout << "Here 4" << endl;
                  //Draw a circle indicating the center of mass on the right pole
                  
                  right = true;
@@ -2585,7 +2585,7 @@ if(depth < minPoint.z+THRESHOLD && depth > minPoint.z-THRESHOLD/2) {
                          r_z+=pclcloud.at(mcR[biggstR].x+i,mcR[biggstR].y+j).z;
                      }
                  }
-                 cout << "Here 5" << endl;
+                // cout << "Here 5" << endl;
                  r_x/=count;
                  r_y/=count;
                  r_z/=count;
@@ -2596,21 +2596,21 @@ if(depth < minPoint.z+THRESHOLD && depth > minPoint.z-THRESHOLD/2) {
                      rightC.x = r_x;
                      rightC.y = r_y;
                      rightC.z = r_z;
-                     cout << "Here 6" << endl;
+                   //  cout << "Here 6" << endl;
                  } else {
                      cout << "Red isn't valid .. " << pclcloud.at(mcR[biggstR].x,mcR[biggstR].y).x << "," << pclcloud.at(mcR[biggstR].x,mcR[biggstR].y).y << "," << endl;
                      
                  }
-                 cout << "Here 7" << endl;
+              //   cout << "Here 7" << endl;
              }
-             cout << "Here 1.3" << endl;
+            // cout << "Here 1.3" << endl;
              
              /////finding center mass of left column
              cvInRangeS(imgHSV, cvScalar(90, 130, 40), cvScalar(150, 255, 250), imgThreshed);//filter blue
-             cout << "Here 1.4" << endl;
+           //  cout << "Here 1.4" << endl;
              
              Mat threshMatL(imgThreshed),bwL;
-             cout << "Here 1.5" << endl;
+            // cout << "Here 1.5" << endl;
              threshold(threshMatL, bwL, 10, 255, CV_THRESH_BINARY);
              
              // imshow("Threshed blue",threshMatL);
@@ -2618,19 +2618,19 @@ if(depth < minPoint.z+THRESHOLD && depth > minPoint.z-THRESHOLD/2) {
              vector<vector<cv::Point> > contoursL;
              // cout<<"next2"<<endl;
              findContours(bwL, contoursL, CV_RETR_LIST, CV_CHAIN_APPROX_SIMPLE);
-             cout << "Here 1.6" << endl;
+          //   cout << "Here 1.6" << endl;
              cout << "Left contour size: " << contoursL.size() << endl;
              size = contoursL.size() > 0 ? contoursL.size()  : 1;
              vector<Moments> muL(size );
              vector<Point2f> mcL(size);
              int biggstL=0;
              if(contoursL.size() !=0) {
-                 cout << "Here 1.6.1" << endl;
+              //   cout << "Here 1.6.1" << endl;
                  drawContours(srcImg, contoursL, -1, CV_RGB(0,0,255), 2);
                  // imshow("Contours", srcImg);
                  // waitKey(0);
                  
-                 cout << "Here 1.6.2" << endl;
+                 //cout << "Here 1.6.2" << endl;
                  for(unsigned int i = 0; i < contoursL.size(); i++ )
                  {
                      muL[i] = moments( contoursL[i], false );
@@ -2639,20 +2639,20 @@ if(depth < minPoint.z+THRESHOLD && depth > minPoint.z-THRESHOLD/2) {
                          biggstL=i;
                      
                  }
-                 cout << "Here 1.6.3" << endl;
+                // cout << "Here 1.6.3" << endl;
                  left = true;
                  // cout << "Left is true! " << endl;
                  double l_x = 0;
                  double l_y = 0;
                  double l_z = 0;
                  int count = 0;
-                 cout << "Here 1.6.4" << endl;
+                // cout << "Here 1.6.4" << endl;
                  for(int i =-15; i <= 15; i++) {
                      for(int j =-100; j <=100; j++) {
                          if(! (IMG_LIMITS(mcL[biggstL].x+i))  || !(IMG_LIMITS(mcL[biggstL].y+j)) ) continue;  
 
-                         cout << "Here 1.6.5" << endl;
-                         cout << "(x,y)=" << mcL[biggstL].x+i << "," << mcL[biggstL].y+j << endl;
+                      //   cout << "Here 1.6.5" << endl;
+                   //      cout << "(x,y)=" << mcL[biggstL].x+i << "," << mcL[biggstL].y+j << endl;
                          if(mcL[biggstL].x != mcL[biggstL].x) continue;
                          if(pclcloud.at(mcL[biggstL].x+i,mcL[biggstL].y+j).x != pclcloud.at(mcL[biggstL].x+i,mcL[biggstL].y+j).x)
                              continue;
@@ -2665,7 +2665,7 @@ if(depth < minPoint.z+THRESHOLD && depth > minPoint.z-THRESHOLD/2) {
                  l_x/=count;
                  l_y/=count;
                  l_z/=count;
-                 cout << "Here 1.6.6" << endl;
+               //  cout << "Here 1.6.6" << endl;
                  if (l_x<50 && l_y <50 && l_z !=0)
                  {
                      cout << "Blue is valid .. " << endl;
@@ -2684,7 +2684,7 @@ if(depth < minPoint.z+THRESHOLD && depth > minPoint.z-THRESHOLD/2) {
                   }*/
                  
              }
-             cout << "Here 1.7" << endl;
+            // cout << "Here 1.7" << endl;
              if(left && right) {
                  
                  
