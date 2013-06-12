@@ -1,0 +1,17 @@
+<package>
+  <description brief="C0_Math">
+
+     C0_Math
+
+  </description>
+  <author>userws2</author>
+  <license>BSD</license>
+  <review status="unreviewed" notes=""/>
+  <url>http://ros.org/wiki/C0_Math</url>
+  <depend package="roscpp"/>
+  <depend package="rospy"/>
+  <depend package="C0_RobilTask"/>
+
+</package>
+
+
