@@ -1,16 +1,16 @@
 C46_MountVehicle
 
 Description: 
-  * A stub module for entering the vehicle
+  * A module for entering the vehicle
 
 Conditions:
   * DRC version 2.0
 
 To test the module follow these steps:
-  1. roslaunch atlas_utils atlas_drc_vehicle_fire_hose.launch
-  2. rosrun C46_MountVehicle C46_MountVehicle.py
-  3. Now choose one of these 2 options:
-     a. rosrun C46_MountVehicle TestMountVehicle.py
+  1. roslaunch SwingIntoCar vrc_task_1.launch
+  2. Now choose one of these 2 options:
+     a. 1. roslaunch C25_GlobalPosition C25.launch
+        2. rosrun C46_MountVehicle C46_MountVehicle.py
      b. 1. Copy the file MountVehicle.xml from /C46_MountVehicle/TestTree/ to /C34_Designer/plans/
         2. Run the executer
         3. Run the designer
@@ -18,5 +18,5 @@ To test the module follow these steps:
         5. Run the tree
 
 Contains:
-  * A stub module for entering the car
+  * A module for entering the car
   * A test tree to test the module
