@@ -7,12 +7,14 @@
 #include "C31_PathPlanner/C31_Waypoints.h"
 //#include <C22_transformations/MapTransformations.h>
 #include "FootPlacement/FootPlacement_Service.h"
+#include "FootPlacement/Foot_Placement_path.h"
+#include "C42_WalkType/extreme_slope.h"
 #include "tf/transform_listener.h"
 
 #define SQUARE_SIZE 0.05
 #define C22_SIZE 40
 #define SIZE 36
-#define STEPS 3
+#define STEPS 5
 
 #define SLOPE_WEIGHT 5
 #define DISTANCE_WEIGHT 5
@@ -23,6 +25,9 @@
 #define LEFT 0
 #define RIGHT 1
 #define NORMALIZER 100
+#define EXTREME_SLOPE 0.174532925
+
+#define MIN_DIST_FROM_TARGET 1
 
 #define USE_C22 0
 
@@ -36,6 +41,8 @@ private:
 	ros::ServiceClient mapClient;
 	ros::ServiceServer footServer;
 	ros::Subscriber pathSub;
+	ros::Publisher footPlacementPathPublisher;
+	ros::Publisher walkNotificationPublisher;
 	C22_CompactGroundRecognitionAndMapping::C22 mapService;
 	C31_PathPlanner::C31_Waypoints::ConstPtr pathPoints;
 
@@ -71,10 +78,14 @@ private:
 			const double &x2,const double &y2);
 
 	//calculate the weight of single cell
-	double singleCellWeight(const double &slope,const double &distance,
+	double singleCellWeight(const double &legDistance,
+			const double &slope,const double &distance,
 			const double &height,const double &direction,const double &slopeWeight,
 			const double &distanceWeight,const double &heightWeight,
 			const double &directionWeight);
+
+
+	void copyFoot(FootPlacement::Foot_Placement_data &a, FootPlacement::Foot_Placement_data &b);
 
 	void calcFootMatrix(
 			std::vector<FootPlacement::Foot_Placement_data>& foot_placement_path,
@@ -87,6 +98,11 @@ private:
 			const double &distanceWeight,
 			const double &heightWeight,
 			const double &directionWeight);
+
+
+
+
+	void publishExtremeSlopeMsg();
 
 public:
 	FootPlacementService();

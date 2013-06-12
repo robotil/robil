@@ -110,7 +110,13 @@ private:
 	bool IsPointsEqual(StructPoint p1, StructPoint p2);
 	bool IsPointInPath(StructPoint p1);
 
+	QPointF GetPixel(StructPoint gridcell);
+	StructPoint GetGridCell(QPointF pixel);
+
 	StructIntPoint CalculateGridPoint(StructIntPoint pointFromRos);
+	StructPoint CalculateGridPoint(StructPoint pointFromRos);
+
+	StructPoint CalculateRosGridPoint(StructPoint pointFromGrid);
 
 protected:
 	bool eventFilter(QObject *o, QEvent* e);

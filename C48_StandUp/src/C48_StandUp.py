@@ -16,7 +16,7 @@ class StandUpServer(RobilTask):
 		self._controller = Controller()
 		roll, pitch, yaw = self._controller.getRPY()
 		# keep trying until robot stands up
-		while pitch > 1.4 or pitch < -1.4 or roll > 1.4 or roll < -1.4:
+		while pitch > 0.8 or pitch < -0.8 or roll > 1.4 or roll < -1.4:
 			# in case it fell on its back roll down
 			while pitch < -1:
 				self.rollDown()
@@ -77,6 +77,7 @@ class StandUpServer(RobilTask):
 		rospy.sleep(1)
 		# straighten step #1
 		self.doPose(AU = -0.8, AP = 1.1, EB = 0, DF = 2.6, KB = 2.8, HF = 2, PF = 0.9, MF = 0, dt = time)
+		self.doPose(AU = -0.8, AP = 0.8, EB = 0, DF = 2.6, KB = 2.8, HF = 2, PF = 0.5, MF = 0, dt = time)
 		# straighten step #2
 		self.doPose(AU = -0.4, AP = 0.15, EB = 0, DF = 0.12, KB = 0.38, HF = 0.35, PF = 0, MF = 0, dt = 3*time)
 		# get back to standing up position

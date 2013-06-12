@@ -1,0 +1,8 @@
+<plan descriptions="./plans/TaskDescriptions.xml">
+   <seq name="mission" x="276.5" y="42.5" collapsed="false" id="abeb235f-5624-4349-a021-479e7328754d"> 
+         <par name="standup_with_anomaly_detection" x="218.5" y="161.5" collapsed="false" id="0892db09-d91b-4d43-b8d0-b5e27b490d10"> 
+               <tsk name="AnomalyDetector" x="133.5" y="280.5" test_time="0" test_result="true" id="65736773-22b6-4351-bd8d-892772ee2f93" />
+               <tsk name="StandUp" x="345.5" y="279.5" test_time="0" test_result="true" id="b1757ac2-2ce4-4c2e-abd0-400ba0bf9ef3" />
+         </par>
+   </seq>
+</plan>

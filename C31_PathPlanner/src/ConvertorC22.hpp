@@ -6,6 +6,7 @@
 #include "C0_RobilTask/RobilTask.h"
 #include "Map.h"
 #include "Gps.h"
+#include <C22_transformations/MapTransformations.h>
 
 
 static AltMap extractMap(const C22_GroundRecognitionAndMapping::C22C0_PATH &res, const MapProperties& prop){
@@ -102,8 +103,10 @@ static Gps2Grid extractLocation(const C22_GroundRecognitionAndMapping::C22C0_PAT
 				 (float) res.robotPos.x, (float) res.robotPos.y, (float) res.xOffset, (float) res.yOffset);
 		//size_t w = res.drivingPath.row.at(0).column.size();
 
-		wp.x=( res.robotPos.x - res.xOffset )/ prop.resolution;
-		wp.y=( res.robotPos.y - res.yOffset )/ prop.resolution;
+		C22_transform trans;
+//		wp.x=( res.robotPos.x - res.xOffset )/ prop.resolution;
+//		wp.y=( res.robotPos.y - res.yOffset )/ prop.resolution;
+		trans.GlobalToMap(res, res.robotPos, wp);
 
 		gps.x = res.robotPos.x;
 		gps.y = res.robotPos.y;

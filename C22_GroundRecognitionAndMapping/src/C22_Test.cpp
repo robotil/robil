@@ -40,13 +40,13 @@ int main(int argc, char **argv)
 		  		std::cout <<"\033[0;34m";
 		  		std::cout<<std::setw(2)<<std::setfill('0')<<i<<" ";
 		  		for (unsigned int j=srv.response.drivingPath.row.size()-1;j>0;j--){
-		  			if (srv.response.drivingPath.row.at(i-1).column.at(j).status==0)
+		  			if (srv.response.drivingPath.row.at(i-1).column.at(j).status==C22_GroundRecognitionAndMapping::C22_MAP_SQUARE::AVAILABLE)
 		  				std::cout << "\033[0;32m"<< "A  ";
-		  				else if (srv.response.drivingPath.row.at(i-1).column.at(j).status==1)
+		  				else if (srv.response.drivingPath.row.at(i-1).column.at(j).status==C22_GroundRecognitionAndMapping::C22_MAP_SQUARE::BLOCKED)
 							std::cout << "\033[0;33m"<<"B  ";
-							else if (srv.response.drivingPath.row.at(i-1).column.at(j).status==3)
+							else if (srv.response.drivingPath.row.at(i-1).column.at(j).status==C22_GroundRecognitionAndMapping::C22_MAP_SQUARE::ATLAS)
 								std::cout << "\033[0;36m"<<"R  ";
-								else if (srv.response.drivingPath.row.at(i-1).column.at(j).status==4)
+								else if (srv.response.drivingPath.row.at(i-1).column.at(j).status==C22_GroundRecognitionAndMapping::C22_MAP_SQUARE::DEBREES)
 									std::cout << "\033[0;34m"<<"D  ";
 		  						else std::cout << "\033[0m"<< "-  ";
 		  		}

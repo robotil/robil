@@ -8,7 +8,7 @@
 #ifndef PATHPLANNERPARAMETERS_H_
 #define PATHPLANNERPARAMETERS_H_
 
-#define PLANNER_VERSION "2013_06_04_14_47"
+#define PLANNER_VERSION "2013_06_09_12_30"
 
 #define PARAMS_FROM_ROS 1
 #define PARAMS_FROM_CODE 2
@@ -49,10 +49,10 @@
 
 #define SET_PF_PARAMETERS(potential_field)\
 	ros::param::param<double>("/C31_GlobalPathPlanner/potential_field/viewRadiusForward", (potential_field).viewRadiusForward, 15);\
-	ros::param::param<double>("/C31_GlobalPathPlanner/potential_field/viewRadiusSide", (potential_field).viewRadiusForward, 4);\
-	ros::param::param<double>("/C31_GlobalPathPlanner/potential_field/stepRate", (potential_field).viewRadiusForward, 0.3);\
-	ros::param::param<double>("/C31_GlobalPathPlanner/potential_field/distanceBetweenPoints", (potential_field).viewRadiusForward, 2);\
-	ros::param::param<double>("/C31_GlobalPathPlanner/potential_field/maxAngleWhileReducing", (potential_field).viewRadiusForward, Vec2d::d2r(10));\
+	ros::param::param<double>("/C31_GlobalPathPlanner/potential_field/viewRadiusSide", (potential_field).viewRadiusSide, 4);\
+	ros::param::param<double>("/C31_GlobalPathPlanner/potential_field/stepRate", (potential_field).stepRate, 0.3);\
+	ros::param::param<double>("/C31_GlobalPathPlanner/potential_field/distanceBetweenPoints", (potential_field).distanceBetweenPoints, 2);\
+	ros::param::param<double>("/C31_GlobalPathPlanner/potential_field/maxAngleWhileReducing", (potential_field).maxAngleWhileReducing, Vec2d::d2r(10));\
 	(potential_field).inertia=pow(1/(pf_params.viewRadiusForward*0.5),2);
 
 
@@ -70,6 +70,9 @@
 
 #define SET_MD_PARAMETERS(mud_detector)\
 	ros::param::param<int>("/C31_GlobalPathPlanner/mud_detector/wp_number", (mud_detector).wp_number, 5);
+#define SET_DD_PARAMETERS(debrees_detector)\
+	ros::param::param<int>("/C31_GlobalPathPlanner/debrees_detector/wp_number", (debrees_detector).wp_number, 5);\
+	ros::param::param<int>("/C31_GlobalPathPlanner/debrees_detector/wp_radius", (debrees_detector).wp_number, 3);
 
 #endif
 
