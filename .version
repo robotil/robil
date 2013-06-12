@@ -1,4 +1,4 @@
-V0.0.1.87
+V0.0.1.88
 ===========================================================
 C0_RobilTask     0.5
 C0_Scripts     0.27
@@ -28,7 +28,7 @@ C42_DRCSim2_tools     0.2
 C42_DynamicLocomotion     0.12
 C42_Leg_IK     0.4
 C42_State     0.2
-C42_WalkType     0.5
+C42_WalkType     0.6
 C42_ZMPWalk     0.8
 C43_LocalBodyCOM     0.2
 C43_LocalBodyCOM_tools     0.1
