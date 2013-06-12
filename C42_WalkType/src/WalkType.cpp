@@ -9,7 +9,7 @@
 #include <C42_WalkType/extreme_slope.h>
 #include <C42_WalkType/debris.h>
 
-#define VERSION "2013_06_09_12_30"
+#define VERSION "2013_06_12_12_00"
 
 ros::Time last_mud_notification;
 ros::Time last_extreme_slope_notification;
