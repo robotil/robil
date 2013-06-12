@@ -78,10 +78,8 @@ class CD_WalkingMode(WalkingMode):
 
         # Put robot into stand position
         stand = AtlasSimInterfaceCommand(None,AtlasSimInterfaceCommand.STAND, None, None, None, None, self._k_effort)
-                
-        rospy.sleep(0.3)
-        
         self.asi_command.publish(stand)
+        rospy.sleep(0.3)
     
     def StartWalking(self):
         self._bDone = False
