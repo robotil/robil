@@ -648,6 +648,7 @@ public:
 
 		TargetPosition tar(msg->x,msg->y);
 		session.arguments.defineTarget(tar,tar);
+		session.arguments.targetGoal="";
 		if(session.arguments.targetDefined)
 			session.arguments.finish = _planner.cast(session.arguments.targetPosition);
 
