@@ -60,6 +60,7 @@ private:
 	Ui::ImageDrawClass ui;
 	C11_Node C11node;
 	CTcpConnection *pCTcpConnection;
+	CTcpConnection *pImageCTcpConnection;
 	int ImageAreaCount;
 	QMap<int,CGraphicsView*> ImageAreas;
 	bool IsUpdateCurrentImg;	//don't create new image, update the current
