@@ -235,7 +235,10 @@ void CTcpServer::SendImage(QImage img)
               out << img;
               pClientConnection->write(block);
               pClientConnection->flush();
-              pClientConnection->waitForBytesWritten();
+              if(!pClientConnection->waitForBytesWritten())
+                {
+                  std::cout<<"TCP: Image send timeout\n";
+                }
               std::cout<<"TCP: Image sent\n";
 }
 
