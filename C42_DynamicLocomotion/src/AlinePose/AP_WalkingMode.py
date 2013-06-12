@@ -96,6 +96,11 @@ class AP_WalkingMode(WalkingMode):
         self._bIsSwaying = False
         #self._bRobotIsStatic = False
         #self._GetOrientationDelta0Values() # Orientation difference between BDI odom and Global
+
+        # Put robot into stand position
+        stand = AtlasSimInterfaceCommand(None,AtlasSimInterfaceCommand.STAND, None, None, None, None, self._k_effort)                
+        self.asi_command.publish(stand)
+        rospy.sleep(0.3)
     
     def StartWalking(self):
         self._bDone = False
