@@ -2,7 +2,7 @@
 
 int FootPlacementService::possible(int i, int j)
 {
-	if(0==i && SIZE/2==j) // Locationh of robot is impossible to step on.
+	if(0==i && SIZE/2==j) // Location of robot is impossible to step on.
 		return 0;
 
 	return 1;
@@ -279,8 +279,10 @@ void FootPlacementService::calcFootMatrix(
 				
 				double slope=calcSlope(plane.x,plane.y,plane.z);
 				
+
 				if( fabs(20.0*0.05-j*0.05) < EXTREME_SLOPE_COR )
 					if(slope>EXTREME_SLOPE)
+
 						publishExtremeSlopeMsg();
 				
 				double direction=calcAngle(points[curPoint].x,
