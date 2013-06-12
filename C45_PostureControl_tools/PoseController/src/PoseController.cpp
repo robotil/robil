@@ -233,9 +233,16 @@ public:
 
 	bool back_movement(PoseController::back_movement::Request &req, PoseController::back_movement::Response &res){
 		//ROS_INFO("Got back movement");
-		if(req.back_lbz != -100) wanted_positions[atlas_msgs::AtlasState::back_lbz] = req.back_lbz;
-		wanted_positions[atlas_msgs::AtlasState::back_mby] = req.back_mby;
-		wanted_positions[atlas_msgs::AtlasState::back_ubx] = req.back_ubx;
+		if(req.back_mby != -100){
+			wanted_positions[atlas_msgs::AtlasState::back_mby] = req.back_mby;
+		}
+
+		if(req.back_ubx != -100){
+			wanted_positions[atlas_msgs::AtlasState::back_ubx] = req.back_ubx;
+		}
+
+		if(req.back_lbz != -100)
+			wanted_positions[atlas_msgs::AtlasState::back_lbz] = req.back_lbz;
 		return true;
 	}
 
@@ -295,9 +302,12 @@ public:
 
 	bool delta_back_movement(PoseController::back_movement::Request &req, PoseController::back_movement::Response &res){
 		//ROS_INFO("Got delta back movement %f", req.back_lbz);
-		if(req.back_lbz != -100) wanted_positions[atlas_msgs::AtlasState::back_lbz] += req.back_lbz;
-		wanted_positions[atlas_msgs::AtlasState::back_mby] += req.back_mby;
-		wanted_positions[atlas_msgs::AtlasState::back_ubx] += req.back_ubx;
+		if(req.back_mby != -100)
+			wanted_positions[atlas_msgs::AtlasState::back_mby] += req.back_mby;
+		if(req.back_ubx != -100)
+			wanted_positions[atlas_msgs::AtlasState::back_ubx] += req.back_ubx;
+		if(req.back_lbz != -100)
+			wanted_positions[atlas_msgs::AtlasState::back_lbz] += req.back_lbz;
 		return true;
 	}
 
@@ -431,6 +441,7 @@ public:
 			atlascommand.kp_position[atlas_msgs::AtlasState::back_lbz] = 1000;
 			atlascommand.ki_position[atlas_msgs::AtlasState::back_lbz] = 10;
 			atlascommand.kd_position[atlas_msgs::AtlasState::back_lbz] = 100;
+			atlascommand.velocity[atlas_msgs::AtlasState::back_lbz] = 0.002;
 			atlascommand.position[atlas_msgs::AtlasState::back_mby] = wanted_positions[atlas_msgs::AtlasState::back_mby];
 			atlascommand.kp_position[atlas_msgs::AtlasState::back_mby] = 1000;
 			atlascommand.ki_position[atlas_msgs::AtlasState::back_mby] = 10;
