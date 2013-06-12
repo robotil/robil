@@ -17,6 +17,7 @@ class StandUpServer(RobilTask):
 		roll, pitch, yaw = self._controller.getRPY()
 		# keep trying until robot stands up
 		while pitch > 0.8 or pitch < -0.8 or roll > 1.4 or roll < -1.4:
+
 			# in case it fell on its back roll down
 			while pitch < -1:
 				self.rollDown()
