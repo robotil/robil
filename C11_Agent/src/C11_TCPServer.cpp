@@ -239,7 +239,10 @@ void CTcpServer::SendImage(QImage img)
                 {
                   std::cout<<"TCP: Image send timeout\n";
                 }
-              std::cout<<"TCP: Image sent\n";
+              else
+                {
+                  std::cout<<"TCP: Image sent\n";
+                }
 }
 
 void CTcpServer::SendGrid(StructGridData grid)

@@ -892,7 +892,7 @@ void CMapMain::CalculateCornerPos()
 StructPoint CMapMain::CalculateGridPoint(StructPoint pointFromRos)
 {
 	Vec2d p(pointFromRos.x, pointFromRos.y);
-	Vec2d v = (p - Vec2d(RobotGridPos.x,RobotGridPos.y)).rotate(-RobotOrientation)+Vec2d(50,20);
+	Vec2d v = (p - Vec2d(RobotGridPos.x,RobotGridPos.y)).rotate(RobotOrientation)+Vec2d(50,20);
 	StructPoint gridPoint;
 	gridPoint.x = v.x;
 	gridPoint.y = v.y;
@@ -908,7 +908,7 @@ StructPoint CMapMain::CalculateGridPoint(StructPoint pointFromRos)
 StructIntPoint CMapMain::CalculateGridPoint(StructIntPoint pointFromRos)
 {
 	Vec2d p(pointFromRos.x, pointFromRos.y);
-	Vec2d v = (p - Vec2d(RobotGridPos.x,RobotGridPos.y)).rotate(-RobotOrientation)+Vec2d(50,20);
+	Vec2d v = (p - Vec2d(RobotGridPos.x,RobotGridPos.y)).rotate(RobotOrientation)+Vec2d(50,20);
 	StructIntPoint gridPoint;
 	gridPoint.x = v.x;
     gridPoint.y = v.y;
@@ -918,7 +918,7 @@ StructIntPoint CMapMain::CalculateGridPoint(StructIntPoint pointFromRos)
 StructPoint CMapMain::CalculateRosGridPoint(StructPoint pointFromGrid)
 {
   Vec2d p(pointFromGrid.x, pointFromGrid.y);
-  Vec2d v = (p - Vec2d(50,20)).rotate(RobotOrientation) + Vec2d(RobotGridPos.x,RobotGridPos.y);
+  Vec2d v = (p - Vec2d(50,20)).rotate(-RobotOrientation) + Vec2d(RobotGridPos.x,RobotGridPos.y);
   StructPoint rosGridPoint;
   rosGridPoint.x = v.x;
   rosGridPoint.y = v.y;
