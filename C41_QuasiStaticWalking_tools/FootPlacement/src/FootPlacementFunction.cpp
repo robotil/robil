@@ -280,7 +280,7 @@ void FootPlacementService::calcFootMatrix(
 				double slope=calcSlope(plane.x,plane.y,plane.z);
 				
 				if( fabs(20.0*0.05-j*0.05) < EXTREME_SLOPE_COR )
-					if(slope<EXTREME_SLOPE)
+					if(slope>EXTREME_SLOPE)
 						publishExtremeSlopeMsg();
 				
 				double direction=calcAngle(points[curPoint].x,

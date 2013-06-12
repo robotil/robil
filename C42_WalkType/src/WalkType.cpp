@@ -9,7 +9,7 @@
 #include <C42_WalkType/extreme_slope.h>
 #include <C42_WalkType/debris.h>
 
-#define VERSION "2013_06_09_12_30"
+#define VERSION "2013_06_12_12_00"
 
 ros::Time last_mud_notification;
 ros::Time last_extreme_slope_notification;
@@ -32,31 +32,40 @@ bool isDebris(){
 }
 
 enum WALKTYPE{
-	DYNAMIC, DISCRETE, CRAWL_MUD
-} walk_type = DYNAMIC;
+	CONTINUES, DISCRETE, CRAWL_MUD, CRAWL_HILLS, CRAWL_BEBRIS
+} walk_type = CONTINUES;
 
 void update_walk_type(){
-	if(isDebris()){
-		if(isMud()){
-			walk_type = CRAWL_MUD;
-		}else{
-			walk_type = DISCRETE;
-		}
-	}else{
-		if(isExtremeslope()){
-			if(isMud()){
-				walk_type = CRAWL_MUD;
+	if(isMud()){
+		if(isDebris()){
+			if(isExtremeslope()){
+				ROS_ERROR("WalkType: excepted state: +mud+debris+eslope");
 			}else{
-				walk_type = DISCRETE;
+				ROS_ERROR("WalkType: excepted state: +mud+debris-eslope");
 			}
 		}else{
-			if(isMud()){
+			if(isExtremeslope()){
 				walk_type = CRAWL_MUD;
 			}else{
-				walk_type = DYNAMIC;
+				walk_type = CRAWL_MUD;
+			}
+		}
+	}else{
+		if(isDebris()){
+			if(isExtremeslope()){
+				walk_type = CONTINUES;
+			}else{
+				walk_type = CONTINUES;
+			}
+		}else{
+			if(isExtremeslope()){
+				walk_type = CRAWL_HILLS;
+			}else{
+				walk_type = CONTINUES;
 			}
 		}
 	}
+
 }
 
 void cb_mud_notifier(const C42_WalkType::mud::ConstPtr msg){
@@ -73,9 +82,55 @@ void cb_debris_notifier(const C42_WalkType::debris::ConstPtr msg){
 using namespace std;
 using namespace C0_RobilTask;
 
-class task_WalkDynamic:public RobilTask{
+#define FWTASK(task_CLASSNAME, task_TOPIC, task_MODE) \
+class task_CLASSNAME:public RobilTask{\
+public:\
+	task_CLASSNAME(string name=task_TOPIC):\
+      RobilTask(name)\
+   {   }\
+   TaskResult task(const string& name, const string& uid, Arguments& args){\
+      while(true){\
+            if (isPreempt()){\
+            	return TaskResult::Preempted();\
+            }\
+            if (task_MODE()==false){\
+            	return TaskResult::SUCCESS();\
+            }\
+            sleep(1000);\
+      }\
+      return TaskResult::FAULT();\
+   }\
+};
+#define FUTASK(task_CLASSNAME, task_TOPIC, task_MODE) \
+class task_CLASSNAME:public RobilTask{\
+public:\
+	task_CLASSNAME(string name=task_TOPIC):\
+      RobilTask(name)\
+   {   }\
+   TaskResult task(const string& name, const string& uid, Arguments& args){\
+      while(true){\
+            if (isPreempt()){\
+            	return TaskResult::Preempted();\
+            }\
+            if (task_MODE()!=false){\
+            	return TaskResult::SUCCESS();\
+            }\
+            sleep(1000);\
+      }\
+      return TaskResult::FAULT();\
+   }\
+};
+FUTASK( task_untilMUD, "/untilDetectedMud", isMud)
+FUTASK( task_untilDEBRIS, "/untilDetectedDebris", isDebris)
+FUTASK( task_untilExtremeSlope, "/untilDetectedExtremeSlope", isExtremeslope)
+FWTASK( task_whileMUD, "/whileDetectedMud", isMud)
+FWTASK( task_whileDEBRIS, "/whileDetectedDebris", isDebris)
+FWTASK( task_whileExtremeSlope, "/whileDetectedExtremeSlope", isExtremeslope)
+
+
+class task_WalkContinues:public RobilTask{
 public:
-	task_WalkDynamic(string name="/whileDynamicWalk"):
+	task_WalkContinues(string name="/whileDynamicWalk"):
       RobilTask(name)
    {   }
    TaskResult task(const string& name, const string& uid, Arguments& args){
@@ -83,7 +138,7 @@ public:
             if (isPreempt()){
             	return TaskResult::Preempted();
             }
-            if (walk_type != DYNAMIC){
+            if (walk_type != CONTINUES){
             	return TaskResult::FAULT();
             }
             sleep(1000);
@@ -137,7 +192,7 @@ public:
             if (isPreempt()){
             	return TaskResult::Preempted();
             }
-            if (walk_type != DISCRETE){
+            if (walk_type != CRAWL_HILLS){
             	return TaskResult::FAULT();
             }
             sleep(1000);
@@ -155,7 +210,7 @@ public:
             if (isPreempt()){
             	return TaskResult::Preempted();
             }
-            if (walk_type != DYNAMIC && walk_type != DISCRETE ){
+            if (walk_type != CRAWL_BEBRIS ){
             	return TaskResult::FAULT();
             }
             sleep(1000);
@@ -174,11 +229,20 @@ int main(int argc, char** argv){
 	ros::Subscriber extrim_slope_notifier = node.subscribe("/walk_notification/extreme_slope", 10, cb_extreme_slope_notifier);
 	ros::Subscriber debris_notifier = node.subscribe("/walk_notification/debris", 10, cb_debris_notifier);
 
-	task_WalkDynamic t_dynamic;
+	task_WalkContinues t_dynamic;
 	task_WalkDiscrete t_discrete;
 	task_WalkCrawlMUD t_crawl_mod;
 	task_WalkCrawlDEBRIS t_crawl_deb;
 	task_WalkCrawlHILLS t_crawl_hill;
+
+	task_untilMUD _task_untilMUD;
+	task_untilDEBRIS _task_untilDEBRIS;
+	task_untilExtremeSlope _task_untilExtremeSlope;
+	task_whileMUD _task_whileMUD;
+	task_whileDEBRIS _task_whileDEBRIS;
+	task_whileExtremeSlope _task_whileExtremeSlope;
+
+
 
 	ros::Rate rate(2);
 	while(ros::ok()){
