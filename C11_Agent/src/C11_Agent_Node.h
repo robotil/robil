@@ -8,6 +8,7 @@
 #include "C10_Common/path_update.h"
 #include "Vec2d.hpp"
 #include "C25_GlobalPosition/C25C0_ROP.h"
+#include "C23_ObjectRecognition/C23C0_ODIM.h"
 #include "C31_PathPlanner/C31_Waypoints.h"
 #include "ros/ros.h"
 #include "ros/package.h"
@@ -70,6 +71,8 @@ public:
 
   void UplinkSubscriber(const std_msgs::StringConstPtr& up);
 
+  void ObjectsSubscriber(const C23_ObjectRecognition::C23C0_ODIMConstPtr& obj);
+
   void SetReleased();
 
   void Pause();
@@ -120,6 +123,7 @@ private:
   ros::Subscriber vrc_score_subscriber;
   ros::Subscriber uplink_subscriber;
   ros::Subscriber downlink_subscriber;
+  ros::Subscriber objects_subscriber;
   ros::ServiceClient c34StopClient;
   ros::ServiceClient c11ExecutionStatusChangeClient;
   ros::ServiceClient c34RunClient;
@@ -137,6 +141,15 @@ private:
   QStringList MissionsList;
   Vec2d position;
   size_t start_pos;
+
+  ////////////VCScore Data/////////////////
+  double SimTime;
+  int Comletion_score;
+  int Falls;
+  QString Message;
+  ////////////Up/Down Data/////////////////
+  QString Uplink;
+  QString Downlink;
 };
 
 #endif // C11_AGENT_NODE_H

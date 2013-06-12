@@ -20,6 +20,12 @@ C11_Agent_Node::C11_Agent_Node(int argc, char** argv):
   pIAgentInterface = NULL;
   IsWaitForRelease = false;
   start_pos = 0;
+  SimTime = 999999;
+  Comletion_score = 0;
+  Falls = 0;
+  Message = "";
+  Uplink = "";
+  Downlink = "";
   std::string filepath;
   filepath = ros::package::getPath("C11_OperatorControl");
   filepath.append("/bin/Missions.txt");
@@ -84,6 +90,7 @@ bool C11_Agent_Node::init()
     vrc_score_subscriber = nh_->subscribe("vrc_score",1000,&C11_Agent_Node::VRCScoreSubscriber,this);
     downlink_subscriber = nh_->subscribe("vrc/bytes/remaining/downlink",1000,&C11_Agent_Node::DownlinkSubscriber,this);
     uplink_subscriber = nh_->subscribe("vrc/bytes/remaining/uplink",1000,&C11_Agent_Node::UplinkSubscriber,this);
+    objects_subscriber = nh_->subscribe("C23/object_dimensions",1000,&C11_Agent_Node::ObjectsSubscriber,this);
 
 
     pushS = new PushHMIServer();
@@ -498,21 +505,42 @@ void C11_Agent_Node::ExecuterStackSubscriber(const std_msgs::StringConstPtr& sta
 
 void C11_Agent_Node::VRCScoreSubscriber(const atlas_msgs::VRCScore& vrcScore)
 {
-//  cout<<vrcScore<<endl;
   QString str(vrcScore.message.data());
-  pIAgentInterface->SendVRCScoreData(vrcScore.sim_time.toSec(),vrcScore.completion_score,vrcScore.falls,str);
+  if(vrcScore.sim_time.toSec() != SimTime || vrcScore.completion_score != Comletion_score || vrcScore.falls != Falls || str != Message)
+    {
+      SimTime = vrcScore.sim_time.toSec();
+      Comletion_score = vrcScore.completion_score;
+      Falls = vrcScore.falls;
+      Message = str;
+    //  cout<<vrcScore<<endl;
+
+      pIAgentInterface->SendVRCScoreData(vrcScore.sim_time.toSec(),vrcScore.completion_score,vrcScore.falls,str);
+    }
 }
 
 void C11_Agent_Node::DownlinkSubscriber(const std_msgs::StringConstPtr& down)
 {
   QString str(down->data.data());
-  pIAgentInterface->SendDownlink(str);
+  if(Downlink != str)
+    {
+      Downlink = str;
+      pIAgentInterface->SendDownlink(str);
+    }
 }
 
 void C11_Agent_Node::UplinkSubscriber(const std_msgs::StringConstPtr& up)
 {
   QString str(up->data.data());
-  pIAgentInterface->SendUplink(str);
+  if(Uplink != str)
+    {
+      Uplink = str;
+      pIAgentInterface->SendUplink(str);
+    }
+}
+
+void C11_Agent_Node::ObjectsSubscriber(const C23_ObjectRecognition::C23C0_ODIMConstPtr& obj)
+{
+  cout<<obj;
 }
 
 void C11_Agent_Node::NewGoalRequest(StructPoint goal)
