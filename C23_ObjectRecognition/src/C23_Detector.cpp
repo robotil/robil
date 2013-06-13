@@ -1162,7 +1162,7 @@ break;
              if(leftSum>rightSum){
                  ROS_INFO("RIGHT ARROW");
                  
-                 a_res = pictureCoordinatesToGlobalPosition(arrowBox.x, arrowBox.y,arrowBox.x + arrowBox.height, arrowBox.y + arrowBox.width, &x1, &y1,&z1,-1,-4);
+                 a_res = pictureCoordinatesToGlobalPosition(arrowBox.x, arrowBox.y,arrowBox.x + arrowBox.height, arrowBox.y + arrowBox.width, &x1, &y1,&z1,-1,4);
                  a_res&= pictureCoordinatesToGlobalPosition(arrowBox.x, arrowBox.y,arrowBox.x + arrowBox.height, arrowBox.y + arrowBox.width, &x2, &y2,&z2,-1,0);
                  res = a_res;
                  this->x = x1;
@@ -1174,7 +1174,7 @@ break;
              else{
                  ROS_INFO("LEFT ARROW");
                  res = true;
-                 a_res = pictureCoordinatesToGlobalPosition(arrowBox.x, arrowBox.y,arrowBox.x + arrowBox.height, arrowBox.y + arrowBox.width, &x1, &y1,&z1,-1,+4);
+                 a_res = pictureCoordinatesToGlobalPosition(arrowBox.x, arrowBox.y,arrowBox.x + arrowBox.height, arrowBox.y + arrowBox.width, &x1, &y1,&z1,-1,-4);
                  a_res&= pictureCoordinatesToGlobalPosition(arrowBox.x, arrowBox.y,arrowBox.x + arrowBox.height, arrowBox.y + arrowBox.width, &x2, &y2,&z2,-1,0);
                  res = a_res;
                  this->x = x1;
@@ -1740,7 +1740,7 @@ return res;
                      
                  }
              }
-             if(biggest_size > 50 && biggest_size < 180) {
+             if(biggest_size > 50 && biggest_size < 500) {
                  
                  
                  
