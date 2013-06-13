@@ -254,6 +254,7 @@ public:
 
 		//open hand
 		sandia_srv.request.grasp.name = "cylindrical";
+		//sandia_srv.request.grasp.name = "spherical";
 		sandia_srv.request.grasp.closed_amount = 0.0;
 		if (rightHand == false)
 		{
@@ -302,6 +303,8 @@ public:
 				{
 					IkCurrent = IkSolution(as.position[q4l], as.position[q5l], as.position[q6l], as.position[q7l],
 						as.position[q8l], as.position[q9l]);
+					//argTarget2 = TraceAngle(argTarget, RPY(-.0,.15,0,M_PI/2, 0,0), angle);
+					//argTarget3 = TraceAngle(argTarget, RPY(-.1,.15,0,M_PI/2, 0,0), angle);
 					argTarget2 = TraceAngle(argTarget, RPY(-.05,.18,0,M_PI/2-M_PI/6, 0,0), angle);
 					argTarget3 = TraceAngle(argTarget, RPY(-.05,.3,0,M_PI/2-M_PI/6, 0,0), angle);
 				}
@@ -350,8 +353,9 @@ public:
 						// move near target
 						rMove(IkCurrent, IkNext2, 2.0, 100);
 						rMove(IkNext2, IkNext, 1.0, 50);
-						sandia_srv.request.grasp.name = "prismatic";
-						sandia_srv.request.grasp.closed_amount = 1.0;
+						//sandia_srv.request.grasp.name = "prismatic";
+						sandia_srv.request.grasp.name = "cylindrical";
+						sandia_srv.request.grasp.closed_amount = 0.0;
 						if (!rsandia_client.call(sandia_srv))
 						{
 							ROS_INFO("%s: Sandia Hand Service Call Failed!", _name.c_str());
