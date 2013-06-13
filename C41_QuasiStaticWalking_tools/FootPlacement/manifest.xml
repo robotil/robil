@@ -14,6 +14,7 @@
   <depend package="C22_CompactGroundRecognitionAndMapping"/>
   <depend package="C31_PathPlanner"/>
   <depend package="C42_WalkType"/>
+  <depend package="C0_RobilTask"/>
 
 </package>
 
