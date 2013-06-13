@@ -38,6 +38,7 @@ ros::ServiceClient c11ExecutionStatusChangeClient;
 ros::Publisher path_update_pub;
 CTcpServer* pCTcpServer;
 CTcpServer* pImageCTcpServer;
+CTcpServer* pDesignerCTcpServer;
 
 
 //bool PathPlan(C11_Agent::C11::Request& req,
@@ -226,8 +227,10 @@ int main(int argc, char **argv)
   QCoreApplication app(argc, argv);
   pCTcpServer = new CTcpServer(QString("172.23.1.130"),45675);
   pImageCTcpServer = new CTcpServer(QString("172.23.1.130"),45676);
+  pDesignerCTcpServer = new CTcpServer(QString("172.23.1.130"),45677);
   m.SetTcp(pCTcpServer);
   m.SetImgTcp(pImageCTcpServer);
+  m.SetDesignerTcp(pDesignerCTcpServer);
  // C11Node.SetTcp(pCTcpServer);
 
 
@@ -267,6 +270,7 @@ int main(int argc, char **argv)
   app.exec();
   delete pCTcpServer;
   delete pImageCTcpServer;
+  delete pDesignerCTcpServer;
 return 0;
 
 
