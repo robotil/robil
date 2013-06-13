@@ -154,7 +154,7 @@ void GeneralDetector::detect(Mat img) {
           if(i == 0) {
             bg_res = res;
           }
-          if((*it).first.compare("background") && res < -0.2 && bg_res > 0.55 && res < best_res && bg_res > best_bg_res) {
+          if((*it).first.compare("background") && res < -0.2 && res> -0.4 && bg_res > 0.55 && res < best_res && bg_res > best_bg_res) {
           
 
             min = res;
@@ -167,6 +167,26 @@ void GeneralDetector::detect(Mat img) {
             cout << "Car: " << (*it).first << ", res: " << res << ",Bg: " << best_bg_res << endl;
             number_of_patches++;
             bestMatch = (*it).first;
+	    
+	    if(!bestMatch.compare("car_driver"))
+	    {
+	     car_target = CAR_DRIVER; 
+	     ROS_INFO("Car driver detected");
+	    }
+	    else if(!bestMatch.compare("car_passenger")){
+	      car_target = CAR_PASSENGER; 
+	      ROS_INFO("Car passenger detected");
+	    }
+	    else if(!bestMatch.compare("car_front")){
+	      car_target = CAR_FRONT; 
+	      ROS_INFO("Car front detected");
+	    }
+	    else if(!bestMatch.compare("car_rear")){
+	      car_target = CAR_REAR; 
+	      ROS_INFO("Car rear detected");
+	    }
+	    
+	    
           }
           i++;
 
@@ -179,6 +199,8 @@ void GeneralDetector::detect(Mat img) {
   }
   if( best_res == 9) {
     cout << "No car found!" << endl;
+    car_target = NONE;
+    ROS_INFO("No car detected");
     return ;
   }
   Mat subImg = img(cv::Range(y_,y_+height), cv::Range(x_,x_+width));

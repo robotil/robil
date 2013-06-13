@@ -114,6 +114,8 @@ public:
     double orient_P;
     double orient_Y;
     double orient_R;
+    string current_status;
+    GEAR_STATUS current_gear_status;
     pcl::PointCloud<pcl::PointXYZ> lastCloud;
 private:
 
