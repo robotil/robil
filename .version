@@ -1,4 +1,4 @@
-V0.0.1.97
+V0.0.1.98
 ===========================================================
 C0_Math     0.1
 C0_RobilTask     0.5
@@ -42,7 +42,7 @@ C51_CarOperation     0.13
 C65_CloseValve     0.1
 C66_Grasp     0.8
 C66_Grasp_tools     0.4
-C67_CarManipulation     0.25
+C67_CarManipulation     0.26
 C67_CarManipulation_tools     0.2
 LidarObstacleDetection     0.1
 RoadExtract     0.1
