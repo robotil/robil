@@ -92,6 +92,7 @@ class CD_PhantomRobot(CD_Robot):
         self._SwingHeight  = 0.2
         self._MinimalCorrection = 0.02
         self._ErrorCorrection = self._StepWidth
+        self._MaxTurningAnglePerStep = 0.25 # max turning angle per step
 
     def Initialize(self,stepQueue,index):
         CD_Robot.Initialize(self,stepQueue,index)
@@ -112,7 +113,7 @@ class CD_PhantomRobot(CD_Robot):
         if (self._LPP.IsEndOfPath()):
             self._AddIdleSteps()
         else:
-            self._Turn()
+            self._Pivot(self._LPP.GetAngleToNextSegment())
             self._LPP.PromoteSegment()
             self._AddIdleSteps()
         x,y = self._Odometer.GetGlobalPosition()
@@ -136,6 +137,10 @@ class CD_PhantomRobot(CD_Robot):
         self._Odom2Bdi_Yaw = yaw
         print("Yaw Delta = ",yaw)
         
+    def AlignToPath(self):
+        turningAngle = self._LPP.GetTargetYaw() - self._Odometer.GetYaw()
+        self._Pivot(turningAngle)
+
     def _PrepareStepData(self):
         self._index  += 1
         command = AtlasSimInterfaceCommand()
@@ -215,20 +220,12 @@ class CD_PhantomRobot(CD_Robot):
         self._Odometer.AddYaw(yaw)
         
         return self._TranslateStepData(stepData)
-            
-    def _Turn(self):
-        turningAngle = self._LPP.GetAngleToNextSegment()
-        theta_max = 0.25 # max turning angle per step
-        ### Turn in place (pivot):
-        Num_seq = int(math.floor(math.fabs(turningAngle)/theta_max))
+        
+    def _Pivot(self,turningAngle):
+        Num_seq = int(math.floor(math.fabs(turningAngle)/self._MaxTurningAnglePerStep))
         for i in range(Num_seq):
-            self._StepQueue.append(self._TurnStep(theta_max*(turningAngle/math.fabs(turningAngle))))
-#            if (turningAngle>0):
-#                # Turning left
-#                self._StepQueue.append(self._LeftStep(theta_max))
-#            else:
-#                # Turning right
-#                self._StepQueue.append(self._RightStep(-theta_max))
+            self._StepQueue.append(self._TurnStep(self._MaxTurningAnglePerStep*(turningAngle/math.fabs(turningAngle))))
+
             
         
     
