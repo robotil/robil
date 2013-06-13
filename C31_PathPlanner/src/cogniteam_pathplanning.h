@@ -26,8 +26,9 @@ struct Attractor{
 typedef vector<Attractor> Attractors;
 
 struct Waypoint{
-	size_t x; size_t y;
-	Waypoint(size_t x=0, size_t y=0):x(x),y(y){}
+	bool defined; size_t x; size_t y;
+	Waypoint(size_t x=0, size_t y=0):defined(true),x(x),y(y){}
+	void undef(){defined=false;}
 };
 typedef vector<Waypoint> Waypoints;
 typedef Waypoints Path;

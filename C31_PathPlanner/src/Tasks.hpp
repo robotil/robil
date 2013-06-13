@@ -14,6 +14,8 @@
 #include <C31_PathPlanner/C31_PlanPath.h>
 #include <C31_PathPlanner/C31_GetPath.h>
 #include <C31_PathPlanner/C31_Exception.h>
+#include <C31_PathPlanner/C31_HMIReset.h>
+#include <C31_PathPlanner/C31_Object.h>
 
 #include <C42_WalkType/mud.h>
 #include <C42_WalkType/debris.h>
@@ -265,11 +267,20 @@ public:
 		ROS_INFO("subscribe to topic /C22_pub <C22_GroundRecognitionAndMapping::C22C0_PATH>");
     	ros::Subscriber c22c0Client = _node.subscribe("C22_pub", 1000, &PathPlanningServer::callbackNewMap, this );
     	
-		ROS_INFO("subscribe to topic /C23/object_deminsions <C23_ObjectRecognition::C23C0_ODIM>");
-		ros::Subscriber c23Client = _node.subscribe("C23/object_deminsions", 1000, &PathPlanningServer::callbackNewTargetLocation, this );
+		ROS_INFO("subscribe to topic /C23/object_globalPosition <C23_ObjectRecognition::C23C0_GP>");
+		ros::Subscriber c23Client = _node.subscribe("C23/object_globalPosition", 1000, &PathPlanningServer::callbackNewTargetLocation, this );
 
 		ROS_INFO("subscribe to topic /c11_path_update <C31_PathPlanner/C31_Waypoints>");
 		ros::Subscriber c11Client = _node.subscribe("/c11_path_update", 1000, &PathPlanningServer::callbackTransitPoints, this );
+
+		ROS_INFO("subscribe to topic /planner/goal/point <C31_PathPlanner/C31_Location>");
+		ros::Subscriber planner_goal_point = _node.subscribe("/planner/goal/point", 1000, &PathPlanningServer::callbackNewGoalPoint, this );
+
+		ROS_INFO("subscribe to topic /planner/goal/object <C31_PathPlanner/C31_Object>");
+		ros::Subscriber planner_goal_object = _node.subscribe("/planner/goal/object", 1000, &PathPlanningServer::callbackNewGoalObject, this );
+
+		ROS_INFO("subscribe to topic /planner/reset <C31_PathPlanner/C31_HMIReset>");
+		ros::Subscriber planner_reset = _node.subscribe("/planner/reset", 1000, &PathPlanningServer::callbackNewReset, this );
 
 		#define TURNON_REQUEST_MAP
 		//#define TURNON_REQUEST_TARGET_LOCATION
@@ -564,23 +575,117 @@ public:
     	SYNCH(SET_CURRENT_TIME(statistic.time_targetLocation_lastRequest));
     	//onNewTargetLocation(NEW_TARGET_LOCATION_GPS)
     }
-    void callbackNewTargetLocation(const C23_ObjectRecognition::C23C0_ODIM::ConstPtr & msg){
+//    void callbackNewTargetLocation(const C23_ObjectRecognition::C23C0_ODIM::ConstPtr & msg){
+//    	std::string objectName = "";
+//    	{
+//    		PathPlanning::ReadSession session = _planner.startReading();
+//    		objectName = session.arguments.targetGoal;
+//    	}
+//    	if( objectName == msg->Object ){
+//    		GPSPoint pos = extractObjectLocation( *msg );
+//    		if( fabs(pos.x) > 1000 || fabs(pos.y) > 1000 ){
+//    			ROS_ERROR("WARNING: Target position is incorrect: (%f,%f)", pos.x, pos.y);
+//    			throw_exception(C31_PathPlanner::C31_Exception::TYPE_TARGETPOSITIONINCORRECT, "Target position is incorrect. use previous one.");
+//    		}
+//    		else onNewTargetLocation( pos );
+//    	}
+//	}
+    void callbackNewTargetLocation(const C23_ObjectRecognition::C23C0_GP::ConstPtr & msg){
     	std::string objectName = "";
     	{
     		PathPlanning::ReadSession session = _planner.startReading();
     		objectName = session.arguments.targetGoal;
     	}
     	if( objectName == msg->Object ){
-    		GPSPoint pos = extractObjectLocation( *msg );
-    		if( fabs(pos.x) > 1000 || fabs(pos.y) > 1000 ){
-    			ROS_ERROR("WARNING: Target position is incorrect: (%f,%f)", pos.x, pos.y);
-    			throw_exception(C31_PathPlanner::C31_Exception::TYPE_TARGETPOSITIONINCORRECT, "Target position is incorrect. use previous one.");
+    		std::vector<GPSPoint> poses = extractObjectLocation( *msg );
+    		bool ok = true;
+    		{
+    			GPSPoint& pos = poses[0];
+				if( fabs(pos.x) > 1000 || fabs(pos.y) > 1000 ){
+					ROS_ERROR("WARNING: Target position is incorrect: (%f,%f)", pos.x, pos.y);
+					throw_exception(C31_PathPlanner::C31_Exception::TYPE_TARGETPOSITIONINCORRECT, "Target position is incorrect. use previous one.");
+					ok=false;
+				}
     		}
-    		else onNewTargetLocation( pos );
+    		{
+    			GPSPoint& pos = poses[1];
+				if( fabs(pos.x) > 1000 || fabs(pos.y) > 1000 ){
+					ROS_ERROR("WARNING: Target Direction position is incorrect: (%f,%f)", pos.x, pos.y);
+					throw_exception(C31_PathPlanner::C31_Exception::TYPE_TARGETPOSITIONINCORRECT, "Target position is incorrect. use previous one.");
+					//ok=false;
+					pos.undef();
+				}
+    		}
+    		if(ok) onNewTargetLocation( poses );
     	}
 	}
     void callbackTransitPoints(const C31_PathPlanner::C31_Waypoints::ConstPtr & msg){
 		onNewTransitPoints( extractPoints( *msg ) );
+	}
+
+    struct TargetStock{
+    	bool defined;
+    	Waypoint finish;
+    	Vec2d finishDir;
+    	GPSPoint targetPos;
+    	GPSPoint targetDirPos;
+    	bool targetDefined;
+    } targetStock;
+    void callbackNewGoalPoint(const C31_PathPlanner::C31_Location::ConstPtr & msg){
+    	PathPlanning::EditSession session = _planner.startEdit();
+		if(_planner.isMapReady()==false){
+			session.aborted();
+			ROS_INFO("NewGoalPoint from topic: Map is not ready");
+			return;
+		}
+
+		targetStock.finish = session.arguments.finish;
+		targetStock.finishDir = session.arguments.finishDir;
+		targetStock.targetPos = session.arguments.targetPosition;
+		targetStock.targetDirPos = session.arguments.targetDirPosition;
+		targetStock.targetDefined = session.arguments.targetDefined;
+		targetStock.defined = true;
+
+		TargetPosition tar(msg->x,msg->y);
+		session.arguments.defineTarget(tar,tar);
+		session.arguments.targetGoal="";
+		if(session.arguments.targetDefined)
+			session.arguments.finish = _planner.cast(session.arguments.targetPosition);
+
+		stringstream info;
+		info<<"CONVERT "
+				<<session.arguments.targetPosition.x<<","<<session.arguments.targetPosition.y
+				<<" -> "
+				<<session.arguments.finish.x<<","<<session.arguments.finish.y<<endl;
+		ROS_INFO(info.str().c_str());
+
+	}
+    void callbackNewGoalObject(const C31_PathPlanner::C31_Object::ConstPtr & msg){
+    	PathPlanning::EditSession session = _planner.startEdit();
+
+		targetStock.finish = session.arguments.finish;
+		targetStock.finishDir = session.arguments.finishDir;
+		targetStock.targetPos = session.arguments.targetPosition;
+		targetStock.targetDirPos = session.arguments.targetDirPosition;
+		targetStock.targetDefined = session.arguments.targetDefined;
+		targetStock.defined = true;
+
+		session.arguments.defineTarget( msg->name );
+		if(session.arguments.targetDefined)
+			session.arguments.finish = _planner.cast(session.arguments.targetPosition);
+	}
+    void callbackNewReset(const C31_PathPlanner::C31_HMIReset::ConstPtr & msg){
+    	PathPlanning::EditSession session = _planner.startEdit();
+    	if(targetStock.defined){
+			session.arguments.finish=targetStock.finish;
+			session.arguments.finishDir=targetStock.finishDir;
+			session.arguments.targetPosition=targetStock.targetPos;
+			session.arguments.targetDirPosition=targetStock.targetDirPos;
+			session.arguments.targetDefined=targetStock.targetDefined;
+    	}
+    	targetStock.defined = false;
+   		session.constraints.gps_transits.clear();
+    	session.constraints.transits.clear();
 	}
 
     //=================== NEW DATA INPUT ==================================================
@@ -602,8 +707,14 @@ public:
     	session.arguments.map = map;
     	session.arguments.mapProperties = prop;
     	session.arguments.start = _planner.cast(session.arguments.selfLocation);
-    	if(session.arguments.targetDefined)
+    	if(session.arguments.targetDefined){
     		session.arguments.finish = _planner.cast(session.arguments.targetPosition);
+    		if(session.arguments.targetDirPosition.defined)
+				session.arguments.finishDir = _planner.castWP(session.arguments.targetDirPosition);
+			else{
+				ROS_INFO("GPS_GRID_CASTING: targetDirPosition is undefined (from newMap)");
+			}
+    	}
     	session.constraints.dimentions.radius = _planner.castLength(session.constraints.dimentions.gps_radius);
     	session.constraints.transits = _planner.castToTransits(session.constraints.gps_transits);
 		ROS_INFO("GPS_GRID_CASTING: start=*(%f,%f)->(%i,%i), finish=*(%f,%f)->(%i,%i), robot.R=*%f->%i (from onNewMap)",
@@ -630,10 +741,28 @@ public:
 		);
     }
     void onNewTargetLocation(const GPSPoint& pos){
+    	struct FUNCTION_NOT_IN_USE{};  	throw FUNCTION_NOT_IN_USE();
+//    	PathPlanning::EditSession session = _planner.startEdit();
+//    	session.arguments.defineTarget( pos );
+//    	if(session.arguments.targetDefined)
+//    		session.arguments.finish = _planner.cast(session.arguments.targetPosition);
+//		ROS_INFO("GPS_GRID_CASTING: start=(%f,%f)->(%i,%i), finish=#(%f,%f)->(%i,%i), robot.R=%f->%i (from onNewTargetLocation)",
+//			(float) session.arguments.selfLocation.x, (float) session.arguments.selfLocation.y, (int) session.arguments.start.x, (int) session.arguments.start.y,
+//			(float) session.arguments.targetPosition.x,(float)  session.arguments.targetPosition.y, (int) session.arguments.finish.x,(int) session.arguments.finish.y,
+//			(float) session.constraints.dimentions.gps_radius, (int) session.constraints.dimentions.radius
+//		);
+    }
+    void onNewTargetLocation(const vector<GPSPoint>& poses){
     	PathPlanning::EditSession session = _planner.startEdit();
-    	session.arguments.defineTarget( pos );
-    	if(session.arguments.targetDefined)
+    	session.arguments.defineTarget( poses[0], poses[1] );
+    	if(session.arguments.targetDefined){
     		session.arguments.finish = _planner.cast(session.arguments.targetPosition);
+    		if(session.arguments.targetDirPosition.defined)
+    			session.arguments.finishDir = _planner.castWP(session.arguments.targetDirPosition);
+    		else{
+    			ROS_INFO("GPS_GRID_CASTING: targetDirPosition is undefined (from newTarget)");
+    		}
+    	}
 		ROS_INFO("GPS_GRID_CASTING: start=(%f,%f)->(%i,%i), finish=#(%f,%f)->(%i,%i), robot.R=%f->%i (from onNewTargetLocation)",
 			(float) session.arguments.selfLocation.x, (float) session.arguments.selfLocation.y, (int) session.arguments.start.x, (int) session.arguments.start.y,
 			(float) session.arguments.targetPosition.x,(float)  session.arguments.targetPosition.y, (int) session.arguments.finish.x,(int) session.arguments.finish.y,
@@ -693,7 +822,8 @@ public:
 				return TaskResult(FAULT, "Map is not ready");
 			}
 
-			session.arguments.defineTarget(TargetPosition(x,y));
+			TargetPosition tar(x,y);
+			session.arguments.defineTarget(tar,tar);
 			if(session.arguments.targetDefined)
 				session.arguments.finish = _planner.cast(session.arguments.targetPosition);
 

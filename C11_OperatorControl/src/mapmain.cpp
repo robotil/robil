@@ -40,6 +40,8 @@ CMapMain::CMapMain(QWidget *parent, Qt::WFlags flags)
 	IsPathChanged = false;
 	PixPressed.i = 0;
 	PixPressed.j = 0;
+	GoalPoint.x = 0;
+	GoalPoint.y = 0;
 	for(int i=0; i<100; i++)
 	{
 		for(int j=0; j<100; j++)
@@ -55,6 +57,8 @@ CMapMain::CMapMain(QWidget *parent, Qt::WFlags flags)
 	pos[1] = p_j;
 
 	AddPix();
+	pCScaleItem = new CScaleItem(ui.graphicsView->scene());
+	ui.graphicsView->scene()->addItem(pCScaleItem);
 	setMode(E_NULL_MODE);
 
 	routePathReady = NULL;;
@@ -107,6 +111,8 @@ CMapMain::CMapMain(int arr[100][100],QWidget *parent, Qt::WFlags flags)
 		pos[1] = p_j;
 
 		AddPix();
+		pCScaleItem = new CScaleItem(ui.graphicsView->scene());
+		ui.graphicsView->scene()->addItem(pCScaleItem);
 		setMode(E_NULL_MODE);
 
 		routePathReady = NULL;;
@@ -886,7 +892,7 @@ void CMapMain::CalculateCornerPos()
 StructPoint CMapMain::CalculateGridPoint(StructPoint pointFromRos)
 {
 	Vec2d p(pointFromRos.x, pointFromRos.y);
-	Vec2d v = (p - Vec2d(RobotGridPos.x,RobotGridPos.y)).rotate(-RobotOrientation)+Vec2d(50,20);
+	Vec2d v = (p - Vec2d(RobotGridPos.x,RobotGridPos.y)).rotate(RobotOrientation)+Vec2d(50,20);
 	StructPoint gridPoint;
 	gridPoint.x = v.x;
 	gridPoint.y = v.y;
@@ -902,7 +908,7 @@ StructPoint CMapMain::CalculateGridPoint(StructPoint pointFromRos)
 StructIntPoint CMapMain::CalculateGridPoint(StructIntPoint pointFromRos)
 {
 	Vec2d p(pointFromRos.x, pointFromRos.y);
-	Vec2d v = (p - Vec2d(RobotGridPos.x,RobotGridPos.y)).rotate(-RobotOrientation)+Vec2d(50,20);
+	Vec2d v = (p - Vec2d(RobotGridPos.x,RobotGridPos.y)).rotate(RobotOrientation)+Vec2d(50,20);
 	StructIntPoint gridPoint;
 	gridPoint.x = v.x;
     gridPoint.y = v.y;
@@ -912,7 +918,7 @@ StructIntPoint CMapMain::CalculateGridPoint(StructIntPoint pointFromRos)
 StructPoint CMapMain::CalculateRosGridPoint(StructPoint pointFromGrid)
 {
   Vec2d p(pointFromGrid.x, pointFromGrid.y);
-  Vec2d v = (p - Vec2d(50,20)).rotate(RobotOrientation) + Vec2d(RobotGridPos.x,RobotGridPos.y);
+  Vec2d v = (p - Vec2d(50,20)).rotate(-RobotOrientation) + Vec2d(RobotGridPos.x,RobotGridPos.y);
   StructPoint rosGridPoint;
   rosGridPoint.x = v.x;
   rosGridPoint.y = v.y;
@@ -965,6 +971,11 @@ std::vector<StructPoint> CMapMain::GetUpdatedRoute()
                         if(!IsPointInPath(p))
                         {
                                 LastUpdatedRoute.push_back(p);
+                                if(i == vec.size()-1)
+                                  {
+                                    GoalPoint = p;
+                                    emit SigGoalUpdated();
+                                  }
                         }
                 }
                 if(!LastUpdatedRoute.empty())
@@ -973,6 +984,11 @@ std::vector<StructPoint> CMapMain::GetUpdatedRoute()
                 }
         }
         return LastUpdatedRoute;
+}
+
+StructPoint CMapMain::GetGoal()
+{
+  return GoalPoint;
 }
 
 bool CMapMain::IsPointsEqual(StructPoint p1, StructPoint p2)

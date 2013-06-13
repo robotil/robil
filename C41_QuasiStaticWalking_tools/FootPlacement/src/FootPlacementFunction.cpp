@@ -138,8 +138,8 @@ double FootPlacementService::calcSlope(const double &a,const double &b,const dou
 	double slope=fabs(asin(c/sqrt(a*a+b*b+c*c)));
 	if(1000==a)
 		return 1000;
-	if(slope<EXTREME_SLOPE)
-		publishExtremeSlopeMsg();
+// 	if(slope<EXTREME_SLOPE)
+// 		publishExtremeSlopeMsg();
 	return slope;
 }
 
@@ -168,11 +168,11 @@ double FootPlacementService::singleCellWeight(const double &legDistance,
 		const double &distanceWeight,const double &heightWeight,
 		const double &directionWeight)
 {
-	if(legDistance<0.1)
+    if(legDistance<MIN_STEP_SIZE)
 		return 100;
-	if(legDistance>0.3)
+    if(legDistance>MAX_STEP_SIZE)
 		return 1000;
-	if(height>0.1)
+    if(height>MAX_STEP_HEIGHT)
 		return 10000;
 	return (/*slope*slopeWeight+*/ distance*distanceWeight+height*heightWeight+
 			direction*directionWeight)/NORMALIZER;
@@ -224,7 +224,6 @@ void FootPlacementService::calcFootMatrix(
 	
 	for(int k=0; k<STEPS; k++)
 	{
-		//FIXME: If 1 is a constant, give it a name.  And document units of distance, and why the constant was chosen.
 		while(MIN_DIST_FROM_TARGET>calcDistance(startPose.pose.position.x,
 				startPose.pose.position.y,
 				points[curPoint].x,points[curPoint].y) && curPoint<points.size())
@@ -268,8 +267,6 @@ void FootPlacementService::calcFootMatrix(
 
 
 				geometry_msgs::Point squarePoint = plane.repPoint;
-				squarePoint.x=plane.repPoint.y+robotPos.x;  // move to world change to transformation
-				squarePoint.y=plane.repPoint.x+robotPos.y;  // move to world change to transformation
 
 				squarePoint.x=robotPos.x+plane.repPoint.x*cosa+plane.repPoint.y*(-sina);
 				squarePoint.y=robotPos.y+plane.repPoint.x*(sina)+plane.repPoint.y*cosa;
@@ -281,6 +278,11 @@ void FootPlacementService::calcFootMatrix(
 				//		plane.repPoint.x, plane.repPoint.y);
 				
 				double slope=calcSlope(plane.x,plane.y,plane.z);
+				
+				if( fabs(20.0*0.05-j*0.05) < EXTREME_SLOPE_COR )
+					if(slope>EXTREME_SLOPE)
+						publishExtremeSlopeMsg();
+				
 				double direction=calcAngle(points[curPoint].x,
 						points[curPoint].y,
 						squarePoint.x,squarePoint.y);
@@ -306,7 +308,7 @@ void FootPlacementService::calcFootMatrix(
 
 				if(minCost>cost)
 				{
-					printf("Changing minCost point for step %d at point %d, %d\n", k,i,j);
+                    //printf("Changing minCost point for step %d at point %d, %d\n", k,i,j);
 					//printf("%d %d %lf %lf %lf %lf\n", i, j,legDist, distance1, distance2, cost);
 
 					minCost=cost;

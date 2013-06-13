@@ -16,6 +16,10 @@
 #define SIZE 36
 #define STEPS 5
 
+#define MAX_STEP_SIZE 0.3
+#define MIN_STEP_SIZE 0.1
+#define MAX_STEP_HEIGHT 0.1
+
 #define SLOPE_WEIGHT 5
 #define DISTANCE_WEIGHT 5
 #define HEIGHT_WEIGHT 5
@@ -26,6 +30,7 @@
 #define RIGHT 1
 #define NORMALIZER 100
 #define EXTREME_SLOPE 0.174532925
+#define EXTREME_SLOPE_COR 0.5
 
 #define MIN_DIST_FROM_TARGET 1
 

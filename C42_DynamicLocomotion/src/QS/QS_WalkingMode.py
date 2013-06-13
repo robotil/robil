@@ -20,10 +20,11 @@ from tf.transformations import quaternion_from_euler, euler_from_quaternion
 import numpy as np
 
 from atlas_msgs.msg import AtlasCommand, AtlasSimInterfaceCommand, AtlasSimInterfaceState, AtlasState, AtlasBehaviorStepData
-from sensor_msgs.msg import Imu
+from sensor_msgs.msg import Imu, JointState
 from nav_msgs.msg import Odometry
 from geometry_msgs.msg import Pose, Quaternion
 from std_msgs.msg import String
+from DW.JointController import JointCommands_msg_handler
 
 from C42_DynamicLocomotion.srv import *
 from C42_DynamicLocomotion.msg import Foot_Placement_data
@@ -40,9 +41,18 @@ class QS_WalkingMode(WalkingMode):
         self._bDone = False
         self._bIsSwaying = False
         self._command = 0
-
-    def Initialize(self):
-        WalkingMode.Initialize(self)
+        ############################
+        #joint controller
+        self._cur_jnt = [0]*28
+        robot_name = "atlas"
+        jnt_names = ['back_lbz', 'back_mby', 'back_ubx', 'neck_ay', #3
+                           'l_leg_uhz', 'l_leg_mhx', 'l_leg_lhy', 'l_leg_kny', 'l_leg_uay', 'l_leg_lax', #9
+                           'r_leg_uhz', 'r_leg_mhx', 'r_leg_lhy', 'r_leg_kny', 'r_leg_uay', 'r_leg_lax', #15
+                           'l_arm_usy', 'l_arm_shx', 'l_arm_ely', 'l_arm_elx', 'l_arm_uwy', 'l_arm_mwx', #21
+                           'r_arm_usy', 'r_arm_shx', 'r_arm_ely', 'r_arm_elx', 'r_arm_uwy', 'r_arm_mwx'] #27
+        self._JC = JointCommands_msg_handler(robot_name,jnt_names)
+    def Initialize(self,parameters):
+        WalkingMode.Initialize(self,parameters)
         self._command = 0
         self._bRobotIsStatic = True
 
@@ -52,14 +62,19 @@ class QS_WalkingMode(WalkingMode):
         self._Subscribers["Odometry"] = rospy.Subscriber('/ground_truth_odom',Odometry,self._odom_cb)
         self._Subscribers["ASI_State"]  = rospy.Subscriber('/atlas/atlas_sim_interface_state', AtlasSimInterfaceState, self.asi_state_cb)
         self._Subscribers["IMU"]  = rospy.Subscriber('/atlas/imu', Imu, self._get_imu)
-
+        self._Subscribers["JointStates"] = rospy.Subscriber('/atlas/joint_states', JointState, self._get_joints)
         rospy.sleep(0.3)
         
-        self._RequestFootPlacements()
         k_effort = [0] * 28
+        k_effort[0:4] = 4*[255]
+        k_effort[16:28] = 12*[255]
+        self._JC.set_k_eff(k_effort)
+        self._JC.set_all_pos(self._cur_jnt)
+        self._JC.send_command()
         self._bDone = False
         self._bIsSwaying = False
         self._bRobotIsStatic = False
+        self._RequestFootPlacements()
         self._GetOrientationDelta0Values() # Orientation difference between BDI odom and Global
     
     def StartWalking(self):
@@ -85,7 +100,10 @@ class QS_WalkingMode(WalkingMode):
     def GetCommand(self,state):
         command = AtlasSimInterfaceCommand()
         command.behavior = AtlasSimInterfaceCommand.STEP
+        #give user control over neck, back_z and arms
         command.k_effort = [0] * 28
+        command.k_effort[2:4] = 2*[255]
+        command.k_effort[16:28] = 12*[255]
         command.step_params.desired_step = self._LPP.GetNextStep()
         if(0 != command.step_params.desired_step):
             # Not sure why such a magic number
@@ -218,6 +236,8 @@ class QS_WalkingMode(WalkingMode):
         roll, pitch, yaw = euler_from_quaternion([msg.orientation.x, msg.orientation.y, msg.orientation.z, msg.orientation.w])
         self._Odometer.SetYaw(yaw)
 
+    def _get_joints(self,msg):
+        self._cur_jnt = msg.position
 
 ###############################################################################################
 

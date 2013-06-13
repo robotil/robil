@@ -5,7 +5,7 @@
 #include <C23_ObjectRecognition/C23C0_ODIM.h>
 #include "C23_Detector.hpp"
 #include <PoseController/neck_movement.h>
-#include <PoseController/back_movement.h>
+#include <PoseController/back_lbz_neck_ay.h>
 #include <std_srvs/Empty.h>
 
 
@@ -30,8 +30,8 @@ public:
 			RobilTask("/searchObject"), _detector(detector) {
 		ROS_INFO("Instance of SearchObjectServer has started.");
         c23_start_posecontroller = nh.serviceClient<std_srvs::Empty>("/PoseController/start");
-        c23_move_neck = nh.serviceClient<PoseController::neck_movement>("/PoseController/neck_movement");
-        c23_move_back = nh.serviceClient<PoseController::back_movement>("/PoseController/back_movement");
+        c23_move_neck = nh.serviceClient<PoseController::back_lbz_neck_ay>("/PoseController/back_lbz_neck_ay");
+    //    c23_move_back = nh.serviceClient<PoseController::back_movement>("/PoseController/back_movement");
 		_detector->is_search = true;
 	}
 
@@ -48,7 +48,7 @@ public:
         double back_angle = 0;
         double angle = -0.3;
 		while (!isPreempt()) {
-            ros::Rate loop_rate(1);
+            ros::Rate loop_rate(10);
             res = _detector->detect(target);
             
            if (_detector->_found) {
@@ -56,12 +56,12 @@ public:
                 return TaskResult(SUCCESS, "OK");
             } else {
                 std_srvs::Empty e;
-                PoseController::neck_movement msg;
-                PoseController::back_movement msg2;
-                if(angle > 0.7 && state == 2) {
+                PoseController::back_lbz_neck_ay msg;
+              //  PoseController::back_movement msg2;
+                if(angle > 0.7 && state == 4) {
                         return TaskResult(FAULT, "Object isn't detected");
                 }
-                if(angle > 0.7 && state != 2) {
+                if(angle > 0.7 && state != 4) {
                         angle = -0.3;
                         state++;
                     
@@ -71,31 +71,39 @@ public:
                         back_angle = 0;
                         break;
                     case 1:
-                        back_angle = 0.61;
+                        back_angle = 0.3;
                         break;
                     case 2:
+                        back_angle = -0.3;
+                        break;
+                    case 3:
+                        back_angle = 0.61;
+                        break;
+                    case 4:
                         back_angle = -0.61;
                         break;
                 }
               
-                msg.request.neck_ay = angle;
+              //  msg.request.neck_ay = angle;
+              msg.request.neck_ay = angle;
+              msg.request.back_lbz = back_angle;
                 angle+=0.1;
-                msg2.request.back_lbz = back_angle;
+               // msg2.request.back_lbz = back_angle;
                 
-                c23_start_posecontroller.call(e);
+              //  c23_start_posecontroller.call(e);
                 if(c23_move_neck.call(msg))
                 {
                 
-                   // return TaskResult(SUCCESS, "OK");;
+               //    cout << "Worked" << endl;
                 }         
-                if(c23_move_back.call(msg2))
-                {
+              //  if(c23_move_back.call(msg2))
+              //  {
                     
                    
-                }         
+             //   }         
               //  return TaskResult(FAULT, "Object isn't detected");
             }   
-            loop_rate.sleep();
+           loop_rate.sleep();
 		}
 	  return TaskResult(SUCCESS, "OK");
 	}
@@ -127,12 +135,15 @@ public:
 		}
 		string target = getValueFromArgument(args, "target");
 		bool res;
-			res = _detector->detect(target);
-			if (_detector->x != -1) {
-          return TaskResult(SUCCESS, "OK");
-			} else {
-          return TaskResult(FAULT, "Object isn't detected");
+        res = _detector->detect(target);
+        while (!isPreempt()) {
+			
+			if (!(_detector->_found)) {
+                return TaskResult(FAULT, "Object isn't detected");
+			
+          
 			}
+        }
 		
 		
 	}

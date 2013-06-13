@@ -19,11 +19,11 @@ from tf.transformations import quaternion_from_euler, euler_from_quaternion
 import numpy as np
 
 from atlas_msgs.msg import AtlasCommand, AtlasSimInterfaceCommand, AtlasSimInterfaceState, AtlasState, AtlasBehaviorStepData
-from sensor_msgs.msg import Imu
+from sensor_msgs.msg import Imu, JointState
 from nav_msgs.msg import Odometry
 from geometry_msgs.msg import Pose
 from std_msgs.msg import String, Int32
-
+from DW.JointController import JointCommands_msg_handler
 from C42_DynamicLocomotion.srv import *
 from C42_DynamicLocomotion.msg import Foot_Placement_data
 
@@ -40,23 +40,40 @@ class DD_WalkingMode(WalkingMode):
         self._bDone = False
         self._StepIndex = 1
         self._command = 0
+        ############################
+        #joint controller
+        self._cur_jnt = [0]*28
+        robot_name = "atlas"
+        jnt_names = ['back_lbz', 'back_mby', 'back_ubx', 'neck_ay', #3
+                           'l_leg_uhz', 'l_leg_mhx', 'l_leg_lhy', 'l_leg_kny', 'l_leg_uay', 'l_leg_lax', #9
+                           'r_leg_uhz', 'r_leg_mhx', 'r_leg_lhy', 'r_leg_kny', 'r_leg_uay', 'r_leg_lax', #15
+                           'l_arm_usy', 'l_arm_shx', 'l_arm_ely', 'l_arm_elx', 'l_arm_uwy', 'l_arm_mwx', #21
+                           'r_arm_usy', 'r_arm_shx', 'r_arm_ely', 'r_arm_elx', 'r_arm_uwy', 'r_arm_mwx'] #27
+        self._JC = JointCommands_msg_handler(robot_name,jnt_names)
         
-    def Initialize(self):
-        WalkingMode.Initialize(self)
+    def Initialize(self,parameters):
+        WalkingMode.Initialize(self,parameters)
         self._LPP.Initialize()
         self._bRobotIsStatic = True
 
-        rospy.wait_for_service('foot_placement_path')
-        self._foot_placement_client = rospy.ServiceProxy('foot_placement_path', FootPlacement_Service)
+        # rospy.wait_for_service('foot_placement_path') # used for clone
+        # self._foot_placement_client = rospy.ServiceProxy('foot_placement_path', FootPlacement_Service)
+        rospy.wait_for_service('foot_placement')
+        self._foot_placement_client = rospy.ServiceProxy('foot_placement', FootPlacement_Service)
         # Subscribers:        
         self._Subscribers["Odometry"] = rospy.Subscriber('/ground_truth_odom',Odometry,self._odom_cb)
         self._Subscribers["ASI_State"]  = rospy.Subscriber('/atlas/atlas_sim_interface_state', AtlasSimInterfaceState, self.asi_state_cb)
         self._Subscribers["IMU"]  = rospy.Subscriber('/atlas/imu', Imu, self._get_imu)
-
+        self._Subscribers["JointStates"] = rospy.Subscriber('/atlas/joint_states', JointState, self._get_joints)
         rospy.sleep(0.3)
+        k_effort = [0] * 28
+        k_effort[3] = 255 # k_effort[0:4] = 4*[255]
+        # k_effort[16:28] = 12*[255]
+        self._JC.set_k_eff(k_effort)
+        self._JC.set_all_pos(self._cur_jnt)
+        self._JC.send_command()
 
         self._RequestFootPlacements()
-        k_effort = [0] * 28
         self._bDone = False
         self._bIsSwaying = False
         self._StepIndex = 1
@@ -85,7 +102,10 @@ class DD_WalkingMode(WalkingMode):
     def GetCommand(self):
         command = AtlasSimInterfaceCommand()
         command.behavior = AtlasSimInterfaceCommand.WALK
-        command.k_effort = [0] * 28
+        # command.k_effort = [0] * 28
+        # k_effort = [0] * 28
+        # k_effort[3] = 255 # k_effort[0:4] = 4*[255]
+        # # k_effort[16:28] = 12*[255]
         step_queue = self._LPP.GetNextStep()
         if(0 == step_queue):
             command = 0
@@ -201,6 +221,9 @@ class DD_WalkingMode(WalkingMode):
 
     # /atlas/atlas_sim_interface_state callback. Before publishing a walk command, we need
     # the current robot position   
+
+    def _get_joints(self,msg):
+        self._cur_jnt = msg.position
     def asi_state_cb(self, state):
         if self._bRobotIsStatic:
             self._BDI_Static_orientation_q = state.foot_pos_est[0].orientation

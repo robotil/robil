@@ -21,10 +21,13 @@ public slots:
 	void SltImageAreaOpened(int);
 	void SltOnNewImg(QImage img);
 	void SltOnPlayPauseClick(bool);
+	void SltOnStopClick();
 	void SltOnCreateClick(bool);
 	void SltOnPathClick(bool);
 	void SltOnAllowClick();
+	void SltOnRestoreClick();
 	void SltOperatorAction();
+	void SltGoalUpdated();
 	void SltOnWaitTimeout();
 	void SltOnGridReceived(int grid[100][100],StructPoint robotPos,int xOffset,int yOffset,double orient);
 
@@ -45,6 +48,9 @@ public:
 	virtual void OnExecutionStatusUpdate(int status);
 	virtual void OnHMIResponseReceived();
 	virtual void OnExecuterStackUpdate(QString strQString);
+	virtual void OnVRCScoreData(double timeSec, int competionScore, int falls, QString message);
+	virtual void OnDownlinkUpdate(QString down);
+	virtual void OnUplinkUpdate(QString up);
 	/*virtual*/ void OnWaitResponseFinished();
 
 protected:
@@ -54,6 +60,7 @@ private:
 	Ui::ImageDrawClass ui;
 	C11_Node C11node;
 	CTcpConnection *pCTcpConnection;
+	CTcpConnection *pImageCTcpConnection;
 	int ImageAreaCount;
 	QMap<int,CGraphicsView*> ImageAreas;
 	bool IsUpdateCurrentImg;	//don't create new image, update the current

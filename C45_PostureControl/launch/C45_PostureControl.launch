@@ -9,11 +9,12 @@
 	<param name="PID_gains/D" type="double" value="-0.02" />
 	-->
 	<node name="PoseController" pkg="PoseController" type="PoseController" cwd="node" output="screen" />
+	<node name="move_back_lbz_neck_ay" pkg="PoseController" type="move_back_lbz_neck_ay" cwd="node" output="screen" />
 	
 	<!--<node name="C45_PostureControl_com_error" pkg="C45_PostureControl" type="C45_PostureControl_com_error" cwd="node" output="screen" />-->
 	<!--<node name="C45_PostureControl_back_lbz_poller_service" pkg="C45_PostureControl" type="C45_PostureControl_back_lbz_poller_service" cwd="node" output="screen" />-->
 	<node name="C45_PostureControl" pkg="C45_PostureControl" type="C45_PostureControl" cwd="node" output="screen" />
-	<node name="C45_PostureControl_maintain_stability" pkg="C45_PostureControl" type="C45_PostureControl_maintain_stability" cwd="node" output="screen" />
+	<!--<node name="C45_PostureControl_maintain_stability" pkg="C45_PostureControl" type="C45_PostureControl_maintain_stability" cwd="node" output="screen" />-->
 	<!--<node name="C45_PostureControl" pkg="C45_PostureControl" type="C45_PostureControl" cwd="node"/>-->
-
+	
 </launch>

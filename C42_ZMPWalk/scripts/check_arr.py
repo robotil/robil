@@ -64,30 +64,41 @@ p_ref_y_stop_from_right = Stop_lateral_y_from_right_foot(ZMP_start_pos, step_wid
 
 p_ref_const_x = Constant_Template(step_length*3, step_time, sample_time)
 
-# p_ref_x_r = r_[ p_ref_x_start, step_length/2 + p_res_x_forward_step2, step_length*1/2 + step_length2 + p_res_x_forward_step, step_length*3/2 + step_length2 + p_ref_x_stop ] # 
+p_ref_x_r = r_[ p_ref_x_start, step_length/2 + p_res_x_forward_step2, step_length*1/2 + step_length2 + p_res_x_forward_step, step_length*3/2 + step_length2 + p_ref_x_stop ] # 
 p_ref_x = r_[ p_ref_x_start, step_length/2 + p_res_x_forward_step, step_length*3/2 + p_res_x_forward_step, step_length*5/2 + p_ref_x_stop, p_ref_const_x ]
 
 p_ref_y = r_[ p_ref_y_old_correction + p_ref_y_start, p_ref_y_old_correction + p_ref_y_step_right, p_ref_y_old_correction + p_ref_y_step_left, p_ref_y_old_correction + p_ref_y_stop_from_left ]
-# p_ref_y_c = r_[ p_ref_y_old_correction + p_ref_y_start, p_ref_y_old_correction + p_ref_y_step_right, p_ref_y_old_correction + p_ref_y_step_left, p_ref_y_old_correction + p_ref_y_step_right, p_ref_y_old_correction + p_ref_y_stop_from_right ]
+p_ref_y_c = r_[ p_ref_y_old_correction + p_ref_y_start, p_ref_y_old_correction + p_ref_y_step_right, p_ref_y_old_correction + p_ref_y_step_left, p_ref_y_old_correction + p_ref_y_step_right, p_ref_y_old_correction + p_ref_y_stop_from_right ]
 
 
-## Testing preview_buffer:
-Preview_Sagital_x = ZMP_Preview_Buffer('Sagital X', 720, 4*step_time/sample_time, 0 ) #name, preview_sample_size, max_step_samples, precede_time_samples
-Preview_Lateral_y = ZMP_Preview_Buffer('Lateral Y', 720, 4*step_time/sample_time, 0 ) #name, preview_sample_size, max_step_samples, precede_time_samples
+# ## Testing preview_buffer:
+# Preview_Sagital_x = ZMP_Preview_Buffer('Sagital X', 720, 4*step_time/sample_time, 0 ) #name, preview_sample_size, max_step_samples, precede_time_samples
+# Preview_Lateral_y = ZMP_Preview_Buffer('Lateral Y', 720, 4*step_time/sample_time, 0 ) #name, preview_sample_size, max_step_samples, precede_time_samples
 
-Preview_Sagital_x.load_NewStep( p_ref_x_start, p_res_x_forward_step)
-Preview_Lateral_y.load_NewStep( p_ref_y_start, r_[ p_ref_y_step_right, p_ref_y_step_left ] )
+# Preview_Sagital_x.load_NewStep( p_ref_x_start, p_res_x_forward_step)
+# Preview_Lateral_y.load_NewStep( p_ref_y_start, r_[ p_ref_y_step_right, p_ref_y_step_left ] )
 
-count = 0
-for num in range(0,preview_buffer_i):
-    p_ref_x_temp = Preview_Sagital_x.update_Preview()
-    p_ref_y_temp = Preview_Lateral_y.update_Preview()
-    count += 1
+# count = 0
+# for num in range(0,preview_buffer_i):
+#     p_ref_x_temp = Preview_Sagital_x.update_Preview()
+#     p_ref_y_temp = Preview_Lateral_y.update_Preview()
+#     count += 1
 
-rospy.loginfo("check_arr: count = %f" % (count ) )
+# rospy.loginfo("check_arr: count = %f" % (count ) )
 
-p_ref_x_r = r_[ zeros(preview_buffer_i-1), p_ref_x_temp ]
-p_ref_y_c = r_[ zeros(preview_buffer_i-1), p_ref_y_temp ]
+# p_ref_x_r = r_[ zeros(preview_buffer_i-1), p_ref_x_temp ]
+# p_ref_y_c = r_[ zeros(preview_buffer_i-1), p_ref_y_temp ]
+
+# ## Test transition_Min_jerk:
+# #!!! transition_Min_jerk(x0,xf,N) = r_[ transition_Min_jerk_firstHalf(x0,xm, floor(N/2), N) , transition_Min_jerk_secondHalf(xm,xf, N-floor(N/2), N) ] !!!
+# N = 101
+# half_N = floor(N/2)
+# p_trans = transition_Min_jerk(5,15, N )
+# p_trans1 = transition_Min_jerk_firstHalf(5,10, half_N, N)
+# p_trans2 = transition_Min_jerk_secondHalf(10,15, N-half_N, N)
+# plot(p_trans,'g', r_[p_trans1, p_trans2],'r--') #plot(p_ref_y,'b-')
+# grid(True)
+# show()
 
 plot(p_ref_x,'g--', p_ref_x_r,'r-', p_ref_y,'b--', p_ref_y_c,'c-') #plot(p_ref_y,'b-')
 grid(True)

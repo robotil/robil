@@ -8,6 +8,7 @@
 //#include <QMainWindow>
 #include <QMouseEvent>
 #include "traingleitem.h"
+#include "scaleitem.h"
 
 typedef struct
 {
@@ -35,6 +36,7 @@ class CMapMain : public QWidget
 signals:
 
 	void SigOperatorAction();
+	void SigGoalUpdated();
 
 public:
 	CMapMain(QWidget *parent = 0, Qt::WFlags flags = 0);
@@ -54,6 +56,7 @@ public:
 	void deleteRoute(ModeDraw m);
 	void SetEditable(bool value);
 	std::vector<StructPoint> GetUpdatedRoute();
+	StructPoint GetGoal();
 	QVector<QPointF> getRoutePath();
 	QVector<QPointF> getRoute(ModeDraw route);
 
@@ -62,6 +65,7 @@ private:
 	CPixItem *pPixItem[100][100];
 	CtraingleItem *traingle;
 	ModeDraw mode;
+	CScaleItem* pCScaleItem;
 	int PixColor[100][100];
 	int pos[2];
 	int startX,startY;
@@ -74,6 +78,7 @@ private:
 	bool IsPathChanged;
 	std::vector<StructPoint> LastReceivedRoute;
 	std::vector<StructPoint> LastUpdatedRoute;
+	StructPoint GoalPoint;
 
 	CRouteItem *routeSelected;
 

@@ -26,6 +26,10 @@ Q_SIGNALS:
         void SigImageRequest();
         void SigGridRequest();
         void SigPathRequest();
+        void SigAllRequest();
+        void SigStopRequest();
+        void SigNewGoalRequest(StructPoint goal);
+        void SigResetRequest();
 
 public Q_SLOTS:
         void SltOnNewConnection();
@@ -42,7 +46,9 @@ public:
         void SendHMIResponse();
         void SendExecutionStatusChange(int status);
         void SendExecuterStack(QString str);
-        void SendHello();
+        void SendVRCScoreData(double timeSec, int competionScore, int falls, QString message);
+        void SendDownlink(QString str);
+        void SendUplink(QString str);
 
 private:
         QTcpServer *pTcpServer;

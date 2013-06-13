@@ -168,25 +168,6 @@ void GeneralDetector::detect(Mat img) {
             number_of_patches++;
             bestMatch = (*it).first;
 	    
-	    if(!bestMatch.compare("car_driver"))
-	    {
-	     car_target = CAR_DRIVER; 
-	     ROS_INFO("Car driver detected");
-	    }
-	    else if(!bestMatch.compare("car_passenger")){
-	      car_target = CAR_PASSENGER; 
-	      ROS_INFO("Car passenger detected");
-	    }
-	    else if(!bestMatch.compare("car_front")){
-	      car_target = CAR_FRONT; 
-	      ROS_INFO("Car front detected");
-	    }
-	    else if(!bestMatch.compare("car_rear")){
-	      car_target = CAR_REAR; 
-	      ROS_INFO("Car rear detected");
-	    }
-	    
-	    
           }
           i++;
 
@@ -201,8 +182,31 @@ void GeneralDetector::detect(Mat img) {
     cout << "No car found!" << endl;
     car_target = NONE;
     ROS_INFO("No car detected");
+    _x = -1;
     return ;
   }
+  
+	  if(!bestMatch.compare("car_driver"))
+	  {
+	    car_target = CAR_DRIVER; 
+	    ROS_INFO("Car driver detected");
+	  }
+	  else if(!bestMatch.compare("car_passenger")){
+	    car_target = CAR_PASSENGER; 
+	    ROS_INFO("Car passenger detected");
+	  }
+	  else if(!bestMatch.compare("car_front")){
+	    car_target = CAR_FRONT; 
+	    ROS_INFO("Car front detected");
+	  }
+	  else if(!bestMatch.compare("car_rear")){
+	    car_target = CAR_REAR; 
+	    ROS_INFO("Car rear detected");
+	  }
+  
+  
+  
+  
   Mat subImg = img(cv::Range(y_,y_+height), cv::Range(x_,x_+width));
   Mat output2;
   detector.detect(subImg, keypoints);

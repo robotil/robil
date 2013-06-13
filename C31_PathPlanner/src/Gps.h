@@ -5,13 +5,18 @@
 
 class GPSPoint{
 public:
+	bool defined;
 	double x, y, heaidng;
-	GPSPoint(double x, double y):x(x),y(y),heaidng(0){
+	GPSPoint(double x, double y):x(x),y(y),heaidng(0),defined(true){
 
 	}
-	GPSPoint(double x, double y, double h):x(x),y(y),heaidng(h){
+	GPSPoint(double x, double y, double h):x(x),y(y),heaidng(h),defined(true){
 
 	}
+	GPSPoint():x(0),y(0),heaidng(0),defined(true){
+
+	}
+	void undef(){defined=false;}
 };
 
 typedef std::vector<GPSPoint> GPSPath;
