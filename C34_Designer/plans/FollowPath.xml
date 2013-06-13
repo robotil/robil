@@ -1,0 +1,26 @@
+<plan descriptions="./plans/TaskDescriptions.xml">
+   <par name="@1" x="827.1252299203104" y="271.5630121729074" collapsed="false" id="c9849206-186a-476f-8902-f62389f47712"> 
+         <par name="Perception" x="721.7323727774531" y="375.8130121729073" collapsed="false" id="b1f3b3cb-a446-43ca-a76a-23c526e495f3"> 
+               <tsk name="LocalizationTrack" x="626.7323727774531" y="422.18801217290707" test_time="0" test_result="true" id="e98b1380-8b10-4881-a99d-9bb1df4f8efa" />
+               <tsk name="PathPlanning" x="781.7323727774528" y="495.813012172907" test_time="0" test_result="true" id="e1503a5b-f307-4784-8978-8cf1507fc10c" />
+         </par>
+         <par name="MissionProgress" x="854.2388662839467" y="380.13119399108894" collapsed="false" id="08b1ff07-8c0f-45c3-a3b0-5e83f2804540"> 
+               <seq name="SearchObjectAndGo" x="965.1912472363274" y="530.3970670069625" collapsed="false" id="2b51a751-d751-4e62-be18-c818e9071409"> 
+                  <dec name="!L!" x="944.7182539682532" y="607.6269841269839"> 
+                        <tsk name="PathPlanningFocus(target=Arrow)" x="780.9804857755652" y="661.3333529432505" test_time="0" test_result="true" id="afc49c4b-301d-4f4e-8512-424772857ce5" />
+                  </dec>
+                  <dec name="L" x="1101.416666666666" y="603.7499999999995"> 
+                        <seq name="SearchPathAndGo" x="1055.3159558610369" y="668.275660635557" collapsed="false" id="783d462d-6ae4-4f0c-94d4-74b1727532f5"> 
+                           <dec name="!L!" x="1179.9069884999003" y="736.5312521454966"> 
+                                 <sel name="PathFollow" x="1157.9682490711928" y="808.6458802635254" collapsed="false" id="30b15714-e354-4a89-a827-00d3d67cfead"> 
+                                       <par name="Zmp" x="1207.579360182303" y="878.4792135968614" collapsed="false" id="2625e2b7-d8ae-447d-b4aa-eeb05ae3591d"> 
+                                             <tsk name="WalkerNode_Continuous" x="1158.8015824045237" y="969.7014358190779" test_time="0" test_result="true" id="e1e963fe-a79a-41b0-af6f-46acd8a19acc" />
+                                       </par>
+                                 </sel>
+                           </dec>
+                        </seq>
+                  </dec>
+               </seq>
+         </par>
+   </par>
+</plan>

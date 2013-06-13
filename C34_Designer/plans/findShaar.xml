@@ -1,11 +1,25 @@
 <plan descriptions="./plans/TaskDescriptions.xml">
-   <par name="skill4" x="509.6935713918517" y="68.73670354126503" collapsed="false" id="e067b8a4-9731-4029-b2b5-7e2fbef41270"> 
-         <tsk name="LocalizationTrack" x="332.01190476190425" y="135.33333333333297" test_time="0" test_result="true" id="adbf1a28-0a56-4cdb-937c-3a56fb84546c" />
-         <tsk name="PathPlanning" x="461.1734248717023" y="137.28157533613557" test_time="0" test_result="true" id="cf684c9e-9207-4dfb-8525-75a5ce9499fd" />
-         <seq name="Mission" x="607.1935713918529" y="153.48670354126477" collapsed="false" id="e7a44ffe-9705-4ca7-93f9-0bee7db7b56d"> 
-               <tsk name="searchObject(target=Gate )" x="382.02172827172046" y="354.0428182928132" test_time="0" test_result="true" id="a32132fe-26f1-40d0-ab18-77d29cc31a4b" />
-               <tsk name="PathPlanningFocus(target=Gate)" x="522.0081559301116" y="441.6748662557418" test_time="0" test_result="true" id="c00011eb-e9f3-430e-87f7-95f450b344d3" />
-               <tsk name="WalkerNode_Continuous" x="733.9285714285704" y="424.41666666666595" test_time="0" test_result="true" id="95f848c9-6b48-4196-98b0-41654e18293c" />
+   <par name="skill4" x="367.6935713918517" y="135.73670354126503" collapsed="false" id="e067b8a4-9731-4029-b2b5-7e2fbef41270"> 
+         <tsk name="LocalizationTrack" x="190.01190476190425" y="202.33333333333297" test_time="0" test_result="true" id="adbf1a28-0a56-4cdb-937c-3a56fb84546c" />
+         <tsk name="PathPlanning" x="319.1734248717023" y="204.28157533613557" test_time="0" test_result="true" id="cf684c9e-9207-4dfb-8525-75a5ce9499fd" />
+         <seq name="SearchObjectAndGo" x="843.0245805696613" y="237.39706700696297" collapsed="false" id="aaed64c2-017a-4af8-944f-fb9c405febb1"> 
+            <dec name="!L!" x="822.551587301587" y="314.6269841269843"> 
+                  <tsk name="PathPlanningFocus(target=Gate)" x="754.8138191088988" y="373.33335294325093" test_time="0" test_result="true" id="c8781823-8a68-4908-92d2-0786f534cabd" />
+            </dec>
+            <dec name="L" x="979.25" y="310.75"> 
+                  <seq name="SearchPathAndGo" x="933.1492891943703" y="375.2756606355574" collapsed="false" id="df5ee590-baf0-41a5-b097-fc4987007609"> 
+                     <dec name="!L!" x="914.3120719150106" y="445.55191866956443"> 
+                           <tsk name="searchObject(target=Gate)" x="845.1233567934369" y="515.305866540762" test_time="0" test_result="true" id="bb3a65ca-3204-4b68-aaec-c008c7cb5ac9" />
+                     </dec>
+                     <dec name="!L!" x="1057.7403218332342" y="443.5312521454971"> 
+                           <sel name="PathFollow" x="1035.8015824045265" y="515.6458802635259" collapsed="false" id="aaf190ac-ca98-4479-8420-e2e3f3886317"> 
+                                 <par name="Zmp" x="1085.4126935156369" y="585.4792135968619" collapsed="false" id="bf05b271-060c-4d9b-94a2-61722f44bfff"> 
+                                       <tsk name="WalkerNode_Continuous" x="1036.6349157378577" y="676.7014358190784" test_time="0" test_result="true" id="8870a236-b71c-40b4-b8b6-ea778001d40d" />
+                                 </par>
+                           </sel>
+                     </dec>
+                  </seq>
+            </dec>
          </seq>
    </par>
 </plan>
