@@ -166,8 +166,8 @@ class DW_Controller(object):
         #[-0.066, 0.082 Sequence Step 2: Extend arms
         ThisRobotCnfg = copy(self.RobotCnfg2[0][:])
         ThisRobotCnfg[16] = ThisRobotCnfg[16+6] = 1.4
-        ThisRobotCnfg[17] = -0.4
-        ThisRobotCnfg[17+6] = 0.4
+        ThisRobotCnfg[17] = -0.2#-0.6#-0.4
+        ThisRobotCnfg[17+6] = 0.2#0.6# 0.4
         ThisRobotCnfg[18] = ThisRobotCnfg[18+6] = 2.9
         ThisRobotCnfg[19] = 0.2
         ThisRobotCnfg[19+6] = -0.2
@@ -207,8 +207,7 @@ class DW_Controller(object):
         ThisRobotCnfg[19] = 0.5
         ThisRobotCnfg[19+6] = -0.5
         self.RobotCnfg2.append(ThisRobotCnfg)
-        # self.StepDur2.append(0.7*T)
-        self.StepDur2.append(1*T)
+        self.StepDur2.append(1*T)#was 0.7*T
 
         ##################################################################
         ########################## INITIALIZE ############################
@@ -391,6 +390,7 @@ class DW_Controller(object):
         if abs(self.DeltaAngle(T_ori,y))>0.1:
             self.RotateToOri(T_ori)
 
+
         # Crawl towards target
         if Point[2] == "fwd":
             self.Crawl()
@@ -420,22 +420,12 @@ class DW_Controller(object):
             # Rotate in place towards target
             if self._fall_count < self.FALL_LIMIT: 
 
-                # Crawl towards target
-                if Point[2] == "fwd":
-                    self.Crawl()
-                if Point[2] == "bwd":
-                    self.BackCrawl()
-
                 Drift = abs(self.DeltaAngle(T_ori,y))
                 if 0.5<Drift<1.4 and Distance>1:
                     self.RotateToOri(T_ori)
                 if Drift>1.4:
                     self.RotateToOri(T_ori)
 
-                # Crawl towards target
-                # if Point[2] == "fwd":
-                #     self.Crawl()
-                # if Point[2] == "bwd":
                     self.BackCrawl()
                 DeltaPos2 = [Point[0]-self.GlobalPos.x,Point[1]-self.GlobalPos.y]
                 Distance2 = math.sqrt(DeltaPos2[0]**2+DeltaPos2[1]**2)
@@ -523,6 +513,7 @@ class DW_Controller(object):
     
 
     def DoSeqStep(self):
+        # if self.CurSeqStep == 2:
         if self.CurSeqStep == 3:
          
             if self.IMU_mon.second_contact == 'arm_r':
@@ -568,6 +559,8 @@ class DW_Controller(object):
         self.CurSeqStep2 += 1
         if self.CurSeqStep2 > 4:
             self.CurSeqStep2 = 0
+        # if self.CurSeqStep2 > 4:
+        #     self.CurSeqStep2 = 0
 
     def AddRotation(self,Delta): # EXPERIMENTAL
         # Delta of 1 gives approx. 0.15 radians turn left
@@ -646,8 +639,8 @@ class DW_Controller(object):
             y0,p,r = self.current_ypr()
             Angle=self.DeltaAngle(Bearing,y0)
 
-            while abs(Angle)>0.15: # Error of 9 degrees
-                # print 'Delta: ',Angle,'Bearing: ',Bearing, 'yaw: ',y0
+            while abs(Angle)>0.3:#0.15: # Error of 9 degrees
+                print 'Delta: ',Angle,'Bearing: ',Bearing, 'yaw: ',y0
                 Delta = Angle/0.75
                 if abs(Delta)>1:
                     Delta/=abs(Delta)
@@ -673,6 +666,7 @@ class DW_Controller(object):
             # Return to original configuration
             self.JC.send_pos_traj(self.RS.GetJointPos(),self.RobotCnfg[0][:],0.5,0.01) 
             self.CurSeqStep = 0
+            self.CurSeqStep2 = 0
             return 1
 
     def RotateToOriInMud(self,Bearing):
@@ -692,7 +686,7 @@ class DW_Controller(object):
         Angle=self.DeltaAngle(Bearing,y0)
         # print 'Angle: ',Angle
         while abs(Angle)>0.1: # Error of 3 degrees
-            # print 'MUD Delta: ',Angle,'Bearing: ',Bearing, 'yaw: ',y0
+            print 'MUD Delta: ',Angle,'Bearing: ',Bearing, 'yaw: ',y0
             Delta = Angle/0.45
             if abs(Delta)>1:
                 Delta/=abs(Delta)
@@ -717,6 +711,7 @@ class DW_Controller(object):
         # Return to original configuration
         self.JC.send_pos_traj(self.RS.GetJointPos(),self.RobotCnfg[0][:],0.5,0.01) 
         self.CurSeqStep = 0
+        self.CurSeqStep2 = 0
         return 1
 
     def RotSpotSeq(self,Delta):
@@ -836,18 +831,27 @@ class DW_Controller(object):
                 # Robot tipped backwards
                 # print "Back recovery"
                 result = self.BackTipRecovery()
+                self.CurSeqStep2 = 0########
+                self.CurSeqStep = 0###############
+
             elif r>math.pi/4:
                 # Robot tipped to the right
                 result = self.TipRecovery("right")
+                self.CurSeqStep2 = 0########
+                self.CurSeqStep = 0###############
                 # print "Right recovery"
             elif r<-math.pi/4:
                 # Robot tipped to the left
                 result = self.TipRecovery("left")
+                self.CurSeqStep2 = 0########
+                self.CurSeqStep = 0###############
                 # print "Left recovery"
             else:
                 result = 1
                 self.FollowPath = 1
                 self._fall_count = 0
+
+
 
 
     def TipRecovery(self,side):
@@ -903,6 +907,7 @@ class DW_Controller(object):
             self.CurSeqStep2 = 4
             # self.GoToBackSeqStep(5)
             return 1
+
         else:
             return 0  
 
@@ -939,7 +944,7 @@ class DW_Controller(object):
         pos[17] = -1.3
         pos[17+6] = 1.3
         pos[19] = pos[19+6] = 0
-        self.JC.send_pos_traj(self.RS.GetJointPos(),pos,2,0.01)
+        self.JC.send_pos_traj(self.RS.GetJointPos(),pos,2.2,0.01)#self.JC.send_pos_traj(self.RS.GetJointPos(),pos,2,0.01)
 
         rospy.sleep(1.5)
 
