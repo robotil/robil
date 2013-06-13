@@ -23,7 +23,7 @@ C34_Executer     0.8
 C35_Monitoring     0.15
 C41_BodyControl     0.1
 C41_QuasiStaticWalking     0.9
-C41_QuasiStaticWalking_tools     0.18
+C41_QuasiStaticWalking_tools     0.19
 C42_DRCSim2_tools     0.2
 C42_DynamicLocomotion     0.13
 C42_Leg_IK     0.4
