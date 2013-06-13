@@ -24,7 +24,7 @@ from CD_StateMachine import *
 
 from atlas_msgs.msg import AtlasCommand, AtlasSimInterfaceCommand, AtlasSimInterfaceState, AtlasState, AtlasBehaviorStepData
 from sensor_msgs.msg import Imu, JointState
-from std_msgs.msg import String
+from std_msgs.msg import String, Int32
 from geometry_msgs.msg import Pose
 from nav_msgs.msg import Odometry
 from C31_PathPlanner.msg import C31_Waypoints
@@ -61,6 +61,13 @@ class CD_WalkingMode(WalkingMode):
         self._bDone = False
         self._yaw = 0
                 
+        # self._BDIswitch_client = rospy.ServiceProxy('C25/BDIswitch',Int32)
+        # resp_switched_to_BDI_odom = self._BDIswitch_client(1)
+        # if resp_switched_to_BDI_odom:
+        #     print "Using BDI odom"
+        # else:
+        #     print "Using ROBIL odom"
+
         # Subscriber
         self._Subscribers["Path"] = rospy.Subscriber('/path',C31_Waypoints,self._path_cb)
         self._Subscribers["Odometry"] = rospy.Subscriber('/C25/publish',C25C0_ROP,self._odom_cb)

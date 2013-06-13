@@ -65,15 +65,25 @@ class AP_WalkingMode(WalkingMode):
             self._DesiredObject = parameters['Object']
         else:
             self._DesiredObject="delta"
-        # parameter 'turn_in_place_Yaw' uses the parameter of the Yaw angle to turn in place 
+        # parameter to turn in place and move (translate):
+        self._delta_yaw = 0.0
+        self._delta_trans = Point()
+        self._delta_trans.x = 0.0
+        self._delta_trans.y = 0.0
+        self._delta_trans.z = 0.0
+        # 'turn_in_place_Yaw' uses the parameter of the Yaw angle to turn in place 
         if ((None != parameters) and ('turn_in_place_Yaw' in parameters)):
-            self._target_pose = "Rotate_in_Place"
+            self._target_pose = "Rotate_Translate_delta"
             self._delta_yaw = float(parameters['turn_in_place_Yaw'])
-            self._delta_trans = Point()
-            self._delta_trans.x = 0.0
-            self._delta_trans.y = 0.0
-            self._delta_trans.z = 0.0
-        else:
+        # 'Xmovement' uses the parameter to translate x meters (+=fwd/-=bwd) from the starting place of the robot 
+        if ((None != parameters) and ('Xmovement' in parameters)):
+            self._target_pose = "Rotate_Translate_delta"
+            self._delta_trans.x = float(parameters['Xmovement'])
+        # 'Ymovement' uses the parameter to translate y meters (+=left/-=right) from the starting place of the robot 
+        if ((None != parameters) and ('Ymovement' in parameters)):
+            self._target_pose = "Rotate_Translate_delta"
+            self._delta_trans.y = float(parameters['Ymovement'])
+        if None == self._target_pose:
             rospy.wait_for_service('C23/C66')
             self._foot_placement_client = rospy.ServiceProxy('C23/C66', C23_orient) # object recognition service
         # rospy.wait_for_service('foot_aline_pose')
@@ -86,10 +96,10 @@ class AP_WalkingMode(WalkingMode):
         rospy.sleep(0.3)
         
         self._RequestTargetPose(self._DesiredObject)
-        k_effort = [0] * 28
-        k_effort[0:4] = 4*[255]
-        k_effort[16:28] = 12*[255]
-        self._JC.set_k_eff(k_effort)
+        self._k_effort = [0] * 28
+        self._k_effort[0:4] = 4*[255]
+        self._k_effort[16:28] = 12*[255]
+        self._JC.set_k_eff(self._k_effort)
         self._JC.set_all_pos(self._cur_jnt)
         self._JC.send_command()
         self._bDone = False
@@ -98,7 +108,7 @@ class AP_WalkingMode(WalkingMode):
         #self._GetOrientationDelta0Values() # Orientation difference between BDI odom and Global
 
         # Put robot into stand position
-        stand = AtlasSimInterfaceCommand(None,AtlasSimInterfaceCommand.STAND, None, None, None, None, k_effort)                
+        stand = AtlasSimInterfaceCommand(None,AtlasSimInterfaceCommand.STAND, None, None, None, None, self._k_effort)                
         self.asi_command.publish(stand)
         rospy.sleep(0.3)
     
@@ -130,9 +140,7 @@ class AP_WalkingMode(WalkingMode):
         command = AtlasSimInterfaceCommand()
         command.behavior = AtlasSimInterfaceCommand.STEP
         #give user control over neck, back_z and arms
-        command.k_effort = [0] * 28
-        command.k_effort[2:4] = 2*[255]
-        command.k_effort[16:28] = 12*[255]
+        command.k_effort = self._k_effort
         command.step_params.desired_step = self._LPP.GetNextStep()
         if(0 != command.step_params.desired_step):
             # Not sure why such a magic number
@@ -183,7 +191,7 @@ class AP_WalkingMode(WalkingMode):
                 self._target_pose = self._foot_placement_client(desired_object) # "target: 'Firehose'") # 
                 print("Got from C23/C66 service the following Pose:",self._target_pose)
                 delta_yaw, delta_trans = self._GetDeltaToObject(desired_object,self._target_pose)
-            elif "Rotate_in_Place" == self._target_pose and not self._started_to_walk:
+            elif "Rotate_Translate_delta" == self._target_pose and not self._started_to_walk:
                 delta_yaw = self._delta_yaw
                 delta_trans = self._delta_trans
             else:
@@ -299,7 +307,7 @@ class AP_WalkingMode(WalkingMode):
         print ("_GetRotationDeltaFP_Path yaw:",delta_yaw, "start ori:",start_orientation )
         foot_placement_path = []
         
-        theta_max = 0.4 # max turning angle per step
+        theta_max = 0.35 # max turning angle per step
 
         ### Turn in place (pivot):
         Num_seq = int(math.floor(math.fabs(delta_yaw)/theta_max))
@@ -372,7 +380,9 @@ class AP_WalkingMode(WalkingMode):
         else: # move right
             LeftRight_step_seq = False
 
+        print self._foot_placement_path
         if [] == self._foot_placement_path:
+            print self._foot_placement_path
             ## Step in place: two first steps
             self._foot_placement_path = self._GetTwoFirstStepFP_Path(start_position,start_orientation,LeftRight_step_seq)
 
@@ -392,7 +402,7 @@ class AP_WalkingMode(WalkingMode):
             r_foot_start_pos = self._foot_placement_path[last_place-1].pose.position
             l_foot_start_pos = self._foot_placement_path[last_place].pose.position
         start_ori = [start_orientation[0], start_orientation[1], start_orientation[2] + delta_yaw ]
-        print ("foot start pos: left-", l_foot_start_pos, " right - ", r_foot_start_pos)
+        #print ("foot start pos: left-", l_foot_start_pos, " right - ", r_foot_start_pos)
         ## Num_seq steps:
         foot_placement_path = []
         Num_seq_R = int(math.ceil(self._DistanceXY(delta_trans)/x_length_max))
@@ -409,7 +419,7 @@ class AP_WalkingMode(WalkingMode):
 
             X_r_foot = n*step_deltaX_BDI + r_foot_start_pos.x
             Y_r_foot = n*step_deltaY_BDI + r_foot_start_pos.y
-            print ("FP pos: left- x=", X_l_foot," y=", Y_l_foot, " right - x=", X_r_foot," y=", Y_r_foot)
+            #print ("FP pos: left- x=", X_l_foot," y=", Y_l_foot, " right - x=", X_r_foot," y=", Y_r_foot)
 
             if LeftRight_step_seq:
                 foot_placement_path.append( self._FP_data(0,[X_l_foot,Y_l_foot,start_position.z],start_ori) )
