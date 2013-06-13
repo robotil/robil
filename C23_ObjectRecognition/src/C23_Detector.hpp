@@ -114,6 +114,8 @@ public:
     double orient_P;
     double orient_Y;
     double orient_R;
+    string current_status;
+    GEAR_STATUS current_gear_status;
     pcl::PointCloud<pcl::PointXYZ> lastCloud;
 private:
 
@@ -122,7 +124,7 @@ private:
     bool detectPath(Mat srcImg);
     bool detectCar(Mat srcImg, const sensor_msgs::PointCloud2::ConstPtr &cloud);
     //bool compareContourAreas ( vector<cv::Point> contour1, vector<cv::Point> contour2) ;
-    bool detectPassengerDriver(Mat srcImg, int x1,int y1,int x2,int y2, pcl::PointXYZ minPoint, pcl::PointCloud<pcl::PointXYZ> pclcloud);
+    bool detectPassengerDriver(Mat srcImg, int x1,int y1,int x2,int y2, pcl::PointXYZ minPoint, pcl::PointCloud<pcl::PointXYZ> pclcloud, GeneralDetector::CAR_TARGET *car_target);
     bool detectValve(Mat srcImg, const sensor_msgs::PointCloud2::ConstPtr &cloud);
     bool detectFirehose(Mat srcImg, const sensor_msgs::PointCloud2::ConstPtr &cloud);
     bool detectFirehoseGrip(Mat srcImg, const sensor_msgs::PointCloud2::ConstPtr &cloud);

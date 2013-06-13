@@ -17,6 +17,14 @@ public:
 	  GeneralDetector();
 	  void initialize(const string& object);
 	  void detect(Mat img);
+	  
+	  typedef enum car_target { 
+	  CAR_FRONT,
+	  CAR_REAR,
+	  CAR_DRIVER,
+	  CAR_PASSENGER,
+	  NONE
+	} CAR_TARGET;
 	//  void detect(Mat img, int* x, int* y, int* width, int* height);
 //	  void learn(const string featuresFile, const string descriptorVectorFile, const string posSamplesDir, const string negSamplesDir,  const string svmModelFile);
 	
@@ -32,6 +40,7 @@ private:
 public:
     int _x,_y,_width,_height;
     float confident;
+    CAR_TARGET car_target;
     map<string,CvSVM> classes_classifiers;
     Mat vocabulary;
     SiftFeatureDetector detector;
