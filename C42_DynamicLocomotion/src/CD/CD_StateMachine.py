@@ -45,6 +45,7 @@ class CD_StateMachine(StateMachine):
         StateMachine.AddTransition(self,'WaitingForActual',     'Both',         'BothWalking')
 
     def Start(self):
+        self._phantomRobot.AlignToPath()
         if (StateMachine.PerformTransition(self,'Start')):
             print("CD_StateMachine::Start")
 
