@@ -57,7 +57,7 @@ public:
 		traj_vector_cli_ = nh_.serviceClient<traj_splitter_to_vector::trajectory_vector>("traj_vector_server");
 		walking_vector_cli_ = nh_.serviceClient<traj_splitter_to_vector::trajectory_vector>("walking_trajectory_vector");
 		walking_position_vector_cli_ = nh_.serviceClient<traj_splitter_to_vector::trajectory_vector>("walking_position_vector");
-		force_sub_ = nh_.subscribe(/*"/atlas/force_torque_sensors"*/"/filtered_contacts",100,&walk_legs_service::force_CB,this);
+		force_sub_ = nh_.subscribe("/atlas/force_torque_sensors",100,&walk_legs_service::force_CB,this);
 
 		while(force_sub_.getNumPublishers() == 0){
 			std::string c = std::string("Waiting for the ")+ force_sub_.getTopic() + " topic";
