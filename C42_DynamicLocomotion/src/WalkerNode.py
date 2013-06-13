@@ -16,7 +16,7 @@ class WalkerNode:
         pass
     
     def PrintHelp(self):
-        print "Usage: WalkingMode.py <Option> <Parameter1> <Parameter2> ..."
+        print "Usage: WalkingMode.py <Option>"
         print "Options are:"
         print " CD for Dynamic Continuous mode"
         print " QS for Discrete Quasi-Static mode"
@@ -25,11 +25,6 @@ class WalkerNode:
         print " AP for Align Pose mode"
         print " Rot for Rotation"
         print " Trans for Translation"
-        print "Parameters:"
-        print " For Rot an angle of rotation in Radians is expected as Parameter 1"
-        print " For Trans a Translation in local coordinates (relative to the Robot's center) is expected:"
-        print "    <Parameter1> - X coordinate for translation"
-        print "    <Parameter2> - Y coordinate for translation"
 
 if __name__ == '__main__':
     wn = WalkerNode()
@@ -55,25 +50,37 @@ if __name__ == '__main__':
         rospy.init_node('WalkerNode_Continuous')       
         walkingModeChooser = WalkingModeChooser(walkingMode)
         node = DynamicLocomotion("WalkerNode_Continuous",walkingModeChooser)
-        print "WalkerNode_Continuous TASK created"
+        print "WalkerNode_Continuous created"
         rospy.spin()
     elif walkingMode in ('QS','DD'):
         rospy.init_node('WalkerNode_Discrete')       
         walkingModeChooser = WalkingModeChooser(walkingMode)
         node = DynamicLocomotion("WalkerNode_Discrete",walkingModeChooser)
-        print "WalkerNode_Discrete TASK created"
+        print "WalkerNode_Discrete created"
         rospy.spin()
     elif walkingMode in ('DW'):
         rospy.init_node('WalkerNode_DW')       
         walkingModeChooser = WalkingModeChooser(walkingMode)
         node = DynamicLocomotion("WalkerNode_DW",walkingModeChooser)
-        print "WalkerNode walk on four TASK created"
+        print "WalkerNode_DW created"
         rospy.spin()
     elif walkingMode in ('AP'):
         rospy.init_node('WalkerNode_AP')       
         walkingModeChooser = WalkingModeChooser(walkingMode)
         node = DynamicLocomotion("WalkerNode_AP",walkingModeChooser)
-        print "WalkerNode Discrete Aline Pose mode TASK created"
+        print "WalkerNode_AP created"
+        rospy.spin()
+    elif walkingMode in ('Rot'):
+        rospy.init_node('WalkerNode_Rotation')
+        walkingModeChooser = WalkingModeChooser(walkingMode)
+        node = DynamicLocomotion("WalkerNode_Rotation",walkingModeChooser)
+        print "WalkerNode_Rotation created"
+        rospy.spin()
+    elif walkingMode in ('Trans'):
+        rospy.init_node('WalkerNode_Translation')
+        walkingModeChooser = WalkingModeChooser(walkingMode)
+        node = DynamicLocomotion("WalkerNode_Translation",walkingModeChooser)
+        print "WalkerNode_Translation created"
         rospy.spin()
     else:
         wn.PrintHelp()
