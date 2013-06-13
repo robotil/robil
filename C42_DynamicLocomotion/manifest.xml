@@ -15,6 +15,7 @@
   <depend package="C0_RobilTask"/>
   <depend package="C31_PathPlanner"/>
   <depend package="C25_GlobalPosition"/>
+  <depend package="C42_State"/>
   <depend package="geometry_msgs"/>
   <depend package="nav_msgs"/>
   <depend package="tf"/>
