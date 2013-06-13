@@ -1,7 +1,8 @@
 <plan descriptions="./plans/TaskDescriptions.xml">
    <par name="event3" x="641.9687994535843" y="93.68107190173171" collapsed="false" id="9928cfff-8ff2-443d-a88d-0e54d8d1d218"> 
-         <par name="perception" x="489.9839509687358" y="205.57501129567098" collapsed="true" id="c802ab1d-8856-41f5-a6c7-470899b39bd8"> 
+         <par name="perception" x="489.9839509687358" y="205.57501129567098" collapsed="false" id="c802ab1d-8856-41f5-a6c7-470899b39bd8"> 
                <tsk name="LocalizationTrack" x="343.98395096873605" y="263.5750112956709" test_time="-1" test_result="true" id="c81489ed-9523-47f7-b513-cc2093de77bf" />
+               <tsk name="Fell" x="477.5" y="298.5" test_time="0" test_result="true" id="10c9f532-8929-4422-9346-7e1100761c6f" />
                <tsk name="PathPlanning" x="545.5721862628538" y="316.5750112956714" test_time="-1" test_result="true" id="66b23e3b-216a-404d-ba5d-d3bc9d8e3fac" />
          </par>
          <par name="ProgressControl" x="690.2187994535843" y="248.68107190173166" collapsed="false" id="9e77bb4a-aa3d-4e12-b838-dc22dfc868f1"> 
