@@ -6,12 +6,15 @@ run the node with the DRC simulation
 to put Atlas on Drc vehicle you can launch:
 roslaunch C67_CarManipulation C67_drc.launch
 
+then to put Atlas in driver seat:
+rostopic pub --once /drc_world/robot_enter_car geometry_msgs/Pose '{position: {}}'
+or
+rostopic pub --once /drc_world/robot_enter_car geometry_msgs/Pose '{position: {y: 0, z: -0.1}}'
+
 you need to run C45 launcher and dependencies:
 rosrun C42_DRCSim2_tools foot_contact_filter.py
 roslaunch C45_PostureControl C45_PostureControl.launch
 
-then to put Atlas in driver seat:
-rostopic pub --once /drc_world/robot_enter_car geometry_msgs/Pose '{position: {}}'
 ------------------------------------------------------------------------------
 
 to test one of the following action servers: GripSteeringWheel, CalibrateWheel, PlaceFeetOnPedals, CalibratePedals,
