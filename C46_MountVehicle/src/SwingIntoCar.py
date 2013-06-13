@@ -4,6 +4,7 @@ import math, rospy, os, rosparam
 import tf
 from sensor_msgs.msg import JointState
 from nav_msgs.msg import Odometry
+from C25_GlobalPosition.msg import C25C0_ROP
 from numpy import zeros, array, linspace, arange
 import numpy as np
 from JointController import JointCommands_msg_handler
@@ -63,7 +64,7 @@ class STC_Controller(object):
         # Initialize robot state listener
         self.RS = robot_state(self._jnt_names)
         self.MsgSub = rospy.Subscriber('/'+self._robot_name+'/atlas_state',AtlasState,self.RS_cb)
-        self.OdomSub = rospy.Subscriber('/ground_truth_odom',Odometry,self.Odom_cb)
+        self.OdomSub = rospy.Subscriber('/C25/publish',C25C0_ROP,self.Odom_cb)
         self.GlobalPos = 0
         self.GlobalOri = 0
 
@@ -102,8 +103,8 @@ class STC_Controller(object):
         self.RS.UpdateState(msg)
 
     def Odom_cb(self,msg):
-        self.GlobalPos = msg.pose.pose.position
-        self.GlobalOri = msg.pose.pose.orientation
+        self.GlobalPos = msg.pose.pose.pose.position
+        self.GlobalOri = msg.pose.pose.pose.orientation
 
     def ResetPose(self):
         self.JC.set_all_pos([0]*28)
