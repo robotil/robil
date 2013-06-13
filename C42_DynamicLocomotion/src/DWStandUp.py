@@ -38,8 +38,8 @@ class DWStandUp(RobilTask):
         rospy.loginfo("DynamicLocomotion, task: %s" % ("DW Stand Up") )
         self._Controller.StandUp()
         # if self._Controller.RotateToOri(Bearing):
-        #     print("SUCCESS!!")
-        #     return RTResult_SUCCESSED("Finished in Success")
+        print("SUCCESS!!")
+        return RTResult_SUCCESSED("Finished in Success")
         # else:
         #     print("FAIL")
         #     return RTResult(RobilTask_FAULT, "", "Did not end in success", False) 
