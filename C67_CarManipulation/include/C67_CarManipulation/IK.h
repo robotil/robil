@@ -94,6 +94,7 @@ IkSolution rIk5Dof(RPY target);
 IkSolution lIk5Dof(RPY target); 
 IkSolution rScanRPY(double mq1, double mq2, double mq3, RPY target, double error);
 IkSolution lScanRPY(double mq1, double mq2, double mq3, RPY target, double error);
+IkSolution ScanRPY2(double mq1, double mq2, double mq3, RPY target, double error, IkSolution origin);
 double RpyError(RPY R1, RPY R2);
 IkSolution rSearchSolution(double mq1, double mq2, double mq3, RPY target);
 IkSolution lSearchSolution(double mq1, double mq2, double mq3, RPY target);
@@ -103,5 +104,6 @@ RPY rPose(double mq1,double mq2,double mq3, IkSolution ik);
 RPY lPose(double mq1,double mq2,double mq3, IkSolution ik);
 void rFindAltSolution(double &mpx, double &mpy, double &mpz);
 void lFindAltSolution(double &mpx, double &mpy, double &mpz);
+double MaxDisp(IkSolution Ik1, IkSolution Ik2);
 
 #endif
