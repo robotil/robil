@@ -17,6 +17,7 @@
 #include "std_msgs/Empty.h"
 #include  "std_srvs/Empty.h"
 #include "geometry_msgs/PoseWithCovarianceStamped.h"
+#include "C25_GlobalPosition/C25BDI.h"
 #include <nav_msgs/Odometry.h>
 #include <sensor_msgs/Imu.h>
 //#include <C21_VisionAndLidar/C21_C22.h>
@@ -110,17 +111,21 @@ public:
 	  }
 
 
-	  bool BDIProccess(std_srvs::Empty::Response  &req,std_srvs::Empty::Response &res ){
+	  bool BDIProccess(C25_GlobalPosition::C25BDI::Request  &req,C25_GlobalPosition::C25BDI::Response &res ){
 		  if(switch_){
-			  if(switch2_){
+			  if(req.state.data==0){
 					switch2_=false;
 					//bdi_sub.shutdown();
 					//pos_sub=nh_.subscribe("/robot_pose_ekf/odom",1,&C25_Node::callback,this);
 			   }else{
+				   if(req.state.data==1){
 					switch2_=true;
+				   }
 					//pos_sub.shutdown();
 					//bdi_sub= nh_.subscribe("/atlas/atlas_sim_interface_state", 1, &C25_Node::bdi_callback, this);
 			   }
+		  }else{
+			  return false;
 		  }
 		  return true;
 	  }
