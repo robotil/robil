@@ -662,8 +662,8 @@ sync( MySyncPolicy( 10 ), left_image_sub_,pointcloud)
   objectDimensionsPublisher = nh.advertise<C23_ObjectRecognition::C23C0_ODIM>("C23/object_dimensions", 1);
   objectGlobalPositionPublisher = nh.advertise<C23_ObjectRecognition::C23C0_GP>("C23/object_globalPosition", 1);
   c21client = nh.serviceClient<C21_VisionAndLidar::C21_obj>("C21/C23"); //Subscribe to the service node to get the absolute coordinates of a point
-  c23_start_posecontroller = nh.serviceClient<std_srvs::Empty>("/PoseController/start");
-  c23_stop_posecontroller = nh.serviceClient<std_srvs::Empty>("/PoseController/stop");
+  //c23_start_posecontroller = nh.serviceClient<std_srvs::Empty>("/PoseController/start");
+ // c23_stop_posecontroller = nh.serviceClient<std_srvs::Empty>("/PoseController/stop");
   orientation_service=nh.advertiseService("C23/C66", &C23_Detector::process_orientation, this);
   ROS_INFO("Started...");
   // gates = new vector<Gate*>();
@@ -880,6 +880,7 @@ if(!target.compare("OutsideSteeringWheel")) {
 	  }
 	  void C23_Detector::callback(const sensor_msgs::ImageConstPtr& msg,const sensor_msgs::PointCloud2::ConstPtr &cloud)
 	  {
+	      cout << "Detector callback .. " << endl;
 	    // ROS_INFO("Receiving image..");
 	    Mat srcImg = fromSensorMsg(msg);
 	    bool res;
@@ -1186,7 +1187,9 @@ if(!target.compare("OutsideSteeringWheel")) {
 	    double x1,y1,z1,x2,y2,z2;
 	    bool a_res =false;
 	    
-	    if(leftSum>rightSum){
+	    double difference = abs(leftSum - rightSum);
+	    
+	    if(leftSum>rightSum && difference > 10){
 	      ROS_INFO("RIGHT ARROW");
 	      
 	      a_res = pictureCoordinatesToGlobalPosition(arrowBox.x, arrowBox.y,arrowBox.x + arrowBox.height, arrowBox.y + arrowBox.width, &x1, &y1,&z1,-1,-4);
@@ -1198,7 +1201,7 @@ if(!target.compare("OutsideSteeringWheel")) {
 	      this->y2 = y2;
 	      
 	    }
-	    else{
+	    else if (leftSum<rightSum && difference > 10){
 	      ROS_INFO("LEFT ARROW");
 	      res = true;
 	      a_res = pictureCoordinatesToGlobalPosition(arrowBox.x, arrowBox.y,arrowBox.x + arrowBox.height, arrowBox.y + arrowBox.width, &x1, &y1,&z1,-1,+4);
@@ -2128,12 +2131,14 @@ if(!target.compare("OutsideSteeringWheel")) {
 	  bool C23_Detector::detectCar(Mat srcImg, const sensor_msgs::PointCloud2::ConstPtr &cloud) {
 	    	    
 	    //Define the service client to be accessed
+	    cout << "I'm in car .." << endl;
 	    C21_VisionAndLidar::C21_obj c21srv;
 	    
 	    pcl::PointCloud<pcl::PointXYZ>pclcloud;
 	    pcl::fromROSMsg<pcl::PointXYZ>(*cloud,pclcloud);
 	    
 	    _generalDetector.detect(srcImg);
+	   
 	    cout << "Done detection" << endl;
 	    // 215,365,182,114
 	    /*_generalDetector._x = 215;
@@ -2143,15 +2148,17 @@ if(!target.compare("OutsideSteeringWheel")) {
 	     */
 	    GeneralDetector::CAR_TARGET car_target = GeneralDetector::NONE;
 	    
-	    Rect carRect(_generalDetector._x, _generalDetector._y, _generalDetector._width, _generalDetector._height);
-	    Mat carImage(srcImg, carRect);
-	    imshow("Car patch", carImage);
-	    waitKey(0);
+	    
 	    
 	    Point2f minImagePoint;
 	    minImagePoint.x = 0;
 	    minImagePoint.y = 0;
 	    if(_generalDetector._x != -1) {
+	      Rect carRect(_generalDetector._x, _generalDetector._y, _generalDetector._width, _generalDetector._height);
+	      Mat carImage(srcImg, carRect);
+	      imshow("Car patch", carImage);
+	      waitKey(0);
+	      
 	      x = _generalDetector._x;
 	      y = _generalDetector._y;
 	      width = _generalDetector._width;
