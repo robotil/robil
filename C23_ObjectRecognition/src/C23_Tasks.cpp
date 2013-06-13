@@ -135,12 +135,15 @@ public:
 		}
 		string target = getValueFromArgument(args, "target");
 		bool res;
-			res = _detector->detect(target);
-			if (_detector->x != -1) {
-          return TaskResult(SUCCESS, "OK");
-			} else {
-          return TaskResult(FAULT, "Object isn't detected");
+        res = _detector->detect(target);
+        while (!isPreempt()) {
+			
+			if (!(_detector->_found)) {
+                return TaskResult(FAULT, "Object isn't detected");
+			
+          
 			}
+        }
 		
 		
 	}
