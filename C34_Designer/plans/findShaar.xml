@@ -1,25 +1,11 @@
 <plan descriptions="./plans/TaskDescriptions.xml">
-   <par name="skill4" x="1130.4316666299474" y="102.73670354126537" collapsed="false" id="38e95426-0932-40d2-aefa-270a3dcd9298"> 
-         <tsk name="LocalizationTrack" x="911.4999999999999" y="186.83333333333331" test_time="0" test_result="true" id="7267f009-7019-4192-8f5a-16fea12b556e" />
-         <seq name="Mission" x="1330.4316666299485" y="183.73670354126511" collapsed="false" id="e6b9d1db-cbf5-4efb-8b22-f2c2e6130a3e"> 
-               <seq name="DriveMission" x="1369.169761868044" y="340.40337020793197" collapsed="false" id="19ac91a7-5f3b-47d5-a2bb-9ef59c48c5ae"> 
-                     <seq name="EnterToCar" x="693.9304134971179" y="469.1953501578072" collapsed="false" id="6858f335-90b6-4a6f-90c6-90a5e8c43825"> 
-                           <seq name="SearchObjectsFromInside" x="486.6209346209291" y="577.2650405150357" collapsed="false" id="e3a15675-85ff-4ceb-a59a-13b98e908d6f"> 
-                                 <tsk name="searchObject(target=Gate )" x="446.5098235098161" y="658.0428182928135" test_time="0" test_result="true" id="f49d86d1-1c85-4f22-b006-e83f220eafbb" />
-                           </seq>
-                     </seq>
-                     <seq name="InCar" x="1318.411520109801" y="480.5535533581136" collapsed="false" id="cee78399-ac08-4713-9a85-542b10c3e7ff"> 
-                           <par name="Driving" x="1273.4115201097954" y="553.5315753361356" collapsed="false" id="6207a22b-f609-4f49-9579-2e83f0c45e36"> 
-                                 <tsk name="PathPlanning" x="1039.411520109798" y="787.5315753361359" test_time="0" test_result="true" id="32da76e3-cd3b-456e-84d4-9dfe611b91c6" />
-                              <dec name="!L!" x="1467.697234395507" y="643.5315753361359"> 
-                                    <seq name="Driving" x="1603.6203113185895" y="838.0150918196535" collapsed="false" id="3121acdd-f660-4d53-96b2-47029c756b6f"> 
-                                          <tsk name="PathPlanningFocus(target=Gate)" x="1208.9962511682072" y="931.9248662557421" test_time="0" test_result="true" id="5668a95a-a827-472a-bae2-b4fff00a36a7" />
-                                          <tsk name="DynamicLocomotion" x="1522.166666666666" y="1047.1666666666663" test_time="0" test_result="true" id="24952ed7-8c71-403f-9557-4e0854e3d4e2" />
-                                    </seq>
-                              </dec>
-                           </par>
-                     </seq>
-               </seq>
+   <par name="skill4" x="509.6935713918517" y="68.73670354126503" collapsed="false" id="e067b8a4-9731-4029-b2b5-7e2fbef41270"> 
+         <tsk name="LocalizationTrack" x="332.01190476190425" y="135.33333333333297" test_time="0" test_result="true" id="adbf1a28-0a56-4cdb-937c-3a56fb84546c" />
+         <tsk name="PathPlanning" x="461.1734248717023" y="137.28157533613557" test_time="0" test_result="true" id="cf684c9e-9207-4dfb-8525-75a5ce9499fd" />
+         <seq name="Mission" x="607.1935713918529" y="153.48670354126477" collapsed="false" id="e7a44ffe-9705-4ca7-93f9-0bee7db7b56d"> 
+               <tsk name="searchObject(target=Gate )" x="382.02172827172046" y="354.0428182928132" test_time="0" test_result="true" id="a32132fe-26f1-40d0-ab18-77d29cc31a4b" />
+               <tsk name="PathPlanningFocus(target=Gate)" x="522.0081559301116" y="441.6748662557418" test_time="0" test_result="true" id="c00011eb-e9f3-430e-87f7-95f450b344d3" />
+               <tsk name="WalkerNode_Continuous" x="733.9285714285704" y="424.41666666666595" test_time="0" test_result="true" id="95f848c9-6b48-4196-98b0-41654e18293c" />
          </seq>
    </par>
 </plan>

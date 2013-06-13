@@ -20,8 +20,9 @@ class manipulate_test(object):
    #     self._asi_com_pub.publish(self._asi_command)
 
     def stand(self,joints):
-        self._asi_command.behavior = AtlasSimInterfaceCommand.MANIPULATE
-	#self._asi_command.behavior = AtlasSimInterfaceCommand.STAND        
+        #self._asi_command.behavior = AtlasSimInterfaceCommand.MANIPULATE
+	#self._asi_command.behavior = AtlasSimInterfaceCommand.STAND 
+	self._asi_command.behavior = AtlasSimInterfaceCommand.WALK               
 	self._asi_command.k_effort = [0 for k in self._jnt_names]
         for k in joints:
             self._asi_command.k_effort[k] = 255
