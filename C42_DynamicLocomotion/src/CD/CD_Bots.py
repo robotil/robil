@@ -140,6 +140,7 @@ class CD_PhantomRobot(CD_Robot):
     def AlignToPath(self):
         turningAngle = self._LPP.GetTargetYaw() - self._Odometer.GetYaw()
         self._Pivot(turningAngle)
+        self._AddIdleSteps()
 
     def _PrepareStepData(self):
         self._index  += 1
@@ -206,7 +207,7 @@ class CD_PhantomRobot(CD_Robot):
         return self._TranslateStepData(stepData)
     
     def _AddIdleSteps(self):
-        for i in range(4):
+        for i in range(2):
             self._StepQueue.append(self._IdleStep())
             
     def _TurnStep(self,yaw):
