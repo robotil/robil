@@ -1,4 +1,4 @@
-V0.0.1.95
+V0.0.1.96
 ===========================================================
 C0_Math     0.1
 C0_RobilTask     0.5
@@ -13,7 +13,7 @@ C22_transformations     0.7
 C23_ObjectRecognition     0.36
 C24_ObstacleDetection     0.6
 C25_AtlasFell     0.2
-C25_GlobalPosition     0.8
+C25_GlobalPosition     0.9
 C25_ekf     0.2
 C27_ScorePerception     0.1
 C31_PathPlanner     0.35
