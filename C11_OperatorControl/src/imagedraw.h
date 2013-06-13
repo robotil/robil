@@ -61,6 +61,7 @@ private:
 	C11_Node C11node;
 	CTcpConnection *pCTcpConnection;
 	CTcpConnection *pImageCTcpConnection;
+	CTcpConnection *pDesignerCTcpConnection;
 	int ImageAreaCount;
 	QMap<int,CGraphicsView*> ImageAreas;
 	bool IsUpdateCurrentImg;	//don't create new image, update the current

@@ -51,6 +51,11 @@ void C11Main::SetImgTcp(CTcpServer* ptcpServer)
   pImageCTcpServer = ptcpServer;
 }
 
+void C11Main::SetDesignerTcp(CTcpServer* ptcpServer)
+{
+  pDesignerCTcpServer = ptcpServer;
+}
+
 void C11Main::PushImage(QImage img)
 {
   emit SigOnImageSend(img);
@@ -129,8 +134,10 @@ void C11Main::SltOnExecutionStatusChange(int status)
 void C11Main::SltOnSendExecuterStack(QString str)
 {
 //	cout<<"C11Main::SltOnSendExecuterStack \n";
-	pCTcpServer->SendExecuterStack(str);
+//	pCTcpServer->SendExecuterStack(str);
 //	pC11Node->SetReleased();
+
+  pDesignerCTcpServer->SendExecuterStack(str);
 }
 
 void C11Main::SltOnVRCScoreData(double timeSec, int competionScore, int falls, QString message)
