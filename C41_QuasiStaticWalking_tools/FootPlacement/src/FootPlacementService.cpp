@@ -102,6 +102,11 @@ void FootPlacementService::publishExtremeSlopeMsg() {
 	walkNotificationPublisher.publish(emptyMsg);
 }
 
+/** ---------- DAN ERUS: task for extreme_slope testing ----------- **/
+#include "FTTask.hpp"
+/** --------------------------------------------------------------- **/
+
+
 /*
  * initiating the node and the service
  */
@@ -109,6 +114,11 @@ int main(int argc, char **argv) {
 	ros::init(argc, argv, "FootPlacementNode");
 	FootPlacementService footPlacementService;
 	ROS_INFO("FOOTPLACEMENT SERVICE READY");
+	
+	/** ---------- DAN ERUS: task for extreme_slope testing ----------- **/
+	TaskCheckExtremeSlope checkExtremeSlope;
+	/** --------------------------------------------------------------- **/
+
 	ros::spin();
 	return 0;
 }
