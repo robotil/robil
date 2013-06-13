@@ -28,7 +28,7 @@ class WalkingMode(object):
     def Stop(self):
         self._LPP.Stop()
         for subscriber in self._Subscribers.itervalues():
-            subscriber.unregister
+            subscriber.unregister()
         self._Subscribers.clear()
         return self._WalkingModeStateMachine.PerformTransition("Stop")
     
