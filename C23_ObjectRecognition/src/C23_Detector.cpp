@@ -2221,19 +2221,19 @@ it_(nh),
 					      
 					      
 					      if (depth!=depth)//If all values are nan then it will stop
-{
-  //ROS_INFO("Nan values obtained. Cannot determine the distance to the car");
-  continue;
-}
+					      {
+						//ROS_INFO("Nan values obtained. Cannot determine the distance to the car");
+						continue;
+					      }
 
-nanColumnFlag = false;
+					      nanColumnFlag = false;
 
-if(depth < minPoint.z+THRESHOLD && depth > minPoint.z-THRESHOLD/2) {
-  cout<<"Depth: "<<depth<<endl;
-  x1 = minImagePoint.x+i;
-  //cout<<"X1: "<<x1<<endl;
-  flag = 1;
-}
+					      if(depth < minPoint.z+THRESHOLD && depth > minPoint.z-THRESHOLD/2) {
+						cout<<"Depth: "<<depth<<endl;
+						x1 = minImagePoint.x+i;
+						//cout<<"X1: "<<x1<<endl;
+						flag = 1;
+					      }
 					    }
 					    if(nanColumnFlag) nanColumnCounter++;
 						 
