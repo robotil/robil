@@ -1,11 +1,11 @@
-V0.0.2.3
+V0.0.2.4
 ===========================================================
 C0_Math     0.1
 C0_RobilTask     0.5
 C0_Scripts     0.27
 C10_Common     0.5
-C11_Agent     0.28
-C11_OperatorControl     0.33
+C11_Agent     0.29
+C11_OperatorControl     0.34
 C21_VisionAndLidar     0.22
 C22_CompactGroundRecognitionAndMapping     0.11
 C22_GroundRecognitionAndMapping     0.19
@@ -18,7 +18,7 @@ C25_ekf     0.2
 C27_ScorePerception     0.1
 C31_PathPlanner     0.36
 C34_BTExecuter     0.8
-C34_Designer     0.43
+C34_Designer     0.44
 C34_Executer     0.8
 C35_Monitoring     0.15
 C41_BodyControl     0.1
