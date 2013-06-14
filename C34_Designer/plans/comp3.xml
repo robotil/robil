@@ -38,7 +38,7 @@
                                                                            <tsk name="PushHMI(data=panoramic_image)" x="-131.95066113050822" y="818.6603534625054" test_time="0" test_result="true" id="a780873b-e82b-4a9b-a8f5-0022a6e1d1f1" />
                                                                            <tsk name="PushHMI(data=occupancy_grid)" x="-84.95066113050908" y="857.6603534625066" test_time="0" test_result="true" id="81f4760b-8b25-40c0-8f4d-3dc7b32e4cf1" />
                                                                            <tsk name="PushHMI(data=path)" x="15.049338869490384" y="899.6603534625068" test_time="0" test_result="true" id="297d56f1-f6fb-4105-abe6-0f8908e6ccc4" />
-                                                                           <tsk name="HMIResponce" x="177.0493388694902" y="896.6603534625068" test_time="0" test_result="true" id="5ca004f6-1ecd-489a-9965-40379c27e109" />
+                                                                           <tsk name="HMIResponse" x="177.0493388694902" y="896.6603534625068" test_time="0" test_result="true" id="5ca004f6-1ecd-489a-9965-40379c27e109" />
                                                                      </seq>
                                                                      <tsk name="TimeoutMonitor(threshold=50)" x="222.04933886949033" y="805.6603534625054" test_time="0" test_result="true" id="2cd85f51-bed8-48e7-bc3f-9861c75c68d6" />
                                                                </par>
@@ -56,7 +56,7 @@
                                                                               <tsk name="PushHMI(data=panoramic_image)" x="-131.95066113050822" y="818.6603534625054" test_time="0" test_result="true" id="a780873b-e82b-4a9b-a8f5-0022a6e1d1f1" />
                                                                               <tsk name="PushHMI(data=occupancy_grid)" x="-84.95066113050908" y="857.6603534625066" test_time="0" test_result="true" id="81f4760b-8b25-40c0-8f4d-3dc7b32e4cf1" />
                                                                               <tsk name="PushHMI(data=path)" x="15.049338869490384" y="899.6603534625068" test_time="0" test_result="true" id="297d56f1-f6fb-4105-abe6-0f8908e6ccc4" />
-                                                                              <tsk name="HMIResponce" x="177.0493388694902" y="896.6603534625068" test_time="0" test_result="true" id="5ca004f6-1ecd-489a-9965-40379c27e109" />
+                                                                              <tsk name="HMIResponse" x="177.0493388694902" y="896.6603534625068" test_time="0" test_result="true" id="5ca004f6-1ecd-489a-9965-40379c27e109" />
                                                                         </seq>
                                                                         <tsk name="TimeoutMonitor(threshold=50)" x="222.04933886949033" y="805.6603534625054" test_time="0" test_result="true" id="2cd85f51-bed8-48e7-bc3f-9861c75c68d6" />
                                                                   </par>
@@ -80,7 +80,7 @@
                                                                            <par name="TimeControl" x="789.3942065976735" y="816.6289268044815" collapsed="false" id="9e044800-7611-45ce-b35d-7ec572c03e03"> 
                                                                                  <seq name="OperatorRequest" x="720.8942065976732" y="885.4622601378145" collapsed="false" id="51403984-43e2-43bf-9140-1e5b451ecbb2"> 
                                                                                        <tsk name="PushHMI(data=panoramic_image)" x="685.8942065976717" y="930.462260137815" test_time="0" test_result="true" id="42a40e34-9b3e-4f90-99b3-8e50bb65dad1" />
-                                                                                       <tsk name="HMIResponce" x="827.8942065976694" y="964.462260137815" test_time="0" test_result="true" id="47697fe9-1b84-45c2-9887-899fe0ed6664" />
+                                                                                       <tsk name="HMIResponse" x="827.8942065976694" y="964.462260137815" test_time="0" test_result="true" id="47697fe9-1b84-45c2-9887-899fe0ed6664" />
                                                                                  </seq>
                                                                                  <tsk name="TimeoutMonitor(threshold=50)" x="881.0608732643379" y="889.1289268044833" test_time="0" test_result="true" id="9a697da0-250a-4743-8336-d9d6b1996d50" />
                                                                            </par>
@@ -128,7 +128,7 @@
                                                                            <tsk name="PushHMI(data=panoramic_image)" x="155.7279102980636" y="827.5889248910802" test_time="0" test_result="true" id="7ff50e11-2a2c-4eb0-ab04-cad47728b48f" />
                                                                            <tsk name="PushHMI(data=occupancy_grid)" x="202.7279102980628" y="866.5889248910813" test_time="0" test_result="true" id="4921fb09-0e2d-44fb-ba40-b5c8d8392a2a" />
                                                                            <tsk name="PushHMI(data=path)" x="302.72791029806234" y="908.5889248910815" test_time="0" test_result="true" id="af702fc6-3d71-4995-8abb-3efc2af2ee28" />
-                                                                           <tsk name="HMIResponce" x="464.727910298062" y="905.5889248910815" test_time="0" test_result="true" id="d2fabd11-5558-4b21-8bb4-67b4b0148b81" />
+                                                                           <tsk name="HMIResponse" x="464.727910298062" y="905.5889248910815" test_time="0" test_result="true" id="d2fabd11-5558-4b21-8bb4-67b4b0148b81" />
                                                                      </seq>
                                                                      <tsk name="TimeoutMonitor(threshold=50)" x="509.7279102980622" y="814.5889248910802" test_time="0" test_result="true" id="7960af9f-5c17-4577-aacb-96a5824f964f" />
                                                                </par>
@@ -146,7 +146,7 @@
                                                                               <tsk name="PushHMI(data=panoramic_image)" x="155.7279102980636" y="827.5889248910802" test_time="0" test_result="true" id="7ff50e11-2a2c-4eb0-ab04-cad47728b48f" />
                                                                               <tsk name="PushHMI(data=occupancy_grid)" x="202.7279102980628" y="866.5889248910813" test_time="0" test_result="true" id="4921fb09-0e2d-44fb-ba40-b5c8d8392a2a" />
                                                                               <tsk name="PushHMI(data=path)" x="302.72791029806234" y="908.5889248910815" test_time="0" test_result="true" id="af702fc6-3d71-4995-8abb-3efc2af2ee28" />
-                                                                              <tsk name="HMIResponce" x="464.727910298062" y="905.5889248910815" test_time="0" test_result="true" id="d2fabd11-5558-4b21-8bb4-67b4b0148b81" />
+                                                                              <tsk name="HMIResponse" x="464.727910298062" y="905.5889248910815" test_time="0" test_result="true" id="d2fabd11-5558-4b21-8bb4-67b4b0148b81" />
                                                                         </seq>
                                                                         <tsk name="TimeoutMonitor(threshold=50)" x="509.7279102980622" y="814.5889248910802" test_time="0" test_result="true" id="7960af9f-5c17-4577-aacb-96a5824f964f" />
                                                                   </par>
@@ -170,7 +170,7 @@
                                                                            <par name="TimeControl" x="1077.0727780262444" y="825.5574982330562" collapsed="false" id="f54ca851-b0f7-4dd6-a191-c8ef59f69a4f"> 
                                                                                  <seq name="OperatorRequest" x="1008.5727780262432" y="894.3908315663892" collapsed="false" id="30ea9531-ef96-44c7-9c4d-b59c05f593b1"> 
                                                                                        <tsk name="PushHMI(data=panoramic_image)" x="973.5727780262414" y="939.3908315663897" test_time="0" test_result="true" id="e7b977dd-da49-4e2d-a59c-d8fe39c41ea0" />
-                                                                                       <tsk name="HMIResponce" x="1115.5727780262398" y="973.3908315663897" test_time="0" test_result="true" id="e551ab1a-1bdb-4502-a50f-ca43905fba5d" />
+                                                                                       <tsk name="HMIResponse" x="1115.5727780262398" y="973.3908315663897" test_time="0" test_result="true" id="e551ab1a-1bdb-4502-a50f-ca43905fba5d" />
                                                                                  </seq>
                                                                                  <tsk name="TimeoutMonitor(threshold=50)" x="1168.7394446929093" y="898.057498233058" test_time="0" test_result="true" id="f6950620-d4fb-4aa5-8551-f904c746a126" />
                                                                            </par>
