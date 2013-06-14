@@ -33,7 +33,7 @@ C42_ZMPWalk     0.8
 C43_LocalBodyCOM     0.2
 C43_LocalBodyCOM_tools     0.1
 C43_LocalBodyPVA     0.2
-C45_PostureControl     0.13
+C45_PostureControl     0.14
 C45_PostureControl_tools     0.4
 C46_MountVehicle     0.11
 C47_DismountVehicle     0.3
