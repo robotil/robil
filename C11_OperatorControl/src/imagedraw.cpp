@@ -230,6 +230,7 @@ void ImageDraw::OnVRCScoreData(double timeSec, int competionScore, int falls, QS
   ui.lblSimTime->setText(simTime.toString());
   ui.lblScoreData->setText(QString::number(competionScore));
   ui.lblFallsData->setText(QString::number(falls));
+  ui.lblMsg->setText(message);
   update();
 }
 
