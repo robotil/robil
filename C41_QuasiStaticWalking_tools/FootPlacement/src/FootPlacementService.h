@@ -22,8 +22,8 @@
 
 #define SLOPE_WEIGHT 5
 #define DISTANCE_WEIGHT 5
-#define HEIGHT_WEIGHT 5
-#define DIRECTION_WEIGHT 5
+#define HEIGHT_WEIGHT 1
+#define DIRECTION_WEIGHT 10
 #define GROUND_TYPE_WEIGHT 5
 
 #define LEFT 0
@@ -32,12 +32,15 @@
 #define EXTREME_SLOPE 0.174532925
 #define EXTREME_SLOPE_COR 0.5
 
-#define MIN_DIST_FROM_TARGET 1
+#define START_TURN_DISTANCE 1.5
+
+#define MIN_DIST_FROM_TARGET 0.5
 
 #define USE_C22 0
 
 #define PI 3.14159265
-#define MAX_ORIENTATION_CHANGE PI/4
+#define MAX_ORIENTATION_CHANGE PI/18
+
 
 
 class FootPlacementService {
@@ -105,7 +108,7 @@ private:
 			const double &directionWeight);
 
 
-
+	void printResult(std::vector<FootPlacement::Foot_Placement_data>& foot_placement_path);
 
 	void publishExtremeSlopeMsg();
 
