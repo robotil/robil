@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
-*/
+ */
 #include <math.h>
 #include <ros/ros.h>
 #include <ros/subscribe_options.h>
@@ -31,6 +31,8 @@
 #include <C67_CarManipulation/IK.h>
 #include <C67_CarManipulation/Path.h>
 #include <C67_CarManipulation/arm_path.h>
+#include <PoseController/hand_movement.h>
+#include <std_srvs/Empty.h>
 
 ros::Publisher pubAtlasCommand;
 atlas_msgs::AtlasCommand ac;
@@ -38,15 +40,18 @@ atlas_msgs::AtlasState as;
 boost::mutex mutex;
 ros::Time t0;
 const unsigned int numJoints = 28;
-
+ros::ServiceClient hand_C45_cli;
+ros::ServiceClient hand_C45_cli_start;
+ros::ServiceClient hand_C45_cli_stop;
 int	 callback_called = 0;
 RPY argTarget;
 bool use_arg = false;
 bool callBackRun = false;
 ros::NodeHandle* rosnode;
+
 void SetAtlasState(const atlas_msgs::AtlasState::ConstPtr &_as)
 {
-	
+
 
 	if (callBackRun == false)
 	{
@@ -70,7 +75,7 @@ void SetAtlasState(const atlas_msgs::AtlasState::ConstPtr &_as)
 		// print current state
 		std::cout << "Current Position:\n";
 		IkSolution IkCurrent = IkSolution(as.position[q4r],as.position[q5r],
-			as.position[q6r],	as.position[q7r], as.position[q8r], as.position[q9r]);
+				as.position[q6r],	as.position[q7r], as.position[q8r], as.position[q9r]);
 		IkCurrent.Print();	
 		RPY rCurrent = rPose(as.position[q1], as.position[q2],as.position[q3],IkCurrent);
 		rCurrent.Print();
@@ -84,14 +89,16 @@ void SetAtlasState(const atlas_msgs::AtlasState::ConstPtr &_as)
 	}
 
 
-  // uncomment to simulate state filtering
-  // usleep(1000);
-	
+	// uncomment to simulate state filtering
+	// usleep(1000);
+
 }
 bool rPath_CB(C67_CarManipulation::arm_path::Request &req,C67_CarManipulation::arm_path::Response &res){
 	int pointsNum;
 	double seconds;
-
+	hand_C45_cli = rosnode->serviceClient<PoseController::hand_movement>("/PoseController/right_hand_movement");
+	hand_C45_cli_start = rosnode->serviceClient<std_srvs::Empty>("/PoseController/start");
+	hand_C45_cli_stop = rosnode->serviceClient<std_srvs::Empty>("/PoseController/stop");
 	double dubGet[6];
 	dubGet[0] = req.PositionDestination.x ;
 	dubGet[1] = req.PositionDestination.y;
@@ -107,143 +114,148 @@ bool rPath_CB(C67_CarManipulation::arm_path::Request &req,C67_CarManipulation::a
 
 
 
-		ros::Time last_ros_time_;
-		bool wait = true;
-		while (wait)
-		{
-			last_ros_time_ = ros::Time::now();
-			if (last_ros_time_.toSec() > 0)
+	ros::Time last_ros_time_;
+	bool wait = true;
+	while (wait)
+	{
+		last_ros_time_ = ros::Time::now();
+		if (last_ros_time_.toSec() > 0)
 			wait = false;
-		}
+	}
 
-		unsigned int n = numJoints;
-		ac.position.resize(n);
-		ac.k_effort.resize(n);
-		ac.velocity.resize(n);
-		ac.effort.resize(n);
-		ac.kp_position.resize(n);
-		ac.ki_position.resize(n);
-		ac.kd_position.resize(n);
-		ac.kp_velocity.resize(n);
-		ac.i_effort_min.resize(n);
-		ac.i_effort_max.resize(n);
+	unsigned int n = numJoints;
+	ac.position.resize(n);
+	ac.k_effort.resize(n);
+	ac.velocity.resize(n);
+	ac.effort.resize(n);
+	ac.kp_position.resize(n);
+	ac.ki_position.resize(n);
+	ac.kd_position.resize(n);
+	ac.kp_velocity.resize(n);
+	ac.i_effort_min.resize(n);
+	ac.i_effort_max.resize(n);
 
 
 
-		// ros topic subscribtions
-		ros::SubscribeOptions atlasStateSo =
+	// ros topic subscribtions
+	ros::SubscribeOptions atlasStateSo =
 			ros::SubscribeOptions::create <atlas_msgs::AtlasState> (
-			"/atlas/atlas_state", 100, SetAtlasState,
-			ros::VoidPtr(), rosnode->getCallbackQueue());
+					"/atlas/atlas_state", 100, SetAtlasState,
+					ros::VoidPtr(), rosnode->getCallbackQueue());
 
-		atlasStateSo.transport_hints = ros::TransportHints().reliable().tcpNoDelay(true);
-		  ros::Subscriber subAtlasState = rosnode->subscribe(atlasStateSo);
+	atlasStateSo.transport_hints = ros::TransportHints().reliable().tcpNoDelay(true);
+	ros::Subscriber subAtlasState = rosnode->subscribe(atlasStateSo);
 
-		// ros topic publisher
-		pubAtlasCommand = rosnode->advertise<atlas_msgs::AtlasCommand>(
+	// ros topic publisher
+	pubAtlasCommand = rosnode->advertise<atlas_msgs::AtlasCommand>(
 			"/atlas/atlas_command", 100, true);
 
 
-		while (ros::ok())
-		{
-			ROS_INFO("rPath start loop");
-			ros::spinOnce();
-			/*if (callback_called == 1)
+	while (ros::ok())
+	{
+		ROS_INFO("rPath start loop");
+		ros::spinOnce();
+		/*if (callback_called == 1)
 			{
 				subJointStates.~Subscriber();
 				callback_called++;
 				break;
 			}*/
-			if (callBackRun)
+		if (callBackRun)
+		{
+			callBackRun = false;
+			// check if no arguments
+			if (!use_arg) break;
+
+			for (unsigned int i = 0; i < n; i++)
 			{
-				callBackRun = false;
-				// check if no arguments
-				if (!use_arg) break;
+				ac.kp_position[i] = as.kp_position[i];
+				ac.ki_position[i] = as.ki_position[i];
+				ac.kd_position[i] = as.kd_position[i];
+				ac.i_effort_min[i] = as.i_effort_min[i];
+				ac.i_effort_max[i] = as.i_effort_max[i];
 
-				for (unsigned int i = 0; i < n; i++)
-				{
-					ac.kp_position[i] = as.kp_position[i];
-					ac.ki_position[i] = as.ki_position[i];
-					ac.kd_position[i] = as.kd_position[i];
-					ac.i_effort_min[i] = as.i_effort_min[i];
-					ac.i_effort_max[i] = as.i_effort_max[i];
+				ac.velocity[i] = 0;
+				ac.effort[i] = 0;
+				ac.kp_velocity[i] = 0;
 
-					ac.velocity[i] = 0;
-					ac.effort[i] = 0;
-					ac.kp_velocity[i] = 0;
+			}
 
-				}
+			IkSolution IkCurrent = IkSolution(as.position[q4r], as.position[q5r], as.position[q6r], as.position[q7r],
+					as.position[q8r], as.position[q9r]);
+			IkSolution IkNext = rScanRPY(as.position[q1], as.position[q2], as.position[q3], argTarget,0.01);
 
-				IkSolution IkCurrent = IkSolution(as.position[q4r], as.position[q5r], as.position[q6r], as.position[q7r],
-						as.position[q8r], as.position[q9r]);
-				IkSolution IkNext = rScanRPY(as.position[q1], as.position[q2], as.position[q3], argTarget,0.01);
+			// check if solution valid
+			if (IkNext.valid)
+			{
+				// print solution
+				std::cout << "Solution/Command:\n";
+				IkNext.Print();
+				RPY r = rPose(as.position[q1], as.position[q2], as.position[q3], IkNext);
+				r.Print();
+				std::cout << "error: " << IkNext.error << std::endl;
+			}
+			else
+			{
+				std::cout << "No Solution.\n";
+				return false;
+			}
 
-				// check if solution valid
-				if (IkNext.valid)
-				{
-					// print solution
-					std::cout << "Solution/Command:\n";
-					IkNext.Print();
-					RPY r = rPose(as.position[q1], as.position[q2], as.position[q3], IkNext);
-					r.Print();
-					std::cout << "error: " << IkNext.error << std::endl;
-				}
-				else
-				{
-					std::cout << "No Solution.\n";
-					return false;
-				}
-				
-				pPathPoints points = pPathPoints(IkCurrent, IkNext, pointsNum);
-				
-				ac.k_effort[q4l]  = 255;
-				ac.k_effort[q5l]  = 255;
-				ac.k_effort[q6l]  = 255;
-				ac.k_effort[q7l]  = 255;
-				ac.k_effort[q8l]  = 255;
-				ac.k_effort[q9l]  = 255;
-				ac.k_effort[q4r]  = 255;
-				ac.k_effort[q5r]  = 255;
-				ac.k_effort[q6r]  = 255;
-				ac.k_effort[q7r]  = 255;
-				ac.k_effort[q8r]  = 255;
-				ac.k_effort[q9r]  = 255;
-				
-				// assign current joint angles
-				for (unsigned int j=0; j<numJoints; j++)
-				{
-					ac.position[j] = as.position[j];
-					//ac.k_effort[j]  = 255;
-					//std::cout << state[j] << " ";
-				}
+			pPathPoints points = pPathPoints(IkCurrent, IkNext, pointsNum);
 
-				for (int i=0; i<pointsNum; i++)
-				{
-					// ros::spinOnce();
+			ac.k_effort[q4l]  = 255;
+			ac.k_effort[q5l]  = 255;
+			ac.k_effort[q6l]  = 255;
+			ac.k_effort[q7l]  = 255;
+			ac.k_effort[q8l]  = 255;
+			ac.k_effort[q9l]  = 255;
+			ac.k_effort[q4r]  = 255;
+			ac.k_effort[q5r]  = 255;
+			ac.k_effort[q6r]  = 255;
+			ac.k_effort[q7r]  = 255;
+			ac.k_effort[q8r]  = 255;
+			ac.k_effort[q9r]  = 255;
 
+			// assign current joint angles
+			for (unsigned int j=0; j<numJoints; j++)
+			{
+				ac.position[j] = as.position[j];
+				//ac.k_effort[j]  = 255;
+				//std::cout << state[j] << " ";
+			}
+			///////////////////////////////////////////////
+			std_srvs::Empty empty;
+			hand_C45_cli_start.call(empty);
+			for (int i=0; i<pointsNum; i++)
+			{
+				// ros::spinOnce();
 
-					ac.position[q4r] = points.pArray[i]._q4;
-					ac.position[q5r] = points.pArray[i]._q5;
-					ac.position[q6r] = points.pArray[i]._q6;
-					ac.position[q7r] = points.pArray[i]._q7;
-					ac.position[q8r] = points.pArray[i]._q8;
-					ac.position[q9r] = points.pArray[i]._q9;
+				PoseController::hand_movement C45_r_move;
+				ac.position[q4r] = points.pArray[i]._q4; C45_r_move.request.r_arm_usy = points.pArray[i]._q4;
+				ac.position[q5r] = points.pArray[i]._q5; C45_r_move.request.r_arm_shx = points.pArray[i]._q5;
+				ac.position[q6r] = points.pArray[i]._q6; C45_r_move.request.r_arm_ely = points.pArray[i]._q6;
+				ac.position[q7r] = points.pArray[i]._q7; C45_r_move.request.r_arm_elx = points.pArray[i]._q7;
+				ac.position[q8r] = points.pArray[i]._q8; C45_r_move.request.r_arm_uwy = points.pArray[i]._q8;
+				ac.position[q9r] = points.pArray[i]._q9; C45_r_move.request.r_arm_mwx = points.pArray[i]._q9;
 
-					//ROS_INFO("");
-					//std::cout << i <<": ";
-					//points.Array[i].Print();
-					
-					pubAtlasCommand.publish(ac);
+				//ROS_INFO("");
+				//std::cout << i <<": ";
+				//points.Array[i].Print();
+				/*
+					pubAtlasCommand.publish(ac);*/ 		hand_C45_cli.call(C45_r_move);
+
 
 					ros::Duration(seconds/pointsNum).sleep();
-				}
-				break;
 			}
-			ros::Duration(0.1).sleep();
+			hand_C45_cli_stop.call(empty);
+			///////////////////////////////////////////////
+			break;
 		}
-
-		return true;
+		ros::Duration(0.1).sleep();
 	}
+
+	return true;
+}
 
 int main(int argc, char** argv)
 {
@@ -257,5 +269,5 @@ int main(int argc, char** argv)
 	ROS_INFO("rPath Ready");
 	ros::spin();
 
-  return 0;
+	return 0;
 }
