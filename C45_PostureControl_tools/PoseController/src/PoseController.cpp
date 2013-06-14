@@ -23,7 +23,7 @@ private:
 	ros::Publisher pub_atlas_commands_,pub_joint_states_;
 	ros::Subscriber joint_states_sub_, atlas_sim_int_state_sub_;
 	ros::ServiceServer hand_service, foot_service, back_service, neck_service, reset_service, start_service, stop_service;
-	ros::ServiceServer delta_hand_service, delta_foot_service, delta_back_service, delta_neck_service;
+	ros::ServiceServer delta_hand_service, delta_foot_service, delta_back_service, delta_neck_service, right_hand_service, left_hand_service;
 	osrf_msgs::JointCommands jointcommands;
 	atlas_msgs::AtlasCommand atlascommand;
 	atlas_msgs::AtlasSimInterfaceState atlassimintstate;
@@ -37,6 +37,8 @@ public:
 		kp_positions.resize(28);
 
 		hand_service = nh_.advertiseService("/PoseController/hand_movement", &PoseControllerClass::hand_movement, this);
+		right_hand_service = nh_.advertiseService("/PoseController/right_hand_movement", &PoseControllerClass::right_hand_movement, this);
+		left_hand_service = nh_.advertiseService("/PoseController/left_hand_movement", &PoseControllerClass::left_hand_movement, this);
 		delta_hand_service = nh_.advertiseService("/PoseController/delta_hand_movement", &PoseControllerClass::delta_hand_movement, this);
 
 		foot_service = nh_.advertiseService("/PoseController/foot_movement", &PoseControllerClass::foot_movement, this);
@@ -199,6 +201,28 @@ public:
 		wanted_positions[atlas_msgs::AtlasState::r_arm_elx] = req.r_arm_elx;
 		wanted_positions[atlas_msgs::AtlasState::r_arm_uwy] = req.r_arm_uwy;
 		wanted_positions[atlas_msgs::AtlasState::r_arm_mwx] = req.r_arm_mwx;
+		return true;
+	}
+
+	bool right_hand_movement(PoseController::hand_movement::Request &req, PoseController::hand_movement::Response &res){
+		//ROS_INFO("Got right hand movement");
+		wanted_positions[atlas_msgs::AtlasState::r_arm_usy] = req.r_arm_usy;
+		wanted_positions[atlas_msgs::AtlasState::r_arm_shx] = req.r_arm_shx;
+		wanted_positions[atlas_msgs::AtlasState::r_arm_ely] = req.r_arm_ely;
+		wanted_positions[atlas_msgs::AtlasState::r_arm_elx] = req.r_arm_elx;
+		wanted_positions[atlas_msgs::AtlasState::r_arm_uwy] = req.r_arm_uwy;
+		wanted_positions[atlas_msgs::AtlasState::r_arm_mwx] = req.r_arm_mwx;
+		return true;
+	}
+
+	bool left_hand_movement(PoseController::hand_movement::Request &req, PoseController::hand_movement::Response &res){
+		//ROS_INFO("Got left hand movement");
+		wanted_positions[atlas_msgs::AtlasState::l_arm_usy] = req.l_arm_usy;
+		wanted_positions[atlas_msgs::AtlasState::l_arm_shx] = req.l_arm_shx;
+		wanted_positions[atlas_msgs::AtlasState::l_arm_ely] = req.l_arm_ely;
+		wanted_positions[atlas_msgs::AtlasState::l_arm_elx] = req.l_arm_elx;
+		wanted_positions[atlas_msgs::AtlasState::l_arm_uwy] = req.l_arm_uwy;
+		wanted_positions[atlas_msgs::AtlasState::l_arm_mwx] = req.l_arm_mwx;
 		return true;
 	}
 
@@ -458,6 +482,38 @@ public:
 				}
 				break;
 
+			case atlas_msgs::AtlasSimInterfaceCommand::STAND:
+				atlascommand.k_effort[atlas_msgs::AtlasState::back_lbz] = 0;
+				atlascommand.k_effort[atlas_msgs::AtlasState::back_mby] = 0;
+				atlascommand.k_effort[atlas_msgs::AtlasState::back_ubx] = 0;
+				atlascommand.k_effort[atlas_msgs::AtlasState::neck_ay] = 255;
+
+				atlascommand.k_effort[atlas_msgs::AtlasState::l_arm_usy] = 255;
+				atlascommand.k_effort[atlas_msgs::AtlasState::l_arm_shx] = 255;
+				atlascommand.k_effort[atlas_msgs::AtlasState::l_arm_ely] = 255;
+				atlascommand.k_effort[atlas_msgs::AtlasState::l_arm_elx] = 255;
+				atlascommand.k_effort[atlas_msgs::AtlasState::l_arm_uwy] = 255;
+				atlascommand.k_effort[atlas_msgs::AtlasState::l_arm_mwx] = 255;
+				atlascommand.k_effort[atlas_msgs::AtlasState::r_arm_usy] = 255;
+				atlascommand.k_effort[atlas_msgs::AtlasState::r_arm_shx] = 255;
+				atlascommand.k_effort[atlas_msgs::AtlasState::r_arm_ely] = 255;
+				atlascommand.k_effort[atlas_msgs::AtlasState::r_arm_elx] = 255;
+				atlascommand.k_effort[atlas_msgs::AtlasState::r_arm_uwy] = 255;
+				atlascommand.k_effort[atlas_msgs::AtlasState::r_arm_mwx] = 255;
+
+				atlascommand.k_effort[atlas_msgs::AtlasState::l_leg_uhz] = 0;
+				atlascommand.k_effort[atlas_msgs::AtlasState::l_leg_mhx] = 0;
+				atlascommand.k_effort[atlas_msgs::AtlasState::l_leg_lhy] = 0;
+				atlascommand.k_effort[atlas_msgs::AtlasState::l_leg_kny] = 0;
+				atlascommand.k_effort[atlas_msgs::AtlasState::l_leg_uay] = 0;
+				atlascommand.k_effort[atlas_msgs::AtlasState::l_leg_lax] = 0;
+				atlascommand.k_effort[atlas_msgs::AtlasState::r_leg_uhz] = 0;
+				atlascommand.k_effort[atlas_msgs::AtlasState::r_leg_mhx] = 0;
+				atlascommand.k_effort[atlas_msgs::AtlasState::r_leg_lhy] = 0;
+				atlascommand.k_effort[atlas_msgs::AtlasState::r_leg_kny] = 0;
+				atlascommand.k_effort[atlas_msgs::AtlasState::r_leg_uay] = 0;
+				atlascommand.k_effort[atlas_msgs::AtlasState::r_leg_lax] = 0;
+				break;
 			case atlas_msgs::AtlasSimInterfaceCommand::MANIPULATE:
 				atlascommand.k_effort[atlas_msgs::AtlasState::back_lbz] = 255;
 				atlascommand.k_effort[atlas_msgs::AtlasState::back_mby] = 255;
