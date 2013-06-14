@@ -50,6 +50,10 @@ class Waypoint(object):
         res._fX = self._fX - otherWaypoint._fX
         res._fY = self._fY - otherWaypoint._fY
         return res
+
+    def PrintWaypoint(self):
+        strWaypoint = " (x=" + str(self._fX) + ", y=" + str(self._fY) + ")"
+        return strWaypoint
         
 ###################################################################################
 #---------------------------------- Segment --------------------------------------

@@ -42,6 +42,7 @@ class CD_WalkingMode(WalkingMode):
         self._CD_StateMachine = CD_StateMachine(self._LPP)
         
         self._bDone = False
+        self._last_path_update_time = rospy.get_rostime()
 
         ############################
         #joint controller
@@ -141,12 +142,20 @@ class CD_WalkingMode(WalkingMode):
 ###################################################################################
 
     def _path_cb(self,path):
-        rospy.loginfo('got path %s',path)
-        p = []
-        for wp in path.points:
-            p.append(Waypoint(wp.x,wp.y))
-        self.SetPath(p)
-        self._CD_StateMachine.SetPath(p)
+        update_period = 5 #[sec]
+        current_time = rospy.get_rostime()
+        time_from_last_update = current_time.secs - self._last_path_update_time.secs
+        if time_from_last_update >= update_period:
+            #rospy.loginfo('got path %s',path)
+            filtered_path = self._filterPath(path)
+            # p = []
+            # for wp in filtered_path.points:
+            #     p.append(Waypoint(wp.x,wp.y))
+            self.SetPath(filtered_path) # p)
+            self._CD_StateMachine.SetPath(filtered_path) # p)
+            self._last_path_update_time = current_time
+        else:
+            rospy.loginfo('ignoring path, time from last update: %f',time_from_last_update)
 
     def _get_joints(self,msg):
         self._cur_jnt = msg.position
@@ -173,3 +182,27 @@ class CD_WalkingMode(WalkingMode):
         roll, pitch, self._yaw = euler_from_quaternion([msg.orientation.x, msg.orientation.y, msg.orientation.z, msg.orientation.w])
         self._CD_StateMachine.UpdateOdometryYaw(self._yaw)
 
+###############################################################################
+    
+    def _filterPath(self,path):
+        radius_between_waypoints = 0.5
+        minimun_spacing = 0.4 # minimum required distatance between waypoints in path. Alert if it is not kept.
+        rospy.loginfo('Received path: %s',path)        
+        filtered_path = []
+        found_first_waypoint = False
+        robot_position = self._LPP.GetPos()
+        for wp in path.points:
+            path_point = Waypoint(wp.x,wp.y)
+            # Remove from received path waypoints that are with in the RadiusLimit (~0.5m) from the robot and insert robot position as first waypoint in path.
+            # This is done to get a good heading direction with noise on path waypoints.  
+            if path_point.GetDistanceFrom(robot_position) >= radius_between_waypoints and not(found_first_waypoint):
+                filtered_path.append(robot_position)
+                found_first_waypoint = True
+                previous_wp = copy.copy(robot_position)
+            if found_first_waypoint:
+                if minimun_spacing > path_point.GetDistanceFrom(previous_wp):
+                     rospy.loginfo('Path spacing warning: waypoint %s distance from previous waypoint is less than %f meters' % (path_point.PrintWaypoint(), minimun_spacing) )
+                filtered_path.append(path_point)
+                previous_wp = copy.copy(path_point)
+        return filtered_path
+    
