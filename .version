@@ -1,4 +1,4 @@
-V0.0.2.2
+V0.0.2.3
 ===========================================================
 C0_Math     0.1
 C0_RobilTask     0.5
@@ -25,7 +25,7 @@ C41_BodyControl     0.1
 C41_QuasiStaticWalking     0.10
 C41_QuasiStaticWalking_tools     0.20
 C42_DRCSim2_tools     0.2
-C42_DynamicLocomotion     0.14
+C42_DynamicLocomotion     0.15
 C42_Leg_IK     0.4
 C42_State     0.4
 C42_WalkType     0.6
