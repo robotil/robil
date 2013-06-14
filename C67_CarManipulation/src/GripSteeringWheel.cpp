@@ -55,6 +55,10 @@ static double startAngle, endAngle;
 static double lastAngle = 0;
 static bool callBackRun = false;
 static bool printOn;
+static bool calcOn;
+static bool calcUpdate = false;
+static bool fastOn;
+
 //end added
 
 ostream& operator<<(ostream& o, std::vector<string>& s){
@@ -68,12 +72,13 @@ ostream& operator<<(ostream& o, std::vector<string>& s){
 class GripSteeringWheelServer: public RobilTask {
 protected:
 	enum Consts { Time = 7 };
-	enum Errors { NoParams = 1, NoSolution = 2 , SandiaCallFail = 3, JointCallFail = 4};
+	enum Errors { NoParams = 1, NoSolution = 2 , SandiaCallFail = 3, JointCallFail = 4, NoCalculation = 5};
 	std::vector<string> params;
 	int operation;
 	int time;
 	int retValue;
 	string outputstr;
+	IkSolution IkArr[32];
 	
 public:
 	GripSteeringWheelServer(std::string name, std::vector<string> par):
@@ -254,9 +259,17 @@ public:
 		if( exists(args,"Print") ){
 			printOn = (cast<int>(args["Print"]) > 0);
 		}
+		calcOn = false;
+		if( exists(args,"Calculate") ){
+			calcOn = (cast<int>(args["Calculate"]) > 0);
+		}
+		if( exists(args,"Fast") ){
+			fastOn = (cast<int>(args["Fast"]) > 0);
+		}
+
 
 		if (((!exists(args,"EndAngle"))||(!exists(args,"StartAngle")))&&
-			(!exists(args,"angle")))
+			(!exists(args,"angle"))&&(!exists(args,"Calculate")))
 		{
 			ROS_INFO("%s: No operation Defined!", _name.c_str());
 			retValue  = NoParams;
@@ -287,92 +300,129 @@ public:
 //			if(outputstr!="no_print"){
 //				ROS_INFO("%s: %s", _name.c_str(), outputstr.c_str());
 //			}
-
+			RPY pose;
 			if(callBackRun)
 			{
+				RPY argTarget2;
 				ROS_INFO("Call Back Entered.");
+				if (calcOn)
+				{
+					int i;
+					double ang;
+					//calculate all angle 0-3.1 radiant
+					for (ang = 0,i = 0; i<32; i++, ang+=0.1 )
+					{
+						argTarget2 = TraceAngle(argTarget, RPY(-.05,.18,0,M_PI/2-M_PI/6, 0,0), ang);
+						if (i>0)
+							IkArr[i] = ScanRPY2(as.position[q1], as.position[q2], as.position[q3], argTarget2,0.01,IkArr[i-1]);
+						else
+							IkArr[i] = lScanRPY(as.position[q1], as.position[q2], as.position[q3], argTarget2,0.01);
+
+						if (!IkArr[i].valid){
+							ROS_INFO("%s: No Solution!", _name.c_str());
+							retValue  = NoSolution;
+							return TaskResult(retValue, "ERROR");
+						}
+						if (printOn)
+						{
+							if (i>0) cout<<"IkArr["<<i<<"]: displacement: "<<MaxDisp(IkArr[i],IkArr[i-1])<<"\n";
+							IkArr[i].Print();
+							pose = lPose(as.position[q1], as.position[q2], as.position[q3],IkArr[i]);
+							pose.Print();
+						}
+					}
+
+					calcUpdate = true;
+					ROS_INFO("%s: End Calculation!", _name.c_str());
+					return TaskResult(SUCCESS, "OK");
+				}
 				//IkSolution IkCurrent = IkSolution(as.position[q4r], as.position[q5r], as.position[q6r], as.position[q7r],
 				//					as.position[q8r], as.position[q9r]);
-				IkSolution IkCurrent = IkSolution(as.position[q4l], as.position[q5l], as.position[q6l], as.position[q7l],
-									as.position[q8l], as.position[q9l]);
+				//IkSolution IkCurrent = IkSolution(as.position[q4l], as.position[q5l], as.position[q6l], as.position[q7l],
+				//					as.position[q8l], as.position[q9l]);
 
 				int n;
-				RPY pose;
-				n = abs(floor((endAngle-startAngle)/0.1)) + 1;
-				ROS_INFO("here1:%d",n);
+
+				// choose angles
+				int startIndex = round(startAngle*10);
+				int endIndex = round(endAngle*10);
+				n = abs(endIndex-startIndex);
 				IkSolution IkNext[n+1];
-				RPY argTarget2;
-				// this array is used to hold the angle position referenced to the array index.
 				double angleArray[n+1];
 
+				// update lastAngle
+				lastAngle = 0.1*startIndex;
+				if (n==0){
+					ROS_INFO("%s: No Movement Needed!", _name.c_str());
+					return TaskResult(SUCCESS, "OK");
+				}
 
-				double delta = (endAngle-startAngle)/n;
+
+				// this array is used to hold the angle position referenced to the array index.
+				double delta = startAngle <= endAngle ? 0.1: -0.1;
 				double angle = startAngle;
-				for (int i = 0;i < n+1; i++)
+
+
+				for (int i = 0;i < n+1; i++, angle += delta)
 				{
-					argTarget2 = TraceAngle(argTarget, RPY(-.05,.18,0,M_PI/2-M_PI/6, 0,0), angle);
-					//argTarget2 = TraceAngle(argTarget, RPY(-.0,.15,0,M_PI/2, 0,0), angle);
-					if (i>0)
-						IkNext[i] = ScanRPY2(as.position[q1], as.position[q2], as.position[q3], argTarget2,0.01,IkNext[i-1]);
-					else
-						IkNext[i] = lScanRPY(as.position[q1], as.position[q2], as.position[q3], argTarget2,0.01);
-					if (printOn)
+					if (!fastOn)
 					{
-						cout<<"argTarget2["<<i<<"]:\n";
-						argTarget2.Print();
+						argTarget2 = TraceAngle(argTarget, RPY(-.05,.18,0,M_PI/2-M_PI/6, 0,0), angle);
+						//argTarget2 = TraceAngle(argTarget, RPY(-.0,.15,0,M_PI/2, 0,0), angle);
+						if (i>0)
+							IkNext[i] = ScanRPY2(as.position[q1], as.position[q2], as.position[q3], argTarget2,0.01,IkNext[i-1]);
+						else
+							IkNext[i] = lScanRPY(as.position[q1], as.position[q2], as.position[q3], argTarget2,0.01);
+
+						if (!IkNext[i].valid){
+							ROS_INFO("%s: No Solution!", _name.c_str());
+							retValue  = NoSolution;
+							return TaskResult(retValue, "ERROR");
+						}
+					}
+					else
+					{
+						if (!calcUpdate){
+							ROS_INFO("%s: No Calculated Points!", _name.c_str());
+							retValue  = NoCalculation;
+							return TaskResult(retValue, "ERROR");
+						}
+						int index = (int)round(angle*10);
+						cout<<"angle: "<<angle<<" index: "<<index<<"\n";
+						IkNext[i] = IkArr[index];
+
 					}
 					// save the angle position
 					angleArray[i] = angle;
-					if (!IkNext[i].valid){
-						ROS_INFO("%s: No Solution!", _name.c_str());
-						retValue  = NoSolution;
-						return TaskResult(retValue, "ERROR");
-					}
-					angle += delta;
+
 				}
 
 
 
-				lMove(IkCurrent, IkNext[0],0.1, NoEnd);
-				if (printOn)
-				{
-					pose = lPose(as.position[q1], as.position[q2], as.position[q3],IkCurrent);
-					cout<<"IkCurrent:\n";
-					IkCurrent.Print();
-					pose.Print();
-					cout<<"IkNext[0]: displacement: "<<MaxDisp(IkCurrent,IkNext[0])<<"\n";
-					IkNext[0].Print();
-					pose = lPose(as.position[q1], as.position[q2], as.position[q3],IkNext[0]);
-					pose.Print();
-				}
 
 
-				// update lastAngle
-				lastAngle = angleArray[0];
-				for (int i = 0; i< n-1; i++)
+				for (int i = 1; i< n+1; i++)
 				{
-					lMove(IkNext[i], IkNext[i+1],0.1 ,NoStartEnd);
+					if (n==1)
+						lMove(IkNext[i-1], IkNext[i],0.1 ,StartEnd);
+					else if (i==1)
+						lMove(IkNext[i-1], IkNext[i],0.1 ,NoEnd);
+					else if (i==(n-1))
+						lMove(IkNext[i-1], IkNext[i],0.1 ,NoStart);
+					else
+						lMove(IkNext[i-1], IkNext[i],0.1 ,NoStartEnd);
 					if (printOn)
 					{
-						cout<<"IkNext["<<i+1<<"]: displacement: "<<MaxDisp(IkNext[i],IkNext[i+1])<<"\n";
-						IkNext[i+1].Print();
-						pose = lPose(as.position[q1], as.position[q2], as.position[q3],IkNext[i+1]);
+						cout<<"IkNext["<<i<<"]: displacement: "<<MaxDisp(IkNext[i],IkNext[i-1])<<"\n";
+						IkNext[i].Print();
+						pose = lPose(as.position[q1], as.position[q2], as.position[q3],IkNext[i]);
 						pose.Print();
 					}
 					// update lastAngle
-					lastAngle = angleArray[i+1];
+					lastAngle = angleArray[i];
 				}
-				lMove(IkNext[n-1], IkNext[n], 0.1, NoStart);
-				if (printOn)
-				{
-					cout<<"IkNext["<<n<<"]: displacement: "<<MaxDisp(IkNext[n-1],IkNext[n])<<"\n";
-					IkNext[n].Print();
-					pose = lPose(as.position[q1], as.position[q2], as.position[q3],IkNext[n]);
-					pose.Print();
-				}
-				// update lastAngle
-				lastAngle = angleArray[n];
-				time -= 100*(n+2) ;
+
+				time -= 100*(n) ;
 
 				ROS_INFO("%s: Finish movement", _name.c_str());
 				break;
