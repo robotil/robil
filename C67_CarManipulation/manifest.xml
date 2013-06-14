@@ -24,7 +24,6 @@
   <depend package="hrl_kinematics"/>
   <depend package="geometry_msgs"/>
 
-
   <export>
     <cpp cflags="-I${prefix}/include" />
   </export>

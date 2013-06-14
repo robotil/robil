@@ -54,17 +54,29 @@ public:
 		positions = state->position;
 	}
 
+
+
+
+	/////////////////////////////////////////////////////////////////////////////////////////////////////
 	bool com_service_CB(PoseController::back_lbz_neck_ay::Request &req, PoseController::back_lbz_neck_ay::Response &res){
+
 		std_srvs::Empty em;
 		atlas_msgs::AtlasSimInterfaceCommand cm;
-		cm.behavior = atlas_msgs::AtlasSimInterfaceCommand::MANIPULATE;
 
+
+		//To switch to manipulate, change STAND to MANIPULATE.
+		cm.behavior = atlas_msgs::AtlasSimInterfaceCommand::STAND;
+
+		//Publish STAND behavior
 		pub_atlas_commands_.publish(cm);
 
 		ros::Duration(0.1).sleep();
 
+		//Send 'start' command to PoseController service
 		start_posecontroller_cli_.call(em);
 
+
+		//Change neck and back joints
 		PoseController::neck_movement neck;
 		neck.request.neck_ay = req.neck_ay;
 		neck_service.call(neck);
@@ -80,14 +92,19 @@ public:
 			ros::Duration(total_time/segments).sleep();
 		}
 		b.request.back_lbz = req.back_lbz;
-		b.request.back_mby = -100;
-		b.request.back_ubx = -100;
+		b.request.back_mby = -100; //Send 'Dont change' to back_mby joint
+		b.request.back_ubx = -100; //Send 'Dont change' to back_ubx joint
 
 		back_service.call(b);
 
+
+		//Send 'stop' command to PoseController service
 		stop_posecontroller_cli_.call(em);
 
 		ros::Duration(0.1).sleep();
+
+
+		//Switch behavior
 		cm.behavior = atlas_msgs::AtlasSimInterfaceCommand::STAND;
 
 		//pub_atlas_commands_.publish(cm);

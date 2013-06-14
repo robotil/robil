@@ -37,4 +37,8 @@ rosbuild_add_executable(C45_PostureControl_maintain_stability_client src/run_sta
 rosbuild_add_executable(C45_PostureControl_maintain_stability src/stability_maintainer.cpp)
 rosbuild_add_executable(C45_PostureControl src/C45_PostureControl.cpp)
 #rosbuild_add_executable(C45_PostureControl_com_error src/com_error.cpp)
+
+rosbuild_add_executable(C45_TaskStart src/C45_TaskStart.cpp)
+rosbuild_add_executable(C45_TaskStop src/C45_TaskStop.cpp)
+
 #target_link_libraries(example ${PROJECT_NAME})

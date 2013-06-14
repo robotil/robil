@@ -570,8 +570,8 @@ PField::Points searchPath_transitAccurate(
 			path.push_back(Waypoint(points[p].x,points[p].y));
 		}
 
-		#undef SEGMENT
-//#undef DO_SMOOTHING
+#undef SEGMENT
+#undef DO_SMOOTHING
 #ifdef DO_SMOOTHING
 		PField::SmoothingParameters pf_params;
 		SET_PF_PARAMETERS(pf_params)
