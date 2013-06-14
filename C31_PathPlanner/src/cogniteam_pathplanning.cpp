@@ -572,7 +572,7 @@ PField::Points searchPath_transitAccurate(
 
 #undef SEGMENT
 #undef DO_SMOOTHING
-//#ifdef DO_SMOOTHING
+#ifdef DO_SMOOTHING
 		PField::SmoothingParameters pf_params;
 		SET_PF_PARAMETERS(pf_params)
 
