@@ -90,6 +90,11 @@ typedef enum gear_status{
  REVERSE_GEAR_STATUS
 }GEAR_STATUS;
 
+typedef enum handbrake_status{
+ RELEASED_HANDBRAKE_STATUS,
+ ENGAGED_HANDBRAKE_STATUS
+}HANDBRAKE_STATUS;
+
 class C23_Detector{
 public:
 	C23_Detector(const char* left_cam, const char* right_cam, const char* pointc);
@@ -116,6 +121,7 @@ public:
     double orient_R;
     string current_status;
     GEAR_STATUS current_gear_status;
+    HANDBRAKE_STATUS current_handbrake_status;
     pcl::PointCloud<pcl::PointXYZ> lastCloud;
 private:
 

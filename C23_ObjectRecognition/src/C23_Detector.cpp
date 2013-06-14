@@ -515,40 +515,71 @@ bool C23_Detector::averagePointCloudInsideCar(int x1, int y1, int x2, int y2, co
   double _x=0;
   double _y=0;
   double _z=0;
+
   int counter=0;
+  
+  double minDepth = 10000;//Only used for the steering wheel
   pcl::PointCloud<pcl::PointXYZ> t;
   pcl::PointXYZ p;
   for(int i=yMin;i<=yMax;i++) {
-    for(int j=xMin;j<=xMax;j++){
-      p=detectionCloud.at(i,j);
-      if(p.x!=p.x)
-	continue;
-      //if(p.x>0.3 && p.y>0.3) {
-	//cout<<"Here"<<endl;
-	_x+=p.x;
-	_y+=p.y;
-	_z+=p.z;
-	
-	// cout<<"x,y,z: "<<x<<", "<<y<<", "<<z<<endl;
-	if(p.x<0){
-	  cout<<"px, py, pz: "<<p.x<<", "<<p.y<<", "<<p.z<<" (i,j): "<<i<<", "<<j<<endl;
-	  
-	}
-	
-	counter++;
-	// break;
-	// cout << "Found a fucking point" << endl;
-	// }
-  }
+	for(int j=xMin;j<=xMax;j++){
+	  p=detectionCloud.at(i,j);
+	  if(p.x!=p.x)
+	    continue;
+	  //if(p.x>0.3 && p.y>0.3) {
+	    //cout<<"Here"<<endl;
+	    // cout<<"x,y,z: "<<x<<", "<<y<<", "<<z<<endl;
+	    if(minDepth>p.x){
+	      //cout<<"px, py, pz: "<<p.x<<", "<<p.y<<", "<<p.z<<" (i,j): "<<i<<", "<<j<<endl;
+	      minDepth = p.x;
+	      //cout<<"new min depth: "<<p.x<<endl;
+	    }
+	    
+	    _x+=p.x;
+	    _y+=p.y;
+	    _z+=p.z;
+	    
+	    counter++;
+	    // break;
+	    // cout << "Found a fucking point" << endl;
+	    // }
+      }
    }
-   cout<<"Counter: "<<counter<<endl;
+      //cout<<"min depth: "<<minDepth<<endl;
+   if (_target == INSIDE_STEERINGWHEEL){
+     ROS_INFO("Calculating Steering Wheel depth");
+      _x=0;
+      _y=0;
+      _z=0;
+      counter=0;
+	    for(int i=yMin;i<=yMax;i++) {
+		for(int j=xMin;j<=xMax;j++){
+		  p=detectionCloud.at(i,j);
+		  if(p.x!=p.x)
+		  continue;
+		  
+		  if(minDepth+0.2>p.x && p.x > minDepth -0.2){
+		  //cout<<"px, py, pz: "<<p.x<<", "<<p.y<<", "<<p.z<<" (i,j): "<<i<<", "<<j<<endl;
+		  _x+=p.x;
+		  _y+=p.y;
+		  _z+=p.z;
+		   counter++;
+		  }
+
+		}
+	    }
+    }
+    
+    
+
+   //cout<<"Counter: "<<counter<<endl;
    if(counter>0){
      //Calculate the average point
      tmp_x=_x/(counter);
      tmp_y=_y/(counter);
      tmp_z=_z/(counter);
      
-     cout << "Point is: " << tmp_x << "," <<tmp_y << "," << tmp_z << endl;
+     //cout << "Point is: " << tmp_x << "," <<tmp_y << "," << tmp_z << endl;
      
      
      *px = tmp_x;
@@ -685,21 +716,24 @@ it_(nh),
 		  templateMatching3D(t, cloud2);
 	      }
 	      else if(!target.compare("Gear")) {
-		char basePath[1000],imageName[1000];
-		
-		sprintf(basePath,"%s/3D_models/%s%c",ros::package::getPath("C23_ObjectRecognition").c_str(),"gear.txt",'\0');
-		string t = basePath;
-		// string t = "/home/isl/darpa/robil/C23_ObjectRecognition/3D_models/firehose.txt";
-		std::cout<<imageName<<endl;
-		pcl::PointCloud<pcl::PointXYZ>::Ptr cloud2 = filterPointCloud(last_x,last_y,width,height,lastCloud);
-		templateMatching3D(t, cloud2);
-		
-		if(current_gear_status==FORWARD_GEAR_STATUS){
-		  status = "Forward";
-		}
-		else if(current_gear_status==REVERSE_GEAR_STATUS){
-		  status = "Reverse";
-		}
+		  char basePath[1000],imageName[1000];
+		  
+		  sprintf(basePath,"%s/3D_models/%s%c",ros::package::getPath("C23_ObjectRecognition").c_str(),"gear.txt",'\0');
+		  string t = basePath;
+		  // string t = "/home/isl/darpa/robil/C23_ObjectRecognition/3D_models/firehose.txt";
+		  std::cout<<imageName<<endl;
+		  pcl::PointCloud<pcl::PointXYZ>::Ptr cloud2 = filterPointCloud(last_x,last_y,width,height,lastCloud);
+		  templateMatching3D(t, cloud2);
+		  
+		  if(current_gear_status==FORWARD_GEAR_STATUS){
+		    status = "Forward";
+		    ROS_INFO("Gear status: FORWARD");
+		    
+		  }
+		  else if(current_gear_status==REVERSE_GEAR_STATUS){
+		    status = "Reverse";
+		    ROS_INFO("Gear status: Reverse");
+		  }
 		}
 		else if(!target.compare("InsideSteeringWheel")) {
 		  char basePath[1000],imageName[1000];
@@ -720,6 +754,22 @@ it_(nh),
 		  std::cout<<imageName<<endl;
 		  pcl::PointCloud<pcl::PointXYZ>::Ptr cloud2 = filterPointCloud(last_x,last_y,width,height,lastCloud);
 		  templateMatching3D(t, cloud2);
+		  }else if(!target.compare("Handbrake")) {
+		    orient_x = x;
+		    orient_y = y;
+		    orient_z = z;
+		    orient_R = 0;
+		    orient_Y = 0;
+		    orient_P = 0;
+		    if(current_handbrake_status==RELEASED_HANDBRAKE_STATUS){
+		    status = "Released";
+		    ROS_INFO("Handbrake status: RELEASED");
+
+		    }
+		    else if(current_handbrake_status==ENGAGED_HANDBRAKE_STATUS){
+		    status = "Engaged";
+		    ROS_INFO("Handbrake status: ENGAGED");
+		    }
 		  }
 		  
 		  
@@ -898,7 +948,11 @@ it_(nh),
 					pcl_ros::transformAsMatrix(transform, sensorTopelvis);
 					pcl::transformPointCloud(detectionCloud, detectionCloud, sensorTopelvis);
 					
-					
+					//Set the x,y,width and height to -1;
+					last_x  = -1;
+					last_y = -1;
+					width = -1;
+					height = -1;
 					
 					lastCloud.swap(detectionCloud);
 					switch (_target) {
@@ -1012,7 +1066,7 @@ it_(nh),
 					//cv::Point matchLoc;
 					
 					minMaxLoc( result, &minVal, &maxVal, &minLoc, &maxLoc, Mat() );
-					cout<<"Minval: "<<minVal<<endl;
+					//cout<<"Minval: "<<minVal<<endl;
 					// For SQDIFF and SQDIFF_NORMED, the best matches are lower values. For all the other methods, the higher the better
 					if( matching_method == 0 || matching_method == 1 )
 					{ *matchLoc = minLoc;
@@ -1029,15 +1083,15 @@ it_(nh),
 					rectangle( img_display, *matchLoc, cv::Point( matchLoc->x + templ.cols , matchLoc->y + templ.rows ), Scalar::all(0), 2, 8, 0 );
 					//rectangle( result, matchLoc, cv::Point( matchLoc.x + templ.cols , matchLoc.y + templ.rows ), Scalar::all(0), 2, 8, 0 );
 					
-					cout<<" Before Gear x,y,z: "<<x<<", "<<y<<", "<<z<<endl;
+					//cout<<" Before Gear x,y,z: "<<x<<", "<<y<<", "<<z<<endl;
 					averagePointCloudInsideCar(matchLoc->x, matchLoc->y, matchLoc->x + templ.cols, matchLoc->y + templ.rows, cloud, &x, &y, &z);
 					
 					
-					cout<<"x close: "<<x<<endl;
+					//cout<<"depth threshold: "<<x<<endl;
 					
 					switch (_target){
 					  case HANDBRAKE:
-					    ROS_INFO("Handbrake template matching");
+					    ROS_INFO("Handbrake template matching target");
 					    //cout<<" Gear x,y,z: "<<x<<", "<<y<<", "<<z<<endl;
 					    x = x - 0.03;
 					    y = y + 0.09;
@@ -1052,14 +1106,14 @@ it_(nh),
 					    
 					    break;
 					  case INSIDE_STEERINGWHEEL:
-					    ROS_INFO("Steeringwheel template matching");
-					    if(x<1.5 && x>0)
+					    ROS_INFO("Steeringwheel template matching target");
+					    if(x<1 && x>0)
 					      res=true;
 					    else
 					      res = false;
 					    break;
 					  case GEAR:
-					    ROS_INFO("Gear template matching");
+					    ROS_INFO("Gear template matching target");
 					    if(x<1&& x>0)
 					      res=true;
 					    else
@@ -1069,6 +1123,12 @@ it_(nh),
 					}
 					
 					cout<<"Result: "<<res<<endl;
+					
+					if (res==false){
+					 x = -1;
+					 y = 0;
+					 z = 0;
+					}
 					
 					//pictureCoordinatesToGlobalPosition(matchLoc->x,matchLoc->y,matchLoc->x + templ.cols,matchLoc->y + templ.rows,&x,&y,NULL);
 					
@@ -1309,9 +1369,9 @@ it_(nh),
 					  Mat steeringwheelTemplate = imread(imageName);
 					  res = templateMatching(srcImg, steeringwheelTemplate, 1, &matchLoc, cloud);
 					  
-					  
-					  imshow("Steering wheel template", steeringwheelTemplate);
-					  waitKey(0);
+					  ROS_INFO("Inside Steering wheel x,y,z is: %f, %f, %f",x,y,z);
+					 // imshow("Steering wheel template", steeringwheelTemplate);
+					 // waitKey(0);
 					}
 					else{
 					  //Robot is outside the car
@@ -1431,6 +1491,10 @@ it_(nh),
 					    Mat boundedSteeringWheelImg(srcImg,rect);
 					    imshow("Bounded area", boundedSteeringWheelImg);
 					    waitKey();
+					    
+					    
+					    ROS_INFO("Outside Steering wheel x,y,z is: %f, %f, %f",x,y,z);
+					    
 					    //x = mc.x;
 					    //y =mc.y;
 					  }
@@ -1440,13 +1504,19 @@ it_(nh),
 					  
 					  
 					}
-
+					
+					x2 = 0;
+					y2 = 0;
+					
 					if (res)
 					  ROS_INFO("Steeringwheel detected");
 					else
 					  ROS_INFO("Steeringwheel NOT detected");
 					return res;
-									      }
+
+					
+					
+				      }
 				      
 				      
 				      
@@ -1462,7 +1532,7 @@ it_(nh),
 					sprintf(basePath,"%s/template_matching_images/%c",ros::package::getPath("C23_ObjectRecognition").c_str(),'\0');
 					
 					sprintf(imageName,"%sgear_template_qual_1_1.jpg%c",basePath,'\0');
-					std::cout<<imageName<<endl;
+					//std::cout<<imageName<<endl;
 					//-----------------------------------------------------------------
 					
 					
@@ -1470,16 +1540,80 @@ it_(nh),
 					
 					//imshow("Hand brake template", handbrakeTemplate);
 					//waitKey(0);
+					double value;
+					bool res = templateMatching(srcImg, gearTemplate, 1, &matchLoc, cloud, &value);
 					
-					bool res = templateMatching(srcImg, gearTemplate, 1, &matchLoc, cloud);
 					
-					if (res)
+					
+					
+					if (res){
 					  ROS_INFO("Detected Handbrake");
+					  ROS_INFO("Handbrake x,y,z is: %f, %f, %f",x,y,z);
+					
+					  
+					  int OFFSET = 100;
+					  //Create a rect of the detected area with some offset
+					  double xtop = max(0, matchLoc.x - OFFSET);
+					  double ytop = max(0, matchLoc.y-OFFSET);
+					  double xtop1 = min(srcImg.cols, matchLoc.x + OFFSET*2);
+					  double ytop1 = min(srcImg.rows,  matchLoc.y +  OFFSET*2);
+					  Rect rect(xtop, ytop,xtop1-xtop ,ytop1-ytop);
+					  Mat newSrcImg(srcImg, rect);
+					  
+					  cout<<"x,y,x1,y1: "<<xtop<<", "<<ytop<<", "<<xtop1<<", "<<ytop1<<endl;
+					  
+					  
+					  //imshow("New section", newSrcImg);
+					  //waitKey();
+					  
+					  //Try and find the status of the handbrake
+					  char basePath1[1000],imageName1[1000];
+					  sprintf(basePath1,"%s/template_matching_images/%c",ros::package::getPath("C23_ObjectRecognition").c_str(),'\0');
+					  sprintf(imageName1,"%shandbrake_state_released_template.jpg%c",basePath1,'\0');
+					  
+					  char basePath2[1000],imageName2[1000];
+					  sprintf(basePath2,"%s/template_matching_images/%c",ros::package::getPath("C23_ObjectRecognition").c_str(),'\0');
+					  sprintf(imageName2,"%shandbrake_state_engaged_template.jpg%c",basePath2,'\0');
+					  
+					  //std::cout<<imageName<<endl;
+					  
+					  Mat handbrakeStateReleasedTemplate = imread(imageName1);
+					  Mat handbrakeStateEngagedTemplate = imread(imageName2);
+					  double minVal1 = 1000;
+					  double minVal2 = 1000;
+					  
+					  templateMatching(newSrcImg, handbrakeStateReleasedTemplate, 1, &matchLoc, cloud, &minVal1);
+					  
+					  templateMatching(newSrcImg, handbrakeStateEngagedTemplate, 1, &matchLoc, cloud, &minVal2);
+					  ROS_INFO("Handbrake released value: %f, handbrake engaged value: %f", minVal1, minVal2);
+					 // cout<<"Value: "<<value*10000<<endl;
+					  double x_h, y_h, z_h;
+					 //averagePointCloudInsideCar(matchLoc.x - OFFSET, matchLoc.y, matchLoc.x + OFFSET*2, matchLoc.y + gearTemplate.rows, cloud, &x_h, &y_h, &z_h); 
+					 //ROS_INFO("The average x,y,z point cloud coordinate is: %f, %f, %f", x_h, y_h, z_h); 
+					  
+					  if(minVal1<minVal2)
+					  {
+					    current_handbrake_status = RELEASED_HANDBRAKE_STATUS;
+					    ROS_INFO("HANDBRAKE RELEASED");
+					  }
+					  else{
+					    current_handbrake_status = ENGAGED_HANDBRAKE_STATUS;
+					    ROS_INFO("HANDBRAKE ENGAGED");
+					  }
+					  
+					  
+					  
+					  
+					}
 					else
 					  ROS_INFO("Handbrake NOT detected");
 					
-					imshow("New Src Image", gearTemplate);
-					waitKey();
+					x2 = 0;
+					y2 = 0;
+					
+					
+					//imshow("New Src Image", gearTemplate);
+					//waitKey();
 					
 					
 					return res;
@@ -1510,70 +1644,156 @@ it_(nh),
 					char basePath[1000],imageName[1000];
 					
 					sprintf(basePath,"%s/template_matching_images/%c",ros::package::getPath("C23_ObjectRecognition").c_str(),'\0');
-					
-					sprintf(imageName,"%sgear_template_qual_1_1.jpg%c",basePath,'\0');
-					std::cout<<imageName<<endl;
+					sprintf(imageName,"%sgear_state_forward_template_qual_1_1.jpg%c",basePath,'\0');
+					//std::cout<<imageName<<endl;
 					//-----------------------------------------------------------------
+					char basePath2[1000],imageName2[1000];
+					sprintf(basePath2,"%s/template_matching_images/%c",ros::package::getPath("C23_ObjectRecognition").c_str(),'\0');
+					sprintf(imageName2,"%sgear_state_reverse_template_qual_1_1.jpg%c",basePath2,'\0');
 					
-					Mat gearTemplate = imread(imageName);
-					//imshow("Gear template", gearTemplate);
-					//waitKey(0);
+					Mat gearForwardTemplate = imread(imageName);
+					Mat gearReverseTemplate = imread(imageName2);
+					/*("Gear template 1", gearForwardTemplate);
+					waitKey(0);
 					
-					res = templateMatching(srcImg, gearTemplate, 0, &matchLoc, cloud);
+					imshow("Gear template 2", gearReverseTemplate);
+					waitKey(0);*/
+					
+					
+					//This should return the central point of the gear
+					//res = templateMatching(srcImg, gearTemplate, 5, &matchLoc, cloud);
+					
+					  double minVal1 = 1000;
+					  double minVal2 = 1000;
+					  
+					  res = templateMatching(srcImg, gearForwardTemplate, 1, &matchLoc, cloud, &minVal1);
+					  
+					  res |= templateMatching(srcImg, gearReverseTemplate, 1, &matchLoc, cloud, &minVal2);
+					  ROS_INFO("Gear forward value: %f, gear reverse value: %f", minVal1, minVal2);
+					 // cout<<"Value: "<<value*10000<<endl;
+					  //double x_h, y_h, z_h;
+					 //averagePointCloudInsideCar(matchLoc.x - OFFSET, matchLoc.y, matchLoc.x + OFFSET*2, matchLoc.y + gearTemplate.rows, cloud, &x_h, &y_h, &z_h); 
+					 //ROS_INFO("The average x,y,z point cloud coordinate is: %f, %f, %f", x_h, y_h, z_h); 
+					  
+					  if(minVal1<minVal2)
+					  {
+					    current_gear_status = FORWARD_GEAR_STATUS;
+					    ROS_INFO("Forward Status");
+					  }
+					  else{
+					    current_gear_status = REVERSE_GEAR_STATUS;
+					    ROS_INFO("Reverse Status");
+					  }
 					
 					
 					
+					//If a gear has been detected, find its status
 					if(res)
 					{
+					  ROS_INFO("Detected Gear");
+					  ROS_INFO("Gear x,y,z is: %f, %f, %f",x,y,z);
+					
+					  
+					 /* int OFFSET = 100;
+					  //Create a rect of the detected area with some offset
+					  double xtop = max(0, matchLoc.x - OFFSET);
+					  double ytop = max(0, matchLoc.y-OFFSET);
+					  double xtop1 = min(srcImg.cols, matchLoc.x + OFFSET*2);
+					  double ytop1 = min(srcImg.rows,  matchLoc.y +  OFFSET*2);
+					  Rect rect(xtop, ytop,xtop1-xtop ,ytop1-ytop);
+					  Mat newSrcImg(srcImg, rect);
+					  
+					  cout<<"x,y,x1,y1: "<<xtop<<", "<<ytop<<", "<<xtop1<<", "<<ytop1<<endl;
 					  
 					  
+					  //imshow("New section", newSrcImg);
+					  //waitKey();
+					  
+					  //Try and find the status of the handbrake
+					  char basePath1[1000],imageName1[1000];
+					  sprintf(basePath1,"%s/template_matching_images/%c",ros::package::getPath("C23_ObjectRecognition").c_str(),'\0');
+					  sprintf(imageName1,"%sgear_state_forward_template.jpg%c",basePath1,'\0');
+					  
+					  char basePath2[1000],imageName2[1000];
+					  sprintf(basePath2,"%s/template_matching_images/%c",ros::package::getPath("C23_ObjectRecognition").c_str(),'\0');
+					  sprintf(imageName2,"%sgear_state_reversed_template.jpg%c",basePath2,'\0');
+					  
+					  //std::cout<<imageName<<endl;
+					  
+					  Mat gearStateForwardTemplate = imread(imageName1);
+					  Mat gearStateReverseTemplate = imread(imageName2);
+					  double minVal1 = 1000;
+					  double minVal2 = 1000;
+					  
+					  templateMatching(newSrcImg, gearStateForwardTemplate, 1, &matchLoc, cloud, &minVal1);
+					  
+					  templateMatching(newSrcImg, gearStateReverseTemplate, 1, &matchLoc, cloud, &minVal2);
+					  ROS_INFO("Gear forward value: %f, gear reverse value: %f", minVal1, minVal2);
+					 // cout<<"Value: "<<value*10000<<endl;
+					  double x_h, y_h, z_h;
+					 //averagePointCloudInsideCar(matchLoc.x - OFFSET, matchLoc.y, matchLoc.x + OFFSET*2, matchLoc.y + gearTemplate.rows, cloud, &x_h, &y_h, &z_h); 
+					 //ROS_INFO("The average x,y,z point cloud coordinate is: %f, %f, %f", x_h, y_h, z_h); 
+					  
+					  if(minVal1<minVal2)
+					  {
+					    current_gear_status = FORWARD_GEAR_STATUS;
+					    ROS_INFO("Forward Status");
+					  }
+					  else{
+					    current_gear_status = REVERSE_GEAR_STATUS;
+					    ROS_INFO("Reverse Status");
+					  }*/
+					  
+					  /*
 					  //Calculate the average distance between the top and bottom of the button
 					  //Top quarter
-					  averagePointCloudInsideCar(matchLoc.x, matchLoc.y, matchLoc.x + gearTemplate.cols/2, matchLoc.y + gearTemplate.rows/2, cloud, &x, &y, &z);
-					  xtop = x;
-					  ytop = y;
-					  ztop = z;
+					  averagePointCloudInsideCar(matchLoc.x, matchLoc.y, matchLoc.x + gearTemplate.cols/2, matchLoc.y + gearTemplate.rows/2, cloud, &xtop, &ytop, &ztop);
+
 					  //Bottom quarter
-					  averagePointCloudInsideCar(matchLoc.x, matchLoc.y + gearTemplate.rows/2, matchLoc.x + gearTemplate.cols/2, matchLoc.y + gearTemplate.rows, cloud, &x, &y, &z);
-					  xbot = x;
-					  ybot = y;
-					  zbot =z;
+					  averagePointCloudInsideCar(matchLoc.x, matchLoc.y + gearTemplate.rows/2, matchLoc.x + gearTemplate.cols/2, matchLoc.y + gearTemplate.rows, cloud, &xbot, &ybot, &zbot);
+
+					  //double distTop = sqrt((xtop*xtop + ytop*ytop + ztop*ztop)*10000);
+					  //double distBot = sqrt((xtop*xtop + ytop*ytop + ztop*ztop)*10000);
 					  
 					  
-					  double distTop = sqrt((xtop*xtop + ytop*ytop + ztop*ztop)*10000);
-					  double distBot = sqrt((xtop*xtop + ytop*ytop + ztop*ztop)*10000);
+					  double difference = (xtop - xbot)*(xtop - xbot)*10000;
 					  
-					  
-					  double difference = (xtop - xbot)*(xtop - xbot)*100000;
-					  
-					  cout<<"xtop: "<<xtop<<endl;
-					  cout<<"xbot: "<<xbot<<endl;
+					  //cout<<"xtop: "<<xtop<<endl;
+					  //cout<<"xbot: "<<xbot<<endl;
 					  
 					  
 					  
-					  cout<<"Distance top: "<<distTop<<endl;
-					  cout<<"Distance bot: "<<distBot<<endl;
+					 // cout<<"Distance top: "<<distTop<<endl;
+					 // cout<<"Distance bot: "<<distBot<<endl;
 					  
-					  cout<<"Distance LS: "<<difference<<endl;
+					  cout<<"Distance between forward and reverse: "<<difference<<endl;
 					  
-					  if(difference >15)
+					  if(difference > 275)
 					  {
 					    current_gear_status = REVERSE_GEAR_STATUS;
-					    cout<<"Reverse status"<<endl;
+					    ROS_INFO("Reverse Status");
 					  }
 					  else{
 					    current_gear_status = FORWARD_GEAR_STATUS;
-					    cout<<"Forward status"<<endl;
-					  }
+					    ROS_INFO("Forward Status");
+					  }*/
 					  
 					  string t = "Gear";
-					  cout << "Saving Gear" << endl;
+					  //cout << "Saving Gear" << endl;
 					  //saveTemplate(matchLoc.x, matchLoc.y,gearTemplate.cols/2, gearTemplate.rows,cloud,t);
 					  //templateMatching3D(t,lastCloud);
+					  
+					  //set the second point in the global position to 0 as it is not needed
+					  x2 = 0;
+					  y2 = 0;
+					  
 					  last_x = matchLoc.x;
 					  last_y = matchLoc.y;
-					  width = gearTemplate.cols/2;
-					  height = gearTemplate.rows;
+					  width = 25;//Based on the template
+					  height = gearForwardTemplate.rows;
+					  //ROS_INFO("Gear x,y,z is: %f, %f, %f",x,y,z);
+					 // ROS_INFO("Gear bounding box is: %f, %f, %f, %f",last_x,last_y,width,height) ;
+					 //cout<<"Gear bounding box: "<<last_x<<", "<<last_y<<", "<<width<<", "<<height<<endl;
 					  
 					}
 					
