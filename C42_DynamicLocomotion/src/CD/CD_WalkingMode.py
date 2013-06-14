@@ -33,6 +33,8 @@ from DW.JointController import JointCommands_msg_handler
 from tf_conversions import posemath
 from tf.transformations import euler_from_quaternion
 
+from myFunc import findIndex
+
 class CD_WalkingMode(WalkingMode):
     def __init__(self):
         WalkingMode.__init__(self,CD_PathPlanner())
@@ -185,14 +187,22 @@ class CD_WalkingMode(WalkingMode):
 ###############################################################################
     
     def _filterPath(self,path):
-        radius_between_waypoints = 0.5
+        radius_between_waypoints = 0.3
         minimun_spacing = 0.4 # minimum required distatance between waypoints in path. Alert if it is not kept.
-        rospy.loginfo('Received path: %s',path)        
+        robot_position = self._LPP.GetPos()
+        rospy.loginfo('Received path: %s',path)
+        pathlist=[]
+        for wp in path.points:
+            pathlist.append([wp.x,wp.y]) 
+        
+        print robot_position.GetX(),robot_position.GetY(),pathlist[0]
+        Path = findIndex([robot_position.GetX(),robot_position.GetY()], pathlist)
+        rospy.loginfo('path from robots position: %s',Path)        
         filtered_path = []
         found_first_waypoint = False
-        robot_position = self._LPP.GetPos()
-        for wp in path.points:
-            path_point = Waypoint(wp.x,wp.y)
+        
+        for wp in Path:
+            path_point = Waypoint(wp[0],wp[1])
             # Remove from received path waypoints that are with in the RadiusLimit (~0.5m) from the robot and insert robot position as first waypoint in path.
             # This is done to get a good heading direction with noise on path waypoints.  
             if path_point.GetDistanceFrom(robot_position) >= radius_between_waypoints and not(found_first_waypoint):
