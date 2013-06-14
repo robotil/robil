@@ -65,6 +65,7 @@ private:
         bool IsSendingGrid;
         bool IsSendingPath;
         bool IsSendingExecuterStatus;
+        QString ExecuterString;
         int ImgSize;
         bool WaitingForResponse;
         int Counter;

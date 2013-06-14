@@ -1195,6 +1195,13 @@
             </layout>
            </widget>
           </item>
+          <item>
+           <widget class="QLabel" name="lblMsg">
+            <property name="text">
+             <string/>
+            </property>
+           </widget>
+          </item>
          </layout>
         </widget>
        </item>
