@@ -1,0 +1,29 @@
+Obstacle Detection for walking process
+--------------------------------------
+
+The purpose of this module is to create a series of points that represents obsticals for dynamic purposes.
+This package includes two src files:
+	1. Lidar.cpp - a C++ file that collect the laser scan from the /multisense_sl/scan topic, and transforms it to pelvis coordinates in geometry_msgs/Polygon type. After that it publishes it to 
+			/LaserCloudForWalking.
+	2. DetectCollision.py - Python code that collects the points from /LaserCloud... topic and creates a point data base. In the beginning of the code there is a parameter TIME that decides how 					long to keep a point before it is discarded. The code also can print the points on to an 2D plot.
+
+	
+running the code
+================
+you must activate the spindle!!! this can be done by:
+	--------------------------------------------------------------------------
+	rostopic pub /multisense_sl/set_spindle_speed std_msgs/Float64 "data: 6.0" 
+	--------------------------------------------------------------------------
+run the Lidar file in the build by:
+	-------------------------------------
+	rosrun WalkingObstacleDetection Lidar
+	-------------------------------------
+run the DetectCollision.py file
+	-------------------------------------
+	rosrun WalkingObstacleDetection DetectCollision.py
+	-------------------------------------
+	
+Launch file
+===========
+After rosmake, you can use the launch file included which activates the spindle and runs the cpp file.
+roslaunch WalkingObstacleDetection lidar.launch
