@@ -115,6 +115,10 @@ class DynamicLocomotion(RobilTask):
 
         elif (WalkingModeChooserEnum.AP == eWalkingMode):
             motionType = MotionType.motion_align_pose
+        elif(WalkingModeChooserEnum.Rot == eWalkingMode):
+            motionType = MotionType.motion_direct_rotation
+        elif(WalkingModeChooserEnum.Trans == eWalkingMode):
+            motionType = MotionType.motion_direct_translation
         else:
             print("DynamicLocomotion::PublishMotionState WalkingModeChooserEnum = ",eWalkingMode)
             bPublish = False

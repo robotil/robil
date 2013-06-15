@@ -15,6 +15,7 @@ import roslib;roslib.load_manifest('C42_DynamicLocomotion')
 from C31_PathPlanner.msg import C31_Waypoints
 from C25_GlobalPosition.msg import C25C0_ROP
 from atlas_msgs.msg import AtlasCommand, AtlasSimInterfaceCommand, AtlasSimInterfaceState, AtlasState, AtlasBehaviorStepData
+
 class DW_WalkingMode(WalkingMode):
     def __init__(self,iTf):
         WalkingMode.__init__(self,DW_PathPlanner())
@@ -38,6 +39,7 @@ class DW_WalkingMode(WalkingMode):
         rospy.sleep(0.3)
         self._Controller.JC.set_all_pos(self._Controller.RS.GetJointPos())
         self._Controller.JC.send_command()
+        
     def StartWalking(self):
         self._Controller.LHC.set_all_pos(self._Controller.BaseHandPose)
         self._Controller.RHC.set_all_pos(self._Controller.BaseHandPose)

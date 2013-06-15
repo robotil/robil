@@ -6,77 +6,38 @@
 # The code in this file is provided "as is" and comes with no warranty whatsoever
 ###################################################################################
 
-import rospy
-from Abstractions.WalkingMode import *
-from AlinePose.AP_WalkingMode import *
-from AlinePose.AP_PathPlanner import *
-from DW.DW_WalkingMode import *
-from DW.DW_PathPlanner import *
-from C42_State.srv import *
-from C42_State.msg import StandingPosition
+from DirectControl.DC_WalkingMode import *
 
-class Rot_WalkingMode(WalkingMode):
+class Rot_WalkingMode(DC_WalkingMode):
     def __init__(self,iTf):
-        self._LPPs = {'DW':DW_PathPlanner(),'AP':AP_PathPlanner()}
-        WalkingMode.__init__(self,self._LPPs['AP'])
-        self._WalkingModes = {'DW':DW_WalkingMode(iTf),'AP':AP_WalkingMode(iTf)}
-               
-        rospy.wait_for_service("/motion_state/info/standing_position")
-        self._srv_StandingPosition = rospy.ServiceProxy("/motion_state/info/standing_position", StandingPositionInfo)
+        DC_WalkingMode.__init__(self,iTf)
  
-        self._SetRequiredWalkingMode()
+    def Initialize(self,generalParameters):
+        DC_WalkingMode.Initialize(self)      
         
-        self._CurrentStandingMode = self._RequiredStandingMode
- 
-    def Initialize(self,parameters):
-        WalkingMode.Initialize(self,parameters)        
+        specificParameters = {}
+        self._rotationAngle = 0.0
+        if ((None != generalParameters) and ('Rotate' in generalParameters)):
+            self._rotationAngle = float(generalParameters['Rotate'])
+        else:
+            self._rotationAngle = 0.0
         
-        self._SetRequiredWalkingMode()
+        if ('AP' == self._CurrentStandingMode):
+            specificParameters['turn_in_place_Yaw'] = self._rotationAngle
+        elif ('DW' == self._CurrentStandingMode):
+            pass
+        else:
+            raise Exception("Rot_WalkingMode::Initialize: Unexpected _CurrentStandingMode")
+            
+        self._WalkingModes[self._CurrentStandingMode].Initialize(specificParameters)
         
-        if(self._CurrentStandingMode != self._RequiredStandingMode):
-            self._WalkingModes[self._RequiredStandingMode].SetPath(self._WalkingModes[self._CurrentStandingMode].GetPath())
-            self._LPP = self._LPPs[_RequiredStandingMode]
-        
-        self._WalkingModes[self._CurrentStandingMode].Initialize(parameters)
-        
-    def StartWalking(self):
-        self._WalkingModes[self._CurrentStandingMode].StartWalking()
-    
     def Walk(self):
-        WalkingMode.Walk(self)
-        self._WalkingModes[self._CurrentStandingMode].Walk()
-    
-    def Stop(self):
-        WalkingMode.Stop(self)
-        self._WalkingModes[self._CurrentStandingMode].Stop()
-    
-    def EmergencyStop(self):
-        WalkingMode.Stop(self)
-        self._WalkingModes[self._CurrentStandingMode].EmergencyStop()
-    
-    def SetPath(self,Path):
-        self._WalkingModes[self._CurrentStandingMode].SetPath(Path)
-        self._LPP.SetPath(Path)
-        
-    def GetPath(self):
-        return self._WalkingModes[self._CurrentStandingMode].GetPath()
-        
-    def IsDone(self):
-        return self._WalkingModes[self._CurrentStandingMode].IsDone()
-
-    def IsReady(self):
-        return self._WalkingModes[self._CurrentStandingMode].IsReady()
-    
-    def Fitness(self,path):
-        return True
-
-################################################
-#                  "private"                   #
-################################################
-
-    def _SetRequiredWalkingMode(self):
-        standingPosition = self._srv_StandingPosition().info.state
-        if (StandingPosition.state_standing == standingPosition):
-            self._RequiredStandingMode = 'AP'
-        elif (StandingPosition.state_sitting == standingPosition):
-            self._RequiredStandingMode = 'DW'
+        if('AP' == self._CurrentStandingMode):
+            DC_WalkingMode.Walk(self)
+        elif('DW' == self._CurrentStandingMode):
+            self._WalkingModes[self._CurrentStandingMode]._WalkingModeStateMachine.PerformTransition("Walk")
+            y,p,r = self._WalkingModes[self._CurrentStandingMode].current_ypr()
+            self._Controller.RotateToOri(y+self._rotationAngle)
+            self._WalkingModes[self._CurrentStandingMode]._bDone = True
+        else:
+            raise Exception("Rot_WalkingMode::Walk: Unexpected _CurrentStandingMode")

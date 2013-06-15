@@ -26,7 +26,7 @@ class WalkingModeChooser(WalkingModeChooserInterface):
         
         self._Modes = {'CD':CD_WalkingMode(),'QS':QS_WalkingMode(iTf),'DD':DD_WalkingMode(iTf),\
                        'DW':DW_WalkingMode(iTf),'AP':AP_WalkingMode(iTf),'Rot':Rot_WalkingMode(iTf),\
-                       'Trans':Rot_WalkingMode(iTf)} #TODO Trans_WalkingMode
+                       'Trans':Rot_WalkingMode(iTf)} #Trans_WalkingMode
         self._Preferred = prefferedMode
         self._CurrentMode = prefferedMode
         self._Recommended = prefferedMode
