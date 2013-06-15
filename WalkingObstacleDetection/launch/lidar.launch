@@ -1,0 +1,6 @@
+ <launch>
+ <!-- start Lidar -->
+<node name="Lidar_bash" pkg="WalkingObstacleDetection" type="LIDAR_bash.bash" />
+
+ <node name="WalkDetect" pkg="WalkingObstacleDetection" type="Lidar"/>
+ </launch>

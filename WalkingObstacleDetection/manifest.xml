@@ -1,0 +1,26 @@
+<package>
+  <description brief="WalkingObstacleDetection">
+
+     WalkingObstacleDetection
+
+  </description>
+  <author>root</author>
+  <license>BSD</license>
+  <review status="unreviewed" notes=""/>
+  <url>http://ros.org/wiki/LidarObstacleDetection</url>
+  <depend package="C25_GlobalPosition"/>
+  <depend package="roscpp"/>
+  <depend package="std_msgs"/>
+  <depend package="nav_msgs"/>
+  <depend package="sensor_msgs"/>
+  <depend package="rospy"/>
+  <depend package="opencv2"/>
+  <depend package="cv_bridge"/>
+  <depend package="message_filters"/>
+  <depend package="image_transport"/>
+  <depend package="pcl_ros"/>
+  <depend package="laser_geometry"/>
+  <depend package="pcl"/>
+</package>
+
+
