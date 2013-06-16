@@ -18,7 +18,6 @@
   <depend package="osrf_msgs"/>
   <depend package="atlas_msgs"/>
   <depend package="sensor_msgs"/>
-  <depend package="C23_dFind"/>
   <depend package="C23_ObjectRecognition"/>
   <depend package="C67_CarManipulation"/>
   <depend package="kdl"/>

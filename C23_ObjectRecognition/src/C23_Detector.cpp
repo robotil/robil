@@ -1,4 +1,3 @@
-
 #include <ros/ros.h>
 #include <sensor_msgs/Image.h>
 #include <cv_bridge/cv_bridge.h>
@@ -286,7 +285,7 @@ pcl::PointCloud<pcl::PointXYZ>::Ptr C23_Detector::filterPointCloud(int x,int y, 
         ros::Time(0), transform);
     }
     catch (tf::TransformException ex){
-        continue;  cout<<"jajajajaj\n";
+        continue; cout<<"jajajajaj\n";
     } break; }
     Eigen::Matrix4f sensorTopelvis;
     pcl_ros::transformAsMatrix(transform, sensorTopelvis);
@@ -295,10 +294,10 @@ pcl::PointCloud<pcl::PointXYZ>::Ptr C23_Detector::filterPointCloud(int x,int y, 
     for(i = x; i < x+width; i++) {
         for(j= y; j < y+height; j++) {
             pcl::PointXYZ p=cloud.at(i,j);
-            //  cout<<p<<endl;
+            // cout<<p<<endl;
             if(p.x!=p.x)// || )
 continue;
-//   cout << "Got shosmo" << endl;
+// cout << "Got shosmo" << endl;
 cloud_filtered->points.push_back(p);
         }
     }
@@ -312,18 +311,17 @@ cloud_filtered->points.push_back(p);
 
 void C23_Detector::saveTemplate(int x,int y, int width, int height, const sensor_msgs::PointCloud2::ConstPtr &cloud2, string target) {
     int i,j;
-    /*  static tf::StampedTransform transform;
-     * while(1){ try{
-     * listener2.lookupTransform("/pelvis","/left_camera_optical_frame",
-     * ros::Time(0), transform);
-     }
-     catch (tf::TransformException ex){
-         continue;  cout<<"jajajajaj\n";
-     } break; }
-     Eigen::Matrix4f sensorTopelvis;
-     
-     pcl_ros::transformAsMatrix(transform, sensorTopelvis);
-     */
+    /* static tf::StampedTransform transform;
+* while(1){ try{
+* listener2.lookupTransform("/pelvis","/left_camera_optical_frame",
+* ros::Time(0), transform);
+}
+catch (tf::TransformException ex){
+continue; cout<<"jajajajaj\n";
+} break; }
+Eigen::Matrix4f sensorTopelvis;
+pcl_ros::transformAsMatrix(transform, sensorTopelvis);
+*/
     pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_filtered (new pcl::PointCloud<pcl::PointXYZ>);
     pcl::PointCloud<pcl::PointXYZ>cloud;
     pcl::fromROSMsg<pcl::PointXYZ>(*cloud2,cloud);
@@ -331,10 +329,10 @@ void C23_Detector::saveTemplate(int x,int y, int width, int height, const sensor
     for(i = x; i < x+width; i++) {
         for(j= y; j < y+height; j++) {
             pcl::PointXYZ p=cloud.at(i,j);
-            //  cout<<p<<endl;
+            // cout<<p<<endl;
             if(p.x!=p.x)// || )
 continue;
-//  cout << "Got shosmo" << endl;
+// cout << "Got shosmo" << endl;
 cloud_filtered->points.push_back(p);
         }
     }
@@ -455,7 +453,7 @@ break;
          c21srv.request.sample.y2 = y2;
          c21srv.request.sample.offsetx = offsetx;
          c21srv.request.sample.offsety = offsety;
-         cout << "Sending datA: " << x1 << "," << y1 << "," <<  x2 << "," << y2 << "," << offsetx << "," << offsety << endl;
+         cout << "Sending datA: " << x1 << "," << y1 << "," << x2 << "," << y2 << "," << offsetx << "," << offsety << endl;
          if(c21client.call(c21srv))
          {
              if(x != NULL) *x = round(c21srv.response.point.x);
@@ -494,25 +492,24 @@ break;
          int yMax=std::max(y1,y2);
          double tmp_x = 0;
          double tmp_y =0;
-         double tmp_z  =0;
+         double tmp_z =0;
          
          pcl::PointCloud<pcl::PointXYZ>detectionCloud;
          pcl::fromROSMsg<pcl::PointXYZ>(*cloud,detectionCloud);
          
          /*tf::TransformListener listener;
-          * static tf::StampedTransform transform;
-          * while(1){
-          * try{
-          * listener.lookupTransform("/left_camera_frame","/left_camera_optical_frame",
-          * ros::Time(0), transform);
-          }
-          catch (tf::TransformException ex){
-              continue;  cout<<"Invalid\n";
-          } break;}
-          
-          Eigen::Matrix4f sensorTopelvis;
-          pcl_ros::transformAsMatrix(transform, sensorTopelvis);
-          pcl::transformPointCloud(detectionCloud, detectionCloud, sensorTopelvis);*/
+* static tf::StampedTransform transform;
+* while(1){
+* try{
+* listener.lookupTransform("/left_camera_frame","/left_camera_optical_frame",
+* ros::Time(0), transform);
+}
+catch (tf::TransformException ex){
+continue; cout<<"Invalid\n";
+} break;}
+Eigen::Matrix4f sensorTopelvis;
+pcl_ros::transformAsMatrix(transform, sensorTopelvis);
+pcl::transformPointCloud(detectionCloud, detectionCloud, sensorTopelvis);*/
          
          
          double _x=0;
@@ -538,10 +535,10 @@ break;
                          
                      }
                      
-                     counter++;   
-                     //   break;
-                     //  cout << "Found a fucking point" << endl;
-                     //  }
+                     counter++;
+                     // break;
+                     // cout << "Found a fucking point" << endl;
+                     // }
              }
          }
          cout<<"Counter: "<<counter<<endl;
@@ -579,7 +576,7 @@ break;
          int yMax=std::max(y1,y2);
          double tmp_x = 0;
          double tmp_y =0;
-         double tmp_z  =0;
+         double tmp_z =0;
          pcl::PointCloud<pcl::PointXYZ>detectionCloud;
          pcl::fromROSMsg<pcl::PointXYZ>(*cloud,detectionCloud);
          double _x=0;
@@ -599,7 +596,7 @@ break;
                      _y+=p.y;
                      _z+=p.z;
                      
-                     counter++;   
+                     counter++;
                      //break;
                      
                  }
@@ -610,7 +607,7 @@ break;
              //tmp_x=_x;
              // tmp_y=_y;
              // tmp_z=_z/(counter);
-             //  
+             //
              _x/=(double)counter;
              _y/=(double)counter;
              _z/=(double)counter;
@@ -669,33 +666,61 @@ break;
              c23_stop_posecontroller = nh.serviceClient<std_srvs::Empty>("/PoseController/stop");
              orientation_service=nh.advertiseService("C23/C66", &C23_Detector::process_orientation, this);
              ROS_INFO("Started...");
-             //	gates = new vector<Gate*>();
+             // gates = new vector<Gate*>();
              
          }
-         bool C23_Detector::process_orientation(C23_ObjectRecognition::C23_orient::Request  &req,
+         bool C23_Detector::process_orientation(C23_ObjectRecognition::C23_orient::Request &req,
                                                 C23_ObjectRecognition::C23_orient::Response &res )
          {
              string target = req.target;
+	     string status  ="none";
              if(!target.compare("Firehose")) {
                  char basePath[1000],imageName[1000];
                  
                  sprintf(basePath,"%s/3D_models/%s%c",ros::package::getPath("C23_ObjectRecognition").c_str(),"firehose.txt",'\0');
                  string t = basePath;
-                 //  string t = "/home/isl/darpa/robil/C23_ObjectRecognition/3D_models/firehose.txt";
+                 // string t = "/home/isl/darpa/robil/C23_ObjectRecognition/3D_models/firehose.txt";
                  std::cout<<imageName<<endl;
                  pcl::PointCloud<pcl::PointXYZ>::Ptr cloud2 = filterPointCloud(last_x,last_y,width,height,lastCloud);
-                 templateMatching3D(t,  cloud2);
+                 templateMatching3D(t, cloud2);
              }
-             if(!target.compare("Gear")) {
+             else if(!target.compare("Gear")) {
                  char basePath[1000],imageName[1000];
                  
                  sprintf(basePath,"%s/3D_models/%s%c",ros::package::getPath("C23_ObjectRecognition").c_str(),"gear.txt",'\0');
                  string t = basePath;
-                 //  string t = "/home/isl/darpa/robil/C23_ObjectRecognition/3D_models/firehose.txt";
+                 // string t = "/home/isl/darpa/robil/C23_ObjectRecognition/3D_models/firehose.txt";
                  std::cout<<imageName<<endl;
                  pcl::PointCloud<pcl::PointXYZ>::Ptr cloud2 = filterPointCloud(last_x,last_y,width,height,lastCloud);
-                 templateMatching3D(t,  cloud2);
+                 templateMatching3D(t, cloud2);
+		 
+		 if(current_gear_status==FORWARD_GEAR_STATUS){
+		    status = "Forward";
+		  }
+		  else if(current_gear_status==REVERSE_GEAR_STATUS){
+		    status = "Reverse";
+		  }
              }
+             else if(!target.compare("InsideSteeringWheel")) {
+		char basePath[1000],imageName[1000];
+		
+		sprintf(basePath,"%s/3D_models/%s%c",ros::package::getPath("C23_ObjectRecognition").c_str(),"insideSteeringWheel.txt",'\0');
+		string t = basePath;
+		// string t = "/home/isl/darpa/robil/C23_ObjectRecognition/3D_models/firehose.txt";
+		std::cout<<imageName<<endl;
+		pcl::PointCloud<pcl::PointXYZ>::Ptr cloud2 = filterPointCloud(last_x,last_y,width,height,lastCloud);
+		templateMatching3D(t, cloud2);
+	      }
+	      else if(!target.compare("OutsideSteeringWheel")) {
+		char basePath[1000],imageName[1000];
+		
+		sprintf(basePath,"%s/3D_models/%s%c",ros::package::getPath("C23_ObjectRecognition").c_str(),"outsideSteeringWheel.txt",'\0');
+		string t = basePath;
+		// string t = "/home/isl/darpa/robil/C23_ObjectRecognition/3D_models/firehose.txt";
+		std::cout<<imageName<<endl;
+		pcl::PointCloud<pcl::PointXYZ>::Ptr cloud2 = filterPointCloud(last_x,last_y,width,height,lastCloud);
+		templateMatching3D(t, cloud2);
+		}
              
              
              res.x = orient_x;
@@ -704,6 +729,7 @@ break;
              res.R = orient_R;
              res.Y = orient_Y;
              res.P = orient_P;
+	     res.status=status;
              return true;
          }
          
@@ -711,11 +737,11 @@ break;
          
          bool C23_Detector::detect(const string target) {
              
-             //   ROS_INFO(target.c_str());
+             // ROS_INFO(target.c_str());
              
              if(!target.compare("Gate")) {
                  _target = GATE;
-                 //  ROS_INFO("We are looking for a gate...");
+                 // ROS_INFO("We are looking for a gate...");
              } else if (!target.compare("Car")) {
                  _generalDetector.initialize("carEntry");
                  _target = CAR;
@@ -767,7 +793,7 @@ break;
              
          }
          void C23_Detector::publishMessage(bool isFound) {
-             //   ROS_INFO("Publishing message..");
+             // ROS_INFO("Publishing message..");
              C23_ObjectRecognition::C23C0_OD msg_detected;
              C23_ObjectRecognition::C23C0_ODIM msg_odim;
              C23_ObjectRecognition::C23C0_GP msg_gp;
@@ -844,7 +870,7 @@ break;
              
              
              
-             //  ROS_INFO("Publishing message..");
+             // ROS_INFO("Publishing message..");
              objectDimensionsPublisher.publish(msg_odim);
              objectDetectedPublisher.publish(msg_detected);
              objectGlobalPositionPublisher.publish(msg_gp);
@@ -853,7 +879,7 @@ break;
          }
          void C23_Detector::callback(const sensor_msgs::ImageConstPtr& msg,const sensor_msgs::PointCloud2::ConstPtr &cloud)
          {
-             //    ROS_INFO("Receiving image..");
+              ROS_INFO("Receiving image..");
              Mat srcImg = fromSensorMsg(msg);
              bool res;
              pcl::PointCloud<pcl::PointXYZ>detectionCloud;
@@ -866,7 +892,7 @@ break;
                  ros::Time(0), transform);
              }
              catch (tf::TransformException ex){
-                 continue;  cout<<"jajajajaj\n";
+                 continue; cout<<"jajajajaj\n";
              } break; }
              Eigen::Matrix4f sensorTopelvis;
              pcl_ros::transformAsMatrix(transform, sensorTopelvis);
@@ -886,7 +912,7 @@ break;
                      publishMessage(res);
                      break;
                  case GATE:
-                     ROS_INFO("GATE");         
+                     ROS_INFO("GATE");
                      boost::filesystem::create_directory("C23_Test");
                      res = detectGate(srcImg,cloud);
                      publishMessage(res);
@@ -941,7 +967,7 @@ break;
                      ROS_INFO("GEAR");
                      res = detectGear(srcImg,cloud,1);
                      publishMessage(res);
-                     break; 
+                     break;
                  case ARROW:
                      ROS_INFO("ARROW");
                      res = detectArrowDirection(srcImg, cloud);
@@ -969,10 +995,10 @@ break;
              Mat img_display;
              Mat result; //The result matrix
              img.copyTo( img_display );
-             bool res  =false;
+             bool res =false;
              
              // Create the result matrix
-             int result_cols =  img.cols - templ.cols + 1;
+             int result_cols = img.cols - templ.cols + 1;
              int result_rows = img.rows - templ.rows + 1;
              
              result.create( result_cols, result_rows, CV_32FC1 );
@@ -988,15 +1014,15 @@ break;
              minMaxLoc( result, &minVal, &maxVal, &minLoc, &maxLoc, Mat() );
              cout<<"Minval: "<<minVal<<endl;
              // For SQDIFF and SQDIFF_NORMED, the best matches are lower values. For all the other methods, the higher the better
-             if( matching_method  == 0 || matching_method == 1 )
-             { *matchLoc = minLoc; 
+             if( matching_method == 0 || matching_method == 1 )
+             { *matchLoc = minLoc;
              if(value!=NULL)
-                 *value  = minVal;
+                 *value = minVal;
              }
              else
-             { *matchLoc = maxLoc; 
+             { *matchLoc = maxLoc;
              if(value!=NULL)
-                 *value  = maxVal;
+                 *value = maxVal;
              }
              
              // Show me what you got
@@ -1004,7 +1030,7 @@ break;
              //rectangle( result, matchLoc, cv::Point( matchLoc.x + templ.cols , matchLoc.y + templ.rows ), Scalar::all(0), 2, 8, 0 );
              
              cout<<" Before Gear x,y,z: "<<x<<", "<<y<<", "<<z<<endl;
-             averagePointCloudInsideCar(matchLoc->x, matchLoc->y, matchLoc->x + templ.cols, matchLoc->y + templ.rows, cloud, &x, &y, &z); 
+             averagePointCloudInsideCar(matchLoc->x, matchLoc->y, matchLoc->x + templ.cols, matchLoc->y + templ.rows, cloud, &x, &y, &z);
              
              
              cout<<"x close: "<<x<<endl;
@@ -1063,7 +1089,7 @@ break;
              cvtColor(srcImg, hsvImg, CV_BGR2HSV);
              inRange(hsvImg, Scalar(70, 0, 0), Scalar(110, 255, 255), thresholdedImg);
              
-             //  imshow("Thresholded Image", thresholdedImg);
+             // imshow("Thresholded Image", thresholdedImg);
              // waitKey();
              
              //Open the image to remove noise
@@ -1073,8 +1099,8 @@ break;
              Mat element2(40, 40, CV_8U, Scalar(1));
              morphologyEx(imgCarOpened, imgCarClosed, MORPH_CLOSE, element2);
              
-             //  imshow("Closed image", imgCarClosed);
-             //  waitKey();
+             // imshow("Closed image", imgCarClosed);
+             // waitKey();
              
              Mat arrowImg;
              imgCarClosed.copyTo(arrowImg);
@@ -1122,7 +1148,7 @@ break;
              
              mu = moments(blobContours[maxIndex], false);
              
-             //  Get the mass centers:
+             // Get the mass centers:
              Point2f mc;
              
              mc = Point2f(mu.m10 / mu.m00, mu.m01 / mu.m00);
@@ -1136,8 +1162,8 @@ break;
              Rect arrowBox = boundingRect(blobContours[maxIndex]);
              
              Mat finalImg(imgCarClosed, arrowBox);
-             //  imshow("Arrow Image", finalImg);
-             //  waitKey();
+             // imshow("Arrow Image", finalImg);
+             // waitKey();
              
              //countNonZero(src Array);
              //Test the direction
@@ -1150,7 +1176,7 @@ break;
              cv::Mat rightCol = finalImg.col(rightSumCol);
              
              int leftSum = countNonZero(leftCol);
-             int rightSum  = countNonZero(rightCol);
+             int rightSum = countNonZero(rightCol);
              
              cout << "Black Pixels Left side: " << leftSum <<" Right side: "<<rightSum<<endl;
              
@@ -1158,29 +1184,30 @@ break;
              
              double x1,y1,z1,x2,y2,z2;
              bool a_res =false;
-             
-             if(leftSum>rightSum){
+	     res = false;
+             double difference = abs(leftSum - rightSum);
+             if(leftSum>rightSum && difference > 10){
                  ROS_INFO("RIGHT ARROW");
                  
-                 a_res = pictureCoordinatesToGlobalPosition(arrowBox.x, arrowBox.y,arrowBox.x + arrowBox.height, arrowBox.y + arrowBox.width, &x1, &y1,&z1,-1,-4);
-                 a_res&= pictureCoordinatesToGlobalPosition(arrowBox.x, arrowBox.y,arrowBox.x + arrowBox.height, arrowBox.y + arrowBox.width, &x2, &y2,&z2,-1,0);
+                 a_res = pictureCoordinatesToGlobalPosition(arrowBox.x, arrowBox.y,arrowBox.x + arrowBox.height, arrowBox.y + arrowBox.width, &x1, &y1,&z1,-1,0);
+                 a_res&= pictureCoordinatesToGlobalPosition(arrowBox.x, arrowBox.y,arrowBox.x + arrowBox.height, arrowBox.y + arrowBox.width, &x2, &y2,&z2,-1,-4);
                  res = a_res;
                  this->x = x1;
                  this->y = y1;
                  this->x2 = x2;
-                 this->y2 =  y2;
+                 this->y2 = y2;
                  
              }
-             else{
+             else if (difference > 10) {
                  ROS_INFO("LEFT ARROW");
                  res = true;
-                 a_res = pictureCoordinatesToGlobalPosition(arrowBox.x, arrowBox.y,arrowBox.x + arrowBox.height, arrowBox.y + arrowBox.width, &x1, &y1,&z1,-1,+4);
-                 a_res&= pictureCoordinatesToGlobalPosition(arrowBox.x, arrowBox.y,arrowBox.x + arrowBox.height, arrowBox.y + arrowBox.width, &x2, &y2,&z2,-1,0);
+                 a_res = pictureCoordinatesToGlobalPosition(arrowBox.x, arrowBox.y,arrowBox.x + arrowBox.height, arrowBox.y + arrowBox.width, &x1, &y1,&z1,-1,0);
+                 a_res&= pictureCoordinatesToGlobalPosition(arrowBox.x, arrowBox.y,arrowBox.x + arrowBox.height, arrowBox.y + arrowBox.width, &x2, &y2,&z2,-1,4);
                  res = a_res;
                  this->x = x1;
                  this->y = y1;
                  this->x2 = x2;
-                 this->y2 =  y2;
+                 this->y2 = y2;
              }
              
              
@@ -1194,68 +1221,65 @@ break;
              
              
              /*cv::Point matchLoc;
-              * double minValLeft = 0;
-              * double minValRight = 0;
-              * //Load the image template for the steering wheel
-              * //------------------------------------------------------------------
-              * // Load the object templates specified in the object_templates.txt file
-              * char basePath[1000],imageName[1000];
-              * 
-              * sprintf(basePath,"%s/template_matching_images/%c",ros::package::getPath("C23_ObjectRecognition").c_str(),'\0');
-              * 
-              * sprintf(imageName,"%sarrow_template_qual_left.jpg%c",basePath,'\0');
-              * std::cout<<imageName<<endl;
-              * //-----------------------------------------------------------------
-              * 
-              * 
-              * Mat leftArrowTemplate = imread(imageName);
-              * 
-              * //imshow("Hand brake template", handbrakeTemplate);
-              * //waitKey(0);
-              * 
-              * bool res =  templateMatching(srcImg, leftArrowTemplate, 1, &matchLoc, cloud, &minValLeft);
-              * 
-              * 
-              * sprintf(basePath,"%s/template_matching_images/%c",ros::package::getPath("C23_ObjectRecognition").c_str(),'\0');
-              * 
-              * sprintf(imageName,"%sarrow_template_qual_right.jpg%c",basePath,'\0');
-              * std::cout<<imageName<<endl;
-              * 
-              * Mat rightArrowTemplate = imread(imageName);
-              * 
-              * //imshow("Hand brake template", handbrakeTemplate);
-              * //waitKey(0);
-              * 
-              * res =  templateMatching(srcImg, rightArrowTemplate, 1, &matchLoc, cloud, &minValRight);
-              * 
-              * double THRESHOLD = 0.04;
-              * if(minValLeft<THRESHOLD || minValRight< THRESHOLD)
-              * {
-              * if (minValLeft >minValRight){
-              * ROS_INFO("Right Arrow Detected");
-              * averagePointCloud(matchLoc.x, matchLoc.y, matchLoc.x + rightArrowTemplate.rows, matchLoc.y + rightArrowTemplate.cols, cloud,&x,&y,&z);
-              * x = x-1;
-              * y = y+4;
-              * cout<<"(x,y,z): "<<x<<y<<z<<endl;
-              }
-              else{
-                  ROS_INFO("Left Arrow Detected");
-                  averagePointCloud(matchLoc.x, matchLoc.y, matchLoc.x + leftArrowTemplate.rows, matchLoc.y + leftArrowTemplate.cols, cloud,&x,&y,&z);
-                  x = x  -1;
-                  y  =y-4;
-                  cout<<"(x,y,z): "<<x<<y<<z<<endl;
-              }
-              }
-              else{
-                  ROS_INFO("Arrow Not Detected"); 
-              }
-              
-              
-              
-              imshow("New Arrow Image", leftArrowTemplate);
-              waitKey();
-              imshow("New Arrow Image", rightArrowTemplate);
-              waitKey();*/
+* double minValLeft = 0;
+* double minValRight = 0;
+* //Load the image template for the steering wheel
+* //------------------------------------------------------------------
+* // Load the object templates specified in the object_templates.txt file
+* char basePath[1000],imageName[1000];
+*
+* sprintf(basePath,"%s/template_matching_images/%c",ros::package::getPath("C23_ObjectRecognition").c_str(),'\0');
+*
+* sprintf(imageName,"%sarrow_template_qual_left.jpg%c",basePath,'\0');
+* std::cout<<imageName<<endl;
+* //-----------------------------------------------------------------
+*
+*
+* Mat leftArrowTemplate = imread(imageName);
+*
+* //imshow("Hand brake template", handbrakeTemplate);
+* //waitKey(0);
+*
+* bool res = templateMatching(srcImg, leftArrowTemplate, 1, &matchLoc, cloud, &minValLeft);
+*
+*
+* sprintf(basePath,"%s/template_matching_images/%c",ros::package::getPath("C23_ObjectRecognition").c_str(),'\0');
+*
+* sprintf(imageName,"%sarrow_template_qual_right.jpg%c",basePath,'\0');
+* std::cout<<imageName<<endl;
+*
+* Mat rightArrowTemplate = imread(imageName);
+*
+* //imshow("Hand brake template", handbrakeTemplate);
+* //waitKey(0);
+*
+* res = templateMatching(srcImg, rightArrowTemplate, 1, &matchLoc, cloud, &minValRight);
+*
+* double THRESHOLD = 0.04;
+* if(minValLeft<THRESHOLD || minValRight< THRESHOLD)
+* {
+* if (minValLeft >minValRight){
+* ROS_INFO("Right Arrow Detected");
+* averagePointCloud(matchLoc.x, matchLoc.y, matchLoc.x + rightArrowTemplate.rows, matchLoc.y + rightArrowTemplate.cols, cloud,&x,&y,&z);
+* x = x-1;
+* y = y+4;
+* cout<<"(x,y,z): "<<x<<y<<z<<endl;
+}
+else{
+ROS_INFO("Left Arrow Detected");
+averagePointCloud(matchLoc.x, matchLoc.y, matchLoc.x + leftArrowTemplate.rows, matchLoc.y + leftArrowTemplate.cols, cloud,&x,&y,&z);
+x = x -1;
+y =y-4;
+cout<<"(x,y,z): "<<x<<y<<z<<endl;
+}
+}
+else{
+ROS_INFO("Arrow Not Detected");
+}
+imshow("New Arrow Image", leftArrowTemplate);
+waitKey();
+imshow("New Arrow Image", rightArrowTemplate);
+waitKey();*/
              
              
              
@@ -1283,7 +1307,7 @@ break;
     
     //Load the image template for the steering wheel
     Mat steeringwheelTemplate = imread(imageName);
-    res  = templateMatching(srcImg, steeringwheelTemplate, 1, &matchLoc, cloud);
+    res = templateMatching(srcImg, steeringwheelTemplate, 1, &matchLoc, cloud);
     
     
     imshow("Steering wheel template", steeringwheelTemplate);
@@ -1319,8 +1343,8 @@ else{
     cout << x << "," << y << "," << width << "," << height << endl;
     for(int i = 0; i < imgCarOpened.rows; i++) {
         for(int j = 0; j < imgCarOpened.cols; j++) {
-            //     cout << "(" << i << "," << j << "," << pclcloud.at(i,j).z << ")" << endl;
-            distance  = sqrt((pclcloud.at(i,j).x*pclcloud.at(i,j).x+pclcloud.at(i,j).y*pclcloud.at(i,j).y+pclcloud.at(i,j).z*pclcloud.at(i,j).z)*10000);
+            // cout << "(" << i << "," << j << "," << pclcloud.at(i,j).z << ")" << endl;
+            distance = sqrt((pclcloud.at(i,j).x*pclcloud.at(i,j).x+pclcloud.at(i,j).y*pclcloud.at(i,j).y+pclcloud.at(i,j).z*pclcloud.at(i,j).z)*10000);
             if( distance > THRESHOLD || distance!=distance || distance<0) {
                 //cout<<"distance: "<<distance<<endl;
                 imgCarOpened.at<uchar>(i,j) = 0;
@@ -1382,7 +1406,7 @@ else{
         mu = moments( blobContours[maxIndex], false );
         
         
-        //  Get the mass centers:
+        // Get the mass centers:
         int OFFSET_WHEEL = 150;
         Point2f mc;
         mc= Point2f( mu.m10/mu.m00 , mu.m01/mu.m00 );
@@ -1393,13 +1417,13 @@ else{
         int y1 = max(0,(int)(mc.x) - OFFSET_WHEEL);
         
         int width = OFFSET_WHEEL*2;
-        int height  = OFFSET_WHEEL*2;
+        int height = OFFSET_WHEEL*2;
         
         if(x1+width>imgCarFinal.cols){
-            width = imgCarFinal.cols - x1; 
+            width = imgCarFinal.cols - x1;
         }
         if(y1+height>imgCarFinal.rows){
-            height = imgCarFinal.rows - y1; 
+            height = imgCarFinal.rows - y1;
         }
         
         Rect rect(x1, y1, width, height);
@@ -1408,7 +1432,7 @@ else{
         imshow("Bounded area", boundedSteeringWheelImg);
         waitKey();
         //x = mc.x;
-        //y  =mc.y;
+        //y =mc.y;
     }
     
     
@@ -1447,7 +1471,7 @@ return res;
              //imshow("Hand brake template", handbrakeTemplate);
              //waitKey(0);
              
-             bool res =  templateMatching(srcImg, gearTemplate, 1, &matchLoc, cloud);
+             bool res = templateMatching(srcImg, gearTemplate, 1, &matchLoc, cloud);
              
              if (res)
                  ROS_INFO("Detected Handbrake");
@@ -1495,7 +1519,7 @@ return res;
              //imshow("Gear template", gearTemplate);
              //waitKey(0);
              
-             res  = templateMatching(srcImg, gearTemplate, 0, &matchLoc, cloud);
+             res = templateMatching(srcImg, gearTemplate, 0, &matchLoc, cloud);
              
              
              
@@ -1510,10 +1534,10 @@ return res;
                  ytop = y;
                  ztop = z;
                  //Bottom quarter
-                 averagePointCloudInsideCar(matchLoc.x, matchLoc.y +  gearTemplate.rows/2, matchLoc.x + gearTemplate.cols/2, matchLoc.y + gearTemplate.rows, cloud, &x, &y, &z); 
+                 averagePointCloudInsideCar(matchLoc.x, matchLoc.y + gearTemplate.rows/2, matchLoc.x + gearTemplate.cols/2, matchLoc.y + gearTemplate.rows, cloud, &x, &y, &z);
                  xbot = x;
                  ybot = y;
-                 zbot  =z;
+                 zbot =z;
                  
                  
                  double distTop = sqrt((xtop*xtop + ytop*ytop + ztop*ztop)*10000);
@@ -1532,15 +1556,15 @@ return res;
                  
                  cout<<"Distance LS: "<<difference<<endl;
                  
-                 if(difference >15)
-                 {
-                     status = REVERSE_GEAR_STATUS;
-                     cout<<"Reverse status"<<endl;
-                 }
-                 else{
-                     status = FORWARD_GEAR_STATUS;
-                     cout<<"Forward status"<<endl;
-                 }
+                 	if(difference >15)
+			{
+			current_gear_status = REVERSE_GEAR_STATUS;
+			cout<<"Reverse status"<<endl;
+			}
+			else{
+			current_gear_status = FORWARD_GEAR_STATUS;
+			cout<<"Forward status"<<endl;
+			}
                  
                  string t = "Gear";
                  cout << "Saving Gear" << endl;
@@ -1557,30 +1581,30 @@ return res;
                  ROS_INFO("Detected Gear");
              else
                  ROS_INFO("Gear NOT detected");
-             /*   //Determine the gear state
-              * //------------------------------------------------------------------
-              * // Load the object templates specified in the object_templates.txt file
-              * sprintf(basePath,"%s/template_matching_images/%c",ros::package::getPath("C23_ObjectRecognition").c_str(),'\0');
-              * 
-              * sprintf(imageName,"%sgear_template_qual_2_1.jpg%c",basePath,'\0');
-              * std::cout<<imageName<<endl;
-              * //-----------------------------------------------------------------
-              * Mat reverseGearTemplate = imread(imageName);
-              * imshow("Reverse Gear template", reverseGearTemplate);
-              * waitKey(0);
-              * 
-              * res  = templateMatching(srcImg, reverseGearTemplate, 0, &matchLoc, cloud);
-              * 
-              */
+             /* //Determine the gear state
+* //------------------------------------------------------------------
+* // Load the object templates specified in the object_templates.txt file
+* sprintf(basePath,"%s/template_matching_images/%c",ros::package::getPath("C23_ObjectRecognition").c_str(),'\0');
+*
+* sprintf(imageName,"%sgear_template_qual_2_1.jpg%c",basePath,'\0');
+* std::cout<<imageName<<endl;
+* //-----------------------------------------------------------------
+* Mat reverseGearTemplate = imread(imageName);
+* imshow("Reverse Gear template", reverseGearTemplate);
+* waitKey(0);
+*
+* res = templateMatching(srcImg, reverseGearTemplate, 0, &matchLoc, cloud);
+*
+*/
              
              
              
              
              /*int xpos = matchLoc.x;
-              * int ypos = matchLoc.y;
-              * int width = matchLoc.x
-              * 
-              * for(int ii=*/
+* int ypos = matchLoc.y;
+* int width = matchLoc.x
+*
+* for(int ii=*/
              
              
              
@@ -1639,14 +1663,14 @@ return res;
                   
                   
                   /* for( int i = 0; i < contours.size(); i++ )
-                   * {
-                   * cout << "Contour: " << i << ", Size: " << contours[i].size() << endl;
-                   * if( contours[i].size() > 5 )
-                   * {
-                   * minEllipse[i] = fitEllipse( Mat(contours[i]) );
-                   *
-                   }
-                   }*/
+* {
+* cout << "Contour: " << i << ", Size: " << contours[i].size() << endl;
+* if( contours[i].size() > 5 )
+* {
+* minEllipse[i] = fitEllipse( Mat(contours[i]) );
+*
+}
+}*/
                   RotatedRect minRect = minAreaRect( Mat(contours[biggest]));
                   minRect.points( rect_points );
                   for( int j = 0; j < 4; j++ )
@@ -1655,13 +1679,13 @@ return res;
                       /// Draw contours + rotated rects + ellipses
                       // Mat drawing = Mat::zeros( threshold_output.size(), CV_8UC3 );
                       /* for( int i = 0; i< contours.size(); i++ )
-                       * {
-                       * Scalar color = Scalar( rng.uniform(0, 255), rng.uniform(0,255), rng.uniform(0,255) );
-                       * // contour
-                       * // drawContours( bw, contours, i, color, 1, 8, vector<Vec4i>(), 0, Pointf() );
-                       * // ellipse
-                       * ellipse( imgThreshed, minEllipse[i], color, 2, 8 );
-                       }*/
+* {
+* Scalar color = Scalar( rng.uniform(0, 255), rng.uniform(0,255), rng.uniform(0,255) );
+* // contour
+* // drawContours( bw, contours, i, color, 1, 8, vector<Vec4i>(), 0, Pointf() );
+* // ellipse
+* ellipse( imgThreshed, minEllipse[i], color, 2, 8 );
+}*/
                       imshow("TESTING",srcImg);
                       waitKey(0);
                       int x1 = MIN(rect_points[0].x,rect_points[1].x);
@@ -1740,20 +1764,20 @@ return res;
                      
                  }
              }
-             if(biggest_size > 50 && biggest_size < 180) {
+             if(biggest_size > 50 && biggest_size < 500) {
                  
                  
                  
                  
                  /* for( int i = 0; i < contours.size(); i++ )
-                  * {
-                  * cout << "Contour: " << i << ", Size: " << contours[i].size() << endl;
-                  * if( contours[i].size() > 5 )
-                  * {
-                  * minEllipse[i] = fitEllipse( Mat(contours[i]) );
-                  *
-                  }
-                  }*/
+* {
+* cout << "Contour: " << i << ", Size: " << contours[i].size() << endl;
+* if( contours[i].size() > 5 )
+* {
+* minEllipse[i] = fitEllipse( Mat(contours[i]) );
+*
+}
+}*/
                  RotatedRect minRect = minAreaRect( Mat(contours[biggest]));
                  minRect.points( rect_points );
                  for( int j = 0; j < 4; j++ )
@@ -1762,16 +1786,16 @@ return res;
                      /// Draw contours + rotated rects + ellipses
                      // Mat drawing = Mat::zeros( threshold_output.size(), CV_8UC3 );
                      /* for( int i = 0; i< contours.size(); i++ )
-                      * {
-                      * Scalar color = Scalar( rng.uniform(0, 255), rng.uniform(0,255), rng.uniform(0,255) );
-                      * // contour
-                      * // drawContours( bw, contours, i, color, 1, 8, vector<Vec4i>(), 0, Pointf() );
-                      * // ellipse
-                      * ellipse( imgThreshed, minEllipse[i], color, 2, 8 );
-                      }*/
+* {
+* Scalar color = Scalar( rng.uniform(0, 255), rng.uniform(0,255), rng.uniform(0,255) );
+* // contour
+* // drawContours( bw, contours, i, color, 1, 8, vector<Vec4i>(), 0, Pointf() );
+* // ellipse
+* ellipse( imgThreshed, minEllipse[i], color, 2, 8 );
+}*/
                      imshow("TESTING",srcImg);
                      waitKey(0);
-                     //	pictureCoordinatesToGlobalPosition(minRect.center.x-100,minRect.center.y+100,minRect.center.x+100,minRect.center.y+100,&x,&y,NULL);
+                     // pictureCoordinatesToGlobalPosition(minRect.center.x-100,minRect.center.y+100,minRect.center.x+100,minRect.center.y+100,&x,&y,NULL);
                      return true;
              }
              return false;
@@ -1832,14 +1856,14 @@ return res;
                  
                  
                  /* for( int i = 0; i < contours.size(); i++ )
-                  * {
-                  * cout << "Contour: " << i << ", Size: " << contours[i].size() << endl;
-                  * if( contours[i].size() > 5 )
-                  * {
-                  * minEllipse[i] = fitEllipse( Mat(contours[i]) );
-                  *
-                  }
-                  }*/
+* {
+* cout << "Contour: " << i << ", Size: " << contours[i].size() << endl;
+* if( contours[i].size() > 5 )
+* {
+* minEllipse[i] = fitEllipse( Mat(contours[i]) );
+*
+}
+}*/
                  RotatedRect minRect = minAreaRect( Mat(contours[biggest]));
                  minRect.points( rect_points );
                  for( int j = 0; j < 4; j++ )
@@ -1848,15 +1872,15 @@ return res;
                      /// Draw contours + rotated rects + ellipses
                      // Mat drawing = Mat::zeros( threshold_output.size(), CV_8UC3 );
                      /* for( int i = 0; i< contours.size(); i++ )
-                      * {
-                      * Scalar color = Scalar( rng.uniform(0, 255), rng.uniform(0,255), rng.uniform(0,255) );
-                      * // contour
-                      * // drawContours( bw, contours, i, color, 1, 8, vector<Vec4i>(), 0, Pointf() );
-                      * // ellipse
-                      * ellipse( imgThreshed, minEllipse[i], color, 2, 8 );
-                      }*/
+* {
+* Scalar color = Scalar( rng.uniform(0, 255), rng.uniform(0,255), rng.uniform(0,255) );
+* // contour
+* // drawContours( bw, contours, i, color, 1, 8, vector<Vec4i>(), 0, Pointf() );
+* // ellipse
+* ellipse( imgThreshed, minEllipse[i], color, 2, 8 );
+}*/
                      //imshow("TESTING",srcImg);
-                     //	waitKey(0);
+                     // waitKey(0);
                      //pictureCoordinatesToGlobalPosition(minRect.center.x-100,minRect.center.y+100,minRect.center.x+100,minRect.center.y+100,&x,&y,NULL);
                      int x1 = MIN(rect_points[0].x,rect_points[1].x);
                      int x2 = MIN(rect_points[2].x,rect_points[3].x);
@@ -1943,14 +1967,14 @@ return res;
                  
                  
                  /* for( int i = 0; i < contours.size(); i++ )
-                  * {
-                  * cout << "Contour: " << i << ", Size: " << contours[i].size() << endl;
-                  * if( contours[i].size() > 5 )
-                  * {
-                  * minEllipse[i] = fitEllipse( Mat(contours[i]) );
-                  *
-                  }
-                  }*/
+* {
+* cout << "Contour: " << i << ", Size: " << contours[i].size() << endl;
+* if( contours[i].size() > 5 )
+* {
+* minEllipse[i] = fitEllipse( Mat(contours[i]) );
+*
+}
+}*/
                  RotatedRect minRect = minAreaRect( Mat(contours[biggest]));
                  minRect.points( rect_points );
                  for( int j = 0; j < 4; j++ )
@@ -1976,11 +2000,11 @@ return res;
                  int max_y = MAX(y1,y2);
                  string t = "Standpipe";
                  cout << "Saving standpipe" << endl;
-                 //   saveTemplate(min_x,min_y,max_x-min_x,max_y-min_y,cloud,t);
-                 //   templateMatching3D(t,lastCloud);
+                 // saveTemplate(min_x,min_y,max_x-min_x,max_y-min_y,cloud,t);
+                 // templateMatching3D(t,lastCloud);
                  imshow("TESTING",srcImg);
                  waitKey(0);
-                 //	pictureCoordinatesToGlobalPosition(minRect.center.x-100,minRect.center.y+100,minRect.center.x+100,minRect.center.y+100,&x,&y,NULL);
+                 // pictureCoordinatesToGlobalPosition(minRect.center.x-100,minRect.center.y+100,minRect.center.x+100,minRect.center.y+100,&x,&y,NULL);
                  return true;
              }
              return false;
@@ -2023,7 +2047,7 @@ return res;
                  cv::drawContours(srcImg, contours, idx, colors[idx % 3]);
              }
              
-             //  drawContours(srcImg,contours,-1,CV_RGB(255,0,0),2);
+             // drawContours(srcImg,contours,-1,CV_RGB(255,0,0),2);
              // imshow("TESSTING",srcImg);
              waitKey(0);
              vector<RotatedRect> minEllipse( contours.size() );
@@ -2033,7 +2057,7 @@ return res;
              {
                  cout << "Contour: " << i << ", Size: " << contours[i].size() << endl;
                  if( contours[i].size() > biggest_size )
-                 { 
+                 {
                      biggest_size = contours[i].size();
                      biggest = i;
                      
@@ -2045,15 +2069,15 @@ return res;
                  
                  
                  /* for( int i = 0; i < contours.size(); i++ )
-                  *            {
-                  *                cout << "Contour: " << i << ", Size: " << contours[i].size() << endl;
-                  *                if( contours[i].size() > 5 )
-                  *                    { 
-                  *                        minEllipse[i] = fitEllipse( Mat(contours[i]) ); 
-                  *                        
-                  }
-                  }*/
-                 RotatedRect minRect =  minAreaRect( Mat(contours[biggest]));
+* {
+* cout << "Contour: " << i << ", Size: " << contours[i].size() << endl;
+* if( contours[i].size() > 5 )
+* {
+* minEllipse[i] = fitEllipse( Mat(contours[i]) );
+*
+}
+}*/
+                 RotatedRect minRect = minAreaRect( Mat(contours[biggest]));
                  minRect.points( rect_points );
                  for( int j = 0; j < 4; j++ )
                      line( srcImg, rect_points[j], rect_points[(j+1)%4], CV_RGB(255,0,0), 1, 8 );
@@ -2061,19 +2085,19 @@ return res;
                      /// Draw contours + rotated rects + ellipses
                      // Mat drawing = Mat::zeros( threshold_output.size(), CV_8UC3 );
                      /* for( int i = 0; i< contours.size(); i++ )
-                      *            {
-                      *                Scalar color = Scalar( rng.uniform(0, 255), rng.uniform(0,255), rng.uniform(0,255) );
-                      *                // contour
-                      *            //  drawContours( bw, contours, i, color, 1, 8, vector<Vec4i>(), 0, Pointf() );
-                      *                // ellipse
-                      *                ellipse( imgThreshed, minEllipse[i], color, 2, 8 );
-                      }*/
+* {
+* Scalar color = Scalar( rng.uniform(0, 255), rng.uniform(0,255), rng.uniform(0,255) );
+* // contour
+* // drawContours( bw, contours, i, color, 1, 8, vector<Vec4i>(), 0, Pointf() );
+* // ellipse
+* ellipse( imgThreshed, minEllipse[i], color, 2, 8 );
+}*/
                      imshow("TESTING",srcImg);
                      waitKey(0);
-                     //	pictureCoordinatesToGlobalPosition(minRect.center.x-100,minRect.center.y+100,minRect.center.x+100,minRect.center.y+100,&x,&y,NULL);
+                     // pictureCoordinatesToGlobalPosition(minRect.center.x-100,minRect.center.y+100,minRect.center.x+100,minRect.center.y+100,&x,&y,NULL);
                      
                      //FIXME:
-                     //  with offset 
+                     // with offset
                      return true;
              }
              return false;
@@ -2082,32 +2106,7 @@ return res;
          
          
          bool C23_Detector::detectCar(Mat srcImg, const sensor_msgs::PointCloud2::ConstPtr &cloud) {
-             
-             //------------------Move Robots Neck---------------------------------------
-             /* PoseController::delta_neck_movement neck;
-              * double total_time = 1.0;
-              * int segments = 50;
-              * //ROS_INFO("Got back_lbz %f", positions[joints["back_lbz"]]);
-              * double velocity = (direction - positions[joints["back_lbz"]])/total_time;
-              * std_srvs::Empty e;
-              * start_posecontroller_cli_.call(e);
-              * //ROS_INFO("velocity %f", velocity);
-              * for(int i = 0; i < segments; i++){
-              * ros::spinOnce();
-              * neck.request.back_lbz = velocity/segments;
-              * //ROS_INFO("velocity #%d: %f", i+1, back.request.back_lbz);
-              * //ROS_INFO("#%d joint: %f", i+1, positions[joints["back_lbz"]]);
-              * //ROS_INFO("#%d direction: %f", i+1, direction);
-              * if(!backz_cli.call(neck)){
-              * ROS_ERROR("%s: aborted", action_name_.c_str());
-              * // set the action state to preempted
-              * as_.setAborted();
-              * break;
-              }
-              ros::Duration(total_time/segments).sleep();
-              }
-              stop_posecontroller_cli_.call(e);*/
-             //----------------------------------------------------------
+            
              
              //Define the service client to be accessed
              C21_VisionAndLidar::C21_obj c21srv;
@@ -2119,20 +2118,21 @@ return res;
              cout << "Done detection" << endl;
              // 215,365,182,114
              /*_generalDetector._x = 215;
-              * _generalDetector._y = 365;
-              * _generalDetector._width = 182;
-              * _generalDetector._height = 114;
-              */
+* _generalDetector._y = 365;
+* _generalDetector._width = 182;
+* _generalDetector._height = 114;
+*/
              
-             Rect carRect(_generalDetector._x, _generalDetector._y, _generalDetector._width, _generalDetector._height);
-             Mat carImage(srcImg, carRect);
-             imshow("Car patch", carImage);
-             waitKey(0);
-             
+	    GeneralDetector::CAR_TARGET car_target = GeneralDetector::NONE;
              Point2f minImagePoint;
-             minImagePoint.x = -1;
-             minImagePoint.y = -1;
+             minImagePoint.x = 0;
+             minImagePoint.y = 0;
              if(_generalDetector._x != -1) {
+	        Rect carRect(_generalDetector._x, _generalDetector._y, _generalDetector._width, _generalDetector._height);
+		Mat carImage(srcImg, carRect);
+		imshow("Car patch", carImage);
+		waitKey(0);
+             
                  x = _generalDetector._x;
                  y = _generalDetector._y;
                  width = _generalDetector._width;
@@ -2151,7 +2151,7 @@ return res;
                  cout << x << "," << y << "," << width << "," << height << endl;
                  for(int i = y; i < y + height; i++) {
                      for(int j = x; j < x + width; j++) {
-                         //     cout << "(" << i << "," << j << "," << pclcloud.at(i,j).z << ")" << endl;
+                         // cout << "(" << i << "," << j << "," << pclcloud.at(i,j).z << ")" << endl;
                          if(sqrt(pclcloud.at(i,j).x*pclcloud.at(i,j).x+pclcloud.at(i,j).y*pclcloud.at(i,j).y+pclcloud.at(i,j).z*pclcloud.at(i,j).z)*10000 < min) {
                              min = sqrt(pclcloud.at(i,j).x*pclcloud.at(i,j).x+pclcloud.at(i,j).y*pclcloud.at(i,j).y+pclcloud.at(i,j).z*pclcloud.at(i,j).z)*10000;
                              minPoint = pclcloud.at(i,j);//Check
@@ -2181,25 +2181,25 @@ return res;
                      // cout << "Checking column in right direction: " << i << endl;
                      nanColumnFlag = true;
                      for(int j= 150; j >= -150 && (minImagePoint.y -j >0 && minImagePoint.y -j <srcImg.rows); j--) {
-                         depth = pclcloud.at(minImagePoint.y-j,minImagePoint.x+i).z;
+                         depth = pclcloud.at(minImagePoint.y-j,minImagePoint.x+i).x;
                          
                          //cout<<"Depth: "<<depth<<endl;
                          
                          
                          if (depth!=depth)//If all values are nan then it will stop
-{
-    //ROS_INFO("Nan values obtained. Cannot determine the distance to the car");
-    continue;
-}
+			  {
+			      //ROS_INFO("Nan values obtained. Cannot determine the distance to the car");
+			      continue;
+			  }
 
-nanColumnFlag = false;
+			  nanColumnFlag = false;
 
-if(depth < minPoint.z+THRESHOLD && depth > minPoint.z-THRESHOLD/2) {
-    cout<<"Depth: "<<depth<<endl;
-    x1 = minImagePoint.x+i;
-    //cout<<"X1: "<<x1<<endl;
-    flag = 1;
-}
+			  if(depth < minPoint.x+THRESHOLD && depth > minPoint.x-THRESHOLD/2) {
+			      cout<<"Depth: "<<depth<<endl;
+			      x1 = minImagePoint.x+i;
+			      //cout<<"X1: "<<x1<<endl;
+			      flag = 1;
+			  }
                      }
                      if(nanColumnFlag) nanColumnCounter++;
                      
@@ -2221,7 +2221,7 @@ if(depth < minPoint.z+THRESHOLD && depth > minPoint.z-THRESHOLD/2) {
                      //cout << "Checking column in left direction: " << i << endl;
                      nanColumnFlag = true;
                      for(int j= 150; j >= -150 && (minImagePoint.y -j >0 && minImagePoint.y -j <srcImg.rows); j--) {
-                         depth = pclcloud.at(minImagePoint.y-j, minImagePoint.x-i).z;
+                         depth = pclcloud.at(minImagePoint.y-j, minImagePoint.x-i).x;
                          
                          if (depth!=depth)
                          {
@@ -2232,7 +2232,7 @@ if(depth < minPoint.z+THRESHOLD && depth > minPoint.z-THRESHOLD/2) {
                          nanColumnFlag = false;
                          
                          
-                         if(depth < minPoint.z+THRESHOLD && depth > minPoint.z-THRESHOLD/2) {
+                         if(depth < minPoint.x+THRESHOLD && depth > minPoint.x-THRESHOLD/2) {
                              cout<<"Depth: "<<depth<<endl;
                              x0 = minImagePoint.x-i;
                              flag = 1;
@@ -2251,7 +2251,7 @@ if(depth < minPoint.z+THRESHOLD && depth > minPoint.z-THRESHOLD/2) {
                  //circle( srcImg, Point2f(x0,minImagePoint.y),10, 300, -1, 8, 0 );
                  
                  //Display the sub-region of the car found
-                 int carHeight = x1  - x0; //Asssume height and width are approximately the same
+                 int carHeight = x1 - x0; //Asssume height and width are approximately the same
                  
                  y0 = minImagePoint.y - carHeight/2;
                  y1 = minImagePoint.y + carHeight/2;
@@ -2283,9 +2283,9 @@ if(depth < minPoint.z+THRESHOLD && depth > minPoint.z-THRESHOLD/2) {
                  //--------------------------------------------------------------
                  
                  //Heuristic to contain the car frame
-                 int yTop =  minImagePoint.y - carHeight/3;
+                 int yTop = minImagePoint.y - carHeight/3;
                  if(yTop<0)
-                     yTop  =1;
+                     yTop =1;
                  
                  //Use the service to get the new coordinates
                      c21srv.request.sample.x1 = x0;
@@ -2295,14 +2295,50 @@ if(depth < minPoint.z+THRESHOLD && depth > minPoint.z-THRESHOLD/2) {
                      
                      cout << "X1: " << x0 << " X2: " << x1 <<" Y1: "<<yTop<<" Y2:"<< y1<< endl;
                      
-                     double z1;
-                     averagePointCloud(x0, yTop, x1, y1, cloud, &x, &y, &z1);
-                     
+		     
+		     //TO DO: Determine if the robot is facing the front, rear, passenger or driver of the car
+		     
+		      
+		     //Determine if the robot is facing the driver or passenger side
+                     detectPassengerDriver(srcImg, x0, yTop, x1, y1, minPoint, pclcloud, &car_target);
+		     
+		     
+                     	double x_s,y_s;
+			double z_s = 0;
+			double offset_x, offset_y;
+
+			if(car_target == GeneralDetector::CAR_FRONT){
+			//Move left
+			offset_x = 2;
+			offset_y = 2;
+			}
+			else if(car_target==GeneralDetector::CAR_REAR){
+			//Move right
+			offset_x = 2;
+			offset_y = -2;
+			}
+			else if(car_target==GeneralDetector::CAR_DRIVER){
+			offset_x = 0;
+			offset_y = 0;
+			}
+			else if(car_target==GeneralDetector::CAR_PASSENGER){
+			offset_x = 0;
+			offset_y = 0;
+			}
+			else
+			return false;
+			// averagePointCloud(x0, yTop, x1, y1, cloud, &x_s, &y_s, &z_s);
+			pictureCoordinatesToGlobalPosition(x0, yTop, x1, y1, &x_s, &y_s,&z_s, offset_x,offset_y);
+
+			x = x_s;
+			y =y_s;
+			x2 = 0;
+			y2 = 0;
+                    
                      //imshow("Testing",srcImg);
                      //waitKey(0);
                      
-                     //Determine if the robot is facing the driver or passenger side
-                     detectPassengerDriver(srcImg, x0, yTop, x1,  y1, minPoint, pclcloud);
+                     
                      
                      
                      
@@ -2318,14 +2354,14 @@ if(depth < minPoint.z+THRESHOLD && depth > minPoint.z-THRESHOLD/2) {
          // comparison function object
          bool compareContourAreas ( vector<cv::Point> contour1, vector<cv::Point> contour2 ) {
              
-             double i =  fabs(contourArea(contour1, false));
-             double j =  fabs(contourArea(contour2,false));
+             double i = fabs(contourArea(contour1, false));
+             double j = fabs(contourArea(contour2,false));
              cout<<"Area1: "<<i<<" Area2: "<<j<<endl;
              
              return ( i < j );
          }
          
-         bool C23_Detector::detectPassengerDriver(Mat srcImg, int x1,int y1,int x2,int y2, pcl::PointXYZ minPoint, pcl::PointCloud<pcl::PointXYZ> pclcloud){
+         bool C23_Detector::detectPassengerDriver(Mat srcImg, int x1,int y1,int x2,int y2, pcl::PointXYZ minPoint, pcl::PointCloud<pcl::PointXYZ> pclcloud, GeneralDetector::CAR_TARGET *car_target){
              
              //To determine where the driver/passenger sides are using blob detection set to true.
              bool detectBlobs = true;
@@ -2354,7 +2390,7 @@ if(depth < minPoint.z+THRESHOLD && depth > minPoint.z-THRESHOLD/2) {
                  //Open the image to remove noise
                  Mat element3(3,3,CV_8U, Scalar(1));
                  
-                 morphologyEx(imgThresholdedCar, imgCarOpened, MORPH_OPEN,element3); 
+                 morphologyEx(imgThresholdedCar, imgCarOpened, MORPH_OPEN,element3);
                  
                  // Apply the dilation operation
                  dilate( imgCarOpened, imgCarDilated, element3 );
@@ -2362,7 +2398,7 @@ if(depth < minPoint.z+THRESHOLD && depth > minPoint.z-THRESHOLD/2) {
                  //Now find the contours of the blobs
                  vector<vector<cv::Point> > blobContours;
                  findContours(imgCarDilated,blobContours,CV_RETR_EXTERNAL, CV_CHAIN_APPROX_SIMPLE);
-                 drawContours(carImage,blobContours,-1,CV_RGB(255,0,0),2); 
+                 drawContours(carImage,blobContours,-1,CV_RGB(255,0,0),2);
                  
                  //imshow("Thresholded Image", imgThresholdedCar);
                  //waitKey(0);
@@ -2379,7 +2415,7 @@ if(depth < minPoint.z+THRESHOLD && depth > minPoint.z-THRESHOLD/2) {
                  
                  cout<<"Number of contours found "<<blobContours.size()<<endl;
                  if(blobContours.size()>1)
-                 {  
+                 {
                      //Sort the contours based on their area
                      sort(blobContours.begin(), blobContours.end(), compareContourAreas);
                      
@@ -2403,19 +2439,21 @@ if(depth < minPoint.z+THRESHOLD && depth > minPoint.z-THRESHOLD/2) {
                      for( int ii = 0; ii < blobContours.size(); ii++ )
                      { mu[ii] = moments( blobContours[ii], false ); }
                      
-                     //  Get the mass centers:
+                     // Get the mass centers:
                      vector<Point2f> mc( blobContours.size() );
                      for( int ii = 0; ii < blobContours.size() ; ii++ )
-                     { mc[ii] = Point2f( mu[ii].m10/mu[ii].m00 , mu[ii].m01/mu[ii].m00 ); 
+                     { mc[ii] = Point2f( mu[ii].m10/mu[ii].m00 , mu[ii].m01/mu[ii].m00 );
                      cout<<"CM: "<<mc[ii]<<", Area: "<<blobAreas[ii]<<endl;
                      }
                      
                      //Determine the largest and second largest contour
                      cout<<"Largest: "<<mc[mc.size()-1].x<<", Second Largest: "<<mc[mc.size()-2].x<<endl;
                      if(mc[mc.size()-1].x > mc[mc.size()-2].x){
-                         ROS_INFO("Robot is facing passenger side"); 
+                         ROS_INFO("Robot is facing passenger side");
+			 *car_target = GeneralDetector::CAR_PASSENGER;
                      }else{
-                         ROS_INFO("Robot is facing driver side"); 
+                         ROS_INFO("Robot is facing driver side");
+			 *car_target = GeneralDetector::CAR_DRIVER;
                      }
                      
                  }else{
@@ -2431,7 +2469,7 @@ if(depth < minPoint.z+THRESHOLD && depth > minPoint.z-THRESHOLD/2) {
              }
              
              return true;
-         }   
+         }
          
          bool C23_Detector::detectPath(Mat srcImg) {
              // IplImage* img = new IplImage(srcImg);
@@ -2494,7 +2532,7 @@ if(depth < minPoint.z+THRESHOLD && depth > minPoint.z-THRESHOLD/2) {
              pcl::fromROSMsg<pcl::PointXYZ>(*cloud,pclcloud);
              string imgpath="C23_Test/img_";
              static int img_count = 0;
-             std::stringstream  number;
+             std::stringstream number;
              string ext = ".jpg";
              number << img_count;
              imgpath += number.str();
@@ -2536,15 +2574,15 @@ if(depth < minPoint.z+THRESHOLD && depth > minPoint.z-THRESHOLD/2) {
              findContours(bw, contoursR, CV_RETR_LIST, CV_CHAIN_APPROX_SIMPLE);
              cout<<"The Contour right size: "<< contoursR.size()<<endl;
              
-        //     cout << "Here 1" << endl;
+        // cout << "Here 1" << endl;
              
-           //  cout << "Here 1.1" << endl;
+           // cout << "Here 1.1" << endl;
              int biggstR=0;
-             int size = contoursR.size() > 0 ? contoursR.size()  : 1;
+             int size = contoursR.size() > 0 ? contoursR.size() : 1;
              
              vector<Moments> muR(size );
              vector<Point2f> mcR(size );
-           //  cout << "Here 1.2" << endl;
+           // cout << "Here 1.2" << endl;
              if(contoursR.size() != 0) {
                 
                  drawContours(srcImg, contoursR, -1, CV_RGB(255,0,0), 2);
@@ -2562,7 +2600,7 @@ if(depth < minPoint.z+THRESHOLD && depth > minPoint.z-THRESHOLD/2) {
                          biggstR=i;
                      
                  }
-               //  cout << "Here 4" << endl;
+               // cout << "Here 4" << endl;
                  //Draw a circle indicating the center of mass on the right pole
                  
                  right = true;
@@ -2575,7 +2613,7 @@ if(depth < minPoint.z+THRESHOLD && depth > minPoint.z-THRESHOLD/2) {
                  int count = 0;
                  for(int i =-15; i <= 15; i++) {
                      for(int j =-100; j <=100; j++) {
-                         if(! (IMG_LIMITS(mcR[biggstR].x+i))  || !(IMG_LIMITS(mcR[biggstR].y+j)) ) continue;
+                         if(! (IMG_LIMITS(mcR[biggstR].x+i)) || !(IMG_LIMITS(mcR[biggstR].y+j)) ) continue;
                          
                          if(pclcloud.at(mcR[biggstR].x+i,mcR[biggstR].y+j).x != pclcloud.at(mcR[biggstR].x+i,mcR[biggstR].y+j).x)
                              continue;
@@ -2596,18 +2634,18 @@ if(depth < minPoint.z+THRESHOLD && depth > minPoint.z-THRESHOLD/2) {
                      rightC.x = r_x;
                      rightC.y = r_y;
                      rightC.z = r_z;
-                   //  cout << "Here 6" << endl;
+                   // cout << "Here 6" << endl;
                  } else {
                      cout << "Red isn't valid .. " << pclcloud.at(mcR[biggstR].x,mcR[biggstR].y).x << "," << pclcloud.at(mcR[biggstR].x,mcR[biggstR].y).y << "," << endl;
                      
                  }
-              //   cout << "Here 7" << endl;
+              // cout << "Here 7" << endl;
              }
             // cout << "Here 1.3" << endl;
              
              /////finding center mass of left column
              cvInRangeS(imgHSV, cvScalar(90, 130, 40), cvScalar(150, 255, 250), imgThreshed);//filter blue
-           //  cout << "Here 1.4" << endl;
+           // cout << "Here 1.4" << endl;
              
              Mat threshMatL(imgThreshed),bwL;
             // cout << "Here 1.5" << endl;
@@ -2618,14 +2656,14 @@ if(depth < minPoint.z+THRESHOLD && depth > minPoint.z-THRESHOLD/2) {
              vector<vector<cv::Point> > contoursL;
              // cout<<"next2"<<endl;
              findContours(bwL, contoursL, CV_RETR_LIST, CV_CHAIN_APPROX_SIMPLE);
-          //   cout << "Here 1.6" << endl;
+          // cout << "Here 1.6" << endl;
              cout << "Left contour size: " << contoursL.size() << endl;
-             size = contoursL.size() > 0 ? contoursL.size()  : 1;
+             size = contoursL.size() > 0 ? contoursL.size() : 1;
              vector<Moments> muL(size );
              vector<Point2f> mcL(size);
              int biggstL=0;
              if(contoursL.size() !=0) {
-              //   cout << "Here 1.6.1" << endl;
+              // cout << "Here 1.6.1" << endl;
                  drawContours(srcImg, contoursL, -1, CV_RGB(0,0,255), 2);
                  // imshow("Contours", srcImg);
                  // waitKey(0);
@@ -2649,10 +2687,10 @@ if(depth < minPoint.z+THRESHOLD && depth > minPoint.z-THRESHOLD/2) {
                 // cout << "Here 1.6.4" << endl;
                  for(int i =-15; i <= 15; i++) {
                      for(int j =-100; j <=100; j++) {
-                         if(! (IMG_LIMITS(mcL[biggstL].x+i))  || !(IMG_LIMITS(mcL[biggstL].y+j)) ) continue;  
+                         if(! (IMG_LIMITS(mcL[biggstL].x+i)) || !(IMG_LIMITS(mcL[biggstL].y+j)) ) continue;
 
-                      //   cout << "Here 1.6.5" << endl;
-                   //      cout << "(x,y)=" << mcL[biggstL].x+i << "," << mcL[biggstL].y+j << endl;
+                      // cout << "Here 1.6.5" << endl;
+                   // cout << "(x,y)=" << mcL[biggstL].x+i << "," << mcL[biggstL].y+j << endl;
                          if(mcL[biggstL].x != mcL[biggstL].x) continue;
                          if(pclcloud.at(mcL[biggstL].x+i,mcL[biggstL].y+j).x != pclcloud.at(mcL[biggstL].x+i,mcL[biggstL].y+j).x)
                              continue;
@@ -2665,7 +2703,7 @@ if(depth < minPoint.z+THRESHOLD && depth > minPoint.z-THRESHOLD/2) {
                  l_x/=count;
                  l_y/=count;
                  l_z/=count;
-               //  cout << "Here 1.6.6" << endl;
+               // cout << "Here 1.6.6" << endl;
                  if (l_x<50 && l_y <50 && l_z !=0)
                  {
                      cout << "Blue is valid .. " << endl;
@@ -2675,13 +2713,13 @@ if(depth < minPoint.z+THRESHOLD && depth > minPoint.z-THRESHOLD/2) {
                      leftC.z = l_z;
                      
                  } else {
-                     cout << "Blue isn't valid .. "  << endl;
+                     cout << "Blue isn't valid .. " << endl;
                      left = false;
                  }
                  /* if (pclcloud.at(mcL[biggstL].x,mcL[biggstL].y).x<50 && pclcloud.at(mcL[biggstL].x,mcL[biggstL].y).y <50 && pclcloud.at(mcL[biggstL].x,mcL[biggstL].y).x !=0)
-                  * {
-                  * leftC=pclcloud.at(mcL[biggstL].x,mcL[biggstL].y);
-                  }*/
+* {
+* leftC=pclcloud.at(mcL[biggstL].x,mcL[biggstL].y);
+}*/
                  
              }
             // cout << "Here 1.7" << endl;
@@ -2727,7 +2765,7 @@ if(depth < minPoint.z+THRESHOLD && depth > minPoint.z-THRESHOLD/2) {
                      }
                      
                      double x1,y1,z1,x2,y2,z2;
-                     bool a_res = pictureCoordinatesToGlobalPosition(mcL[biggstL].x-5, mcL[biggstL].y-50, mcL[biggstL].x+5, mcL[biggstL].y+50,  &x1, &y1,&z1, -0.5,0);
+                     bool a_res = pictureCoordinatesToGlobalPosition(mcL[biggstL].x-5, mcL[biggstL].y-50, mcL[biggstL].x+5, mcL[biggstL].y+50, &x1, &y1,&z1, -0.5,0);
                      a_res &= pictureCoordinatesToGlobalPosition(mcR[biggstR].x-5, mcR[biggstR].y-50, mcR[biggstR].x+5, mcR[biggstR].y+50, &x2, &y2,&z2,-0.5,0);
                      if(!a_res) {
                          return false;
@@ -2735,7 +2773,7 @@ if(depth < minPoint.z+THRESHOLD && depth > minPoint.z-THRESHOLD/2) {
                      x = (x1+x2)/2.0;
                      y = (y1+y2)/2.0;
                      
-                     a_res = pictureCoordinatesToGlobalPosition(mcL[biggstL].x-5, mcL[biggstL].y-50, mcL[biggstL].x+5, mcL[biggstL].y+50,  &x1, &y1,&z1, 0.5,0);
+                     a_res = pictureCoordinatesToGlobalPosition(mcL[biggstL].x-5, mcL[biggstL].y-50, mcL[biggstL].x+5, mcL[biggstL].y+50, &x1, &y1,&z1, 0.5,0);
                      a_res &= pictureCoordinatesToGlobalPosition(mcR[biggstR].x-5, mcR[biggstR].y-50, mcR[biggstR].x+5, mcR[biggstR].y+50, &x2, &y2,&z2, 0.5,0);
                      // cout << "Middle: " <<
                      // imshow("TESTING",srcImg);
@@ -2817,17 +2855,17 @@ if(depth < minPoint.z+THRESHOLD && depth > minPoint.z-THRESHOLD/2) {
                          int y_pic = mcR[biggstR].y;
                          
                          
-                         //  double x1,y1,z1,x2,y2,z2;
+                         // double x1,y1,z1,x2,y2,z2;
                          double x1,y1,z1,x2,y2,z2;
                          bool a_res = pictureCoordinatesToGlobalPosition(mcR[biggstR].x-5, mcR[biggstR].y-50, mcR[biggstR].x+5, mcR[biggstR].y+50, &x1, &y1,&z1,-0.5,2.5);
                          if(!a_res) {
                              return false;
-                         } 
+                         }
                          x = x1;
                          y = y1;
                          a_res = pictureCoordinatesToGlobalPosition(mcR[biggstR].x-5, mcR[biggstR].y-50, mcR[biggstR].x+5, mcR[biggstR].y+50, &x1, &y1,&z1,0.5,2.5);
                          
-                         this->x2 =  x1;
+                         this->x2 = x1;
                          this->y2 = y1;
                          
                          cout << "Middle point: " << x <<"," << y << endl;
@@ -2835,11 +2873,11 @@ if(depth < minPoint.z+THRESHOLD && depth > minPoint.z-THRESHOLD/2) {
                          // return true;
                          return mcM[biggstM].x > mcR[biggstR].x ? true : false;
                          // averagePointCloud(mcR[biggstR].x-5, mcR[biggstR].y-50, mcR[biggstR].x+5, mcR[biggstR].y+50, cloud, &x2, &y2,&z2);
-                         //  x = x2;
-                         //  y = y2-2.5;
-                         //  cout<<"Point is: " <<x<<", " <<y <<endl;
+                         // x = x2;
+                         // y = y2-2.5;
+                         // cout<<"Point is: " <<x<<", " <<y <<endl;
                          // cout << "Detected right" << endl;
-                         //  circle( srcImg, Point2f(x_pic,y_pic), 16, Scalar(0,255,255), -1, 8, 0 );
+                         // circle( srcImg, Point2f(x_pic,y_pic), 16, Scalar(0,255,255), -1, 8, 0 );
                      }
                      
                      // imshow("Testing" , srcImg);
@@ -2877,18 +2915,18 @@ if(depth < minPoint.z+THRESHOLD && depth > minPoint.z-THRESHOLD/2) {
                      // waitKey(0);
                      
                      /*double x1,y1,z1,x2,y2,z2;
-                      * averagePointCloud(mcL[biggstL].x-5, mcL[biggstL].y-50, mcL[biggstL].x+5, mcL[biggstL].y+50, cloud, &x2, &y2,&z2);
-                      * x = x2;
-                      * y = y2-2.5;
-                      * imwrite(imgpath.c_str(),srcImg);
-                      * return mcM[biggstM].x > mcL[biggstL].x ? true : false;
-                      */
+* averagePointCloud(mcL[biggstL].x-5, mcL[biggstL].y-50, mcL[biggstL].x+5, mcL[biggstL].y+50, cloud, &x2, &y2,&z2);
+* x = x2;
+* y = y2-2.5;
+* imwrite(imgpath.c_str(),srcImg);
+* return mcM[biggstM].x > mcL[biggstL].x ? true : false;
+*/
                      
                      double x1,y1,z1,x2,y2,z2;
                      bool a_res = pictureCoordinatesToGlobalPosition(mcL[biggstL].x-5, mcL[biggstL].y-50, mcL[biggstL].x+5, mcL[biggstL].y+50, &x1, &y1,&z1,-0.5,2.5);
                      if(!a_res) {
                          return false;
-                     } 
+                     }
                      x = x1;
                      y = y1;
                      a_res = pictureCoordinatesToGlobalPosition(mcL[biggstL].x-5, mcL[biggstL].y-50, mcL[biggstL].x+5, mcL[biggstL].y+50, &x1, &y1,&z1,-0.5,2.5);
@@ -2904,7 +2942,4 @@ if(depth < minPoint.z+THRESHOLD && depth > minPoint.z-THRESHOLD/2) {
              
              
          }
-         
-         
-         
          

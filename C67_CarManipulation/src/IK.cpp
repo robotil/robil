@@ -2,6 +2,7 @@
 IK.cpp Inverse Kinematics file
 */
 #include <math.h>
+#include <stdlib.h>
 #include <iostream>
 #include <string>
 #include <C67_CarManipulation/FK.h>
@@ -697,6 +698,103 @@ IkSolution ScanRPY(double mq1, double mq2, double mq3, RPY target, double error,
 	return solution;
 }
 
+IkSolution ScanRPY2(double mq1, double mq2, double mq3, RPY target, double error, IkSolution origin)
+{
+	double i,j,k,R0,P0,Y0;
+	IkSolution solution;
+	bool valid = false;
+	double disp = 0.5;
+	R0 = target.R;
+	P0 = target.P;
+	Y0 = target.Y;
+	for (i = 0;i < M_PI/2; i+=0.1)
+	{
+		for (j = 0; j<M_PI/2; j+=0.1)
+		{
+			for (k = 0; k<M_PI/2; k+=0.1)
+			{
+				target.R = R0 + i;
+				target.P = P0 + j;
+				target.Y = Y0 + k;
+				solution = lSearchSolution(mq1, mq2, mq3, target);
+				if ((solution.error < error)&&(MaxDisp(origin,solution)<disp))
+				{
+					valid = true;
+					break;
+				}
+				target.R = R0 + i;
+				target.P = P0 + j;
+				target.Y = Y0 - k;
+				solution = lSearchSolution(mq1, mq2, mq3, target);
+				if ((solution.error < error)&&(MaxDisp(origin,solution)<disp))
+				{
+					valid = true;
+					break;
+				}
+				target.R = R0 + i;
+				target.P = P0 - j;
+				target.Y = Y0 + k;
+				solution = lSearchSolution(mq1, mq2, mq3, target);
+				if ((solution.error < error)&&(MaxDisp(origin,solution)<disp))
+				{
+					valid = true;
+					break;
+				}
+				target.R = R0 + i;
+				target.P = P0 - j;
+				target.Y = Y0 - k;
+				solution = lSearchSolution(mq1, mq2, mq3, target);
+				if ((solution.error < error)&&(MaxDisp(origin,solution)<disp))
+				{
+					valid = true;
+					break;
+				}
+				target.R = R0 - i;
+				target.P = P0 + j;
+				target.Y = Y0 + k;
+				solution = lSearchSolution(mq1, mq2, mq3, target);
+				if ((solution.error < error)&&(MaxDisp(origin,solution)<disp))
+				{
+					valid = true;
+					break;
+				}
+				target.R = R0 - i;
+				target.P = P0 + j;
+				target.Y = Y0 - k;
+				solution = lSearchSolution(mq1, mq2, mq3, target);
+				if ((solution.error < error)&&(MaxDisp(origin,solution)<disp))
+				{
+					valid = true;
+					break;
+				}
+				target.R = R0 - i;
+				target.P = P0 - j;
+				target.Y = Y0 + k;
+				solution = lSearchSolution(mq1, mq2, mq3, target);
+				if ((solution.error < error)&&(MaxDisp(origin,solution)<disp))
+				{
+					valid = true;
+					break;
+				}
+				target.R = R0 - i;
+				target.P = P0 - j;
+				target.Y = Y0 - k;
+				solution = lSearchSolution(mq1, mq2, mq3, target);
+				if ((solution.error < error)&&(MaxDisp(origin,solution)<disp))
+				{
+					valid = true;
+					break;
+				}
+			}
+			if (valid) break;
+		}
+		if (valid) break;
+	}
+	solution.valid = valid;
+
+	return solution;
+}
+
 IkSolution rScanRPY(double mq1, double mq2, double mq3, RPY target, double error)
 {
 	return ScanRPY(mq1, mq2, mq3, target, error, true);
@@ -705,6 +803,17 @@ IkSolution rScanRPY(double mq1, double mq2, double mq3, RPY target, double error
 IkSolution lScanRPY(double mq1, double mq2, double mq3, RPY target, double error)
 {
 	return ScanRPY(mq1, mq2, mq3, target, error, false);
+}
+// max displacement
+double MaxDisp(IkSolution Ik1, IkSolution Ik2)
+{
+	double max = 0, delta;
+	for (int i = 0; i<6; i++)
+	{
+		delta = fabs(Ik1.m_q[i]-Ik2.m_q[i]);
+		max =  delta > max? delta: max;
+	}
+	return max;
 }
 
 

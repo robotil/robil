@@ -365,7 +365,7 @@ class AP_WalkingMode(WalkingMode):
 
     def _GetTranslationDeltaFP_Path(self,delta_yaw,delta_trans,start_position,start_orientation):
         print ("_GetTranslationDeltaFP_Path deltaXY:",delta_trans, "start ori:",start_orientation)
-
+        foot_placement_path = []
         x_length_max = 0.25 # [meters] max step length (radius =~ 0.42 [m])
         y_length_max = 0.2 # [meters]
 
@@ -380,31 +380,40 @@ class AP_WalkingMode(WalkingMode):
         else: # move right
             LeftRight_step_seq = False
 
-        print self._foot_placement_path
         if [] == self._foot_placement_path:
-            print self._foot_placement_path
             ## Step in place: two first steps
-            self._foot_placement_path = self._GetTwoFirstStepFP_Path(start_position,start_orientation,LeftRight_step_seq)
-
-        ## add extra step if needed:
-        last_place = len(self._foot_placement_path) - 1
-        if (0 == self._foot_placement_path[last_place].foot_index) and LeftRight_step_seq: # last step is with left foot while we want to start stepping with left foot 
-            self._foot_placement_path.append( self._foot_placement_path[last_place-1] ) # add a nother right foot step
-        elif (1 == self._foot_placement_path[last_place].foot_index) and not LeftRight_step_seq: # last step is with right foot while we want to start stepping with right foot 
-            self._foot_placement_path.append( self._foot_placement_path[last_place-1] ) # add a nother left foot step
+            foot_placement_path = self._GetTwoFirstStepFP_Path(start_position,start_orientation,LeftRight_step_seq)
+            last_FP = copy.copy( foot_placement_path[1] )
+            one_before_last_FP = copy.copy( foot_placement_path[0] )
+        else:
+            last_FP = 0
+            ## add extra step if needed:
+            last_place = len(self._foot_placement_path) - 1
+            if (0 == self._foot_placement_path[last_place].foot_index) and LeftRight_step_seq: # last step is with left foot while we want to start stepping with left foot 
+                last_FP = copy.copy(self._foot_placement_path[last_place-1])
+                foot_placement_path.append( last_FP ) # add a nother right foot step 
+            elif (1 == self._foot_placement_path[last_place].foot_index) and not LeftRight_step_seq: # last step is with right foot while we want to start stepping with right foot 
+                last_FP = copy.copy(self._foot_placement_path[last_place-1])
+                foot_placement_path.append( last_FP ) # add a nother left foot step
+            
+            if 0 != last_FP:
+                one_before_last_FP = copy.copy( self._foot_placement_path[last_place] )
+            else:
+                last_FP = copy.copy( self._foot_placement_path[last_place] )
+                one_before_last_FP = copy.copy( self._foot_placement_path[last_place-1] )
 
         # initial foot pose:
-        last_place = len(self._foot_placement_path) - 1
+        last_place = len(foot_placement_path) - 1
         if LeftRight_step_seq:
-            r_foot_start_pos = self._foot_placement_path[last_place].pose.position
-            l_foot_start_pos = self._foot_placement_path[last_place-1].pose.position
+            r_foot_start_pos = last_FP.pose.position
+            l_foot_start_pos = one_before_last_FP.pose.position
         else:
-            r_foot_start_pos = self._foot_placement_path[last_place-1].pose.position
-            l_foot_start_pos = self._foot_placement_path[last_place].pose.position
+            r_foot_start_pos = one_before_last_FP.pose.position
+            l_foot_start_pos = last_FP.pose.position
         start_ori = [start_orientation[0], start_orientation[1], start_orientation[2] + delta_yaw ]
         #print ("foot start pos: left-", l_foot_start_pos, " right - ", r_foot_start_pos)
         ## Num_seq steps:
-        foot_placement_path = []
+        
         Num_seq_R = int(math.ceil(self._DistanceXY(delta_trans)/x_length_max))
         Num_seq_X = int(math.ceil(math.fabs(deltaX_BDI)/x_length_max))
         Num_seq_Y = int(math.ceil(math.fabs(deltaY_BDI)/y_length_max))
@@ -441,7 +450,6 @@ class AP_WalkingMode(WalkingMode):
         # else:
         #     foot_placement_path.append( self._FP_data(1,[X_r_foot,Y_r_foot,start_position.z],start_ori) )
         #     foot_placement_path.append( self._FP_data(0,[X_l_foot,Y_l_foot,start_position.z],start_ori) )
-
         return foot_placement_path
     
     # def _GetStartingFootPose(self): #*************** NEED TO CHANGE when not static *************#

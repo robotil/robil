@@ -1,16 +1,16 @@
 <launch>
 
 	<!-- Standup -->
-	<node pkg="C25_AtlasFell" type="Fell_server.py" name="C25_AtlasFell_server" output="log" />
-	<node pkg="C25_AtlasFell" type="Fell_client.py" name="C25_AtlasFell_client" output="log" />
-	<node pkg="C35_Monitoring" type="FallingMonitor.py" name="C35_Monitoring_FallingMonitor" output="log" respawn="true" />
-	<node pkg="C48_StandUp" type="C48_StandUp.py" name="C48_StandUp" output="log" respawn="true" />
+	<node pkg="C25_AtlasFell" type="Fell_server.py" name="Fell" output="log" respawn="true" />
+	<!-- node pkg="C25_AtlasFell" type="Fell_client.py" name="C25_AtlasFell_client" output="log" respawn="true"/ -->
+	<node pkg="C35_Monitoring" type="FallingMonitor.py" name="FallingMonitor" output="log" respawn="true" />
+	<node pkg="C48_StandUp" type="C48_StandUp.py" name="StandUp" output="log" respawn="true" />
 	<node pkg="C42_WalkType" type="walktype" name="C42_WalkType" output="log" respawn="true" />
 	<!-- Agent -->
-	<node pkg="C35_Monitoring" type="TimeoutMonitor.py" name="C35_Monitoring_TimeoutMonitor" output="log" respawn="true" />
-	<node pkg="C11_Agent" type="C11_Agent" name="C11_Agent" output="log" respawn="true" />
+	<node pkg="C35_Monitoring" type="TimeoutMonitor.py" name="TimeoutMonitor" output="log" respawn="true" />
+	<!-- node pkg="C11_Agent" type="C11_Agent" name="C11_Agent" output="log" respawn="true" / -->
 	<node pkg="C31_PathPlanner" type="gpp" name="C31_PathPlanner" output="log" respawn="true" />
-
 	<node pkg="C34_Executer" type="executer" name="C34_Executer" output="log" respawn="true" />
-
 </launch>
+
+

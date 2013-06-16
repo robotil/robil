@@ -8,7 +8,7 @@
 #include <math.h>
 #include <boost/bind.hpp>
 #include <string>
-#include <C23_dFind/perceptionTransform.h>
+//#include <C23_dFind/perceptionTransform.h>
 #include <boost/bind/bind.hpp>
 #include <hand_grasp/grasp.h>
 #include <move_hand/pelvis_move_hand.h>
@@ -17,7 +17,7 @@
 #include <sensor_msgs/JointState.h>
 #include <sstream>
 #include <iostream>
-#include <C23_dFind/perceptionTransform.h>
+//#include <C23_dFind/perceptionTransform.h>
 #include <C23_ObjectRecognition/C23_orient.h>
 #include <sandia_hand_msgs/SimpleGraspSrv.h>
 #include <C67_CarManipulation/arm_path.h>
@@ -62,7 +62,7 @@ public:
 		pelvis_move_hand_matrix_cli_ = nh_.serviceClient<move_hand::matrix>("C66_matrix");
 		pelvis_move_hand_cli_ = nh_.serviceClient<move_hand::pelvis_move_hand>("pelvis_move_hand");
 		move_hand_cli_ = nh_.serviceClient<move_hand::move_hand>("move_hand");
-		perception_transform_cli_ = nh_.serviceClient<C23_dFind::perceptionTransform>("perceptionTransform");
+		//perception_transform_cli_ = nh_.serviceClient<C23_dFind::perceptionTransform>("perceptionTransform");
 		r_arm_path_cli_ = nh_.serviceClient<C67_CarManipulation::arm_path>("rPath_srv");
 		sandia_right_pub = rosnode->advertise<sandia_hand_msgs::SimpleGrasp>("/sandia_hands/r_hand/simple_grasp", 100, true);
 		//Set callback functions
