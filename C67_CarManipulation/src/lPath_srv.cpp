@@ -151,9 +151,23 @@ bool lPath_CB(C67_CarManipulation::arm_path::Request &req,C67_CarManipulation::a
 		}*/
 		if (callBackRun)
 		{
+			callBackRun = false;
 			// check if no arguments			
 			if (!use_arg) break;			
-						
+
+			for (unsigned int i = 0; i < n; i++)
+							{
+								ac.kp_position[i] = as.kp_position[i];
+								ac.ki_position[i] = as.ki_position[i];
+								ac.kd_position[i] = as.kd_position[i];
+								ac.i_effort_min[i] = as.i_effort_min[i];
+								ac.i_effort_max[i] = as.i_effort_max[i];
+
+								ac.velocity[i] = 0;
+								ac.effort[i] = 0;
+								ac.kp_velocity[i] = 0;
+
+							}
 			IkSolution IkCurrent = IkSolution(as.position[q4l], as.position[q5l], as.position[q6l], as.position[q7l],
 					as.position[q8l], as.position[q9l]);
 			IkSolution IkNext = lScanRPY(as.position[q1], as.position[q2], as.position[q3], argTarget,0.01);
@@ -231,6 +245,7 @@ int main(int argc, char** argv)
 	rosnode = new ros::NodeHandle();
 	ros::ServiceServer lPath_server;
 	lPath_server = rosnode->advertiseService("lPath_srv",&lPath_CB);
+	ROS_INFO("lPath Ready");
 	ros::spin();
 
   return 0;
