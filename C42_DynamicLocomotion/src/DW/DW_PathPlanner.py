@@ -31,9 +31,10 @@ class DW_PathPlanner(PathPlanner):
 
     def SetPath(self,waypointList):
         PathPlanner.SetPath(self,waypointList)
+        self._Queue = deque([])
         self._Queue.extend(waypointList)
         if(0 < len(self._Queue)):
-            self._SetPathYaw()
+            #self._SetPathYaw()
             #print ("Setting PathYaw:", self._PathYaw)
             self.State = DW_PathPlannerEnum.Active
         #print ("SetPath",self._Queue)

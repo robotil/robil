@@ -65,8 +65,14 @@ class IMUCh(object):
 
         
         self.last_start = 0
-        self.force_treshold = 1000
+        self.force_treshold = 800
         self.time_treshold = 0.3
+        self.time_treshold_contact = 0.03
+        self.time_contact_r = 0.0
+        self.time_contact_l = 0.0
+        self.second_contact = ''
+        self.first_contact = ''
+
 
 
         self.roll = 0
@@ -110,75 +116,95 @@ class IMUCh(object):
        
     def get_contact(self,msg):
 
-       self.filter2.update(msg)
-       buf = self.filter2.get_buffer()
-       self.leg_force_z_r = buf[0].r_foot.force.z
-       self.leg_force_z_l = buf[0].l_foot.force.z
-       self.leg_force_y_r = buf[0].r_foot.force.y
-       self.leg_force_y_l = buf[0].l_foot.force.y
-       self.leg_force_x_r = buf[0].r_foot.force.x
-       self.leg_force_x_l = buf[0].l_foot.force.x
+        self.filter2.update(msg)
+        buf = self.filter2.get_buffer()
+        self.leg_force_z_r = buf[0].r_foot.force.z
+        self.leg_force_z_l = buf[0].l_foot.force.z
+        self.leg_force_y_r = buf[0].r_foot.force.y
+        self.leg_force_y_l = buf[0].l_foot.force.y
+        self.leg_force_x_r = buf[0].r_foot.force.x
+        self.leg_force_x_l = buf[0].l_foot.force.x
 
 
-       self.arm_force_z_r = buf[0].r_hand.force.z
-       self.arm_force_z_l = buf[0].l_hand.force.z      
-       self.arm_force_x_r = buf[0].r_hand.force.x
-       self.arm_force_x_l = buf[0].l_hand.force.x
-       self.arm_force_y_r = buf[0].r_hand.force.y
-       self.arm_force_y_l = buf[0].l_hand.force.y
+        self.arm_force_z_r = buf[0].r_hand.force.z
+        self.arm_force_z_l = buf[0].l_hand.force.z      
+        self.arm_force_x_r = buf[0].r_hand.force.x
+        self.arm_force_x_l = buf[0].l_hand.force.x
+        self.arm_force_y_r = buf[0].r_hand.force.y
+        self.arm_force_y_l = buf[0].l_hand.force.y
 
-       self.arm_force_r = (self.arm_force_z_r**2 + self.arm_force_y_r**2 + self.arm_force_x_r**2)**0.5
-       self.arm_force_l = (self.arm_force_z_l**2 + self.arm_force_y_l**2 + self.arm_force_x_l**2)**0.5
-       self.leg_force_r = (self.leg_force_z_r**2 + self.leg_force_y_r**2 + self.leg_force_x_r**2)**0.5
-       self.leg_force_l = (self.leg_force_z_l**2 + self.leg_force_y_l**2 + self.leg_force_x_l**2)**0.5
+        self.arm_force_r = (self.arm_force_z_r**2 + self.arm_force_y_r**2 + self.arm_force_x_r**2)**0.5
+        self.arm_force_l = (self.arm_force_z_l**2 + self.arm_force_y_l**2 + self.arm_force_x_l**2)**0.5
+        self.leg_force_r = (self.leg_force_z_r**2 + self.leg_force_y_r**2 + self.leg_force_x_r**2)**0.5
+        self.leg_force_l = (self.leg_force_z_l**2 + self.leg_force_y_l**2 + self.leg_force_x_l**2)**0.5
 
-       self.F_av = (self.arm_force_r+self.arm_force_l+self.leg_force_r+self.leg_force_l)/4
-       self.Sigma = ( ((self.arm_force_r-self.F_av)**2 + (self.arm_force_l-self.F_av)**2 + (self.leg_force_r-self.F_av)**2 + (self.leg_force_l-self.F_av)**2)/3 )**0.5
+        self.F_av = (self.arm_force_r+self.arm_force_l+self.leg_force_r+self.leg_force_l)/4
+        self.Sigma = ( ((self.arm_force_r-self.F_av)**2 + (self.arm_force_l-self.F_av)**2 + (self.leg_force_r-self.F_av)**2 + (self.leg_force_l-self.F_av)**2)/3 )**0.5
 
 
-       if ((self.arm_force_r > self.force_treshold) or (self.arm_force_l > self.force_treshold)) and ( (rospy.get_time()-self.last_start) > self.time_treshold ):
-        self.last_start = rospy.get_time()
-        print 'last_start:',self.last_start
 
-        #compute_angle_avg(self.pitch_acc,self.roll_acc,self.yaw_acc)
-        self.pitch_avg = self.pitch_acc/self.count
-        self.roll_avg = self.roll_acc/self.count
-        self.yaw_avg = self.yaw_acc/self.count
-        print 'pitch_avg:',self.pitch_avg
+        if (self.arm_force_r > self.force_treshold): 
+            self.time_contact_r = rospy.get_time()
+
+        if (self.arm_force_l > self.force_treshold): 
+            self.time_contact_l = rospy.get_time()
+
+        delta_t = self.time_contact_r - self.time_contact_l
+        self.second_contact = self.first_contact = 'None'
+        if 2 >= abs(delta_t) >= self.time_treshold_contact:
+            if delta_t > 0:
+              self.first_contact = 'arm_l'
+              self.second_contact = 'arm_r'
+            else:
+              self.first_contact = 'arm_r'
+              self.second_contact = 'arm_l'
+
+        # print 'first_contact:' ,self.first_contact
+        # print 'second_contact:',self.second_contact
+      
+        if ((self.arm_force_r > self.force_treshold) or (self.arm_force_l > self.force_treshold)) and ( (rospy.get_time()-self.last_start) > self.time_treshold ):
+            self.last_start = rospy.get_time()
+            # print 'last_start:',self.last_start
+
+            #compute_angle_avg(self.pitch_acc,self.roll_acc,self.yaw_acc)
+            self.pitch_avg = self.pitch_acc/self.count
+            self.roll_avg = self.roll_acc/self.count
+            self.yaw_avg = self.yaw_acc/self.count
+            # print 'pitch_avg:',self.pitch_avg
 
 
         #Check if robot stoped turning and goes with back forward and rise flag turn==1  
-        if abs(self.pitch_avg) >= 0.7 :
-           self.turned = 1
-           print 'Turn finished'
+            if abs(self.pitch_avg) >= 0.7 :
+               self.turned = 1
+               # print 'Turn finished'
 
-        #Check if robot goes with back forward and on slop and rise flag slop==1  
-        if (self.turned == 1) and (abs(self.pitch_avg) < 0.65) :
-           self.slop = 1
-           #self.turned = 0
-           print 'Slop'
-           self.count_stand =0
+            #Check if robot goes with back forward and on slop and rise flag slop==1  
+            if (self.turned == 1) and (abs(self.pitch_avg) < 0.65) :
+               self.slop = 1
+               #self.turned = 0
+               # print 'Slop'
+               self.count_stand =0
 
-        #Check if robot on slop and ground slop starts to be flat self.count_stand += 1
-        if (self.slop == 1 ) and (abs(self.pitch_avg) > 0.61) :
-            print 'count_stand:',self.count_stand
-            self.count_stand += 1
-        #Check if groung is flat i.e. self. count_stand >= 2 ===> Stand up
-        if self.count_stand >=2 and (abs(self.pitch_avg)) > 0.61:
-               self.stand_up_flag = 1
-               print 'Ground is flat :',self.count_stand
-               self.slop = 0
-               print 'You can stand up!!!'
-         #reset_angle_acc()
-        self.pitch_acc = 0
-        self.roll_acc = 0
-        self.yaw_acc = 0
-        self.count = 0
+            #Check if robot on slop and ground slop starts to be flat self.count_stand += 1
+            if (self.slop == 1 ) and (abs(self.pitch_avg) > 0.61) :
+                print 'count_stand:',self.count_stand
+                self.count_stand += 1
+            #Check if groung is flat i.e. self. count_stand >= 2 ===> Stand up
+            if self.count_stand >=2 and (abs(self.pitch_avg)) > 0.61:
+                   self.stand_up_flag = 1
+                   # print 'Ground is flat :',self.count_stand
+                   self.slop = 0
+                   # print 'You can stand up!!!'
+             #reset_angle_acc()
+            self.pitch_acc = 0
+            self.roll_acc = 0
+            self.yaw_acc = 0
+            self.count = 0
 
-       self.pitch_acc += self.pitch
-       self.roll_acc += self.roll
-       self.yaw_acc += self.yaw
-       self.count += 1 
+        self.pitch_acc += self.pitch
+        self.roll_acc += self.roll
+        self.yaw_acc += self.yaw
+        self.count += 1 
 
 
        # self.leg_contact_r,self.leg_contact_l = self.contact.update(self.leg_force_z_r,self.leg_force_z_l)

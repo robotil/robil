@@ -70,3 +70,6 @@ class Walker(object):
 
     def GetResult(self):
         return self._Result
+
+    def Sleep(self):
+        self._WalkingMode.Sleep()
