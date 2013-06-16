@@ -1038,7 +1038,7 @@ class DW_Controller(object):
             0, 0, 0, 0, 0, 0,
             0, 0, 0, 0, 0, 0]
         # self.JC.send_pos_traj(self.RS.GetJointPos(),pos,0.5,0.01)
-        self.JC.send_pos_traj(self.RS.GetJointPos(),pos,1.0,0.01)
+        self.JC.send_pos_traj(self.RS.GetJointPos(),pos,2,0.01)
 
         pos = [ 0, 0, 0, 0,
             0, 0, 0, 0, -2.1, 0,
@@ -1046,7 +1046,7 @@ class DW_Controller(object):
             0, 0, 0, 1.5, 0, 0,
             0, 0, 0, -1.5, 0, 0]
         # self.JC.send_pos_traj(self.RS.GetJointPos(),pos,0.5,0.01)
-        self.JC.send_pos_traj(self.RS.GetJointPos(),pos,1.0,0.01)
+        self.JC.send_pos_traj(self.RS.GetJointPos(),pos,1.5,0.01)
 
         pos = [0, 0.8, 0, 0,
             0, 0, -2, 2, -2.1, 0,
