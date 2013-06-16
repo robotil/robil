@@ -55,6 +55,7 @@ public:
           //   if (false) {
                 return TaskResult(SUCCESS, "OK");
             } else {
+                return TaskResult(FAULT, "Object isn't detected");
                 std_srvs::Empty e;
                 PoseController::back_lbz_neck_ay msg;
               //  PoseController::back_movement msg2;
@@ -137,7 +138,6 @@ public:
 		bool res;
         res = _detector->detect(target);
         while (!isPreempt()) {
-			
 			if (!(_detector->_found)) {
                 return TaskResult(FAULT, "Object isn't detected");
 			
