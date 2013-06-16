@@ -497,19 +497,19 @@ bool C23_Detector::averagePointCloudInsideCar(int x1, int y1, int x2, int y2, co
   pcl::PointCloud<pcl::PointXYZ>detectionCloud;
   pcl::fromROSMsg<pcl::PointXYZ>(*cloud,detectionCloud);
   
-  /*tf::TransformListener listener;
-   * static tf::StampedTransform transform;
-   * while(1){
-   * try{
-   * listener.lookupTransform("/left_camera_frame","/left_camera_optical_frame",
-   * ros::Time(0), transform);
+  tf::TransformListener listener;
+    static tf::StampedTransform transform;
+    while(1){
+    try{
+    listener.lookupTransform("/pelvis","/left_camera_optical_frame",
+    ros::Time(0), transform);
    }
    catch (tf::TransformException ex){
      continue; cout<<"Invalid\n";
    } break;}
    Eigen::Matrix4f sensorTopelvis;
    pcl_ros::transformAsMatrix(transform, sensorTopelvis);
-   pcl::transformPointCloud(detectionCloud, detectionCloud, sensorTopelvis);*/
+   pcl::transformPointCloud(detectionCloud, detectionCloud, sensorTopelvis);
   
   
   double _x=0;
@@ -2336,6 +2336,25 @@ it_(nh),
 					
 					_generalDetector.detect(srcImg);
 					cout << "Done detection" << endl;
+					
+					
+					tf::TransformListener listener;
+					  static tf::StampedTransform transform;
+					  while(1){
+					  try{
+					  listener.lookupTransform("/pelvis","/left_camera_optical_frame",
+					  ros::Time(0), transform);
+					}
+					catch (tf::TransformException ex){
+					  continue; cout<<"Invalid\n";
+					} break;}
+					Eigen::Matrix4f sensorTopelvis;
+					pcl_ros::transformAsMatrix(transform, sensorTopelvis);
+					pcl::transformPointCloud(pclcloud, pclcloud, sensorTopelvis);
+					
+					
+					
+					
 					// 215,365,182,114
 					/*_generalDetector._x = 215;
 					 * _generalDetector._y = 365;
@@ -2350,8 +2369,8 @@ it_(nh),
 					if(_generalDetector._x != -1) {
 					  Rect carRect(_generalDetector._x, _generalDetector._y, _generalDetector._width, _generalDetector._height);
 					  Mat carImage(srcImg, carRect);
-					  imshow("Car patch", carImage);
-					    waitKey(0);
+					  //imshow("Car patch", carImage);
+					  //  waitKey(0);
 					    
 					    x = _generalDetector._x;
 					    y = _generalDetector._y;
@@ -2377,6 +2396,7 @@ it_(nh),
 						  minPoint = pclcloud.at(i,j);//Check
 						  minImagePoint.x = j;// Col: http://docs.opencv.org/doc/user_guide/ug_mat.html --> Scalar intensity = img.at<uchar>(Point(x, y));
 						minImagePoint.y = i;// Row
+						cout<<"Point: "<<i<<", "<<j<<": x,y,z "<<minPoint.x<<", "<<minPoint.y<<", "<<minPoint.z<<endl;
 						}
 					      }
 					    }
@@ -2390,11 +2410,11 @@ it_(nh),
 					    double THRESHOLD = 2;
 					    int nanColumnCounter = 0;
 					    bool nanColumnFlag = true;
-					    cout<<"Max depth: "<<minPoint.z<<endl;
+					    cout<<"Min depth x,y,z: "<<minPoint.x<<", "<<minPoint.y<<", "<<minPoint.z<<endl;
 					    cout<<"Min Image point x,y: "<<minImagePoint.x<<", "<<minImagePoint.y<<endl;
-					    circle( srcImg, Point2f(minImagePoint.x,minImagePoint.y),10, 300, -1, 8, 0 );
-					    imshow("Min pt", srcImg);
-					    waitKey();
+					   // circle( srcImg, Point2f(minImagePoint.x,minImagePoint.y),10, Scalar(0,0,255), -1, 8, 0 );
+					   // imshow("Min pt", srcImg);
+					   // waitKey();
 					    
 					    for(int i = 1; i < 500 && i + minImagePoint.x < srcImg.cols; i +=10) {
 					      flag = 0;
@@ -2407,24 +2427,24 @@ it_(nh),
 						
 						
 						if (depth!=depth)//If all values are nan then it will stop
-			  {
-			    //ROS_INFO("Nan values obtained. Cannot determine the distance to the car");
-			    continue;
-			  }
-			  
-			  nanColumnFlag = false;
-			  
-			  if(depth < minPoint.x+THRESHOLD && depth > minPoint.x-THRESHOLD/2) {
-			    cout<<"Depth: "<<depth<<endl;
-			    x1 = minImagePoint.x+i;
-			    //cout<<"X1: "<<x1<<endl;
-			    flag = 1;
-			  }
+						{
+						  //ROS_INFO("Nan values obtained. Cannot determine the distance to the car");
+						  continue;
+						}
+						
+						nanColumnFlag = false;
+						
+						if(depth < minPoint.x+THRESHOLD && depth > minPoint.x-THRESHOLD/2) {
+						  cout<<"Depth: "<<depth<<endl;
+						  x1 = minImagePoint.x+i;
+						  //cout<<"X1: "<<x1<<endl;
+						  flag = 1;
+						}
 					      }
 					      if(nanColumnFlag) nanColumnCounter++;
 							     
 							     
-							     if(!flag && nanColumnCounter>50) {
+							     if(!flag && nanColumnCounter>10) {
 							       break;
 							     }
 							     
@@ -2461,7 +2481,7 @@ it_(nh),
 					      if(nanColumnFlag) nanColumnCounter++;
 							     
 							     
-							     if(!flag && nanColumnCounter>50) {
+							     if(!flag && nanColumnCounter>10) {
 							       break;
 							     }
 							     
@@ -2519,13 +2539,19 @@ it_(nh),
 					      //TO DO: Determine if the robot is facing the front, rear, passenger or driver of the car
 					      
 					      
+					      //Detect the rear. If it is detected, find out which light is closer. This will tell us if we are facing driver/passenger side
+					     detectRearCar(srcImg, x0, yTop, x1, y1, minPoint, pclcloud,&car_target);
+					     
+					      
 					      //Determine if the robot is facing the driver or passenger side
 					      detectPassengerDriver(srcImg, x0, yTop, x1, y1, minPoint, pclcloud, &car_target);
 					      if(car_target==GeneralDetector::NONE)//The robot is neither facing the front or the rear
 					      {
-						detectRearCar(srcImg, x0, yTop, x1, y1, minPoint, pclcloud,&car_target);
+						cout<<"Here rear"<<endl;
+						
 						
 						if(car_target==GeneralDetector::NONE){
+						  cout<<"Here front"<<endl;
 						  detectFrontCar(srcImg, x0, yTop, x1, y1, minPoint, pclcloud,&car_target);
 						}
 					      }
@@ -2536,12 +2562,22 @@ it_(nh),
 					      
 					      if(car_target == GeneralDetector::CAR_FRONT){
 						//Move left
-						offset_x = 2;
+						offset_x = 0.5;
 						offset_y = 2;
+					      }
+					      else if(car_target==GeneralDetector::CAR_REAR_PASSENGER){
+						//Move right
+						offset_x = 1;
+						offset_y = -1;
+					      }
+					      else if(car_target==GeneralDetector::CAR_REAR_DRIVER){
+						//Move right
+						offset_x = 1;
+						offset_y = -2;
 					      }
 					      else if(car_target==GeneralDetector::CAR_REAR){
 						//Move right
-						offset_x = 2;
+						offset_x = 1;
 						offset_y = -2;
 					      }
 					      else if(car_target==GeneralDetector::CAR_DRIVER){
@@ -2653,12 +2689,30 @@ it_(nh),
 					//Test the two largest contours
 					x_difference = abs(mc[mc.size()-1].x - mc[mc.size()-2].x);
 					y_difference = abs(mc[mc.size()-1].y - mc[mc.size()-2].y);
+					
+					int x_cm_largest = mc[mc.size()-1].x;
+					int x_cm_second_largest = mc[mc.size()-2].x;
 
 					cout << x_difference << endl;
 					cout << y_difference << endl;
 					if (x_difference > 100 && x_difference < 250 && y_difference > 0
 					  && y_difference < 30) {
 					  *car_target = GeneralDetector::CAR_REAR;
+					ROS_INFO("REAR DETECTED");
+					  
+					  double x_largest = pclcloud.at(mc[mc.size()-1].y, mc[mc.size()-1].x).x;
+					  double x_second_largest = pclcloud.at(mc[mc.size()-2].y, mc[mc.size()-2].x).x;
+					  
+					  if(x_largest > x_second_largest && x_cm_largest>x_cm_second_largest){
+					    *car_target = GeneralDetector::CAR_REAR_DRIVER;
+					    ROS_INFO("CAR PASSENGER IN THE REAR");
+					  }
+					  else{
+					    *car_target = GeneralDetector::CAR_REAR_PASSENGER;
+					    ROS_INFO("CAR DRIVER IN THE REAR");
+					  }
+					
+					
 					  } else
 					    return false;
 					  
@@ -2732,8 +2786,9 @@ it_(nh),
 						//Test the two largest contours
 						double ratio = firstMaxBlobArea/secondMaxBlobArea;
 						cout<<"Ratio"<<ratio<<endl;
-						if(firstMaxBlobArea>5000){
-						*car_target = GeneralDetector::CAR_REAR;
+						if(firstMaxBlobArea>2000){
+						*car_target = GeneralDetector::CAR_FRONT;
+						ROS_INFO("FRONT DETECTED");
 						} else
 							return false;
 
@@ -2755,8 +2810,8 @@ it_(nh),
 					cout<<"X1: "<<x1<<" Y1: "<<y1<<"X2: "<<x2<<" Y2: "<<y2<<endl;
 					Rect carRect(x1, y1, x2-x1, y2-y1);
 					Mat carImage(srcImg, carRect);
-					imshow("Car", carImage);
-					waitKey(0);
+					//imshow("Car", carImage);
+					//waitKey(0);
 					
 					//Covert the image to HSV colour space
 					Mat imgHsvCar, imgThresholdedCar, imgCarOpened, imgCarDilated;
@@ -2777,11 +2832,15 @@ it_(nh),
 					  morphologyEx(imgThresholdedCar, imgCarOpened, MORPH_OPEN,element3);
 					  
 					  // Apply the dilation operation
-					  dilate( imgCarOpened, imgCarDilated, element3 );
+					  //Open the image to remove noise
+					  Mat element5(3,3,CV_8U, Scalar(1));
+					  dilate( imgCarOpened, imgCarDilated, element5 );
 					  
 					  //Now find the contours of the blobs
 					  vector<vector<cv::Point> > blobContours;
-					  findContours(imgCarDilated,blobContours,CV_RETR_EXTERNAL, CV_CHAIN_APPROX_SIMPLE);
+					  Mat contourImage;
+					  imgCarDilated.copyTo(contourImage);
+					  findContours(contourImage,blobContours,CV_RETR_EXTERNAL, CV_CHAIN_APPROX_SIMPLE);
 					  drawContours(carImage,blobContours,-1,CV_RGB(255,0,0),2);
 					  
 					  //imshow("Thresholded Image", imgThresholdedCar);
@@ -2835,6 +2894,9 @@ it_(nh),
 					    if(mc[mc.size()-1].x > mc[mc.size()-2].x){
 					      ROS_INFO("Robot is facing passenger side");
 					      *car_target = GeneralDetector::CAR_PASSENGER;
+					     x = (pclcloud.at(mc[mc.size()-1].y,mc[mc.size()-1].x).x + pclcloud.at(mc[mc.size()-2].y,mc[mc.size()-2].x).x)/2;
+					    y = (pclcloud.at(mc[mc.size()-1].y,mc[mc.size()-1].x).y + pclcloud.at(mc[mc.size()-2].y,mc[mc.size()-2].x).y)/2;
+					    z = (pclcloud.at(mc[mc.size()-1].y,mc[mc.size()-1].x).z + pclcloud.at(mc[mc.size()-2].y,mc[mc.size()-2].x).z)/2;
 					    }else{
 					      ROS_INFO("Robot is facing driver side");
 					      *car_target = GeneralDetector::CAR_DRIVER;
