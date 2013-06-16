@@ -69,6 +69,9 @@ class DC_WalkingMode(WalkingMode):
     def Fitness(self,path):
         return True
 
+    def Sleep(self):
+        self._WalkingModes[self._CurrentStandingMode].Sleep()
+
 ################################################
 #                  "private"                   #
 ################################################

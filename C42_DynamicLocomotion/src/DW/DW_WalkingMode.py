@@ -61,16 +61,24 @@ class DW_WalkingMode(WalkingMode):
     
     def Walk(self):
         WalkingMode.Walk(self)
-        self._Controller.DoPath(self._LPP.GetPath())
-        self._Controller.RotateToOri( self._LPP.GetPathYaw() ) # - math.pi )
-        # self._Controller.DynStandUp()
-        self._bDone = True
+        path = self._LPP.GetPath()
+        self._Controller.GoToPoint(path[0])
     
     def EmergencyStop(self):
         WalkingMode.Stop(self)    
         
     def IsDone(self):
+        if(self._Controller.PerformStep()):
+            self._LPP.GetPath().popleft()
+            if(0 < len(self._LPP.GetPath())):
+                path = self._LPP.GetPath()
+                self._Controller.GoToPoint(path[0])
+            else:
+                self._bDone = True
         return self._bDone
+
+    def Sleep(self):
+        pass
 
 ###################################################################################
 #--------------------------- CallBacks --------------------------------------------

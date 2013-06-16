@@ -57,7 +57,7 @@ class DynamicLocomotion(RobilTask):
                 self.Unsubscribe()
                 return RTResult_PREEPTED()
             self.PublishMotionState(parameters)
-            self._interval.sleep()
+            self._Walker.Sleep()
 
         self._Walker.Stop()
                 

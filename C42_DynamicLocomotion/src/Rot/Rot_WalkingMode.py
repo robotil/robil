@@ -41,3 +41,10 @@ class Rot_WalkingMode(DC_WalkingMode):
             self._WalkingModes[self._CurrentStandingMode]._bDone = True
         else:
             raise Exception("Rot_WalkingMode::Walk: Unexpected _CurrentStandingMode")
+
+    def IsDone(self):
+        result = self._WalkingModes[self._CurrentStandingMode]._bDone
+        if (False == result):
+            result = DC_WalkingMode.IsDone(self)
+        return result
+
