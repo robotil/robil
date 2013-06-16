@@ -155,8 +155,8 @@ class DW_Controller(object):
         ThisRobotCnfg[7] = ThisRobotCnfg[7+6] = 1.0
         ThisRobotCnfg[8] = ThisRobotCnfg[8+6] = 0.8
         ThisRobotCnfg[16] = ThisRobotCnfg[16+6] = 1.5
-        ThisRobotCnfg[17] = -0.4#-0.6
-        ThisRobotCnfg[17+6] = 0.4#0.6
+        ThisRobotCnfg[17] = -0.6#-0.4#-0.6
+        ThisRobotCnfg[17+6] = 0.6#0.4#0.6
         ThisRobotCnfg[18] = ThisRobotCnfg[18+6] = 2.5
         ThisRobotCnfg[19] = 1.8
         ThisRobotCnfg[19+6] = -1.8
@@ -165,9 +165,9 @@ class DW_Controller(object):
 
         #[-0.066, 0.082 Sequence Step 2: Extend arms
         ThisRobotCnfg = copy(self.RobotCnfg2[0][:])
-        ThisRobotCnfg[16] = ThisRobotCnfg[16+6] = 1.4
-        ThisRobotCnfg[17] = -0.2#-0.6#-0.4
-        ThisRobotCnfg[17+6] = 0.2#0.6# 0.4
+        ThisRobotCnfg[16] = ThisRobotCnfg[16+6] = 1.2#1.4
+        ThisRobotCnfg[17] = -0.6#-0.4#-0.2#-0.6#-0.4
+        ThisRobotCnfg[17+6] = 0.6#0.4#0.2#0.6# 0.4
         ThisRobotCnfg[18] = ThisRobotCnfg[18+6] = 2.9
         ThisRobotCnfg[19] = 0.2
         ThisRobotCnfg[19+6] = -0.2
@@ -181,7 +181,8 @@ class DW_Controller(object):
         ThisRobotCnfg[7] = ThisRobotCnfg[7+6] = 2.6
         ThisRobotCnfg[8] = ThisRobotCnfg[8+6] = 0.2
         self.RobotCnfg2.append(ThisRobotCnfg)
-        self.StepDur2.append(0.4*T)
+        # self.StepDur2.append(0.4*T)
+        self.StepDur2.append(0.3*T)
 
         # Sequence Step 4: Place legs on ground and lift pelvis
         ThisRobotCnfg = copy(self.RobotCnfg2[2][:])
@@ -341,6 +342,25 @@ class DW_Controller(object):
         else:
             print 'position command legth doest fit'
 
+    # def TimeVariantIterp(self,pos1,pos2,T_nom,dt_nom,vel_ind):
+    #     if len(pos1) == len(pos2) == len(self._jnt_names):
+    #         N = ceil(T_nom/dt_nom)
+    #         pos1 = array(pos1)
+    #         pos2 = array(pos2)
+    #         K =100
+    #         for ratio in linspace(0, 1, N):
+    #             interpCommand = (1-ratio)*pos1 + ratio * pos2
+    #             if np.linalg.norm(interpCommand - pos2) <= 0.01:
+    #                 return
+    #             self.JC.set_all_pos([ float(x) for x in interpCommand ])
+    #             self.JC.send_command()
+    #             vel = self.RS.GetAngVel()
+    #             dt = max(dt_nom/(K*vel[vel_ind]),dt_nom/100)
+    #             rospy.sleep(dt)
+
+    #     else:
+    #         print 'position command legth doest fit'
+
     def Sit(self,T):
         self.JC.set_gains("l_arm_elx",5,0,20)
         self.JC.set_gains("r_arm_elx",5,0,20)
@@ -418,8 +438,12 @@ class DW_Controller(object):
             self.CheckTipping()
 
             # Rotate in place towards target
-            if self._fall_count < self.FALL_LIMIT: 
-
+            if self._fall_count < self.FALL_LIMIT:
+              # Crawl towards target
+                if Point[2] == "fwd":
+                    self.Crawl()
+                if Point[2] == "bwd":
+                    self.BackCrawl()
                 Drift = abs(self.DeltaAngle(T_ori,y))
                 if 0.5<Drift<1.4 and Distance>1:
                     self.RotateToOri(T_ori)
@@ -440,7 +464,7 @@ class DW_Controller(object):
                             self.Crawl()
                         if Point[2] == "fwd":
                             self.BackCrawl()
-                        self.RotSpotSeq(0.5)
+                        self.RotSpotSeq(1)
                         self.FollowPath = 1
                         stuck_counter = 0
                 else:
@@ -536,12 +560,6 @@ class DW_Controller(object):
     def DoInvSeqStep(self):
         if self._terrain =='HILLS':
 
-            if self.CurSeqStep2 == 2:
-                pos = list(self.RS.GetJointPos())
-                pos[2] = -1.3*self.IMU_mon.roll 
-                self.JC.send_pos_traj(list(self.RS.GetJointPos()),pos,0.2,0.01)
-                pos = copy(self.RobotCnfg2[1][:])
-
             if self.CurSeqStep2 == 3:
              
                 if self.IMU_mon.second_contact == 'arm_r':
@@ -554,6 +572,16 @@ class DW_Controller(object):
 
                 print 'second_contact:',self.IMU_mon.second_contact   
             print 'Doing inv. Step seq #',self.CurSeqStep2
+            if self.CurSeqStep2 == 2:
+                pos = list(self.RS.GetJointPos())
+                pos[2] = -1.3*self.IMU_mon.roll 
+                self.JC.send_pos_traj(list(self.RS.GetJointPos()),pos,0.2,0.01)
+                # pos = copy(self.RobotCnfg2[1][:])
+                # self.TimeVariantIterp(self.RS.GetJointPos(),self.RobotCnfg2[self.CurSeqStep2],self.StepDur2[self.CurSeqStep2]/self.Throtle,0.005,0)
+                # self.CurSeqStep2 += 1
+                # if self.CurSeqStep2 > 4:
+                #     self.CurSeqStep2 = 0
+                # return
         self.JC.send_pos_traj(self.RS.GetJointPos(),self.RobotCnfg2[self.CurSeqStep2],self.StepDur2[self.CurSeqStep2]/self.Throtle,0.005) 
         self.JC.reset_gains()
         self.CurSeqStep2 += 1
@@ -663,10 +691,17 @@ class DW_Controller(object):
                 y0 = y
                 Angle=self.DeltaAngle(Bearing,y0)
 
+            # # Return to original configuration
+
+            # self.JC.send_pos_traj(self.RS.GetJointPos(),self.RobotCnfg[0][:],0.5,0.01) 
+            # self.CurSeqStep = 0
+            # self.CurSeqStep2 = 0
+            #############################################
             # Return to original configuration
-            self.JC.send_pos_traj(self.RS.GetJointPos(),self.RobotCnfg[0][:],0.5,0.01) 
-            self.CurSeqStep = 0
-            self.CurSeqStep2 = 0
+
+            self.JC.send_pos_traj(self.RS.GetJointPos(),self.RobotCnfg2[4][:],2,0.01)
+            rospy.sleep(1)
+            self.CurSeqStep2 = 4
             return 1
 
     def RotateToOriInMud(self,Bearing):
@@ -708,10 +743,17 @@ class DW_Controller(object):
             # Angle=self.DeltaAngle(Bearing,y0)
             Angle=self.DeltaAngle(Bearing,y0)
 
-        # Return to original configuration
-        self.JC.send_pos_traj(self.RS.GetJointPos(),self.RobotCnfg[0][:],0.5,0.01) 
-        self.CurSeqStep = 0
-        self.CurSeqStep2 = 0
+        # # Return to original configuration
+        # self.JC.send_pos_traj(self.RS.GetJointPos(),self.RobotCnfg[0][:],0.5,0.01) 
+        # self.CurSeqStep = 0
+        # self.CurSeqStep2 = 0
+
+        #############################################
+            # Return to original configuration
+
+        self.JC.send_pos_traj(self.RS.GetJointPos(),self.RobotCnfg2[4][:],2,0.01)
+        rospy.sleep(1)
+        self.CurSeqStep2 = 4
         return 1
 
     def RotSpotSeq(self,Delta):
