@@ -7,6 +7,7 @@
                <tsk name="PathPlanning" x="606.1175778145257" y="151.77365888810877" test_time="0" test_result="true" id="e5237ea1-8c69-4d0f-af20-cd104e4dedad" />
             <dec name="!L!" x="756.1175778145257" y="116.77365888810877"> 
                   <seq name="MissionLoop" x="728.1018821683119" y="186.5756936658919" collapsed="false" id="b479e922-b81b-45cd-a5ef-a54e77b9d55f"> 
+                        <tsk name="resetHead" x="529.5" y="262.5" test_time="0" test_result="true" id="43254ef6-8278-44d0-8c0b-9bee611647d7" />
                      <dec name="!L!" x="748.1018821683119" y="226.5756936658919"> 
                            <sel name="OperatorObjectValidation" x="556.0932307675224" y="331.74630179425213" collapsed="false" id="3d662d8a-f404-49bd-a83e-dea5ce0851eb"> 
                                  <sel name="SearchAndTurn" x="437.135188156539" y="482.9145573948615" collapsed="false" id="d20d877b-28b4-48d0-b70c-2bcb7e69898e"> 
