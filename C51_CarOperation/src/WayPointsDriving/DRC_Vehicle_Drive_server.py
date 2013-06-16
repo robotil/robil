@@ -7,10 +7,10 @@ from C51_CarOperation.msg import Monitoring
 from geometry_msgs.msg import Twist
 import geometry_msgs.msg
 from nav_msgs.msg import Odometry
-from std_msgs.msg import  Float64
+from std_msgs.msg import  Float64, Int32
 from Point2Point import P2P
 import numpy
-from geometry_msgs.msg import Pose, Polygon
+from geometry_msgs.msg import Pose, Polygon, Twist
 from plotGraph import plotGraph
 from math import *
 from LogData import LOG
@@ -18,8 +18,9 @@ from Point2Point import P2P
 from tf.transformations import euler_from_quaternion
 import time
 from datetime import datetime, timedelta
-from datetime import datetime
 from C25_GlobalPosition.msg import C25C0_ROP
+from C25_GlobalPosition.srv import C25BDI
+from C42_State.msg import MotionType
 from C31_PathPlanner.msg import C31_Waypoints
 from C31_PathPlanner.srv import C31_GetPath
 import Tkinter
@@ -29,11 +30,10 @@ import Queue
 import threading
 from WheelClient import Wheel_client
 from CalibrateWheel import WheelCalibrate_client, runCalibrate
+GUI = 0
 LEFT = -1
 RIGHT = 1
-TIME = 4
-
-
+TIME = 0.4
 
 class RTD():
     def __init__(self):
@@ -52,6 +52,22 @@ class INPUTrtd:
         self.MAP=0
         self.GOAL=[-1, -1]
         self.WP = []
+
+def TurnSteering(wheel_Q):
+        Init_Angle=1.57
+        Wheel_before=10
+        while 1:
+            try:
+                host=wheel_Q.get(timeout=0.1)
+            except:
+                host=0
+            print host
+            if abs(host)>1.5:
+                Wheel_client(Init_Angle, 1.57+host*0.5)
+            else:
+                Wheel_client(Init_Angle, 1.57+host*0.25)
+            Init_Angle=999
+            
 def task(root,app,q_in,  q_out):
     host=RTD()
     try:
@@ -67,14 +83,13 @@ def task(root,app,q_in,  q_out):
     q_in.put(INP)
     #app.distancePlot(host.ObsticalPoints)
     app.showMAP(host.ObsticalPoints)
+    app.showMAP2(host.ObsticalPoints)
     try:
         pass
         #app.canvas.draw()
     except:
         pass    
-    
     if host.location:
-        
         app.updateLocation([int(host.location[0]), int(host.location[1])])
         app.updateActSpeed(int(host.ActSpeed*100)/100.0)
         app.updateObject([int(host.object[0]), int(host.object[1])])
@@ -92,29 +107,6 @@ def task(root,app,q_in,  q_out):
         root.quit
     
 
-def TurnSteering(wheel_Q):
-        Init_Angle=1.57
-        Wheel_before=10
-        while 1:
-            try:
-                host=wheel_Q.get(timeout=0.1)
-            except:
-                host=0
-    
-            
-            print host
-#            if host<-0.5:
-#                host=-1
-#            elif host>0.5:
-#                host=1
-#            else:
-#                host=0
-            if abs(host)>1.5:
-                Wheel_client(Init_Angle, 1.57+host*0.5)
-            else:
-                Wheel_client(Init_Angle, 1.57+host*0.25)
-            Init_Angle=999
-            
 def doGui(q_in, q_out):
     root = Tkinter.Tk()
     
@@ -142,41 +134,51 @@ class Drive(object):
         self.OE = [0, 0]
         self.dOE = 0
         self.Htime = 0
-        self.q_in = Queue.Queue()
-        self.q_out = Queue.Queue()
-        
+        if GUI:
+            self.q_in = Queue.Queue()
+            self.q_out = Queue.Queue()
+            t = threading.Thread(target=doGui, args =  (self.q_in, self.q_out, ) )
+            t.daemon = True
+            t.start()
+            a=RTD()
+            self.q_out.put(a)        
         self.Obsticalpoints=[]
         self.ObsticalTime=[]
-        sub = rospy.Subscriber('/my_cloud', Polygon,self.Obs_callback)    
+        #sub = rospy.Subscriber('/my_cloud', Polygon,self.Obs_callback)    
+        sub = rospy.Subscriber('/RoadExtract', Polygon,self.Obs_callback)    
         
-        #self.sub = rospy.Subscriber('/C25/publish', C25C0_ROP,self.MyLocation_callback) #get atlas location by subscribing to C25 module       
-        self.sub = rospy.Subscriber('/ground_truth_odom', Odometry,self.MyLocation_callback2) #get atlas location by subscribing to C25 module   
-        
-        t = threading.Thread(target=doGui, args =  (self.q_in, self.q_out, ) )
-        t.daemon = True
-        t.start()
-#        MAPthread=threading.Thread(target=self.MAPPING) #, args =  (self.q_in, self.q_out, )
-#        MAPthread.daemon = True
-#        MAPthread.start()
-        a=RTD()
-        
-        self.q_out.put(a)
+        self.sub = rospy.Subscriber('/C25/publish', C25C0_ROP,self.MyLocation_callback) #get atlas location by subscribing to C25 module       
+        #self.sub = rospy.Subscriber('/ground_truth_odom', Odometry,self.MyLocation_callback2) #get atlas location by subscribing to C25 module   
+        self.MotionTypeMSG = MotionType()
+        self.MotionTypeMSG.motion =5        
+        self.motionTypePublisher = rospy.Publisher("/motion_state/motion_type", MotionType)        
+
         
 
         self._action_name = name
         self.path=pathVec
-        
         self._as = actionlib.SimpleActionServer(self._action_name, C51_CarOperation.msg.DriveAction, execute_cb=self.DriveCallback, auto_start=False)
         self.feedback_publisher = rospy.Publisher("C51/m_feedback", Monitoring)
-    
         self._as.start()
     def Obs_callback(self, data):
         a=datetime.now()
+        F=-0.5
+        H=1.5
+        #H=self.floorFilter(data)
+        #print H
         for pt in data.points:
-            self.Obsticalpoints.append((pt.x, -pt.y))
-            self.ObsticalTime.append(a)
+            #if pt.z>F  and pt.z<H:
+                self.Obsticalpoints.append((pt.x, -pt.y, -pt.z))
+                self.ObsticalTime.append(a)
         
         self.filter()
+    def floorFilter(self, data):
+        floorH=10
+        epsilon=0.1
+        for pt in data.points:
+            if pt.z<floorH:
+                floorH = pt.z
+        return floorH+epsilon
     def filter(self):
         n = datetime.now()
         try:
@@ -186,22 +188,23 @@ class Drive(object):
             
         except:
             pass
-        self.rtd.ObsticalPoints=self.Obsticalpoints
-        self.q_out.put(self.rtd)
-    def MAPPING(self):
-        while not rospy.is_shutdown():
-            rospy.sleep(0.5)
-            f =self.factorGenerator()
-            print "VL", f[3],"L", f[0],"Z", f[1],"R",f[2], "VR", f[4]
-            # [L  ST  R HL  HR]
-#            [collisionPt, side]=self.willCollide()
-#            if collisionPt:
-#                if side==LEFT:
-#                    print "will colide in %f meters. can pass on the LEFT side" %collisionPt[0]
-#                elif side==RIGHT:
-#                    print "will colide in %f meters. can pass on the RIGHT side" %collisionPt[0]
-#                else:
-#                    print "will colide in %f meters. can't pass!!!!" %collisionPt[0]
+        if GUI:
+            self.rtd.ObsticalPoints=self.Obsticalpoints
+            self.q_out.put(self.rtd)
+#    def MAPPING(self):
+#        while not rospy.is_shutdown():
+#            rospy.sleep(0.5)
+#            f =self.factorGenerator()
+#            print "VL", f[3],"L", f[0],"Z", f[1],"R",f[2], "VR", f[4]
+#            # [L  ST  R HL  HR]
+##            [collisionPt, side]=self.willCollide()
+##            if collisionPt:
+##                if side==LEFT:
+##                    print "will colide in %f meters. can pass on the LEFT side" %collisionPt[0]
+##                elif side==RIGHT:
+##                    print "will colide in %f meters. can pass on the RIGHT side" %collisionPt[0]
+##                else:
+##                    print "will colide in %f meters. can't pass!!!!" %collisionPt[0]
             
 
 
@@ -224,21 +227,21 @@ class Drive(object):
         Orientation=euler_from_quaternion( numpy.array((data.pose.pose.pose.orientation.x, data.pose.pose.pose.orientation.y, data.pose.pose.pose.orientation.z, data.pose.pose.pose.orientation.w), dtype=numpy.float64))
         self.zOrientation = Orientation[2]
         self.ActSpeed = (data.pose.twist.twist.linear.x**2+data.pose.twist.twist.linear.y**2)**0.5
-        
-        self.rtd.ActSpeed=self.ActSpeed
-        self.rtd.location = [self.xPosition, self.yPosition]
-        self.q_out.put(self.rtd)
-    def MyLocation_callback2(self, data):
-        self.Htime=(10**-9)*data.header.stamp.nsecs+data.header.stamp.secs
-        self.xPosition =data.pose.pose.position.x
-        self.yPosition =data.pose.pose.position.y
-        Orientation=euler_from_quaternion( numpy.array((data.pose.pose.orientation.x, data.pose.pose.orientation.y, data.pose.pose.orientation.z, data.pose.pose.orientation.w), dtype=numpy.float64))
-        self.zOrientation = Orientation[2]
-        self.ActSpeed = (data.twist.twist.linear.x**2+data.twist.twist.linear.y**2)**0.5
-        
-        self.rtd.ActSpeed=self.ActSpeed
-        self.rtd.location = [self.xPosition, self.yPosition]
-        self.q_out.put(self.rtd)
+        if GUI:
+            self.rtd.ActSpeed=self.ActSpeed
+            self.rtd.location = [self.xPosition, self.yPosition]
+            self.q_out.put(self.rtd)
+#    def MyLocation_callback2(self, data):
+#        self.Htime=(10**-9)*data.header.stamp.nsecs+data.header.stamp.secs
+#        self.xPosition =data.pose.pose.position.x
+#        self.yPosition =data.pose.pose.position.y
+#        Orientation=euler_from_quaternion( numpy.array((data.pose.pose.orientation.x, data.pose.pose.orientation.y, data.pose.pose.orientation.z, data.pose.pose.orientation.w), dtype=numpy.float64))
+#        self.zOrientation = Orientation[2]
+#        self.ActSpeed = (data.twist.twist.linear.x**2+data.twist.twist.linear.y**2)**0.5
+#        if GUI:
+#            self.rtd.ActSpeed=self.ActSpeed
+#            self.rtd.location = [self.xPosition, self.yPosition]
+#            self.q_out.put(self.rtd)
     def DistanceToWP(self, object):
         return float((object[0]-self.xPosition)**2+(object[1]-self.yPosition)**2)**0.5 #Distance^2 = (Xd-Xc)^2+(Yd-Yc)^2
     
@@ -287,12 +290,20 @@ class Drive(object):
         
         return ([flag, b, m])
     def DriveCallback(self, goal):
+        self.motionTypePublisher.publish(self.MotionTypeMSG)
+        num = Int32(0)
+        rospy.wait_for_service('/C25/BDIswitch')
+        try:
+            State= rospy.ServiceProxy('/C25/BDIswitch', C25BDI)
+            resp = State(num)
+        except rospy.ServiceException, e:
+            print "Service /C25/BDISwitch call failed: %s"%e
+            log.info("Might be driving without Global Position")
         gasP=Gas() #gas pedal online
         brakeP=Brake() #gas pedal online
         #Steer=SW()      #steering wheel online        
         self._result.success = 1
-        
-        
+             
         #rospy.sleep(5.0)
         
         wheel_dat=0
@@ -318,8 +329,9 @@ class Drive(object):
                     self.path=self.C31_path
                     flag+=1
             if self.path:
-                self.rtd.AllWP = [[(int(k*100))/100.0, float(int(j*100))/100] for k, j in self.path]
-                self.q_out.put(self.rtd)
+                if GUI:
+                    self.rtd.AllWP = [[(int(k*100))/100.0, float(int(j*100))/100] for k, j in self.path]
+                    self.q_out.put(self.rtd)
                 for object in self.path:
                     if self._as.is_preempt_requested():
                         success = False
@@ -353,12 +365,15 @@ class Drive(object):
                             
 
                             factor = self.factorGenerator()
+                            
 #                            for f in range(0, len(factor)):
 #                                if not factor[f]==1:
 #                                    factor[f]=0
                             #[dSpeed, Cspeed]=P2P(self.DistanceToWP(object), self.OE[0], self.dOE, [1, 1, 1, 1, 1])
 #                            print "without:", Cspeed                                    
                             [dSpeed, Cspeed]=P2P(self.DistanceToWP(object), self.OE[0], self.dOE, factor)
+                            if factor==[0, 0, 0, 0, 0]:
+                                dSpeed=0
 #                            print "with:", Cspeed
                             
                             #rospy.sleep(0.05)
@@ -375,16 +390,17 @@ class Drive(object):
                             #print "sending"
                             wheel_Q.put(Cspeed)
                             
-                            #Steer.turn(Cspeed)
-                            self.rtd.object=object
-                            self.rtd.location = [self.xPosition,self.yPosition]
-                            self.rtd.speed = dSpeed
-                            self.rtd.turn = Cspeed
-                            self.rtd.distance = self.DistanceToWP(object)
-                            self.rtd.OriEr = self.OE[0]
-                            self.rtd.dO = self.dOE
-                            self.rtd.ActSpeed = self.ActSpeed
-                            self.q_out.put(self.rtd) #data to GUI!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+                            #Steer.turn(-Cspeed)
+                            if GUI:
+                                self.rtd.object=object
+                                self.rtd.location = [self.xPosition,self.yPosition]
+                                self.rtd.speed = dSpeed
+                                self.rtd.turn = Cspeed
+                                self.rtd.distance = self.DistanceToWP(object)
+                                self.rtd.OriEr = self.OE[0]
+                                self.rtd.dO = self.dOE
+                                self.rtd.ActSpeed = self.ActSpeed
+                                self.q_out.put(self.rtd) #data to GUI!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
                         DATA.DistanceError(sqrt((self.xPosition-object[0])*(self.xPosition-object[0])+( self.yPosition-object[1])*( self.yPosition-object[1])))
                         DATA.PassedWayPoint(object)
                         newMsg=Monitoring()
@@ -424,13 +440,13 @@ class Drive(object):
             return [error*kp, 0]
         else:
             return [0, -error*kp/10]
-    def SteeringController(self, desiredTurn):
-        error=desiredTurn-self.ActSpeed
-        kp = 1
-        if error>0:
-            return [error*kp, 0]
-        else:
-            return [0, -error*kp/10]            
+#    def SteeringController(self, desiredTurn):
+#        error=desiredTurn-self.ActSpeed
+#        kp = 1
+#        if error>0:
+#            return [error*kp, 0]
+#        else:
+#            return [0, -error*kp/10]            
     def getPath(self, data):
 #        try:
             self.C31_path = []
@@ -494,6 +510,7 @@ class Drive(object):
                 #print pt
                 if pt[0]<3:
                     rospy.loginfo("Will surely collide!!!")
+                    rospy.sleep(0.05)
                     return [0, 0, 0, 0, 0]
                 z=0.051*exp(0.208*pt[0])
                 if z<Z:#choose lowest
@@ -570,18 +587,18 @@ class Brake:
     def brake(self, num):
         self.pub.publish(num)
 
-#class SW:
-#    status=0
-#    pub=0
-#    sub=0
-#    def __init__(self):
-#        self.pub = rospy.Publisher(car+'/hand_wheel/cmd', Float64)
-#        self.sub = rospy.Subscriber('/'+car+'/hand_wheel/state', Float64, self.SWCallback)
-#    def SWCallback(self, data):
-#        self.status=data.data
-#
-#    def turn(self, num):
-#        self.pub.publish(num)
+class SW:
+    status=0
+    pub=0
+    sub=0
+    def __init__(self):
+        self.pub = rospy.Publisher(car+'/hand_wheel/cmd', Float64)
+        self.sub = rospy.Subscriber('/'+car+'/hand_wheel/state', Float64, self.SWCallback)
+    def SWCallback(self, data):
+        self.status=data.data
+
+    def turn(self, num):
+        self.pub.publish(num)
 #==============================================================================================#
 #==============================================================================================#
 
