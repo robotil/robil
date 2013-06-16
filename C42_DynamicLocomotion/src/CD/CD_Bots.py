@@ -72,6 +72,9 @@ class CD_ActualRobot(CD_Robot):
         
     def PrepareNextSegment(self):
         self._LPP.PromoteSegment()
+
+    def SetPosition(self,x,y):
+        self._LPP.UpdatePosition(x,y,0.2)
     
 ###################################################################################
 #-------------------------------- Phantom Bot -------------------------------------
