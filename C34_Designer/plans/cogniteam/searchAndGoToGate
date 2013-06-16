@@ -1,0 +1,8 @@
+INCLUDE=searchAndGoTo
+
+def root{
+	GO(target=Gate)
+}
+
+
+END

@@ -116,11 +116,16 @@ public:
 };
 
 
+#include "task.hpp"
+
 int main(int argc, char **argv) {
 	ros::init(argc, argv, "back_neck");
 
 	back_neck* PoseControl = new back_neck("back_neck");
 	ROS_INFO("Running back_neck service");
+	
+	TaskResetHead task;
+	
 	ros::spin();
 
 	return 0;
