@@ -90,6 +90,11 @@ typedef enum gear_status{
  REVERSE_GEAR_STATUS
 }GEAR_STATUS;
 
+typedef enum handbrake_status{
+ RELEASED_HANDBRAKE_STATUS,
+ ENGAGED_HANDBRAKE_STATUS
+}HANDBRAKE_STATUS;
+
 class C23_Detector{
 public:
 	C23_Detector(const char* left_cam, const char* right_cam, const char* pointc);
@@ -116,6 +121,7 @@ public:
     double orient_R;
     string current_status;
     GEAR_STATUS current_gear_status;
+    HANDBRAKE_STATUS current_handbrake_status;
     pcl::PointCloud<pcl::PointXYZ> lastCloud;
 private:
 
@@ -125,6 +131,8 @@ private:
     bool detectCar(Mat srcImg, const sensor_msgs::PointCloud2::ConstPtr &cloud);
     //bool compareContourAreas ( vector<cv::Point> contour1, vector<cv::Point> contour2) ;
     bool detectPassengerDriver(Mat srcImg, int x1,int y1,int x2,int y2, pcl::PointXYZ minPoint, pcl::PointCloud<pcl::PointXYZ> pclcloud, GeneralDetector::CAR_TARGET *car_target);
+    bool detectRearCar(Mat srcImg, int x1,int y1,int x2,int y2, pcl::PointXYZ minPoint, pcl::PointCloud<pcl::PointXYZ> pclcloud, GeneralDetector::CAR_TARGET *car_target);
+    bool detectFrontCar(Mat srcImg, int x1,int y1,int x2,int y2, pcl::PointXYZ minPoint, pcl::PointCloud<pcl::PointXYZ> pclcloud, GeneralDetector::CAR_TARGET *car_target);
     bool detectValve(Mat srcImg, const sensor_msgs::PointCloud2::ConstPtr &cloud);
     bool detectFirehose(Mat srcImg, const sensor_msgs::PointCloud2::ConstPtr &cloud);
     bool detectFirehoseGrip(Mat srcImg, const sensor_msgs::PointCloud2::ConstPtr &cloud);
