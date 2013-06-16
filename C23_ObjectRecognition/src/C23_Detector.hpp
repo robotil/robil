@@ -101,6 +101,7 @@ public:
 
   bool detect(string target);
 	void callback(const sensor_msgs::ImageConstPtr& msg,const sensor_msgs::PointCloud2::ConstPtr &cloud);
+    void stopDetection();
 public:
 	bool is_search;
 	double x;
@@ -123,6 +124,7 @@ public:
     GEAR_STATUS current_gear_status;
     HANDBRAKE_STATUS current_handbrake_status;
     pcl::PointCloud<pcl::PointXYZ> lastCloud;
+    
 private:
 
   	bool detectGate(Mat img, const sensor_msgs::PointCloud2::ConstPtr &cloud);
@@ -142,7 +144,7 @@ private:
     bool detectHandbrake(Mat srcImg,const sensor_msgs::PointCloud2::ConstPtr &cloud,int location);
     bool detectGear(Mat srcImg,const sensor_msgs::PointCloud2::ConstPtr &cloud,int location);
     bool detectArrowDirection(Mat srcImg,const sensor_msgs::PointCloud2::ConstPtr &cloud);
-    
+   
     bool pictureCoordinatesToGlobalPosition(double x1, double y1, double x2, double y2, double * x, double* y, double*z,double offsetx = 0, double offsety = 0);
     bool pointCloudCoordinatesToGlobalPosition(double x, double y, double z, double* px, double* py, double*pz);
 
