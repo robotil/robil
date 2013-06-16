@@ -34,7 +34,7 @@ class DW_WalkingMode(WalkingMode):
         if ((None != parameters) and ('Terrain' in parameters)):
             self.terrain = parameters['Terrain']
         else:
-            self.terrain="MUD"
+            self.terrain="HILLS"
 
         self._Controller.Initialize(Terrain = self.terrain)
         self._bDone = False
@@ -60,6 +60,7 @@ class DW_WalkingMode(WalkingMode):
         rospy.sleep(0.5)
     
     def Walk(self):
+        print("DW_WalkingMode::Walk: path",self._LPP.GetPath())
         WalkingMode.Walk(self)
         path = self._LPP.GetPath()
         self._Controller.GoToPoint(path[0])
@@ -68,9 +69,10 @@ class DW_WalkingMode(WalkingMode):
         WalkingMode.Stop(self)    
         
     def IsDone(self):
+        print("DW_WalkingMode::IsDone: path",self._LPP.GetPath())
         if(self._Controller.PerformStep()):
-            self._LPP.GetPath().popleft()
-            if(0 < len(self._LPP.GetPath())):
+            if(1 < len(self._LPP.GetPath())):
+                self._LPP.GetPath().popleft()
                 path = self._LPP.GetPath()
                 self._Controller.GoToPoint(path[0])
             else:
@@ -89,7 +91,7 @@ class DW_WalkingMode(WalkingMode):
         p = []
         i = 0
         for wp in path.points:
-            if 0 < i: # ignor first way-point (current position) 
+            if 0 < i: # ignore first way-point (current position) 
                 if 1 == i%2:
                     if self.terrain=="MUD":
                         direction = "fwd"

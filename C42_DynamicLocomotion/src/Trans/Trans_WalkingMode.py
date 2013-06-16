@@ -44,13 +44,17 @@ class Trans_WalkingMode(DC_WalkingMode):
             self._WalkingModes[self._CurrentStandingMode]._WalkingModeStateMachine.PerformTransition("Walk")
 
             p = []
-            direction = "fwd"
+            if (0 > self._translationX):
+                direction = "bwd"
+            else:
+                direction = "fwd"
             yaw,pitch,roll = self._WalkingModes[self._CurrentStandingMode]._Controller.current_ypr()
             x = self._WalkingModes[self._CurrentStandingMode]._Controller.GlobalPos.x
             y = self._WalkingModes[self._CurrentStandingMode]._Controller.GlobalPos.y
-            p.append([x,y,direction])
-            p.append([x+self._translationX*math.cos(yaw)+self._translationY*math.cos(yaw),\
-                y+self._translationX*math.sin(yaw)+self._translationY*math.sin(yaw),direction])
+            # p.append([x,y,direction])
+            p.append([x+self._translationX*math.cos(yaw)-self._translationY*math.sin(yaw),\
+                y+self._translationX*math.sin(yaw)+self._translationY*math.cos(yaw),direction])
+            print("Trans_WalkingMode::Walk",p)
             self._WalkingModes[self._CurrentStandingMode].SetPath(p)
             
             DC_WalkingMode.Walk(self)

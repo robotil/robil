@@ -639,11 +639,12 @@ class DW_Controller(object):
             self.RotFlag = 1
 
             # Make sure Bearing is from -pi to +pi
-            Bearing = Bearing % (2*math.pi)
-            if Bearing > math.pi:
-                Bearing -= 2*math.pi
-            if Bearing < -math.pi:
-                Bearing += 2*math.pi
+            Bearing = math.acos(math.cos(Bearing))
+            # Bearing = Bearing % (2*math.pi)
+            # if Bearing > math.pi:
+            #     Bearing -= 2*math.pi
+            # if Bearing < -math.pi:
+            #     Bearing += 2*math.pi
 
             # Get into "break-dance" configuration
             #self.GoToSeqStep(3)
@@ -704,11 +705,12 @@ class DW_Controller(object):
         self.RotFlag = 1
 
         # Make sure Bearing is from -pi to +pi
-        Bearing = Bearing % (2*math.pi)
-        if Bearing > math.pi:
-            Bearing -= 2*math.pi
-        if Bearing < -math.pi:
-            Bearing += 2*math.pi
+        Bearing = math.acos(math.cos(Bearing))
+        # Bearing = Bearing % (2*math.pi)
+        # if Bearing > math.pi:
+        #     Bearing -= 2*math.pi
+        # if Bearing < -math.pi:
+        #     Bearing += 2*math.pi
 
         self.JC.send_pos_traj(self.RS.GetJointPos(),self.RobotCnfg2[4][:],1.5,0.01)
 
