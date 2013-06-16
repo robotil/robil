@@ -33,7 +33,7 @@ class Trans_WalkingMode(DC_WalkingMode):
         elif ('DW' == self._CurrentStandingMode):
             pass
         else:
-            raise Exception("Rot_WalkingMode::Initialize: Unexpected _CurrentStandingMode")
+            raise Exception("Trans_WalkingMode::Initialize: Unexpected _CurrentStandingMode")
             
         self._WalkingModes[self._CurrentStandingMode].Initialize(specificParameters)
         
@@ -42,9 +42,17 @@ class Trans_WalkingMode(DC_WalkingMode):
             DC_WalkingMode.Walk(self)
         elif('DW' == self._CurrentStandingMode):
             self._WalkingModes[self._CurrentStandingMode]._WalkingModeStateMachine.PerformTransition("Walk")
-            ##########################
-            y,p,r = self._WalkingModes[self._CurrentStandingMode].current_ypr()
-            self._Controller.RotateToOri(y+self._rotationAngle)
-            self._WalkingModes[self._CurrentStandingMode]._bDone = True
+
+            p = []
+            direction = "fwd"
+            yaw,pitch,roll = self._WalkingModes[self._CurrentStandingMode]._Controller.current_ypr()
+            x = self._WalkingModes[self._CurrentStandingMode]._Controller.GlobalPos.x
+            y = self._WalkingModes[self._CurrentStandingMode]._Controller.GlobalPos.y
+            p.append([x,y,direction])
+            p.append([x+self._translationX*math.cos(yaw)+self._translationY*math.cos(yaw),\
+                y+self._translationX*math.sin(yaw)+self._translationY*math.sin(yaw),direction])
+            self._WalkingModes[self._CurrentStandingMode].SetPath(p)
+            
+            DC_WalkingMode.Walk(self)
         else:
-            raise Exception("Rot_WalkingMode::Walk: Unexpected _CurrentStandingMode")
+            raise Exception("Trans_WalkingMode::Walk: Unexpected _CurrentStandingMode")

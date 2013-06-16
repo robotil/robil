@@ -36,8 +36,8 @@ class Rot_WalkingMode(DC_WalkingMode):
             DC_WalkingMode.Walk(self)
         elif('DW' == self._CurrentStandingMode):
             self._WalkingModes[self._CurrentStandingMode]._WalkingModeStateMachine.PerformTransition("Walk")
-            y,p,r = self._WalkingModes[self._CurrentStandingMode].current_ypr()
-            self._Controller.RotateToOri(y+self._rotationAngle)
+            y,p,r = self._WalkingModes[self._CurrentStandingMode]._Controller.current_ypr()
+            self._WalkingModes[self._CurrentStandingMode]._Controller.RotateToOri(y+self._rotationAngle)
             self._WalkingModes[self._CurrentStandingMode]._bDone = True
         else:
             raise Exception("Rot_WalkingMode::Walk: Unexpected _CurrentStandingMode")
