@@ -2733,7 +2733,7 @@ it_(nh),
 						double ratio = firstMaxBlobArea/secondMaxBlobArea;
 						cout<<"Ratio"<<ratio<<endl;
 						if(firstMaxBlobArea>5000){
-						*car_target = GeneralDetector::CAR_REAR;
+						*car_target = GeneralDetector::CAR_FRONT;
 						} else
 							return false;
 
