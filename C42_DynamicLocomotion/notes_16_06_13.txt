@@ -1,5 +1,5 @@
 Updates:
-Add Quasi-Static Foot Placement task and Walking On Four to pass Mud-Pit.
+Rotate / Translate nodes added to the WalkerNode family
 
 USING WALKER:
 
@@ -34,7 +34,28 @@ To run Walker:
        $ rosrun C0_RobilTask task_tester WalkerNode_Discrete
 
 
- C - Aline Pose (AP) rotation and translation:
+ C - rotation and translation:
+
+    0. Needs to run COM calculation (C43_LocalBodyCOM):
+       $ rosrun C43_LocalBodyCOM computeCOM
+       and needs to run C42_State node
+       $ rosrun C42_State state
+
+    1. run node:
+       $ rosrun C42_DynamicLocomotion WalkerNode.py <Trans or Rot> # for translation or rotation
+
+    2. run C23_orient.srv to emulate the C23_orient server (returns target translation and rotation): 
+       $ rosrun C42_DynamicLocomotion Clone_C23_orient.py
+
+    3. run task using C0 task_tester:
+      For Translation:
+       $ rosrun C0_RobilTask task_tester WalkerNode_Translation args="Translate_X=1.0,Translate_Y=0.0"
+       Translate_X and Translate_Y are optional, defaulting to 0.0 in locla frame coordiantes
+      For Rotation:
+       $ rosrun C0_RobilTask task_tester WalkerNode_Rotation args="Rotate=-1"
+        Rotate is in rads, counter-clockwise
+
+ C_ - Aline Pose (AP) rotation and translation:
 
     1. run node:
        $ rosrun C42_DynamicLocomotion WalkerNode.py AP
@@ -46,7 +67,6 @@ To run Walker:
        $ rosrun C0_RobilTask task_tester WalkerNode_AP args="Object=Firehose"
      OR (operates without service)
        $ rosrun C0_RobilTask task_tester WalkerNode_AP args=turn_in_place_Yaw=0.8,Xmovement=0.3,Ymovement=0.3
-
 
  *D - Walking On Four (DW)
 
@@ -62,20 +82,7 @@ To run Walker:
     4. run C31_clone to emulate the C31PathPlanner (publish a path message): 
        $ rosrun C42_DynamicLocomotion scripts/C31_Clone_VRC2_Mud_Pit.py
 
-
- *E - Turn On Four (DW Turn)
-
-    1. Needs to run COM calculation (C43_LocalBodyCOM):
-       $ rosrun C43_LocalBodyCOM computeCOM
-
-    2. run node:
-       $ rosrun C42_Dynamic locomotion DWturn.py
-    
-    3. run task using C0 task_tester:
-       $ rosrun C0_RobilTask task_tester DWTurn args=Bearing=<desired yaw (global)>,Terrain=<MUD or HILLS>
-
-
- F - Stand Up from On Four (DW Stand Up)
+ E - Stand Up from On Four (DW Stand Up)
 
     1. Needs to run COM calculation (C43_LocalBodyCOM):
        $ rosrun C43_LocalBodyCOM computeCOM
@@ -86,6 +93,16 @@ To run Walker:
     3. run task using C0 task_tester:
        $ rosrun C0_RobilTask task_tester DWStand
 
+ *E_ - Turn On Four (DW Turn)
+
+    1. Needs to run COM calculation (C43_LocalBodyCOM):
+       $ rosrun C43_LocalBodyCOM computeCOM
+
+    2. run node:
+       $ rosrun C42_Dynamic locomotion DWturn.py
+    
+    3. run task using C0 task_tester:
+       $ rosrun C0_RobilTask task_tester DWTurn args=Bearing=<desired yaw (global)>,Terrain=<MUD or HILLS>
 
 * NEEDS C25_GlobalPosition, can use with cheats clone C25_GlobalPosition copy of ground_truth_odom:
    $ rosrun C42_DynamicLocomotion C25_GlobalPosition_Clone.py

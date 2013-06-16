@@ -6,4 +6,6 @@ int32 motion_quad_debris=4
 int32 motion_driving=5
 int32 motion_discrete_walk_quasi_static=6
 int32 motion_align_pose=7
+int32 motion_direct_rotation=8
+int32 motion_direct_translation=9
 int32 motion

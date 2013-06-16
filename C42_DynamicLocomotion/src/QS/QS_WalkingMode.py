@@ -29,6 +29,9 @@ from DW.JointController import JointCommands_msg_handler
 from C42_DynamicLocomotion.srv import *
 from C42_DynamicLocomotion.msg import Foot_Placement_data
 
+from C25_GlobalPosition.msg import C25C0_ROP
+from C25_GlobalPosition.srv import *
+
 class QS_WalkingMode(WalkingMode):
     def __init__(self,iTf):
         self._LPP = QS_PathPlanner()
@@ -59,7 +62,7 @@ class QS_WalkingMode(WalkingMode):
         rospy.wait_for_service('foot_placement_path')
         self._foot_placement_client = rospy.ServiceProxy('foot_placement_path', FootPlacement_Service)
         # Subscribers:
-        self._Subscribers["Odometry"] = rospy.Subscriber('/ground_truth_odom',Odometry,self._odom_cb)
+        self._Subscribers["Odometry"] = rospy.Subscriber('/C25/publish',C25C0_ROP,self._odom_cb)
         self._Subscribers["ASI_State"]  = rospy.Subscriber('/atlas/atlas_sim_interface_state', AtlasSimInterfaceState, self.asi_state_cb)
         self._Subscribers["IMU"]  = rospy.Subscriber('/atlas/imu', Imu, self._get_imu)
         self._Subscribers["JointStates"] = rospy.Subscriber('/atlas/joint_states', JointState, self._get_joints)
@@ -76,6 +79,11 @@ class QS_WalkingMode(WalkingMode):
         self._bRobotIsStatic = False
         self._RequestFootPlacements()
         self._GetOrientationDelta0Values() # Orientation difference between BDI odom and Global
+
+        # Put robot into stand position
+        stand = AtlasSimInterfaceCommand(None,AtlasSimInterfaceCommand.STAND, None, None, None, None, self._k_effort)
+        self.asi_command.publish(stand)
+        rospy.sleep(0.3)
     
     def StartWalking(self):
         self._bDone = False
