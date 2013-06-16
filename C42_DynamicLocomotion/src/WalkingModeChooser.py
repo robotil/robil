@@ -13,7 +13,7 @@ from DD.DD_WalkingMode import *
 from DW.DW_WalkingMode import *
 from CD.CD_WalkingMode import *
 from AlinePose.AP_WalkingMode import *
-#from Trans.Trans_WalkingMode import *
+from Trans.Trans_WalkingMode import *
 from Rot.Rot_WalkingMode import *
 
 class WalkingModeChooserEnum:
@@ -26,7 +26,7 @@ class WalkingModeChooser(WalkingModeChooserInterface):
         
         self._Modes = {'CD':CD_WalkingMode(),'QS':QS_WalkingMode(iTf),'DD':DD_WalkingMode(iTf),\
                        'DW':DW_WalkingMode(iTf),'AP':AP_WalkingMode(iTf),'Rot':Rot_WalkingMode(iTf),\
-                       'Trans':Rot_WalkingMode(iTf)} #Trans_WalkingMode
+                       'Trans':Trans_WalkingMode(iTf)}
         self._Preferred = prefferedMode
         self._CurrentMode = prefferedMode
         self._Recommended = prefferedMode
