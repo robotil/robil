@@ -113,6 +113,61 @@ Points PField::smooth(const SmoothingParameters& in_params)const{
 	return reduced_fixed;
 }
 
+Path PField::smoothWaypoints_withoutPF(const SmoothingParameters& in_params)const{
+	return convert(smooth_withoutPF(in_params), map);
+}
+Points PField::smooth_withoutPF(const SmoothingParameters& in_params)const{
+	SmoothingParameters params = in_params;
+	if(opath.size()==0){
+		cout<<"WARNING: path size is zero."<<endl;
+
+		return convert(opath, map);
+	}
+
+	if(params.repulsorType==RT_ERROR)  params.repulsorType = RT_R1;
+	if(params.attractorType==AT_ERROR) params.attractorType = AT_A1;
+	//if(params.maxIterationNumber==0) params.maxIterationNumber = (long)round(2*opath.size()/params.stepRate);
+
+	if(params.notDefined()){
+		cout<<"WARNING: Some of Smoothing Parameters are not defined"<<endl;
+
+		return convert(opath, map);
+	}
+
+	Points points;
+	for(size_t i=0;i<opath.size();i++){
+		points.push_back(Vec2d(opath[i].x,opath[i].y));
+	}
+
+	#if DISPLAY_SMOOTHED_PATH == 1
+		cout<<"smoothed "<<endl;
+		for(size_t i=0;i<points.size();i++){
+			cout<<points[i].x<<"\t"<<points[i].y<<endl;
+		}
+	#endif
+
+	Points reduced = reducePath(points, params);
+	reduced = reducePath(reduced, params);
+
+	#if DISPLAY_SMOOTHED_REDUCED_PATH == 1
+		cout<<"reduced "<<endl;
+		for(size_t i=0;i<reduced.size();i++){
+			cout<<reduced[i].x<<"\t"<<reduced[i].y<<endl;
+		}
+	#endif
+
+	Points reduced_fixed = addPointsToPath(reduced, params);
+
+	#if DISPLAY_SMOOTHED_REDUCEDFIX_PATH == 1
+		cout<<"reduced fixed "<<endl;
+		for(size_t i=0;i<reduced_fixed.size();i++){
+			cout<<reduced_fixed[i].x<<"\t"<<reduced_fixed[i].y<<endl;
+		}
+	#endif
+
+	return reduced_fixed;
+}
+
 struct Position{
 	Vec2d loc;
 	double heading;
