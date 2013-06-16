@@ -216,7 +216,12 @@ BStar::Path BStar::search(size_t sx, size_t sy, size_t gx, size_t gy){
 			 }
 			 {
 				 P("reconstruct_path")
-				 return reconstruct_path(came_from, goal);
+				 try{
+					 return reconstruct_path(came_from, goal);
+				 }catch (NoPathException& nopath) {
+					 cout<<cout<<"WARNING: A*: path throw walls: some of points located on blocked cells"<<std::endl;
+					 return Path();
+				 }
 			 }
 		 }
 
@@ -257,13 +262,14 @@ BStar::Path BStar::search(size_t sx, size_t sy, size_t gx, size_t gy){
 
 
 BStar::Path BStar::reconstruct_path(map<Point,Point>& came_from, const Point& current_node){
-	 if( came_from.find(current_node) != came_from.end() ){
-		 Path p = reconstruct_path(came_from, came_from[current_node]);
-		 p.push_back(current_node);
-		 return p;
-	 }else{
-		 Path p; p.push_back(current_node);
-		 return p;
-	 }
+	if(_walls(current_node.x, current_node.y) == ObsMap::ST_BLOCKED) throw NoPathException();
+	if( came_from.find(current_node) != came_from.end() ){
+		Path p = reconstruct_path(came_from, came_from[current_node]);
+		p.push_back(current_node);
+		return p;
+	}else{
+		Path p; p.push_back(current_node);
+		return p;
+	}
 }
 
