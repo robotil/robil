@@ -325,7 +325,7 @@ void C11_Agent_Node::RobotPosUpdateCallback(const C25_GlobalPosition::C25C0_ROP&
 	orientation.yaw = y0;
 	orientation.pitch = p0;
 	orientation.roll = r0;
-    CheckPath();
+//    CheckPath();
 //    std::cout<<"C11_Agent_Node: Robot data -> "<<robot_pos.pose.pose.pose.position.x<<","<<robot_pos.pose.pose.pose.position.y<<"\n";
   }
 
