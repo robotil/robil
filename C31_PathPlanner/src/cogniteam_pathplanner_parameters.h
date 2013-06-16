@@ -14,6 +14,10 @@
 #define PARAMS_FROM_CODE 2
 #define PARAMS_SOURCE PARAMS_FROM_ROS
 
+#define USE_TRANSITS_AS_PLAN
+//#define DO_SMOOTHING
+
+
 #if PARAMS_SOURCE==PARAMS_FROM_CODE
 /*
 #define SET_PF_PARAMETERS(potential_field)\
@@ -75,7 +79,5 @@
 	ros::param::param<int>("/C31_GlobalPathPlanner/debrees_detector/wp_radius", (debrees_detector).wp_number, 3);
 
 #endif
-
-#define DO_SMOOTHING
 
 #endif /* PATHPLANNERPARAMETERS_H_ */
