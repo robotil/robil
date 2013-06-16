@@ -38,14 +38,16 @@ class DW_Controller(object):
 
         self.count_tottal = 0
         self.count_tipping = 0
+
+        self.BaseHipZ = 0.3
         
         ##################################################################
         ###################### Basic Standing Pose #######################
         ##################################################################
 
         self.BasStndPose = zeros(28)
-        self.BasStndPose[5] = 0.3#0.1
-        self.BasStndPose[5+6] = -0.3#-0.1
+        self.BasStndPose[5] = 0.1
+        self.BasStndPose[5+6] = -0.1
         self.BasStndPose[6] = self.BasStndPose[6+6] = -0.2
         self.BasStndPose[7] = self.BasStndPose[7+6] = 0.4
         self.BasStndPose[8] = self.BasStndPose[8+6] = -0.2
@@ -71,6 +73,9 @@ class DW_Controller(object):
 
         self.SitDwnSeq1 = copy(self.BasStndPose)
         self.SitDwnSeq1[1] = 0.5
+        self.SitDwnSeq1[4] = self.BaseHipZ#0.1 ######### NEW #########
+        self.SitDwnSeq1[4+6] = -self.BaseHipZ#-0.1 ######### NEW #########
+        self.SitDwnSeq1[5] = self.SitDwnSeq1[5+6] = 0 ######### NEW #########
         self.SitDwnSeq1[6] = self.SitDwnSeq1[6+6] = -1.5
         self.SitDwnSeq1[7] = self.SitDwnSeq1[7+6] = 2.4
         self.SitDwnSeq1[8] = self.SitDwnSeq1[8+6] = -1.2
@@ -149,45 +154,54 @@ class DW_Controller(object):
         # Sequence Step 1: Bring pelvis down to the ground and lift arms
         ThisRobotCnfg = copy(self.SitDwnSeq1)
         ThisRobotCnfg[1] = 0.5
-        ThisRobotCnfg[4] = 0.1
-        ThisRobotCnfg[4+6] = -0.1
+        ThisRobotCnfg[4] = self.BaseHipZ
+        ThisRobotCnfg[4+6] = -self.BaseHipZ
         ThisRobotCnfg[6] = ThisRobotCnfg[6+6] = -1.7
         ThisRobotCnfg[7] = ThisRobotCnfg[7+6] = 1.0
         ThisRobotCnfg[8] = ThisRobotCnfg[8+6] = 0.8
         ThisRobotCnfg[16] = ThisRobotCnfg[16+6] = 1.5
-        ThisRobotCnfg[17] = -0.6#-0.4#-0.6
-        ThisRobotCnfg[17+6] = 0.6#0.4#0.6
+        ThisRobotCnfg[17] = -0.2#-0.6
+        ThisRobotCnfg[17+6] = 0.2#0.6
         ThisRobotCnfg[18] = ThisRobotCnfg[18+6] = 2.5
         ThisRobotCnfg[19] = 1.8
         ThisRobotCnfg[19+6] = -1.8
+        ThisRobotCnfg[21] = -0.5
+        ThisRobotCnfg[21+6] = 0.5
         self.RobotCnfg2.append(ThisRobotCnfg)
         self.StepDur2.append(0.3*T)
 
-        #[-0.066, 0.082 Sequence Step 2: Extend arms
+        # Sequence Step 2: Extend arms
         ThisRobotCnfg = copy(self.RobotCnfg2[0][:])
         ThisRobotCnfg[16] = ThisRobotCnfg[16+6] = 1.2#1.4
-        ThisRobotCnfg[17] = -0.6#-0.4#-0.2#-0.6#-0.4
-        ThisRobotCnfg[17+6] = 0.6#0.4#0.2#0.6# 0.4
+        ThisRobotCnfg[17] = -0.4#-0.4#-0.2#-0.6#-0.4
+        ThisRobotCnfg[17+6] = 0.4#0.4#0.2#0.6# 0.4
         ThisRobotCnfg[18] = ThisRobotCnfg[18+6] = 2.9
         ThisRobotCnfg[19] = 0.2
         ThisRobotCnfg[19+6] = -0.2
+        ThisRobotCnfg[21] = 0
+        ThisRobotCnfg[21+6] = 0
         self.RobotCnfg2.append(ThisRobotCnfg)
-        self.StepDur2.append(0.4*T)
+        self.StepDur2.append(0.3*T)
 
         # Sequence Step 3: Extend torso, fall back on arms, lift and fold legs
         ThisRobotCnfg = copy(self.RobotCnfg2[1][:])
-        ThisRobotCnfg[1] = 0.4
-        ThisRobotCnfg[6] = ThisRobotCnfg[6+6] = -1.6
+        ThisRobotCnfg[1] = 0.6
+        ThisRobotCnfg[4] = ThisRobotCnfg[4+6] = 0
+        ThisRobotCnfg[5] = self.BaseHipZ
+        ThisRobotCnfg[5+6] = -self.BaseHipZ
+        ThisRobotCnfg[6] = ThisRobotCnfg[6+6] = -1.8
         ThisRobotCnfg[7] = ThisRobotCnfg[7+6] = 2.6
         ThisRobotCnfg[8] = ThisRobotCnfg[8+6] = 0.2
+        ThisRobotCnfg[17] = -0.6#-0.4#-0.2#-0.6#-0.4
+        ThisRobotCnfg[17+6] = 0.6#0.4#0.2#0.6# 0.4
         self.RobotCnfg2.append(ThisRobotCnfg)
-        # self.StepDur2.append(0.4*T)
-        self.StepDur2.append(0.3*T)
+        self.StepDur2.append(0.4*T)
 
         # Sequence Step 4: Place legs on ground and lift pelvis
         ThisRobotCnfg = copy(self.RobotCnfg2[2][:])
-        ThisRobotCnfg[6] = ThisRobotCnfg[6+6] = -1.
-        ThisRobotCnfg[7] = ThisRobotCnfg[7+6] = 2.2
+        ThisRobotCnfg[1] = 0.3
+        ThisRobotCnfg[6] = ThisRobotCnfg[6+6] = -0.6
+        ThisRobotCnfg[7] = ThisRobotCnfg[7+6] = 2.0
         ThisRobotCnfg[8] = ThisRobotCnfg[8+6] = 0
         ThisRobotCnfg[18] = ThisRobotCnfg[18+6] = 2.8
         ThisRobotCnfg[19] = 0.4
@@ -198,6 +212,9 @@ class DW_Controller(object):
         # Sequence Step 5: Move pelvis back, between arms
         ThisRobotCnfg = copy(self.RobotCnfg2[3][:])
         ThisRobotCnfg[1] = 0.5
+        ThisRobotCnfg[4] = self.BaseHipZ
+        ThisRobotCnfg[4+6] = -self.BaseHipZ
+        ThisRobotCnfg[5] = ThisRobotCnfg[5+6] = 0
         ThisRobotCnfg[6] = ThisRobotCnfg[6+6] = -1.7
         ThisRobotCnfg[7] = ThisRobotCnfg[7+6] = 1.0
         ThisRobotCnfg[8] = ThisRobotCnfg[8+6] = 0.8
@@ -209,6 +226,7 @@ class DW_Controller(object):
         ThisRobotCnfg[19+6] = -0.5
         self.RobotCnfg2.append(ThisRobotCnfg)
         self.StepDur2.append(1*T)#was 0.7*T
+
 
         ##################################################################
         ########################## INITIALIZE ############################
@@ -451,22 +469,23 @@ class DW_Controller(object):
                     self.BackCrawl()
                 DeltaPos2 = [self._Point[0]-self.GlobalPos.x,self._Point[1]-self.GlobalPos.y]
                 Distance2 = math.sqrt(DeltaPos2[0]**2+DeltaPos2[1]**2)
-                if abs(Distance2-Distance)<0.1:
-                    self._stuck_counter+=1
-                    print 'stuck... D=',(Distance2-Distance)
-                    if self._stuck_counter >= 2:
-                        #dont follow path
-                        self.FollowPath = 0
-                        #go oposite dir
-                        if self._Point[2] == "bwd":
-                            self.Crawl()
-                        if self._Point[2] == "fwd":
-                            self.BackCrawl()
-                        self.RotSpotSeq(1)
-                        self.FollowPath = 1
+                if self._terrain !='MUD':
+                    if abs(Distance2-Distance)<0.1:
+                        self._stuck_counter+=1
+                        print 'stuck... D=',(Distance2-Distance)
+                        if self._stuck_counter >= 2:
+                            #dont follow path
+                            self.FollowPath = 0
+                            #go oposite dir
+                            if self._Point[2] == "bwd":
+                                self.Crawl()
+                            if self._Point[2] == "fwd":
+                                self.BackCrawl()
+                            self.RotSpotSeq(2)
+                            self.FollowPath = 1
+                            self._stuck_counter = 0
+                    else:
                         self._stuck_counter = 0
-                else:
-                    self._stuck_counter = 0
 
             else:
                 self.FollowPath = 0
@@ -532,19 +551,7 @@ class DW_Controller(object):
 
     
 
-    def DoSeqStep(self):
-        # if self.CurSeqStep == 2:
-        if self.CurSeqStep == 3:
-         
-            if self.IMU_mon.second_contact == 'arm_r':
-                self.JC.set_gains('r_arm_ely',3000,0,10,set_default= False)
-                self.JC.set_gains('l_arm_ely',1000,0,10,set_default= False)
-
-            elif self.IMU_mon.second_contact == 'arm_l':
-                self.JC.set_gains('l_arm_ely',3000,0,10,set_default= False)
-                self.JC.set_gains('r_arm_ely',1000,0,10,set_default= False)
-
-            print 'second_contact:',self.IMU_mon.second_contact   
+    def DoSeqStep(self): 
         print 'Doing Step seq #',self.CurSeqStep
         #self.traj_with_impedance(self.RS.GetJointPos(),self.RobotCnfg[self.CurSeqStep],self.StepDur[self.CurSeqStep]/self.Throtle,0.005) 
         self.JC.send_pos_traj(self.RS.GetJointPos(),self.RobotCnfg[self.CurSeqStep],self.StepDur[self.CurSeqStep]/self.Throtle,0.005) 
@@ -555,6 +562,9 @@ class DW_Controller(object):
     
     def DoInvSeqStep(self):
         if self._terrain =='HILLS':
+            if self.CurSeqStep == 2: ###### NEW ######
+                self.JC.set_gains('r_arm_ely',600,0,30,set_default= False)
+                self.JC.set_gains('l_arm_ely',600,0,30,set_default= False)
 
             if self.CurSeqStep2 == 3:
              
@@ -567,17 +577,22 @@ class DW_Controller(object):
                     self.JC.set_gains('r_arm_ely',1000,0,10,set_default= False)
 
                 print 'second_contact:',self.IMU_mon.second_contact   
+
             print 'Doing inv. Step seq #',self.CurSeqStep2
-            if self.CurSeqStep2 == 2:
+
+            if self.CurSeqStep2 == 1 or self.CurSeqStep2 == 2:
                 pos = list(self.RS.GetJointPos())
                 pos[2] = -1.3*self.IMU_mon.roll 
                 self.JC.send_pos_traj(list(self.RS.GetJointPos()),pos,0.2,0.01)
+                self.RobotCnfg2[self.CurSeqStep2][2] = pos[2] ###### NEW ######
+
                 # pos = copy(self.RobotCnfg2[1][:])
                 # self.TimeVariantIterp(self.RS.GetJointPos(),self.RobotCnfg2[self.CurSeqStep2],self.StepDur2[self.CurSeqStep2]/self.Throtle,0.005,0)
                 # self.CurSeqStep2 += 1
                 # if self.CurSeqStep2 > 4:
                 #     self.CurSeqStep2 = 0
                 # return
+
         self.JC.send_pos_traj(self.RS.GetJointPos(),self.RobotCnfg2[self.CurSeqStep2],self.StepDur2[self.CurSeqStep2]/self.Throtle,0.005) 
         self.JC.reset_gains()
         self.CurSeqStep2 += 1
@@ -586,28 +601,28 @@ class DW_Controller(object):
         # if self.CurSeqStep2 > 4:
         #     self.CurSeqStep2 = 0
 
-    def AddRotation(self,Delta): # EXPERIMENTAL
+    def AddRotation(self,Delta):
         # Delta of 1 gives approx. 0.15 radians turn left
         # Add gait changes to appropriate step
-        self.RobotCnfg[1][4] = self.RobotCnfg[1][4+6] = Delta*0.2
+        self.RobotCnfg[1][4] = self.BaseHipZ+Delta*0.2
+        self.RobotCnfg[1][4+6] = -self.BaseHipZ+Delta*0.2
         self.RobotCnfg[1][9] = self.RobotCnfg[1][9+6] = Delta*0.12
-        # self.RobotCnfg[2][0] = -Delta*0.12
-        # self.RobotCnfg[2][2] = -Delta*0.10
-        # self.RobotCnfg[3][2] = 0
-        # self.RobotCnfg[4][0] = 0
-        self.RobotCnfg[4][4] = self.RobotCnfg[4][4+6] = 0
+        self.RobotCnfg[4][4] = self.BaseHipZ
+        self.RobotCnfg[4][4+6] = -self.BaseHipZ
         self.RobotCnfg[4][9] = self.RobotCnfg[4][9+6] = 0
 
         # Insert those changes in following steps as well
-        self.RobotCnfg[2][4] = self.RobotCnfg[2][4+6] = Delta*0.2
+        self.RobotCnfg[2][4] = self.BaseHipZ+Delta*0.2
+        self.RobotCnfg[2][4+6] = -self.BaseHipZ+Delta*0.2
         self.RobotCnfg[2][9] = self.RobotCnfg[2][9+6] = Delta*0.12
-        self.RobotCnfg[3][4] = self.RobotCnfg[3][4+6] = Delta*0.2
+        self.RobotCnfg[3][4] = self.BaseHipZ+Delta*0.2
+        self.RobotCnfg[3][4+6] = -self.BaseHipZ+Delta*0.2
         self.RobotCnfg[3][9] = self.RobotCnfg[3][9+6] = Delta*0.12
-        # self.RobotCnfg[3][0] = -Delta*0.12
-        self.RobotCnfg[0][4] = self.RobotCnfg[0][4+6] = 0
+        self.RobotCnfg[0][4] = self.BaseHipZ
+        self.RobotCnfg[0][4+6] = -self.BaseHipZ
         self.RobotCnfg[0][9] = self.RobotCnfg[0][9+6] = 0
 
-    def AddBackRotation(self,Delta): # EXPERIMENTAL
+    def AddBackRotation(self,Delta):
         # Delta of 1 gives approx. 0.22 radians turn left
         if Delta>0:
             dID = 0
@@ -631,7 +646,7 @@ class DW_Controller(object):
         self.RobotCnfg2[0][2] = 0
 
     def RotateToOri(self,Bearing):
-        if self._terrain == "MUD":
+        if self._terrain == "MUD" or self._terrain == "HILLS":
             return self.RotateToOriInMud(Bearing)
         else:
             if self.RotFlag == 2:
@@ -804,51 +819,60 @@ class DW_Controller(object):
         rospy.sleep(0.1*T)
 
     def RotOnMudSeq(self,Delta):
-        # Delta of 1 gives a left rotation of approx. 0.45 radians
-        if Delta>0:
-            dID = 0
-        else:
-            dID = 6
+       # Delta of 1 gives a left rotation of approx. 0.45 radians
+       if Delta>0:
+           dID = 0
+       else:
+           dID = 6
 
-        T=1
+       T=1
 
-        # Get into starting position
-        pos = copy(self.RobotCnfg2[4][:])
-        pos[1] = 0.8
-        pos[6] = pos[6+6] = -1.3
-        pos[16] = pos[16+6] = 0.2
-        self.JC.send_pos_traj(self.RS.GetJointPos(),pos,0.5*T,0.01)
-        # pos[6] -= 0.2
+       # Get into starting position
+       pos = copy(self.RobotCnfg2[4][:])
+       pos[1] = 0.8
+       # Get current orientation
+       y0,p,r = self.current_ypr()
+       pos[2] = -0.5*r
+       pos[6] = pos[6+6] = -1.3
+       pos[16] = pos[16+6] = 0.6
+       pos[17] = -1.2
+       pos[17+6] = 1.2
+       pos[18] = pos[18+6] = 1.8
+       self.JC.send_pos_traj(self.RS.GetJointPos(),pos,0.5*T,0.01)
+       # pos[6] -= 0.2
 
-        # Lift first leg
-        pos[6+dID] = -1.7
-        self.JC.send_pos_traj(self.RS.GetJointPos(),pos,0.2*T,0.01)
+       # Lift first leg
+       pos[2] = 0
+       pos[6+dID] = -1.7
+       self.JC.send_pos_traj(self.RS.GetJointPos(),pos,0.2*T,0.01)
 
-        # Rotate it to the side
-        pos[4+dID] = 0.8*Delta
-        pos[0] = -0.4*Delta
-        pos[4+6-dID] = -0.4*Delta
-        self.JC.send_pos_traj(self.RS.GetJointPos(),pos,0.4*T,0.01)
+       # Rotate it to the side
+       pos[4+dID] = 0.8*Delta
+       pos[0] = -0.4*Delta
+       pos[4+6-dID] = -0.4*Delta
+       self.JC.send_pos_traj(self.RS.GetJointPos(),pos,0.4*T,0.01)
 
-        # Lower first leg / Lift second leg
-        pos[6+dID] = -1.3
-        pos[6+6-dID] = -1.8
-        self.JC.send_pos_traj(self.RS.GetJointPos(),pos,0.2*T,0.01)
+       # Lower first leg / Lift second leg
+       pos[6+dID] = -1.3
+       pos[6+6-dID] = -1.8
+       self.JC.send_pos_traj(self.RS.GetJointPos(),pos,0.2*T,0.01)
 
-        # Rotate pelvis / Close first leg
-        pos[0] = -0.8*Delta
-        pos[4+dID] = 0
-        pos[4+6-dID] = 0
-        self.JC.send_pos_traj(self.RS.GetJointPos(),pos,0.4*T,0.01)
+       # Rotate pelvis / Close first leg
+       pos[0] = -0.8*Delta
+       pos[4+dID] = 0
+       pos[4+6-dID] = 0
+       self.JC.send_pos_traj(self.RS.GetJointPos(),pos,0.4*T,0.01)
 
-        # Return to init
-        pos[1] = 0.9
-        pos[6] = pos[6+6] = -1.3
-        self.JC.send_pos_traj(self.RS.GetJointPos(),pos,0.2*T,0.01)
+       # Return to init
+       pos[1] = 0.9
+       pos[6] = pos[6+6] = -1.3
+       self.JC.send_pos_traj(self.RS.GetJointPos(),pos,0.2*T,0.01)
 
-        # Lift arms
-        pos = copy(self.RobotCnfg2[0][:])
-        self.JC.send_pos_traj(self.RS.GetJointPos(),pos,1*T,0.01)
+       # Lift arms
+       pos = copy(self.RobotCnfg2[0][:])
+       y0,p,r = self.current_ypr()
+       pos[2] = -0.5*r
+       self.JC.send_pos_traj(self.RS.GetJointPos(),pos,0.6*T,0.01)
 
     def CheckTipping(self):
         
@@ -918,6 +942,14 @@ class DW_Controller(object):
         pos[4+6] = -0.5
         # self.JC.send_pos_traj(self.RS.GetJointPos(),pos,0.4,0.01)
         self.JC.send_pos_traj(self.RS.GetJointPos(),pos,0.8,0.01)
+        ###############NEW #################
+                    
+        R,P,Y = self.RS.GetIMU()
+          
+        if  P>=0.8:
+            print "Front recovery"
+            result = self.FrontTipRecovery()
+            return result
 
         # Push with arm to rotate
         pos[16+6-dID] = 0.2
@@ -1006,7 +1038,7 @@ class DW_Controller(object):
             0, 0, 0, 0, 0, 0,
             0, 0, 0, 0, 0, 0]
         # self.JC.send_pos_traj(self.RS.GetJointPos(),pos,0.5,0.01)
-        self.JC.send_pos_traj(self.RS.GetJointPos(),pos,1.0,0.01)
+        self.JC.send_pos_traj(self.RS.GetJointPos(),pos,2,0.01)
 
         pos = [ 0, 0, 0, 0,
             0, 0, 0, 0, -2.1, 0,
@@ -1014,7 +1046,7 @@ class DW_Controller(object):
             0, 0, 0, 1.5, 0, 0,
             0, 0, 0, -1.5, 0, 0]
         # self.JC.send_pos_traj(self.RS.GetJointPos(),pos,0.5,0.01)
-        self.JC.send_pos_traj(self.RS.GetJointPos(),pos,1.0,0.01)
+        self.JC.send_pos_traj(self.RS.GetJointPos(),pos,1.5,0.01)
 
         pos = [0, 0.8, 0, 0,
             0, 0, -2, 2, -2.1, 0,
