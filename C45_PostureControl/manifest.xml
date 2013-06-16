@@ -25,6 +25,7 @@
   <depend package="control_msgs"/>
   <depend package="PoseController"/>
   <depend package="pelvis_leg_target"/>
+  <depend package="atlas_msgs"/>
   
   
 </package>

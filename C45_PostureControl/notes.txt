@@ -2,13 +2,16 @@ C45 – Posture Control
 ---------------------------------
 Prerequisites:
 1) Depends on HRL_Kinematics package. Installation instructions: http://www.robil.org/trac_robil/wiki/InstallUbuntuLog#insthrl
-*Not needed anymore* 2) C42_DRCSim2ools must be running:
-rosrun C42_DRCSim2ools foot_contact_filter.py
 
 To run:
 1) Launch:
 roslaunch C45_PostureControl C45_PostureControl.launch
-2) Use action C45_PostureControl with parameter direction=0/1/-1
+2) Available actions:
+C45_PostureControl with args direction=0/1/-1 (rotates the back clockwise/counterclockwise/initial position)
+C45_Behavior with args Behavior=MANIPULATE or Behavior=USER or Behavior=STAND (changes the BDI controller behavior)
+C45_TaskStart with no args (starts the PoseController)
+C45_TaskStart with no args (starts the PoseController)
 
-Note that BDI walking module does not work with this module and there are no plans to make them work together. Therefore, you cannot do BDI walking while moving the neck/enabling stability maintaining/moving the back. The robot will maintain its joints values and will not move.
+
+Note that BDI walking module does not work with this module concurrently and there are no plans to make them work together at the same time. Therefore, you cannot do BDI walking while moving the neck/enabling stability maintaining/moving the back. The robot will maintain its joints values and will not move.
 To enable BDI after doing the above, "/PoseController/stop" must be called.
