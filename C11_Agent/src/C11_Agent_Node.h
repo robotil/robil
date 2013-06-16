@@ -35,6 +35,7 @@ public:
   virtual void SendVRCScoreData(double timeSec, int competionScore, int falls, QString message) = 0;
   virtual void SendDownlink(QString) = 0;
   virtual void SendUplink(QString) = 0;
+  virtual void SendRobotData(StructPoint pos, StructOrientation orient) = 0;
 };
 
 class C11_Agent_Node : public QThread, public IPushHMIInterface, public IHMIResponseInterface
@@ -99,6 +100,8 @@ public:
 
   void ResetRequest();
 
+  void SendRobotData();
+
   virtual void PushImage(QImage img);
   virtual void PushGrid(StructGridData grid);
   virtual void PushPath(vector<StructPoint> path);
@@ -140,6 +143,7 @@ private:
   bool IsWaitForRelease;
   QStringList MissionsList;
   Vec2d position;
+  StructOrientation orientation;
   size_t start_pos;
 
   ////////////VCScore Data/////////////////

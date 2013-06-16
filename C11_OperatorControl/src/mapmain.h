@@ -9,6 +9,7 @@
 #include <QMouseEvent>
 #include "traingleitem.h"
 #include "scaleitem.h"
+#include "robotdataitem.h"
 
 typedef struct
 {
@@ -59,6 +60,7 @@ public:
 	StructPoint GetGoal();
 	QVector<QPointF> getRoutePath();
 	QVector<QPointF> getRoute(ModeDraw route);
+	void OnRobotData(StructPoint pos, StructOrientation orient);
 
 private:
 	Ui::CMapMainClass ui;
@@ -66,6 +68,7 @@ private:
 	CtraingleItem *traingle;
 	ModeDraw mode;
 	CScaleItem* pCScaleItem;
+	CRobotDataItem* pCRobotDataItem;
 	int PixColor[100][100];
 	int pos[2];
 	int startX,startY;

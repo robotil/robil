@@ -52,6 +52,7 @@ public:
 	virtual void OnDownlinkUpdate(QString down);
 	virtual void OnUplinkUpdate(QString up);
 	/*virtual*/ void OnWaitResponseFinished();
+	virtual void OnRobotData(StructPoint pos, StructOrientation orient);
 
 protected:
 	void CloseOpenedImages();

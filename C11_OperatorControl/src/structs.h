@@ -20,6 +20,13 @@ typedef struct
 
 typedef struct
 {
+        double yaw;
+        double pitch;
+        double roll;
+} StructOrientation;
+
+typedef struct
+{
         int x;
         int y;
 } StructIntPoint;

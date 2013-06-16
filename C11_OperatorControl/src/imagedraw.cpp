@@ -230,7 +230,10 @@ void ImageDraw::OnVRCScoreData(double timeSec, int competionScore, int falls, QS
   ui.lblSimTime->setText(simTime.toString());
   ui.lblScoreData->setText(QString::number(competionScore));
   ui.lblFallsData->setText(QString::number(falls));
-  ui.lblMsg->setText(message);
+  if(message != "")
+  {
+	  ui.lblMsg->setText(message);
+  }
   update();
 }
 
@@ -242,6 +245,11 @@ void ImageDraw::OnDownlinkUpdate(QString down)
 void ImageDraw::OnUplinkUpdate(QString up)
 {
   ui.lblUplinkData->setText(up);
+}
+
+void ImageDraw::OnRobotData(StructPoint pos, StructOrientation orient)
+{
+	ui.mapWidget->OnRobotData(pos,orient);
 }
 
 void ImageDraw::SltOnWaitTimeout()
