@@ -14,6 +14,7 @@ class WalkingMode(object):
         self._LPP = localPathPlanner
         self._WalkingModeStateMachine = WalkingModeStateMachine()
         self._Subscribers = dict()
+        self._interval = rospy.Rate(0.6)
         
     def Initialize(self,parameters):
         self._WalkingModeStateMachine = WalkingModeStateMachine()
@@ -49,3 +50,8 @@ class WalkingMode(object):
     
     def Fitness(self,path):
         return True
+
+    def Sleep(self):
+        self._interval.sleep()
+
+

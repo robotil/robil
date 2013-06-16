@@ -382,28 +382,24 @@ class DW_Controller(object):
         self.JC.send_command()
         rospy.sleep(T*0.4)
 
-    def DoPath(self,Path):
-        for Point in Path:
-            if Point[2] == "fwd":
-                self.Throtle=1
-            if Point[2] == "bwd":
-                self.Throtle=0.6
-
-            self.GoToPoint(Point)
-
     def GoToPoint(self,Point):
+        if Point[2] == "fwd":
+            self.Throtle=1
+        if Point[2] == "bwd":
+            self.Throtle=0.6
+        self._Point = Point
         # Calculate distance and orientation to target
         while (0 == self.GlobalPos):
             rospy.sleep(1)
             print("Waiting for GlobalPos")
-        DeltaPos = [Point[0]-self.GlobalPos.x,Point[1]-self.GlobalPos.y]
+        DeltaPos = [self._Point[0]-self.GlobalPos.x,self._Point[1]-self.GlobalPos.y]
         Distance = math.sqrt(DeltaPos[0]**2+DeltaPos[1]**2)
 
         # Get current orientation
         y,p,r = self.current_ypr()
         T_ori = math.atan2(DeltaPos[1],DeltaPos[0])
         self.DesOri = T_ori
-        if Point[2] == "bwd":
+        if self._Point[2] == "bwd":
             T_ori += math.pi
 
         # Rotate in place towards target
@@ -412,27 +408,29 @@ class DW_Controller(object):
 
 
         # Crawl towards target
-        if Point[2] == "fwd":
+        if self._Point[2] == "fwd":
             self.Crawl()
-        if Point[2] == "bwd":
+        if self._Point[2] == "bwd":
             self.BackCrawl()
 
-        stuck_counter = 0
-        while True:
-            self.count_tottal +=1
-            print 'Total_count:', self.count_tottal
-            # Calculate distance and orientation to target
-            DeltaPos = [Point[0]-self.GlobalPos.x,Point[1]-self.GlobalPos.y]
-            Distance = math.sqrt(DeltaPos[0]**2+DeltaPos[1]**2)
-            T_ori = math.atan2(DeltaPos[1],DeltaPos[0])
-            self.DesOri = T_ori
-            if Point[2] == "bwd":
-                T_ori += math.pi
+        self._stuck_counter = 0
 
-            if Distance<0.4:
-                print "Reached Waypoint"
-                break
+    def PerformStep(self):
+        result = False
+        self.count_tottal +=1
+        print 'Total_count:', self.count_tottal
+        # Calculate distance and orientation to target
+        DeltaPos = [self._Point[0]-self.GlobalPos.x,self._Point[1]-self.GlobalPos.y]
+        Distance = math.sqrt(DeltaPos[0]**2+DeltaPos[1]**2)
+        T_ori = math.atan2(DeltaPos[1],DeltaPos[0])
+        self.DesOri = T_ori
+        if self._Point[2] == "bwd":
+            T_ori += math.pi
 
+        if Distance<0.4:
+            print "Reached Waypoint"
+            result = True
+        else:
             y,p,r = self.current_ypr()
             # Check tipping
             self.CheckTipping()
@@ -440,9 +438,9 @@ class DW_Controller(object):
             # Rotate in place towards target
             if self._fall_count < self.FALL_LIMIT:
               # Crawl towards target
-                if Point[2] == "fwd":
+                if self._Point[2] == "fwd":
                     self.Crawl()
-                if Point[2] == "bwd":
+                if self._Point[2] == "bwd":
                     self.BackCrawl()
                 Drift = abs(self.DeltaAngle(T_ori,y))
                 if 0.5<Drift<1.4 and Distance>1:
@@ -451,30 +449,28 @@ class DW_Controller(object):
                     self.RotateToOri(T_ori)
 
                     self.BackCrawl()
-                DeltaPos2 = [Point[0]-self.GlobalPos.x,Point[1]-self.GlobalPos.y]
+                DeltaPos2 = [self._Point[0]-self.GlobalPos.x,self._Point[1]-self.GlobalPos.y]
                 Distance2 = math.sqrt(DeltaPos2[0]**2+DeltaPos2[1]**2)
                 if abs(Distance2-Distance)<0.1:
-                    stuck_counter+=1
+                    self._stuck_counter+=1
                     print 'stuck... D=',(Distance2-Distance)
-                    if stuck_counter >= 2:
+                    if self._stuck_counter >= 2:
                         #dont follow path
                         self.FollowPath = 0
                         #go oposite dir
-                        if Point[2] == "bwd":
+                        if self._Point[2] == "bwd":
                             self.Crawl()
-                        if Point[2] == "fwd":
+                        if self._Point[2] == "fwd":
                             self.BackCrawl()
                         self.RotSpotSeq(2)
                         self.FollowPath = 1
-                        stuck_counter = 0
+                        self._stuck_counter = 0
                 else:
-                    stuck_counter = 0
+                    self._stuck_counter = 0
 
             else:
                 self.FollowPath = 0
-            # if self._terrain == "MUD" and self.IMU_mon.stand_up_flag == 1:
-            #     print "Reached stand up zone"
-            #     return
+        return result
 
     def Crawl(self):
         # self.IMU_mon.turned = 0
