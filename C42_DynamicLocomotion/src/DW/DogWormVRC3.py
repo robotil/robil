@@ -165,34 +165,43 @@ class DW_Controller(object):
         ThisRobotCnfg[18] = ThisRobotCnfg[18+6] = 2.5
         ThisRobotCnfg[19] = 1.8
         ThisRobotCnfg[19+6] = -1.8
+        ThisRobotCnfg[21] = -0.5
+        ThisRobotCnfg[21+6] = 0.5
         self.RobotCnfg2.append(ThisRobotCnfg)
         self.StepDur2.append(0.3*T)
 
-        #[-0.066, 0.082 Sequence Step 2: Extend arms
+        # Sequence Step 2: Extend arms
         ThisRobotCnfg = copy(self.RobotCnfg2[0][:])
         ThisRobotCnfg[16] = ThisRobotCnfg[16+6] = 1.2#1.4
-        ThisRobotCnfg[17] = -0.6#-0.4#-0.2#-0.6#-0.4
-        ThisRobotCnfg[17+6] = 0.6#0.4#0.2#0.6# 0.4
+        ThisRobotCnfg[17] = -0.4#-0.4#-0.2#-0.6#-0.4
+        ThisRobotCnfg[17+6] = 0.4#0.4#0.2#0.6# 0.4
         ThisRobotCnfg[18] = ThisRobotCnfg[18+6] = 2.9
         ThisRobotCnfg[19] = 0.2
         ThisRobotCnfg[19+6] = -0.2
+        ThisRobotCnfg[21] = 0
+        ThisRobotCnfg[21+6] = 0
         self.RobotCnfg2.append(ThisRobotCnfg)
-        self.StepDur2.append(0.4*T)
+        self.StepDur2.append(0.3*T)
 
         # Sequence Step 3: Extend torso, fall back on arms, lift and fold legs
         ThisRobotCnfg = copy(self.RobotCnfg2[1][:])
-        ThisRobotCnfg[1] = 0.4
-        ThisRobotCnfg[6] = ThisRobotCnfg[6+6] = -1.6
+        ThisRobotCnfg[1] = 0.6
+        ThisRobotCnfg[4] = ThisRobotCnfg[4+6] = 0
+        ThisRobotCnfg[5] = self.BaseHipZ
+        ThisRobotCnfg[5+6] = -self.BaseHipZ
+        ThisRobotCnfg[6] = ThisRobotCnfg[6+6] = -1.8
         ThisRobotCnfg[7] = ThisRobotCnfg[7+6] = 2.6
         ThisRobotCnfg[8] = ThisRobotCnfg[8+6] = 0.2
+        ThisRobotCnfg[17] = -0.6#-0.4#-0.2#-0.6#-0.4
+        ThisRobotCnfg[17+6] = 0.6#0.4#0.2#0.6# 0.4
         self.RobotCnfg2.append(ThisRobotCnfg)
-        # self.StepDur2.append(0.4*T)
-        self.StepDur2.append(0.3*T)
+        self.StepDur2.append(0.4*T)
 
         # Sequence Step 4: Place legs on ground and lift pelvis
         ThisRobotCnfg = copy(self.RobotCnfg2[2][:])
-        ThisRobotCnfg[6] = ThisRobotCnfg[6+6] = -1.
-        ThisRobotCnfg[7] = ThisRobotCnfg[7+6] = 2.2
+        ThisRobotCnfg[1] = 0.3
+        ThisRobotCnfg[6] = ThisRobotCnfg[6+6] = -0.6
+        ThisRobotCnfg[7] = ThisRobotCnfg[7+6] = 2.0
         ThisRobotCnfg[8] = ThisRobotCnfg[8+6] = 0
         ThisRobotCnfg[18] = ThisRobotCnfg[18+6] = 2.8
         ThisRobotCnfg[19] = 0.4
@@ -203,6 +212,9 @@ class DW_Controller(object):
         # Sequence Step 5: Move pelvis back, between arms
         ThisRobotCnfg = copy(self.RobotCnfg2[3][:])
         ThisRobotCnfg[1] = 0.5
+        ThisRobotCnfg[4] = self.BaseHipZ
+        ThisRobotCnfg[4+6] = -self.BaseHipZ
+        ThisRobotCnfg[5] = ThisRobotCnfg[5+6] = 0
         ThisRobotCnfg[6] = ThisRobotCnfg[6+6] = -1.7
         ThisRobotCnfg[7] = ThisRobotCnfg[7+6] = 1.0
         ThisRobotCnfg[8] = ThisRobotCnfg[8+6] = 0.8
@@ -214,6 +226,7 @@ class DW_Controller(object):
         ThisRobotCnfg[19+6] = -0.5
         self.RobotCnfg2.append(ThisRobotCnfg)
         self.StepDur2.append(1*T)#was 0.7*T
+
 
         ##################################################################
         ########################## INITIALIZE ############################
@@ -819,7 +832,7 @@ class DW_Controller(object):
        pos[1] = 0.8
        # Get current orientation
        y0,p,r = self.current_ypr()
-       pos[2] = -r
+       pos[2] = -0.5*r
        pos[6] = pos[6+6] = -1.3
        pos[16] = pos[16+6] = 0.6
        pos[17] = -1.2
@@ -858,7 +871,7 @@ class DW_Controller(object):
        # Lift arms
        pos = copy(self.RobotCnfg2[0][:])
        y0,p,r = self.current_ypr()
-       pos[2] = -r
+       pos[2] = -0.5*r
        self.JC.send_pos_traj(self.RS.GetJointPos(),pos,0.6*T,0.01)
 
     def CheckTipping(self):
@@ -929,6 +942,14 @@ class DW_Controller(object):
         pos[4+6] = -0.5
         # self.JC.send_pos_traj(self.RS.GetJointPos(),pos,0.4,0.01)
         self.JC.send_pos_traj(self.RS.GetJointPos(),pos,0.8,0.01)
+        ###############NEW #################
+                    
+        R,P,Y = self.RS.GetIMU()
+          
+        if  P>=0.8:
+            print "Front recovery"
+            result = self.FrontTipRecovery()
+            return result
 
         # Push with arm to rotate
         pos[16+6-dID] = 0.2
