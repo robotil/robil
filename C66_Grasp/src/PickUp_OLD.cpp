@@ -15,6 +15,7 @@
 #include <atlas_msgs/AtlasCommand.h>
 #include <sensor_msgs/JointState.h>
 #include <sstream>
+#include <tf/transform_listener.h>
 #include <iostream>
 #include <C23_ObjectRecognition/C23_orient.h>
 #include <sandia_hand_msgs/SimpleGraspSrv.h>
@@ -54,6 +55,40 @@ private:
 	move_hand::move_hand hand_msg;
 	sandia_hand_msgs::SimpleGrasp sandia_msg;
 	C67_CarManipulation::arm_path arm_path_msg;
+	tf::TransformListener listener;
+	tf::StampedTransform tf_input;
+
+	double QuatToRoll(double x, double y, double z, double w){
+			return atan2(2*(w*x + y*z), 1 - 2*(pow(x,2) + pow(y,2)));
+		}
+		double QuatToRoll(const tf::Quaternion &quat){
+			return atan2(2*(quat.w()*quat.x() + quat.y()*quat.z()), 1 - 2*(pow(quat.x(),2) + pow(quat.y(),2)));
+		}
+		double QuatToRoll(const geometry_msgs::Quaternion &quat){
+			return atan2(2*(quat.w*quat.x + quat.y*quat.z), 1 - 2*(pow(quat.x,2) + pow(quat.y,2)));
+		}
+
+
+		double QuatToPitch(double x, double y, double z, double w){
+			return asin(2*(w*y - z*x));
+		}
+		double QuatToPitch(const tf::Quaternion &quat){
+			return asin(2*(quat.w()*quat.y() - quat.z()*quat.x()));
+		}
+		double QuatToPitch(const geometry_msgs::Quaternion &quat){
+			return asin(2*(quat.w*quat.y - quat.z*quat.x));
+		}
+
+
+		double QuatToYaw(double x, double y, double z, double w){
+			return atan2(2*(w*z + x*y), 1 - 2*(pow(y,2) + pow(z,2)));
+		}
+		double QuatToYaw(const tf::Quaternion &quat){
+			return atan2(2*(quat.w()*quat.z() + quat.x()*quat.y()), 1 - 2*(pow(quat.y(),2) + pow(quat.z(),2)));
+		}
+		double QuatToYaw(const geometry_msgs::Quaternion &quat){
+			return atan2(2*(quat.w*quat.z + quat.x*quat.y), 1 - 2*(pow(quat.y,2) + pow(quat.z,2)));
+		}
 public:
 	PickUp(std::string name)
 	:as_(nh_, name, false), action_name_(name){
@@ -134,6 +169,8 @@ public:
 			sandia_srv.request.grasp.name = "cylindrical";
 			sandia_srv.request.grasp.closed_amount = 0.4;
 			}
+			update_comand();
+			ros::spinOnce();
 
 			arm_path_msg.request.PositionDestination.x = -0.128;
 			arm_path_msg.request.PositionDestination.y = -0.414;
@@ -252,8 +289,8 @@ public:
 				}}
 			else {
 				ROS_INFO("ERROR in requesting transformation from perception");
-				as_.setAborted();
-				return;
+				/*as_.setAborted();
+				return;*/
 			}
 
 			/*user*/
@@ -269,13 +306,25 @@ public:
 				as_.setAborted();
 				return;
 			}
-			hand_msg.request.PositionDestination_right.z = -0.2;
-			hand_msg.request.quick = false;
-			if(move_hand_cli_.call(hand_msg)){
+
+			ROS_INFO("taking tf info");
+			try {
+				listener.waitForTransform("/pelvis","/right_f1_0",ros::Time(0),ros::Duration(0.2));
+				listener.lookupTransform("/pelvis","/right_f1_0",ros::Time(0),tf_input);
+			} catch (tf::TransformException &ex) {
+				ROS_ERROR("%s",ex.what());
+			}
+			arm_path_msg.request.PositionDestination.x = tf_input.getOrigin().getX();
+			arm_path_msg.request.PositionDestination.y = tf_input.getOrigin().getY();
+			arm_path_msg.request.PositionDestination.z = tf_input.getOrigin().getZ() - 0.2;
+			arm_path_msg.request.AngleDestination.x = QuatToRoll(tf_input.getRotation());
+			arm_path_msg.request.AngleDestination.y = QuatToYaw(tf_input.getRotation());
+			arm_path_msg.request.AngleDestination.z = QuatToPitch(tf_input.getRotation());
+			if(r_arm_path_cli_.call(arm_path_msg)){
 
 			}
 			else{
-				ROS_INFO("ERROR in move_hnad service");
+				ROS_INFO("ERROR in rPath_srv service");
 				as_.setAborted();
 				return;
 			}
@@ -290,13 +339,25 @@ public:
 			ros::Duration(1.2).sleep();
 			/*lifting*/
 
-			arm_path_msg.request.PositionDestination.z += 0.2;
+			ROS_INFO("taking tf info");
+			try {
+				listener.waitForTransform("/pelvis","/right_f1_0",ros::Time(0),ros::Duration(0.2));
+				listener.lookupTransform("/pelvis","/right_f1_0",ros::Time(0),tf_input);
+			} catch (tf::TransformException &ex) {
+				ROS_ERROR("%s",ex.what());
+			}
+			arm_path_msg.request.PositionDestination.x = tf_input.getOrigin().getX();
+			arm_path_msg.request.PositionDestination.y = tf_input.getOrigin().getY();
+			arm_path_msg.request.PositionDestination.z = tf_input.getOrigin().getZ() + 0.2;
+			arm_path_msg.request.AngleDestination.x = QuatToRoll(tf_input.getRotation());
+			arm_path_msg.request.AngleDestination.y = QuatToYaw(tf_input.getRotation());
+			arm_path_msg.request.AngleDestination.z = QuatToPitch(tf_input.getRotation());
 
 			if(r_arm_path_cli_.call(arm_path_msg)){
 
 			}
 			else{
-				ROS_INFO("ERROR in arm_path service");
+				ROS_INFO("ERROR in rPath_srv service");
 				as_.setAborted();
 				return;
 			}
@@ -328,8 +389,6 @@ public:
 			sandia_srv.request.grasp.name = "cylindrical";
 			sandia_srv.request.grasp.closed_amount = 0.4;
 			}
-			update_comand();
-			ros::spinOnce();
 			if (getObjectData(g,X,Y,Z,R,P,YA)){
 				//Grasp the other way if the grasp is over 90 degrees
 				if (!((-M_PI/2<*YA)&&(*YA<M_PI/2))) {
@@ -370,14 +429,6 @@ public:
 				arm_path_msg.request.time =4;
 				arm_path_msg.request.points =200;
 				ROS_INFO("recieved matrix from perception");
-				if (as_.isPreemptRequested() || !ros::ok())
-				{
-					ROS_INFO("ERROR not recieve matrix from perception");
-					ROS_ERROR("%s: Preempted", action_name_.c_str());
-					// set the action state to preempted
-					as_.setPreempted();
-					return;
-				}
 				/*moving hand to requested object*/
 				ROS_INFO("moving hand to requested object");
 
@@ -410,8 +461,6 @@ public:
 			sandia_srv.request.grasp.name = "cylindrical";
 			sandia_srv.request.grasp.closed_amount = 1;
 			}
-			update_comand();
-			ros::spinOnce();
 			ros::Duration(1.2).sleep();
 			/*lifting*/
 
