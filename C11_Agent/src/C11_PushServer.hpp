@@ -47,7 +47,7 @@ public:
 	{
 	  pIPushHMIInterface = ipushHMIInterface;
 	  path_subscriber = _node.subscribe("/path",1000,&PushHMIServer::PathCallback,this);
-	  image_subscriber = _node.subscribe("/camera/image/compressed",500000,&PushHMIServer::ImageUpdateCallback,this);
+	  image_subscriber = _node.subscribe("/multisense_sl/camera/left/image_raw/compressed",500000,&PushHMIServer::ImageUpdateCallback,this);
 	}
 
 	void SetReleased()
@@ -55,7 +55,7 @@ public:
 	  IsWaitForRelease = false;
 	}
 
-	void ImageUpdateCallback(const sensor_msgs::CompressedImagePtr& img)
+	void ImageUpdateCallback(const sensor_msgs::CompressedImage& img)
 	{
 		Img = img;
 	}
@@ -95,9 +95,12 @@ public:
 		cout<<"Height: "<<srv21.response.res.height<<"\n";
 		cout<<"Step: "<<srv21.response.res.step<<"\n";
 		QImage img(srv21.response.res.data.data(),srv21.response.res.width,srv21.response.res.height,QImage::Format_RGB888);
+		img.save("111.jpg",0,20);
+		img.load("111.jpg");
 
 
-//		QImage img(Img.data.data(),Img.width,Img.height,QImage::Format_RGB888);
+//		QImage img(Img.data.data(),800,800,QImage::Format_RGB888);
+//		img.save("111.jpg");
 		if(pIPushHMIInterface != NULL)
 		  {
 		    IsWaitForRelease = true;
@@ -316,7 +319,7 @@ private:
     ros::Subscriber path_subscriber;
     ros::Subscriber image_subscriber;
     vector<StructPoint> Path;
-    sensor_msgs::CompressedImagePtr Img;
+    sensor_msgs::CompressedImage Img;
 };
 
 

@@ -463,7 +463,7 @@ void CTcpServer::SendRobotData(StructPoint& pos, StructOrientation& orient)
 	out.setByteOrder(QDataStream::LittleEndian);
 	out << header;
 	out << pos.x << pos.y << orient.yaw << orient.pitch << orient.roll;
-	std::cout<<"TCP: Robot data -> "<<pos.x<<pos.y<<orient.yaw<<orient.pitch<<orient.roll<<"\n";
+//	std::cout<<"TCP: Robot data -> "<<pos.x<<pos.y<<orient.yaw<<orient.pitch<<orient.roll<<"\n";
 	pClientConnection->write(block);
 	pClientConnection->flush();
 	pClientConnection->waitForBytesWritten();
