@@ -45,6 +45,7 @@
 #include <nav_msgs/Odometry.h>
 #include <pcl/visualization/pcl_visualizer.h>
 #include <pcl/visualization/cloud_viewer.h>
+#include "resolution.h"
 namespace enc=sensor_msgs::image_encodings;
 
 using namespace cv;
@@ -256,7 +257,7 @@ public:
 			    	if(req.req.cmd==C21_VisionAndLidar::C21_PICTURE::LEFT){
 			  
 			    	
-			    	cv::resize(leftImage,tmp,cv::Size(40,40),0,0,cv::INTER_NEAREST);
+			    	cv::resize(leftImage,tmp,cv::Size(OUTPUTSIZE,OUTPUTSIZE),0,0,cv::INTER_NEAREST);
 			    	
 			    	  	cvi.image = tmp; 
 			    		//.namedWindow( "Display window", CV_WINDOW_AUTOSIZE );// Create a window for display.
@@ -264,7 +265,7 @@ public:
     //waitKey(10);
     	           
 			    }else{
-			    	cv::resize(rightImage,tmp,cv::Size(80,80),0,0,cv::INTER_NEAREST);
+			    	cv::resize(rightImage,tmp,cv::Size(OUTPUTSIZE,OUTPUTSIZE),0,0,cv::INTER_NEAREST);
 			    	
 			    	cvi.image = rightImage;
 			    }
