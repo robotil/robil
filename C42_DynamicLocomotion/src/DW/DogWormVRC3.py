@@ -806,51 +806,60 @@ class DW_Controller(object):
         rospy.sleep(0.1*T)
 
     def RotOnMudSeq(self,Delta):
-        # Delta of 1 gives a left rotation of approx. 0.45 radians
-        if Delta>0:
-            dID = 0
-        else:
-            dID = 6
+       # Delta of 1 gives a left rotation of approx. 0.45 radians
+       if Delta>0:
+           dID = 0
+       else:
+           dID = 6
 
-        T=1
+       T=1
 
-        # Get into starting position
-        pos = copy(self.RobotCnfg2[4][:])
-        pos[1] = 0.8
-        pos[6] = pos[6+6] = -1.3
-        pos[16] = pos[16+6] = 0.2
-        self.JC.send_pos_traj(self.RS.GetJointPos(),pos,0.5*T,0.01)
-        # pos[6] -= 0.2
+       # Get into starting position
+       pos = copy(self.RobotCnfg2[4][:])
+       pos[1] = 0.8
+       # Get current orientation
+       y0,p,r = self.current_ypr()
+       pos[2] = -r
+       pos[6] = pos[6+6] = -1.3
+       pos[16] = pos[16+6] = 0.6
+       pos[17] = -1.2
+       pos[17+6] = 1.2
+       pos[18] = pos[18+6] = 1.8
+       self.JC.send_pos_traj(self.RS.GetJointPos(),pos,0.5*T,0.01)
+       # pos[6] -= 0.2
 
-        # Lift first leg
-        pos[6+dID] = -1.7
-        self.JC.send_pos_traj(self.RS.GetJointPos(),pos,0.2*T,0.01)
+       # Lift first leg
+       pos[2] = 0
+       pos[6+dID] = -1.7
+       self.JC.send_pos_traj(self.RS.GetJointPos(),pos,0.2*T,0.01)
 
-        # Rotate it to the side
-        pos[4+dID] = 0.8*Delta
-        pos[0] = -0.4*Delta
-        pos[4+6-dID] = -0.4*Delta
-        self.JC.send_pos_traj(self.RS.GetJointPos(),pos,0.4*T,0.01)
+       # Rotate it to the side
+       pos[4+dID] = 0.8*Delta
+       pos[0] = -0.4*Delta
+       pos[4+6-dID] = -0.4*Delta
+       self.JC.send_pos_traj(self.RS.GetJointPos(),pos,0.4*T,0.01)
 
-        # Lower first leg / Lift second leg
-        pos[6+dID] = -1.3
-        pos[6+6-dID] = -1.8
-        self.JC.send_pos_traj(self.RS.GetJointPos(),pos,0.2*T,0.01)
+       # Lower first leg / Lift second leg
+       pos[6+dID] = -1.3
+       pos[6+6-dID] = -1.8
+       self.JC.send_pos_traj(self.RS.GetJointPos(),pos,0.2*T,0.01)
 
-        # Rotate pelvis / Close first leg
-        pos[0] = -0.8*Delta
-        pos[4+dID] = 0
-        pos[4+6-dID] = 0
-        self.JC.send_pos_traj(self.RS.GetJointPos(),pos,0.4*T,0.01)
+       # Rotate pelvis / Close first leg
+       pos[0] = -0.8*Delta
+       pos[4+dID] = 0
+       pos[4+6-dID] = 0
+       self.JC.send_pos_traj(self.RS.GetJointPos(),pos,0.4*T,0.01)
 
-        # Return to init
-        pos[1] = 0.9
-        pos[6] = pos[6+6] = -1.3
-        self.JC.send_pos_traj(self.RS.GetJointPos(),pos,0.2*T,0.01)
+       # Return to init
+       pos[1] = 0.9
+       pos[6] = pos[6+6] = -1.3
+       self.JC.send_pos_traj(self.RS.GetJointPos(),pos,0.2*T,0.01)
 
-        # Lift arms
-        pos = copy(self.RobotCnfg2[0][:])
-        self.JC.send_pos_traj(self.RS.GetJointPos(),pos,1*T,0.01)
+       # Lift arms
+       pos = copy(self.RobotCnfg2[0][:])
+       y0,p,r = self.current_ypr()
+       pos[2] = -r
+       self.JC.send_pos_traj(self.RS.GetJointPos(),pos,0.6*T,0.01)
 
     def CheckTipping(self):
         
