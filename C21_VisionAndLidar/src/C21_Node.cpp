@@ -245,21 +245,27 @@ public:
 	  bool pic_proccess(C21_VisionAndLidar::C21_Pic::Request  &req,
 	  			  C21_VisionAndLidar::C21_Pic::Response &res )
 	  	  {
-	  	  	Mat tmp;
+	  	  	Mat tmp,tmp2;
 	  	  		tmp.create(leftImage.size(),leftImage.type());
 		  boost::mutex::scoped_lock(_panMutex);
 	  			cv_bridge::CvImage cvi;
 			    cvi.header.stamp = ros::Time::now();
 			    cvi.header.frame_id = "image";
-			    cvi.encoding = "rgb8";
+			    if (COLOR)
+			    	cvi.encoding = enc::RGB8;
+			    else
+			    	cvi.encoding = enc::MONO8;
 			    //cv::resize
 			    
 			    	if(req.req.cmd==C21_VisionAndLidar::C21_PICTURE::LEFT){
 			  
 			    	
 			    	cv::resize(leftImage,tmp,cv::Size(OUTPUTSIZE,OUTPUTSIZE),0,0,cv::INTER_NEAREST);
-			    	
-			    	  	cvi.image = tmp; 
+    			 
+			    				cvtColor(tmp,tmp2,CV_BGR2GRAY);
+			    	  	 if (COLOR)cvi.image = tmp; 
+			    	  	 	else cvi.image = tmp2;
+
 			    		//.namedWindow( "Display window", CV_WINDOW_AUTOSIZE );// Create a window for display.
     //imshow( "Display window", cvi.image );
     //waitKey(10);
@@ -296,7 +302,7 @@ public:
 			  cv_bridge::CvImage cvi;
 			  cvi.header.stamp = ros::Time::now();
 			  cvi.header.frame_id = "image";
-			  cvi.encoding = "rgb8";
+			  cvi.encoding = enc::RGB8;
 			  cvi.image = pano;
 			  cvi.toImageMsg(res.res);
 			  while(pan_imgs->size()>0){
