@@ -1,0 +1,34 @@
+<plan descriptions="./plans/TaskDescriptions.xml">
+   <seq name="exit"> 
+         <par name="@1"> 
+               <par name="Perception"> 
+                     <tsk name="LocalizationTrack" />
+                     <tsk name="PathPlanning" />
+               </par>
+               <seq name="SearchGo_ARROW"> 
+                  <dec name="T"> 
+                        <seq name="search_arrow"> 
+                              <tsk name="searchObject(target=Arrow)" />
+                           <dec name="!L!"> 
+                                 <tsk name="PathPlanningFocus(target=Arrow)" />
+                           </dec>
+                        </seq>
+                  </dec>
+                     <seq name="OperatorCheckPoint"> 
+                        <dec name="T"> 
+                              <par name="TimeControl"> 
+                                    <seq name="OperatorRequest"> 
+                                          <tsk name="PushHMI(data=panoramic_image)" />
+                                          <tsk name="PushHMI(data=occupancy_grid)" />
+                                          <tsk name="PushHMI(data=path)" />
+                                          <tsk name="HMIResponse" />
+                                    </seq>
+                                    <tsk name="TimeoutMonitor(threshold=50)" />
+                              </par>
+                        </dec>
+                     </seq>
+                     <tsk name="WalkerNode_Continuous" />
+               </seq>
+         </par>
+   </seq>
+</plan>
