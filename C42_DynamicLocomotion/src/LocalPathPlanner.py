@@ -178,7 +178,7 @@ class LocalPathPlanner(PathPlanner):
         self._Position = Waypoint()
         self._CurrentSegment = Segment(self._Position,self._Position)
         self._PathReady = False
-        self._Preview_Distance = 1.7 # [meters], should be updated according to distance of number of step ahead 
+        #self._Preview_Distance = 1.0 #1.7 # [meters], should be updated according to distance of number of step ahead 
         self._DoingQual = False
         
     def SetPath(self,waypointList):
@@ -209,11 +209,11 @@ class LocalPathPlanner(PathPlanner):
         return self._CurrentSegment.GetYaw()
 
     def GetCloseEnoughToTargetDistance(self):
-        turningRadius = 1.5
+        turningRadius = 0.20#1.5
         theta = 0.0
         if(0 == len(self._Path)):
             # Last segment
-            result = 0.2
+            result = 0.4
         else:
             NextSegment = Segment(self._CurrentSegment.GetTarget(),self._Path[0])
             theta = NextSegment.GetYaw()-self._CurrentSegment.GetYaw()
@@ -225,10 +225,10 @@ class LocalPathPlanner(PathPlanner):
         #rospy.loginfo('GetCloseEnoughToTargetDistance: %f, theta = %f' %(result,theta))
         return result
 
-    def GetCloseEnoughToTargetDistanceWithPreview(self):
-        return self.GetCloseEnoughToTargetDistance() + self._Preview_Distance
+    # def GetCloseEnoughToTargetDistanceWithPreview(self):
+    #     return self.GetCloseEnoughToTargetDistance() + self._Preview_Distance
             
-    def UpdatePosition(self,CoordinateX,CoordinateY):
+    def UpdatePosition(self,CoordinateX,CoordinateY,Preview_Distance=0.0):
         """
             Updates the position, returns true if at end of current path, false otherwise
         """
@@ -239,7 +239,7 @@ class LocalPathPlanner(PathPlanner):
             sagital,lateral = self._CurrentSegment.GetDistanceFrom(self._Position)
             distanceFromTarget = self._CurrentSegment.GetTarget().GetDistanceFrom(self._Position)
             #rospy.loginfo('UpdatePosition: distanceFromTarget = %f' %(distanceFromTarget))
-            if ((sagital>0.0)or(distanceFromTarget < self.GetCloseEnoughToTargetDistanceWithPreview())):
+            if ((sagital>0.0)or(distanceFromTarget < (self.GetCloseEnoughToTargetDistance()+Preview_Distance) )):
                 rospy.loginfo('UpdatePosition: distanceFromTarget = %f' %(distanceFromTarget))
                 if(len(self._Path)==0):
                     bStop = True

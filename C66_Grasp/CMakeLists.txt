@@ -8,6 +8,10 @@ include($ENV{ROS_ROOT}/core/rosbuild/rosbuild.cmake)
 #  RelWithDebInfo : w/ debug symbols, w/ optimization
 #  MinSizeRel     : w/o debug symbols, w/ optimization, stripped binaries
 #set(ROS_BUILD_TYPE RelWithDebInfo)
+list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
+find_package(Eigen REQUIRED)
+include_directories(${Eigen_INCLUDE_DIRS})
+
 
 rosbuild_find_ros_package(actionlib_msgs)
 include(${actionlib_msgs_PACKAGE_PATH}/cmake/actionbuild.cmake)
@@ -29,9 +33,10 @@ rosbuild_add_library(Kinematics src/FK.cpp src/IK.cpp src/Path.cpp src/Trace.cpp
 rosbuild_add_boost_directories()
 
 #rosbuild_add_boost_directories()
-rosbuild_add_executable(PickUp src/PickUp.cpp)
-rosbuild_link_boost(PickUp thread)
-target_link_libraries(PickUp Kinematics)
+#rosbuild_add_executable(PickUp src/PickUp.cpp)
+rosbuild_add_executable(PickUp_OLD src/PickUp_OLD.cpp)
+rosbuild_link_boost(PickUp_OLD thread)
+target_link_libraries(PickUp_OLD Kinematics)
 
 
 rosbuild_add_executable(client src/client.cpp)

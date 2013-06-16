@@ -15,6 +15,9 @@ C11Main::C11Main(int argc, char **argv)
   connect(this,SIGNAL(SigOnHMIResponse()),this,SLOT(SltOnHMIResponse()));
   connect(this,SIGNAL(SigOnExecutionStatusChange(int)),this,SLOT(SltOnExecutionStatusChange(int)));
   connect(this,SIGNAL(SigOnSendExecuterStack(QString)),this,SLOT(SltOnSendExecuterStack(QString)));
+  connect(this,SIGNAL(SigOnVRCScoreData(double,int,int,QString)),this,SLOT(SltOnVRCScoreData(double,int,int,QString)));
+  connect(this,SIGNAL(SigOnSendDownlink(QString)),this,SLOT(SltOnSendDownlink(QString)));
+  connect(this,SIGNAL(SigOnSendUplink(QString)),this,SLOT(SltOnSendUplink(QString)));
 }
 
 C11Main::~C11Main()
@@ -37,6 +40,20 @@ void C11Main::SetTcp(CTcpServer* ptcpServer)
   connect(pCTcpServer,SIGNAL(SigImageRequest()),this,SLOT(SltImageRequest()));
   connect(pCTcpServer,SIGNAL(SigGridRequest()),this,SLOT(SltGridRequest()));
   connect(pCTcpServer,SIGNAL(SigPathRequest()),this,SLOT(SltPathRequest()));
+  connect(pCTcpServer,SIGNAL(SigAllRequest()),this,SLOT(SltAllRequest()));
+  connect(pCTcpServer,SIGNAL(SigStopRequest()),this,SLOT(SltStopRequest()));
+  connect(pCTcpServer,SIGNAL(SigNewGoalRequest(StructPoint)),this,SLOT(SltNewGoalRequest(StructPoint)));
+  connect(pCTcpServer,SIGNAL(SigResetRequest()),this,SLOT(SltResetRequest()));
+}
+
+void C11Main::SetImgTcp(CTcpServer* ptcpServer)
+{
+  pImageCTcpServer = ptcpServer;
+}
+
+void C11Main::SetDesignerTcp(CTcpServer* ptcpServer)
+{
+  pDesignerCTcpServer = ptcpServer;
 }
 
 void C11Main::PushImage(QImage img)
@@ -66,14 +83,29 @@ void C11Main::ExecutionStatusChanged(int status)
 
 void C11Main::SendExecuterStack(QString str)
 {
-	cout<<"C11Main::SendExecuterStack \n";
+//	cout<<"C11Main::SendExecuterStack \n";
 //	QString strString(str.data());
 	emit SigOnSendExecuterStack(str);
 }
 
+void C11Main::SendVRCScoreData(double timeSec, int competionScore, int falls, QString message)
+{
+  emit SigOnVRCScoreData(timeSec,competionScore,falls,message);
+}
+
+void C11Main::SendDownlink(QString down)
+{
+  emit SigOnSendDownlink(down);
+}
+
+void C11Main::SendUplink(QString up)
+{
+  emit SigOnSendUplink(up);
+}
+
 void C11Main::SltOnImageSend(QImage img)
 {
-  pCTcpServer->SendImage(img);
+  pImageCTcpServer->SendImage(img);
   pC11Node->SetReleased();
 }
 
@@ -101,9 +133,26 @@ void C11Main::SltOnExecutionStatusChange(int status)
 
 void C11Main::SltOnSendExecuterStack(QString str)
 {
-	cout<<"C11Main::SltOnSendExecuterStack \n";
-	pCTcpServer->SendExecuterStack(str);
+//	cout<<"C11Main::SltOnSendExecuterStack \n";
+//	pCTcpServer->SendExecuterStack(str);
 //	pC11Node->SetReleased();
+
+  pDesignerCTcpServer->SendExecuterStack(str);
+}
+
+void C11Main::SltOnVRCScoreData(double timeSec, int competionScore, int falls, QString message)
+{
+  pCTcpServer->SendVRCScoreData(timeSec,competionScore,falls,message);
+}
+
+void C11Main::SltOnSendDownlink(QString down)
+{
+  pCTcpServer->SendDownlink(down);
+}
+
+void C11Main::SltOnSendUplink(QString up)
+{
+  pCTcpServer->SendUplink(up);
 }
 
 void C11Main::SltHMIResponded()
@@ -144,4 +193,24 @@ void C11Main::SltGridRequest()
 void C11Main::SltPathRequest()
 {
   pC11Node->PathRequest();
+}
+
+void C11Main::SltAllRequest()
+{
+  pC11Node->AllRequest();
+}
+
+void C11Main::SltStopRequest()
+{
+  pC11Node->Stop();
+}
+
+void C11Main::SltNewGoalRequest(StructPoint goal)
+{
+  pC11Node->NewGoalRequest(goal);
+}
+
+void C11Main::SltResetRequest()
+{
+  pC11Node->ResetRequest();
 }

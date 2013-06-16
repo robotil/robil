@@ -3,7 +3,7 @@
 #include "C34_Executer/stop.h"
 #include "C34_Executer/resume.h"
 #include "C34_Executer/pause.h"
-#include "C31_PathPlanner/C31_Waypoints.h"
+#include "C31_PathPlanner/C31_HMIReset.h"
 #include <sstream>
 #include <stdlib.h>
 #include "tinyxml2.h"
@@ -20,6 +20,12 @@ C11_Agent_Node::C11_Agent_Node(int argc, char** argv):
   pIAgentInterface = NULL;
   IsWaitForRelease = false;
   start_pos = 0;
+  SimTime = 999999;
+  Comletion_score = 0;
+  Falls = 0;
+  Message = "";
+  Uplink = "";
+  Downlink = "";
   std::string filepath;
   filepath = ros::package::getPath("C11_OperatorControl");
   filepath.append("/bin/Missions.txt");
@@ -73,12 +79,18 @@ bool C11_Agent_Node::init()
     nh_ = new ros::NodeHandle();
 
     path_update_pub = nh_->advertise<C31_PathPlanner::C31_Waypoints>("c11_path_update",10000);
+    goal_update_pub = nh_->advertise<C31_PathPlanner::C31_Location>("planner/goal/point",1000);
+    goal_reset_pub = nh_->advertise<C31_PathPlanner::C31_HMIReset>("planner/reset",1000);
     service_MissionSelection = nh_->advertiseService("MissionSelection", &C11_Agent_Node::MissionSelection,this);
     service_PauseMission = nh_->advertiseService("PauseMission", &C11_Agent_Node::PauseMission,this);
     service_ResumeSelection = nh_->advertiseService("ResumeMission", &C11_Agent_Node::ResumeMission,this);
     service_PathUpdate = nh_->advertiseService("PathUpdate", &C11_Agent_Node::PathUpdate,this);
     robot_pos_subscriber = nh_->subscribe("C25/publish",1000,&C11_Agent_Node::RobotPosUpdateCallback,this);
-    robot_pos_subscriber = nh_->subscribe("executer/stack_stream",1000,&C11_Agent_Node::ExecuterStackSubscriber,this);;
+    robot_pos_subscriber = nh_->subscribe("executer/stack_stream",1000,&C11_Agent_Node::ExecuterStackSubscriber,this);
+    vrc_score_subscriber = nh_->subscribe("vrc_score",1000,&C11_Agent_Node::VRCScoreSubscriber,this);
+    downlink_subscriber = nh_->subscribe("vrc/bytes/remaining/downlink",1000,&C11_Agent_Node::DownlinkSubscriber,this);
+    uplink_subscriber = nh_->subscribe("vrc/bytes/remaining/uplink",1000,&C11_Agent_Node::UplinkSubscriber,this);
+    objects_subscriber = nh_->subscribe("C23/object_dimensions",1000,&C11_Agent_Node::ObjectsSubscriber,this);
 
 
     pushS = new PushHMIServer();
@@ -100,7 +112,7 @@ void C11_Agent_Node::run()
           loop_rate.sleep();
           ++count;
   }
-  std::cout << "Ros shutdown, proceeding to close the gui." << std::endl;
+  std::cout << "Ros shutdown, proceeding to close the agent." << std::endl;
 }
 
 bool C11_Agent_Node::MissionSelection(C10_Common::mission_selection::Request& req,
@@ -219,6 +231,26 @@ bool C11_Agent_Node::ResumeMission(C10_Common::resume_mission::Request& req,
     }
 }
 
+void C11_Agent_Node::Stop()
+{
+  if(!tree_id_str.empty())
+     c34StopClient = nh_->serviceClient<C34_Executer::stop>("executer/stop");
+  C34_Executer::stop srv34Stop;
+  srv34Stop.request.tree_id = tree_id_str;
+  if (!c34StopClient.call(srv34Stop))
+  {
+          ROS_ERROR("stop of mission error, exiting\n");
+  }
+  else
+  {
+          ROS_INFO("Stop request sent\n");
+  }
+  if(pIAgentInterface != NULL)
+  {
+    pIAgentInterface->ExecutionStatusChanged(2);
+  }
+}
+
 bool C11_Agent_Node::PathUpdate(C10_Common::path_update::Request& req,
                 C10_Common::path_update::Response& res)
 {
@@ -232,7 +264,7 @@ void C11_Agent_Node::StopExecuteMessageCallback(const std_msgs::StringConstPtr& 
 {
   ROS_INFO(msg->data.data());
   if(!tree_id_str.empty())
-  c34StopClient = nh_->serviceClient<C34_Executer::stop>("executer/stop");
+   c34StopClient = nh_->serviceClient<C34_Executer::stop>("executer/stop");
   C34_Executer::stop srv34Stop;
   srv34Stop.request.tree_id = tree_id_str;
   if (!c34StopClient.call(srv34Stop))
@@ -435,6 +467,7 @@ void C11_Agent_Node::PathUpdated(std::vector<StructPoint> points)
   }
   start_pos = 0;
   path_update_pub.publish(waypoints);
+  cout << "Path update sent with " <<  waypoints.points.size() << "points!" << endl;
 }
 
 void C11_Agent_Node::ImageRequest()
@@ -452,15 +485,78 @@ void C11_Agent_Node::PathRequest()
   pushS->path_task();
 }
 
+void C11_Agent_Node::AllRequest()
+{
+  pushS->panoramic_image_task();
+  pushS->occupancy_grid_task();
+  pushS->path_task();
+}
+
 void C11_Agent_Node::ExecuterStackSubscriber(const std_msgs::StringConstPtr& stack)
 {
-	cout<<"ExecuterStackSubscriber received data"<< endl;
+//	cout<<"ExecuterStackSubscriber received data"<< endl;
 //	cout<<"ExecuterStackUpdate: "<< stack << "\n";
 //	cout<<endl<<endl<<endl<<endl<<endl<<endl;
 	QString str(stack->data.data());
 	pIAgentInterface->SendExecuterStack(str);
 //	cout<<"ExecuterStackUpdate: "<< str.toStdString() << "\n";
 
+}
+
+void C11_Agent_Node::VRCScoreSubscriber(const atlas_msgs::VRCScore& vrcScore)
+{
+  QString str(vrcScore.message.data());
+  if(vrcScore.sim_time.toSec() != SimTime || vrcScore.completion_score != Comletion_score || vrcScore.falls != Falls || str != Message)
+    {
+      SimTime = vrcScore.sim_time.toSec();
+      Comletion_score = vrcScore.completion_score;
+      Falls = vrcScore.falls;
+      Message = str;
+    //  cout<<vrcScore<<endl;
+
+      pIAgentInterface->SendVRCScoreData(vrcScore.sim_time.toSec(),vrcScore.completion_score,vrcScore.falls,str);
+    }
+}
+
+void C11_Agent_Node::DownlinkSubscriber(const std_msgs::StringConstPtr& down)
+{
+  QString str(down->data.data());
+  if(Downlink != str)
+    {
+      Downlink = str;
+      pIAgentInterface->SendDownlink(str);
+    }
+}
+
+void C11_Agent_Node::UplinkSubscriber(const std_msgs::StringConstPtr& up)
+{
+  QString str(up->data.data());
+  if(Uplink != str)
+    {
+      Uplink = str;
+      pIAgentInterface->SendUplink(str);
+    }
+}
+
+void C11_Agent_Node::ObjectsSubscriber(const C23_ObjectRecognition::C23C0_ODIMConstPtr& obj)
+{
+//  cout<<obj;
+}
+
+void C11_Agent_Node::NewGoalRequest(StructPoint goal)
+{
+  C31_PathPlanner::C31_Location loc;
+  loc.x = goal.x;
+  loc.y = goal.y;
+  goal_update_pub.publish(loc);
+  cout<<"New goal sent: "<<goal.x<<","<<goal.y<<endl;
+}
+
+void C11_Agent_Node::ResetRequest()
+{
+  C31_PathPlanner::C31_HMIReset reset;
+  goal_reset_pub.publish(reset);
+  cout<<"ResetRequest sent!"<<endl;
 }
 
 void C11_Agent_Node::CheckPath()
@@ -480,6 +576,7 @@ void C11_Agent_Node::CheckPath()
               waypoints.points.push_back(loc);
             }
             path_update_pub.publish(waypoints);
+            cout << "Path update sent with " <<  waypoints.points.size() << "points!" << endl;
           }
      }
 }

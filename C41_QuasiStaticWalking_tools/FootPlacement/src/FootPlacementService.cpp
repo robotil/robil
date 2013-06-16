@@ -17,7 +17,7 @@ FootPlacementService::FootPlacementService() {
 		    ros::VoidPtr(), nh.getCallbackQueue());
 	pathSub = nh.subscribe(pathSo);
 	footPlacementPathPublisher = nh.advertise<FootPlacement::Foot_Placement_path>("foot_placement", 1, true);
-	walkNotificationPublisher = nh.advertise<C42_WalkType::extreme_slope>("walk_notification/exterme_slope", 1, true);
+	walkNotificationPublisher = nh.advertise<C42_WalkType::extreme_slope>("walk_notification/extreme_slope", 1, true);
 }
 
 /*
@@ -68,6 +68,10 @@ bool FootPlacementService::callback(FootPlacement::FootPlacement_Service::Reques
 				req.start_pose, req.other_foot_pose,
 				pathPoints->points,
 				SLOPE_WEIGHT, DISTANCE_WEIGHT, HEIGHT_WEIGHT, DIRECTION_WEIGHT);
+
+        // FIXME: Now needs to transform points to global coordinates.
+
+
 	}
 	else {
 		printf("ERROR! NO MAP SERVICE!\n");
@@ -75,6 +79,7 @@ bool FootPlacementService::callback(FootPlacement::FootPlacement_Service::Reques
 	}
 	FootPlacement::Foot_Placement_path footPlacementPath;
 	footPlacementPath.foot_placement_path = res.foot_placement_path;
+
 	footPlacementPathPublisher.publish(footPlacementPath);
 	return true;
 }
@@ -97,6 +102,11 @@ void FootPlacementService::publishExtremeSlopeMsg() {
 	walkNotificationPublisher.publish(emptyMsg);
 }
 
+/** ---------- DAN ERUS: task for extreme_slope testing ----------- **/
+#include "FTTask.hpp"
+/** --------------------------------------------------------------- **/
+
+
 /*
  * initiating the node and the service
  */
@@ -104,6 +114,11 @@ int main(int argc, char **argv) {
 	ros::init(argc, argv, "FootPlacementNode");
 	FootPlacementService footPlacementService;
 	ROS_INFO("FOOTPLACEMENT SERVICE READY");
+	
+	/** ---------- DAN ERUS: task for extreme_slope testing ----------- **/
+	TaskCheckExtremeSlope checkExtremeSlope;
+	/** --------------------------------------------------------------- **/
+
 	ros::spin();
 	return 0;
 }

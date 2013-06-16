@@ -121,6 +121,9 @@ ObsMap MapEditor::	merge(const ObsMap& m1, const ObsMap& m2, MergeOperator op)co
 			case XOR:
 				res(x,y) = m1(x,y)!=Map::ST_BLOCKED != m2(x,y)!=Map::ST_BLOCKED ? Map::ST_BLOCKED : Map::ST_AVAILABLE;
 				break;
+			case SUB:
+				res(x,y) = m1(x,y)==Map::ST_BLOCKED && m2(x,y)!=Map::ST_BLOCKED ? Map::ST_BLOCKED : Map::ST_AVAILABLE;
+				break;
 			}
 		}
 	}}
@@ -482,31 +485,39 @@ PField::Points searchPath_transitAccurate(
 	Inflator ii( rr*0.5, Map::ST_DEBRIS);
 	MapEditor e;
 
-	Map walls = e.merge(s_walls, s_obstacles, MapEditor::OR);
+//	Map walls = e.merge(s_walls, s_obstacles, MapEditor::OR);
+	Map walls = s_walls;
 
-	Map inflated_map = e.replace(
-			i.inflate(walls),
-			Map::ST_UNCHARTED, Map::ST_AVAILABLE
-		);
 	Map inflated_terrain = e.replace(e.cut(
 			ii.inflate(s_terrain),
 			Map::ST_DEBRIS, Map::ST_AVAILABLE), Map::ST_DEBRIS, Map::ST_BLOCKED
 		);
 
+	walls = e.merge(walls, inflated_terrain, MapEditor::SUB);
+
+	Map inflated_map = e.replace(
+			i.inflate(walls),
+			Map::ST_UNCHARTED, Map::ST_AVAILABLE
+		);
+
 	inflated_map = e.merge(inflated_map, inflated_terrain, MapEditor::OR);
 
-	o_obstacles = inflated_map;
+	//o_obstacles = inflated_map;
 
 	if( inflated_map(start.x, start.y)==Map::ST_BLOCKED || inflated_map(finish.x, finish.y)==Map::ST_BLOCKED ){
 		cout<<"searchPath: "<<"some of interesting points are unattainable (after inflation)"<<endl;
 		return EmptyPath;
 	}
+//TODO: [DAN]: CHECK WHY THIS DOES NOT WARK
+//	walls =
+//		e.coloring(
+//			inflated_map,
+//			start.x, start.y, Map::ST_AVAILABLE,Map::ST_BLOCKED
+//		);
 
-	walls =
-		e.coloring(
-			inflated_map,
-			start.x, start.y, Map::ST_AVAILABLE,Map::ST_BLOCKED
-		);
+	walls = inflated_map;
+
+	o_obstacles = walls;
 
 	AltMap map = costs;
 
@@ -559,8 +570,8 @@ PField::Points searchPath_transitAccurate(
 			path.push_back(Waypoint(points[p].x,points[p].y));
 		}
 
-		#undef SEGMENT
-
+#undef SEGMENT
+#undef DO_SMOOTHING
 #ifdef DO_SMOOTHING
 		PField::SmoothingParameters pf_params;
 		SET_PF_PARAMETERS(pf_params)

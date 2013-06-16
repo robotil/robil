@@ -34,6 +34,9 @@ public:
 	ObsMap walls()const;
 	AltMap slops()const;
 	AltMap costs()const;
+	ObsMap walls(const ObsMap& filter)const;
+	AltMap slops(const ObsMap& filter)const;
+	AltMap costs(const ObsMap& filter)const;
 private:
 	char filter(size_t x, size_t y)const;
 	char filterBorder(size_t x, size_t y)const;
@@ -42,6 +45,15 @@ private:
 	double slopBorder(size_t x, size_t y)const;
 
 	double cost(size_t x, size_t y)const;
+
+
+	char filter(size_t x, size_t y, const ObsMap& f)const;
+	char filterBorder(size_t x, size_t y, const ObsMap& f)const;
+
+	double slop(size_t x, size_t y, const ObsMap& f)const;
+	double slopBorder(size_t x, size_t y, const ObsMap& f)const;
+
+	double cost(size_t x, size_t y, const ObsMap& f)const;
 };
 
 #endif /* AltTransforms_H_ */

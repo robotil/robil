@@ -5,6 +5,7 @@ import rospy
 import actionlib
 from RobilTaskPy import *
 from geometry_msgs.msg import Pose
+import SwingIntoCar 
 
 class MountVehicleServer(RobilTask):
 	def __init__(self):
@@ -16,14 +17,20 @@ class MountVehicleServer(RobilTask):
 		print "Start mounting the vehicle"
 
 		#Here should be the code for entering the car
-		pub = rospy.Publisher('/drc_world/robot_enter_car', Pose)
-		rospy.sleep(1)
-		pub.publish()
+		
+		# Cheat. No longer works.
+		#pub = rospy.Publisher('/drc_world/robot_enter_car', Pose)
+		#rospy.sleep(1)
+		#pub.publish()
+
+		SwingIntoCar.do_main_thing()
+
 
 		#Task succeeded
 		return RTResult_SUCCESSED("Finished in Success")
 
 if __name__ == '__main__':
 	rospy.init_node('C46_MountVehicle')
+	SwingIntoCar.do_main_thing()
 	MountVehicleServer()
 	rospy.spin()

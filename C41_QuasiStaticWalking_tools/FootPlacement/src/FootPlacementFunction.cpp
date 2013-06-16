@@ -136,10 +136,10 @@ geometry_msgs::Point FootPlacementService::calcPoint(const int &i, const int &j,
 double FootPlacementService::calcSlope(const double &a,const double &b,const double &c)
 {
 	double slope=fabs(asin(c/sqrt(a*a+b*b+c*c)));
-	if(1000==a)
-		return 1000;
-	if(slope<EXTREME_SLOPE)
-		publishExtremeSlopeMsg();
+//	if(1000==a)
+//		return 1000;
+// 	if(slope<EXTREME_SLOPE)
+// 		publishExtremeSlopeMsg();
 	return slope;
 }
 
@@ -168,12 +168,12 @@ double FootPlacementService::singleCellWeight(const double &legDistance,
 		const double &distanceWeight,const double &heightWeight,
 		const double &directionWeight)
 {
-	if(legDistance<0.1)
-		return 100;
-	if(legDistance>0.3)
-		return 1000;
-	if(height>0.1)
-		return 10000;
+    if(legDistance<MIN_STEP_SIZE)
+		return std::numeric_limits<double>::infinity();
+    if(legDistance>MAX_STEP_SIZE)
+		return std::numeric_limits<double>::infinity();
+    if(height>MAX_STEP_HEIGHT)
+		return std::numeric_limits<double>::infinity();
 	return (/*slope*slopeWeight+*/ distance*distanceWeight+height*heightWeight+
 			direction*directionWeight)/NORMALIZER;
 }
@@ -203,8 +203,8 @@ void FootPlacementService::calcFootMatrix(
 	FootPlacement::Foot_Placement_data startPose=start_pose;
 	FootPlacement::Foot_Placement_data otherFootPose=other_foot_pose;
 	C22_CompactGroundRecognitionAndMapping::C22_PLANE_TYPE avgMap[SIZE][SIZE];
-	const geometry_msgs::Point &robotPos = map.robotPos;
-	const geometry_msgs::Point &robotOri = map.robotOri;
+	geometry_msgs::Point robotPos = map.robotPos;
+	geometry_msgs::Point robotOri = map.robotOri;
 	FootPlacementService::createAvgMatrix(avgMap,map);
 	unsigned curPoint=0;
 	double minCost;
@@ -213,22 +213,58 @@ void FootPlacementService::calcFootMatrix(
 	double a=robotOri.z;
 	double cosa=cos(a), sina=sin(a);
 
-	printf("a cos sin: %lf %lf %lf \n",a, cosa, sina);
 
-	printf("pos: %lf %lf %lf \n",robotPos.x, robotPos.y, robotPos.z);
-	printf("startPose: %lf %lf %lf \n",startPose.pose.position.x
-			, startPose.pose.position.y, startPose.pose.position.z);
-	printf("otherFootPose: %lf %lf %lf \n",otherFootPose.pose.position.x
-			, otherFootPose.pose.position.y, otherFootPose.pose.position.z);
 
+	//printf("a cos sin: %lf %lf %lf \n",a, cosa, sina);
+
+
+	/*
+	 startPose.foot_index=LEFT;
+
+	robotPos.x=7;
+	robotPos.y=11.3;
+	robotPos.z=0.92;
+	points.erase(points.begin(),points.end());
+	C31_PathPlanner::C31_Location aaa,bbb,ccc,ddd;
+	aaa.x=8.5;
+	aaa.y=11.3;
+	bbb.x=8.5;
+	bbb.y=12.5;
+	ccc.x=8;
+	ccc.y=12.5;
+	ddd.x=8;
+	ddd.y=17;
+	points.push_back(aaa);
+	points.push_back(bbb);
+	points.push_back(ccc);
+	points.push_back(ddd);
+	printf("Received path:\n");
+	for (unsigned long i = 0; i < points.size(); i++)
+			printf("  point %lu: %lf %lf\n", i, points[i].x, points[i].y);
+
+	*/
+
+	printf("robotPos: position:%lf %lf %lf , angle: %lf \n",robotPos.x, robotPos.y, robotPos.z,a);
+	printf("startPose: leg: %s, position: %lf %lf %lf , angle: %lf\n",(LEFT==startPose.foot_index)?"Left":"Right"
+			,startPose.pose.position.x
+			, startPose.pose.position.y, startPose.pose.position.z,startPose.pose.ang_euler.z);
+	printf("otherFootPose: leg: %s, position: %lf %lf %lf , angle: %lf\n",(LEFT==otherFootPose.foot_index)?"Left":"Right"
+			,otherFootPose.pose.position.x
+			, otherFootPose.pose.position.y, otherFootPose.pose.position.z,otherFootPose.pose.ang_euler.z);
+
+	if(calcDistance(otherFootPose.pose.position.x
+			, otherFootPose.pose.position.y, robotPos.x,robotPos.y)>1)
+	{
+		printf("positions problem\n");
+		return ;
+	}
 	
 	for(int k=0; k<STEPS; k++)
 	{
-		//FIXME: If 1 is a constant, give it a name.  And document units of distance, and why the constant was chosen.
-		while(MIN_DIST_FROM_TARGET>calcDistance(startPose.pose.position.x,
-				startPose.pose.position.y,
-				points[curPoint].x,points[curPoint].y) && curPoint<points.size())
-		//FIXME: If we run out of points, and the last point is close to startPose, we will access points[] above range!
+		while(curPoint<points.size() &&
+				MIN_DIST_FROM_TARGET>calcDistance(startPose.pose.position.x, startPose.pose.position.y,
+				points[curPoint].x,points[curPoint].y)  )
+
 		{
 			curPoint++;
 		}
@@ -240,18 +276,14 @@ void FootPlacementService::calcFootMatrix(
 		}
 		else
 		{
-			printf("step %d point: %lf %lf\n",k,points[curPoint].x,points[curPoint].y);
+			//printf("step %d point: %lf %lf\n",k,points[curPoint].x,points[curPoint].y);
 		}
 		minCost = std::numeric_limits<double>::infinity();
 		for (int i=0; i<SIZE; i++)
 		{
 			for (int j=0; j<SIZE; j++)
 			{
-				if( !this->possible(i,j))
-				{
-					//FIXME: If this become true for all, for some reason, will generate same minCost point as previous step!
-					continue ;
-				}
+
 
 				C22_CompactGroundRecognitionAndMapping::C22_PLANE_TYPE plane=
 						avgMap[i][j];
@@ -263,33 +295,32 @@ void FootPlacementService::calcFootMatrix(
 				}
 
 
-				//geometry_msgs::Point squarePoint = calcPoint(i,j,plane,
-				//		robotPos,robotOri);
 
 
-				geometry_msgs::Point squarePoint = plane.repPoint;
-				squarePoint.x=plane.repPoint.y+robotPos.x;  // move to world change to transformation
-				squarePoint.y=plane.repPoint.x+robotPos.y;  // move to world change to transformation
+
+				geometry_msgs::Point squarePoint ;
 
 				squarePoint.x=robotPos.x+plane.repPoint.x*cosa+plane.repPoint.y*(-sina);
 				squarePoint.y=robotPos.y+plane.repPoint.x*(sina)+plane.repPoint.y*cosa;
+				squarePoint.z=robotPos.z+plane.repPoint.z;
 
 
 
 
-				//printf("%d %d %lf %lf %lf %lf %lf", i, j, squarePoint.x, squarePoint.y, squarePoint.z,
-				//		plane.repPoint.x, plane.repPoint.y);
 				
+
 				double slope=calcSlope(plane.x,plane.y,plane.z);
+				
+				if( fabs(20.0*0.05-j*0.05) < EXTREME_SLOPE_COR )
+					if(slope>EXTREME_SLOPE)
+						publishExtremeSlopeMsg();
+				
 				double direction=calcAngle(points[curPoint].x,
 						points[curPoint].y,
 						squarePoint.x,squarePoint.y);
 
-				double distance1=calcDistance(startPose.pose.position.x,
-						startPose.pose.position.y,
-						squarePoint.x,squarePoint.y);
 
-				double distance2=calcDistance(points[curPoint].x,
+				double distance=calcDistance(points[curPoint].x,
 						points[curPoint].y,
 						squarePoint.x,squarePoint.y);
 
@@ -299,14 +330,20 @@ void FootPlacementService::calcFootMatrix(
 								otherFootPose.pose.position.y,
 										squarePoint.x,squarePoint.y);
 
-				double cost=singleCellWeight(legDist,slope,distance2,height,direction,
+				double cost=singleCellWeight(legDist,slope,distance,height,direction,
 						slopeWeight,distanceWeight,heightWeight,directionWeight);
 
-				//printf("%d %d %lf %lf %lf %lf\n", i, j,legDist, distance1, distance2, cost);
+				/*
+				if( j>15 && j<21)
+				{
+					printf("%d %d %lf %lf %lf", i, j, squarePoint.x, squarePoint.y, squarePoint.z);
+					printf("%lf %lf %lf\n",height ,legDist, distance, cost);
+				}
+				*/
 
 				if(minCost>cost)
 				{
-					printf("Changing minCost point for step %d at point %d, %d\n", k,i,j);
+                    //printf("Changing minCost point for step %d at point %d, %d\n", k,i,j);
 					//printf("%d %d %lf %lf %lf %lf\n", i, j,legDist, distance1, distance2, cost);
 
 					minCost=cost;
@@ -317,42 +354,58 @@ void FootPlacementService::calcFootMatrix(
 			} //j
 		} //i
 
+
+		if(std::numeric_limits<double>::infinity() == minCost)
+		{
+			printf("all possible steps are too far/close/high\nwrong results:\n");
+			//printf("position: %lf %lf %lf \n", minCostPoint.x,minCostPoint.y,minCostPoint.z);
+			printResult(foot_placement_path);
+			foot_placement_path.erase(foot_placement_path.begin(),foot_placement_path.end());
+			break;
+		}
+
 		double stepDistance=calcDistance(startPose.pose.position.x,
 								startPose.pose.position.y,
 								minCostPoint.x,minCostPoint.y);
-		double targetDistance=calcDistance(points[curPoint].x,
+		double targetDistance=stepDistance+ calcDistance(points[curPoint].x,
 				points[curPoint].y,
 				minCostPoint.x,minCostPoint.y);
 
-		double angle=0;
-		if(points.size()>curPoint+1)
+		double angleChange=0,angle=startPose.pose.ang_euler.z;
+		if(targetDistance< START_TURN_DISTANCE)
 		{
-			//direction to new point
-			angle=atan2(points[curPoint].y-points[curPoint+1].y,
-				points[curPoint].x-points[curPoint+1].x);
-			//in relation to current direction
-			angle-=startPose.pose.ang_euler.z;
-			//normalize
-			if(angle> PI)
+			if(points.size()>curPoint+1)
 			{
-				angle-=PI;
-			}
-			else if(angle<-PI)
-			{
-				angle+=PI;
-			}
-			//move the proportional part of distance from the angle
-			angle*=stepDistance/targetDistance;
-			if(fabs(angle)>=MAX_ORIENTATION_CHANGE)
-			{
-				angle*= MAX_ORIENTATION_CHANGE /angle;
+				//direction to new point
+				angleChange=atan2(points[curPoint+1].y-points[curPoint].y,
+					points[curPoint+1].x-points[curPoint].x);
+
+				//in relation to current direction
+				angleChange-=startPose.pose.ang_euler.z;
+
+
+				//normalize
+				if(angle> PI)
+				{
+					angleChange-=2*PI;
+				}
+				else if(angle<-PI)
+				{
+					angleChange+=2*PI;
+				}
+
+				//printf("angle needed %lf, step %lf, target %lf, \n", angleChange,stepDistance,targetDistance );
+
+				//move the proportional part of distance from the angle
+				angleChange*=stepDistance/targetDistance;
+				if(fabs(angleChange)>=MAX_ORIENTATION_CHANGE)
+				{
+					angleChange=  MAX_ORIENTATION_CHANGE *fabs(angleChange)/angleChange ;
+				}
 			}
 		}
 
-
-		// FIXME:  This is wrong, because it never exchanges foot_index and possibly other information about the startpos. It only changes point in space.
-
-
+		angle+=angleChange;
 
 
 
@@ -361,7 +414,7 @@ void FootPlacementService::calcFootMatrix(
 		data.foot_index = startPose.foot_index; 
 		data.pose.position.x=minCostPoint.x;
 		data.pose.position.y=minCostPoint.y;
-		data.pose.position.z=minCostPoint.z+robotPos.z;
+		data.pose.position.z=minCostPoint.z;
 		data.pose.ang_euler.x = 0.0;
 		data.pose.ang_euler.y = 0.0;
 
@@ -370,36 +423,14 @@ void FootPlacementService::calcFootMatrix(
 		data.clearance_height = 0.0;
 		foot_placement_path.push_back(data);
 
-		/*
-		printf("data1 step %d point: %lf %lf %lf\n",k,data.pose.position.x,
-								data.pose.position.y,data.pose.position.z);
-		printf("start1 step %d point: %lf %lf %lf\n",k,startPose.pose.position.x,
-						startPose.pose.position.y,startPose.pose.position.z);
 
-		printf("other1 step %d point: %lf %lf %lf\n",k,otherFootPose.pose.position.x,
-						otherFootPose.pose.position.y,otherFootPose.pose.position.z);
-		*/
-		startPose.foot_index = otherFootPose.foot_index;
-		startPose.pose.position.x=otherFootPose.pose.position.x;
-		startPose.pose.position.y=otherFootPose.pose.position.y;
-		startPose.pose.position.z=otherFootPose.pose.position.z;
-		//startPose.pose.position.x=otherFootPose.pose.ang_euler.x;
-		//startPose.pose.position.y=otherFootPose.pose.ang_euler.y;
-		//startPose.pose.position.z=otherFootPose.pose.ang_euler.z;
-		//startPose.clearance_height = otherFootPose.clearance_height;
+		copyFoot(startPose,otherFootPose);
+		startPose.pose.ang_euler.z = otherFootPose.pose.ang_euler.z;
+		//startPose.foot_index = otherFootPose.foot_index;
 
-
-		otherFootPose.foot_index = data.foot_index;
-		otherFootPose.pose.position.x=data.pose.position.x;
-		otherFootPose.pose.position.y=data.pose.position.y;
-		otherFootPose.pose.position.z=data.pose.position.z;
-		//otherFootPose.pose.position.x=data.pose.ang_euler.x;
-		//otherFootPose.pose.position.y=data.pose.ang_euler.y;
-		//otherFootPose.pose.position.z=data.pose.ang_euler.z;
-		//otherFootPose.clearance_height = data.clearance_height;
-
-		//copyFoot(otherFootPose,data);
-
+		copyFoot(otherFootPose,data);
+		otherFootPose.pose.ang_euler.z=data.pose.ang_euler.z;
+		//otherFootPose.foot_index = data.foot_index;
 		/*
 		printf("data2 step %d point: %lf %lf %lf\n",k,data.pose.position.x,
 										data.pose.position.y,data.pose.position.z);
@@ -410,7 +441,14 @@ void FootPlacementService::calcFootMatrix(
 		printf("other2 step %d point: %lf %lf %lf\n",k,otherFootPose.pose.position.x,
 				otherFootPose.pose.position.y,otherFootPose.pose.position.z);
 		*/
+		//printf("cost: %lf\n",minCost);
+
+		//printf("ang: %lf  data %lf start  %lf other %lf \n",angle, data.pose.ang_euler.z,
+			//	startPose.pose.ang_euler.z ,otherFootPose.pose.ang_euler.z);
 	} //k (step counter)
+
+
+	printResult(foot_placement_path);
 
 } //function
 
@@ -423,14 +461,24 @@ void FootPlacementService::copyFoot(FootPlacement::Foot_Placement_data &a,
 	a.pose.position.x=b.pose.position.x;
 	a.pose.position.y=b.pose.position.y;
 	a.pose.position.z=b.pose.position.z;
-	a.pose.position.x=b.pose.ang_euler.x;
-	a.pose.position.y=b.pose.ang_euler.y;
+	//a.pose.position.x=b.pose.ang_euler.x;
+	//a.pose.position.y=b.pose.ang_euler.y;
 	a.pose.position.z=b.pose.ang_euler.z;
-	a.clearance_height = b.clearance_height;
+	//a.clearance_height = b.clearance_height;
 }
 
-
-
+void FootPlacementService::printResult(std::vector<FootPlacement::Foot_Placement_data>& foot_placement_path)
+{
+	for (unsigned long i = 0; i < foot_placement_path.size(); i++)
+	{
+		printf("step %lu: Leg: %s, position: %lf %lf %lf , angle: %lf\n", i,
+						(LEFT==foot_placement_path[i].foot_index)?"Left":"Right",
+						foot_placement_path[i].pose.position.x,
+						foot_placement_path[i].pose.position.y,
+						foot_placement_path[i].pose.position.z,
+						foot_placement_path[i].pose.ang_euler.z);
+	}
+}
 
 
 

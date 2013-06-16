@@ -16,4 +16,10 @@ class WalkingModeChooserInterface(object):
     
     def GetRecommendedMode(self):
         pass
+    
+    def GetCurrentModeName(self):
+        pass
+    
+    def GetCurrentModeEnum(self):
+        pass
         

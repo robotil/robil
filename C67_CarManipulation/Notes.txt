@@ -4,9 +4,17 @@ How to Check:
 ============
 run the node with the DRC simulation
 to put Atlas on Drc vehicle you can launch:
-roslaunch C67_CarManipulation C67_drc.lauch
+roslaunch C67_CarManipulation C67_drc.launch
+
 then to put Atlas in driver seat:
 rostopic pub --once /drc_world/robot_enter_car geometry_msgs/Pose '{position: {}}'
+or
+rostopic pub --once /drc_world/robot_enter_car geometry_msgs/Pose '{position: {y: 0, z: -0.1}}'
+
+you need to run C45 launcher and dependencies:
+rosrun C42_DRCSim2_tools foot_contact_filter.py
+roslaunch C45_PostureControl C45_PostureControl.launch
+
 ------------------------------------------------------------------------------
 
 to test one of the following action servers: GripSteeringWheel, CalibrateWheel, PlaceFeetOnPedals, CalibratePedals,
@@ -106,7 +114,11 @@ angle q9: 0.200000 Limits(-1.571000, 0.436000)
 q4-q9:0.019041, 0.109008, 1.856177, -1.485410, -1.571013, 0.200000
 RPY(0.528851 -0.547337 0.235189 -1.455533 0.777741 0.164615)
  
-
+----------------------------------------------------------------------------------------
+C67_Path server is a service to give Inverse Kinematics result
+to run service 
+rosrun C67_CarManipulation PathServer
+use answer only if valid == true
 ---------------------------------------------------------------------------------------
 *RPY parameters are x,y,z,R,P,Y: x,y,z - position, R,P,Y - orientation.
 The Orientation is pelvis to middle finger base (right_f1_base/left_f1_base)

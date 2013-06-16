@@ -8,9 +8,12 @@
 #include "C10_Common/path_update.h"
 #include "Vec2d.hpp"
 #include "C25_GlobalPosition/C25C0_ROP.h"
+#include "C23_ObjectRecognition/C23C0_ODIM.h"
+#include "C31_PathPlanner/C31_Waypoints.h"
 #include "ros/ros.h"
 #include "ros/package.h"
 #include "std_msgs/String.h"
+#include "atlas_msgs/VRCScore.h"
 #include "C11_PushServer.hpp"
 #include "C11_HMIResponseServer.hpp"
 #include "C11_UntilOperatorIntervention.hpp"
@@ -29,6 +32,9 @@ public:
   virtual void HMIResponse() = 0;
   virtual void ExecutionStatusChanged(int status) = 0;
   virtual void SendExecuterStack(QString) = 0;
+  virtual void SendVRCScoreData(double timeSec, int competionScore, int falls, QString message) = 0;
+  virtual void SendDownlink(QString) = 0;
+  virtual void SendUplink(QString) = 0;
 };
 
 class C11_Agent_Node : public QThread, public IPushHMIInterface, public IHMIResponseInterface
@@ -59,11 +65,21 @@ public:
 
   void ExecuterStackSubscriber(const std_msgs::StringConstPtr& stack);
 
+  void VRCScoreSubscriber(const atlas_msgs::VRCScore& vrcScore);
+
+  void DownlinkSubscriber(const std_msgs::StringConstPtr& down);
+
+  void UplinkSubscriber(const std_msgs::StringConstPtr& up);
+
+  void ObjectsSubscriber(const C23_ObjectRecognition::C23C0_ODIMConstPtr& obj);
+
   void SetReleased();
 
   void Pause();
 
   void Resume();
+
+  void Stop();
 
   void HMIResponded();
 
@@ -77,6 +93,12 @@ public:
 
   void PathRequest();
 
+  void AllRequest();
+
+  void NewGoalRequest(StructPoint goal);
+
+  void ResetRequest();
+
   virtual void PushImage(QImage img);
   virtual void PushGrid(StructGridData grid);
   virtual void PushPath(vector<StructPoint> path);
@@ -89,6 +111,8 @@ private:
 
   ros::NodeHandle *nh_;
   ros::Publisher path_update_pub;
+  ros::Publisher goal_update_pub;
+  ros::Publisher goal_reset_pub;
   ros::ServiceServer service_MissionSelection;
   ros::ServiceServer service_PauseMission;
   ros::ServiceServer service_ResumeSelection;
@@ -96,6 +120,10 @@ private:
   ros::Subscriber status_subscriber;
   ros::Subscriber robot_pos_subscriber;
   ros::Subscriber executer_stack_subscriber;
+  ros::Subscriber vrc_score_subscriber;
+  ros::Subscriber uplink_subscriber;
+  ros::Subscriber downlink_subscriber;
+  ros::Subscriber objects_subscriber;
   ros::ServiceClient c34StopClient;
   ros::ServiceClient c11ExecutionStatusChangeClient;
   ros::ServiceClient c34RunClient;
@@ -113,6 +141,15 @@ private:
   QStringList MissionsList;
   Vec2d position;
   size_t start_pos;
+
+  ////////////VCScore Data/////////////////
+  double SimTime;
+  int Comletion_score;
+  int Falls;
+  QString Message;
+  ////////////Up/Down Data/////////////////
+  QString Uplink;
+  QString Downlink;
 };
 
 #endif // C11_AGENT_NODE_H

@@ -42,18 +42,19 @@ class WalkingModeBDI(WalkingMode):
         # Initialize atlas mode and atlas_sim_interface_command publishers        
         self.asi_command = rospy.Publisher('/atlas/atlas_sim_interface_command', AtlasSimInterfaceCommand, None, False, True, None)
         self._Odometer = Odometer()
-        ##############################
-        #self._StrategyForward = BDI_StrategyForward(self._Odometer)
-        self._stepDataInit = BDI_Strategy(self._Odometer)
-        self._StepQueue = StepQueue()
-        self._SteppingStonesQueue = PathQueue()
-        self._SteppingStonesPath = []
-        self._setStep = True 
-        self._passedSteppingStones = False
-        ##############################
+        # ##############################
+        # #self._StrategyForward = BDI_StrategyForward(self._Odometer)
+        # self._stepDataInit = BDI_Strategy(self._Odometer)
+        # self._StepQueue = StepQueue()
+        # self._SteppingStonesQueue = PathQueue()
+        # self._SteppingStonesPath = []
+        # self._setStep = True 
+        # self._passedSteppingStones = False
+        # ##############################
         self._BDI_StateMachine = BDI_StateMachine(self._Odometer)
         #self._odom_position = Pose()
         self._bDone = False
+
         ############################
         #joint controller
         self._cur_jnt = [0]*28
@@ -66,6 +67,7 @@ class WalkingModeBDI(WalkingMode):
         self._JC = JointCommands_msg_handler(robot_name,jnt_names)
     def Initialize(self,parameters):
         WalkingMode.Initialize(self,parameters)
+        self._Preview_Distance = 0.0 # planned ahead distance in BDI command
         # Subscriber
         self._Subscribers["Path"] = rospy.Subscriber('/path',C31_Waypoints,self._path_cb)
         self._Subscribers["Odometry"] = rospy.Subscriber('/C25/publish',C25C0_ROP,self._odom_cb) #
@@ -154,41 +156,41 @@ class WalkingModeBDI(WalkingMode):
     # /atlas/atlas_sim_interface_state callback. Before publishing a walk command, we need
     # the current robot position   
     def asi_state_cb(self, state):
-        if self._LPP.GetDoingQual() and (16.2 < self._LPP.GetPos().GetX()) and (self._LPP.GetPos().GetX() < 19.7) and not self._passedSteppingStones:
-            if (True == self._setStep): # Initialize before stepping stones
-                self.step_index = state.walk_feedback.next_step_index_needed -1
-                step1,step2,step3,step4 = self.initSteppingStoneStepData(self.step_index, state)
-                self._StepQueue.Initialize(step1,step2,step3,step4)
-                self.GetSteppingStoneStepPlan(state)
-                print("asi_state_cb:: SteppingStonesQueue length: ",self._SteppingStonesQueue.Length() )
-                self._setStep = False
-            command = self.SteppingStoneCommand(state);
-            #print(command)
-        else:
-            if self._LPP.GetDoingQual() and (False == self._setStep): # Initialize after stepping stones
-                self._passedSteppingStones = True
-                self._Odometer.SetPosition(state.pos_est.position.x,state.pos_est.position.y)
-                print("asi_state_cb:: Initialize after stepping stones. Odometer X,Y: ",self._Odometer.GetGlobalPosition() )       
-                #self.Initialize()
-                print("asi_state_cb:: Initialize after stepping stones. step index: ",self.step_index )
-                WalkingMode.Initialize(self)
-                self._BDI_StateMachine.Initialize(self.step_index)
-                # self.step_index = state.behavior_feedback.walk_feedback.next_step_index_needed -1
-                # step1,step2,step3,step4 = self.initSteppingStoneStepData(self.step_index, state)
+        # if self._LPP.GetDoingQual() and (16.2 < self._LPP.GetPos().GetX()) and (self._LPP.GetPos().GetX() < 19.7) and not self._passedSteppingStones:
+        #     if (True == self._setStep): # Initialize before stepping stones
+        #         self.step_index = state.walk_feedback.next_step_index_needed -1
+        #         step1,step2,step3,step4 = self.initSteppingStoneStepData(self.step_index, state)
+        #         self._StepQueue.Initialize(step1,step2,step3,step4)
+        #         self.GetSteppingStoneStepPlan(state)
+        #         print("asi_state_cb:: SteppingStonesQueue length: ",self._SteppingStonesQueue.Length() )
+        #         self._setStep = False
+        #     command = self.SteppingStoneCommand(state);
+        #     #print(command)
+        # else:
+        #     if self._LPP.GetDoingQual() and (False == self._setStep): # Initialize after stepping stones
+        #         self._passedSteppingStones = True
+        #         self._Odometer.SetPosition(state.pos_est.position.x,state.pos_est.position.y)
+        #         print("asi_state_cb:: Initialize after stepping stones. Odometer X,Y: ",self._Odometer.GetGlobalPosition() )       
+        #         #self.Initialize()
+        #         print("asi_state_cb:: Initialize after stepping stones. step index: ",self.step_index )
+        #         WalkingMode.Initialize(self)
+        #         self._BDI_StateMachine.Initialize(self.step_index)
+        #         # self.step_index = state.behavior_feedback.walk_feedback.next_step_index_needed -1
+        #         # step1,step2,step3,step4 = self.initSteppingStoneStepData(self.step_index, state)
 
-            command = self.HandleStateMsg(state)
-            self._bDone = self._WalkingModeStateMachine.IsDone()
-            ######################
-            self._setStep = True
+        #     command = self.HandleStateMsg(state)
+        #     self._bDone = self._WalkingModeStateMachine.IsDone()
+        #     ######################
+        #     self._setStep = True
 
-        # command = self._StateMachine.HandleStateMsg(state)
-        # self._bDone = self._StateMachine.IsDone()
+        command = self._StateMachine.HandleStateMsg(state)
+        self._bDone = self._StateMachine.IsDone()
         if (0 !=command):
             self.asi_command.publish(command)
 
     def _odom_cb(self,odom):
         # SHOULD USE:
-        self._LPP.UpdatePosition(odom.pose.pose.pose.position.x,odom.pose.pose.pose.position.y) # from C25_GlobalPosition
+        self._LPP.UpdatePosition(odom.pose.pose.pose.position.x,odom.pose.pose.pose.position.y, self._Preview_Distance) # from C25_GlobalPosition
         #self._LPP.UpdatePosition(odom.pose.pose.position.x,odom.pose.pose.position.y) # from /ground_truth_odom
         #self._odom_position = odom.pose.pose
  
@@ -355,12 +357,20 @@ class WalkingModeBDI(WalkingMode):
             self._SteppingStonesQueue.Append([stepData])
 
     def HandleStateMsg(self,state):
+        step_queue_i = 3 # 0-3 
+        self._Preview_Distance = 0.3 + ( (state.pos_est.position.x-state.walk_feedback.step_queue_saturated[step_queue_i].pose.position.x)**2 + \
+                                   (state.pos_est.position.y-state.walk_feedback.step_queue_saturated[step_queue_i].pose.position.y)**2  )**0.5
+        if 2.0 <= self._Preview_Distance:
+            self._Preview_Distance = 2.0
         command = 0
         if ("Idle" == self._WalkingModeStateMachine.GetCurrentState().Name):
             pass
         elif ("Wait" == self._WalkingModeStateMachine.GetCurrentState().Name):
             self.step_index_for_reset = state.walk_feedback.next_step_index_needed - 1
             self._Odometer.SetPosition(state.pos_est.position.x,state.pos_est.position.y)
+            BDI_Static_orientation_q=state.foot_pos_est[0].orientation
+            BDI_euler = euler_from_quaternion([BDI_Static_orientation_q.x,BDI_Static_orientation_q.y,BDI_Static_orientation_q.z,BDI_Static_orientation_q.w])
+            self._Odometer.SetYaw(BDI_euler[2])
             self._BDI_StateMachine.Initialize(self.step_index_for_reset)
             self._BDI_StateMachine.GoForward()
             self._WalkingModeStateMachine.PerformTransition("Go")
@@ -375,11 +385,11 @@ class WalkingModeBDI(WalkingMode):
                 delatYaw = targetYaw - self._Odometer.GetYaw()
                   
                 debug_transition_cmd = "NoCommand"
-                if (math.sin(delatYaw) > 0.12):
+                if (math.sin(delatYaw) > 0.15):
                     #print("Sin(Delta)",math.sin(delatYaw), "Left")
                     debug_transition_cmd = "TurnLeft"
                     self._BDI_StateMachine.TurnLeft(targetYaw)
-                elif (math.sin(delatYaw) < -0.12):
+                elif (math.sin(delatYaw) < -0.15):
                     #print("Sin(Delta)",math.sin(delatYaw), "Right")
                     debug_transition_cmd = "TurnRight"
                     self._BDI_StateMachine.TurnRight(targetYaw)
@@ -392,7 +402,7 @@ class WalkingModeBDI(WalkingMode):
             command = self._BDI_StateMachine.Step(state.walk_feedback.next_step_index_needed)
             
             if (0 !=command):
-                rospy.loginfo("WalkingModeBDI, asi_state_cb: State Machine Transition Cmd = %s" % (debug_transition_cmd) )
+                rospy.loginfo("WalkingModeBDI, asi_state_cb: State Machine Transition Cmd = %s, Preview Distance=%f" % (debug_transition_cmd,self._Preview_Distance) )
         elif ("Done" == self._WalkingModeStateMachine.GetCurrentState().Name):
                 pass
         else:

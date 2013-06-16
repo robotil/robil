@@ -28,8 +28,8 @@ set(LIBRARY_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/lib)
 rosbuild_genmsg()
 #uncomment if you have defined services
 rosbuild_gensrv()
-set(qt_hdrs src/graphicsview.h src/imagedraw.h src/C11_Node.h src/mapmain.h src/mapwidget.h src/pixitem.h src/routeitem.h src/lineItemlist.h src/lineitem.h src/pointitem.h src/structs.h src/arcitem.h src/polygonitem.h src/traingleitem.h src/tcpConnection.h)
-set(qt_srcs src/graphicsview.cpp src/imagedraw.cpp src/main.cpp src/C11_Node.cpp src/mapmain.cpp src/mapwidget.cpp src/pixitem.cpp src/routeitem.cpp src/lineitemlist.cpp src/lineitem.cpp src/pointitem.cpp src/arcitem.cpp src/polygonitem.cpp src/traingleitem.cpp src/tcpConnection.cpp src/structs.cpp)
+set(qt_hdrs src/graphicsview.h src/imagedraw.h src/C11_Node.h src/mapmain.h src/mapwidget.h src/pixitem.h src/routeitem.h src/lineItemlist.h src/lineitem.h src/pointitem.h src/structs.h src/arcitem.h src/polygonitem.h src/traingleitem.h src/tcpConnection.h src/scaleitem.h)
+set(qt_srcs src/graphicsview.cpp src/imagedraw.cpp src/main.cpp src/C11_Node.cpp src/mapmain.cpp src/mapwidget.cpp src/pixitem.cpp src/routeitem.cpp src/lineitemlist.cpp src/lineitem.cpp src/pointitem.cpp src/arcitem.cpp src/polygonitem.cpp src/traingleitem.cpp src/tcpConnection.cpp src/structs.cpp src/scaleitem.cpp)
 
 qt4_automoc(${qt_srcs})
 QT4_WRAP_CPP(qt_moc_srcs ${qt_hdrs})

@@ -64,3 +64,32 @@ RPY TraceAngle(RPY center, RPY position, double angle)
 	ans.ToRPY(A);
 	return ans;
 }
+
+RPY TraceInverse(RPY A)
+{
+	Matrix MA = A.FromRPY();
+	// make -Rt*P
+	double Rx = -MA.T[0][0]*MA.T[0][3] + -MA.T[1][0]*MA.T[1][3] + -MA.T[2][0]*MA.T[2][3];
+	double Ry = -MA.T[0][1]*MA.T[0][3] + -MA.T[1][1]*MA.T[1][3] + -MA.T[2][1]*MA.T[2][3];
+	double Rz = -MA.T[0][2]*MA.T[0][3] + -MA.T[1][2]*MA.T[1][3] + -MA.T[2][2]*MA.T[2][3];
+
+	double R[4][4] = 	{{MA.T[0][0],MA.T[1][0],MA.T[2][0],Rx},
+						{MA.T[0][1],MA.T[1][1],MA.T[2][1],Ry},
+						{MA.T[0][2],MA.T[1][2],MA.T[2][2],Rz},
+						{0,0,0,1}};
+
+	Matrix MB = Matrix(R);
+	RPY B;
+	B.ToRPY(MB);
+	return B;
+}
+
+RPY TraceAB(RPY A, RPY B)
+{
+	Matrix MA = A.FromRPY();
+	Matrix MB = B.FromRPY();
+	MA.Multiply(MB);
+	RPY C;
+	C.ToRPY(MA);
+	return C;
+}

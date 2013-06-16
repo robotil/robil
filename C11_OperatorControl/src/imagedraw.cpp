@@ -3,6 +3,7 @@
 #include <QDateTime>
 #include <QGraphicsTextItem>
 #include <QFile>
+#include <QTime>
 //#include "cnode.h"
 //#include "figure.h"
 #include "imagedraw.h"
@@ -26,11 +27,14 @@ ImageDraw::ImageDraw(int argc, char** argv, QWidget *parent, Qt::WFlags flags)
 
 	connect(this,SIGNAL(SigOnNewImg(QImage)),this,SLOT(SltOnNewImg(QImage)),Qt::QueuedConnection);
 	connect(ui.btnPlayPause,SIGNAL(clicked(bool)),this,SLOT(SltOnPlayPauseClick(bool)));
+	connect(ui.btnStop,SIGNAL(clicked()),this,SLOT(SltOnStopClick()));
 	connect(ui.btnAllow,SIGNAL(clicked()),this,SLOT(SltOnAllowClick()));
+	connect(ui.btnRestore,SIGNAL(clicked()),this,SLOT(SltOnRestoreClick()));
 	connect(ui.btnCreate,SIGNAL(clicked(bool)),this,SLOT(SltOnCreateClick(bool)));
 	connect(ui.btnPath,SIGNAL(clicked(bool)),this,SLOT(SltOnPathClick(bool)));
 	connect(WaitTimer,SIGNAL(timeout()),this,SLOT(SltOnWaitTimeout()));
 	connect(ui.mapWidget,SIGNAL(SigOperatorAction()),this,SLOT(SltOperatorAction()));
+	connect(ui.mapWidget,SIGNAL(SigGoalUpdated()),this,SLOT(SltGoalUpdated()));
 	C11node.init();
 
 	QFile file("C11Config.txt");
@@ -54,12 +58,16 @@ ImageDraw::ImageDraw(int argc, char** argv, QWidget *parent, Qt::WFlags flags)
             QString line = in.readLine();
 //	    pCTcpConnection = new CTcpConnection(QString("172.23.1.130"),45671);
             pCTcpConnection = new CTcpConnection(line,45675);
+            pImageCTcpConnection = new  CTcpConnection(line,45676);
+            pDesignerCTcpConnection = new CTcpConnection(line,45677);
 
 
-            connect(pCTcpConnection,SIGNAL(SigOnImgReceived(QImage)),this,SLOT(SltOnNewImg(QImage)));
+            connect(pImageCTcpConnection,SIGNAL(SigOnImgReceived(QImage)),this,SLOT(SltOnNewImg(QImage)));
             connect(pCTcpConnection,SIGNAL(SigOnGridReceived(int[100][100],StructPoint,int,int,double)),this,SLOT(SltOnGridReceived(int[100][100],StructPoint,int,int,double)));
 
             pCTcpConnection->SetSubscriber(this);
+            pImageCTcpConnection->SetSubscriber(this);
+            pDesignerCTcpConnection->SetSubscriber(this);
 	  }
 
 	QFile missfile("Missions.txt");
@@ -96,6 +104,16 @@ ImageDraw::~ImageDraw()
     {
       delete pCTcpConnection;
       pCTcpConnection = NULL;
+    }
+  if(pImageCTcpConnection != NULL)
+    {
+      delete pImageCTcpConnection;
+      pImageCTcpConnection = NULL;
+    }
+  if(pDesignerCTcpConnection != NULL)
+    {
+      delete pDesignerCTcpConnection;
+      pDesignerCTcpConnection = NULL;
     }
 }
 
@@ -157,10 +175,10 @@ void ImageDraw::SltImageAreaOpened(int id)
 
 void ImageDraw::OnImgReceived(QImage image)
 {
-	std::cout << "Step2" << std::endl;
+//	std::cout << "Step2" << std::endl;
 	QImage myImage(image);
 	emit SigOnNewImg(myImage);
-	std::cout << "Step3" << std::endl;
+//	std::cout << "Step3" << std::endl;
 
 }
 
@@ -200,6 +218,29 @@ void ImageDraw::OnHMIResponseReceived()
 void ImageDraw::OnExecuterStackUpdate(QString strQString)
 {
 	C11node.SendExecuterUpdate(strQString);
+}
+
+void ImageDraw::OnVRCScoreData(double timeSec, int competionScore, int falls, QString message)
+{
+  int timeSecInt = timeSec;
+  int h = timeSecInt/360;
+  int m = timeSecInt/60;
+  int s = timeSecInt%60;
+  QTime simTime(h,m,s);
+  ui.lblSimTime->setText(simTime.toString());
+  ui.lblScoreData->setText(QString::number(competionScore));
+  ui.lblFallsData->setText(QString::number(falls));
+  update();
+}
+
+void ImageDraw::OnDownlinkUpdate(QString down)
+{
+  ui.lblDownlinkData->setText(down);
+}
+
+void ImageDraw::OnUplinkUpdate(QString up)
+{
+  ui.lblUplinkData->setText(up);
 }
 
 void ImageDraw::SltOnWaitTimeout()
@@ -254,10 +295,10 @@ void ImageDraw::SltOnNewImg(QImage image)
 	if(!IsUpdateCurrentImg)
 	{
 //		IsUpdateCurrentImg = true;
-		std::cout << "Step4" << std::endl;
+//		std::cout << "Step4" << std::endl;
 		CloseOpenedImages();
 
-		std::cout << "Step5" << std::endl;
+//		std::cout << "Step5" << std::endl;
 		QRectF rect(0,0,image.size().width(),image.size().height());
 		QGraphicsScene* pScene = new QGraphicsScene(rect,this);
 
@@ -266,10 +307,10 @@ void ImageDraw::SltOnNewImg(QImage image)
 		QString timeStr = dateTime.toString("hh:mm:ss");
 		QString DateTimeStr = dateStr + " " + timeStr;
 
-		std::cout << "Step6" << std::endl;
+//		std::cout << "Step6" << std::endl;
 		CGraphicsView* pCGraphicsView = new CGraphicsView(ImageAreaCount,image,DateTimeStr,this);
 		ImageAreaCount++;
-		std::cout << "Step7" << std::endl;
+//		std::cout << "Step7" << std::endl;
 
 		pCGraphicsView->setScene(pScene);
 		pCGraphicsView->setSceneRect(rect);
@@ -288,7 +329,7 @@ void ImageDraw::SltOnNewImg(QImage image)
 		}
 
 		connect(pCGraphicsView,SIGNAL(SigOpened(int)),this,SLOT(SltImageAreaOpened(int)));
-		std::cout << "Step8" << std::endl;
+//		std::cout << "Step8" << std::endl;
 	}
 	else
 	{
@@ -377,6 +418,11 @@ void ImageDraw::SltOnPlayPauseClick(bool checked)
         }
 }
 
+void ImageDraw::SltOnStopClick()
+{
+  pCTcpConnection->Stop();
+}
+
 void ImageDraw::SltOnCreateClick(bool checked)
 {
 	if(checked)
@@ -421,11 +467,18 @@ void ImageDraw::SltOnAllowClick()
     case 3:
       pCTcpConnection->SendPathRequest();
       break;
+    case 4:
+      pCTcpConnection->SendAllRequest();
+      break;
     default:
       break;
   }
 }
 
+void ImageDraw::SltOnRestoreClick()
+{
+
+}
 
 void ImageDraw::SltOperatorAction()
 {
@@ -433,4 +486,9 @@ void ImageDraw::SltOperatorAction()
           {
             WaitTimer->stop();
           }
+}
+
+void ImageDraw::SltGoalUpdated()
+{
+  pCTcpConnection->SendNewGoal(ui.mapWidget->GetGoal());
 }

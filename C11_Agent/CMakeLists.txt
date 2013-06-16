@@ -13,9 +13,9 @@ rosbuild_init()
 
 find_package(Qt4 REQUIRED)
 # enable/disable some Qt features
-set( QT_USE_QTGUI TRUE )
-set( QT_USE_QTOPENGL TRUE )
-set( QT_USE_QTXML TRUE )
+set( QT_USE_QTGUI FALSE )
+set( QT_USE_QTOPENGL FALSE )
+set( QT_USE_QTXML FALSE )
 set( QT_USE_QTNETWORK TRUE )
 include(${QT_USE_FILE})
 

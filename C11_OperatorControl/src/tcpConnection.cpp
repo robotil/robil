@@ -13,6 +13,7 @@ CTcpConnection::CTcpConnection(QString ipAddress,int port)
   IsSendingPath = false;
   WaitingForResponse = false;
   IsSendingExecuterStatus = false;
+  ResetImgReceive = false;
   pITcpConnectionInterface = NULL;
   ImgSize = 0;
   Counter = 0;
@@ -66,6 +67,14 @@ void CTcpConnection::SltReadyRead()
             {
               std::cout<<"TCP: Size not big enough!\n";
               std::cout<<"TCP: expected = " << ImgSize << " received = " << bufSize << "\n";
+              if(ResetImgReceive)
+                {
+                  ResetImgReceive = false;
+                  ImgSize = 0;
+                  QByteArray bfr;
+                  IsSendingImage = false;
+                  bfr = pConnection->read(bufSize);
+                }
               return;
             }
           else
@@ -114,6 +123,24 @@ void CTcpConnection::SltReadyRead()
                       in>>(int &)(grid.Grid[i][j]);
                   }
                 }
+//                for(int i=99; i>=0; i--)
+//                  {
+//                          for(int j=0; j<100; j++)
+//                          {
+//                              switch ( grid.Grid[i][j] ){
+//                              case 0:
+//                                  std::cout<<'.'; break;
+//                              case 1:
+//                                  std::cout<<'*'; break;
+//                              case 2:
+//                                  std::cout<<'.'; break;
+//                              default:
+//                                  std::cout<<'?'; break;
+//                              }
+//                          }
+//                          std::cout<<std::endl;
+//                  }
+
                 std::cout<<"TCP: Grid receive completed!\n";
                 std::cout<<"Robot pos: "<<grid.RobotPos.x<<","<<grid.RobotPos.y<<"\n";
                 std::cout<<"Robot orientation: "<<grid.RobolOrientation<<"\n";
@@ -188,18 +215,7 @@ void CTcpConnection::SltReadyRead()
                 return;
         }
         in >> msgId;
-        if(msgId == 45)
-          {
-        	char* s = new char(pConnection->bytesAvailable());
-        	pConnection->read(s,pConnection->bytesAvailable());
-        	std::cout<<"The Hello msg is: " << s << std::endl;
-            std::cout<<"TCP: Hello Received!\n";
-            return;
-          }
-        else
-          {
-   //         std::cout<<"TCP: msg id: " << msgId << "\n";
-          }
+
         bufSize = pConnection->bytesAvailable();
         if (pConnection->bytesAvailable() < (int)sizeof(unsigned int))
         {
@@ -218,6 +234,7 @@ void CTcpConnection::SltReadyRead()
             IsSendingImage = true;
             ImgSize = dataSize;
             std::cout<<"TCP: image coming!\n";
+ //           pTimer->start(5000);
           }
         else if(2 == msgId)
           {
@@ -245,6 +262,30 @@ void CTcpConnection::SltReadyRead()
             in >> status;
             pITcpConnectionInterface->OnExecutionStatusUpdate(status);
           }
+        else if(6 == msgId)
+          {
+            double timeSec;
+            int completionScore;
+            int falls;
+            QString message;
+            in >> timeSec;
+            in >> completionScore;
+            in >> falls;
+            in >> message;
+            pITcpConnectionInterface->OnVRCScoreData(timeSec,completionScore,falls,message);
+          }
+        else if(7 == msgId)
+        {
+          QString down;
+          in >> down;
+          pITcpConnectionInterface->OnDownlinkUpdate(down);
+        }
+        else if(8 == msgId)
+        {
+          QString up;
+          in >> up;
+          pITcpConnectionInterface->OnUplinkUpdate(up);
+        }
         else if(31 == msgId)
 		  {
  //       	IsSendingExecuterStatus = true;
@@ -282,6 +323,9 @@ void CTcpConnection::SltOnTimer()
 {
 //  std::cout<<"TCP: Bytes avaliable: "<< pConnection->bytesAvailable() <<"\n";
 //  std::cout<<"TCP: The socket is: "<< pConnection->state() <<"\n";
+  std::cout<<"TCP: Image receive timeout"<<std::endl;
+  ResetImgReceive = true;
+  pTimer->stop();
 }
 
 void CTcpConnection::LoadMission(int index)
@@ -362,6 +406,25 @@ void CTcpConnection::Resume()
       pConnection->waitForBytesWritten();
       std::cout<<"TCP: Resume sent\n";
     }
+}
+
+void CTcpConnection::Stop()
+{
+  StructHeader header;
+  header.MessageID = 20;
+  header.DataSize = 0;
+  header.Counter = Counter;
+  Counter++;
+  QByteArray block;
+  QDataStream out(&block, QIODevice::WriteOnly);
+  out.setByteOrder(QDataStream::LittleEndian);
+  out << header.MessageID;
+  out << header.DataSize;
+  out << header.Counter;
+  pConnection->write(block);
+  pConnection->flush();
+  pConnection->waitForBytesWritten();
+  std::cout<<"TCP: Stop sent\n";
 }
 
 void CTcpConnection::SendPathUpdate(std::vector<StructPoint> points)
@@ -448,4 +511,66 @@ void CTcpConnection::SendPathRequest()
   pConnection->flush();
   pConnection->waitForBytesWritten();
   std::cout<<"TCP: SendPathRequest sent\n";
+}
+
+void CTcpConnection::SendAllRequest()
+{
+  WaitingForResponse = false;
+  StructHeader header;
+  header.MessageID = 19;
+  header.DataSize = 0;
+  header.Counter = Counter;
+  Counter++;
+  QByteArray block;
+  QDataStream out(&block, QIODevice::WriteOnly);
+  out.setByteOrder(QDataStream::LittleEndian);
+  out << header.MessageID;
+  out << header.DataSize;
+  out << header.Counter;
+  pConnection->write(block);
+  pConnection->flush();
+  pConnection->waitForBytesWritten();
+  std::cout<<"TCP: SendAllRequest sent\n";
+}
+
+void CTcpConnection::SendNewGoal(StructPoint goal)
+{
+  WaitingForResponse = false;
+  StructHeader header;
+  header.MessageID = 21;
+  header.DataSize = 0;
+  header.Counter = Counter;
+  Counter++;
+  QByteArray block;
+  QDataStream out(&block, QIODevice::WriteOnly);
+  out.setByteOrder(QDataStream::LittleEndian);
+  out << header.MessageID;
+  out << header.DataSize;
+  out << header.Counter;
+  out << goal.x;
+  out << goal.y;
+  pConnection->write(block);
+  pConnection->flush();
+  pConnection->waitForBytesWritten();
+  std::cout<<"TCP: SendNewGoal sent\n";
+}
+
+void CTcpConnection::SendReset()
+{
+  WaitingForResponse = false;
+  StructHeader header;
+  header.MessageID = 22;
+  header.DataSize = 0;
+  header.Counter = Counter;
+  Counter++;
+  QByteArray block;
+  QDataStream out(&block, QIODevice::WriteOnly);
+  out.setByteOrder(QDataStream::LittleEndian);
+  out << header.MessageID;
+  out << header.DataSize;
+  out << header.Counter;
+  pConnection->write(block);
+  pConnection->flush();
+  pConnection->waitForBytesWritten();
+  std::cout<<"TCP: SendReset sent\n";
 }

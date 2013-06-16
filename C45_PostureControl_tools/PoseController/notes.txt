@@ -13,6 +13,8 @@ Usage:
 ------
 This module creates the following services:
 /PoseController/hand_movement
+/PoseController/right_hand_movement
+/PoseController/left_hand_movement
 /PoseController/delta_hand_movement
 /PoseController/foot_movement
 /PoseController/delta_foot_movement
@@ -32,5 +34,8 @@ You need to call /PoseController/start (with message of type std_srvs/Empty) to 
 
 /PoseController/*_movement services set the values of the joints with the inputs.
 /PoseController/delta_*_movement services add the inputs as deltas to the joints' values.
+/PoseController/right_hand_movement and /PoseController/left_hand_movement are services for moving only one arm. Inputs to the other arm (e.g. right arm joint on left arm service) are ignored).
 
 This module automatically detects the BDI controller desired behavior (e.g. "Manipulate", "User") and sends the correct k_effort values accordingly.
+
+Update: /PoseController/back_lbz_neck_ay service was added for back_lbz and neck_ay manipulation.

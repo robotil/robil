@@ -28,6 +28,8 @@ using namespace C0_RobilTask;
 #include <C67_CarManipulation/IK.h>
 #include <C67_CarManipulation/Path.h>
 #include <C67_CarManipulation/Trace.h>
+#include <PoseController/hand_movement.h>
+#include <std_srvs/Empty.h>
 // end added
 
 //variables added
@@ -36,7 +38,14 @@ static atlas_msgs::AtlasCommand ac;
 static atlas_msgs::AtlasState as;
 static ros::ServiceClient rsandia_client;
 static ros::ServiceClient lsandia_client;
+static ros::ServiceClient joint_client;
+static ros::ServiceClient joint_start_client;
+static ros::ServiceClient joint_stop_client;
+
 static sandia_hand_msgs::SimpleGraspSrv sandia_srv;
+static PoseController::hand_movement joint_srv;
+static std_srvs::Empty joint_start_srv;
+static std_srvs::Empty joint_stop_srv;
 static boost::mutex mutex;
 static ros::Time t0;
 static const unsigned int numJoints = 28;
@@ -45,6 +54,7 @@ static RPY argTarget;
 static double startAngle, endAngle;
 static double lastAngle = 0;
 static bool callBackRun = false;
+static bool printOn;
 //end added
 
 ostream& operator<<(ostream& o, std::vector<string>& s){
@@ -58,7 +68,7 @@ ostream& operator<<(ostream& o, std::vector<string>& s){
 class GripSteeringWheelServer: public RobilTask {
 protected:
 	enum Consts { Time = 7 };
-	enum Errors { NoParams = 1, NoSolution = 2 , SandiaCallFail = 3};
+	enum Errors { NoParams = 1, NoSolution = 2 , SandiaCallFail = 3, JointCallFail = 4};
 	std::vector<string> params;
 	int operation;
 	int time;
@@ -118,8 +128,11 @@ public:
 		return a;
 	}
 
-	void Move(IkSolution origin, IkSolution goal, double sec, int pointsNum, bool rightSide, int option = StartEnd)
+	void Move(IkSolution origin, IkSolution goal, bool rightSide, double sec,  int option = StartEnd)
 	{
+		//double sec = MaxDisp(origin,goal)*0.25;
+		//sec = sec > 0.05? sec: 0.05;
+		int pointsNum = floor(sec*100);
 		pPathPoints points = pPathPoints(origin, goal, pointsNum, option);
 
 		for (int i=0; i<pointsNum; i++)
@@ -128,44 +141,63 @@ public:
 
 			if (rightSide)
 			{
-				ac.position[q4r] = points.pArray[i]._q4;
-				ac.position[q5r] = points.pArray[i]._q5;
-				ac.position[q6r] = points.pArray[i]._q6;
-				ac.position[q7r] = points.pArray[i]._q7;
-				ac.position[q8r] = points.pArray[i]._q8;
-				ac.position[q9r] = points.pArray[i]._q9;
+				joint_srv.request.l_arm_usy = ac.position[q4l];
+				joint_srv.request.l_arm_shx = ac.position[q5l];
+				joint_srv.request.l_arm_ely = ac.position[q6l];
+				joint_srv.request.l_arm_elx = ac.position[q7l];
+				joint_srv.request.l_arm_uwy = ac.position[q8l];
+				joint_srv.request.l_arm_mwx = ac.position[q9l];
+				joint_srv.request.r_arm_usy = points.pArray[i]._q4;
+				joint_srv.request.r_arm_shx = points.pArray[i]._q5;
+				joint_srv.request.r_arm_ely = points.pArray[i]._q6;
+				joint_srv.request.r_arm_elx = points.pArray[i]._q7;
+				joint_srv.request.r_arm_uwy = points.pArray[i]._q8;
+				joint_srv.request.r_arm_mwx = points.pArray[i]._q9;
 			}
 			else
 			{
-				ac.position[q4l] = points.pArray[i]._q4;
-				ac.position[q5l] = points.pArray[i]._q5;
-				ac.position[q6l] = points.pArray[i]._q6;
-				ac.position[q7l] = points.pArray[i]._q7;
-				ac.position[q8l] = points.pArray[i]._q8;
-				ac.position[q9l] = points.pArray[i]._q9;
+				joint_srv.request.r_arm_usy = ac.position[q4r];
+				joint_srv.request.r_arm_shx = ac.position[q5r];
+				joint_srv.request.r_arm_ely = ac.position[q6r];
+				joint_srv.request.r_arm_elx = ac.position[q7r];
+				joint_srv.request.r_arm_uwy = ac.position[q8r];
+				joint_srv.request.r_arm_mwx = ac.position[q9r];
+				joint_srv.request.l_arm_usy = points.pArray[i]._q4;
+				joint_srv.request.l_arm_shx = points.pArray[i]._q5;
+				joint_srv.request.l_arm_ely = points.pArray[i]._q6;
+				joint_srv.request.l_arm_elx = points.pArray[i]._q7;
+				joint_srv.request.l_arm_uwy = points.pArray[i]._q8;
+				joint_srv.request.l_arm_mwx = points.pArray[i]._q9;
+			}
+//			if ((sec > 2)&&(sec < 3.1))
+//			{
+//				points.pArray[i].Print();
+//				ROS_INFO("q4-q9:%f,%f,%f,%f,%f,%f",as.position[q4l], as.position[q5l], as.position[q6l], as.position[q7l],
+//						as.position[q8l], as.position[q9l]);
+//			}
+
+			if (!joint_client.call(joint_srv))
+			{
+				ROS_INFO("%s: Joint Service Call Failed!", _name.c_str());
+				retValue  = JointCallFail;
+				//return TaskResult(retValue, "ERROR");
 			}
 
-			//ROS_INFO("");
-			//std::cout << i <<": ";
-			//points.Array[i].Print();
-
-			pubAtlasCommand.publish(ac);
+			//pubAtlasCommand.publish(ac);
 
 			ros::Duration(sec/pointsNum).sleep();
-
 		}
 	}
 
-	void rMove(IkSolution origin, IkSolution goal, double sec, int pointsNum)
+	void rMove(IkSolution origin, IkSolution goal)
 	{
-		Move(origin, goal, sec, pointsNum, true);
+		Move(origin, goal, true, 0.1);
 	}
 
-	void lMove(IkSolution origin, IkSolution goal, double sec, int pointsNum, int option = StartEnd)
+	void lMove(IkSolution origin, IkSolution goal,double sec, int option = StartEnd)
 	{
-		Move(origin, goal, sec, pointsNum, false, option);
+		Move(origin, goal, false, sec, option);
 	}
-
 
     
     TaskResult task(const string& name, const string& uid, Arguments& args) {
@@ -218,6 +250,10 @@ public:
 		if( exists(args,"Y") ){
 			argTarget.Y = cast<double>(args["Y"]);
 		}
+		printOn = false;
+		if( exists(args,"Print") ){
+			printOn = (cast<int>(args["Print"]) > 0);
+		}
 
 		if (((!exists(args,"EndAngle"))||(!exists(args,"StartAngle")))&&
 			(!exists(args,"angle")))
@@ -260,18 +296,31 @@ public:
 				IkSolution IkCurrent = IkSolution(as.position[q4l], as.position[q5l], as.position[q6l], as.position[q7l],
 									as.position[q8l], as.position[q9l]);
 
-				int n = 10;
+				int n;
+				RPY pose;
+				n = abs(floor((endAngle-startAngle)/0.1)) + 1;
+				ROS_INFO("here1:%d",n);
 				IkSolution IkNext[n+1];
 				RPY argTarget2;
 				// this array is used to hold the angle position referenced to the array index.
 				double angleArray[n+1];
+
 
 				double delta = (endAngle-startAngle)/n;
 				double angle = startAngle;
 				for (int i = 0;i < n+1; i++)
 				{
 					argTarget2 = TraceAngle(argTarget, RPY(-.05,.18,0,M_PI/2-M_PI/6, 0,0), angle);
-					IkNext[i] = lScanRPY(as.position[q1], as.position[q2], as.position[q3], argTarget2,0.01);
+					//argTarget2 = TraceAngle(argTarget, RPY(-.0,.15,0,M_PI/2, 0,0), angle);
+					if (i>0)
+						IkNext[i] = ScanRPY2(as.position[q1], as.position[q2], as.position[q3], argTarget2,0.01,IkNext[i-1]);
+					else
+						IkNext[i] = lScanRPY(as.position[q1], as.position[q2], as.position[q3], argTarget2,0.01);
+					if (printOn)
+					{
+						cout<<"argTarget2["<<i<<"]:\n";
+						argTarget2.Print();
+					}
 					// save the angle position
 					angleArray[i] = angle;
 					if (!IkNext[i].valid){
@@ -284,21 +333,46 @@ public:
 
 
 
+				lMove(IkCurrent, IkNext[0],0.1, NoEnd);
+				if (printOn)
+				{
+					pose = lPose(as.position[q1], as.position[q2], as.position[q3],IkCurrent);
+					cout<<"IkCurrent:\n";
+					IkCurrent.Print();
+					pose.Print();
+					cout<<"IkNext[0]: displacement: "<<MaxDisp(IkCurrent,IkNext[0])<<"\n";
+					IkNext[0].Print();
+					pose = lPose(as.position[q1], as.position[q2], as.position[q3],IkNext[0]);
+					pose.Print();
+				}
 
-				lMove(IkCurrent, IkNext[0], 1, 50, NoEnd);
+
 				// update lastAngle
 				lastAngle = angleArray[0];
 				for (int i = 0; i< n-1; i++)
 				{
-					lMove(IkNext[i], IkNext[i+1], 3.0/n, 50, NoStartEnd);
+					lMove(IkNext[i], IkNext[i+1],0.1 ,NoStartEnd);
+					if (printOn)
+					{
+						cout<<"IkNext["<<i+1<<"]: displacement: "<<MaxDisp(IkNext[i],IkNext[i+1])<<"\n";
+						IkNext[i+1].Print();
+						pose = lPose(as.position[q1], as.position[q2], as.position[q3],IkNext[i+1]);
+						pose.Print();
+					}
 					// update lastAngle
 					lastAngle = angleArray[i+1];
 				}
-				lMove(IkNext[n-1], IkNext[n], 3.0/n, 50, NoStart);
+				lMove(IkNext[n-1], IkNext[n], 0.1, NoStart);
+				if (printOn)
+				{
+					cout<<"IkNext["<<n<<"]: displacement: "<<MaxDisp(IkNext[n-1],IkNext[n])<<"\n";
+					IkNext[n].Print();
+					pose = lPose(as.position[q1], as.position[q2], as.position[q3],IkNext[n]);
+					pose.Print();
+				}
 				// update lastAngle
 				lastAngle = angleArray[n];
-
-				time -= 5200 ;
+				time -= 100*(n+2) ;
 
 				ROS_INFO("%s: Finish movement", _name.c_str());
 				break;
@@ -329,6 +403,11 @@ public:
 void SetAtlasState(const atlas_msgs::AtlasState::ConstPtr &_as)
 {
 
+//	// lock to copy incoming AtlasState
+//	{
+//		boost::mutex::scoped_lock lock(mutex);
+//		as = *_as;
+//	}
 
 	if (callBackRun == false)
 	{
@@ -456,6 +535,14 @@ int main(int argc, char **argv)
 	rsandia_client = rosnode->serviceClient<sandia_hand_msgs::SimpleGraspSrv>("/sandia_hands/r_hand/simple_grasp");
 	lsandia_client = rosnode->serviceClient<sandia_hand_msgs::SimpleGraspSrv>("/sandia_hands/l_hand/simple_grasp");
 
+	joint_start_client = rosnode->serviceClient<std_srvs::Empty>("/PoseController/start");
+	joint_client = rosnode->serviceClient<PoseController::hand_movement>("/PoseController/hand_movement");
+	joint_start_client.call(joint_start_srv);
+	if (!joint_start_client.call(joint_start_srv))
+	{
+		ROS_INFO("Fail calling Joint Server");
+		return 1;
+	}
 
 	ROS_INFO("create task");
 	

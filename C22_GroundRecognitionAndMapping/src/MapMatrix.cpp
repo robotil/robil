@@ -84,7 +84,7 @@ double MapMatrix::calcSlopeZ(float a,float b,float c){
 void MapMatrix::clearMatrix(){
 	for(unsigned int i=0;i<data->size();i++){
 		for(unsigned int j=0;j<data->at(i)->size();j++){
-			data->at(i)->at(j)->clearSq();
+			data->at(i)->at(j)->ratable=true;
 		}
 	}
 }
@@ -106,29 +106,30 @@ void MapMatrix::updateMapRelationToRobot(float movmentX,float movmentY,float yaw
 	if(xOffset> movmentX-BOUNDOFUPDATE)
 		newOffsetX= movmentX-BOUNDOFUPDATE;
 	if(xOffset+NUMOFSQUARES*SIZEOFSQUARE< movmentX+BOUNDOFUPDATE)
-		newOffsetX=movmentX+BOUNDOFUPDATE;
+		newOffsetX=movmentX+BOUNDOFUPDATE-NUMOFSQUARES*SIZEOFSQUARE;
 	if(yOffset> movmentY-BOUNDOFUPDATE)
 		newOffsetY= movmentY-BOUNDOFUPDATE;
 	if(yOffset+NUMOFSQUARES*SIZEOFSQUARE< movmentY+BOUNDOFUPDATE)
-		newOffsetY=movmentY+BOUNDOFUPDATE;
-	yOffset=newOffsetY;
-	xOffset=newOffsetX;
+		newOffsetY=movmentY+BOUNDOFUPDATE-NUMOFSQUARES*SIZEOFSQUARE;
+
 
 	//move the map to the right directions
-	//std::cout<<"x:"<<x<<" y:"<<y<<std::endl;
-	//std::cout<<"x offset"<<newOffsetX<<" y offset"<<newOffsetY<<std::endl;
+	std::cout<<"x:"<<movmentX<<" y:"<<movmentY<<std::endl;
+	std::cout<<"offx:"<<xOffset<<" offy:"<<yOffset<<std::endl;
+	std::cout<<"x offset"<<newOffsetX<<" y offset"<<newOffsetY<<std::endl;
 	/*if(std::abs(newOffsetY-yOffset)>=NUMOFSQUARES*SIZEOFSQUARE || std::abs(newOffsetX-xOffset)>=NUMOFSQUARES*SIZEOFSQUARE){
 		clearMatrix();
 		return;
 	}
+	*/
 	moveMapHarisontaly(((int)newOffsetY-yOffset)*(1/SIZEOFSQUARE));
 	moveMapVerticaly(((int)newOffsetX-xOffset)*(1/SIZEOFSQUARE));
 	yOffset=newOffsetY;
 	xOffset=newOffsetX;
-	*/
 }
 
 void MapMatrix::moveMapHarisontaly(int times){
+	cout<<"called move map hrisontaly "<<times<<endl;
 	if(times<0){
 		for (int i=0;i<std::abs(times);i++){
 			data->pop_back();
@@ -151,6 +152,7 @@ void MapMatrix::moveMapHarisontaly(int times){
 }
 
 void MapMatrix::moveMapVerticaly(int times){
+	cout<<"called move map verticaly "<<times<<endl;
 	if(times<0){
 		for (int i=0;i<std::abs(times);i++){
 			for (int j=0;j<NUMOFSQUARES;j++){
@@ -190,19 +192,23 @@ void MapMatrix::computeMMatrix(std::vector<pclPlane*>* mapPlanes,pcl::PointCloud
 					xIndex = (p.x -xOffset)*(1/SIZEOFSQUARE);	//added for now instead of previous three lines
 					yIndex = (p.y-yOffset) *(1/SIZEOFSQUARE);	//same as above
 					MapSquare* ms=data->at(xIndex)->at(yIndex);
+					if(ms->ratable){
+						ms->clearSq();
+						ms->ratable=false;
+					}
 					ms->addRating();
 					if(!ms->hasPlane(tempPlane)){
 						MPlane* newPlane=new MPlane(pcl::PointXYZ(p.x,p.y,p.z),coff);
 						newPlane->addRating();
 						newPlane->rating=20;
 						ms->square_Planes->push_back(newPlane);
-						if (p.z>(0.5+pelvisHeight-PELVIS_HEIGHT) || p.z<(-0.4+pelvisHeight-PELVIS_HEIGHT)){
+						if (p.z>(0.5) || p.z<(-0.4)){
 							//std::cout<<"pelvis height:"<<pelvisHeight<<" point z:"<<p.z<<"\n";
 							ms->square_status = BLOCKED;
 						}
 						else{
 							if(ms->square_status!=BLOCKED){
-								if(p.z>(0.15+pelvisHeight-PELVIS_HEIGHT) || p.z<(-0.15+pelvisHeight-PELVIS_HEIGHT)){
+								if(p.z>(0.15) || p.z<(-0.15)){
 									ms->square_status = DEBREE;
 									//cout<<p.z<<"\n";
 								}
@@ -222,11 +228,11 @@ void MapMatrix::computeMMatrix(std::vector<pclPlane*>* mapPlanes,pcl::PointCloud
 				}
 			}
 		}
-		for(unsigned int i=0; i< data->size();i++){
+		/*for(unsigned int i=0; i< data->size();i++){
 			for(unsigned int j=0; j< data->at(i)->size();j++){
 				 data->at(i)->at(j)->setRatable();
 			}
-		}
+		}*/
 
 
 }

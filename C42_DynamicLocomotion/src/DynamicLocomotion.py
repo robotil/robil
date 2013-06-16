@@ -9,6 +9,8 @@ from LocalPathPlanner import *
 import actionlib
 from std_msgs.msg import Int32
 
+from C42_State.msg import *
+
 ###################################################################################
 # File created by David Dovrat, 2013.
 # For Robil, under project Robil's license of choice
@@ -20,7 +22,7 @@ class DynamicLocomotion(RobilTask):
     def __init__(self,name,walkingModeChooser):
         RobilTask.__init__(self, name)
         self._Walker = Walker(walkingModeChooser)
-        self._interval = rospy.Rate(2)
+        self._interval = rospy.Rate(0.6)
     
     def _init_values(self):
         self._debug_cmd = 1 # default value, has no effect
@@ -35,9 +37,13 @@ class DynamicLocomotion(RobilTask):
         ## TOPIC setup:
         self._debug_cmd_sub = rospy.Subscriber('walker_command',Int32,self._debug_command)
 
+        self._publisher_motion_type = rospy.Publisher("/motion_state/motion_type", MotionType)
+        self._publisher_standing_position = rospy.Publisher("/motion_state/standing_position", StandingPosition)
+
         self._Walker.Initialize(parameters)
 
         if (True != self.WaitForPath()):
+            self.Unsubscribe()
             return RTResult_PREEPTED()
 
         self._Walker.Start()
@@ -48,13 +54,15 @@ class DynamicLocomotion(RobilTask):
         while not self._Walker.IsDone():
             if self.isPreepted() or (3 == self._debug_cmd):
                 self._Walker.Stop()
+                self.Unsubscribe()
                 return RTResult_PREEPTED()
+            self.PublishMotionState(parameters)
             self._interval.sleep()
 
         self._Walker.Stop()
-        
-        self._debug_cmd_sub.unregister
-        
+                
+        self.Unsubscribe()
+
         if(WalkerResultEnum.Success == self._Walker.GetResult()):
             print("SUCCESS!!")
             return RTResult_SUCCESSED("Finished in Success")
@@ -71,6 +79,49 @@ class DynamicLocomotion(RobilTask):
                 return RTResult_PREEPTED()
             self._interval.sleep()
         return True
+
+    def Unsubscribe(self):
+        self._debug_cmd_sub.unregister()
+
+    def PublishMotionState(self,parameters):
+        eWalkingMode = self._Walker.GetWalkingModeEnum()
+        bPublish = True
+        standingPosition = StandingPosition.state_standing
+
+        if (WalkingModeChooserEnum.CD == eWalkingMode):
+            motionType = MotionType.motion_continuous_walk
+        elif (WalkingModeChooserEnum.QS == eWalkingMode):
+            motionType = MotionType.motion_discrete_walk_quasi_static
+        elif (WalkingModeChooserEnum.DD == eWalkingMode):
+            motionType = MotionType.motion_discrete_walk_dynamic
+        elif (WalkingModeChooserEnum.DW == eWalkingMode):
+            standingPosition = StandingPosition.state_sitting
+
+            if ((None != parameters) and ('Terrain' in parameters)):
+                terrain = parameters['Terrain']
+            else:
+                terrain="MUD"
+
+            if ("MUD" == terrain):
+                motionType = MotionType.motion_quad_mud
+            elif ("HILLS" == terrain):
+                motionType = MotionType.motion_quad_hills
+            elif ("DEBRIS" == terrain):
+                motionType = MotionType.motion_quad_hills
+            else:
+                print("DynamicLocomotion::PublishMotionState WalkingModeChooserEnum = ",eWalkingMode)
+                print("Unknown Terrain type: ",terrain)
+                bPublish = False
+
+        elif (WalkingModeChooserEnum.AP == eWalkingMode):
+            motionType = MotionType.motion_align_pose
+        else:
+            print("DynamicLocomotion::PublishMotionState WalkingModeChooserEnum = ",eWalkingMode)
+            bPublish = False
+
+        if bPublish:
+            self._publisher_motion_type.publish(motionType)
+            self._publisher_standing_position.publish(standingPosition)
 
 
 ###################################################################################
