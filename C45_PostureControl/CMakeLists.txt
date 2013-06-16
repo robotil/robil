@@ -40,5 +40,6 @@ rosbuild_add_executable(C45_PostureControl src/C45_PostureControl.cpp)
 
 rosbuild_add_executable(C45_TaskStart src/C45_TaskStart.cpp)
 rosbuild_add_executable(C45_TaskStop src/C45_TaskStop.cpp)
+rosbuild_add_executable(C45_Behavior src/C45_Behavior.cpp)
 
 #target_link_libraries(example ${PROJECT_NAME})
