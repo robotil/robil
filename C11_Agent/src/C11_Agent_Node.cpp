@@ -79,8 +79,8 @@ bool C11_Agent_Node::init()
             }
     nh_ = new ros::NodeHandle();
 
-//    path_update_pub = nh_->advertise<C31_PathPlanner::C31_Waypoints>("c11_path_update",10000);
-    path_update_pub = nh_->advertise<C31_PathPlanner::C31_Waypoints>("/path",10000);
+    path_update_pub = nh_->advertise<C31_PathPlanner::C31_Waypoints>("c11_path_update",10000);
+//    path_update_pub = nh_->advertise<C31_PathPlanner::C31_Waypoints>("/path",10000);
     goal_update_pub = nh_->advertise<C31_PathPlanner::C31_Location>("planner/goal/point",1000);
     goal_reset_pub = nh_->advertise<C31_PathPlanner::C31_HMIReset>("planner/reset",1000);
     service_MissionSelection = nh_->advertiseService("MissionSelection", &C11_Agent_Node::MissionSelection,this);
@@ -113,24 +113,24 @@ void C11_Agent_Node::run()
           ros::spinOnce();
           loop_rate.sleep();
           ++count;
-          if(count == 1)
-          {
-        	  C31_PathPlanner::C31_Location location;
-
-				C31_PathPlanner::C31_Waypoints waypoints;
-				Vec2d pos;
-			  //  UpdatedPath = points;
-				for(int i=0; i<UpdatedPath.size(); i++)
-				{
-				  location.x = UpdatedPath[i].x;
-				  location.y = UpdatedPath[i].y;
-				  pos.x = UpdatedPath[i].x;
-				  pos.x = UpdatedPath[i].y;
-				  UpdatedPath.push_back(pos);
-				  waypoints.points.push_back(location);
-				}
-			  path_update_pub.publish(waypoints);
-          }
+//          if(count == 1)
+//          {
+//        	  C31_PathPlanner::C31_Location location;
+//
+//				C31_PathPlanner::C31_Waypoints waypoints;
+//				Vec2d pos;
+//			  //  UpdatedPath = points;
+//				for(int i=0; i<UpdatedPath.size(); i++)
+//				{
+//				  location.x = UpdatedPath[i].x;
+//				  location.y = UpdatedPath[i].y;
+//				  pos.x = UpdatedPath[i].x;
+//				  pos.x = UpdatedPath[i].y;
+//				  UpdatedPath.push_back(pos);
+//				  waypoints.points.push_back(location);
+//				}
+//			  path_update_pub.publish(waypoints);
+//          }
   }
   std::cout << "Ros shutdown, proceeding to close the agent." << std::endl;
 }
@@ -600,24 +600,24 @@ void C11_Agent_Node::SendRobotData()
 
 void C11_Agent_Node::CheckPath()
 {
-//  size_t size_of_path = UpdatedPath.size();
-//  if(size_of_path>0)
-//    {
-//        size_t start = searchOnPathPosition(position, UpdatedPath);
-//        if(start_pos != start)
-//          {
-//            C31_PathPlanner::C31_Waypoints waypoints;
-//            for( size_t i=start;i<size_of_path;i++ )
-//            {
-//              C31_PathPlanner::C31_Location loc;
-//              loc.x=UpdatedPath[i].x;
-//              loc.y=UpdatedPath[i].y;
-//              waypoints.points.push_back(loc);
-//            }
-//            path_update_pub.publish(waypoints);
-//            cout << "Path update sent with " <<  waypoints.points.size() << "points!" << endl;
-//          }
-//     }
+  size_t size_of_path = UpdatedPath.size();
+  if(size_of_path>0)
+    {
+        size_t start = searchOnPathPosition(position, UpdatedPath);
+        if(start_pos != start)
+          {
+            C31_PathPlanner::C31_Waypoints waypoints;
+            for( size_t i=start;i<size_of_path;i++ )
+            {
+              C31_PathPlanner::C31_Location loc;
+              loc.x=UpdatedPath[i].x;
+              loc.y=UpdatedPath[i].y;
+              waypoints.points.push_back(loc);
+            }
+            path_update_pub.publish(waypoints);
+            cout << "Path update sent with " <<  waypoints.points.size() << "points!" << endl;
+          }
+     }
 }
 
 size_t C11_Agent_Node::searchOnPathPosition(const Vec2d& pos, const vector<Vec2d>& path)
