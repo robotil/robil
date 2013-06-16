@@ -49,6 +49,7 @@ public:
         void SendVRCScoreData(double timeSec, int competionScore, int falls, QString message);
         void SendDownlink(QString str);
         void SendUplink(QString str);
+        void SendRobotData(StructPoint& pos, StructOrientation& orient);
 
 private:
         QTcpServer *pTcpServer;

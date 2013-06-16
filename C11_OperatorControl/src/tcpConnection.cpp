@@ -305,6 +305,15 @@ void CTcpConnection::SltReadyRead()
           pITcpConnectionInterface->OnUplinkUpdate(up);
           ImgSize = 0;
         }
+        else if(9 == msgId)
+		{
+          StructPoint pos;
+          StructOrientation orient;
+		  in >> pos.x >> pos.y >> orient.yaw >> orient.pitch >> orient.roll;
+		  std::cout<<"TCP: Robot data -> "<<pos.x<<pos.y<<orient.yaw<<orient.pitch<<orient.roll<<"\n";
+		  pITcpConnectionInterface->OnRobotData(pos,orient);
+		  ImgSize = 0;
+		}
         else if(31 == msgId)
 		  {
  //       	IsSendingExecuterStatus = true;
