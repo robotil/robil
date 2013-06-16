@@ -14,16 +14,17 @@ C45_PID=$!
 sleep 4
 #echo $C42T_PID $C45_PID >> $PKILL
 #echo $C25_PID $C42T_PID $C45_PID >> $PKILL
-#echo "Start  PoseController"
-#rosservice call /PoseController/start "{}" 
-#echo "Started"
+echo "Start  PoseController"
+rosservice call /PoseController/start "{}" 
+echo "Started"
 #echo "Move head position 0: rosservice call /PoseController/neck_movement 'neck_ay: 0.0'"
 #rosservice call /PoseController/neck_movement "neck_ay: 0.0"
-#rosservice call /PoseController/stop "{}" 
 echo "Move head position 0: rosservice call /PoseController/back_lbz_neck_ay 'back_lbz: 0.0 
 neck_ay: 0.0'"
 rosservice call /PoseController/back_lbz_neck_ay "back_lbz: 0.0
 neck_ay: 0.0"
 
 echo "Done"
+rosservice call /PoseController/stop "{}" 
+echo "PoseController stopped"
 kill $C45_PID
