@@ -14,6 +14,7 @@ import math
 import roslib;roslib.load_manifest('C42_DynamicLocomotion')
 from C31_PathPlanner.msg import C31_Waypoints
 from C25_GlobalPosition.msg import C25C0_ROP
+from C25_GlobalPosition.srv import *
 from atlas_msgs.msg import AtlasCommand, AtlasSimInterfaceCommand, AtlasSimInterfaceState, AtlasState, AtlasBehaviorStepData
 from C42_State.srv import *
 from C42_State.msg import StandingPosition
@@ -38,6 +39,12 @@ class DW_WalkingMode(WalkingMode):
 
         self._Controller.Initialize(Terrain = self.terrain)
         self._bDone = False
+
+        self._BDIswitch_client = rospy.ServiceProxy('C25/BDIswitch',C25BDI)
+        state = Int32()
+        state.data = 0
+        resp_switched_to_BDI_odom = self._BDIswitch_client(state)
+        print "Using ROBIL odom"
         
         self._Subscribers["Path"] = rospy.Subscriber('/path',C31_Waypoints,self._path_cb)
         self._Subscribers["Odometry"] = rospy.Subscriber('/C25/publish',C25C0_ROP,self._Controller.Odom_cb)
