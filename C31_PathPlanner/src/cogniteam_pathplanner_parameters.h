@@ -8,14 +8,15 @@
 #ifndef PATHPLANNERPARAMETERS_H_
 #define PATHPLANNERPARAMETERS_H_
 
-#define PLANNER_VERSION "2013_06_12_17_30"
+#define PLANNER_VERSION "2013_06_16_12_20"
 
 #define PARAMS_FROM_ROS 1
 #define PARAMS_FROM_CODE 2
 #define PARAMS_SOURCE PARAMS_FROM_ROS
 
 #define USE_TRANSITS_AS_PLAN
-//#define DO_SMOOTHING
+#define DO_SMOOTHING
+#define SMOOTHING_WITHOUT_PF
 
 
 #if PARAMS_SOURCE==PARAMS_FROM_CODE
@@ -55,7 +56,7 @@
 	ros::param::param<double>("/C31_GlobalPathPlanner/potential_field/viewRadiusForward", (potential_field).viewRadiusForward, 15);\
 	ros::param::param<double>("/C31_GlobalPathPlanner/potential_field/viewRadiusSide", (potential_field).viewRadiusSide, 4);\
 	ros::param::param<double>("/C31_GlobalPathPlanner/potential_field/stepRate", (potential_field).stepRate, 0.3);\
-	ros::param::param<double>("/C31_GlobalPathPlanner/potential_field/distanceBetweenPoints", (potential_field).distanceBetweenPoints, 2);\
+	ros::param::param<double>("/C31_GlobalPathPlanner/potential_field/distanceBetweenPoints", (potential_field).distanceBetweenPoints, 4);\
 	ros::param::param<double>("/C31_GlobalPathPlanner/potential_field/maxAngleWhileReducing", (potential_field).maxAngleWhileReducing, Vec2d::d2r(10));\
 	(potential_field).inertia=pow(1/(pf_params.viewRadiusForward*0.5),2);
 
