@@ -25,16 +25,18 @@ class DW_WalkingMode(WalkingMode):
 
         rospy.wait_for_service("/motion_state/info/standing_position")
         self._srv_StandingPosition = rospy.ServiceProxy("/motion_state/info/standing_position", StandingPositionInfo)
+
+        self.terrain = ''
         
     def Initialize(self,parameters):
         WalkingMode.Initialize(self,parameters)
 
         if ((None != parameters) and ('Terrain' in parameters)):
-            terrain = parameters['Terrain']
+            self.terrain = parameters['Terrain']
         else:
-            terrain="MUD"
+            self.terrain="MUD"
 
-        self._Controller.Initialize(Terrain = terrain)
+        self._Controller.Initialize(Terrain = self.terrain)
         self._bDone = False
         
         self._Subscribers["Path"] = rospy.Subscriber('/path',C31_Waypoints,self._path_cb)
@@ -81,7 +83,10 @@ class DW_WalkingMode(WalkingMode):
         for wp in path.points:
             if 0 < i: # ignor first way-point (current position) 
                 if 1 == i%2:
-                    direction = "fwd"
+                    if self.terrain=="MUD":
+                        direction = "fwd"
+                    elif  self.terrain=="HILLS":
+                        direction = "bwd"
                 else:
                     direction = "bwd"
                 p.append([wp.x,wp.y,direction])
