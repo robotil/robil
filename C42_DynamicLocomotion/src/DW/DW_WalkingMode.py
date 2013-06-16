@@ -75,7 +75,6 @@ class DW_WalkingMode(WalkingMode):
                         direction = "fwd"
                     elif  self.terrain=="HILLS":
                         direction = "bwd"
-
                 else:
                     direction = "bwd"
                 p.append([wp.x,wp.y,direction])

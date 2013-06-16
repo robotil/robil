@@ -464,7 +464,7 @@ class DW_Controller(object):
                             self.Crawl()
                         if Point[2] == "fwd":
                             self.BackCrawl()
-                        self.RotSpotSeq(1)
+                        self.RotSpotSeq(2)
                         self.FollowPath = 1
                         stuck_counter = 0
                 else:
@@ -472,9 +472,9 @@ class DW_Controller(object):
 
             else:
                 self.FollowPath = 0
-            if self._terrain == "MUD" and self.IMU_mon.stand_up_flag == 1:
-                print "Reached stand up zone"
-                return
+            # if self._terrain == "MUD" and self.IMU_mon.stand_up_flag == 1:
+            #     print "Reached stand up zone"
+            #     return
 
     def Crawl(self):
         # self.IMU_mon.turned = 0
