@@ -247,6 +247,11 @@ void ImageDraw::OnUplinkUpdate(QString up)
   ui.lblUplinkData->setText(up);
 }
 
+void ImageDraw::OnRobotData(StructPoint pos, StructOrientation orient)
+{
+	ui.mapWidget->OnRobotData(pos,orient);
+}
+
 void ImageDraw::SltOnWaitTimeout()
 {
   std::cout << "SltOnWaitTimeout" << std::endl;

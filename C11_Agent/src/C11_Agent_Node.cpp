@@ -7,6 +7,7 @@
 #include <sstream>
 #include <stdlib.h>
 #include "tinyxml2.h"
+#include <tf/tf.h>
 #include "C11_Agent_Node.h"
 
 using namespace tinyxml2;
@@ -87,7 +88,7 @@ bool C11_Agent_Node::init()
     service_ResumeSelection = nh_->advertiseService("ResumeMission", &C11_Agent_Node::ResumeMission,this);
     service_PathUpdate = nh_->advertiseService("PathUpdate", &C11_Agent_Node::PathUpdate,this);
     robot_pos_subscriber = nh_->subscribe("C25/publish",1000,&C11_Agent_Node::RobotPosUpdateCallback,this);
-    robot_pos_subscriber = nh_->subscribe("executer/stack_stream",1000,&C11_Agent_Node::ExecuterStackSubscriber,this);
+    executer_stack_subscriber = nh_->subscribe("executer/stack_stream",1000,&C11_Agent_Node::ExecuterStackSubscriber,this);
     vrc_score_subscriber = nh_->subscribe("vrc_score",1000,&C11_Agent_Node::VRCScoreSubscriber,this);
     downlink_subscriber = nh_->subscribe("vrc/bytes/remaining/downlink",1000,&C11_Agent_Node::DownlinkSubscriber,this);
     uplink_subscriber = nh_->subscribe("vrc/bytes/remaining/uplink",1000,&C11_Agent_Node::UplinkSubscriber,this);
@@ -313,9 +314,19 @@ void C11_Agent_Node::StopExecuteMessageCallback(const std_msgs::StringConstPtr& 
 
 void C11_Agent_Node::RobotPosUpdateCallback(const C25_GlobalPosition::C25C0_ROP& robot_pos)
   {
+//	std::cout<<robot_pos;
     position.x = robot_pos.pose.pose.pose.position.x;
     position.y = robot_pos.pose.pose.pose.position.y;
+    double r0,p0,y0,r1,p1,y1;
+	tf::Quaternion oldQ;
+	tf::quaternionMsgToTF(robot_pos.pose.pose.pose.orientation, oldQ);
+	tf::Matrix3x3 mOld(oldQ);
+	mOld.getRPY(r0,p0,y0);
+	orientation.yaw = y0;
+	orientation.pitch = p0;
+	orientation.roll = r0;
     CheckPath();
+//    std::cout<<"C11_Agent_Node: Robot data -> "<<robot_pos.pose.pose.pose.position.x<<","<<robot_pos.pose.pose.pose.position.y<<"\n";
   }
 
 void C11_Agent_Node::PushImage(QImage img)
@@ -580,6 +591,11 @@ void C11_Agent_Node::ResetRequest()
   C31_PathPlanner::C31_HMIReset reset;
   goal_reset_pub.publish(reset);
   cout<<"ResetRequest sent!"<<endl;
+}
+
+void C11_Agent_Node::SendRobotData()
+{
+	pIAgentInterface->SendRobotData((StructPoint&)position,orientation);
 }
 
 void C11_Agent_Node::CheckPath()

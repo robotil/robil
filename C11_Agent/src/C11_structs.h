@@ -14,6 +14,13 @@ typedef struct
 
 typedef struct
 {
+        double yaw;
+        double pitch;
+        double roll;
+} StructOrientation;
+
+typedef struct
+{
     short MessageID;
     unsigned int DataSize;
     unsigned int Counter;

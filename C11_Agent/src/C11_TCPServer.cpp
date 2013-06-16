@@ -445,3 +445,26 @@ void CTcpServer::SendUplink(QString up)
   pClientConnection->flush();
   pClientConnection->waitForBytesWritten();
 }
+
+void CTcpServer::SendRobotData(StructPoint& pos, StructOrientation& orient)
+{
+	 if(NULL == pClientConnection)
+	  {
+	    std::cout<<"TCP: No connection\n";
+	    return;
+	  }
+	 StructHeader header;
+	header.MessageID = 9;
+	header.DataSize = 0;
+	header.Counter = Counter;
+	Counter++;
+	QByteArray block;
+	QDataStream out(&block, QIODevice::WriteOnly);
+	out.setByteOrder(QDataStream::LittleEndian);
+	out << header;
+	out << pos.x << pos.y << orient.yaw << orient.pitch << orient.roll;
+	std::cout<<"TCP: Robot data -> "<<pos.x<<pos.y<<orient.yaw<<orient.pitch<<orient.roll<<"\n";
+	pClientConnection->write(block);
+	pClientConnection->flush();
+	pClientConnection->waitForBytesWritten();
+}
