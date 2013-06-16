@@ -12,6 +12,7 @@ from DW_PathPlanner import *
 import math
 
 import roslib;roslib.load_manifest('C42_DynamicLocomotion')
+from std_msgs.msg import Int32
 from C31_PathPlanner.msg import C31_Waypoints
 from C25_GlobalPosition.msg import C25C0_ROP
 from C25_GlobalPosition.srv import *

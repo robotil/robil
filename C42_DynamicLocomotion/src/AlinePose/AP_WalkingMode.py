@@ -23,7 +23,7 @@ from atlas_msgs.msg import AtlasCommand, AtlasSimInterfaceCommand, AtlasSimInter
 from sensor_msgs.msg import Imu, JointState
 from nav_msgs.msg import Odometry
 from geometry_msgs.msg import Pose, Quaternion, Point
-from std_msgs.msg import String
+from std_msgs.msg import String, Int32
 from DW.JointController import JointCommands_msg_handler
 from C42_DynamicLocomotion.srv import *
 from C42_DynamicLocomotion.msg import Foot_Placement_data
