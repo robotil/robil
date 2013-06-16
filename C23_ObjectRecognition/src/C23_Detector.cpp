@@ -898,12 +898,14 @@ it_(nh),
 					  x= - 1;
 					  _found = false;
 					  cout << "Object not found ! " << endl;
+                     
 					} else {
 					  _found = true;
 					}
 					msg_detected.ObjectDetected = isFound ? 1 : 0;
 					msg_detected.Object = target;
-					
+					if(!isFound)
+                           return;
 					msg_gp.x = x;
 					msg_gp.y = y;
 					msg_gp.x2 = x2;
