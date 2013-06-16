@@ -165,6 +165,7 @@ class CD_WalkingMode(WalkingMode):
     # /atlas/atlas_sim_interface_state callback. Before publishing a walk command, we need
     # the current robot position   
     def asi_state_cb(self, state):
+        #print(state)
         command = 0
         #print(self._CD_StateMachine.GetIndex()," < ",state.walk_feedback.next_step_index_needed)
         if(self._CD_StateMachine.GetIndex() < state.walk_feedback.next_step_index_needed):
