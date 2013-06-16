@@ -75,6 +75,9 @@ public:
 	Path smoothWaypoints(const SmoothingParameters& params)const;
 	Path castPath(const Points& points)const;
 
+	Points smooth_withoutPF(const SmoothingParameters& params)const;
+	Path smoothWaypoints_withoutPF(const SmoothingParameters& params)const;
+
 private:
 public://<- for testing only
 	Points simulate(const SmoothingParameters& params) const;
