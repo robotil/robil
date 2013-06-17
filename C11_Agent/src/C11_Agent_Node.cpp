@@ -482,6 +482,10 @@ void C11_Agent_Node::LoadMission(int missionId)
 void C11_Agent_Node::PathUpdated(std::vector<StructPoint> points)
 {
   ROS_INFO("path update received\n");
+  if(points.size() < 2)
+  {
+	  return;
+  }
   C31_PathPlanner::C31_Location location;
   C31_PathPlanner::C31_Waypoints waypoints;
   Vec2d pos;
@@ -588,9 +592,24 @@ void C11_Agent_Node::NewGoalRequest(StructPoint goal)
 
 void C11_Agent_Node::ResetRequest()
 {
-  C31_PathPlanner::C31_HMIReset reset;
-  goal_reset_pub.publish(reset);
+//  C31_PathPlanner::C31_HMIReset reset;
+//  goal_reset_pub.publish(reset);
+	ros::ServiceClient c22Client = nh_->serviceClient<C22_GroundRecognitionAndMapping::C22>("C22");
+	C22_GroundRecognitionAndMapping::C22 srv22;
+	srv22.request.erase = -1;
+	if (!c22Client.call(srv22))
+	{
+		ROS_ERROR("couldn't get a occupancy grid, exiting\n");
+		return;
+//		return TaskResult::FAULT();
+	}
   cout<<"ResetRequest sent!"<<endl;
+}
+
+void C11_Agent_Node::GridAndPathRequest()
+{
+	pushS->occupancy_grid_task();
+	pushS->path_task();
 }
 
 void C11_Agent_Node::SendRobotData()

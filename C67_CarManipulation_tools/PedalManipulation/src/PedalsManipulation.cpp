@@ -65,14 +65,14 @@ public:
 			}
 			PoseController::foot_movement r_foot, l_foot;
 			r_dist = positions[atlas_msgs::AtlasState::r_leg_kny] + wanted_right_pedal_location * (0.13) - (base_r_leg_kny);
-			ROS_INFO("r_leg_kny = %f, r_dist = %f", positions[atlas_msgs::AtlasState::r_leg_kny], r_dist);
+			//ROS_INFO("r_leg_kny = %f, r_dist = %f", positions[atlas_msgs::AtlasState::r_leg_kny], r_dist);
 			if(fabs(r_dist) > 0.00199){
 				r_foot.request.r_leg_kny = (r_dist < 0) ? 0.001 : -0.001;
 				r_foot.request.r_leg_uay = (r_dist < 0) ? -0.001 : 0.001;
 				posecontroller_foot_client.call(r_foot);
 			}
 			l_dist = positions[atlas_msgs::AtlasState::l_leg_kny] + wanted_left_pedal_location * (0.13) - (base_l_leg_kny);
-			ROS_INFO("l_leg_kny = %f, l_dist = %f", positions[atlas_msgs::AtlasState::l_leg_kny], l_dist);
+			//ROS_INFO("l_leg_kny = %f, l_dist = %f", positions[atlas_msgs::AtlasState::l_leg_kny], l_dist);
 			if(fabs(l_dist) > 0.00199){
 				l_foot.request.l_leg_kny = (l_dist < 0) ? 0.001 : -0.001;
 				l_foot.request.l_leg_uay = (l_dist < 0) ? -0.001 : 0.001;

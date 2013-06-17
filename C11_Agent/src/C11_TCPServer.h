@@ -30,6 +30,7 @@ Q_SIGNALS:
         void SigStopRequest();
         void SigNewGoalRequest(StructPoint goal);
         void SigResetRequest();
+        void SigGridAndPathRequest();
 
 public Q_SLOTS:
         void SltOnNewConnection();

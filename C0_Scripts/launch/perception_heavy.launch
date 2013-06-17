@@ -9,6 +9,6 @@
 
 	<!-- include file="$(find C22_CompactGroundRecognitionAndMapping)/launch/C22_compact.launch"/ -->
 
-	
+	<node pkg="C23_ObjectRecognition" type="C23" name="C23_ObjectRecognition" args="/multisense_sl/camera/left/image_color /multisense_sl/camera/right/image_color /multisense_sl/camera/points2" output="log" respawn="true"/>
 
 </launch>

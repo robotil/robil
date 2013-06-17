@@ -44,19 +44,28 @@ public:
 	C45_task_start(std::string name, std::vector<string> par):
         RobilTask(name), params(par)
     {
-		start_posecontroller_cli_ = nh_.serviceClient<std_srvs::Empty>("/PoseController/start");
-		stop_posecontroller_cli_ = nh_.serviceClient<std_srvs::Empty>("/PoseController/stop");
     }
 
     TaskResult task(const string& name, const string& uid, Arguments& args) {
-		int time = this->time;
+	try{
+		//start_posecontroller_cli_ = nh_.serviceClient<std_srvs::Empty>("/PoseController/start");
+		stop_posecontroller_cli_ = nh_.serviceClient<std_srvs::Empty>("/PoseController/stop");
+		//int time = this->time;
 		std_srvs::Empty e;
 		ROS_INFO("%s: %s", _name.c_str(), "CALLED");
 //		ROS_INFO("%s: %s", _name.c_str(), "STARTING");
 //		start_posecontroller_cli_.call(e);
 		ROS_INFO("%s: %s", _name.c_str(), "DONE");
-		stop_posecontroller_cli_.call(e);
+		if( stop_posecontroller_cli_.call(e) ){
+			ROS_INFO("TaskStop: call ok.");
+		}else{
+			ROS_INFO("TaskStop: call fault.");
+		}
+	}catch(...){
+		ROS_INFO("TaskStop: some exception catched.");
+	}
 
+	ROS_INFO("TaskStop: finished");
         return TaskResult(SUCCESS, "OK");
     }
 
@@ -64,11 +73,11 @@ public:
 
 int main(int argc, char **argv) {
 	ros::init(argc, argv, "C45_TaskStop");
-	ROS_INFO("Running");
+	ROS_INFO("TaskStop: node Running");
 	std::vector<string> params;
 
-	C45_task_start* posture_control = new C45_task_start("C45_TaskStop",params);
-	ROS_INFO("Running posture controller action");
+	C45_task_start posture_control("C45_TaskStop",params);
+	ROS_INFO("TaskStop: Running posture controller action");
 	ros::spin();
 	return 0;
 }

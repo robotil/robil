@@ -100,6 +100,8 @@ public:
 
   void ResetRequest();
 
+  void GridAndPathRequest();
+
   void SendRobotData();
 
   virtual void PushImage(QImage img);

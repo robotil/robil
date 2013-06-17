@@ -1,16 +1,16 @@
-V0.0.2.19
+V0.0.2.29
 ===========================================================
 C0_Math     0.1
 C0_RobilTask     0.5
 C0_Scripts     0.28
 C10_Common     0.5
-C11_Agent     0.31
-C11_OperatorControl     0.35
+C11_Agent     0.33
+C11_OperatorControl     0.37
 C21_VisionAndLidar     0.24
 C22_CompactGroundRecognitionAndMapping     0.11
-C22_GroundRecognitionAndMapping     0.19
+C22_GroundRecognitionAndMapping     0.21
 C22_transformations     0.7
-C23_ObjectRecognition     0.37
+C23_ObjectRecognition     0.38
 C24_ObstacleDetection     0.6
 C25_AtlasFell     0.2
 C25_GlobalPosition     0.9
@@ -23,9 +23,9 @@ C34_Executer     0.8
 C35_Monitoring     0.15
 C41_BodyControl     0.1
 C41_QuasiStaticWalking     0.10
-C41_QuasiStaticWalking_tools     0.21
+C41_QuasiStaticWalking_tools     0.22
 C42_DRCSim2_tools     0.2
-C42_DynamicLocomotion     0.16
+C42_DynamicLocomotion     0.17
 C42_Leg_IK     0.4
 C42_State     0.4
 C42_WalkType     0.6
@@ -33,16 +33,16 @@ C42_ZMPWalk     0.8
 C43_LocalBodyCOM     0.2
 C43_LocalBodyCOM_tools     0.1
 C43_LocalBodyPVA     0.2
-C45_PostureControl     0.15
+C45_PostureControl     0.16
 C45_PostureControl_tools     0.5
 C46_MountVehicle     0.11
 C47_DismountVehicle     0.3
-C48_StandUp     0.11
+C48_StandUp     0.12
 C51_CarOperation     0.14
 C65_CloseValve     0.1
 C66_Grasp     0.11
-C66_Grasp_tools     0.4
-C67_CarManipulation     0.26
+C66_Grasp_tools     0.5
+C67_CarManipulation     0.27
 C67_CarManipulation_tools     0.2
 LidarObstacleDetection     0.1
 RoadExtract     0.1
