@@ -494,7 +494,7 @@ void ImageDraw::SltOnAllowClick()
 
 void ImageDraw::SltOnRestoreClick()
 {
-
+	pCTcpConnection->SendReset();
 }
 
 void ImageDraw::SltOperatorAction()
