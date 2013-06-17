@@ -108,7 +108,6 @@ public:
 		sandia_srv.request.grasp.name = "cylindrical";
 		sandia_srv.request.grasp.closed_amount = 0;
 		}
-		ROS_INFO("starting");
 		as_.start();
 		ROS_INFO("started");
 	}
@@ -118,7 +117,7 @@ public:
 		C23_ObjectRecognition::C23_orient c23srv;
 		c23srv.request.target = target;
 
-		ROS_INFO("Calling C23 perception service");
+		ROS_INFO("Calling perception");
 		if(c23client.call(c23srv))
 		{
 			*x = c23srv.response.x;
@@ -128,7 +127,6 @@ public:
 			*P = c23srv.response.P;
 			*Y = c23srv.response.Y;
 
-			ROS_INFO("Received data from majd: x= %f , y= %f , z= %f R= %f , P= %f , Y= %f",*x ,*y ,*z,*R,*P,*Y);
 			//cout << "Received data from majd: " << c23srv.response.x << "," << c23srv.response.y << "," << c23srv.response.z << endl;
 			return true;
 		}
@@ -149,13 +147,11 @@ public:
 		move_hand::move_hand move_hand_msg;
 		std::string g = as_.acceptNewGoal()->parameters;
 		char c = g.at(0);
-		ROS_INFO("got command %c",c);
 		double *X,*Y,*Z,*R,*P,*YA;
 		switch (c) {
 		case 'F':
 
 			ros::Duration(0.3).sleep();
-			ROS_INFO("requesting transformation from perception");
 			//double *X,*Y,*Z,*R,*P,*YA;
 			X = new double(0);
 			Y = new double(0);
@@ -180,7 +176,6 @@ public:
 			arm_path_msg.request.AngleDestination.z = -1.408;
 			arm_path_msg.request.time =4;
 			arm_path_msg.request.points =200;
-			ROS_INFO("Calibrating Hands1");
 			if(r_arm_path_cli_.call(arm_path_msg)){}
 			else{
 				ROS_INFO("ERROR in arm_path service");
@@ -194,7 +189,6 @@ public:
 			arm_path_msg.request.AngleDestination.x = 2.803;
 			arm_path_msg.request.AngleDestination.y = 0.927;
 			arm_path_msg.request.AngleDestination.z = -1.471;
-			ROS_INFO("Calibrating Hands2");
 			if(r_arm_path_cli_.call(arm_path_msg)){}
 			else{
 				ROS_INFO("ERROR in arm_path service");
@@ -207,7 +201,6 @@ public:
 			arm_path_msg.request.AngleDestination.x = 2.734;
 			arm_path_msg.request.AngleDestination.y = -0.862;
 			arm_path_msg.request.AngleDestination.z = -2.309;
-			ROS_INFO("Calibrating Hands3");
 			if(r_arm_path_cli_.call(arm_path_msg)){}
 			else{
 				ROS_INFO("ERROR in arm_path service");
@@ -220,7 +213,6 @@ public:
 			arm_path_msg.request.AngleDestination.x = 2.762;
 			arm_path_msg.request.AngleDestination.y = 0.5;
 			arm_path_msg.request.AngleDestination.z = 0.0;
-			ROS_INFO("Calibrating Hands4");
 			if(r_arm_path_cli_.call(arm_path_msg)){}
 			else{
 				ROS_INFO("ERROR in arm_path service");
@@ -267,7 +259,6 @@ public:
 				arm_path_msg.request.AngleDestination.z = atan2((double)cross(1,0),(double)cross(0,0));
 				arm_path_msg.request.time =4;
 				arm_path_msg.request.points =200;
-				ROS_INFO("recieved matrix from perception");
 				if (as_.isPreemptRequested() || !ros::ok())
 				{
 					ROS_INFO("ERROR not recieve matrix from perception");
@@ -277,7 +268,6 @@ public:
 					return;
 				}
 				/*moving hand to requested object*/
-				ROS_INFO("moving hand to requested object");
 
 				if(r_arm_path_cli_.call(arm_path_msg)){
 
@@ -307,7 +297,6 @@ public:
 				return;
 			}
 
-			ROS_INFO("taking tf info");
 			try {
 				listener.waitForTransform("/pelvis","/right_f1_0",ros::Time(0),ros::Duration(0.2));
 				listener.lookupTransform("/pelvis","/right_f1_0",ros::Time(0),tf_input);
@@ -329,7 +318,6 @@ public:
 				return;
 			}
 
-			ROS_INFO("closing right hand");
 			{boost::mutex::scoped_lock l(send_mutex);
 			sandia_srv.request.grasp.name = "cylindrical";
 			sandia_srv.request.grasp.closed_amount = 1;
@@ -339,7 +327,6 @@ public:
 			ros::Duration(1.2).sleep();
 			/*lifting*/
 
-			ROS_INFO("taking tf info");
 			try {
 				listener.waitForTransform("/pelvis","/right_f1_0",ros::Time(0),ros::Duration(0.2));
 				listener.lookupTransform("/pelvis","/right_f1_0",ros::Time(0),tf_input);
@@ -501,7 +488,6 @@ public:
 int main(int argc, char **argv) {
 	ros::init(argc, argv, "C66_PickUp");
 	PickUp* QuasiStaticWalker = new PickUp("PickUp");
-	ROS_INFO("Running PickUp action");
 
 	ros::NodeHandle* rosnode = new ros::NodeHandle();
 	sandia_client = rosnode->serviceClient<sandia_hand_msgs::SimpleGraspSrv>("/sandia_hands/r_hand/simple_grasp");
