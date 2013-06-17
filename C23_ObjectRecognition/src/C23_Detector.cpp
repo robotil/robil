@@ -942,7 +942,7 @@ it_(nh),
 				      }
 				      void C23_Detector::callback(const sensor_msgs::ImageConstPtr& msg,const sensor_msgs::PointCloud2::ConstPtr &cloud)
 				      {
-				//	ROS_INFO("Receiving image..");
+					ROS_INFO("Receiving image..");
 					Mat srcImg = fromSensorMsg(msg);
 					bool res;
 					pcl::PointCloud<pcl::PointXYZ>detectionCloud;
