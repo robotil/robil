@@ -700,6 +700,10 @@ it_(nh),
 		// gates = new vector<Gate*>();
 		
 	      }
+	      
+	      void C23_Detector::stopDetection() {
+              _target = NONE;
+          }
 	      bool C23_Detector::process_orientation(C23_ObjectRecognition::C23_orient::Request &req,
 						     C23_ObjectRecognition::C23_orient::Response &res )
 	      {
@@ -901,12 +905,14 @@ it_(nh),
 					  x= - 1;
 					  _found = false;
 					  cout << "Object not found ! " << endl;
+                     
 					} else {
 					  _found = true;
 					}
 					msg_detected.ObjectDetected = isFound ? 1 : 0;
 					msg_detected.Object = target;
-					
+					if(!isFound)
+                           return;
 					msg_gp.x = x;
 					msg_gp.y = y;
 					msg_gp.x2 = x2;
@@ -936,7 +942,7 @@ it_(nh),
 				      }
 				      void C23_Detector::callback(const sensor_msgs::ImageConstPtr& msg,const sensor_msgs::PointCloud2::ConstPtr &cloud)
 				      {
-					ROS_INFO("Receiving image..");
+				//	ROS_INFO("Receiving image..");
 					Mat srcImg = fromSensorMsg(msg);
 					bool res;
 					pcl::PointCloud<pcl::PointXYZ>detectionCloud;
@@ -2793,9 +2799,14 @@ it_(nh),
 						//Test the two largest contours
 						double ratio = firstMaxBlobArea/secondMaxBlobArea;
 						cout<<"Ratio"<<ratio<<endl;
+
+						//if(firstMaxBlobArea>5000){
+						//*car_target = GeneralDetector::CAR_FRONT;
+
 						if(firstMaxBlobArea>2000){
 						*car_target = GeneralDetector::CAR_FRONT;
 						ROS_INFO("FRONT DETECTED");
+
 						} else
 							return false;
 
