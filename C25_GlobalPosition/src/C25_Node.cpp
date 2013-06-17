@@ -109,7 +109,7 @@ public:
 		    //		    	  ros::spin();
 		    //xbreak;
 		    //yuval? seriously?
-		    ros::Duration(10000).sleep();
+		    ros::Duration(1).sleep();
 		    //ros::Duration(0.001).sleep(1000);
 		  }
 	  }
