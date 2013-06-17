@@ -571,6 +571,27 @@ void CTcpConnection::SendAllRequest()
   std::cout<<"TCP: SendAllRequest sent\n";
 }
 
+void CTcpConnection::SendGridAndPathRequest()
+{
+	WaitingForResponse = false;
+	StructHeader header;
+	header.MessageID = 23;
+	header.DataSize = 0;
+	header.Counter = Counter;
+	Counter++;
+	QByteArray block;
+	QDataStream out(&block, QIODevice::WriteOnly);
+	out.setByteOrder(QDataStream::LittleEndian);
+	out << header.MessageID;
+	out << header.DataSize;
+	out << header.Counter;
+	pConnection->write(block);
+	pConnection->flush();
+	pConnection->waitForBytesWritten();
+	std::cout<<"TCP: SendAllRequest sent\n";
+}
+
+
 void CTcpConnection::SendNewGoal(StructPoint goal)
 {
   StructHeader header;

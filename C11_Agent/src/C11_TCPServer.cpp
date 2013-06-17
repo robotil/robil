@@ -186,6 +186,11 @@ void CTcpServer::SltOnDataReceived()
               emit SigResetRequest();
               std::cout<<"TCP: Reset received!\n";
             }
+          else if(23 == msgId)
+		  {
+			emit SigGridAndPathRequest();
+			std::cout<<"TCP: Reset received!\n";
+		  }
         }
     }
 }

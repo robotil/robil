@@ -47,6 +47,7 @@ void C11Main::SetTcp(CTcpServer* ptcpServer)
   connect(pCTcpServer,SIGNAL(SigStopRequest()),this,SLOT(SltStopRequest()));
   connect(pCTcpServer,SIGNAL(SigNewGoalRequest(StructPoint)),this,SLOT(SltNewGoalRequest(StructPoint)));
   connect(pCTcpServer,SIGNAL(SigResetRequest()),this,SLOT(SltResetRequest()));
+  connect(pCTcpServer,SIGNAL(SigGridAndPathRequest()),this,SLOT(SltGridAndPathRequest()));
 
   DataTimer = new QTimer(this);
   connect(DataTimer,SIGNAL(timeout()),this,SLOT(SltOnDataTimerTimeout()));
@@ -230,6 +231,11 @@ void C11Main::SltNewGoalRequest(StructPoint goal)
 void C11Main::SltResetRequest()
 {
   pC11Node->ResetRequest();
+}
+
+void C11Main::SltGridAndPathRequest()
+{
+
 }
 
 void C11Main::SltOnDataTimerTimeout()

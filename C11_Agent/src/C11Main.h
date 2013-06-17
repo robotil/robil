@@ -45,6 +45,7 @@ class C11Main: public QObject, public IAgentInterface
     void SltStopRequest();
     void SltNewGoalRequest(StructPoint goal);
     void SltResetRequest();
+    void SltGridAndPathRequest();
     void SltOnDataTimerTimeout();
 
 public:
