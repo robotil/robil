@@ -54,6 +54,8 @@ class DW_WalkingMode(WalkingMode):
         rospy.sleep(0.3)
         self._Controller.JC.set_all_pos(self._Controller.RS.GetJointPos())
         self._Controller.JC.send_command()
+        # Move neck to view position:
+        self._Controller.move_neck()
         
     def StartWalking(self):
         self._Controller.LHC.set_all_pos(self._Controller.BaseHandPose)

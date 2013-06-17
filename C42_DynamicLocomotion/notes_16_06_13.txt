@@ -67,6 +67,9 @@ To run Walker:
 
  *D - Walking On Four (DW)
 
+    0. Needs to run C42_State node
+       $ rosrun C42_State state
+
     1. Needs to run COM calculation (C43_LocalBodyCOM):
        $ rosrun C43_LocalBodyCOM computeCOM
 
