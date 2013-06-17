@@ -103,7 +103,7 @@ class CD_WalkingMode(WalkingMode):
     
     def EmergencyStop(self):
         k_effort = [0] * 28
-        k_effort[3] = 255
+        #k_effort[3] = 255
         stand = AtlasSimInterfaceCommand(None,AtlasSimInterfaceCommand.STAND, None, None, None, None, k_effort)
         self.asi_command.publish(stand)
 
@@ -132,7 +132,9 @@ class CD_WalkingMode(WalkingMode):
             if (self._CD_StateMachine.IsDone()):
                 self._WalkingModeStateMachine.PerformTransition("Finished")
         elif ("Done" == self._WalkingModeStateMachine.GetCurrentState().Name):
-            #print("CD WalkingMode - Done")
+            print("CD WalkingMode - Done")
+            self.EmergencyStop()
+            print(state)
             self._bDone = True
         else:
             raise Exception("QS_WalkingModeStateMachine::Bad State Name")
