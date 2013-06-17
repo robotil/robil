@@ -2272,7 +2272,7 @@ it_(nh),
 					RNG rng(12345);
 					pcl::PointCloud<pcl::PointXYZ>detectionCloud;
 					pcl::fromROSMsg<pcl::PointXYZ>(*cloud,detectionCloud);
-					pcl::io::savePCDFileASCII ("test_pcd.pcd", detectionCloud);
+				//	pcl::io::savePCDFileASCII ("test_pcd.pcd", detectionCloud);
 					
 					Mat imgHSV, imgThreshed;
 					cvtColor(srcImg,imgHSV,CV_BGR2HSV);
