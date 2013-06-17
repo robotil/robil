@@ -9,6 +9,7 @@ from std_msgs.msg import Int32
 from DW.DogWormVRC3 import *
 import math
 from C25_GlobalPosition.srv import *
+from C42_State.msg import *
 
 ###################################################################################
 # File created by David Dovrat, 2013.
@@ -34,6 +35,9 @@ class DWStandUp(RobilTask):
         state = Int32()
         state.data = 0
         resp_switched_to_BDI_odom = self._BDIswitch_client(state)
+
+        self._publisher_standing_position = rospy.Publisher("/motion_state/standing_position", StandingPosition)
+
         print "Using ROBIL odom"
         odom_sub = rospy.Subscriber('/C25/publish',C25C0_ROP,self._Controller.Odom_cb)
         rs_sub = rospy.Subscriber('/atlas/atlas_state',AtlasState,self._Controller.RS_cb)
@@ -44,6 +48,8 @@ class DWStandUp(RobilTask):
         rospy.loginfo("DynamicLocomotion, task: %s" % ("DW Stand Up") )
         self._Controller.StandUp()
         # if self._Controller.RotateToOri(Bearing):
+        standingPosition = StandingPosition.state_standing
+        self._publisher_standing_position.publish(standingPosition)
         print("SUCCESS!!")
         return RTResult_SUCCESSED("Finished in Success")
         # else:
