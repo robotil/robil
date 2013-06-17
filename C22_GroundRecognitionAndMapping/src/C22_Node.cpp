@@ -83,6 +83,7 @@ bool C22_Node::proccess(C22_GroundRecognitionAndMapping::C22::Request  &req,
 
 if (req.erase==-1)
 {cout<<(int)req.erase<<"ksdusdusduj"<<endl;
+	exit(2);	
 	_myMatrix->clearMatrix();
 	return true;
 }
