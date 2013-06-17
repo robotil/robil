@@ -59,6 +59,7 @@ ImageDraw::ImageDraw(int argc, char** argv, QWidget *parent, Qt::WFlags flags)
 //	    pCTcpConnection = new CTcpConnection(QString("172.23.1.130"),45671);
             pCTcpConnection = new CTcpConnection(line,45675);
             pImageCTcpConnection = new  CTcpConnection(line,45676);
+            pDesignerCTcpConnection = new CTcpConnection(line,45677);
 
 
             connect(pImageCTcpConnection,SIGNAL(SigOnImgReceived(QImage)),this,SLOT(SltOnNewImg(QImage)));
@@ -66,6 +67,7 @@ ImageDraw::ImageDraw(int argc, char** argv, QWidget *parent, Qt::WFlags flags)
 
             pCTcpConnection->SetSubscriber(this);
             pImageCTcpConnection->SetSubscriber(this);
+            pDesignerCTcpConnection->SetSubscriber(this);
 	  }
 
 	QFile missfile("Missions.txt");
@@ -107,6 +109,11 @@ ImageDraw::~ImageDraw()
     {
       delete pImageCTcpConnection;
       pImageCTcpConnection = NULL;
+    }
+  if(pDesignerCTcpConnection != NULL)
+    {
+      delete pDesignerCTcpConnection;
+      pDesignerCTcpConnection = NULL;
     }
 }
 
@@ -223,6 +230,7 @@ void ImageDraw::OnVRCScoreData(double timeSec, int competionScore, int falls, QS
   ui.lblSimTime->setText(simTime.toString());
   ui.lblScoreData->setText(QString::number(competionScore));
   ui.lblFallsData->setText(QString::number(falls));
+  ui.lblMsg->setText(message);
   update();
 }
 

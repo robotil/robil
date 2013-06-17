@@ -10,7 +10,7 @@ To run Walker:
  *A - Continuous Dynamic mode (BDI):
 
     1. run node:
-       $ rosrun C42_DynamicLocomotion WalkerNode.py BDI
+       $ rosrun C42_DynamicLocomotion WalkerNode.py CD
 
     2. run task using C0 task_tester:
        $ rosrun C0_RobilTask task_tester WalkerNode_Continuous
@@ -45,7 +45,7 @@ To run Walker:
     3. run task using C0 task_tester:
        $ rosrun C0_RobilTask task_tester WalkerNode_AP args="Object=Firehose"
      OR (operates without service)
-       $ rosrun C0_RobilTask task_tester WalkerNode_AP args="turn_in_place_Yaw=1.57"
+       $ rosrun C0_RobilTask task_tester WalkerNode_AP args=turn_in_place_Yaw=0.8,Xmovement=0.3,Ymovement=0.3
 
 
  *D - Walking On Four (DW)

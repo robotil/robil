@@ -359,7 +359,7 @@ void CTcpServer::SendExecuterStack(QString str)
 	  }
 	StructHeader header;
 	  header.MessageID = 31;
-	  header.DataSize = 0;
+	  header.DataSize = str.length();
 	  header.Counter = Counter;
 	  Counter++;
 	  QByteArray block;

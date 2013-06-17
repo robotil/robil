@@ -1,11 +1,12 @@
 <launch>
 
-	<node pkg="C42_DynamicLocomotion" type="WalkerNode.py" name="C42_DynamicLocomotion_BDI" args="BDI" output="log" respawn="true" />
-	<node pkg="C42_DynamicLocomotion" type="WalkerNode.py" name="C42_DynamicLocomotion_DD" args="DD" output="log" respawn="true" />
-	<node pkg="C42_DynamicLocomotion" type="WalkerNode.py" name="C42_DynamicLocomotion_QS" args="QS" output="log" respawn="true" />
-	<node pkg="C42_DynamicLocomotion" type="WalkerNode.py" name="C42_DynamicLocomotion_AP" args="AP" output="log" respawn="true" />	
+	<node pkg="C42_DynamicLocomotion" type="WalkerNode.py" name="WalkerNode_Continuous" args="CD" output="log" respawn="true" />
+	<!--node pkg="C42_DynamicLocomotion" type="WalkerNode.py" name="C42_DynamicLocomotion_BDI" args="BDI" output="log" respawn="true" / -->
+	<node pkg="C42_DynamicLocomotion" type="WalkerNode.py" name="WalkerNode_Discrete_DD" args="DD" output="log" respawn="true" />
+	<node pkg="C42_DynamicLocomotion" type="WalkerNode.py" name="WalkerNode_Discrete_QS" args="QS" output="log" respawn="true" />
+	<node pkg="C42_DynamicLocomotion" type="WalkerNode.py" name="WalkerNode_AP" args="AP" output="log" respawn="true" />	
    <node pkg="C43_LocalBodyCOM" type="computeCOM" name="C43_LocalBodyCOM" output="log" respawn="true" />
-	<node pkg="C42_DynamicLocomotion" type="WalkerNode.py" name="C42_DynamicLocomotion_DW" args="DW" output="log" respawn="true" />
-	<node pkg="C42_DynamicLocomotion" type="DWturn.py" name="C42_DynamicLocomotion_DWTurn" output="log" respawn="true" />
-	<node pkg="C42_DynamicLocomotion" type="DWStandUp.py" name="C42_DynamicLocomotion_DWStandUp" output="log" respawn="true" />
+	<node pkg="C42_DynamicLocomotion" type="WalkerNode.py" name="WalkerNode_DW" args="DW" output="log" respawn="true" />
+	<node pkg="C42_DynamicLocomotion" type="DWturn.py" name="DWTurn" output="log" respawn="true" />
+	<node pkg="C42_DynamicLocomotion" type="DWStandUp.py" name="DWStand" output="log" respawn="true" />
 </launch>

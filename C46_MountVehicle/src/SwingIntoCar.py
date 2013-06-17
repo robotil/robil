@@ -19,13 +19,7 @@ from std_srvs.srv import Empty
 class STC_Controller(object):
     """STC_Controller"""
     def __init__(self, arg):
-        super(STC_Controller, self).__init__()
-
-        ##################################################################
-        ######################## GAIT PARAMETERS #########################
-        ##################################################################
-
-        
+        super(STC_Controller, self).__init__()        
         ##################################################################
         ###################### Basic Standing Pose #######################
         ##################################################################
@@ -50,12 +44,6 @@ class STC_Controller(object):
         self.ClosedHandPose = zeros(12)
         self.ClosedHandPose[1] = self.ClosedHandPose[1+3] = self.ClosedHandPose[1+6] = self.ClosedHandPose[1+9] = 1.5
         self.ClosedHandPose[2] = self.ClosedHandPose[2+3] = self.ClosedHandPose[2+6] = self.ClosedHandPose[2+9] = 1.5
-
-
-        ##################################################################
-        ####################### Sit Down Sequence ########################
-        ##################################################################
-
 
         ##################################################################
         ########################## INITIALIZE ############################
@@ -191,12 +179,12 @@ class STC_Controller(object):
         pos[6] = pos[6+6] = 0
         pos[7] = pos[7+6] = 0.1
         pos[8] = pos[8+6] = -0.05
-        self.JC.send_pos_traj(self.RS.GetJointPos(),pos,1.0,0.005)
+        self.JC.send_pos_traj(self.RS.GetJointPos(),pos,0.6,0.005)
 
         pos[8] = pos[8+6] = -0.2
         self.JC.send_pos_traj(self.RS.GetJointPos(),pos,0.5,0.005)
 
-        rospy.sleep(1)
+        rospy.sleep(0.5)
 
         # "Grasp" top pole with wrists
         # Lift own weight by flexing elbows
@@ -205,15 +193,15 @@ class STC_Controller(object):
         pos[19+6] = -0.8
         pos[21] = 1.5
         pos[21+6] = -1.5
-        self.JC.send_pos_traj(self.RS.GetJointPos(),pos,1.0,0.005)
+        self.JC.send_pos_traj(self.RS.GetJointPos(),pos,0.5,0.005)
 
-        # Lift legs of ground and flex pelvis+hips until legs clear seat
+        # Lift legs of ground and flex pelvis+hips dynamically
         pos[1] = 1.5
         pos[5] = pos[5+6] = 0
         pos[6] = pos[6+6] = -1.6
         pos[7] = pos[7+6] = 2.4
         pos[8] = pos[8+6] = -0.2
-        self.JC.send_pos_traj(self.RS.GetJointPos(),pos,0.8,0.005) 
+        self.JC.send_pos_traj(self.RS.GetJointPos(),pos,0.5,0.005) 
         pos[8] = pos[8+6] = -0.6 
         self.JC.send_pos_traj(self.RS.GetJointPos(),pos,0.2,0.005)  
 
@@ -246,127 +234,403 @@ class STC_Controller(object):
         pos[6] = pos[6+6] = 0
         self.JC.send_pos_traj(self.RS.GetJointPos(),pos,0.15,0.005) 
 
+        rospy.sleep(0.5)
         # "Catch" seat with heels and pull
-        pos[7] = pos[7+6] = 0.3
+        pos[7] = pos[7+6] = 1.2
         pos[8] = pos[8+6] = 0.7
-        self.JC.send_pos_traj(self.RS.GetJointPos(),pos,0.3,0.005) 
-        pos[7] = pos[7+6] = 0.9
-        pos[8] = pos[8+6] = 0.7
-        # self.JC.send_pos_traj(self.RS.GetJointPos(),pos,1.2,0.005) 
-
-        # Release hands and fall on seat
-        pos[7] = pos[7+6] = 1.4
-        pos[8] = pos[8+6] = 0
-        pos[21] = -0.5
+        pos[6+6] = -1.5
+        self.JC.send_pos_traj(self.RS.GetJointPos(),pos,0.6,0.005) 
+        rospy.sleep(0.5)
+        # Release right hand to "hang on the side"
         pos[21+6] = 0.5
+        self.JC.send_pos_traj(self.RS.GetJointPos(),pos,0.5,0.005) 
+        # Extend left arm to lower robot smoothly
+        pos[16] = -1.5
+        pos[17] = 0.0
+        pos[18] = 1.9
+        pos[19] = 0
+        pos[20] = 1.5
         self.JC.send_pos_traj(self.RS.GetJointPos(),pos,0.8,0.005) 
+        # Release left hand
+        pos[21] = 0
+        self.JC.send_pos_traj(self.RS.GetJointPos(),pos,0.2,0.005) 
 
     def GetHandsIn(self):
         pos = copy(self.BasStndPose)
         pos[1] = 0
         pos[3] = 1
         pos[5] = pos[5+6] = 0
-        pos[6] = pos[6+6] = 0
-        pos[7] = pos[7+6] = 1.4
-        pos[8] = pos[8+6] = 0
-        pos[17] = 1.8
+        pos[6] = 0
+        pos[6+6] = -1.6
+        pos[7] = pos[7+6] = 1.2
+        pos[8] = pos[8+6] = 0.7
+        pos[16] = -1.5
+        pos[17] = 0.0
+        pos[18] = 1.9
+        pos[19] = 0
+        pos[20] = 1.5
+        pos[21] = 0
         pos[17+6] = -1.8
-        pos[19] = 0.8
         pos[19+6] = -0.8
-        pos[21] = -0.5
-        pos[21+6] = 0.5
+        pos[21+6] = 0.5 
 
-        # Get left hand into the car - phase 1
+        # Bring left arm into the car
         pos[16] = -1.3
-        pos[19] = 1.2
-        # # Get right hand into the car - phase 1
-        # pos[16+6] = 1.5
-        # pos[17+6] = 0.5
-        # pos[18+6] = 0
-        # pos[19+6] = -2
-        # pos[21+6] = -1.2
-        self.JC.send_pos_traj(self.RS.GetJointPos(),pos,0.5,0.005) 
-        # Get left hand into the car - phase 2
-        pos[17] = -1.5
-        pos[18] = 0.5
-        pos[19] = 1.7
-        pos[21] = 0.3
-        # # Get right hand into the car - phase 2
-        # pos[16+6] = -1.3
-        # pos[17+6] = 1.5
-        # pos[18+6] = 0.5
-        # pos[19+6] = -2.3
-        self.JC.send_pos_traj(self.RS.GetJointPos(),pos,0.5,0.005) 
-        # # Get right hand into the car - phase 3
-        # pos[19+6] = -1.7
-        # pos[21+6] = -0.3
-        # self.JC.send_pos_traj(self.RS.GetJointPos(),pos,0.5,0.005) 
+        pos[17] = -1.2
+        pos[18] = 0.6
+        pos[19] = 1.8
+        self.JC.send_pos_traj(self.RS.GetJointPos(),pos,1,0.005)
 
-        # Get right hand into the car - phase 1
-        pos[16+6] = 1.5
-        pos[17+6] = 0.5
+        # Rotate right arm, preparing to enter the car
+        pos[16+6] = -0.3
+        pos[17+6] = -0.4
         pos[18+6] = 0
         pos[19+6] = -2
-        pos[21+6] = -1.2
-        self.JC.send_pos_traj(self.RS.GetJointPos(),pos,0.5,0.005) 
-        # Get right hand into the car - phase 2
-        pos[16+6] = -1.3
-        pos[17+6] = 1.5
-        pos[18+6] = 0.5
-        pos[19+6] = -2.3
-        self.JC.send_pos_traj(self.RS.GetJointPos(),pos,0.5,0.005) 
-        # Get right hand into the car - phase 3
-        pos[19+6] = -1.7
-        pos[21+6] = -0.3
-        self.JC.send_pos_traj(self.RS.GetJointPos(),pos,0.5,0.005) 
+        pos[21+6] = -1.5
+        self.JC.send_pos_traj(self.RS.GetJointPos(),pos,1,0.005)
+        # Rotate arm at shoulder to help robot lay flat on the seat
+        # (with help from right leg)
+        pos[2] = 0.3
+        pos[4+6] = -0.5
+        pos[16+6] = 1.0
+        pos[17+6] = -0.1
+        self.JC.send_pos_traj(self.RS.GetJointPos(),pos,0.5,0.005)
+        rospy.sleep(1)
+        # Rotate right arm into car
+        pos[16+6] = -1.5
+        self.JC.send_pos_traj(self.RS.GetJointPos(),pos,0.7,0.005)
+        pos[17+6] = 1.3
+        self.JC.send_pos_traj(self.RS.GetJointPos(),pos,0.8,0.005)
+        # Straighten hands
+        pos[16] = -1.35
+        pos[16+6] = -1.35
+        pos[17] = -1.8
+        pos[17+6] = 1.3
+        pos[18] = pos[18+6] = 0.3
+        pos[19] = 0.2
+        pos[19+6] = -0.2
+        pos[20] = pos[20+6] = 0
+        pos[21] = pos[21+6] = 0
+        self.JC.send_pos_traj(self.RS.GetJointPos(),pos,0.5,0.005)
 
+    def SitUp(self):
+        pos = copy(self.BasStndPose)
+        pos[0] = 0
+        pos[2] = 0.5
+        pos[1] = 0
+        pos[3] = 1
+        pos[5] = pos[5+6] = 0
+        pos[5+6] = -0.5
+        pos[6] = pos[6+6] = 0
+        pos[7] = pos[7+6] = 1.6
+        pos[8] = pos[8+6] = 0
+        pos[16] = -1.35
+        pos[16+6] = -1.45
+        pos[17] = -1.8
+        pos[17+6] = 1.8
+        pos[18] = 0.3
+        pos[18+6] = 0.4
+        pos[19] = 0.2
+        pos[19+6] = -0.2
+        pos[20] = pos[20+6] = 0
+        pos[21] = pos[21+6] = 0
+
+        # Extend knees
+        pos[7] = 0
+        pos[7+6] = 0.7
+        pos[8+6] = -0.7
+        self.JC.send_pos_traj(self.RS.GetJointPos(),pos,0.3,0.005)    
+
+        # Flex torso and hips
+        # Move right arm up so it won't interfere with the st. wheel
+        pos[1] = 1.5
+        pos[5] = 0.5
+        pos[6] = pos[6+6] = -0.7
+        # pos[7+6] = 1.4
+        pos[17] = -0.7
+        pos[16+6] = -1.1
+        pos[17+6] = -0.4
+        pos[19+6] = -1
+        self.JC.send_pos_traj(self.RS.GetJointPos(),pos,0.5,0.005)
+        rospy.sleep(0.3)
+
+        # Use left arm to push on frame to help sit up
+        # Push on dashboard with right hand
+        pos[4+6] = -0.5
+        pos[5+6] = 0.1
+        pos[7+6] = 1.2
+        # pos[7] = 1.7
+        pos[17] = 0.9
+        pos[19] = 0.8 #1.3
+        pos[16+6] = 0.5
+        pos[17+6] = 0.2
+        pos[18+6] = 1.0
+        self.JC.send_pos_traj(self.RS.GetJointPos(),pos,0.5,0.005)
+
+        # Straighten most body joints into sitting position
+        pos[0] = 0
+        pos[2] = 0
+        pos[1] = 0.2
+        pos[4] = -0.2
+        pos[5] = 0
+        pos[5+6] = 0
+        pos[6] = -1.6
+        pos[6+6] = -1.9
+        pos[7+6] = 2
+        pos[17] = 0.6
+        pos[16+6] = -0.4
+        pos[17+6] =  0.5
+        pos[19+6] = -0.6
+        self.JC.set_gains('r_leg_lax',30,0,1,set_default=False)
+        self.JC.send_pos_traj(self.RS.GetJointPos(),pos,1.5,0.005)
+        rospy.sleep(0.5)
+        self.JC.set_gains('r_leg_kny',30,0,1,set_default=False)
+
+        # Overcompensate with back_y to make sure the robot sits
+        # pos[1] = -0.3
+        # pos[2] = 0.3
+        pos[17] = -0.9
+        self.JC.send_pos_traj(self.RS.GetJointPos(),pos,0.5,0.005)
+        rospy.sleep(0.5)
+
+        # Return back_y to 0
+        pos[1] = 0
+        pos[2] = 0
+        pos[6+6] = -1.5
+        pos[7+6] = 1.8
+        self.JC.send_pos_traj(self.RS.GetJointPos(),pos,0.5,0.005)
+
+        self.JC.reset_gains(5+6)
+        self.JC.reset_gains(9+6)
+
+    def RotateToPedals(self,DesOri):
+        pos = copy(self.BasStndPose)
+        pos[0] = 0.2
+        pos[1] = 0
+        pos[2] = 0
+        pos[3] = 1
+        pos[4] = -0.2
+        pos[5] = 0
+        pos[6] = -1.6
+        pos[7] = 1.8
+        pos[8] = 0.7
+        pos[4+6] = -0.5
+        pos[5+6] = 0
+        pos[6+6] = -1.5
+        pos[7+6] = 1.8
+        pos[8+6] = -0.7
+        pos[16] = -1.35
+        pos[17] = -0.9
+        pos[18] = 0.3
+        pos[19] = 1.3
+        pos[16+6] = -0.6
+        pos[17+6] =  0.2 
+        pos[18+6] = 1.0
+        pos[19+6] = -0.4
+        pos[20] = pos[20+6] = 0
+        pos[21] = pos[21+6] = 0
+
+        # Lower right arm and rotate it inward
+        # Rotate left arm outward
+        # Straighten legs
+        pos[4] = pos[4+6] = 0
+        pos[5] = pos[5+6] = 0
+        pos[6] = pos[6+6] = -1.8
+        pos[8] = pos[8+6] = -0.7
+        pos[16] = -1.1
+        pos[16+6] = -1.1
+        pos[17+6] = 0.6
+        pos[19+6] = -0.8
+        self.JC.send_pos_traj(self.RS.GetJointPos(),pos,0.5,0.005)
+
+        # # Push back with legs
+        # pos[7] = pos[7+6] = 0.4
+        # self.JC.send_pos_traj(self.RS.GetJointPos(),pos,0.7,0.005)
+        # pos[7] = pos[7+6] = 1.7
+        # # pos[8] = 0
+        # self.JC.send_pos_traj(self.RS.GetJointPos(),pos,0.5,0.005)
+
+        # Insert left arm
+        pos[17] = -1.5
+        pos[19] = 2
+        pos[21] = 1.0
+        self.JC.send_pos_traj(self.RS.GetJointPos(),pos,0.8,0.005)
+        pos[0] = -0.4
+        pos[16+6] = -1.1
+        pos[19+6] = -0.6
+        pos[16] = -1.6
+        pos[18] = 0.8
+        pos[21] = 0
+        self.JC.send_pos_traj(self.RS.GetJointPos(),pos,0.8,0.005)
+
+        # Extend and rotate left arm outward
+        pos[16] = -1.5
+        pos[17] = -1.1
+        pos[18] = 1.0
+        pos[19] = 1.0
+        self.JC.send_pos_traj(self.RS.GetJointPos(),pos,0.8,0.005)
+        pos[16] = -1.3
+        pos[18] = 0.3
+        self.JC.send_pos_traj(self.RS.GetJointPos(),pos,0.8,0.005)
+
+        # Rotate in place towards target
+        self.JC.set_gains('r_leg_lax',30,0,1,set_default=False)
+        self.JC.set_gains('l_leg_lax',30,0,1,set_default=False)
+        # Check current time
+        T0 = rospy.Time.now().to_sec()
+        while True:
+            # Get current orientation
+            r,p,y = STC.current_ypr()
+            print DesOri, y
+
+            # Check if more than 15 seconds elapsed
+            if rospy.Time.now().to_sec()-T0>10:
+                if abs(self.DeltaAngle(DesOri,y))>0.1:
+                    self.RotateWithLegs(-self.DeltaAngle(DesOri,y),pos)
+                else:
+                    break
+                if rospy.Time.now().to_sec()-T0>20:
+                    print "Rotate to pedals: FAIL!"
+                    print "Giving up... Please try again"
+                    break
+            else: 
+                if abs(self.DeltaAngle(DesOri,y))>0.1:
+                    self.RotateWithLegs(self.DeltaAngle(DesOri,y),pos)
+
+            rospy.sleep(0.01)
+
+        pos[8] = pos[8+6] = 0
+        self.JC.send_pos_traj(self.RS.GetJointPos(),pos,0.5,0.005)
+        self.JC.reset_gains(9)
+        self.JC.reset_gains(9+6)
+
+    def RotateWithLegs(self,Delta,pos):
+        # # Push back with legs
+        # pos[7] = pos[7+6] = 0.4
+        # self.JC.send_pos_traj(self.RS.GetJointPos(),pos,0.7,0.005)
+        # pos[7] = pos[7+6] = 1.7
+        # self.JC.send_pos_traj(self.RS.GetJointPos(),pos,0.5,0.005)
+
+        if Delta>0:
+            print "Turning right..."
+            # Rotate torso with help from the legs
+            pos[6] = pos[6+6] = -1.9
+            pos[7] = pos[7+6] = 1.8
+            self.JC.send_pos_traj(self.RS.GetJointPos(),pos,0.2,0.005)
+            pos[0] = 0.5
+            pos[4] = 0 # NEW
+            pos[4+6] = 0 # NEW
+            # pos[16+6] = -1.3
+            pos[17+6] = 0.8
+            pos[18+6] = 1.2
+            self.JC.send_pos_traj(self.RS.GetJointPos(),pos,0.5,0.005)
+            pos[6] = -1.6
+            pos[7] = 1.7
+            self.JC.send_pos_traj(self.RS.GetJointPos(),pos,0.2,0.005)
+            pos[0] = 0
+            pos[4] = 0.3
+            pos[4+6] = -0.3
+            self.JC.send_pos_traj(self.RS.GetJointPos(),pos,0.5,0.005)
+            pos[6+6] = -1.6
+            pos[7+6] = 1.7
+            self.JC.send_pos_traj(self.RS.GetJointPos(),pos,0.2,0.005)
+        else:
+            print "Turning left..."
+            # Rotate torso with help from the legs
+            pos[6] = pos[6+6] = -1.8
+            pos[7] = pos[7+6] = 1.8
+            self.JC.send_pos_traj(self.RS.GetJointPos(),pos,0.2,0.005)
+            pos[0] = -0.5
+            pos[4] = 0 # NEW
+            pos[4+6] = 0 # NEW
+            # pos[16+6] = -1.3
+            pos[17+6] = 0.8
+            pos[18+6] = 1.2
+            self.JC.send_pos_traj(self.RS.GetJointPos(),pos,0.5,0.005)
+            pos[6+6] = -1.6
+            pos[7+6] = 1.7
+            self.JC.send_pos_traj(self.RS.GetJointPos(),pos,0.2,0.005)
+            pos[0] = 0
+            pos[4] = 0.3
+            pos[4+6] = -0.3
+            self.JC.send_pos_traj(self.RS.GetJointPos(),pos,0.5,0.005)
+            pos[6] = -1.6
+            pos[7] = 1.7
+            self.JC.send_pos_traj(self.RS.GetJointPos(),pos,0.2,0.005)
 
 ##################################################################
 ######################### USAGE EXAMPLE ##########################
 ##################################################################
 
-def do_main_thing():
+if __name__=='__main__':
     STC = STC_Controller([])
-    # DW.Run(60)
-    rospy.sleep(1)
 
-    STC.JC.send_pos_traj(STC.RS.GetJointPos(),STC.BasStndPose,2,0.005)
-    rospy.sleep(1)
+    rospy.sleep(0.5)
+    STC.LHC.set_all_pos(STC.ClosedHandPose)
+    STC.LHC.send_command()
+    STC.RHC.set_all_pos(STC.ClosedHandPose)
+    STC.RHC.send_command()
+
+    STC.JC.send_pos_traj(STC.RS.GetJointPos(),STC.BasStndPose,0.5,0.005)
+    rospy.sleep(0.5)
     #STC.reset()
-    rospy.sleep(1)
+    rospy.sleep(0.5)
 
     STC.SwingIn()
-    rospy.sleep(1)
+    rospy.sleep(0.3)
 
     STC.GetHandsIn()
 
+    rospy.sleep(1)
+    STC.SitUp()
+
+    rospy.sleep(0.5)
+
+    Continue = 1
+    # Check current time
+    T0 = rospy.Time.now().to_sec()
+    while True:
+        # Get current orientation
+        r,p,y = STC.current_ypr()
+        print r,p
+
+        # Wait to see if the robot was able to properly sit up
+        if 0.65<r<1.2 and abs(p)<0.3: ######## GOTTA CHECK THIS PARAMS! ########
+            print "Sit up: SUCCESS!"
+            Continue = 1
+            break
+
+        # Check if more than 3 seconds elapsed
+        if rospy.Time.now().to_sec()-T0>3:
+            print "Sit up: FAIL!"
+            print "Giving up... Please try again"
+            Continue = 0
+            break
+
+        rospy.sleep(0.01)
+
+    if Continue == 1:
+        STC.RotateToPedals(0)
+
     pos = copy(STC.BasStndPose)
+    pos[0] = 0
     pos[1] = 0
+    pos[2] = 0
     pos[3] = 1
+    pos[4] = 0.3
+    pos[4+6] = -0.3
     pos[5] = pos[5+6] = 0
-    pos[6] = pos[6+6] = 0
-    pos[7] = pos[7+6] = 1.4
-    pos[8] = pos[8+6] = 0.7
-    pos[16] = -1.3
+    pos[6] = -1.8
+    pos[6+6] = -1.6
+    pos[7] = pos[7+6] = 1.7
+    pos[8] = pos[8+6] = 0
+    pos[16] = -1.4
     pos[17] = -1.5
-    pos[18] = 0.5
-    pos[19] = 1.7
-    pos[21] = 0.3
-    pos[16+6] = -1.3
-    pos[17+6] = 1.5
-    pos[18+6] = 0.5
-    pos[19+6] = -1.7
-    pos[21+6] = -0.3
-
-    # Lift torso
-    # pos[1] = 1.2
-    pos[6] = pos[6+6] = -1.5
-    # STC.JC.send_pos_traj(STC.RS.GetJointPos(),pos,3,0.005) 
-
-    pos[19] = -1
-    # STC.JC.send_pos_traj(STC.RS.GetJointPos(),pos,3,0.005) 
-
-
-if __name__=='__main__':
-    do_main_thing()
-
+    pos[18] = 0.8
+    pos[19] = 2
+    pos[16+6] = -1.1
+    pos[17+6] = 0.8
+    pos[18+6] = 1.2
+    pos[19+6] = -0.8
+    pos[20] = pos[20+6] = 0
+    pos[21] = pos[21+6] = 0

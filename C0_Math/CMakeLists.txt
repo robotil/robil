@@ -7,7 +7,7 @@ include($ENV{ROS_ROOT}/core/rosbuild/rosbuild.cmake)
 #  Release        : w/o debug symbols, w/ optimization
 #  RelWithDebInfo : w/ debug symbols, w/ optimization
 #  MinSizeRel     : w/o debug symbols, w/ optimization, stripped binaries
-set(ROS_BUILD_TYPE Debug)
+#set(ROS_BUILD_TYPE RelWithDebInfo)
 
 rosbuild_init()
 
@@ -19,23 +19,10 @@ set(LIBRARY_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/lib)
 #uncomment if you have defined messages
 #rosbuild_genmsg()
 #uncomment if you have defined services
-rosbuild_gensrv()
-
-find_package(Eigen REQUIRED)
-include_directories(${EIGEN_INCLUDE_DIRS})
-add_definitions(${EIGEN_DEFINITIONS})
-
-
-find_package( PCL 1.5 REQUIRED )
-
-include_directories(${PCL_INCLUDE_DIRS})
-link_directories(${PCL_LIBRARY_DIRS})
-add_definitions(${PCL_DEFINITIONS})
+#rosbuild_gensrv()
 
 #common commands for building c++ executables and libraries
-rosbuild_add_executable(drill src/template_alignment.cpp)
-target_link_libraries(drill ${PCL_LIBRARIES})
-
+#rosbuild_add_library(${PROJECT_NAME} src/example.cpp)
 #target_link_libraries(${PROJECT_NAME} another_library)
 #rosbuild_add_boost_directories()
 #rosbuild_link_boost(${PROJECT_NAME} thread)

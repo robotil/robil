@@ -6,4 +6,6 @@
 	<node pkg="C24_ObstacleDetection" type="C24" name="C24_ObstacleDetection" output="log" respawn="true" />
 	<include file="$(find C25_GlobalPosition)/launch/C25.launch"/>
 
+<node pkg="C23_ObjectRecognition" type="C23" name="C23_ObjectRecognition" args="/multisense_sl/camera/left/image_color /multisense_sl/camera/right/image_color /multisense_sl/camera/points2" output="log" respawn="true"/>
+
 </launch>

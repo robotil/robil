@@ -14,6 +14,7 @@ CTcpConnection::CTcpConnection(QString ipAddress,int port)
   WaitingForResponse = false;
   IsSendingExecuterStatus = false;
   ResetImgReceive = false;
+  ExecuterString = "";
   pITcpConnectionInterface = NULL;
   ImgSize = 0;
   Counter = 0;
@@ -83,6 +84,7 @@ void CTcpConnection::SltReadyRead()
           }
           if(!IsSendingImage)
            {
+        	  ImgSize = 0;
               QImage img;
              in >> img;
   //           if(!img.save("received.jpg"))
@@ -110,6 +112,7 @@ void CTcpConnection::SltReadyRead()
             }
             if(!IsSendingGrid)
               {
+            	ImgSize = 0;
                 StructGridData grid;
                 in >> grid.RobotPos.x;
                 in >> grid.RobotPos.y;
@@ -167,6 +170,7 @@ void CTcpConnection::SltReadyRead()
           }
           if(!IsSendingGrid)
             {
+        	  ImgSize = 0;
               short pathLength;
               std::vector<StructPoint> points;
               in >> pathLength;
@@ -185,8 +189,18 @@ void CTcpConnection::SltReadyRead()
                 }
             }
         }
-//      else if(IsSendingExecuterStatus)
-//      {
+      else if(IsSendingExecuterStatus)
+      {
+    	  QString str;
+    	  in>>str;
+    	  ExecuterString.append(str);
+    	  if(!ExecuterString.length()<=ImgSize)
+    	  {
+    		  ImgSize = 0;
+    		  IsSendingExecuterStatus = false;
+    		  pITcpConnectionInterface->OnExecuterStackUpdate(ExecuterString);
+    		  ExecuterString = "";
+    	  }
 //    	  if(bufSize < ImgSize*sizeof(char))
 //			{
 //			  std::cout<<"TCP: Size not big enough!\n";
@@ -208,7 +222,7 @@ void CTcpConnection::SltReadyRead()
 ////			std::cout<<"ExecuterStatus received: "<<strQString.toStdString()<<"\n";
 ////			pITcpConnectionInterface->OnExecuterStackUpdate(strQString);
 //    	  }
-//      }
+      }
       else
       { if (pConnection->bytesAvailable() < (int)sizeof(short))
         {
@@ -254,6 +268,7 @@ void CTcpConnection::SltReadyRead()
             {
                 WaitingForResponse = true;
               pITcpConnectionInterface->OnHMIResponseReceived();
+              ImgSize = 0;
             }
           }
         else if(5 == msgId)
@@ -261,6 +276,7 @@ void CTcpConnection::SltReadyRead()
             int status;
             in >> status;
             pITcpConnectionInterface->OnExecutionStatusUpdate(status);
+            ImgSize = 0;
           }
         else if(6 == msgId)
           {
@@ -273,28 +289,41 @@ void CTcpConnection::SltReadyRead()
             in >> falls;
             in >> message;
             pITcpConnectionInterface->OnVRCScoreData(timeSec,completionScore,falls,message);
+            ImgSize = 0;
           }
         else if(7 == msgId)
         {
           QString down;
           in >> down;
           pITcpConnectionInterface->OnDownlinkUpdate(down);
+          ImgSize = 0;
         }
         else if(8 == msgId)
         {
           QString up;
           in >> up;
           pITcpConnectionInterface->OnUplinkUpdate(up);
+          ImgSize = 0;
         }
         else if(31 == msgId)
 		  {
  //       	IsSendingExecuterStatus = true;
  //       	ImgSize = dataSize;
  //       	std::cout<<"TCP: ExecuterStack coming!\n";
+        	ImgSize = dataSize;
         	QString str;
+
 		    in>>str;
-//		    std::cout<<"ExecuterStatus received: "<<str.toStdString()<<std::endl;
-		    pITcpConnectionInterface->OnExecuterStackUpdate(str);
+		    if(str.length() < ImgSize)
+		    {
+		    	IsSendingExecuterStatus = true;
+		    }
+		    else
+		    {
+	//		    std::cout<<"ExecuterStatus received: "<<str.toStdString()<<std::endl;
+				pITcpConnectionInterface->OnExecuterStackUpdate(str);
+				ImgSize = 0;
+		    }
 		  }
       }
     }
@@ -535,7 +564,6 @@ void CTcpConnection::SendAllRequest()
 
 void CTcpConnection::SendNewGoal(StructPoint goal)
 {
-  WaitingForResponse = false;
   StructHeader header;
   header.MessageID = 21;
   header.DataSize = 0;
@@ -557,7 +585,6 @@ void CTcpConnection::SendNewGoal(StructPoint goal)
 
 void CTcpConnection::SendReset()
 {
-  WaitingForResponse = false;
   StructHeader header;
   header.MessageID = 22;
   header.DataSize = 0;
