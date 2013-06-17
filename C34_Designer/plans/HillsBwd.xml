@@ -1,0 +1,13 @@
+<plan descriptions="./plans/TaskDescriptions.xml">
+   <seq name="exit" x="421.2472968368784" y="-0.23653627486487494" collapsed="false" id="19fe0a2b-b80c-47ab-8d0d-a6a4ac73c0f4"> 
+         <par name="@1" x="433.91396350354523" y="40.287273248944814" collapsed="false" id="4a619058-c818-4cc2-aabf-9e5e564c22f8"> 
+               <par name="Perception" x="283.4377730273544" y="120.6206065822783" collapsed="false" id="4217ac38-b52b-42d3-bc23-d0ee99eae97f"> 
+                     <tsk name="LocalizationTrack" x="188.4377730273542" y="166.99560658227776" test_time="0" test_result="true" id="d8f846a4-c22b-4c36-91a6-c36d7df7cacc" />
+                     <tsk name="PathPlanning" x="237.43777302735424" y="218.62060658227784" test_time="0" test_result="true" id="21a9ce24-f73a-451d-9cb1-c90ffe518497" />
+               </par>
+               <seq name="SearchGo_ARROW" x="550.3811352207165" y="108.12457483624675" collapsed="false" id="e8795206-3f10-4289-a7f6-0a612b4be4b6"> 
+                     <tsk name="WalkerNode_DW(terrain=HILLS, Dir=fwd)" x="746.936891634336" y="389.63048654989234" test_time="0" test_result="true" id="fdaaeac5-32b4-484e-8bf5-e00c64acc500" />
+               </seq>
+         </par>
+   </seq>
+</plan>
