@@ -1,0 +1,9 @@
+<plan descriptions="./plans/TaskDescriptions.xml">
+   <seq name="Head" x="452.66497228261886" y="233.14171449465528" collapsed="false" id="75a80361-4ca5-424d-85b6-aecaff187b63"> 
+         <tsk name="C45_Behavior(Behavior=MANIPULATE)" x="-4.335027717381195" y="273.1417144946553" test_time="0" test_result="true" id="44cb5241-4167-41a5-85d1-1c08082c72e1" />
+      <dec name="T" x="289.7954545454544" y="281.5707070707068"> 
+            <tsk name="resetHeadAll" x="177.87553949318678" y="313.74253034547013" test_time="0" test_result="true" id="51bbfd1e-1641-4d1f-bfd3-a90fe4ecd1ab" />
+      </dec>
+         <tsk name="C45_Behavior(Behavior=STAND)" x="380.66497228261886" y="318.1417144946553" test_time="0" test_result="true" id="3189c0fc-3d44-4b4e-af27-b0c5710f5a3b" />
+   </seq>
+</plan>

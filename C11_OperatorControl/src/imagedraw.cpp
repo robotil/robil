@@ -255,7 +255,7 @@ void ImageDraw::OnRobotData(StructPoint pos, StructOrientation orient)
 	ui.lblOrientYaw->setText(QString::number(orient.yaw*RAD2DEG,'f',3));
 	ui.lblOrientPitch->setText(QString::number(orient.pitch*RAD2DEG,'f',3));
 	ui.lblOrientRoll->setText(QString::number(orient.roll*RAD2DEG,'f',3));
-//	ui.mapWidget->OnRobotData(pos,orient);
+	ui.mapWidget->OnRobotData(pos,orient);
 }
 
 void ImageDraw::SltOnWaitTimeout()
@@ -494,7 +494,7 @@ void ImageDraw::SltOnAllowClick()
 
 void ImageDraw::SltOnRestoreClick()
 {
-
+	pCTcpConnection->SendReset();
 }
 
 void ImageDraw::SltOperatorAction()

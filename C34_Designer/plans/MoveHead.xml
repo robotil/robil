@@ -1,0 +1,11 @@
+<plan descriptions="./plans/TaskDescriptions.xml">
+   <seq name="Head" x="394.1649722826189" y="155.14171449465542" collapsed="false" id="81b4142a-3c2f-4cc6-a1e9-a4f6d3533dc7"> 
+         <tsk name="C45_Behavior(Behavior=MANIPULATE)" x="-62.83502771738114" y="195.14171449465542" test_time="0" test_result="true" id="c526bf68-44c9-4534-9b9a-e3bf87457cda" />
+         <tsk name="C45_TaskStart" x="6.437699555346086" y="231.59625994920103" test_time="0" test_result="true" id="b109cf9f-b46b-4a0e-9db4-9ee306ab6fd7" />
+      <dec name="T" x="231.29545454545442" y="203.57070707070696"> 
+            <tsk name="resetHead" x="119.37553949318684" y="235.74253034547027" test_time="0" test_result="true" id="003fb421-ca55-46f1-b01e-81576ffc25f1" />
+      </dec>
+         <tsk name="C45_TaskStop" x="220.1649722826189" y="239.14171449465542" test_time="0" test_result="true" id="7978662d-d93a-4992-989d-8dd52d5aace5" />
+         <tsk name="C45_Behavior(Behavior=STAND)" x="322.1649722826189" y="240.14171449465542" test_time="0" test_result="true" id="8824dc16-3d1d-4bdf-a851-5ff593d4a314" />
+   </seq>
+</plan>

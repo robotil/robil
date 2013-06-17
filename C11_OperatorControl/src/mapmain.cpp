@@ -409,6 +409,7 @@ void CMapMain::UpdateGrid(int grid[100][100], StructPoint robotPos, int xOffset,
         StructIntPoint oldPoint;
         StructIntPoint newPoint;
         int i,j;
+        robotPoint->setPointParam(QPointF(pPixItem[19][49]->pos()));
         WorldToRobotOrientation = (90.0f/RAD2DEG + orient);
 //        std::cout<<"\n";
 //        for(j=0; j<100; j++)
@@ -494,6 +495,9 @@ void CMapMain::AddPix()
 	RobotPixPos.x = pPixItem[19][49]->pos().x();
 	RobotPixPos.y = pPixItem[19][49]->pos().y();
 	ui.graphicsView->scene()->addItem(traingle);
+	robotPoint = new CPointItem(QPointF(pPixItem[19][49]->pos()),ui.graphicsView->scene());
+	robotPoint->SetColor(QColor(0,0,255));
+	ui.graphicsView->scene()->addItem(robotPoint);
 }
 
 bool CMapMain::eventFilter(QObject *o, QEvent* e)
@@ -997,17 +1001,22 @@ StructPoint CMapMain::GetGoal()
 
 void CMapMain::OnRobotData(StructPoint pos, StructOrientation orient)
 {
-	QString robotDataStr("Robot Pos: x= ");
-	robotDataStr.append(QString::number(pos.x));
-	robotDataStr.append(", y= ");
-	robotDataStr.append(QString::number(pos.y));
-	robotDataStr.append("   Robot orientation: yaw = ");
-	robotDataStr.append(QString::number(orient.yaw));
-	robotDataStr.append(", pitch= ");
-	robotDataStr.append(QString::number(orient.pitch));
-	robotDataStr.append(", roll= ");
-	robotDataStr.append(QString::number(orient.roll));
-	pCRobotDataItem->SetText(robotDataStr.append(QString::number(orient.pitch)));
+//	QString robotDataStr("Robot Pos: x= ");
+//	robotDataStr.append(QString::number(pos.x));
+//	robotDataStr.append(", y= ");
+//	robotDataStr.append(QString::number(pos.y));
+//	robotDataStr.append("   Robot orientation: yaw = ");
+//	robotDataStr.append(QString::number(orient.yaw));
+//	robotDataStr.append(", pitch= ");
+//	robotDataStr.append(QString::number(orient.pitch));
+//	robotDataStr.append(", roll= ");
+//	robotDataStr.append(QString::number(orient.roll));
+//	pCRobotDataItem->SetText(robotDataStr.append(QString::number(orient.pitch)));
+
+
+	QPointF robotPosPix = PointToPix(pos);
+	cout<<"robotPosPix: x= "<<pos.x<<" y= "<<pos.y<<endl;
+	robotPoint->setPointParam(robotPosPix);
 }
 
 bool CMapMain::IsPointsEqual(StructPoint p1, StructPoint p2)

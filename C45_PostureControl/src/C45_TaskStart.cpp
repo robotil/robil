@@ -44,31 +44,64 @@ public:
 	C45_task_start(std::string name, std::vector<string> par):
         RobilTask(name), params(par)
     {
-		start_posecontroller_cli_ = nh_.serviceClient<std_srvs::Empty>("/PoseController/start");
-		stop_posecontroller_cli_ = nh_.serviceClient<std_srvs::Empty>("/PoseController/stop");
     }
 
     TaskResult task(const string& name, const string& uid, Arguments& args) {
-		int time = this->time;
-		std_srvs::Empty e;
-		ROS_INFO("%s: %s", _name.c_str(), "CALLED");
-		ROS_INFO("%s: %s", _name.c_str(), "STARTING");
-		start_posecontroller_cli_.call(e);
+		try{
+			start_posecontroller_cli_ = nh_.serviceClient<std_srvs::Empty>("/PoseController/start");
+			//stop_posecontroller_cli_ = nh_.serviceClient<std_srvs::Empty>("/PoseController/stop");
+			//int time = this->time;
+			std_srvs::Empty e;
+			ROS_INFO("%s: %s", _name.c_str(), "CALLED");
+			ROS_INFO("%s: %s", _name.c_str(), "STARTING");
+			if(start_posecontroller_cli_.call(e)){
+				ROS_INFO("TaskStart: call ok.");
+			}else{
+				ROS_INFO("TaskStart: call fault.");
+			}
+		}catch(...){
+			ROS_INFO("TaskStart: some exception catched.");
+		}
 //		ROS_INFO("%s: %s", _name.c_str(), "DONE");
 //		stop_posecontroller_cli_.call(e);
 
+	ROS_INFO("TaskStart: finished");
         return TaskResult(SUCCESS, "OK");
+    }
+
+};
+
+
+class task_planner: public RobilTask {
+
+public:
+	task_planner(std::string name="/resetHeadAll"):
+        RobilTask(name)
+    {
+    }
+
+    TaskResult task(const string& name, const string& uid, Arguments& args) {
+	try{
+		
+	}catch(...){
+		ROS_INFO("resetHeadAll: some exception catched.");
+	}
+
+	ROS_INFO("resetHeadAll: finished");
+        return TaskResult("<plan><seq><tsk name=\"C45_TaskStart\" id=\"IDTaskStart\" /><tsk name=\"resetHead\" id=\"IDresetHead\" /><tsk name=\"C45_TaskStop\" id=\"IDTaskStop\" /></seq></plan>", "MyPlan");
     }
 
 };
 
 int main(int argc, char **argv) {
 	ros::init(argc, argv, "C45_TaskStart");
-	ROS_INFO("Running");
+	ROS_INFO("TaskStart: node Running");
 	std::vector<string> params;
 
-	C45_task_start* posture_control = new C45_task_start("C45_TaskStart",params);
-	ROS_INFO("Running posture controller action");
+	C45_task_start posture_control("C45_TaskStart",params);
+	task_planner tp;
+	
+	ROS_INFO("TaskStart: Running posture controller action");
 	ros::spin();
 	return 0;
 }
