@@ -106,7 +106,11 @@ public:
 		  ros::init(argc, argv, "C25_LocalizationTrackServer");
 		  taskserver=new LocalizationTrackServer();
 		  while(ros::ok()){
-		    usleep(1000);
+		    //		    	  ros::spin();
+		    //xbreak;
+		    //yuval? seriously?
+		    ros::Duration(10000).sleep();
+		    //ros::Duration(0.001).sleep(1000);
 		  }
 	  }
 
@@ -258,7 +262,7 @@ int main(int argc, char **argv)
   ros::init(argc, argv, "C25_GlobalPosition");
   C25_Node *my_node=new C25_Node(argc,argv);
   while(ros::ok()){
-    usleep(1000);
+    // usleep(1000);
 	  ros::spin();
   }
   return 0;
