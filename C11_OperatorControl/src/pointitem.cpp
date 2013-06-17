@@ -8,12 +8,16 @@ CPointItem::CPointItem(QPointF p,QGraphicsScene* scene)
 	pScene = scene;
 	point = p;
 	radius = 10;
+	PointColor.setRgb(124,143,58);
+	PointBrushColor.setRgb(124,143,58,180);
 }
 CPointItem::CPointItem(QGraphicsScene* scene)
 {
 	pScene = scene;
 	point= QPointF(0,0);
 	radius = 10;
+	PointColor.setRgb(124,143,58);
+	PointBrushColor.setRgb(124,143,58,180);
 	
 }
 CPointItem::~CPointItem()
@@ -34,8 +38,8 @@ QRectF CPointItem::boundingRect()  const
 }
 void CPointItem::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget)
 {
-	painter->setPen(QPen(QColor(124,143,58)));
-	painter->setBrush(QBrush(QColor(124,143,58,180)));
+	painter->setPen(QPen(PointColor));
+	painter->setBrush(QBrush(PointBrushColor));
 	painter->drawEllipse(point.x()-radius/2, point.y()-radius/2, radius, radius);
 }
 QPointF CPointItem::getPoint()
@@ -59,4 +63,12 @@ void CPointItem::setRadius(int r)
 	radius = r;
 	pScene->update();
 	update();
+}
+
+void CPointItem::SetColor(QColor color)
+{
+	PointColor = color;
+	int r,g,b,a;
+	PointColor.getRgb(&r,&g,&b,&a);
+	PointBrushColor.setRgb(r,g,b,a);
 }

@@ -18,11 +18,14 @@ public:
 	bool isContainPoint(QPointF p);
 	//CPointItem* getPressedPoint();
 	void setRadius(int r);
+	void SetColor(QColor color);
 
 private:
 	QGraphicsScene* pScene;
 	QPointF point;
 	float radius;
+	QColor PointColor;
+	QColor PointBrushColor;
 };
 
 #endif // POINTITEM_H

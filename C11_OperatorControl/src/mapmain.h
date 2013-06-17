@@ -93,6 +93,8 @@ private:
 	CRouteItem *routeSteps;
 	CRouteItem *routePolygon;
 
+	CPointItem * robotPoint;
+
 	StructPoint RobotPos;
 	StructIntPoint RobotGridPos;
 	double RobotOrientation;
