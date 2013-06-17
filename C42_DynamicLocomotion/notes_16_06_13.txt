@@ -44,10 +44,7 @@ To run Walker:
     1. run node:
        $ rosrun C42_DynamicLocomotion WalkerNode.py <Trans or Rot> # for translation or rotation
 
-    2. run C23_orient.srv to emulate the C23_orient server (returns target translation and rotation): 
-       $ rosrun C42_DynamicLocomotion Clone_C23_orient.py
-
-    3. run task using C0 task_tester:
+    2. run task using C0 task_tester:
       For Translation:
        $ rosrun C0_RobilTask task_tester WalkerNode_Translation args="Translate_X=1.0,Translate_Y=0.0"
        Translate_X and Translate_Y are optional, defaulting to 0.0 in locla frame coordiantes
