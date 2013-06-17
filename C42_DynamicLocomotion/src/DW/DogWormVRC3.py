@@ -297,6 +297,18 @@ class DW_Controller(object):
         # self.GlobalPos = msg.pose.pose.position    # from /ground_truth_odom
         # self.GlobalOri = msg.pose.pose.orientation # from /ground_truth_odom
 
+    def move_neck(self):
+        init_pos = self.RS.GetJointPos()
+        self.JC.set_all_pos(init_pos)
+        pos1 = self.RS.GetJointPos()[3]
+        pos2 = 0.2 # 0.0 # 0.4 # Fire hose 0.7 # 
+        dt = 0.05;
+        N = 50
+        for ratio in linspace(0, 1, N):
+            interpCommand = (1-ratio)*pos1 + ratio * pos2
+            self.JC.set_pos(3,interpCommand)
+            self.JC.send_command()
+            rospy.sleep(dt)
 
     def ResetPose(self):
         self.JC.set_all_pos([0]*28)
@@ -445,7 +457,7 @@ class DW_Controller(object):
         if self._Point[2] == "bwd":
             T_ori += math.pi
 
-        if Distance<0.4:
+        if Distance<0.8:
             print "Reached Waypoint"
             result = True
         else:
