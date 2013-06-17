@@ -8,6 +8,7 @@ import actionlib
 from std_msgs.msg import Int32
 from DW.DogWormVRC3 import *
 import math
+from C25_GlobalPosition.srv import *
 
 ###################################################################################
 # File created by David Dovrat, 2013.
@@ -29,6 +30,11 @@ class DWStandUp(RobilTask):
         Bearing = 0.5*math.pi
         self._Controller.Initialize(Terrain = "HILLS")
         ## TOPIC setup:
+        self._BDIswitch_client = rospy.ServiceProxy('C25/BDIswitch',C25BDI)
+        state = Int32()
+        state.data = 0
+        resp_switched_to_BDI_odom = self._BDIswitch_client(state)
+        print "Using ROBIL odom"
         odom_sub = rospy.Subscriber('/C25/publish',C25C0_ROP,self._Controller.Odom_cb)
         rs_sub = rospy.Subscriber('/atlas/atlas_state',AtlasState,self._Controller.RS_cb)
         rospy.sleep(1)

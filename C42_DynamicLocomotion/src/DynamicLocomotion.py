@@ -57,7 +57,7 @@ class DynamicLocomotion(RobilTask):
                 self.Unsubscribe()
                 return RTResult_PREEPTED()
             self.PublishMotionState(parameters)
-            self._interval.sleep()
+            self._Walker.Sleep()
 
         self._Walker.Stop()
                 
@@ -85,7 +85,8 @@ class DynamicLocomotion(RobilTask):
 
     def PublishMotionState(self,parameters):
         eWalkingMode = self._Walker.GetWalkingModeEnum()
-        bPublish = True
+        bPublishMotion = True
+        bPublisPosition = True
         standingPosition = StandingPosition.state_standing
 
         if (WalkingModeChooserEnum.CD == eWalkingMode):
@@ -111,16 +112,26 @@ class DynamicLocomotion(RobilTask):
             else:
                 print("DynamicLocomotion::PublishMotionState WalkingModeChooserEnum = ",eWalkingMode)
                 print("Unknown Terrain type: ",terrain)
-                bPublish = False
+                bPublishMotion = False
+                bPublisPosition = False
 
         elif (WalkingModeChooserEnum.AP == eWalkingMode):
             motionType = MotionType.motion_align_pose
+        elif(WalkingModeChooserEnum.Rot == eWalkingMode):
+            motionType = MotionType.motion_direct_rotation
+            bPublisPosition = False
+        elif(WalkingModeChooserEnum.Trans == eWalkingMode):
+            motionType = MotionType.motion_direct_translation
+            bPublisPosition = False
         else:
             print("DynamicLocomotion::PublishMotionState WalkingModeChooserEnum = ",eWalkingMode)
-            bPublish = False
+            bPublishMotion = False
+            bPublisPosition = False
 
-        if bPublish:
+        if bPublishMotion:
             self._publisher_motion_type.publish(motionType)
+
+        if bPublisPosition:
             self._publisher_standing_position.publish(standingPosition)
 
 
