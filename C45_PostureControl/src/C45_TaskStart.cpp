@@ -81,14 +81,26 @@ public:
     }
 
     TaskResult task(const string& name, const string& uid, Arguments& args) {
+
+        std::stringstream plan;
 	try{
-		
+		plan <<"<plan><seq>";
+		  plan << "<tsk name=\"C45_TaskStart\" id=\"IDTaskStart\" />";
+		  if(args.find("neck")!=args.end()){
+			plan << "<tsk name=\"resetHead("<< args["neck"] <<")\" id=\"IDresetHead\" />";
+		  }else{
+			plan << "<tsk name=\"resetHead\" id=\"IDresetHead\" />"; 
+		  }
+		  plan << "<tsk name=\"C45_TaskStop\" id=\"IDTaskStop\" />";
+		plan <<"</seq></plan>";
+
 	}catch(...){
 		ROS_INFO("resetHeadAll: some exception catched.");
 	}
 
 	ROS_INFO("resetHeadAll: finished");
-        return TaskResult("<plan><seq><tsk name=\"C45_TaskStart\" id=\"IDTaskStart\" /><tsk name=\"resetHead\" id=\"IDresetHead\" /><tsk name=\"C45_TaskStop\" id=\"IDTaskStop\" /></seq></plan>", "MyPlan");
+        return TaskResult(plan.str(), "MyPlan");
+
     }
 
 };
