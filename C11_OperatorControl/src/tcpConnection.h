@@ -50,6 +50,7 @@ public Q_SLOTS:
         void SendGridRequest();
         void SendPathRequest();
         void SendAllRequest();
+        void SendGridAndPathRequest();
 
 public:
 

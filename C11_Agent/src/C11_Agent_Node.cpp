@@ -593,6 +593,12 @@ void C11_Agent_Node::ResetRequest()
   cout<<"ResetRequest sent!"<<endl;
 }
 
+void C11_Agent_Node::GridAndPathRequest()
+{
+	pushS->occupancy_grid_task();
+	pushS->path_task();
+}
+
 void C11_Agent_Node::SendRobotData()
 {
 	pIAgentInterface->SendRobotData((StructPoint&)position,orientation);
