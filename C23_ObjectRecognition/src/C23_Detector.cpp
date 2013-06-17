@@ -2349,10 +2349,31 @@ it_(nh),
 					     }*/
 					    imshow("TESTING",srcImg);
 					    waitKey(0);
-					    // pictureCoordinatesToGlobalPosition(minRect.center.x-100,minRect.center.y+100,minRect.center.x+100,minRect.center.y+100,&x,&y,NULL);
-					    
-					    //FIXME:
-					    // with offset
+                        double z1;
+                        double x1 = MIN(rect_points[0].x,rect_points[1].x);
+                        double x2 = MIN(rect_points[2].x,rect_points[3].x);
+                        int min_x = MIN(x1,x2);
+                        
+                        double y1 = MIN(rect_points[0].y,rect_points[1].y);
+                        double y2 = MIN(rect_points[2].y,rect_points[3].y);
+                        int min_y = MIN(y1,y2);
+                        
+                        
+                        x1 = MAX(rect_points[0].x,rect_points[1].x);
+                        x2 = MAX(rect_points[2].x,rect_points[3].x);
+                        double max_x = MAX(x1,x2);
+                        
+                        y1 = MAX(rect_points[0].y,rect_points[1].y);
+                        y2 = MAX(rect_points[2].y,rect_points[3].y);
+                        double max_y = MAX(y1,y2);
+                        
+                        bool a_res = pictureCoordinatesToGlobalPosition(min_x,min_y,max_x,max_y, &x1, &y1,&z1, -1.5,0);
+                        if(!a_res) {
+                            return false;
+                        }
+                        x = x1;
+                        y = y1;
+					   
 					    return true;
 					}
 					return false;
