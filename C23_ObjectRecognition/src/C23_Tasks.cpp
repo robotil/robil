@@ -40,6 +40,7 @@ public:
 		if (isPreempt()) {
 			/* SHOULD STOP EVERYTHING RUNNING! */
 			ROS_INFO("searchObject::I've been preempted");
+            _detector->stopDetection();
 			return TaskResult::Preempted();
 		}
 		string target = getValueFromArgument(args, "target");
@@ -50,7 +51,7 @@ public:
 		while (!isPreempt()) {
             ros::Rate loop_rate(10);
             res = _detector->detect(target);
-            
+            _detector->stopDetection();
            if (_detector->_found) {
           //   if (false) {
                 return TaskResult(SUCCESS, "OK");
@@ -106,6 +107,7 @@ public:
             }   
            loop_rate.sleep();
 		}
+		_detector->stopDetection();
 	  return TaskResult(SUCCESS, "OK");
 	}
 
@@ -131,18 +133,23 @@ public:
 		ROS_INFO("trackObject::I was called\n");
 		if (isPreempt()) {
 			/* SHOULD STOP EVERYTHING RUNNING! */
+            _detector->stopDetection();
 			ROS_INFO("trackObject::I've been preempted");
 			return TaskResult::Preempted();
 		}
 		string target = getValueFromArgument(args, "target");
 		bool res;
+        int count = 0;
         res = _detector->detect(target);
         while (!isPreempt()) {
-			if (!(_detector->_found)) {
+			if (!(_detector->_found) && ++count >= 100) {
                 return TaskResult(FAULT, "Object isn't detected");
 			
           
-			}
+			} else {
+                    count = 0;
+            }
+            ros::Duration(0.5).sleep();
         }
 		
 		
