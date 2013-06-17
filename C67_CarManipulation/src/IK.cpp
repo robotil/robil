@@ -66,9 +66,9 @@ bool IkSqrSolve(double cc, double cs, double c1, double angle[2])
 }
 void IkSolution::Print()
 {
-	std::cout.precision(6);
-	std::cout.setf (std::ios::fixed , std::ios::floatfield ); 
-	std::cout << "q4-q9:"<< _q4<< ", "<< _q5<< ", "<< _q6<< ", "<< _q7<< ", "<< _q8<< ", "<< _q9<< std::endl;
+	//std::cout.precision(6);
+	//std::cout.setf (std::ios::fixed , std::ios::floatfield );
+	//std::cout << "q4-q9:"<< _q4<< ", "<< _q5<< ", "<< _q6<< ", "<< _q7<< ", "<< _q8<< ", "<< _q9<< std::endl;
 }
 IkSolution rIk5Dof(RPY target)
 {

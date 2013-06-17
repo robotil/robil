@@ -22,6 +22,7 @@ public:
   virtual void OnVRCScoreData(double timeSec, int competionScore, int falls, QString message) = 0;
   virtual void OnDownlinkUpdate(QString down) = 0;
   virtual void OnUplinkUpdate(QString up) = 0;
+  virtual void OnRobotData(StructPoint pos, StructOrientation orient) = 0;
 };
 
 class CTcpConnection : public QObject
@@ -49,6 +50,7 @@ public Q_SLOTS:
         void SendGridRequest();
         void SendPathRequest();
         void SendAllRequest();
+        void SendGridAndPathRequest();
 
 public:
 

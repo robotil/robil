@@ -12,6 +12,7 @@ from Abstractions.Odometer import *
 from CD_Bots import *
 
 from collections import deque
+from atlas_msgs.msg import AtlasSimInterfaceCommand
 
 ###################################################################################
 #--------------------------- CD State Machine -------------------------------------
@@ -36,13 +37,15 @@ class CD_StateMachine(StateMachine):
         StateMachine.AddState(self,State('WaitingForPhantom'))
         StateMachine.AddState(self,State('BothWalking'))
         StateMachine.AddState(self,State('WaitingForActual'))
+        StateMachine.AddState(self,State('WindDown'))
         
         # Add transitions
         StateMachine.AddTransition(self,'Idle',                 'Start',        'WaitingForPhantom')
         StateMachine.AddTransition(self,'WaitingForPhantom',    'Both',         'BothWalking')
         StateMachine.AddTransition(self,'BothWalking',          'Actual',       'WaitingForActual')
-        StateMachine.AddTransition(self,'WaitingForActual',     'None',         'Idle')
+        StateMachine.AddTransition(self,'WaitingForActual',     'WindingDown',  'WindDown')
         StateMachine.AddTransition(self,'WaitingForActual',     'Both',         'BothWalking')
+        StateMachine.AddTransition(self,'WindDown',             'Done',         'Idle')
 
     def Start(self):
         self._phantomRobot.AlignToPath()
@@ -77,11 +80,11 @@ class CD_StateMachine(StateMachine):
             print("CD StateMachine - WaitingForActual")
             if (5 > len(self._StepQueue)):
                 if (self._actualRobot.IsEndOfPath()):
-                    if (StateMachine.PerformTransition(self,'None')):
-                        print("CD_StateMachine::Idle")
-                        self._bIsDone = True
+                    if (StateMachine.PerformTransition(self,'WindingDown')):
+                        print("CD_StateMachine::WindingDown")
+                        self._WindingDownCounter = 0
                     else:
-                        raise StateMachineError("CD_StateMachine::Step() - could not perform transition 'None'")
+                        raise StateMachineError("CD_StateMachine::Step() - could not perform transition 'WindingDown'")
                 else:
                     self._actualRobot.PrepareNextSegment()
                     if (StateMachine.PerformTransition(self,'Both')):
@@ -90,6 +93,18 @@ class CD_StateMachine(StateMachine):
                         raise StateMachineError("CD_StateMachine::Step() - could not perform transition 'Both'")
             else:
                 command = self._actualRobot.Step()
+        elif ('WindDown' == self._CurrentState.Name):
+            print("CD StateMachine - WindDown")
+            self._phantomRobot.Step()
+            command = self._actualRobot.Step()
+            command = AtlasSimInterfaceCommand(None,AtlasSimInterfaceCommand.STAND, None, None, None, None, [0]*28)
+            self._WindingDownCounter += 1
+            if (self._WindingDownCounter > 1):
+                if (StateMachine.PerformTransition(self,'Done')):
+                    print("CD_StateMachine::Done")
+                    self._bIsDone = True
+                else:
+                    raise StateMachineError("CD_StateMachine::Step() - could not perform transition 'Done'")
         else:
             raise StateMachineError("CD_StateMachine::Step() - unknown state")
         return command

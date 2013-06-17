@@ -59,6 +59,8 @@ CMapMain::CMapMain(QWidget *parent, Qt::WFlags flags)
 	AddPix();
 	pCScaleItem = new CScaleItem(ui.graphicsView->scene());
 	ui.graphicsView->scene()->addItem(pCScaleItem);
+	pCRobotDataItem = new CRobotDataItem(ui.graphicsView->scene(),QString(""));
+	ui.graphicsView->scene()->addItem(pCRobotDataItem);
 	setMode(E_NULL_MODE);
 
 	routePathReady = NULL;;
@@ -113,6 +115,8 @@ CMapMain::CMapMain(int arr[100][100],QWidget *parent, Qt::WFlags flags)
 		AddPix();
 		pCScaleItem = new CScaleItem(ui.graphicsView->scene());
 		ui.graphicsView->scene()->addItem(pCScaleItem);
+		pCRobotDataItem = new CRobotDataItem(ui.graphicsView->scene(),QString(""));
+		ui.graphicsView->scene()->addItem(pCRobotDataItem);
 		setMode(E_NULL_MODE);
 
 		routePathReady = NULL;;
@@ -989,6 +993,21 @@ std::vector<StructPoint> CMapMain::GetUpdatedRoute()
 StructPoint CMapMain::GetGoal()
 {
   return GoalPoint;
+}
+
+void CMapMain::OnRobotData(StructPoint pos, StructOrientation orient)
+{
+	QString robotDataStr("Robot Pos: x= ");
+	robotDataStr.append(QString::number(pos.x));
+	robotDataStr.append(", y= ");
+	robotDataStr.append(QString::number(pos.y));
+	robotDataStr.append("   Robot orientation: yaw = ");
+	robotDataStr.append(QString::number(orient.yaw));
+	robotDataStr.append(", pitch= ");
+	robotDataStr.append(QString::number(orient.pitch));
+	robotDataStr.append(", roll= ");
+	robotDataStr.append(QString::number(orient.roll));
+	pCRobotDataItem->SetText(robotDataStr.append(QString::number(orient.pitch)));
 }
 
 bool CMapMain::IsPointsEqual(StructPoint p1, StructPoint p2)

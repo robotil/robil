@@ -17,6 +17,7 @@ ImageDraw::ImageDraw(int argc, char** argv, QWidget *parent, Qt::WFlags flags)
 	ui.mainToolBar->hide();
 	ui.menuBar->hide();
 	ui.statusBar->hide();
+	ui.wid1->hide();
 	ui.btnCreate->setEnabled(false);
 
 	ImageAreaCount = 0;
@@ -58,7 +59,7 @@ ImageDraw::ImageDraw(int argc, char** argv, QWidget *parent, Qt::WFlags flags)
             QString line = in.readLine();
 //	    pCTcpConnection = new CTcpConnection(QString("172.23.1.130"),45671);
             pCTcpConnection = new CTcpConnection(line,45675);
-            pImageCTcpConnection = new  CTcpConnection(line,45676);
+            pImageCTcpConnection = new  CTcpConnection(line,45678);
             pDesignerCTcpConnection = new CTcpConnection(line,45677);
 
 
@@ -230,7 +231,10 @@ void ImageDraw::OnVRCScoreData(double timeSec, int competionScore, int falls, QS
   ui.lblSimTime->setText(simTime.toString());
   ui.lblScoreData->setText(QString::number(competionScore));
   ui.lblFallsData->setText(QString::number(falls));
-  ui.lblMsg->setText(message);
+  if(message != "")
+  {
+	  ui.lblMsg->setText(message);
+  }
   update();
 }
 
@@ -242,6 +246,16 @@ void ImageDraw::OnDownlinkUpdate(QString down)
 void ImageDraw::OnUplinkUpdate(QString up)
 {
   ui.lblUplinkData->setText(up);
+}
+
+void ImageDraw::OnRobotData(StructPoint pos, StructOrientation orient)
+{
+	ui.lblPosX->setText(QString::number(pos.x,'f',3));
+	ui.lblPosY->setText(QString::number(pos.y,'f',3));
+	ui.lblOrientYaw->setText(QString::number(orient.yaw*RAD2DEG,'f',3));
+	ui.lblOrientPitch->setText(QString::number(orient.pitch*RAD2DEG,'f',3));
+	ui.lblOrientRoll->setText(QString::number(orient.roll*RAD2DEG,'f',3));
+//	ui.mapWidget->OnRobotData(pos,orient);
 }
 
 void ImageDraw::SltOnWaitTimeout()
@@ -471,6 +485,8 @@ void ImageDraw::SltOnAllowClick()
     case 4:
       pCTcpConnection->SendAllRequest();
       break;
+    case 5:
+    	break;
     default:
       break;
   }

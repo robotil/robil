@@ -13,14 +13,14 @@ class TaskCheckExtremeSlope:public RobilTask{
 protected:
 
 public:
-	TaskCheckExtremeSlope(SharedObjectForAllTasks& sofat, string name="/checkExtremeSlope"):
+	TaskCheckExtremeSlope(string name="/checkExtremeSlope"):
 		RobilTask(name)
 	{
 		
 	}
 	TaskResult task(const string& name, const string& uid, Arguments& args){
 
-		ros::ServiceClient foot_placement = nh.serviceClient<FootPlacement::FootPlacement_Service>("foot_placement");
+		ros::ServiceClient client = _node.serviceClient<FootPlacement::FootPlacement_Service>("foot_placement");
 		FootPlacement::FootPlacement_Service srv;
 
 		while(true){

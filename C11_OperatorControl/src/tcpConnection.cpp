@@ -305,6 +305,15 @@ void CTcpConnection::SltReadyRead()
           pITcpConnectionInterface->OnUplinkUpdate(up);
           ImgSize = 0;
         }
+        else if(9 == msgId)
+		{
+          StructPoint pos;
+          StructOrientation orient;
+		  in >> pos.x >> pos.y >> orient.yaw >> orient.pitch >> orient.roll;
+		  std::cout<<"TCP: Robot data -> "<<pos.x<<pos.y<<orient.yaw<<orient.pitch<<orient.roll<<"\n";
+		  pITcpConnectionInterface->OnRobotData(pos,orient);
+		  ImgSize = 0;
+		}
         else if(31 == msgId)
 		  {
  //       	IsSendingExecuterStatus = true;
@@ -561,6 +570,27 @@ void CTcpConnection::SendAllRequest()
   pConnection->waitForBytesWritten();
   std::cout<<"TCP: SendAllRequest sent\n";
 }
+
+void CTcpConnection::SendGridAndPathRequest()
+{
+	WaitingForResponse = false;
+	StructHeader header;
+	header.MessageID = 23;
+	header.DataSize = 0;
+	header.Counter = Counter;
+	Counter++;
+	QByteArray block;
+	QDataStream out(&block, QIODevice::WriteOnly);
+	out.setByteOrder(QDataStream::LittleEndian);
+	out << header.MessageID;
+	out << header.DataSize;
+	out << header.Counter;
+	pConnection->write(block);
+	pConnection->flush();
+	pConnection->waitForBytesWritten();
+	std::cout<<"TCP: SendAllRequest sent\n";
+}
+
 
 void CTcpConnection::SendNewGoal(StructPoint goal)
 {

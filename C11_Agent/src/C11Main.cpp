@@ -5,6 +5,8 @@ C11Main::C11Main(int argc, char **argv)
 {
   qRegisterMetaType<StructGridData>("StructGridData");
   qRegisterMetaType< vector<StructPoint> >("vector<StructPoint>");
+  qRegisterMetaType< StructPoint >("StructPoint");
+  qRegisterMetaType< StructOrientation >("StructOrientation");
   pC11Node = new C11_Agent_Node(argc, argv);
   pC11Node->init();
   pC11Node->SetAgentInterface(this);
@@ -18,6 +20,7 @@ C11Main::C11Main(int argc, char **argv)
   connect(this,SIGNAL(SigOnVRCScoreData(double,int,int,QString)),this,SLOT(SltOnVRCScoreData(double,int,int,QString)));
   connect(this,SIGNAL(SigOnSendDownlink(QString)),this,SLOT(SltOnSendDownlink(QString)));
   connect(this,SIGNAL(SigOnSendUplink(QString)),this,SLOT(SltOnSendUplink(QString)));
+  connect(this,SIGNAL(SigOnRobotData(StructPoint,StructOrientation)),this,SLOT(SltOnRobotData(StructPoint,StructOrientation)));
 }
 
 C11Main::~C11Main()
@@ -44,6 +47,11 @@ void C11Main::SetTcp(CTcpServer* ptcpServer)
   connect(pCTcpServer,SIGNAL(SigStopRequest()),this,SLOT(SltStopRequest()));
   connect(pCTcpServer,SIGNAL(SigNewGoalRequest(StructPoint)),this,SLOT(SltNewGoalRequest(StructPoint)));
   connect(pCTcpServer,SIGNAL(SigResetRequest()),this,SLOT(SltResetRequest()));
+  connect(pCTcpServer,SIGNAL(SigGridAndPathRequest()),this,SLOT(SltGridAndPathRequest()));
+
+  DataTimer = new QTimer(this);
+  connect(DataTimer,SIGNAL(timeout()),this,SLOT(SltOnDataTimerTimeout()));
+  DataTimer->start(3000);
 }
 
 void C11Main::SetImgTcp(CTcpServer* ptcpServer)
@@ -103,6 +111,11 @@ void C11Main::SendUplink(QString up)
   emit SigOnSendUplink(up);
 }
 
+void C11Main::SendRobotData(StructPoint pos, StructOrientation orient)
+{
+	emit SigOnRobotData(pos,orient);
+}
+
 void C11Main::SltOnImageSend(QImage img)
 {
   pImageCTcpServer->SendImage(img);
@@ -153,6 +166,11 @@ void C11Main::SltOnSendDownlink(QString down)
 void C11Main::SltOnSendUplink(QString up)
 {
   pCTcpServer->SendUplink(up);
+}
+
+void C11Main::SltOnRobotData(StructPoint pos, StructOrientation orient)
+{
+	pCTcpServer->SendRobotData(pos,orient);
 }
 
 void C11Main::SltHMIResponded()
@@ -213,4 +231,14 @@ void C11Main::SltNewGoalRequest(StructPoint goal)
 void C11Main::SltResetRequest()
 {
   pC11Node->ResetRequest();
+}
+
+void C11Main::SltGridAndPathRequest()
+{
+
+}
+
+void C11Main::SltOnDataTimerTimeout()
+{
+	pC11Node->SendRobotData();
 }

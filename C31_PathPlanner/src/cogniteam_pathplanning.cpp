@@ -97,6 +97,15 @@ Map MapEditor::replace(const Map& source, const char from, const char to)const{
 	return res;
 }
 
+ObsMap MapEditor::removeNearest(const ObsMap& m1, const size_t& px, const size_t& py)const{
+	Map res ( m1 );
+	for( int y=py-2; y<=py+2; y++){for( int x=px-2; x<=py+2; x++){
+		if(x<0||y<0||x>=m1.w()||x>=m1.h()) continue;
+		res(x,y) = ObsMap::ST_AVAILABLE;
+	}}
+	return res;
+}
+
 ObsMap MapEditor::	merge(const ObsMap& m1, const ObsMap& m2, MergeOperator op)const{
 	if(m1.w()!=m2.w() || m1.h()!=m2.h()){
 		cout<<"ERROR: MapEditor::merge: dimensions of maps are different"<<endl;
@@ -504,6 +513,9 @@ PField::Points searchPath_transitAccurate(
 
 	//o_obstacles = inflated_map;
 
+	inflated_map = e.removeNearest(inflated_map, start.x, start.y);
+	inflated_map = e.removeNearest(inflated_map, finish.x, finish.y);
+
 	if( inflated_map(start.x, start.y)==Map::ST_BLOCKED || inflated_map(finish.x, finish.y)==Map::ST_BLOCKED ){
 		cout<<"searchPath: "<<"some of interesting points are unattainable (after inflation)"<<endl;
 		return EmptyPath;
@@ -571,14 +583,17 @@ PField::Points searchPath_transitAccurate(
 		}
 
 #undef SEGMENT
-#undef DO_SMOOTHING
+
 #ifdef DO_SMOOTHING
 		PField::SmoothingParameters pf_params;
 		SET_PF_PARAMETERS(pf_params)
 
 		PField pf(s_walls, path);
+	#ifdef SMOOTHING_WITHOUT_PF
+		PField::Points smoothed_path = pf.smooth_withoutPF(pf_params);
+	#else
 		PField::Points smoothed_path = pf.smooth(pf_params);
-
+	#endif
 #else
 		PField::Points smoothed_path;
 		for( size_t p=0; p<path.size(); p++ )

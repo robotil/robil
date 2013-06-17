@@ -30,6 +30,7 @@ Q_SIGNALS:
         void SigStopRequest();
         void SigNewGoalRequest(StructPoint goal);
         void SigResetRequest();
+        void SigGridAndPathRequest();
 
 public Q_SLOTS:
         void SltOnNewConnection();
@@ -49,6 +50,7 @@ public:
         void SendVRCScoreData(double timeSec, int competionScore, int falls, QString message);
         void SendDownlink(QString str);
         void SendUplink(QString str);
+        void SendRobotData(StructPoint& pos, StructOrientation& orient);
 
 private:
         QTcpServer *pTcpServer;

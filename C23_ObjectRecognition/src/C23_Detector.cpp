@@ -724,8 +724,25 @@ it_(nh),
 		  std::cout<<imageName<<endl;
 		  pcl::PointCloud<pcl::PointXYZ>::Ptr cloud2 = filterPointCloud(last_x,last_y,width,height,lastCloud);
 		  templateMatching3D(t, cloud2);
-	      }
-	      else if(!target.compare("Gear")) {
+        } else if(!target.compare("Standpipe")) {
+            char basePath[1000],imageName[1000];
+            
+            sprintf(basePath,"%s/3D_models/%s%c",ros::package::getPath("C23_ObjectRecognition").c_str(),"standpipe.txt",'\0');
+            string t = basePath;
+            // string t = "/home/isl/darpa/robil/C23_ObjectRecognition/3D_models/firehose.txt";
+            std::cout<<imageName<<endl;
+            pcl::PointCloud<pcl::PointXYZ>::Ptr cloud2 = filterPointCloud(last_x,last_y,width,height,lastCloud);
+            templateMatching3D(t, cloud2);
+        }else if(!target.compare("Valve")) {
+            char basePath[1000],imageName[1000];
+            
+            sprintf(basePath,"%s/3D_models/%s%c",ros::package::getPath("C23_ObjectRecognition").c_str(),"valve.txt",'\0');
+            string t = basePath;
+            // string t = "/home/isl/darpa/robil/C23_ObjectRecognition/3D_models/firehose.txt";
+            std::cout<<imageName<<endl;
+            pcl::PointCloud<pcl::PointXYZ>::Ptr cloud2 = filterPointCloud(last_x,last_y,width,height,lastCloud);
+            templateMatching3D(t, cloud2);
+        } else if(!target.compare("Gear")) {
 		  char basePath[1000],imageName[1000];
 		  
 		  sprintf(basePath,"%s/3D_models/%s%c",ros::package::getPath("C23_ObjectRecognition").c_str(),"gear.txt",'\0');
@@ -745,8 +762,7 @@ it_(nh),
 		    status = "Reverse";
 		    ROS_INFO("Gear status: Reverse");
 		  }
-		}
-		else if(!target.compare("InsideSteeringWheel")) {
+		} else if(!target.compare("InsideSteeringWheel")) {
 		  char basePath[1000],imageName[1000];
 		  
 		  sprintf(basePath,"%s/3D_models/%s%c",ros::package::getPath("C23_ObjectRecognition").c_str(),"insideSteeringWheel.txt",'\0');
@@ -755,8 +771,7 @@ it_(nh),
 		  std::cout<<imageName<<endl;
 		  pcl::PointCloud<pcl::PointXYZ>::Ptr cloud2 = filterPointCloud(last_x,last_y,width,height,lastCloud);
 		  templateMatching3D(t, cloud2);
-		  }
-		  else if(!target.compare("OutsideSteeringWheel")) {
+		} else if(!target.compare("OutsideSteeringWheel")) {
 		    char basePath[1000],imageName[1000];
 		    
 		    sprintf(basePath,"%s/3D_models/%s%c",ros::package::getPath("C23_ObjectRecognition").c_str(),"outsideSteeringWheel.txt",'\0');
@@ -765,7 +780,7 @@ it_(nh),
 		  std::cout<<imageName<<endl;
 		  pcl::PointCloud<pcl::PointXYZ>::Ptr cloud2 = filterPointCloud(last_x,last_y,width,height,lastCloud);
 		  templateMatching3D(t, cloud2);
-		  }else if(!target.compare("Handbrake")) {
+	 } else if(!target.compare("Handbrake")) {
 		    orient_x = x;
 		    orient_y = y;
 		    orient_z = z;
@@ -959,7 +974,7 @@ it_(nh),
 					} break; }
 					Eigen::Matrix4f sensorTopelvis;
 					pcl_ros::transformAsMatrix(transform, sensorTopelvis);
-					pcl::transformPointCloud(detectionCloud, detectionCloud, sensorTopelvis);
+				//	pcl::transformPointCloud(detectionCloud, detectionCloud, sensorTopelvis);
 					
 					//Set the x,y,width and height to -1;
 					last_x  = -1;
@@ -1919,25 +1934,35 @@ it_(nh),
 					     * // ellipse
 					     * ellipse( imgThreshed, minEllipse[i], color, 2, 8 );
 					     }*/
-					    imshow("TESTING",srcImg);
-					    waitKey(0);
-					    int x1 = MIN(rect_points[0].x,rect_points[1].x);
-					    int x2 = MIN(rect_points[2].x,rect_points[3].x);
-					    int min_x = MIN(x1,x2);
-					    
-					    int y1 = MIN(rect_points[0].y,rect_points[1].y);
-					    int y2 = MIN(rect_points[2].y,rect_points[3].y);
-					    int min_y = MIN(y1,y2);
-					    
-					    
-					    x1 = MAX(rect_points[0].x,rect_points[1].x);
-					    x2 = MAX(rect_points[2].x,rect_points[3].x);
-					    int max_x = MAX(x1,x2);
-					    
-					    y1 = MAX(rect_points[0].y,rect_points[1].y);
-					    y2 = MAX(rect_points[2].y,rect_points[3].y);
-					    int max_y = MAX(y1,y2);
-					    
+					   // imshow("TESTING",srcImg);
+					 //   waitKey(0);
+                    
+                        
+                        
+                        
+                        int x1 = MIN(rect_points[0].x,rect_points[1].x);
+                        int x2 = MIN(rect_points[2].x,rect_points[3].x);
+                        int min_x = MIN(x1,x2);
+                        
+                        int y1 = MIN(rect_points[0].y,rect_points[1].y);
+                        int y2 = MIN(rect_points[2].y,rect_points[3].y);
+                        int min_y = MIN(y1,y2);
+                        
+                        
+                        x1 = MAX(rect_points[0].x,rect_points[1].x);
+                        x2 = MAX(rect_points[2].x,rect_points[3].x);
+                        int max_x = MAX(x1,x2);
+                        
+                        y1 = MAX(rect_points[0].y,rect_points[1].y);
+                        y2 = MAX(rect_points[2].y,rect_points[3].y);
+                        int max_y = MAX(y1,y2);
+                        string t = "Valve.pcd";
+                        cout << "Saving valve" << endl;
+                      //  saveTemplate(min_x,min_y,max_x-min_x,max_y-min_y,cloud,t);
+                        last_x = min_x;
+                        last_y = min_y;
+                        width = (max_x-min_x);
+                        height = (max_y-min_y);
 					    // pcl::PointCloud<pcl::PointXYZ>::Ptr cloud2 = filterPointCloud(min_x,min_y,max_x-min_x,max_y-min_y,cloud);
 					    // templateMatching3D(t,cloud2);
 					    
@@ -2133,8 +2158,8 @@ it_(nh),
 					    int max_y = MAX(y1,y2);
 					    string t = "FireHoseGrip";
 					    cout << "Saving firehose" << endl;
-					    // saveTemplate(min_x,min_y,max_x-min_x,max_y-min_y,cloud,t);
-					    // templateMatching3D(t,lastCloud);
+					 //   saveTemplate(min_x,min_y,max_x-min_x,max_y-min_y,cloud,t);
+					   //  templateMatching3D(t,lastCloud);
 					    last_x = min_x;
 					    last_y = min_y;
 					    width = (max_x-min_x);
@@ -2154,20 +2179,20 @@ it_(nh),
 					cvtColor(srcImg,imgHSV,CV_BGR2HSV);
 					inRange(imgHSV,Scalar(0, 120, 50), Scalar(3, 180, 70),imgThreshed);
 					//namedWindow("TESTING");
-					imshow("TESTING",imgThreshed);
-					waitKey(0);
+			//		imshow("TESTING",imgThreshed);
+				//	waitKey(0);
 					// imwrite("test12.jpg",imgThreshed);
 					Mat imgDilated;
 					Mat element = getStructuringElement( MORPH_ELLIPSE,
 									     Size( 2*18 + 1, 2*18+1 ),
-									     cv::Point( 18, 18 ) );
+									     cv::Point( 24, 24 ) );
 					/// Apply the dilation operation
 					dilate( imgThreshed, imgDilated, element );
 					Mat bw;
 					vector<vector<cv::Point> > contours;
 					threshold(imgDilated,bw,10,255,CV_THRESH_BINARY);
-					imshow("TESTING",bw);
-					waitKey(0);
+					//imshow("TESTING",bw);
+					//waitKey(0);
 					cv::Scalar colors[3];
 					colors[0] = cv::Scalar(120, 120, 0);
 					colors[1] = cv::Scalar(120, 255, 0);
@@ -2180,7 +2205,7 @@ it_(nh),
 					
 					// drawContours(srcImg,contours,-1,CV_RGB(255,0,0),2);
 					// imshow("TESSTING",srcImg);
-					waitKey(0);
+					//waitKey(0);
 					vector<RotatedRect> minEllipse( contours.size() );
 					int biggest_size = 0;
 					int biggest = 0;
@@ -2231,12 +2256,16 @@ it_(nh),
 					  y1 = MAX(rect_points[0].y,rect_points[1].y);
 					  y2 = MAX(rect_points[2].y,rect_points[3].y);
 					  int max_y = MAX(y1,y2);
-					  string t = "Standpipe";
+					  string t = "Standpipe.pcd";
 					  cout << "Saving standpipe" << endl;
-					  // saveTemplate(min_x,min_y,max_x-min_x,max_y-min_y,cloud,t);
+                      last_x = min_x;
+                      last_y = min_y;
+                      width = (max_x-min_x);
+                      height = (max_y-min_y);
+					//   saveTemplate(min_x,min_y,max_x-min_x,max_y-min_y,cloud,t);
 					  // templateMatching3D(t,lastCloud);
-					  imshow("TESTING",srcImg);
-					  waitKey(0);
+				//	  imshow("TESTING",srcImg);
+					 // waitKey(0);
 					  // pictureCoordinatesToGlobalPosition(minRect.center.x-100,minRect.center.y+100,minRect.center.x+100,minRect.center.y+100,&x,&y,NULL);
 					  return true;
 					}

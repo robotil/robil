@@ -71,6 +71,7 @@ public:
 	typedef vector<Point> Path;
 
 private:
+	struct NoPathException{};
 
 	double heuristic_cost_estimate(const Point& start, const Point& goal)const;
 	double cost_estimate(const Point& current, const Point& neighbor)const;

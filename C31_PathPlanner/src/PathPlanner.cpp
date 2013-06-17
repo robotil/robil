@@ -3,13 +3,14 @@
 
 #include <C22_transformations/MapTransformations.h>
 
+#include "cogniteam_pathplanner_parameters.h"
+
 typedef World Map;
 
 // copy from HEADER
 #define SYNCHRONIZED boost::mutex::scoped_lock l(_mtx);
 #define LOCK( X ) boost::shared_ptr<boost::mutex::scoped_lock> X(new boost::mutex::scoped_lock(_mtx));
 #define UNLOCK( X ) X = boost::shared_ptr<boost::mutex::scoped_lock>();
-
 
 	bool PathPlanning::plan(){
 		bool plan_created = false;
@@ -30,20 +31,33 @@ typedef World Map;
 
 			Constraints constraints(_data.dimentions, _data.transits, _data.attractors);
 			
+			ObsMap printed_map = _data.map.walls;;
+			SmoothedPath _path;
 
-#if MAP_MODE == MM_ALTS
-			_data.map.walls(_data.start.x, _data.start.y) = ObsMap::ST_AVAILABLE;
-			ObsMap printed_map = _data.map.walls;
-			SmoothedPath _path = searchPath_transitAccurate(
-					_data.map.altitudes, _data.map.slops, _data.map.costs, _data.map.walls, _data.map.grid, _data.map.terrain,
-					_data.start, _data.finish, constraints, printed_map
-			);
+#ifdef USE_TRANSITS_AS_PLAN
+			if(_data.transits.size()>0){
 #else
-			_data.map.grid(_data.start.x, _data.start.y) = ObsMap::ST_AVAILABLE;
-			ObsMap printed_map = _data.map.grid;
-			SmoothedPath _path = searchPath_transitAccurate(_data.map.grid, _data.start, _data.finish, constraints);
+			if(false){
 #endif
-
+				ROS_INFO("WARNING: PLANNING RESULT IS TRANSIT POINTS AS IS.");
+				printed_map = _data.map.walls;
+				for(size_t i=0; i<_data.transits.size(); i++){
+					_path.push_back(Vec2d(_data.transits[i].x,_data.transits[i].y));
+				}
+			}else{
+#if MAP_MODE == MM_ALTS
+				_data.map.walls(_data.start.x, _data.start.y) = ObsMap::ST_AVAILABLE;
+				printed_map = _data.map.walls;
+				_path = searchPath_transitAccurate(
+						_data.map.altitudes, _data.map.slops, _data.map.costs, _data.map.walls, _data.map.grid, _data.map.terrain,
+						_data.start, _data.finish, constraints, printed_map
+				);
+#else
+				_data.map.grid(_data.start.x, _data.start.y) = ObsMap::ST_AVAILABLE;
+				printed_map = _data.map.grid;
+				_path = searchPath_transitAccurate(_data.map.grid, _data.start, _data.finish, constraints);
+#endif
+			}
 			ROS_INFO("Calculated path (%i): %s",(int)(_path.size()),STR(_path));
 			
 			PField pf(printed_map, Path());

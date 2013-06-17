@@ -199,6 +199,8 @@ public:
 	};
 	ObsMap merge(const ObsMap& m1, const ObsMap& m2, MergeOperator op)const;
 
+	ObsMap removeNearest(const ObsMap& m1, const size_t& px, const size_t& py)const;
+
 private:
 	void coloring(const ObsMap& source, size_t x, size_t y, char c, char av, char bl, ObsMap& visited, ObsMap& res)const;
 

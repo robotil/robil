@@ -21,6 +21,8 @@
 #include <tf/transform_listener.h>
 #include <atlas_msgs/AtlasCommand.h>
 #include <math.h>
+#include <PoseController/hand_movement.h>
+#include <std_srvs/Empty.h>
 
 class move_hand_service{
 
@@ -30,6 +32,7 @@ protected:
 	ros::ServiceServer move_hand_srv_,pelvis_move_hand_srv_,C66_matrix_srv_,wheel_move_hand_srv_;
 	ros::ServiceClient traj_vector_cli_,wheel_traj_vector_cli_;
 	ros::ServiceClient arms_val_calc_cli_;
+	ros::ServiceClient hand_C45_cli;
 	ros::Subscriber joint_states_sub_;
 	double q0_l,q1_l,q2_l,q3_l,q4_l,q5_l;
 	double q0_r,q1_r,q2_r,q3_r,q4_r,q5_r;
@@ -38,6 +41,7 @@ protected:
 	std::map <std::string, int> joints;
 	std::vector<double> positions;
 	ros::Publisher pub_joint_commands_;
+	PoseController::hand_movement C45_hand_move;
 
 private:
 	int _n;
@@ -79,6 +83,7 @@ public:
 		rosnode = new ros::NodeHandle();
 		ros::NodeHandle nh_private("~");
 		traj_vector_cli_ = nh_.serviceClient<traj_splitter_to_vector::trajectory_vector>("traj_vector_server");
+		hand_C45_cli = nh_.serviceClient<PoseController::hand_movement>("/PoseController/hand_movement");
 		wheel_traj_vector_cli_ = nh_.serviceClient<traj_splitter_to_vector::trajectory_vector>("wheel_traj_vector_server");
 		while((!traj_vector_cli_.waitForExistence(ros::Duration(1.0)))&&(!wheel_traj_vector_cli_.waitForExistence(ros::Duration(1.0)))){
 			ROS_INFO("Waiting for the traj_vector_server server");
@@ -99,15 +104,15 @@ public:
 		pub_joint_commands_ = rosnode->advertise<atlas_msgs::AtlasCommand>("/atlas/atlas_command", 1, true);
 
 		move_hand_srv_ = nh_.advertiseService("move_hand", &move_hand_service::gen_traj, this);
-		ROS_INFO("running move hand service");
+		//ROS_INFO("running move hand service");
 
 		pelvis_move_hand_srv_ = nh3_.advertiseService("pelvis_move_hand",&move_hand_service::pelvis_move_hand_CB,this);
-		ROS_INFO("running pelvis move hand service");
+		//ROS_INFO("running pelvis move hand service");
 
 		C66_matrix_srv_ = nh4_.advertiseService("C66_matrix",&move_hand_service::matrix_in,this);
 
 		wheel_move_hand_srv_ = nh5_.advertiseService("wheel_move_hand",&move_hand_service::wheel_move_hand_CB,this);
-		ROS_INFO("running wheel move hand service");
+		//ROS_INFO("running wheel move hand service");
 
 	}
 	~move_hand_service(){
@@ -314,41 +319,53 @@ public:
 
 					atlas_command.position[joints["l_arm_usy"]] = p0_l + v_left.response.q_left_dot[0]*traj_vec_left_srv.response.dt[ind];
 					//atlas_command.velocity[joints["l_arm_usy"]] = v_left.response.q_left_dot[0];
+					C45_hand_move.request.l_arm_usy = atlas_command.position[joints["l_arm_usy"]];
 					p0_l = atlas_command.position[joints["l_arm_usy"]];
 					atlas_command.position[joints["l_arm_shx"]] = p1_l + v_left.response.q_left_dot[1]*traj_vec_left_srv.response.dt[ind];
 					//atlas_command.velocity[joints["l_arm_shx"]] = v_left.response.q_left_dot[1];
+					C45_hand_move.request.l_arm_shx = atlas_command.position[joints["l_arm_shx"]];
 					p1_l = atlas_command.position[joints["l_arm_shx"]];
 					atlas_command.position[joints["l_arm_ely"]] = p2_l + v_left.response.q_left_dot[2]*traj_vec_left_srv.response.dt[ind];
 					//atlas_command.velocity[joints["l_arm_ely"]] = v_left.response.q_left_dot[2];
+					C45_hand_move.request.l_arm_ely = atlas_command.position[joints["l_arm_ely"]];
 					p2_l = atlas_command.position[joints["l_arm_ely"]];
 					atlas_command.position[joints["l_arm_elx"]] = p3_l + v_left.response.q_left_dot[3]*traj_vec_left_srv.response.dt[ind];
 					//atlas_command.velocity[joints["l_arm_elx"]] = v_left.response.q_left_dot[3];
+					C45_hand_move.request.l_arm_elx = atlas_command.position[joints["l_arm_elx"]];
 					p3_l = atlas_command.position[joints["l_arm_elx"]];
 					atlas_command.position[joints["l_arm_uwy"]] = p4_l + v_left.response.q_left_dot[4]*traj_vec_left_srv.response.dt[ind];
 					//atlas_command.velocity[joints["l_arm_uwy"]] = v_left.response.q_left_dot[4];
+					C45_hand_move.request.l_arm_uwy = atlas_command.position[joints["l_arm_uwy"]];
 					p4_l = atlas_command.position[joints["l_arm_uwy"]];
 					atlas_command.position[joints["l_arm_mwx"]] = p5_l + v_left.response.q_left_dot[5]*traj_vec_left_srv.response.dt[ind];
 					//atlas_command.velocity[joints["l_arm_mwx"]] = v_left.response.q_left_dot[5];
+					C45_hand_move.request.l_arm_mwx = atlas_command.position[joints["l_arm_mwx"]];
 					p5_l = atlas_command.position[joints["l_arm_mwx"]];
 
 
 					atlas_command.position[joints["r_arm_usy"]] = p0_r + v_right.response.q_right_dot[0]*traj_vec_right_srv.response.dt[ind];
 					//atlas_command.velocity[joints["r_arm_usy"]] = v_right.response.q_right_dot[0];
+					C45_hand_move.request.r_arm_usy = atlas_command.position[joints["r_arm_usy"]];
 					p0_r = atlas_command.position[joints["r_arm_usy"]];
 					atlas_command.position[joints["r_arm_shx"]] = p1_r + v_right.response.q_right_dot[1]*traj_vec_right_srv.response.dt[ind];
 					//atlas_command.velocity[joints["r_arm_shx"]] = v_right.response.q_right_dot[1];
+					C45_hand_move.request.r_arm_shx = atlas_command.position[joints["r_arm_shx"]];
 					p1_r = atlas_command.position[joints["r_arm_shx"]];
 					atlas_command.position[joints["r_arm_ely"]] = p2_r + v_right.response.q_right_dot[2]*traj_vec_right_srv.response.dt[ind];
 					//atlas_command.velocity[joints["r_arm_ely"]] = v_right.response.q_right_dot[2];
+					C45_hand_move.request.r_arm_ely = atlas_command.position[joints["r_arm_ely"]];
 					p2_r = atlas_command.position[joints["r_arm_ely"]];
 					atlas_command.position[joints["r_arm_elx"]] = p3_r + v_right.response.q_right_dot[3]*traj_vec_right_srv.response.dt[ind];
 					//atlas_command.velocity[joints["r_arm_elx"]] = v_right.response.q_right_dot[3];
+					C45_hand_move.request.r_arm_elx = atlas_command.position[joints["r_arm_elx"]];
 					p3_r = atlas_command.position[joints["r_arm_elx"]];
 					atlas_command.position[joints["r_arm_uwy"]] = p4_r + v_right.response.q_right_dot[4]*traj_vec_right_srv.response.dt[ind];
 					//atlas_command.velocity[joints["r_arm_uwy"]] = v_right.response.q_right_dot[4];
+					C45_hand_move.request.r_arm_uwy = atlas_command.position[joints["r_arm_uwy"]];
 					p4_r = atlas_command.position[joints["r_arm_uwy"]];
 					atlas_command.position[joints["r_arm_mwx"]] = p5_r + v_right.response.q_right_dot[5]*traj_vec_right_srv.response.dt[ind];
 					//atlas_command.velocity[joints["r_arm_mwx"]] = v_right.response.q_right_dot[5];
+					C45_hand_move.request.r_arm_mwx = atlas_command.position[joints["r_arm_mwx"]];
 					p5_r = atlas_command.position[joints["r_arm_mwx"]];
 
 
@@ -413,7 +430,8 @@ public:
 						return false;
 					}
 					// To be reached 1+ind second after the start of the trajectory
-					pub_joint_commands_.publish(atlas_command);
+					//pub_joint_commands_.publish(atlas_command);
+					hand_C45_cli.call(C45_hand_move);
 					ros::Duration(traj_vec_left_srv.response.dt[ind]).sleep();
 				}else{
 					ROS_ERROR("Could not reach gen arms velocity vector server");
@@ -445,10 +463,10 @@ public:
 	}
 
 	bool pelvis_move_hand_CB(move_hand::pelvis_move_handRequest &req,move_hand::pelvis_move_handResponse &res){
-		ROS_INFO("pelvis move hand: got request left: x y z R P Y: %f %f %f %f %f %f",req.PositionDestination_left.x,req.PositionDestination_left.y,req.PositionDestination_left.z,
-																					  req.AngleDestination_left.x,req.AngleDestination_left.y,req.AngleDestination_left.z);
-		ROS_INFO("pelvis move hand: got request right: x y z R P Y: %f %f %f %f %f %f",req.PositionDestination_right.x,req.PositionDestination_right.y,req.PositionDestination_right.z,
-																							  req.AngleDestination_right.x,req.AngleDestination_right.y,req.AngleDestination_right.z);
+		//ROS_INFO("pelvis move hand: got request left: x y z R P Y: %f %f %f %f %f %f",req.PositionDestination_left.x,req.PositionDestination_left.y,req.PositionDestination_left.z,
+		//																			  req.AngleDestination_left.x,req.AngleDestination_left.y,req.AngleDestination_left.z);
+		//ROS_INFO("pelvis move hand: got request right: x y z R P Y: %f %f %f %f %f %f",req.PositionDestination_right.x,req.PositionDestination_right.y,req.PositionDestination_right.z,
+																				//			  req.AngleDestination_right.x,req.AngleDestination_right.y,req.AngleDestination_right.z);
 		double cosr_left,sinr_left,cosp_left,sinp_left,cosy_left,siny_left,cosr_right,sinr_right,cosp_right,sinp_right,cosy_right,siny_right;
 		double cosr_tf_left,sinr_tf_left,cosp_tf_left,sinp_tf_left,cosy_tf_left,siny_tf_left,cosr_tf_right,sinr_tf_right,cosp_tf_right,sinp_tf_right,cosy_tf_right,siny_tf_right;
 		cosr_left = cos(req.AngleDestination_left.x);
@@ -477,7 +495,7 @@ public:
 				-sinp_right,                    cosp_right*sinr_right,                                      cosp_right*cosr_right,                                 req.PositionDestination_right.z,
 				0,                                    0,                                                              0,                                                  1;
 		tf::StampedTransform transform_left,transform_right,transform_left_finger,transform_right_finger;
-		ROS_INFO("taking tf info");
+		//ROS_INFO("taking tf info");
 		try {
 			listener.waitForTransform("/l_clav","/pelvis",ros::Time(0),ros::Duration(0.2));
 			listener.lookupTransform("/l_clav","/pelvis",ros::Time(0),transform_left);
@@ -547,8 +565,8 @@ public:
 			move_hand_msg.request.AngleDestination_left.x = (atan2((double)left_mat(2,1),(double)left_mat(2,2))) - QuatToRoll(transform_left_finger.getRotation());
 			move_hand_msg.request.AngleDestination_left.y = (atan2((double)left_mat(2,0)*-1,sqrt(pow((double)left_mat(2,1),2)+pow((double)left_mat(2,2),2))))- QuatToPitch(transform_left_finger.getRotation());
 			move_hand_msg.request.AngleDestination_left.z = (atan2((double)left_mat(1,0),(double)left_mat(0,0)))- QuatToYaw(transform_left_finger.getRotation());
-			ROS_INFO("pelvis move to hand move: left x y z roll pitch yaw: %f %f %f %f %f %f",move_hand_msg.request.PositionDestination_left.x,move_hand_msg.request.PositionDestination_left.y,move_hand_msg.request.PositionDestination_left.z,
-					move_hand_msg.request.AngleDestination_left.x,move_hand_msg.request.AngleDestination_left.y,move_hand_msg.request.AngleDestination_left.z);
+	//		ROS_INFO("pelvis move to hand move: left x y z roll pitch yaw: %f %f %f %f %f %f",move_hand_msg.request.PositionDestination_left.x,move_hand_msg.request.PositionDestination_left.y,move_hand_msg.request.PositionDestination_left.z,
+		//			move_hand_msg.request.AngleDestination_left.x,move_hand_msg.request.AngleDestination_left.y,move_hand_msg.request.AngleDestination_left.z);
 		}
 		if(!(req.PositionDestination_right.x==0 && req.PositionDestination_right.y==0 && req.PositionDestination_right.z==0))
 		{
@@ -559,11 +577,11 @@ public:
 			move_hand_msg.request.AngleDestination_right.x = (atan2((double)right_mat(2,1),(double)right_mat(2,2))) - QuatToRoll(transform_right_finger.getRotation());
 			move_hand_msg.request.AngleDestination_right.y = (atan2((double)right_mat(2,0)*-1,sqrt(pow((double)right_mat(2,1),2)+pow((double)right_mat(2,2),2)))) - QuatToPitch(transform_right_finger.getRotation());
 			move_hand_msg.request.AngleDestination_right.z = (atan2((double)right_mat(1,0),(double)right_mat(0,0)))- QuatToYaw(transform_right_finger.getRotation());
-			ROS_INFO("pelvis move to hand move: right x y z roll pitch yaw: %f %f %f %f %f %f",move_hand_msg.request.PositionDestination_right.x,move_hand_msg.request.PositionDestination_right.y,move_hand_msg.request.PositionDestination_right.z,
-					move_hand_msg.request.AngleDestination_right.x,move_hand_msg.request.AngleDestination_right.y,move_hand_msg.request.AngleDestination_right.z);
+			//ROS_INFO("pelvis move to hand move: right x y z roll pitch yaw: %f %f %f %f %f %f",move_hand_msg.request.PositionDestination_right.x,move_hand_msg.request.PositionDestination_right.y,move_hand_msg.request.PositionDestination_right.z,
+			//		move_hand_msg.request.AngleDestination_right.x,move_hand_msg.request.AngleDestination_right.y,move_hand_msg.request.AngleDestination_right.z);
 			move_hand_msg.request.quick = req.quick;
 		}
-		ROS_INFO("moving hand");
+		//ROS_INFO("moving hand");
 
 		if (gen_traj(move_hand_msg.request,move_hand_msg.response))
 		{
@@ -575,10 +593,10 @@ public:
 		position1();
 		ros::Duration(0.5).sleep();
 
-		ROS_INFO("moving hand");
+		//ROS_INFO("moving hand");
 		ros::spinOnce();
 
-		ROS_INFO("taking tf info");
+		//ROS_INFO("taking tf info");
 		try {
 			listener.waitForTransform("/l_clav","/pelvis",ros::Time(0),ros::Duration(0.2));
 			listener.lookupTransform("/l_clav","/pelvis",ros::Time(0),transform_left);
@@ -648,8 +666,8 @@ public:
 			move_hand_msg.request.AngleDestination_left.x = (atan2((double)left_mat(2,1),(double)left_mat(2,2))) - QuatToRoll(transform_left_finger.getRotation());
 			move_hand_msg.request.AngleDestination_left.y = (atan2((double)left_mat(2,0)*-1,sqrt(pow((double)left_mat(2,1),2)+pow((double)left_mat(2,2),2))))- QuatToPitch(transform_left_finger.getRotation());
 			move_hand_msg.request.AngleDestination_left.z = (atan2((double)left_mat(1,0),(double)left_mat(0,0)))- QuatToYaw(transform_left_finger.getRotation());
-			ROS_INFO("pelvis move to hand move: left x y z roll pitch yaw: %f %f %f %f %f %f",move_hand_msg.request.PositionDestination_left.x,move_hand_msg.request.PositionDestination_left.y,move_hand_msg.request.PositionDestination_left.z,
-					move_hand_msg.request.AngleDestination_left.x,move_hand_msg.request.AngleDestination_left.y,move_hand_msg.request.AngleDestination_left.z);
+			//ROS_INFO("pelvis move to hand move: left x y z roll pitch yaw: %f %f %f %f %f %f",move_hand_msg.request.PositionDestination_left.x,move_hand_msg.request.PositionDestination_left.y,move_hand_msg.request.PositionDestination_left.z,
+				//	move_hand_msg.request.AngleDestination_left.x,move_hand_msg.request.AngleDestination_left.y,move_hand_msg.request.AngleDestination_left.z);
 		}
 		if(!(req.PositionDestination_right.x==0 && req.PositionDestination_right.y==0 && req.PositionDestination_right.z==0))
 		{
@@ -660,11 +678,11 @@ public:
 			move_hand_msg.request.AngleDestination_right.x = (atan2((double)right_mat(2,1),(double)right_mat(2,2))) - QuatToRoll(transform_right_finger.getRotation());
 			move_hand_msg.request.AngleDestination_right.y = (atan2((double)right_mat(2,0)*-1,sqrt(pow((double)right_mat(2,1),2)+pow((double)right_mat(2,2),2)))) - QuatToPitch(transform_right_finger.getRotation());
 			move_hand_msg.request.AngleDestination_right.z = (atan2((double)right_mat(1,0),(double)right_mat(0,0)))- QuatToYaw(transform_right_finger.getRotation());
-			ROS_INFO("pelvis move to hand move: right x y z roll pitch yaw: %f %f %f %f %f %f",move_hand_msg.request.PositionDestination_right.x,move_hand_msg.request.PositionDestination_right.y,move_hand_msg.request.PositionDestination_right.z,
-					move_hand_msg.request.AngleDestination_right.x,move_hand_msg.request.AngleDestination_right.y,move_hand_msg.request.AngleDestination_right.z);
+			//ROS_INFO("pelvis move to hand move: right x y z roll pitch yaw: %f %f %f %f %f %f",move_hand_msg.request.PositionDestination_right.x,move_hand_msg.request.PositionDestination_right.y,move_hand_msg.request.PositionDestination_right.z,
+				//	move_hand_msg.request.AngleDestination_right.x,move_hand_msg.request.AngleDestination_right.y,move_hand_msg.request.AngleDestination_right.z);
 			move_hand_msg.request.quick = req.quick;
 		}
-		ROS_INFO("moving hand");
+		//ROS_INFO("moving hand");
 
 		if (gen_traj(move_hand_msg.request,move_hand_msg.response))
 		{
@@ -996,9 +1014,9 @@ public:
 int main(int argc, char **argv)
 {
 	ros::init(argc, argv, "move_hand_service");
-	ROS_INFO("starting move hand service");
+	//ROS_INFO("starting move hand service");
 	move_hand_service* c = new move_hand_service();
-	ROS_INFO("started move hand service");
+	//ROS_INFO("started move hand service");
 
 	ros::spin();
 	return 0;

@@ -226,7 +226,7 @@ int main(int argc, char **argv)
 
   QCoreApplication app(argc, argv);
   pCTcpServer = new CTcpServer(QString("172.23.1.130"),45675);
-  pImageCTcpServer = new CTcpServer(QString("172.23.1.130"),45676);
+  pImageCTcpServer = new CTcpServer(QString("172.23.1.130"),45678);
   pDesignerCTcpServer = new CTcpServer(QString("172.23.1.130"),45677);
   m.SetTcp(pCTcpServer);
   m.SetImgTcp(pImageCTcpServer);

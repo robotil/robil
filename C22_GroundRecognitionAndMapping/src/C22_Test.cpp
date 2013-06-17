@@ -23,7 +23,13 @@ int main(int argc, char **argv)
    *
    *
   */
+	static int aa=0;
   while(1){
+		if(!aa++)
+		srv.request.erase=-1;
+		else{aa=0;
+		srv.request.erase=0;
+	}
 	  if (client.call(srv))
 	  {
 		  cout<<"About to print matrix"<<endl;
