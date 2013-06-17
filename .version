@@ -1,4 +1,4 @@
-V0.0.2.29
+V0.0.2.30
 ===========================================================
 C0_Math     0.1
 C0_RobilTask     0.5
@@ -10,7 +10,7 @@ C21_VisionAndLidar     0.24
 C22_CompactGroundRecognitionAndMapping     0.11
 C22_GroundRecognitionAndMapping     0.21
 C22_transformations     0.7
-C23_ObjectRecognition     0.38
+C23_ObjectRecognition     0.39
 C24_ObstacleDetection     0.6
 C25_AtlasFell     0.2
 C25_GlobalPosition     0.9
