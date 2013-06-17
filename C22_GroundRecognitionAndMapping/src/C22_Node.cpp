@@ -81,6 +81,11 @@ static tf::StampedTransform righttransform;
 bool C22_Node::proccess(C22_GroundRecognitionAndMapping::C22::Request  &req,
 	C22_GroundRecognitionAndMapping::C22::Response &res ){
 
+if (req.erase==-1)
+{cout<<(int)req.erase<<"ksdusdusduj"<<endl;
+	_myMatrix->clearMatrix();
+	return true;
+}
 	    bool retry=true;
 	    while(retry){
 	    	retry=false;
