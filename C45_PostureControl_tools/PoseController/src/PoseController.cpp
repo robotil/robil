@@ -13,6 +13,7 @@
 #include <PoseController/hand_movement.h>
 #include <PoseController/neck_movement.h>
 
+
 class PoseControllerClass{
 private:
 	ros::NodeHandle nh_, nh2_, nh3_, nh4_;
@@ -155,6 +156,7 @@ public:
 			joints[state->name[i]] = i;
 		}
 		joint_positions = state->position;
+
 		if(!waitForJointStates) {
 			std_srvs::Empty e;
 			this->reset_joints_CB(e.request, e.response);
@@ -176,6 +178,10 @@ public:
 
 	bool start_CB(std_srvs::Empty::Request &req, std_srvs::Empty::Response &res){
 		ROS_INFO("Starting PoseController");
+		if(!waitForJointStates) {
+			ROS_ERROR("Can't start PoseController");
+			return false;
+		}
 		this->reset_joints_CB(req, res);
 		this->up = true;
 		return true;
@@ -184,6 +190,7 @@ public:
 	bool stop_CB(std_srvs::Empty::Request &req, std_srvs::Empty::Response &res){
 		ROS_INFO("Stopping PoseController");
 		this->up = false;
+		this->waitForJointStates = false;
 		return true;
 	}
 

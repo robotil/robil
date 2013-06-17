@@ -31,7 +31,7 @@ class manipulate_test(object):
         init_pos = self.RS.GetJointPos()
         self.JC.set_all_pos(init_pos)
         pos1 = self.RS.GetJointPos()[3]
-        pos2 = 0.4 # Fire hose 0.7 # 
+        pos2 = 0.0 # 0.4 # Fire hose 0.7 # 
         dt = 0.05;
         N = 50
         for ratio in linspace(0, 1, N):

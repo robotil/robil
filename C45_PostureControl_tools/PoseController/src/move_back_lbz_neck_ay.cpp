@@ -65,15 +65,15 @@ public:
 
 
 		//To switch to manipulate, change STAND to MANIPULATE.
-		cm.behavior = atlas_msgs::AtlasSimInterfaceCommand::STAND;
+		/*cm.behavior = atlas_msgs::AtlasSimInterfaceCommand::MANIPULATE;
 
 		//Publish STAND behavior
 		pub_atlas_commands_.publish(cm);
 
-		ros::Duration(0.1).sleep();
+		ros::Duration(0.3).sleep();
 
 		//Send 'start' command to PoseController service
-		start_posecontroller_cli_.call(em);
+		start_posecontroller_cli_.call(em);*/
 
 
 		//Change neck and back joints
@@ -88,26 +88,23 @@ public:
 		for(int i = 0; i < segments; i++){
 			ros::spinOnce();
 			b.request.back_lbz = velocity/segments;
+			b.request.back_mby = -100; //Send 'Dont change' to back_mby joint
+			b.request.back_ubx = -100; //Send 'Dont change' to back_ubx joint
 			back_service.call(b);
 			ros::Duration(total_time/segments).sleep();
 		}
-		b.request.back_lbz = req.back_lbz;
-		b.request.back_mby = -100; //Send 'Dont change' to back_mby joint
-		b.request.back_ubx = -100; //Send 'Dont change' to back_ubx joint
-
-		back_service.call(b);
 
 
 		//Send 'stop' command to PoseController service
-		stop_posecontroller_cli_.call(em);
+		//stop_posecontroller_cli_.call(em);
 
-		ros::Duration(0.1).sleep();
+		//ros::Duration(0.3).sleep();
 
 
 		//Switch behavior
-		cm.behavior = atlas_msgs::AtlasSimInterfaceCommand::STAND;
+		/*cm.behavior = atlas_msgs::AtlasSimInterfaceCommand::STAND;
 
-		//pub_atlas_commands_.publish(cm);
+		pub_atlas_commands_.publish(cm);*/
 
 		res.success = true;
 		return true;
@@ -116,11 +113,16 @@ public:
 };
 
 
+#include "task.hpp"
+
 int main(int argc, char **argv) {
 	ros::init(argc, argv, "back_neck");
 
 	back_neck* PoseControl = new back_neck("back_neck");
 	ROS_INFO("Running back_neck service");
+	
+	TaskResetHead task;
+	
 	ros::spin();
 
 	return 0;

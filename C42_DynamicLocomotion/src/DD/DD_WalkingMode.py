@@ -26,6 +26,8 @@ from std_msgs.msg import String, Int32
 from DW.JointController import JointCommands_msg_handler
 from C42_DynamicLocomotion.srv import *
 from C42_DynamicLocomotion.msg import Foot_Placement_data
+from C25_GlobalPosition.msg import C25C0_ROP
+from C25_GlobalPosition.srv import *
 
 class DD_WalkingMode(WalkingMode):
     def __init__(self,iTf):
@@ -56,20 +58,25 @@ class DD_WalkingMode(WalkingMode):
         self._LPP.Initialize()
         self._bRobotIsStatic = True
 
+        self._BDIswitch_client = rospy.ServiceProxy('C25/BDIswitch',C25BDI)
+        state = Int32()
+        state.data = 1
+        resp_switched_to_BDI_odom = self._BDIswitch_client(state)
+        print "Using BDI odom"
         # rospy.wait_for_service('foot_placement_path') # used for clone
         # self._foot_placement_client = rospy.ServiceProxy('foot_placement_path', FootPlacement_Service)
         rospy.wait_for_service('foot_placement')
         self._foot_placement_client = rospy.ServiceProxy('foot_placement', FootPlacement_Service)
         # Subscribers:        
-        self._Subscribers["Odometry"] = rospy.Subscriber('/ground_truth_odom',Odometry,self._odom_cb)
+        self._Subscribers["Odometry"] = rospy.Subscriber('/C25/publish',C25C0_ROP,self._odom_cb)
         self._Subscribers["ASI_State"]  = rospy.Subscriber('/atlas/atlas_sim_interface_state', AtlasSimInterfaceState, self.asi_state_cb)
         self._Subscribers["IMU"]  = rospy.Subscriber('/atlas/imu', Imu, self._get_imu)
         self._Subscribers["JointStates"] = rospy.Subscriber('/atlas/joint_states', JointState, self._get_joints)
         rospy.sleep(0.3)
-        k_effort = [0] * 28
-        k_effort[3] = 255 # k_effort[0:4] = 4*[255]
+        self._k_effort = [0] * 28
+        self._k_effort[3] = 255 # k_effort[0:4] = 4*[255]
         # k_effort[16:28] = 12*[255]
-        self._JC.set_k_eff(k_effort)
+        self._JC.set_k_eff(self._k_effort)
         self._JC.set_all_pos(self._cur_jnt)
         self._JC.send_command()
 
@@ -80,6 +87,11 @@ class DD_WalkingMode(WalkingMode):
         self._command = 0
         #self._bRobotIsStatic = False
         self._GetOrientationDelta0Values() # Orientation difference between BDI odom and Global
+
+        # Put robot into stand position
+        stand = AtlasSimInterfaceCommand(None,AtlasSimInterfaceCommand.STAND, None, None, None, None, self._k_effort)
+        self.asi_command.publish(stand)
+        rospy.sleep(0.3)
     
     def StartWalking(self):
         self._bDone = False

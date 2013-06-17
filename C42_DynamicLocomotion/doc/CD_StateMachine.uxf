@@ -1,11 +1,10 @@
-<?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<diagram program="umlet" version="11.4">
+<?xml version="1.0" encoding="UTF-8"?><diagram program="umlet" version="11.3">
   <zoom_level>10</zoom_level>
   <element>
     <type>com.umlet.element.custom.State</type>
     <coordinates>
-      <x>380</x>
-      <y>110</y>
+      <x>400</x>
+      <y>100</y>
       <w>120</w>
       <h>50</h>
     </coordinates>
@@ -16,8 +15,8 @@ for Phantom</panel_attributes>
   <element>
     <type>com.umlet.element.custom.State</type>
     <coordinates>
-      <x>720</x>
-      <y>110</y>
+      <x>740</x>
+      <y>100</y>
       <w>90</w>
       <h>40</h>
     </coordinates>
@@ -28,8 +27,8 @@ Walking</panel_attributes>
   <element>
     <type>com.umlet.element.custom.State</type>
     <coordinates>
-      <x>730</x>
-      <y>330</y>
+      <x>750</x>
+      <y>320</y>
       <w>90</w>
       <h>40</h>
     </coordinates>
@@ -40,8 +39,8 @@ Turning</panel_attributes>
   <element>
     <type>com.umlet.element.custom.State</type>
     <coordinates>
-      <x>70</x>
-      <y>120</y>
+      <x>90</x>
+      <y>110</y>
       <w>90</w>
       <h>40</h>
     </coordinates>
@@ -51,8 +50,8 @@ Turning</panel_attributes>
   <element>
     <type>com.umlet.element.custom.State</type>
     <coordinates>
-      <x>420</x>
-      <y>310</y>
+      <x>440</x>
+      <y>300</y>
       <w>100</w>
       <h>80</h>
     </coordinates>
@@ -64,8 +63,8 @@ Turning</panel_attributes>
   <element>
     <type>com.umlet.element.Relation</type>
     <coordinates>
-      <x>130</x>
-      <y>90</y>
+      <x>150</x>
+      <y>80</y>
       <w>270</w>
       <h>108</h>
     </coordinates>
@@ -78,8 +77,8 @@ State Machine -&gt; Walking)</panel_attributes>
   <element>
     <type>com.umlet.element.Relation</type>
     <coordinates>
-      <x>470</x>
-      <y>80</y>
+      <x>490</x>
+      <y>70</y>
       <w>270</w>
       <h>70</h>
     </coordinates>
@@ -90,8 +89,8 @@ QueueSize&gt;4</panel_attributes>
   <element>
     <type>com.umlet.element.Relation</type>
     <coordinates>
-      <x>690</x>
-      <y>120</y>
+      <x>710</x>
+      <y>110</y>
       <w>152</w>
       <h>230</h>
     </coordinates>
@@ -103,8 +102,8 @@ of Segment</panel_attributes>
   <element>
     <type>com.umlet.element.Relation</type>
     <coordinates>
-      <x>490</x>
-      <y>300</y>
+      <x>510</x>
+      <y>290</y>
       <w>260</w>
       <h>70</h>
     </coordinates>
@@ -115,8 +114,8 @@ Phantom Done Turning</panel_attributes>
   <element>
     <type>com.umlet.element.Relation</type>
     <coordinates>
-      <x>490</x>
-      <y>120</y>
+      <x>510</x>
+      <y>110</y>
       <w>280</w>
       <h>220</h>
     </coordinates>
@@ -128,8 +127,8 @@ Phantom End
   <element>
     <type>com.umlet.element.custom.State</type>
     <coordinates>
-      <x>210</x>
-      <y>320</y>
+      <x>180</x>
+      <y>360</y>
       <w>120</w>
       <h>50</h>
     </coordinates>
@@ -140,41 +139,65 @@ waiting for Real</panel_attributes>
   <element>
     <type>com.umlet.element.Relation</type>
     <coordinates>
-      <x>300</x>
-      <y>310</y>
-      <w>140</w>
-      <h>50</h>
+      <x>270</x>
+      <y>300</y>
+      <w>190</w>
+      <h>100</h>
     </coordinates>
     <panel_attributes>lt=&lt;-
 </panel_attributes>
-    <additional_attributes>30;30;120;30</additional_attributes>
+    <additional_attributes>30;80;170;30</additional_attributes>
   </element>
   <element>
     <type>com.umlet.element.Relation</type>
     <coordinates>
       <x>90</x>
-      <y>130</y>
-      <w>160</w>
-      <h>210</h>
+      <y>260</y>
+      <w>152</w>
+      <h>128</h>
     </coordinates>
     <panel_attributes>lt=&lt;-
 QueueSize&lt;4
 and
 Path done</panel_attributes>
-    <additional_attributes>30;30;140;190</additional_attributes>
+    <additional_attributes>60;30;110;100</additional_attributes>
   </element>
   <element>
     <type>com.umlet.element.Relation</type>
     <coordinates>
-      <x>230</x>
-      <y>120</y>
-      <w>510</w>
-      <h>220</h>
+      <x>200</x>
+      <y>110</y>
+      <w>560</w>
+      <h>270</h>
     </coordinates>
     <panel_attributes>lt=&lt;-
 QueueSize&lt;4
 and
 Path not done</panel_attributes>
-    <additional_attributes>490;30;30;200</additional_attributes>
+    <additional_attributes>540;30;30;250</additional_attributes>
+  </element>
+  <element>
+    <type>com.umlet.element.custom.State</type>
+    <coordinates>
+      <x>80</x>
+      <y>240</y>
+      <w>120</w>
+      <h>50</h>
+    </coordinates>
+    <panel_attributes>Real 
+Winding Down</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <type>com.umlet.element.Relation</type>
+    <coordinates>
+      <x>100</x>
+      <y>120</y>
+      <w>50</w>
+      <h>140</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;-
+</panel_attributes>
+    <additional_attributes>30;30;30;120</additional_attributes>
   </element>
 </diagram>

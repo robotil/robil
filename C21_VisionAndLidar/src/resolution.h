@@ -1,2 +1,2 @@
-#define OUTPUTSIZE 400
-//#define COLOR true
+#define OUTPUTSIZE 500
+#define COLOR true

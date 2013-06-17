@@ -1,0 +1,45 @@
+<plan descriptions="./plans/TaskDescriptions.xml">
+   <par name="searchAndGoToTable" x="368.41565473760215" y="21.280069144519388" collapsed="false" id="d7ffed7a-f8c8-40ff-89ea-0c16218a6baa"> 
+         <tsk name="LocalizationTrack" x="139.11120772263072" y="72.18539335247446" test_time="0" test_result="true" id="bc5e1436-dd28-49c7-b86b-1ae6f5ee9fad" />
+         <tsk name="PathPlanning" x="216.66458636153374" y="100.7394708539205" test_time="0" test_result="true" id="b1ded53e-8d41-4f8b-8536-6f55e65fdac6" />
+      <dec name="!L!" x="342.8931623931616" y="79.77350427350422"> 
+            <tsk name="trackObject(target=Table)" x="250.3275525763354" y="138.51763505783458" test_time="0" test_result="true" id="eec9f97a-2f19-4994-babf-457856f818ad" />
+      </dec>
+      <dec name="!L!" x="568.9722786692271" y="114.97024008468989"> 
+            <seq name="MissionLoop" x="544.0335060999363" y="186.3107364009346" collapsed="false" id="a30d297f-95da-4936-ba43-9a29fe5a89ed"> 
+                  <tsk name="resetHead" x="345.4316239316242" y="262.2350427350424" test_time="0" test_result="true" id="9082d8b3-0738-41d5-a0b2-583169b6c6ae" />
+               <dec name="T" x="529.0470085470082" y="250.54273504273488"> 
+                     <seq name="Search" x="479.8162393162405" y="308.2350427350427" collapsed="false" id="65ad4bcc-0016-44f8-a9de-c2bd1b2ed68a"> 
+                           <sel name="SearchAndTurn" x="369.8360428573929" y="409.18806166836487" collapsed="false" id="4256996c-0c41-415f-bf39-273cf0d9117b"> 
+                                 <tsk name="searchObject(target=Table)" x="-113.79648335505541" y="523.7627982279963" test_time="0" test_result="false" id="37968f33-36ab-46a8-a540-dcc57cc7b631" />
+                              <dec name="F:1" x="-61.79648335505525" y="560.7627982279951"> 
+                                    <tsk name="WalkerNode_AP(turn_in_place_Yaw=2.1)" x="-5.275068253716924" y="558.8547283350274" test_time="0" test_result="true" id="3027d499-5fea-46cb-942f-1c4954d7bd57" />
+                              </dec>
+                                 <tsk name="searchObject(target=Table)" x="161.8701833116117" y="522.4294648946601" test_time="0" test_result="false" id="bcd2379a-ab2b-429e-a17d-edcdf0374a71" />
+                              <dec name="F:1" x="209.8701833116114" y="555.4294648946592"> 
+                                    <tsk name="WalkerNode_AP(turn_in_place_Yaw=2.1)" x="264.9471539685048" y="549.5213950016941" test_time="0" test_result="true" id="88aeebe8-4a75-4a20-badd-e02eeb54f4fd" />
+                              </dec>
+                                 <tsk name="searchObject(target=Table)" x="388.0924055338357" y="518.4294648946602" test_time="0" test_result="false" id="e6fa0c09-9cf7-49ac-b2fa-ce381285001b" />
+                              <dec name="F:1" x="450.09240553383506" y="551.4294648946593"> 
+                                    <tsk name="WalkerNode_AP(turn_in_place_Yaw=2.1)" x="514.8830514044035" y="550.6047283350283" test_time="0" test_result="true" id="1159bfbe-5756-4ae0-9391-c3a41331b645" />
+                              </dec>
+                           </sel>
+                        <dec name="!L!" x="522.8931623931628" y="379.773504273504"> 
+                              <tsk name="PathPlanningFocus(target=Table)" x="498.6866640530967" y="460.90691244711394" test_time="0" test_result="true" id="48896aea-b452-4cbb-9b07-a78ff009503d" />
+                        </dec>
+                     </seq>
+               </dec>
+                  <par name="OperatorCheckPoint" x="600.2580208009205" y="368.2965195720163" collapsed="true" id="b8df7a69-2464-4798-bb30-13cf6caab4df"> 
+                        <seq name="OperatorRequest" x="570.8338755017718" y="441.49951102499796" collapsed="false" id="1eb93321-bc34-4647-aec4-1bfe26fefea3"> 
+                              <tsk name="PushHMI(data=panoramic_image)" x="311.8338755017754" y="500.49951102500165" test_time="0" test_result="true" id="4e81ca37-8e84-4731-835f-7a6318402be8" />
+                              <tsk name="PushHMI(data=occupancy_grid)" x="358.8338755017739" y="539.499511025004" test_time="0" test_result="true" id="18c84490-f92f-4c94-a8c7-3b7dd44525b6" />
+                              <tsk name="PushHMI(data=path)" x="458.83387550177224" y="581.499511025004" test_time="0" test_result="true" id="08c9306b-79f7-408d-a8d7-3eaf966c2c7d" />
+                              <tsk name="HMIResponse" x="620.833875501772" y="578.4995110250039" test_time="0" test_result="true" id="21548872-127e-443a-a180-2584595e105f" />
+                        </seq>
+                        <tsk name="TimeoutMonitor(threshold=50)" x="718.0560977239966" y="510.8328443583348" test_time="0" test_result="true" id="ce66d6c2-c2fa-4d5b-b3e9-b836383c677e" />
+                  </par>
+                  <tsk name="WalkerNode_Continuous" x="799.9671623914629" y="380.84764489557733" test_time="0" test_result="true" id="f2fe5c08-58ae-452e-80aa-a7389280086f" />
+            </seq>
+      </dec>
+   </par>
+</plan>
