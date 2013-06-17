@@ -110,7 +110,7 @@ bool rPath_CB(C67_CarManipulation::arm_path::Request &req,C67_CarManipulation::a
 	seconds =  req.time;
 	pointsNum = req.points;
 	use_arg = true;
-	ROS_INFO("rPath got point %f %f %f %f %f %f",dubGet[0],dubGet[1],dubGet[2],dubGet[3],dubGet[4],dubGet[5]);
+	//ROS_INFO("rPath got point %f %f %f %f %f %f",dubGet[0],dubGet[1],dubGet[2],dubGet[3],dubGet[4],dubGet[5]);
 
 
 
@@ -153,7 +153,7 @@ bool rPath_CB(C67_CarManipulation::arm_path::Request &req,C67_CarManipulation::a
 
 	while (ros::ok())
 	{
-		ROS_INFO("rPath start loop");
+		//ROS_INFO("rPath start loop");
 		ros::spinOnce();
 		/*if (callback_called == 1)
 			{
@@ -266,7 +266,7 @@ int main(int argc, char** argv)
 	rosnode = new ros::NodeHandle();
 	ros::ServiceServer rPath_server;
 	rPath_server = rosnode->advertiseService("/rPath_srv",&rPath_CB);
-	ROS_INFO("rPath Ready");
+	//ROS_INFO("rPath Ready");
 	ros::spin();
 
 	return 0;
