@@ -7,7 +7,7 @@ from Controller import Controller
 from atlas_msgs.msg import AtlasCommand
 from atlas_msgs.msg import AtlasSimInterfaceCommand, AtlasSimInterfaceState, AtlasState, AtlasBehaviorStepData
 
-
+import numpy as np
 class StandUpServer(RobilTask):
 	def __init__(self):
 		print "StandUp Server Started!"
