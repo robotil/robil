@@ -29,6 +29,7 @@ from geometry_msgs.msg import Pose
 from nav_msgs.msg import Odometry
 from C31_PathPlanner.msg import C31_Waypoints
 from C25_GlobalPosition.msg import C25C0_ROP
+from C25_GlobalPosition.srv import *
 from DW.JointController import JointCommands_msg_handler
 from tf_conversions import posemath
 from tf.transformations import euler_from_quaternion
@@ -64,8 +65,11 @@ class CD_WalkingMode(WalkingMode):
         self._bDone = False
         self._yaw = 0
                 
-        # self._BDIswitch_client = rospy.ServiceProxy('C25/BDIswitch',Int32)
-        # resp_switched_to_BDI_odom = self._BDIswitch_client(1)
+        self._BDIswitch_client = rospy.ServiceProxy('C25/BDIswitch',C25BDI)
+        state = Int32()
+        state.data = 1
+        resp_switched_to_BDI_odom = self._BDIswitch_client(state)
+        print "Using BDI odom"
         # if resp_switched_to_BDI_odom:
         #     print "Using BDI odom"
         # else:
