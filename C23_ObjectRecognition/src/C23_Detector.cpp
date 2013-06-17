@@ -705,6 +705,12 @@ it_(nh),
 	      {
 		string target = req.target;
 		string status  ="none";
+		cout<<"Vals: "<<last_x<<", "<<last_y<<", "<<width<<", "<<height<<endl;
+		if (last_x ==-1 ||last_y == -1||width ==-1||height==-1){
+		 ROS_INFO("Invalid coordinates");
+		  return false;
+		}
+		
 		if(!target.compare("Firehose")) {
 		  char basePath[1000],imageName[1000];
 		  
@@ -722,6 +728,7 @@ it_(nh),
 		  string t = basePath;
 		  // string t = "/home/isl/darpa/robil/C23_ObjectRecognition/3D_models/firehose.txt";
 		  std::cout<<imageName<<endl;
+		  
 		  pcl::PointCloud<pcl::PointXYZ>::Ptr cloud2 = filterPointCloud(last_x,last_y,width,height,lastCloud);
 		  templateMatching3D(t, cloud2);
 		  
