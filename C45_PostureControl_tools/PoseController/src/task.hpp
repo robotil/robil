@@ -19,28 +19,40 @@ public:
 		
 	}
 	TaskResult task(const string& name, const string& uid, Arguments& args){
+		try{
 
-		ros::ServiceClient srv_client = _node.serviceClient<PoseController::back_lbz_neck_ay>("/PoseController/back_lbz_neck_ay");
-		PoseController::back_lbz_neck_ay srv;
+			ros::ServiceClient srv_client = _node.serviceClient<PoseController::back_lbz_neck_ay>("/PoseController/back_lbz_neck_ay");
+			PoseController::back_lbz_neck_ay srv;
 
-		//while(true)
-		{
-			if (isPreempt()){
-				return TaskResult::Preempted();
+			//while(true)
+			{
+				if (isPreempt()){
+					return TaskResult::Preempted();
+				}
+				
+				srv.request.back_lbz=0;
+				if(args.find("neck")==args.end()){
+					srv.request.neck_ay=0;
+				}else{
+					std::stringstream o; o<<args["neck"];
+					o>>srv.request.neck_ay;
+				}
+					
+			
+				if (srv_client.call(srv)) {
+					ROS_INFO("TaskResetHead: /PoseController/back_lbz_neck_ay call is successed");
+				}else{
+					ROS_INFO("TaskResetHead: /PoseController/back_lbz_neck_ay call is fault");
+				}
+			
+				sleep(100);	
 			}
-			
-			srv.request.back_lbz=0;
-			srv.request.neck_ay=0;
-			
-			if (srv_client.call(srv)) {
-				ROS_INFO("/PoseController/back_lbz_neck_ay call is successed");
-			}else{
-				ROS_INFO("/PoseController/back_lbz_neck_ay call is fault");
-			}
-			
-			sleep(1000);	
+		}catch(...){
+			ROS_INFO("TaskResetHead: WARNING: some exception is chatched.");
 		}
-		return TaskResult::FAULT();
+
+		ROS_INFO("TaskResetHead: finished");
+		return TaskResult::SUCCESS();
 	}
 
 };
