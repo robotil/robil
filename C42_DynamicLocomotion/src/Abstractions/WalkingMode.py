@@ -37,6 +37,7 @@ class WalkingMode(object):
         pass    
     
     def SetPath(self,Path):
+        print("WalkingMode: SetPath()")
         self._LPP.SetPath(Path)
         
     def GetPath(self):
