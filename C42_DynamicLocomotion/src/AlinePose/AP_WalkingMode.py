@@ -62,6 +62,7 @@ class AP_WalkingMode(WalkingMode):
         self._started_to_walk = False
         self._target_pose = None
         self._isDynamic = False
+        self._StepIndex = 0
         ## USING parameters:
         if ((None != parameters) and ('Motion' in parameters)):
             DesiredMotion = parameters['Motion']
@@ -111,7 +112,7 @@ class AP_WalkingMode(WalkingMode):
         
         self._RequestTargetPose(self._DesiredObject)
         self._k_effort = [0] * 28
-        self._k_effort[3] = [255]
+        self._k_effort[3] = 255
         # self._k_effort[0:4] = 4*[255]
         # self._k_effort[16:28] = 12*[255]
         self._JC.set_k_eff(self._k_effort)
@@ -134,7 +135,7 @@ class AP_WalkingMode(WalkingMode):
         WalkingMode.Walk(self)
         #self._command = self.GetCommand(self._BDI_state)
         if self._isDynamic:
-            self._command = self.GetCommandDynamic(self._BDI_state)
+            self._command = self.GetCommandDynamic()
         else:
             self._command = self.GetCommandStatic(self._BDI_state)
         if(0 != self._command):
@@ -183,12 +184,13 @@ class AP_WalkingMode(WalkingMode):
         if(0 == step_queue):
             command = 0
         else:
+            self._StepIndex +=1
             for i in range(4):
                 command.walk_params.step_queue[i] = copy.deepcopy(step_queue[i])
                 command.walk_params.step_queue[i].step_index = self._StepIndex + i
                 command.walk_params.step_queue[i].duration = 0.63
                 #print("GetCommand",command.walk_params.step_queue)
-                command.walk_params.step_queue[i] = self._TransforFromGlobalToBDI(command.walk_params.step_queue[i],i)
+                #command.walk_params.step_queue[i] = self._TransforFromGlobalToBDI(command.walk_params.step_queue[i],i)
         return command
     
     def HandleStateMsg(self,state):
@@ -204,7 +206,7 @@ class AP_WalkingMode(WalkingMode):
             #print(3)
             if (AP_PathPlannerEnum.Active == self._LPP.State):
                 if self._isDynamic:
-                    command = self.GetCommandDynamic(state)
+                    command = self.GetCommandDynamic()
                 else:
                     command = self.GetCommandStatic(state)
             elif(AP_PathPlannerEnum.Waiting == self._LPP.State): # or (AP_PathPlannerEnum.Empty == self._LPP.State):
