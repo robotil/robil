@@ -64,7 +64,7 @@ class StandUpServer(RobilTask):
 				0, 0, 0, 0, 0, 0,
 				0, 0, 0, 0, 0, 0]
 		self._controller.publish(pos, 0.6)
-
+		rospy.sleep(0.5)
 	def standUp(self):
 		# return to ground position
 		pos = [0, 0, 0, 0,
