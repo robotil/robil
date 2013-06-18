@@ -541,7 +541,9 @@ int main(int argc, char **argv)
   C21_Node my_node("/multisense_sl/camera/left/image_rect_color","/multisense_sl/camera/right/image_rect_color");
   ros::waitForShutdown();
   while(ros::ok()){
+		
 	  ros::spin();
+	  ros::Duration(0.01).sleep();
   }
   return 0;
 }
