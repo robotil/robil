@@ -84,8 +84,9 @@ class CD_WalkingMode(WalkingMode):
         rospy.sleep(0.3)
             
         self._k_effort = [0] * 28
-        self._k_effort[0:4] = 4*[255]
-        self._k_effort[16:28] = 12*[255]
+        self._k_effort[3] = [255]
+        # self._k_effort[0:4] = 4*[255]
+        # self._k_effort[16:28] = 12*[255]
         self._JC.set_k_eff(self._k_effort)
         self._JC.set_all_pos(self._cur_jnt)
         self._JC.send_command()
@@ -104,7 +105,7 @@ class CD_WalkingMode(WalkingMode):
     
     def Stop(self):
         WalkingMode.Stop(self)        
-        rospy.sleep(5)
+        rospy.sleep(8)
     
     def EmergencyStop(self):
         #k_effort = [0] * 28
@@ -210,7 +211,10 @@ class CD_WalkingMode(WalkingMode):
         found_first_waypoint = False
         
         for wp in Path:
-            path_point = Waypoint(wp[0],wp[1])
+            try:
+                path_point = Waypoint(wp[0],wp[1])
+            except:
+                path_point = Waypoint(Path[0],Path[1])
             # Remove from received path waypoints that are with in the RadiusLimit (~0.5m) from the robot and insert robot position as first waypoint in path.
             # This is done to get a good heading direction with noise on path waypoints.  
             if path_point.GetDistanceFrom(robot_position) >= radius_between_waypoints and not(found_first_waypoint):
