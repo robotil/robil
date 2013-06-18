@@ -34,6 +34,7 @@ class AP_WalkingMode(WalkingMode):
         self._LPP = AP_PathPlanner()
         WalkingMode.__init__(self,self._LPP)
         self._tf = iTf
+        self._StepIndex = 1
         # Initialize atlas atlas_sim_interface_command publisher       
         self.asi_command = rospy.Publisher('/atlas/atlas_sim_interface_command', AtlasSimInterfaceCommand, None, False, True, None)       
 
@@ -62,7 +63,7 @@ class AP_WalkingMode(WalkingMode):
         self._started_to_walk = False
         self._target_pose = None
         self._isDynamic = False
-        self._StepIndex = 0
+        self._StepIndex = 1
         ## USING parameters:
         if ((None != parameters) and ('Motion' in parameters)):
             DesiredMotion = parameters['Motion']
@@ -136,6 +137,7 @@ class AP_WalkingMode(WalkingMode):
         #self._command = self.GetCommand(self._BDI_state)
         if self._isDynamic:
             self._command = self.GetCommandDynamic()
+            self._StepIndex = self._StepIndex + 1
         else:
             self._command = self.GetCommandStatic(self._BDI_state)
         if(0 != self._command):
@@ -184,7 +186,6 @@ class AP_WalkingMode(WalkingMode):
         if(0 == step_queue):
             command = 0
         else:
-            self._StepIndex +=1
             for i in range(4):
                 command.walk_params.step_queue[i] = copy.deepcopy(step_queue[i])
                 command.walk_params.step_queue[i].step_index = self._StepIndex + i
@@ -537,22 +538,34 @@ class AP_WalkingMode(WalkingMode):
         #self._Update_tf_BDI_odom(state)
         self._BDI_state = copy.copy(state)
         command = 0
-        #print(state.step_feedback.status_flags)
-        # When the robot status_flags are 1 (SWAYING), you can publish the next step command.
-        if (state.step_feedback.status_flags == 1 and not self._bIsSwaying):
-            command = self.HandleStateMsg(state)
-        elif (state.step_feedback.status_flags == 2 and self._bIsSwaying):
-            self._bIsSwaying = False
-            #print("step done")
-        if (0 != command):
-            self._command = command
-            self._bIsSwaying = True
-        
-        if(0 == state.current_behavior and 0 != self._command):
-            #print self._command
-            self.asi_command.publish(self._command)
-            self._command = 0
-            print("step start")
+        if (self._isDynamic):
+            if(self._StepIndex < state.walk_feedback.next_step_index_needed):
+                command = self.HandleStateMsg(state)
+            if (0 != command):
+                #print("Step",self._StepIndex,command)
+                self._bRobotIsStatic = False
+                self.asi_command.publish(command)
+                self._StepIndex = self._StepIndex+1
+        else:
+            #self._Update_tf_BDI_odom(state)
+            self._BDI_state = copy.copy(state)
+            command = 0
+            #print(state.step_feedback.status_flags)
+            # When the robot status_flags are 1 (SWAYING), you can publish the next step command.
+            if (state.step_feedback.status_flags == 1 and not self._bIsSwaying):
+                command = self.HandleStateMsg(state)
+            elif (state.step_feedback.status_flags == 2 and self._bIsSwaying):
+                self._bIsSwaying = False
+                #print("step done")
+            if (0 != command):
+                self._command = command
+                self._bIsSwaying = True
+            
+            if(0 == state.current_behavior and 0 != self._command):
+                #print self._command
+                self.asi_command.publish(self._command)
+                self._command = 0
+                print("step start")
 
     # def _odom_cb(self,odom):
     #     if self._bRobotIsStatic:
