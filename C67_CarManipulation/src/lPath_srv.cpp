@@ -31,6 +31,8 @@
 #include <C67_CarManipulation/IK.h>
 #include <C67_CarManipulation/Path.h>
 #include <C67_CarManipulation/arm_path.h>
+#include <PoseController/hand_movement.h>
+#include <std_srvs/Empty.h>
 
 ros::Publisher pubAtlasCommand;
 atlas_msgs::AtlasCommand ac;
@@ -44,6 +46,9 @@ RPY argTarget;
 bool use_arg = false;
 bool callBackRun = false;
 ros::NodeHandle* rosnode;
+ros::ServiceClient hand_C45_cli;
+ros::ServiceClient hand_C45_cli_start;
+ros::ServiceClient hand_C45_cli_stop;
 void SetAtlasState(const atlas_msgs::AtlasState::ConstPtr &_as)
 {
 
@@ -90,7 +95,9 @@ bool lPath_CB(C67_CarManipulation::arm_path::Request &req,C67_CarManipulation::a
 
 	int pointsNum;
 	double seconds; 
-
+	hand_C45_cli = rosnode->serviceClient<PoseController::hand_movement>("/PoseController/left_hand_movement");
+	hand_C45_cli_start = rosnode->serviceClient<std_srvs::Empty>("/PoseController/start");
+	hand_C45_cli_stop = rosnode->serviceClient<std_srvs::Empty>("/PoseController/stop");
 	double dubGet[6];
 	dubGet[0] = req.PositionDestination.x ;
 	dubGet[1] = req.PositionDestination.y;
@@ -209,27 +216,31 @@ bool lPath_CB(C67_CarManipulation::arm_path::Request &req,C67_CarManipulation::a
 				ac.position[j] = as.position[j];
 				//std::cout << state[j] << " ";
 			}
-
+			///////////////////////////////////////////////
+			/*std_srvs::Empty empty;
+			hand_C45_cli_start.call(empty);*/
 			for (int i=0; i<pointsNum; i++)
 			{
 				// ros::spinOnce();
 				
-
-				ac.position[q4l] = points.pArray[i]._q4;
-				ac.position[q5l] = points.pArray[i]._q5;
-				ac.position[q6l] = points.pArray[i]._q6;
-				ac.position[q7l] = points.pArray[i]._q7;
-				ac.position[q8l] = points.pArray[i]._q8;
-				ac.position[q9l] = points.pArray[i]._q9;
+				PoseController::hand_movement C45_l_move;
+				ac.position[q4r] = points.pArray[i]._q4; C45_l_move.request.l_arm_usy = points.pArray[i]._q4;
+				ac.position[q5r] = points.pArray[i]._q5; C45_l_move.request.l_arm_shx = points.pArray[i]._q5;
+				ac.position[q6r] = points.pArray[i]._q6; C45_l_move.request.l_arm_ely = points.pArray[i]._q6;
+				ac.position[q7r] = points.pArray[i]._q7; C45_l_move.request.l_arm_elx = points.pArray[i]._q7;
+				ac.position[q8r] = points.pArray[i]._q8; C45_l_move.request.l_arm_uwy = points.pArray[i]._q8;
+				ac.position[q9r] = points.pArray[i]._q9; C45_l_move.request.l_arm_mwx = points.pArray[i]._q9;
 				
 				//ROS_INFO("");
 				//std::cout << i <<": ";				
 				//points.Array[i].Print();
-				
-				pubAtlasCommand.publish(ac);
+				/*
+					pubAtlasCommand.publish(ac);*/ 		hand_C45_cli.call(C45_l_move);
 					
 				ros::Duration(seconds/pointsNum).sleep();
 			}
+			/*hand_C45_cli_stop.call(empty);*/
+			///////////////////////////////////////////////
 			break;
 		}
 		ros::Duration(0.1).sleep();
