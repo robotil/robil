@@ -114,7 +114,8 @@ public:
 			c31_PathPublisher.publish(res_path);
 		}
     }
-    void publish_transits_as_plan(ros::Publisher& c31_PathPublisher){
+    bool publish_transits_as_plan(ros::Publisher& c31_PathPublisher){
+	bool sent = false;
     	PathPlanning::EditSession session = _planner.startEdit();
     	//if(c31_PathPublisher.getNumSubscribers()>0){
 			ROS_INFO("PUBLISH CALCULATED GLOBAL PATH FROM TRANSITS");
@@ -125,9 +126,11 @@ public:
 			  C31_PathPlanner::C31_Location loc; loc.x=path[i].x; loc.y=path[i].y;
 			  res_path.points.push_back(loc);
 			}
-		if(c31_PathPublisher.getNumSubscribers()>0){
+		if(c31_PathPublisher.getNumSubscribers()>0 && session.constraints.gps_transits.size()>0){
+			sent = true;
 			c31_PathPublisher.publish(res_path);
 		}
+	return sent;
     }
    void publish_special_plan_firstAndLast(ros::Publisher& output_path){
     	//if(output_path.getNumSubscribers()>0){
@@ -341,22 +344,25 @@ public:
 					map_and_location_gotten();
 
 			UNLOCK( locker )
+			
+					if( ! publish_transits_as_plan(c31_PathPublisher) ){
 
-					SET_CURRENT_TIME(statistic.time_plan_startPlanning);
-					ROS_INFO("%s: plan path", _name.c_str());
-					if( _planner.plan() ){
-						publish_new_plan(c31_PathPublisher);
-						check_terrain(
-								C42_walk_notification_mud,
-								C42_walk_notification_debris,
-								c42_Quadruped_path_mud,
-								c42_Quadruped_path_debris,
-								c42_Quadruped_path_hills
-						);
-					}else{
-						throw_exception(C31_PathPlanner::C31_Exception::TYPE_NOSOLUTIONFORPLAN, "No solution for plan found.");
+					    SET_CURRENT_TIME(statistic.time_plan_startPlanning);
+					    ROS_INFO("%s: plan path", _name.c_str());
+					    if( _planner.plan() ){
+						    publish_new_plan(c31_PathPublisher);
+						    check_terrain(
+								    C42_walk_notification_mud,
+								    C42_walk_notification_debris,
+								    c42_Quadruped_path_mud,
+								    c42_Quadruped_path_debris,
+								    c42_Quadruped_path_hills
+						    );
+					    }else{
+						    throw_exception(C31_PathPlanner::C31_Exception::TYPE_NOSOLUTIONFORPLAN, "No solution for plan found.");
+					    }
+					    SET_CURRENT_TIME(statistic.time_plan_stopPlanning);
 					}
-					SET_CURRENT_TIME(statistic.time_plan_stopPlanning);
 
             }else{
 
@@ -434,7 +440,7 @@ public:
     	TIME_T now = NOW;
     	double duration = DURATION(statistic.time_map_lastReceive, now);
     	//ROS_INFO("requestNewMapNeeded : %s",STR("Now="<<TIME_STR(now)<<", lastReceive="<<TIME_STR(statistic.time_map_lastReceive)<<", duration="<<duration<<"s"));
-    	return duration > 5;
+    	return duration > 30;
 #else
     	return false;
 #endif
