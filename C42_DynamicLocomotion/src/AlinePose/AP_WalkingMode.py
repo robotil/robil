@@ -89,11 +89,11 @@ class AP_WalkingMode(WalkingMode):
             self._foot_placement_client = rospy.ServiceProxy('C23/C66', C23_orient) # object recognition service
         # rospy.wait_for_service('foot_aline_pose')
         # self._foot_placement_client = rospy.ServiceProxy('foot_aline_pose', C23_orient) # clone_service
-#        self._BDIswitch_client = rospy.ServiceProxy('C25/BDIswitch',C25BDI)
-#        state = Int32()
-#        state.data = 1
-#        resp_switched_to_BDI_odom = self._BDIswitch_client(state)
-#        print "Using BDI odom"
+        self._BDIswitch_client = rospy.ServiceProxy('C25/BDIswitch',C25BDI)
+        state = Int32()
+        state.data = 1
+        resp_switched_to_BDI_odom = self._BDIswitch_client(state)
+        print "Using BDI odom"
         # Subscribers:
         #self._Subscribers["Odometry"] = rospy.Subscriber('/ground_truth_odom',Odometry,self._odom_cb)
         self._Subscribers["ASI_State"]  = rospy.Subscriber('/atlas/atlas_sim_interface_state', AtlasSimInterfaceState, self.asi_state_cb)
