@@ -6,7 +6,7 @@
                      <tsk name="PathPlanning" x="237.43777302735424" y="218.62060658227784" test_time="0" test_result="true" id="21a9ce24-f73a-451d-9cb1-c90ffe518497" />
                </par>
                <seq name="SearchGo_ARROW" x="550.3811352207165" y="108.12457483624675" collapsed="false" id="e8795206-3f10-4289-a7f6-0a612b4be4b6"> 
-                     <tsk name="WalkerNode_DW(terrain=HILLS, Dir=fwd)" x="746.936891634336" y="389.63048654989234" test_time="0" test_result="true" id="fdaaeac5-32b4-484e-8bf5-e00c64acc500" />
+                     <tsk name="WalkerNode_DW(terrain=HILLS, Dir=bwd)" x="734.936891634336" y="393.63048654989234" test_time="0" test_result="true" id="fdaaeac5-32b4-484e-8bf5-e00c64acc500" />
                </seq>
          </par>
    </seq>
