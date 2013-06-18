@@ -104,7 +104,7 @@ class CD_WalkingMode(WalkingMode):
     
     def Stop(self):
         WalkingMode.Stop(self)        
-        rospy.sleep(5)
+        rospy.sleep(8)
     
     def EmergencyStop(self):
         #k_effort = [0] * 28
