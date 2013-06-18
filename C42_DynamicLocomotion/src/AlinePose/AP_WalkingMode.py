@@ -103,7 +103,7 @@ class AP_WalkingMode(WalkingMode):
         
         self._RequestTargetPose(self._DesiredObject)
         self._k_effort = [0] * 28
-        self._k_effort[3] = [255]
+        self._k_effort[3] = 255
         # self._k_effort[0:4] = 4*[255]
         # self._k_effort[16:28] = 12*[255]
         self._JC.set_k_eff(self._k_effort)
