@@ -72,7 +72,7 @@ private:
 public:
 
 	 /**
-	  * constructor, initializes the ROS node, subscribe it to the given topics and instruct it to provide the service
+	  * public, initializes the ROS node, subscribe it to the given topics and instruct it to provide the service
 	  */
 	  C25_Node(int argc, char **argv):
 		  imu_sub(nh_,"/atlas/imu",1),
@@ -90,7 +90,7 @@ public:
 		  kalman_delta_z=0;
 		  kalman_delta_time=0;
 		  sync.registerCallback( boost::bind( &C25_Node::bdi_callback, this, _1, _2 ) );
-		  c25_publisher=nh_.advertise<C25_GlobalPosition::C25C0_ROP>("C25/publish",100);
+		  c25_publisher=nh_.advertise<C25_GlobalPosition::C25C0_ROP>("C25/publish",1);
 		  c25_service=nh_.advertiseService("C25/service",&C25_Node::proccess,this);
 		  ground_truth_service=nh_.advertiseService("C25/ground_truth",&C25_Node::groundtruthProccess,this);
 		  bdi_service=nh_.advertiseService("C25/BDIswitch",&C25_Node::BDIProccess,this);
@@ -135,7 +135,7 @@ public:
 
 	 bool groundtruthProccess(std_srvs::Empty::Response  &req,
 			 std_srvs::Empty::Response &res )
-	 	  {
+  {//cout<<"isdfkjhsadfjhsdfhj\n";
 		 	 if(switch_){
 		 		switch_=false;
 		 		/*if(!switch2_)
@@ -262,9 +262,9 @@ int main(int argc, char **argv)
   
   while(ros::ok()){
 
-      ros::Duration(0.02).sleep();
-      ros::spinOnce();
-	//ros::spin();
+    ros::Duration(0.02).sleep();
+    ros::spinOnce();
+    //ros::spin();
 
   }
   return 0;
