@@ -483,6 +483,94 @@ bool C23_Detector::pointCloudCoordinatesToGlobalPosition(double x, double y, dou
   
 }
 
+bool C23_Detector::averagePointCloudCar(int x1, int y1, int x2, int y2, pcl::PointCloud<pcl::PointXYZ> pclcloud, float* px, float* py, float *pz) {
+  
+  int xMin=std::min(x1,x2);
+  int yMin=std::min(y1,y2);
+  int xMax=std::max(x1,x2);
+  int yMax=std::max(y1,y2);
+  float tmp_x = 0;
+  float tmp_y =0;
+  float tmp_z =0;
+  
+  /*pcl::PointCloud<pcl::PointXYZ>detectionCloud;
+  pcl::fromROSMsg<pcl::PointXYZ>(*cloud,detectionCloud);
+  
+  tf::TransformListener listener;
+    static tf::StampedTransform transform;
+    while(1){
+    try{
+    listener.lookupTransform("/pelvis","/left_camera_optical_frame",
+    ros::Time(0), transform);
+   }
+   catch (tf::TransformException ex){
+     continue; cout<<"Invalid\n";
+   } break;}
+   Eigen::Matrix4f sensorTopelvis;
+   pcl_ros::transformAsMatrix(transform, sensorTopelvis);
+   pcl::transformPointCloud(detectionCloud, detectionCloud, sensorTopelvis);*/
+  
+  cout<<xMin<<", "<<xMax<<", "<<yMin<<", "<<yMax<<endl;
+  
+  float _x=0;
+  float _y=0;
+  float _z=0;
+
+  int counter=0;
+  
+  float minDepth = 10000;//Only used for the steering wheel
+  pcl::PointCloud<pcl::PointXYZ> t;
+  pcl::PointXYZ p;
+  for(int i=yMin;i<=yMax;i++) {
+	for(int j=xMin;j<=xMax;j++){
+	  p=pclcloud.at(i,j);
+	  if(p.x!=p.x)
+	    continue;
+	  //if(p.x>0.3 && p.y>0.3) {
+	    //cout<<"Here"<<endl;
+	     cout<<"x,y,z: "<<x<<", "<<y<<", "<<z<<endl;
+	    if(minDepth>p.x){
+	      //cout<<"px, py, pz: "<<p.x<<", "<<p.y<<", "<<p.z<<" (i,j): "<<i<<", "<<j<<endl;
+	      minDepth = p.x;
+	      //cout<<"new min depth: "<<p.x<<endl;
+	    }
+	    
+	    _x+=p.x;
+	    _y+=p.y;
+	    _z+=p.z;
+	    
+	    counter++;
+	    // break;
+	    // cout << "Found a fucking point" << endl;
+	    // }
+      }
+   }
+   
+   //cout<<"Counter: "<<counter<<endl;
+   if(counter>0){
+     //Calculate the average point
+     tmp_x=_x/(counter);
+     tmp_y=_y/(counter);
+     tmp_z=_z/(counter);
+     
+     cout << "Point is: " << tmp_x << "," <<tmp_y << "," << tmp_z << endl;
+     
+     
+     *px = tmp_x;
+     *py = tmp_y;
+     *pz = tmp_z;
+   }else{
+     *px = 0;
+     *py = 0;
+     *pz = 0;
+     return false;
+   }
+   
+   
+   return true;
+   
+}
+
 
 bool C23_Detector::averagePointCloudInsideCar(int x1, int y1, int x2, int y2, const sensor_msgs::PointCloud2::ConstPtr &cloud, double* px, double* py, double *pz) {
   
@@ -709,6 +797,12 @@ it_(nh),
 	      {
 		string target = req.target;
 		string status  ="none";
+		cout<<"Vals: "<<last_x<<", "<<last_y<<", "<<width<<", "<<height<<endl;
+		if (last_x ==-1 ||last_y == -1||width ==-1||height==-1){
+		 ROS_INFO("Invalid coordinates");
+		  return false;
+		}
+		
 		if(!target.compare("Firehose")) {
 		  char basePath[1000],imageName[1000];
 		  
@@ -743,6 +837,7 @@ it_(nh),
 		  string t = basePath;
 		  // string t = "/home/isl/darpa/robil/C23_ObjectRecognition/3D_models/firehose.txt";
 		  std::cout<<imageName<<endl;
+		  
 		  pcl::PointCloud<pcl::PointXYZ>::Ptr cloud2 = filterPointCloud(last_x,last_y,width,height,lastCloud);
 		  templateMatching3D(t, cloud2);
 		  
@@ -789,6 +884,14 @@ it_(nh),
 		    status = "Engaged";
 		    ROS_INFO("Handbrake status: ENGAGED");
 		    }
+		  } else if(!target.compare("Car")) {
+		    //Note yaw is set in the method detectCar
+		    orient_x = x;
+		    orient_y = y;
+		    orient_z = z;
+		    orient_R = 0;
+		    orient_P = 0;
+		    status = "Car";
 		  }
 		  
 		  
@@ -950,7 +1053,7 @@ it_(nh),
 				      }
 				      void C23_Detector::callback(const sensor_msgs::ImageConstPtr& msg,const sensor_msgs::PointCloud2::ConstPtr &cloud)
 				      {
-				//	ROS_INFO("Receiving image..");
+					ROS_INFO("Receiving image..");
 					Mat srcImg = fromSensorMsg(msg);
 					bool res;
 					pcl::PointCloud<pcl::PointXYZ>detectionCloud;
@@ -2349,14 +2452,100 @@ it_(nh),
 					     }*/
 					    imshow("TESTING",srcImg);
 					    waitKey(0);
-					    // pictureCoordinatesToGlobalPosition(minRect.center.x-100,minRect.center.y+100,minRect.center.x+100,minRect.center.y+100,&x,&y,NULL);
-					    
-					    //FIXME:
-					    // with offset
+                        double z1;
+                        double x1 = MIN(rect_points[0].x,rect_points[1].x);
+                        double x2 = MIN(rect_points[2].x,rect_points[3].x);
+                        int min_x = MIN(x1,x2);
+                        
+                        double y1 = MIN(rect_points[0].y,rect_points[1].y);
+                        double y2 = MIN(rect_points[2].y,rect_points[3].y);
+                        int min_y = MIN(y1,y2);
+                        
+                        
+                        x1 = MAX(rect_points[0].x,rect_points[1].x);
+                        x2 = MAX(rect_points[2].x,rect_points[3].x);
+                        double max_x = MAX(x1,x2);
+                        
+                        y1 = MAX(rect_points[0].y,rect_points[1].y);
+                        y2 = MAX(rect_points[2].y,rect_points[3].y);
+                        double max_y = MAX(y1,y2);
+                        
+                        bool a_res = pictureCoordinatesToGlobalPosition(min_x,min_y,max_x,max_y, &x1, &y1,&z1, -1.5,0);
+                        if(!a_res) {
+                            return false;
+                        }
+                        x = x1;
+                        y = y1;
+					   
 					    return true;
 					}
 					return false;
 					
+				      }
+				      
+				      
+				      //Calculates the yaw relative to the robot
+				      double C23_Detector::calculateYaw(GeneralDetector::CAR_TARGET *car_target){
+					
+					double m_car = 0;
+					double m_rear = 0;
+					double m_robot = 0;
+					double m_front = 0;
+					double tan_alpha  = 0;
+					double alpha = 0;
+					Point2f point_car;//Used to generate a point on the car
+					double THRESHOLD = 0.1;
+					Point2f mid_point;
+					
+					if(*car_target==GeneralDetector::CAR_DRIVER || *car_target==GeneralDetector::CAR_PASSENGER){
+					  
+					  m_car = (_pointa.y - _pointb.y)/(_pointa.x - _pointb.x);
+					  m_robot = _pointa.y/_pointb.y;
+					  
+					  
+					  
+					}else if(*car_target==GeneralDetector::CAR_REAR_DRIVER || *car_target==GeneralDetector::CAR_REAR_PASSENGER){
+					  //The line representing the rear of the car
+					  m_rear = (_pointa.y - _pointb.y)/(_pointa.x - _pointb.x);
+					  m_car = -1/m_rear;//Assumes that the car line gradient is perpendicular to the rear gradient
+					  
+					  //Find the midpoint of the rear lines
+					  mid_point.x  = (_pointa.x + _pointb.x)/2;
+					  mid_point.y = (_pointa.y + _pointb.y)/2;
+					  
+					  //Get a new point on the line of the car (approximate)
+					  mid_point.x = mid_point.x + 1;
+					  mid_point.y = mid_point.y + 0.75;
+					  
+					  m_robot  = mid_point.y/ mid_point.x;//TOFIX
+					}else if(*car_target==GeneralDetector::CAR_FRONT){
+					  //The line representing the rear of the car
+					  m_front = (_pointa.y - _pointb.y)/(_pointa.x - _pointb.x);
+					  m_car = -1/m_front;//Assumes that the car line gradient is perpendicular to the rear gradient
+					  
+					  //Find the midpoint of the front line
+					  mid_point.x  = (_pointa.x + _pointb.x)/2;
+					  mid_point.y = (_pointa.y + _pointb.y)/2;
+					  
+					  //Get a new point on the line of the car (approximate)
+					  mid_point.x = mid_point.x + 1;
+					  mid_point.y = mid_point.y + 0.75;
+					  
+					  m_robot  = mid_point.y/ mid_point.x;//TOFIX
+					  
+					}
+					//If perpendicular, then return 90 degrees
+					if (m_car*m_robot <-1+THRESHOLD && m_car*m_robot>-1 - THRESHOLD){
+					   return 3.14/2; 
+					}else{
+					//Using the formula to find the acute angle between two lines: http://www.slideshare.net/SimonBorgert/angle-between-2-lines
+
+					//Find the yaw
+					alpha = atan2((m_robot - m_car),(1+m_robot*m_car));
+					ROS_INFO("The yaw of the robot relative to the car is: %f radians",alpha); 
+					
+					return alpha;
+					}
 				      }
 				      
 				      
@@ -2431,7 +2620,7 @@ it_(nh),
 						  minPoint = pclcloud.at(i,j);//Check
 						  minImagePoint.x = j;// Col: http://docs.opencv.org/doc/user_guide/ug_mat.html --> Scalar intensity = img.at<uchar>(Point(x, y));
 						minImagePoint.y = i;// Row
-						cout<<"Point: "<<i<<", "<<j<<": x,y,z "<<minPoint.x<<", "<<minPoint.y<<", "<<minPoint.z<<endl;
+						//cout<<"Point: "<<i<<", "<<j<<": x,y,z "<<minPoint.x<<", "<<minPoint.y<<", "<<minPoint.z<<endl;
 						}
 					      }
 					    }
@@ -2470,7 +2659,7 @@ it_(nh),
 						nanColumnFlag = false;
 						
 						if(depth < minPoint.x+THRESHOLD && depth > minPoint.x-THRESHOLD/2) {
-						  cout<<"Depth: "<<depth<<endl;
+						 // cout<<"Depth: "<<depth<<endl;
 						  x1 = minImagePoint.x+i;
 						  //cout<<"X1: "<<x1<<endl;
 						  flag = 1;
@@ -2508,7 +2697,7 @@ it_(nh),
 						
 						
 						if(depth < minPoint.x+THRESHOLD && depth > minPoint.x-THRESHOLD/2) {
-						  cout<<"Depth: "<<depth<<endl;
+						  //cout<<"Depth: "<<depth<<endl;
 						  x0 = minImagePoint.x-i;
 						  flag = 1;
 						}
@@ -2546,7 +2735,7 @@ it_(nh),
 					      x1 = srcImgWidth-1;
 					    
 					    
-					    cout<<"The image dimensions are "<<srcImgWidth<<", "<<srcImgHeight<<endl;
+					    //cout<<"The image dimensions are "<<srcImgWidth<<", "<<srcImgHeight<<endl;
 					    
 					    std::vector<cv::Point> bounds;
 					    line( srcImg, cv::Point(x0, y0), cv::Point(x0, y1), Scalar(0,0,255), 3, CV_AA);
@@ -2568,28 +2757,30 @@ it_(nh),
 					      c21srv.request.sample.x2 = x1;
 					      c21srv.request.sample.y2 = y1;
 					      
-					      cout << "X1: " << x0 << " X2: " << x1 <<" Y1: "<<yTop<<" Y2:"<< y1<< endl;
+					      //cout << "X1: " << x0 << " X2: " << x1 <<" Y1: "<<yTop<<" Y2:"<< y1<< endl;
 					      
 					      
-					      //TO DO: Determine if the robot is facing the front, rear, passenger or driver of the car
-					      
-					      
-					      //Detect the rear. If it is detected, find out which light is closer. This will tell us if we are facing driver/passenger side
+					      //Determine if the robot is facing the front, rear, passenger or driver of the car
+
+					     //Detect the rear. If it is detected, find out which light is closer. This will tell us if we are facing driver/passenger side
 					     detectRearCar(srcImg, x0, yTop, x1, y1, minPoint, pclcloud,&car_target);
-					     
-					      
+					     if(car_target==GeneralDetector::NONE)//The robot is neither facing the front or the rear
+					     {
 					      //Determine if the robot is facing the driver or passenger side
 					      detectPassengerDriver(srcImg, x0, yTop, x1, y1, minPoint, pclcloud, &car_target);
 					      if(car_target==GeneralDetector::NONE)//The robot is neither facing the front or the rear
 					      {
-						cout<<"Here rear"<<endl;
-						
-						
-						if(car_target==GeneralDetector::NONE){
 						  cout<<"Here front"<<endl;
 						  detectFrontCar(srcImg, x0, yTop, x1, y1, minPoint, pclcloud,&car_target);
-						}
 					      }
+					      
+					     }
+					     
+					     //Calculate the yaw of the car relative to the robot
+					      double yaw =  calculateYaw(&car_target);
+					      
+					      orient_Y  =yaw;
+					      
 					      
 					      double x_s,y_s;
 					      double z_s = 0;
@@ -2662,7 +2853,7 @@ it_(nh),
 				      
 				      bool C23_Detector::detectRearCar(Mat srcImg, int x1,int y1,int x2,int y2, pcl::PointXYZ minPoint, pcl::PointCloud<pcl::PointXYZ> pclcloud, GeneralDetector::CAR_TARGET *car_target){
 					    
-					 Mat hsvImg, thresholdedImg, imgCarOpened, imgCarClosed, imgCarProcessing;
+					 Mat hsvImg, thresholdedImg, imgCarOpened, imgCarClosed, imgCarProcessing, imgCarDilated;
 						    
 					cvtColor(srcImg, hsvImg, CV_BGR2HSV);
 					inRange(hsvImg, Scalar(1, 150, 0), Scalar(30, 255, 255), thresholdedImg);
@@ -2676,18 +2867,25 @@ it_(nh),
 					//Open the image to remove noise
 					Mat element1(4, 4, CV_8U, Scalar(1));
 					morphologyEx(thresholdedImg, imgCarOpened, MORPH_OPEN, element1);
+					
+					Mat element2(4, 4, CV_8U, Scalar(1));
+					dilate(imgCarOpened, imgCarDilated, element2);
 
-					//imshow("Car opened", imgCarOpened);
+					//imshow("Car opened", imgCarDilated);
 					//waitKey();
 
 					//Find the cm of the 2 detected blobs
 					//Now find the contours of the blobs
 					vector<vector<cv::Point> > blobContours;
-					imgCarOpened.copyTo(imgCarProcessing);
+					imgCarDilated.copyTo(imgCarProcessing);
 					findContours(imgCarProcessing, blobContours, CV_RETR_EXTERNAL,
 						    CV_CHAIN_APPROX_SIMPLE);
 					drawContours(srcImg, blobContours, -1, CV_RGB(255,0,0), 2);
-
+					
+					
+					//imshow("Src", srcImg);
+					//waitKey();
+					
 					//Sort the contours based on their area
 					sort(blobContours.begin(), blobContours.end(), compareContourAreas);
 
@@ -2735,16 +2933,76 @@ it_(nh),
 					  *car_target = GeneralDetector::CAR_REAR;
 					ROS_INFO("REAR DETECTED");
 					  
-					  double x_largest = pclcloud.at(mc[mc.size()-1].y, mc[mc.size()-1].x).x;
-					  double x_second_largest = pclcloud.at(mc[mc.size()-2].y, mc[mc.size()-2].x).x;
 					  
-					  if(x_largest > x_second_largest && x_cm_largest>x_cm_second_largest){
+					  
+					  double left_light_depth = -1;
+					  double right_light_depth = -1;
+					  int OFFSET = 10;
+					  int topCol_l, topRow_l, bottomCol_l, bottomRow_l;
+					  int topCol_s, topRow_s, bottomCol_s, bottomRow_s;
+					  float z1,z2;
+					  //Set the x,y points to be used for the yaw calculation
+					  int largest_x = mc[mc.size()-1].x;
+					  int largest_y = mc[mc.size()-1].y;
+					  
+					  int second_largest_x = mc[mc.size()-2].x;
+					  int second_largest_y =mc[mc.size()-2].y;
+					  
+					  topCol_l = MAX(0, largest_x - OFFSET);
+					  topRow_l = MAX(0, largest_y - OFFSET);
+					  bottomCol_l = MIN(799, largest_x + OFFSET);
+					  bottomRow_l = MIN(799, largest_y + OFFSET);
+					  
+					  topCol_s = MAX(0, second_largest_x - OFFSET);
+					  topRow_s = MAX(0, second_largest_y - OFFSET);
+					  bottomCol_s = MIN(799, second_largest_x + OFFSET);
+					  bottomRow_s = MIN(799, second_largest_y + OFFSET);
+					  
+					  //Get the depth of the center of masses for each contour
+					  //double x_largest_depth = pclcloud.at(mc[mc.size()-1].y, mc[mc.size()-1].x).x;
+					  //double x_second_largest_depth = pclcloud.at(mc[mc.size()-2].y, mc[mc.size()-2].x).x;
+					  
+					  float x_largest_depth, y_ld, z_ld;
+					  averagePointCloudCar(topCol_l, topRow_l, bottomCol_l, bottomRow_l, pclcloud, &x_largest_depth,&y_ld, &z_ld);
+					  float x_second_largest_depth, y_sld, z_sld;
+					  averagePointCloudCar(topCol_s, topRow_s, bottomCol_s, bottomRow_s, pclcloud, &x_second_largest_depth,&y_sld, &z_sld);  
+					  
+					  
+					  if(x_cm_largest>x_cm_second_largest){
+					    right_light_depth = x_largest_depth;
+					    left_light_depth = x_second_largest_depth;
+
+					    averagePointCloudCar(topCol_l, topRow_l, bottomCol_l, bottomRow_l, pclcloud, &_pointb.x,&_pointb.y, &z1);
+					    averagePointCloudCar(topCol_s, topRow_s, bottomCol_s, bottomRow_s, pclcloud, &_pointa.x, &_pointa.y, &z2);
+					    //_pointa.x = pclcloud.at(mc[mc.size()-2].y, mc[mc.size()-2].x).x;
+					   // _pointa.y = pclcloud.at(mc[mc.size()-2].y, mc[mc.size()-2].x).y;
+					   //_pointb.x = pclcloud.at(mc[mc.size()-1].y, mc[mc.size()-1].x).x;
+					   // _pointb.y = pclcloud.at(mc[mc.size()-1].y, mc[mc.size()-1].x).y;
+					    
+					  }else if(x_cm_largest<x_cm_second_largest){
+					    right_light_depth = x_second_largest_depth;
+					    left_light_depth = x_largest_depth;
+					    
+					    //Set the x,y points to be used for the yaw calculation
+					    
+					    averagePointCloudCar(topCol_l, topRow_l, bottomCol_l, bottomRow_l, pclcloud,&_pointa.x, &_pointa.y, &z1);
+					    averagePointCloudCar(topCol_s, topRow_s, bottomCol_s, bottomRow_s, pclcloud, &_pointb.x, &_pointb.y, &z2);
+					   // _pointa.x = pclcloud.at(mc[mc.size()-1].y, mc[mc.size()-1].x).x;
+					   // _pointa.y = pclcloud.at(mc[mc.size()-1].y, mc[mc.size()-1].x).y;
+					   // _pointb.x = pclcloud.at(mc[mc.size()-2].y, mc[mc.size()-2].x).x;
+					   // _pointb.y = pclcloud.at(mc[mc.size()-2].y, mc[mc.size()-2].x).y;
+					  }
+					  ROS_INFO("Points X,Y,Z are: A: %f, %f NULL B %f, %f, NULL", _pointa.x, _pointa.y, _pointb.x, _pointb.y);
+					  ROS_INFO("Right light depth: %f", right_light_depth);
+					  ROS_INFO("Left light depth: %f", left_light_depth);
+
+					  if(right_light_depth > left_light_depth){
 					    *car_target = GeneralDetector::CAR_REAR_DRIVER;
-					    ROS_INFO("CAR PASSENGER IN THE REAR");
+					    ROS_INFO("CAR DRIVER REAR");
 					  }
 					  else{
 					    *car_target = GeneralDetector::CAR_REAR_PASSENGER;
-					    ROS_INFO("CAR DRIVER IN THE REAR");
+					    ROS_INFO("CAR PASSENGER REAR");
 					  }
 					
 					
@@ -2759,7 +3017,7 @@ it_(nh),
 					//imshow("The image", srcImg);
 					//waitKey();
 
-					Mat hsvImg, thresholdedImg, imgCarOpened, imgCarClosed, imgCarProcessing;
+					Mat hsvImg, thresholdedImg, imgCarOpened, imgCarClosed, imgCarProcessing, imgCarDilated;
 
 					cvtColor(srcImg, hsvImg, CV_BGR2HSV);
 					inRange(hsvImg, Scalar(50, 150, 0), Scalar(120, 255, 255), thresholdedImg);
@@ -2773,14 +3031,17 @@ it_(nh),
 					//Open the image to remove noise
 					Mat element1(4, 4, CV_8U, Scalar(1));
 					morphologyEx(thresholdedImg, imgCarOpened, MORPH_OPEN, element1);
-
-					//imshow("Car opened", imgCarOpened);
+					
+					
+					Mat element2(40, 40, CV_8U, Scalar(1));
+					dilate(imgCarOpened, imgCarDilated, element2);
+					//imshow("Car opened", imgCarDilated);
 					//waitKey();
 
 					//Find the cm of the 2 detected blobs
 					//Now find the contours of the blobs
 					vector<vector<cv::Point> > blobContours;
-					imgCarOpened.copyTo(imgCarProcessing);
+					imgCarDilated.copyTo(imgCarProcessing);
 					findContours(imgCarProcessing, blobContours, CV_RETR_EXTERNAL,
 							CV_CHAIN_APPROX_SIMPLE);
 					drawContours(srcImg, blobContours, -1, CV_RGB(255,0,0), 2);
@@ -2824,19 +3085,67 @@ it_(nh),
 
 						//if(firstMaxBlobArea>5000){
 						//*car_target = GeneralDetector::CAR_FRONT;
-
+						
+						//Find the maximum x,y,z points on either side of the largest contour
+						vector<cv::Point> currentLargestBlobContour;
+						currentLargestBlobContour = blobContours.at(blobContours.size()-1);
+						
+						
+						
+						
 						if(firstMaxBlobArea>2000){
 						*car_target = GeneralDetector::CAR_FRONT;
 						ROS_INFO("FRONT DETECTED");
-
+						//Extract the extreme points of the contour for calculating points
+						Point2f leftmost, rightmost;
+						int maxVal = 0;
+						int minVal = 1000000;
+						Point2f currentpoint;
+						int OFFSET = 10;
+						for (int ii=0;ii<currentLargestBlobContour.size();ii++){
+						  currentpoint = currentLargestBlobContour.at(ii);
+						  if(currentpoint.x>maxVal)
+						  {
+						    rightmost = currentpoint;
+						    
+						  }
+						  
+						}
+						
+						for (int ii=0;ii<currentLargestBlobContour.size();ii++){
+						  currentpoint = currentLargestBlobContour.at(ii);
+						  if(currentpoint.x<minVal)
+						  {
+						    leftmost = currentpoint;
+						  }
+						}
+						ROS_INFO("Leftmost %f, %f Right most %f, %f", leftmost.x, leftmost.y, rightmost.x, rightmost.y);
+						//leftmost = tuple(currentLargestBlobContour[currentLargestBlobContour[:,:,0].argmin()][0]);
+						//rightmost = tuple(currentLargestBlobContour[currentLargestBlobContour[:,:,0].argmax()][0]);
+						
+						float z_l, z_r;
+						averagePointCloudCar((int)leftmost.x, (int)leftmost.y, (int)leftmost.x + OFFSET, (int)leftmost.y + OFFSET, pclcloud, &_pointa.x, &_pointa.y, &z_l);
+						averagePointCloudCar((int)rightmost.x, (int)rightmost.y, (int)rightmost.x + OFFSET, (int)rightmost.y + OFFSET, pclcloud, &_pointb.x, &_pointb.y, &z_r);
+						
+						//Set the x,y points to be used for the yaw calculation
+						/*_pointa.x = pclcloud.at(leftmost.y, leftmost.x).x;
+						_pointa.y = pclcloud.at(leftmost.y, leftmost.x).y;
+						_pointb.x = pclcloud.at(rightmost.y, rightmost.x).x;
+						_pointb.y = pclcloud.at(rightmost.y, rightmost.x).y;*/
+					    
+						//Set the x,y points to be used for the yaw calculation
+						/*_pointa.x = pclcloud.at(mc[mc.size()-1].y, mc[mc.size()-1].x).x;
+						_pointa.y = pclcloud.at(mc[mc.size()-1].y, mc[mc.size()-1].x).y;
+						_pointb.x = pclcloud.at(mc[mc.size()-2].y, mc[mc.size()-2].x).x;
+						_pointb.y = pclcloud.at(mc[mc.size()-2].y, mc[mc.size()-2].x).y;*/
+						ROS_INFO("Points X,Y,Z are: A: %f, %f NULL B %f, %f, NULL", _pointa.x, _pointa.y, _pointb.x, _pointb.y);
+						
 						} else
 							return false;
 
 					} else
 						return false;
-					
-					
-					
+
 				      }
 				      
 				      
@@ -2929,17 +3238,70 @@ it_(nh),
 					    cout<<"CM: "<<mc[ii]<<", Area: "<<blobAreas[ii]<<endl;
 					    }
 					    
+					    
+					  int OFFSET = 10;
+					  int topCol_l, topRow_l, bottomCol_l, bottomRow_l;
+					  int topCol_s, topRow_s, bottomCol_s, bottomRow_s;
+					  float z1,z2;
 					    //Determine the largest and second largest contour
 					    cout<<"Largest: "<<mc[mc.size()-1].x<<", Second Largest: "<<mc[mc.size()-2].x<<endl;
-					    if(mc[mc.size()-1].x > mc[mc.size()-2].x){
+					  if(mc[mc.size()-1].x > mc[mc.size()-2].x){
 					      ROS_INFO("Robot is facing passenger side");
 					      *car_target = GeneralDetector::CAR_PASSENGER;
-					     x = (pclcloud.at(mc[mc.size()-1].y,mc[mc.size()-1].x).x + pclcloud.at(mc[mc.size()-2].y,mc[mc.size()-2].x).x)/2;
-					    y = (pclcloud.at(mc[mc.size()-1].y,mc[mc.size()-1].x).y + pclcloud.at(mc[mc.size()-2].y,mc[mc.size()-2].x).y)/2;
-					    z = (pclcloud.at(mc[mc.size()-1].y,mc[mc.size()-1].x).z + pclcloud.at(mc[mc.size()-2].y,mc[mc.size()-2].x).z)/2;
+
+					  //Set the x,y points to be used for the yaw calculation
+					  int largest_x = mc[mc.size()-1].x;
+					  int largest_y = mc[mc.size()-1].y;
+					  
+					  int second_largest_x = mc[mc.size()-2].x;
+					  int second_largest_y =mc[mc.size()-2].y;
+					  
+					  topCol_l = MAX(0, largest_x - OFFSET);
+					  topRow_l = MAX(0, largest_y - OFFSET);
+					  bottomCol_l = MIN(799, largest_x + OFFSET);
+					  bottomRow_l = MIN(799, largest_y + OFFSET);
+					  
+					  topCol_s = MAX(0, second_largest_x - OFFSET);
+					  topRow_s = MAX(0, second_largest_y - OFFSET);
+					  bottomCol_s = MIN(799, second_largest_x + OFFSET);
+					  bottomRow_s = MIN(799, second_largest_y + OFFSET);
+					  
+					  //Get the depth of the center of masses for each contour
+					  //double x_largest_depth = pclcloud.at(mc[mc.size()-1].y, mc[mc.size()-1].x).x;
+					  //double x_second_largest_depth = pclcloud.at(mc[mc.size()-2].y, mc[mc.size()-2].x).x;
+					  
+					  float x_largest_depth, y_ld, z_ld;
+					  averagePointCloudCar(topCol_l, topRow_l, bottomCol_l, bottomRow_l, pclcloud, &x_largest_depth,&y_ld, &z_ld);
+					  float x_second_largest_depth, y_sld, z_sld;
+					  averagePointCloudCar(topCol_s, topRow_s, bottomCol_s, bottomRow_s, pclcloud, &x_second_largest_depth,&y_sld, &z_sld);  
+					    
+					  
+					    //Find the central point in the car
+					    x = (x_largest_depth + x_second_largest_depth)/2;
+					    y = (y_ld + y_sld)/2;
+					    z = (z_ld + z_sld)/2;
+					    
+					    //Set the x,y points to be used for the yaw calculation
+					    averagePointCloudCar(topCol_l, topRow_l, bottomCol_l, bottomRow_l, pclcloud,&_pointa.x, &_pointa.y, &z1);
+					    averagePointCloudCar(topCol_s, topRow_s, bottomCol_s, bottomRow_s, pclcloud, &_pointb.x, &_pointb.y, &z2);
+					   /* _pointa.x = pclcloud.at(mc[mc.size()-2].y, mc[mc.size()-2].x).x;
+					    _pointa.y = pclcloud.at(mc[mc.size()-2].y, mc[mc.size()-2].x).y;
+					    _pointb.x = pclcloud.at(mc[mc.size()-1].y, mc[mc.size()-1].x).x;
+					    _pointb.y = pclcloud.at(mc[mc.size()-1].y, mc[mc.size()-1].x).y;*/
+					    ROS_INFO("Point a %f, %f Point b %f, %f", _pointa.x, _pointa.y, _pointb.x, _pointb.y);
 					    }else{
 					      ROS_INFO("Robot is facing driver side");
 					      *car_target = GeneralDetector::CAR_DRIVER;
+					      
+					      //Set the x,y points to be used for the yaw calculation
+					      averagePointCloudCar(topCol_l, topRow_l, bottomCol_l, bottomRow_l, pclcloud, &_pointb.x,&_pointb.y, &z1);
+					    averagePointCloudCar(topCol_s, topRow_s, bottomCol_s, bottomRow_s, pclcloud, &_pointa.x, &_pointa.y, &z2);
+					    
+					    /*_pointa.x = pclcloud.at(mc[mc.size()-1].y, mc[mc.size()-1].x).x;
+					    _pointa.y = pclcloud.at(mc[mc.size()-1].y, mc[mc.size()-1].x).y;
+					    _pointb.x = pclcloud.at(mc[mc.size()-2].y, mc[mc.size()-2].x).x;
+					    _pointb.y = pclcloud.at(mc[mc.size()-2].y, mc[mc.size()-2].x).y;*/
+					    ROS_INFO("Point a %f, %f Point b %f, %f", _pointa.x, _pointa.y, _pointb.x, _pointb.y);
 					    }
 					    
 					  }else{
@@ -2947,10 +3309,6 @@ it_(nh),
 					    ROS_INFO("Not enough contours found");
 					    
 					  }
-					  
-					}else
-					{
-					  
 					  
 					}
 					

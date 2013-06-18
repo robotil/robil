@@ -124,6 +124,7 @@ public:
     GEAR_STATUS current_gear_status;
     HANDBRAKE_STATUS current_handbrake_status;
     pcl::PointCloud<pcl::PointXYZ> lastCloud;
+    Point2f _pointa, _pointb;
     
 private:
 
@@ -148,11 +149,12 @@ private:
     bool pictureCoordinatesToGlobalPosition(double x1, double y1, double x2, double y2, double * x, double* y, double*z,double offsetx = 0, double offsety = 0);
     bool pointCloudCoordinatesToGlobalPosition(double x, double y, double z, double* px, double* py, double*pz);
 
-    bool averagePointCloudInsideCar(int x1, int y1, int x2, int y2, const sensor_msgs::PointCloud2::ConstPtr &cloud, double* px, double* py, double *pz); 
+    bool averagePointCloudInsideCar(int x1, int y1, int x2, int y2, const sensor_msgs::PointCloud2::ConstPtr &cloud, double* px, double* py, double *pz);
+    bool averagePointCloudCar(int x1, int y1, int x2, int y2, pcl::PointCloud<pcl::PointXYZ> pclcloud, float* px, float* py, float *pz); 
     bool averagePointCloud(int x1, int y1, int x2, int y2, const sensor_msgs::PointCloud2::ConstPtr &detectionCloud, double* px, double* py, double *pz);
     bool process_orientation(C23_ObjectRecognition::C23_orient::Request  &req,
                                            C23_ObjectRecognition::C23_orient::Response &res );
-        
+    double calculateYaw(GeneralDetector::CAR_TARGET *car_target);   
 	ros::NodeHandle nh;
     bool takePictures(Mat srcImg);
     bool templateMatching( Mat img, Mat templateImage, int matching_method, cv::Point *matchLoc, const sensor_msgs::PointCloud2::ConstPtr &cloud, double *value = NULL);
