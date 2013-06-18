@@ -54,13 +54,21 @@ class AP_WalkingMode(WalkingMode):
 
     def Initialize(self,parameters):
         WalkingMode.Initialize(self,parameters)
+        self._LPP.Initialize()
         self._command = 0
         self._bRobotIsStatic = True
         self._bGotStaticPose = False
         self._BDI_Static_pose = Pose()
         self._started_to_walk = False
         self._target_pose = None
+        self._isDynamic = False
         ## USING parameters:
+        if ((None != parameters) and ('Motion' in parameters)):
+            DesiredMotion = parameters['Motion']
+            if "Dynamic" == DesiredMotion:
+                self._isDynamic = True
+            else:
+                self._isDynamic = False
         # parameter 'Object' uses service to get delta alignment to target object 
         if ((None != parameters) and ('Object' in parameters)):
             self._DesiredObject = parameters['Object']
@@ -103,8 +111,9 @@ class AP_WalkingMode(WalkingMode):
         
         self._RequestTargetPose(self._DesiredObject)
         self._k_effort = [0] * 28
-        self._k_effort[0:4] = 4*[255]
-        self._k_effort[16:28] = 12*[255]
+        self._k_effort[3] = [255]
+        # self._k_effort[0:4] = 4*[255]
+        # self._k_effort[16:28] = 12*[255]
         self._JC.set_k_eff(self._k_effort)
         self._JC.set_all_pos(self._cur_jnt)
         self._JC.send_command()
@@ -123,7 +132,11 @@ class AP_WalkingMode(WalkingMode):
     
     def Walk(self):
         WalkingMode.Walk(self)
-        self._command = self.GetCommand(self._BDI_state)
+        #self._command = self.GetCommand(self._BDI_state)
+        if self._isDynamic:
+            self._command = self.GetCommandDynamic(self._BDI_state)
+        else:
+            self._command = self.GetCommandStatic(self._BDI_state)
         if(0 != self._command):
             self.asi_command.publish(self._command)
             self._bIsSwaying = True
@@ -142,12 +155,12 @@ class AP_WalkingMode(WalkingMode):
     def IsReady(self):
         return True
     
-    def GetCommand(self,state):
+    def GetCommandStatic(self,state):
         command = AtlasSimInterfaceCommand()
         command.behavior = AtlasSimInterfaceCommand.STEP
         #give user control over neck, back_z and arms
         command.k_effort = self._k_effort
-        command.step_params.desired_step = self._LPP.GetNextStep()
+        command.step_params.desired_step = self._LPP.GetNextStaticStep()
         if(0 != command.step_params.desired_step):
             # Not sure why such a magic number
             command.step_params.desired_step.duration = 0.63
@@ -156,6 +169,26 @@ class AP_WalkingMode(WalkingMode):
             #command.step_params.desired_step = self._TransforFromGlobalToBDI(command.step_params.desired_step,state)
         else:
             command = 0
+        return command
+
+    def GetCommandDynamic(self):
+        command = AtlasSimInterfaceCommand()
+        command.behavior = AtlasSimInterfaceCommand.WALK
+        # command.k_effort = [0] * 28
+        # k_effort = [0] * 28
+        # k_effort[3] = 255 # k_effort[0:4] = 4*[255]
+        # # k_effort[16:28] = 12*[255]
+        command.k_effort = self._k_effort
+        step_queue = self._LPP.GetNextDynamicStep()
+        if(0 == step_queue):
+            command = 0
+        else:
+            for i in range(4):
+                command.walk_params.step_queue[i] = copy.deepcopy(step_queue[i])
+                command.walk_params.step_queue[i].step_index = self._StepIndex + i
+                command.walk_params.step_queue[i].duration = 0.63
+                #print("GetCommand",command.walk_params.step_queue)
+                command.walk_params.step_queue[i] = self._TransforFromGlobalToBDI(command.walk_params.step_queue[i],i)
         return command
     
     def HandleStateMsg(self,state):
@@ -170,7 +203,10 @@ class AP_WalkingMode(WalkingMode):
         elif ("Walking" == self._WalkingModeStateMachine.GetCurrentState().Name):
             #print(3)
             if (AP_PathPlannerEnum.Active == self._LPP.State):
-                command = self.GetCommand(state)
+                if self._isDynamic:
+                    command = self.GetCommandDynamic(state)
+                else:
+                    command = self.GetCommandStatic(state)
             elif(AP_PathPlannerEnum.Waiting == self._LPP.State): # or (AP_PathPlannerEnum.Empty == self._LPP.State):
                 self._RequestTargetPose(self._DesiredObject)
         elif ("Done" == self._WalkingModeStateMachine.GetCurrentState().Name):
@@ -180,6 +216,7 @@ class AP_WalkingMode(WalkingMode):
             raise Exception("AL_WalkingModeStateMachine::Bad State Name")
     
         return command
+
     
     def _RequestTargetPose(self,desired_object):
         err_rot = 0.10 # [rad]
