@@ -104,11 +104,12 @@ class CD_WalkingMode(WalkingMode):
     
     def Stop(self):
         WalkingMode.Stop(self)        
+        rospy.sleep(5)
     
     def EmergencyStop(self):
-        k_effort = [0] * 28
+        #k_effort = [0] * 28
         #k_effort[3] = 255
-        stand = AtlasSimInterfaceCommand(None,AtlasSimInterfaceCommand.STAND, None, None, None, None, k_effort)
+        stand = AtlasSimInterfaceCommand(None,AtlasSimInterfaceCommand.STAND, None, None, None, None, self._k_effort)
         self.asi_command.publish(stand)
 
     def IsDone(self):
