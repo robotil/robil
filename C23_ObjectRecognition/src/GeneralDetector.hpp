@@ -25,6 +25,8 @@ public:
 	  CAR_PASSENGER,
 	  CAR_REAR_PASSENGER,
 	  CAR_REAR_DRIVER,
+	  CAR_FRONT_DRIVER,
+	  CAR_FRONT_PASSENGER,
 	  NONE
 	} CAR_TARGET;
 	//  void detect(Mat img, int* x, int* y, int* width, int* height);

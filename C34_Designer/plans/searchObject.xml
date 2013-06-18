@@ -1,5 +1,7 @@
 <plan descriptions="./plans/TaskDescriptions.xml">
    <seq name="mission" x="470.5" y="112.5" collapsed="false" id="6006f6c7-0e3f-4ac5-bc07-3ab15200678e"> 
-         <tsk name="searchObject(target=Arrow)" x="442.9999999999999" y="224.99999999999994" test_time="0" test_result="true" id="2e38e143-fe05-4c53-9634-5b55cde61077" />
+         <tsk name="trackObject(target=Arrow)" x="257.9999999999999" y="237.99999999999994" test_time="0" test_result="true" id="2e38e143-fe05-4c53-9634-5b55cde61077" />
+         <tsk name="trackObject(target=Arrow)" x="477.9999999999999" y="242.99999999999994" test_time="0" test_result="true" id="954ea7d8-28e1-41cd-a4e3-1798904df3a8" />
+         <tsk name="trackObject(target=Arrow)" x="743.9999999999999" y="248.99999999999994" test_time="0" test_result="true" id="edc548ad-2fd7-41cd-87d1-650bb1cdbf29" />
    </seq>
 </plan>

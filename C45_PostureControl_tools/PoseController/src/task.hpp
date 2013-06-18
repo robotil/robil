@@ -29,9 +29,16 @@ public:
 				if (isPreempt()){
 					return TaskResult::Preempted();
 				}
-			
+
+				
 				srv.request.back_lbz=0;
-				srv.request.neck_ay=0;
+				if(args.find("neck")==args.end()){
+					srv.request.neck_ay=0;
+				}else{
+					std::stringstream o; o<<args["neck"];
+					o>>srv.request.neck_ay;
+				}
+					
 			
 				if (srv_client.call(srv)) {
 					ROS_INFO("TaskResetHead: /PoseController/back_lbz_neck_ay call is successed");
@@ -39,6 +46,7 @@ public:
 					ROS_INFO("TaskResetHead: /PoseController/back_lbz_neck_ay call is fault");
 				}
 			
+
 				sleep(100);	
 			}
 		}catch(...){

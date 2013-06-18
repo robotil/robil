@@ -6,13 +6,13 @@
 	<node pkg="C67_CarManipulation" type="GripHandBrake" name="GripHandbrake" output="log" respawn="true" />
 	<node pkg="C67_CarManipulation" type="GripSteeringWheel" name="GripSteeringWheel" output="log" respawn="true" />
 	<node pkg="C67_CarManipulation" type="CalibrateWheel" name="CalibrateWheel" output="log" respawn="true" />
-	<node pkg="C67_CarManipulation" type="PlaceFeetOnPedals" name="PlaceFeetOnPedals" output="log" respawn="true" />
-	<node pkg="C67_CarManipulation" type="CalibratePedals" name="CalibratePedals" output="log" respawn="true" />
-
+	<!--node pkg="C67_CarManipulation" type="PlaceFeetOnPedals" name="PlaceFeetOnPedals" output="log" respawn="true" / -->
+	<!--node pkg="C67_CarManipulation" type="CalibratePedals" name="CalibratePedals" output="log" respawn="true" / -->
+	<node pkg="PedalManipulation" type="PedalManipulation" name="PedalManipulation" output="log" respawn="true" />
 	<node pkg="C46_MountVehicle" type="C46_MountVehicle.py" name="MountVehicle" output="log" respawn="true"/>
 	<node pkg="C47_DismountVehicle" type="C47_DismountVehicle.py" name="DismountVehicle" output="log" respawn="true" />
 
-	<node pkg="C35_Monitoring" type="DrivingMonitor.py" name="DrivingMonitor" output="log" respawn="true" />
+	<!-- node pkg="C35_Monitoring" type="DrivingMonitor.py" name="DrivingMonitor" output="log" respawn="true" /-->
 
 	<node pkg="C51_CarOperation" type="DRC_Vehicle_Init_server.py" name="InitDrive" output="log" respawn="true" />
 	<node pkg="C51_CarOperation" type="DRC_Vehicle_Drive_server.py" name="WaypointsDriving" output="log" respawn="true" />

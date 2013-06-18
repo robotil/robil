@@ -1,9 +1,13 @@
 <launch>
 
 	<node pkg="C42_DynamicLocomotion" type="WalkerNode.py" name="WalkerNode_Continuous" args="CD" output="log" respawn="true" />
-	<node pkg="C42_DynamicLocomotion" type="WalkerNode.py" name="WalkerNode_AP" args="AP" output="log" respawn="true" />	
+	
    <node pkg="C43_LocalBodyCOM" type="computeCOM" name="C43_LocalBodyCOM" output="log" respawn="true" />
 	<!--node pkg="C42_DynamicLocomotion" type="WalkerNode.py" name="WalkerNode_DW" args="DW" output="log" respawn="true" /-->
 	<node pkg="C42_State"             type="state" name="State" output="log" respawn="true" />
+	<node pkg="C42_DynamicLocomotion" type="WalkerNode.py" name="WalkerNode_DW" args="DW" output="log" respawn="true" />
+	<node pkg="C42_DynamicLocomotion" type="DWStandUp.py" name="DWStand" output="log" respawn="true" />
+   <node pkg="C42_DynamicLocomotion" type="WalkerNode.py" name="Trans" args="Trans" output="log" respawn="true" />
+   <node pkg="C42_DynamicLocomotion" type="WalkerNode.py" name="Rot"  args="Rot" output="log" respawn="true" />
   
 </launch>

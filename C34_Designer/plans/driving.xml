@@ -1,39 +1,27 @@
 <plan descriptions="./plans/TaskDescriptions.xml">
-   <par name="event1" x="532.6944115542224" y="-330.2600220732437" collapsed="false" id="9d746c82-b87a-4162-b22a-35dd6fecef96"> 
-         <par name="Perception" x="313.9049378700122" y="-245.26002207324416" collapsed="false" id="c3f65350-843d-4b46-b2f5-277b579547e2"> 
-               <tsk name="LocalizationTrack" x="145.90493787001182" y="-204.2600220732441" test_time="0" test_result="true" id="aa18c80f-40e8-4332-ba25-7a7df5232744" />
+   <par name="event1" x="607.335895070706" y="24.47632491310327" collapsed="false" id="25586da7-8f40-4680-b9d7-0942099d05d3"> 
+         <par name="Perception" x="388.54642138649587" y="109.47632491310281" collapsed="false" id="8fcfc549-d8d1-4693-b169-1ce457caa7a7"> 
+               <tsk name="LocalizationTrack" x="220.54642138649547" y="150.47632491310287" test_time="0" test_result="true" id="7bb11422-b336-42b0-9a5c-f5be9b199207" />
+               <tsk name="PathPlanning" x="380.07399030879645" y="252.07156300833975" test_time="0" test_result="true" id="c9fb9efa-2be0-4631-bb25-c927a1acb388" />
          </par>
-         <seq name="Mission" x="476.69441155422396" y="-204.260022073244" collapsed="false" id="4575bcb3-d78b-4907-b51c-3db42a9d0f1d"> 
-               <seq name="InCar" x="473.9325067923196" y="-145.83145064467448" collapsed="false" id="36007a39-6a19-4324-b6ea-31bb0105ace6"> 
-                  <dec name="!L!" x="403.9325067923214" y="-99.1647839780079"> 
-                        <seq name="Setting" x="392.7420306018439" y="-43.1806569938783" collapsed="false" id="6ac68c2f-eefd-45f0-b916-6cb1a3785df2"> 
-                              <seq name="TestControllers" x="350.7858902509586" y="102.08250090085801" collapsed="false" id="08e1a836-b5fa-4dd4-8f7e-5d1e79149e05"> 
-                                    <tsk name="GripSteeringWheel(angle=1.5)" x="79.83514216863057" y="219.05899516682325" test_time="0" test_result="true" id="51b6dacd-58ba-45c3-aadd-7f16014b94ed" />
-                                    <tsk name="CalibrateWheel" x="178.46548662701215" y="326.21398034619506" test_time="0" test_result="true" id="4167d66f-a234-4251-9a4a-f77682b05530" />
-                                    <tsk name="PlaceFeetOnPedals(angle=1.5)" x="233.4541138402366" y="375.5295655321231" test_time="0" test_result="true" id="8f3633dd-0c08-4dc2-a8a4-2ccbbd0754ef" />
-                                    <tsk name="CalibratePedals" x="351.95755011907625" y="319.5552501874597" test_time="0" test_result="true" id="c01e1fd5-ce92-4c31-a1bf-981de2f70851" />
-                                    <tsk name="GripHandBrake(operation=1)" x="477.3781850397123" y="365.785408917617" test_time="0" test_result="true" id="4770d2ac-361e-4c04-a9ab-c3eafcc5b966" />
-                                    <tsk name="GripGearStick(operation=1)" x="552.2670739285991" y="274.06318669539917" test_time="0" test_result="true" id="1d8db9c8-689b-4063-b37f-b2e48ec6b882" />
-                              </seq>
-                        </seq>
-                  </dec>
-                     <par name="Driving" x="563.9325067923141" y="-89.83145064467504" collapsed="false" id="34db94ed-e27b-4f7c-aecd-34b4d1eb9cfa"> 
-                           <tsk name="PathPlanning" x="486.4325067923128" y="-35.66478397800722" test_time="0" test_result="true" id="87723865-390a-46df-88dd-2704024e4842" />
-                        <dec name="!L!" x="614.05155441136" y="-36.498117311340366"> 
-                              <seq name="Driving" x="772.7182210780279" y="13.716168402944163" collapsed="false" id="d0fa4957-6092-4ed0-afa1-abf0229c8823"> 
-                                    <tsk name="PathPlanningFocus(target=Gate)" x="525.5941609276517" y="115.12594283902968" test_time="0" test_result="true" id="0bf3e0c1-6c7e-41f0-a0cc-c29fe7bccdcc" />
-                                    <seq name="@4" x="905.5607247222506" y="95.13461526682869" collapsed="false" id="7855bb1b-7f37-4c8b-9269-d2ed6a085d21"> 
-                                          <tsk name="InitDrive" x="724.7869345283169" y="167.4235618866507" test_time="0" test_result="true" id="a1f0a103-51bb-4826-9e86-8400759aaff3" />
-                                          <sel name="@5" x="903.5607247222506" y="156.13461526682647" collapsed="false" id="a0a26e65-c3c6-4c0c-8718-7ce32713c4dd"> 
-                                                <tsk name="WayPointsDriving" x="813.0924900838694" y="200.6255251280977" test_time="0" test_result="true" id="bfab5a52-2336-4c72-918f-eca5eee0ae39" />
-                                                <tsk name="FinishDrive" x="1000.1321532936788" y="199.99175812396925" test_time="0" test_result="true" id="3aa6cea3-b134-48ce-8a17-d5abdd9bed18" />
-                                          </sel>
-                                          <tsk name="FinishDrive" x="1000.1321532936788" y="199.99175812396925" test_time="0" test_result="true" id="3aa6cea3-b134-48ce-8a17-d5abdd9bed18" />
-                                    </seq>
-                              </seq>
-                        </dec>
-                     </par>
+         <seq name="@4" x="893.2022082387342" y="209.87096225317566" collapsed="false" id="34968940-00f0-47d2-ba9d-2507e6452b34"> 
+               <seq name="TestControllers" x="627.4273737674422" y="286.818847887205" collapsed="false" id="b6433604-a04c-4d7c-93bc-3624e1b5bb05"> 
+                     <tsk name="CalibrateWheel" x="374.10697014349586" y="384.95032733254203" test_time="0" test_result="true" id="a695974e-9ccc-4908-82a6-f23449b953b3" />
+                     <tsk name="GripHandBrake(operation=1)" x="376.7469412834678" y="429.7944831766913" test_time="0" test_result="true" id="eb1250de-5673-470b-92d4-e058415a3f5a" />
+                     <tsk name="GripGearStick(operation=1)" x="574.2721938087184" y="421.79953368174614" test_time="0" test_result="true" id="7753d1a0-430f-4b53-a282-a65d8e5e07b4" />
+                     <tsk name="PlaceFeetOnPedals" x="767.8636363636363" y="413.95454545454544" test_time="0" test_result="true" id="64dd023f-202b-4071-ac95-e610d411010a" />
+                     <seq name="OperatorRequest" x="955.1392104787885" y="459.755055466723" collapsed="false" id="b40827bb-1737-40b2-ad2a-f1a227732fa8"> 
+                           <tsk name="PushHMI(data=panoramic_image)" x="696.1392104787909" y="518.7550554667241" test_time="0" test_result="true" id="af143eb3-af05-4853-be63-c61b1842f671" />
+                           <tsk name="PushHMI(data=occupancy_grid)" x="743.1392104787901" y="557.7550554667265" test_time="0" test_result="true" id="a883d19d-23b2-486f-bd8e-47cbefe4c694" />
+                           <tsk name="PushHMI(data=path)" x="843.1392104787889" y="599.7550554667256" test_time="0" test_result="true" id="b58c4cdd-1be6-4033-aba0-146636ecb521" />
+                           <tsk name="HMIResponse" x="1005.1392104787889" y="596.7550554667256" test_time="0" test_result="true" id="9f2dfae6-c8fc-4f7a-a132-76c437462239" />
+                     </seq>
                </seq>
+               <sel name="@5" x="891.2022082387342" y="270.87096225317345" collapsed="false" id="ee88ecdc-a48c-4a2d-8f23-83f1bd5bf9eb"> 
+                     <tsk name="WayPointsDriving" x="800.733973600353" y="315.3618721144447" test_time="0" test_result="true" id="c5a75ecb-c131-400b-bb69-2595c7e7178f" />
+                     <tsk name="FinishDrive" x="987.7736368101624" y="314.7281051103162" test_time="0" test_result="true" id="af790dda-648d-4a14-9aeb-cc5da159ec3c" />
+               </sel>
+               <tsk name="FinishDrive" x="987.7736368101624" y="314.7281051103162" test_time="0" test_result="true" id="af790dda-648d-4a14-9aeb-cc5da159ec3c" />
          </seq>
    </par>
 </plan>
