@@ -62,15 +62,15 @@ class AP_WalkingMode(WalkingMode):
         self._BDI_Static_pose = Pose()
         self._started_to_walk = False
         self._target_pose = None
-        self._isDynamic = False
+        self._isDynamic = True#False
         self._StepIndex = 1
         ## USING parameters:
-        if ((None != parameters) and ('Motion' in parameters)):
-            DesiredMotion = parameters['Motion']
-            if "Dynamic" == DesiredMotion:
-                self._isDynamic = True
-            else:
-                self._isDynamic = False
+        # if ((None != parameters) and ('Motion' in parameters)):
+        #     DesiredMotion = parameters['Motion']
+        #     if "Dynamic" == DesiredMotion:
+        #         self._isDynamic = True
+        #     else:
+        #         self._isDynamic = False
         # parameter 'Object' uses service to get delta alignment to target object 
         if ((None != parameters) and ('Object' in parameters)):
             self._DesiredObject = parameters['Object']
@@ -222,9 +222,9 @@ class AP_WalkingMode(WalkingMode):
 
     
     def _RequestTargetPose(self,desired_object):
-        err_rot = 0.10 # [rad]
-        err_trans = 0.1 # [meters]
-        self._stepWidth = 0.3 # Width of stride
+        err_rot = 0.018#0.10 # [rad]
+        err_trans = 0.02# 0.1 # [meters]
+        self._stepWidth = 0.2#0.3 # Width of stride
         self._R = self._stepWidth/2 # Radius of turn, turn in place
 
         # Perform a service request from FP
@@ -353,7 +353,7 @@ class AP_WalkingMode(WalkingMode):
         print ("_GetRotationDeltaFP_Path yaw:",delta_yaw, "start ori:",start_orientation )
         foot_placement_path = []
         
-        theta_max = 0.35 # max turning angle per step
+        theta_max = 0.018#0.35 # max turning angle per step
 
         ### Turn in place (pivot):
         Num_seq = int(math.floor(math.fabs(delta_yaw)/theta_max))
@@ -412,8 +412,8 @@ class AP_WalkingMode(WalkingMode):
     def _GetTranslationDeltaFP_Path(self,delta_yaw,delta_trans,start_position,start_orientation):
         print ("_GetTranslationDeltaFP_Path deltaXY:",delta_trans, "start ori:",start_orientation)
         foot_placement_path = []
-        x_length_max = 0.25 # [meters] max step length (radius =~ 0.42 [m])
-        y_length_max = 0.2 # [meters]
+        x_length_max = 0.02#0.25 # [meters] max step length (radius =~ 0.42 [m])
+        y_length_max = 0.15#0.2 # [meters]
 
         # yaw angle of robot
         theta0 = -start_orientation[2] #copy.copy(start_orientation[2])       
@@ -540,6 +540,7 @@ class AP_WalkingMode(WalkingMode):
         command = 0
         if (self._isDynamic):
             if(self._StepIndex < state.walk_feedback.next_step_index_needed):
+                print "START Dynamic WALK"
                 command = self.HandleStateMsg(state)
             if (0 != command):
                 #print("Step",self._StepIndex,command)
