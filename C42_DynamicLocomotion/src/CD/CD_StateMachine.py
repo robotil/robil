@@ -79,7 +79,7 @@ class CD_StateMachine(StateMachine):
             print("CD StateMachine - WaitingForActual")
             print(len(self._StepQueue))
             if (5 > len(self._StepQueue)):
-                if (self._actualRobot.IsEndOfPath()):
+                if (self._phantomRobot.IsEndOfPath()):
                     if (StateMachine.PerformTransition(self,'WindingDown')):
                         print("CD_StateMachine::WindingDown")
                         self._phantomRobot.AddFinalSteps()
