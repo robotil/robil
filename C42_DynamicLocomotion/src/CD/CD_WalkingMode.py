@@ -12,7 +12,7 @@ import rospy
 import sys
 import copy
 import roslib
-import PyKDL
+#import PyKDL
 
 roslib.load_manifest('C42_DynamicLocomotion')
 
@@ -84,7 +84,7 @@ class CD_WalkingMode(WalkingMode):
         rospy.sleep(0.3)
             
         self._k_effort = [0] * 28
-        self._k_effort[3] = [255]
+        self._k_effort[3] = 255
         # self._k_effort[0:4] = 4*[255]
         # self._k_effort[16:28] = 12*[255]
         self._JC.set_k_eff(self._k_effort)
@@ -204,8 +204,14 @@ class CD_WalkingMode(WalkingMode):
         for wp in path.points:
             pathlist.append([wp.x,wp.y]) 
         
-        print robot_position.GetX(),robot_position.GetY(),pathlist[0]
-        Path = findIndex([robot_position.GetX(),robot_position.GetY()], pathlist)
+        try:
+            print robot_position.GetX(),robot_position.GetY(),pathlist[0]
+        except:
+            print robot_position.GetX(),robot_position.GetY(),"No Path"
+        if pathlist:
+            Path = findIndex([robot_position.GetX(),robot_position.GetY()], pathlist)
+        else:
+            Path=[]
         rospy.loginfo('path from robots position: %s',Path)        
         filtered_path = []
         found_first_waypoint = False
