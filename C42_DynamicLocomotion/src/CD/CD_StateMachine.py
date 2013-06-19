@@ -77,6 +77,7 @@ class CD_StateMachine(StateMachine):
                     raise StateMachineError("CD_StateMachine::Step() - could not perform transition 'Actual'") 
         elif ('WaitingForActual' == self._CurrentState.Name):
             print("CD StateMachine - WaitingForActual")
+            print(len(self._StepQueue))
             if (5 > len(self._StepQueue)):
                 if (self._actualRobot.IsEndOfPath()):
                     if (StateMachine.PerformTransition(self,'WindingDown')):

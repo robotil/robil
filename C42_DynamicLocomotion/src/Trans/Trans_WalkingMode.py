@@ -17,6 +17,8 @@ class Trans_WalkingMode(DC_WalkingMode):
         
         specificParameters = {}
         self._translationY = 0.0
+        isDynamic = "Static"
+        
         if ((None != generalParameters) and ('Translate_X' in generalParameters)):
             self._translationX = float(generalParameters['Translate_X'])
         else:
@@ -27,9 +29,14 @@ class Trans_WalkingMode(DC_WalkingMode):
         else:
             self._translationY = 0.0
         
+        if ((None != generalParameters) and ('IsDynamic' in generalParameters)):
+            if ("Yes" == generalParameters['IsDynamic']):
+                isDynamic = "Dynamic"
+            
         if ('AP' == self._CurrentStandingMode):
             specificParameters['Xmovement'] = self._translationX
             specificParameters['Ymovement'] = self._translationY
+            specificParameters['Motion'] = isDynamic
         elif ('DW' == self._CurrentStandingMode):
             pass
         else:

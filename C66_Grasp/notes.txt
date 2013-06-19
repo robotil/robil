@@ -1,5 +1,17 @@
 C66 – Grasp and Release
 
+before:hange o
+add the: C66_Grasp/launch/vrc_task_3_3.launch   to   /usr/share/drcsim-2.6/ros/atlas_utils/launch:
+sudo cp C66_Grasp/launch/vrc_task_3_3.launch /usr/share/drcsim-2.6/ros/atlas_utils/launch
+Add the: C66_Grasp/launch/vrc_task_3_3.world           to   /usr/share/drcsim-2.6/worlds
+
+roslaunch C66_Grasp C66_Grasp_no_dFind.launch
+roslaunch C45_PostureControl C45_PostureControl.launch
+rosservice call /PoseController/start "{}" 
+rosrun C66_Grasp client 
+
+
+*************** OLD **********************************
 before:
 add the: C66_Grasp/launch/vrc_task_3_3.launch   to   /usr/share/drcsim-2.6/ros/atlas_utils/launch:
 sudo cp C66_Grasp/launch/vrc_task_3_3.launch /usr/share/drcsim-2.6/ros/atlas_utils/launch
