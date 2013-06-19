@@ -43,6 +43,7 @@ class PathPlanningServer:public RobilTask{
 	#define SYNCH(V) {boost::mutex::scoped_lock locker(_mtx); V}
 
 	bool new_map_or_location;
+	bool custom_path_sent;
 
 	class Statistic{
 		friend class PathPlanningServer;
@@ -63,7 +64,7 @@ class PathPlanningServer:public RobilTask{
 	ros::Publisher* c31_Exception;
 public:
     PathPlanningServer(PathPlanning& planner, string name = "/PathPlanning"):
-    	RobilTask(name), _planner(planner), new_map_or_location(false), c31_Exception(NULL)
+    	RobilTask(name), _planner(planner), new_map_or_location(false), custom_path_sent(true), c31_Exception(NULL)
     {
     	_planner.setChangeNotifier(boost::bind(&PathPlanningServer::dataChanged, this));
 
@@ -115,7 +116,7 @@ public:
 		}
     }
     bool publish_transits_as_plan(ros::Publisher& c31_PathPublisher){
-	bool sent = false;
+    	bool sent = false;
     	PathPlanning::EditSession session = _planner.startEdit();
     	//if(c31_PathPublisher.getNumSubscribers()>0){
 			ROS_INFO("PUBLISH CALCULATED GLOBAL PATH FROM TRANSITS");
@@ -128,9 +129,13 @@ public:
 			}
 		if(c31_PathPublisher.getNumSubscribers()>0 && session.constraints.gps_transits.size()>0){
 			sent = true;
-			c31_PathPublisher.publish(res_path);
+			if(custom_path_sent==false) {
+				custom_path_sent = true;
+				c31_PathPublisher.publish(res_path);
+			}
+
 		}
-	return sent;
+		return sent;
     }
    void publish_special_plan_firstAndLast(ros::Publisher& output_path){
     	//if(output_path.getNumSubscribers()>0){
@@ -300,7 +305,7 @@ public:
 		ROS_INFO("subscribe to topic /planner/reset <C31_PathPlanner/C31_HMIReset>");
 		ros::Subscriber planner_reset = _node.subscribe("/planner/reset", 1000, &PathPlanningServer::callbackNewReset, this );
 
-		#define TURNON_REQUEST_MAP
+		//#define TURNON_REQUEST_MAP
 		//#define TURNON_REQUEST_TARGET_LOCATION
 		
 		#ifdef TURNON_REQUEST_MAP
@@ -374,7 +379,7 @@ public:
             }
 
             /* SLEEP BETWEEN LOOP ITERATIONS */
-            sleep(1000); //millisec
+            sleep(100); //millisec
         }
 
         this->c31_Exception=0;
@@ -804,6 +809,7 @@ public:
     void onNewTransitPoints(const std::vector<GPSPoint> points){
     	PathPlanning::EditSession session = _planner.startEdit();
    		session.constraints.gps_transits = points;
+   		custom_path_sent = false;
    		if(exists_new_map_or_location()){
 			session.constraints.transits = _planner.castToTransits(session.constraints.gps_transits);
 			ROS_INFO("GPS_GRID_CASTING: Transits: (from NewTransitPoints)");
