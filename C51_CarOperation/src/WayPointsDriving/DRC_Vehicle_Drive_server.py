@@ -20,7 +20,7 @@ import time
 from datetime import datetime, timedelta
 from C25_GlobalPosition.msg import C25C0_ROP
 from C25_GlobalPosition.srv import C25BDI
-#from C42_State.msg import MotionType
+from C42_State.msg import MotionType
 from C31_PathPlanner.msg import C31_Waypoints
 from C31_PathPlanner.srv import C31_GetPath
 import Tkinter
@@ -149,9 +149,9 @@ class Drive(object):
         
         self.sub = rospy.Subscriber('/C25/publish', C25C0_ROP,self.MyLocation_callback) #get atlas location by subscribing to C25 module       
         #self.sub = rospy.Subscriber('/ground_truth_odom', Odometry,self.MyLocation_callback2) #get atlas location by subscribing to C25 module   
-#        self.MotionTypeMSG = MotionType()
-#        self.MotionTypeMSG.motion =5        
-#        self.motionTypePublisher = rospy.Publisher("/motion_state/motion_type", MotionType)        
+        self.MotionTypeMSG = MotionType()
+        self.MotionTypeMSG.motion =5        
+        self.motionTypePublisher = rospy.Publisher("/motion_state/motion_type", MotionType)        
 
         
 
@@ -290,15 +290,15 @@ class Drive(object):
         
         return ([flag, b, m])
     def DriveCallback(self, goal):
-        #self.motionTypePublisher.publish(self.MotionTypeMSG)
+        self.motionTypePublisher.publish(self.MotionTypeMSG)
         num = Int32(0)
-        rospy.wait_for_service('/C25/BDIswitch')
-        try:
-            State= rospy.ServiceProxy('/C25/BDIswitch', C25BDI)
-            resp = State(num)
-        except rospy.ServiceException, e:
-            print "Service /C25/BDISwitch call failed: %s"%e
-            log.info("Might be driving without Global Position")
+#        rospy.wait_for_service('/C25/BDIswitch')
+#        try:
+#            State= rospy.ServiceProxy('/C25/BDIswitch', C25BDI)
+#            resp = State(num)
+#        except rospy.ServiceException, e:
+#            print "Service /C25/BDISwitch call failed: %s"%e
+#            log.info("Might be driving without Global Position")
         gasP=Gas() #gas pedal online
         #brakeP=Brake() #gas pedal online
         #Steer=SW()      #steering wheel online        
