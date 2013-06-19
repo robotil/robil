@@ -176,7 +176,7 @@ if (req.erase==-1)
 				  cloudf_backup.swap(cloud_temp);
 				  if(cloudf_backup->points.size()<300)
 					  break;
-				  ros::Duration(0.01).sleep();//added here a line!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+				  ros::Duration(0.001).sleep();//added here a line!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 			  }
     std::cout<<"pre- matrix\n";
 	_myMatrix->clearMatrix();

@@ -4,7 +4,7 @@
 	<!--node pkg="C25_AtlasFell" type="Fell_server.py" name="Fell" output="log" respawn="true" / -->
 	<!-- node pkg="C25_AtlasFell" type="Fell_client.py" name="C25_AtlasFell_client" output="log" respawn="true"/ -->
 	<!--node pkg="C35_Monitoring" type="FallingMonitor.py" name="FallingMonitor" output="log" respawn="true" /-->
-	<node pkg="C48_StandUp" type="C48_StandUp.py" name="StandUp" output="log" respawn="true" />
+	<!-- node pkg="C48_StandUp" type="C48_StandUp.py" name="StandUp" output="log" respawn="true" / -->
 	<!--node pkg="C42_WalkType" type="walktype" name="C42_WalkType" output="log" respawn="true" / -->
 	<!-- Agent -->
 	<!-- node pkg="C35_Monitoring" type="TimeoutMonitor.py" name="TimeoutMonitor" output="log" respawn="true" / -->
