@@ -100,7 +100,7 @@ class CD_PhantomRobot(CD_Robot):
         self._Duration = 0.63
         self._SwingHeight  = 0.2
         self._MinimalCorrection = 0.02
-        self._ErrorCorrection = self._StepWidth
+        self._ErrorCorrection = 0.15
         self._MaxTurningAnglePerStep = 0.25 # max turning angle per step
 
     def Initialize(self,stepQueue,index):
@@ -155,12 +155,15 @@ class CD_PhantomRobot(CD_Robot):
         
     def AddFinalSteps(self):
         originalStepWidth = self._StepWidth
-        self._StepWidth = 0.15
+        originalDuration = self._Duration
+        self._Duration = 1
+        self._StepWidth = 0.2
         print("adding final steps")
         self._AddIdleSteps()
         self._AddIdleSteps()
         self._AddIdleSteps()
         self._StepWidth = originalStepWidth
+        self._Duration = originalDuration
 
     def _PrepareStepData(self):
         self._index  += 1
