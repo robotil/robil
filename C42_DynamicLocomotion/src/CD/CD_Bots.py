@@ -42,6 +42,10 @@ class CD_Robot(object):
         
     def GetIndex(self):
         return self._index 
+    
+    def IsEndOfPath(self):
+        return self._LPP.IsEndOfPath()
+    
 ###################################################################################
 #-------------------------------- Actual Bot --------------------------------------
 ###################################################################################
@@ -61,15 +65,12 @@ class CD_ActualRobot(CD_Robot):
             for i in range(4):
                 command.walk_params.step_queue[i] = self._StepQueue[i]
         else:
-            print("Sending STAND Command")
-            command = AtlasSimInterfaceCommand(None,AtlasSimInterfaceCommand.STAND, None, None, None, None, [0]*28)
+            command = 0
+#            print("Sending STAND Command")
+#            command = AtlasSimInterfaceCommand(None,AtlasSimInterfaceCommand.STAND, None, None, None, None, [0]*28)
         self._StepQueue.popleft()
         self._index+=1
         return command
-    
-
-    def IsEndOfPath(self):
-        return self._LPP.IsEndOfPath()
     
     def GetPathError(self):
         return self._LPP.GetPathError()
@@ -100,7 +101,7 @@ class CD_PhantomRobot(CD_Robot):
         self._Duration = 0.63
         self._SwingHeight  = 0.2
         self._MinimalCorrection = 0.02
-        self._ErrorCorrection = self._StepWidth
+        self._ErrorCorrection = 0.15
         self._MaxTurningAnglePerStep = 0.25 # max turning angle per step
 
     def Initialize(self,stepQueue,index):
@@ -121,8 +122,7 @@ class CD_PhantomRobot(CD_Robot):
     def PrepareNextSegment(self):
         if (self._LPP.IsEndOfPath()):
             self._AddIdleSteps()
-            self._AddIdleSteps()
-            #self._AddIdleSteps()
+            #self.AddFinalSteps()
         else:
             self._Pivot(self._LPP.GetAngleToNextSegment())
             self._LPP.PromoteSegment()
@@ -154,13 +154,16 @@ class CD_PhantomRobot(CD_Robot):
         self._AddIdleSteps()
         
     def AddFinalSteps(self):
-        originalStepWidth = self._StepWidth
-        self._StepWidth = 0.10 # 0.15
+#        originalStepWidth = self._StepWidth
+#        originalDuration = self._Duration
+#        self._Duration = 0.7
+#        self._StepWidth = 0.15
         print("adding final steps")
         self._AddIdleSteps()
-        self._AddIdleSteps()
-        #self._AddIdleSteps()
-        self._StepWidth = originalStepWidth
+#        self._AddIdleSteps()
+#        self._AddIdleSteps()
+#        self._StepWidth = originalStepWidth
+#        self._Duration = originalDuration
 
     def _PrepareStepData(self):
         self._index  += 1
