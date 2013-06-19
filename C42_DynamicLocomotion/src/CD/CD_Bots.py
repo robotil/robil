@@ -65,8 +65,9 @@ class CD_ActualRobot(CD_Robot):
             for i in range(4):
                 command.walk_params.step_queue[i] = self._StepQueue[i]
         else:
-            print("Sending STAND Command")
-            command = AtlasSimInterfaceCommand(None,AtlasSimInterfaceCommand.STAND, None, None, None, None, [0]*28)
+            command = 0
+#            print("Sending STAND Command")
+#            command = AtlasSimInterfaceCommand(None,AtlasSimInterfaceCommand.STAND, None, None, None, None, [0]*28)
         self._StepQueue.popleft()
         self._index+=1
         return command
@@ -159,8 +160,8 @@ class CD_PhantomRobot(CD_Robot):
 #        self._StepWidth = 0.15
         print("adding final steps")
         self._AddIdleSteps()
-        self._AddIdleSteps()
-        self._AddIdleSteps()
+#        self._AddIdleSteps()
+#        self._AddIdleSteps()
 #        self._StepWidth = originalStepWidth
 #        self._Duration = originalDuration
 
