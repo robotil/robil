@@ -61,6 +61,7 @@ class CD_ActualRobot(CD_Robot):
             for i in range(4):
                 command.walk_params.step_queue[i] = self._StepQueue[i]
         else:
+            print("Sending STAND Command")
             command = AtlasSimInterfaceCommand(None,AtlasSimInterfaceCommand.STAND, None, None, None, None, [0]*28)
         self._StepQueue.popleft()
         self._index+=1
@@ -80,7 +81,7 @@ class CD_ActualRobot(CD_Robot):
         self._LPP.PromoteSegment()
 
     def SetPosition(self,x,y):
-        self._LPP.UpdatePosition(x,y,self._StepLength)
+        self._LPP.UpdatePosition(x,y,0*self._StepLength)
     
 ###################################################################################
 #-------------------------------- Phantom Bot -------------------------------------
@@ -120,6 +121,8 @@ class CD_PhantomRobot(CD_Robot):
     def PrepareNextSegment(self):
         if (self._LPP.IsEndOfPath()):
             self._AddIdleSteps()
+            self._AddIdleSteps()
+            self._AddIdleSteps()
         else:
             self._Pivot(self._LPP.GetAngleToNextSegment())
             self._LPP.PromoteSegment()
@@ -153,6 +156,8 @@ class CD_PhantomRobot(CD_Robot):
     def AddFinalSteps(self):
         originalStepWidth = self._StepWidth
         self._StepWidth = 0.15
+        print("adding final steps")
+        self._AddIdleSteps()
         self._AddIdleSteps()
         self._AddIdleSteps()
         self._StepWidth = originalStepWidth
