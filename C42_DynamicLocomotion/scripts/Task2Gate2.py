@@ -1,4 +1,4 @@
-#! /usr/bin/env python
+#!/usr/bin/env python
 import roslib; roslib.load_manifest('C42_ZMPWalk')
 import rospy
 from C31_PathPlanner.msg import C31_Waypoints, C31_Location

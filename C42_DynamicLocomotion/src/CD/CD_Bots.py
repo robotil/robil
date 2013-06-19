@@ -122,7 +122,7 @@ class CD_PhantomRobot(CD_Robot):
         if (self._LPP.IsEndOfPath()):
             self._AddIdleSteps()
             self._AddIdleSteps()
-            self._AddIdleSteps()
+            #self._AddIdleSteps()
         else:
             self._Pivot(self._LPP.GetAngleToNextSegment())
             self._LPP.PromoteSegment()
@@ -155,11 +155,11 @@ class CD_PhantomRobot(CD_Robot):
         
     def AddFinalSteps(self):
         originalStepWidth = self._StepWidth
-        self._StepWidth = 0.15
+        self._StepWidth = 0.10 # 0.15
         print("adding final steps")
         self._AddIdleSteps()
         self._AddIdleSteps()
-        self._AddIdleSteps()
+        #self._AddIdleSteps()
         self._StepWidth = originalStepWidth
 
     def _PrepareStepData(self):
