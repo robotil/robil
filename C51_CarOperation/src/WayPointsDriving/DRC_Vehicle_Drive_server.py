@@ -144,8 +144,8 @@ class Drive(object):
             self.q_out.put(a)        
         self.Obsticalpoints=[]
         self.ObsticalTime=[]
-        #sub = rospy.Subscriber('/my_cloud', Polygon,self.Obs_callback)    
-        sub = rospy.Subscriber('/RoadExtract', Polygon,self.Obs_callback)    
+        sub = rospy.Subscriber('/my_cloud', Polygon,self.Obs_callback)    
+        #sub = rospy.Subscriber('/RoadExtract', Polygon,self.Obs_callback)    
         
         self.sub = rospy.Subscriber('/C25/publish', C25C0_ROP,self.MyLocation_callback) #get atlas location by subscribing to C25 module       
         #self.sub = rospy.Subscriber('/ground_truth_odom', Odometry,self.MyLocation_callback2) #get atlas location by subscribing to C25 module   
@@ -167,7 +167,7 @@ class Drive(object):
         #H=self.floorFilter(data)
         #print H
         for pt in data.points:
-            #if pt.z>F  and pt.z<H:
+            if pt.z>F  and pt.z<H:
                 self.Obsticalpoints.append((pt.x, -pt.y, -pt.z))
                 self.ObsticalTime.append(a)
         
