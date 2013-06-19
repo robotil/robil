@@ -15,15 +15,21 @@ class Rot_WalkingMode(DC_WalkingMode):
     def Initialize(self,generalParameters):
         DC_WalkingMode.Initialize(self)      
         
+        isDynamic = "Static"
         specificParameters = {}
         self._rotationAngle = 0.0
         if ((None != generalParameters) and ('Rotate' in generalParameters)):
             self._rotationAngle = float(generalParameters['Rotate'])
         else:
             self._rotationAngle = 0.0
+            
+        if ((None != generalParameters) and ('IsDynamic' in generalParameters)):
+            if ("Yes" == generalParameters['IsDynamic']):
+                isDynamic = "Dynamic"
         
         if ('AP' == self._CurrentStandingMode):
             specificParameters['turn_in_place_Yaw'] = self._rotationAngle
+            specificParameters['Motion'] = isDynamic
         elif ('DW' == self._CurrentStandingMode):
             pass
         else:

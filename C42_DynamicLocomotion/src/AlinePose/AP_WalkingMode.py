@@ -34,6 +34,7 @@ class AP_WalkingMode(WalkingMode):
         self._LPP = AP_PathPlanner()
         WalkingMode.__init__(self,self._LPP)
         self._tf = iTf
+        self._StepIndex = 1
         # Initialize atlas atlas_sim_interface_command publisher       
         self.asi_command = rospy.Publisher('/atlas/atlas_sim_interface_command', AtlasSimInterfaceCommand, None, False, True, None)       
 
@@ -54,13 +55,22 @@ class AP_WalkingMode(WalkingMode):
 
     def Initialize(self,parameters):
         WalkingMode.Initialize(self,parameters)
+        self._LPP.Initialize()
         self._command = 0
         self._bRobotIsStatic = True
         self._bGotStaticPose = False
         self._BDI_Static_pose = Pose()
         self._started_to_walk = False
         self._target_pose = None
+        self._isDynamic = True#False
+        self._StepIndex = 1
         ## USING parameters:
+        # if ((None != parameters) and ('Motion' in parameters)):
+        #     DesiredMotion = parameters['Motion']
+        #     if "Dynamic" == DesiredMotion:
+        #         self._isDynamic = True
+        #     else:
+        #         self._isDynamic = False
         # parameter 'Object' uses service to get delta alignment to target object 
         if ((None != parameters) and ('Object' in parameters)):
             self._DesiredObject = parameters['Object']
@@ -124,7 +134,12 @@ class AP_WalkingMode(WalkingMode):
     
     def Walk(self):
         WalkingMode.Walk(self)
-        self._command = self.GetCommand(self._BDI_state)
+        #self._command = self.GetCommand(self._BDI_state)
+        if self._isDynamic:
+            self._command = self.GetCommandDynamic()
+            self._StepIndex = self._StepIndex + 1
+        else:
+            self._command = self.GetCommandStatic(self._BDI_state)
         if(0 != self._command):
             self.asi_command.publish(self._command)
             self._bIsSwaying = True
@@ -143,12 +158,12 @@ class AP_WalkingMode(WalkingMode):
     def IsReady(self):
         return True
     
-    def GetCommand(self,state):
+    def GetCommandStatic(self,state):
         command = AtlasSimInterfaceCommand()
         command.behavior = AtlasSimInterfaceCommand.STEP
         #give user control over neck, back_z and arms
         command.k_effort = self._k_effort
-        command.step_params.desired_step = self._LPP.GetNextStep()
+        command.step_params.desired_step = self._LPP.GetNextStaticStep()
         if(0 != command.step_params.desired_step):
             # Not sure why such a magic number
             command.step_params.desired_step.duration = 0.63
@@ -157,6 +172,26 @@ class AP_WalkingMode(WalkingMode):
             #command.step_params.desired_step = self._TransforFromGlobalToBDI(command.step_params.desired_step,state)
         else:
             command = 0
+        return command
+
+    def GetCommandDynamic(self):
+        command = AtlasSimInterfaceCommand()
+        command.behavior = AtlasSimInterfaceCommand.WALK
+        # command.k_effort = [0] * 28
+        # k_effort = [0] * 28
+        # k_effort[3] = 255 # k_effort[0:4] = 4*[255]
+        # # k_effort[16:28] = 12*[255]
+        command.k_effort = self._k_effort
+        step_queue = self._LPP.GetNextDynamicStep()
+        if(0 == step_queue):
+            command = 0
+        else:
+            for i in range(4):
+                command.walk_params.step_queue[i] = copy.deepcopy(step_queue[i])
+                command.walk_params.step_queue[i].step_index = self._StepIndex + i
+                command.walk_params.step_queue[i].duration = 0.63
+                #print("GetCommand",command.walk_params.step_queue)
+                #command.walk_params.step_queue[i] = self._TransforFromGlobalToBDI(command.walk_params.step_queue[i],i)
         return command
     
     def HandleStateMsg(self,state):
@@ -171,7 +206,10 @@ class AP_WalkingMode(WalkingMode):
         elif ("Walking" == self._WalkingModeStateMachine.GetCurrentState().Name):
             #print(3)
             if (AP_PathPlannerEnum.Active == self._LPP.State):
-                command = self.GetCommand(state)
+                if self._isDynamic:
+                    command = self.GetCommandDynamic()
+                else:
+                    command = self.GetCommandStatic(state)
             elif(AP_PathPlannerEnum.Waiting == self._LPP.State): # or (AP_PathPlannerEnum.Empty == self._LPP.State):
                 self._RequestTargetPose(self._DesiredObject)
         elif ("Done" == self._WalkingModeStateMachine.GetCurrentState().Name):
@@ -181,11 +219,12 @@ class AP_WalkingMode(WalkingMode):
             raise Exception("AL_WalkingModeStateMachine::Bad State Name")
     
         return command
+
     
     def _RequestTargetPose(self,desired_object):
-        err_rot = 0.10 # [rad]
-        err_trans = 0.1 # [meters]
-        self._stepWidth = 0.3 # Width of stride
+        err_rot = 0.018#0.10 # [rad]
+        err_trans = 0.02# 0.1 # [meters]
+        self._stepWidth = 0.2#0.3 # Width of stride
         self._R = self._stepWidth/2 # Radius of turn, turn in place
 
         # Perform a service request from FP
@@ -314,7 +353,7 @@ class AP_WalkingMode(WalkingMode):
         print ("_GetRotationDeltaFP_Path yaw:",delta_yaw, "start ori:",start_orientation )
         foot_placement_path = []
         
-        theta_max = 0.35 # max turning angle per step
+        theta_max = 0.018#0.35 # max turning angle per step
 
         ### Turn in place (pivot):
         Num_seq = int(math.floor(math.fabs(delta_yaw)/theta_max))
@@ -373,8 +412,8 @@ class AP_WalkingMode(WalkingMode):
     def _GetTranslationDeltaFP_Path(self,delta_yaw,delta_trans,start_position,start_orientation):
         print ("_GetTranslationDeltaFP_Path deltaXY:",delta_trans, "start ori:",start_orientation)
         foot_placement_path = []
-        x_length_max = 0.25 # [meters] max step length (radius =~ 0.42 [m])
-        y_length_max = 0.2 # [meters]
+        x_length_max = 0.02#0.25 # [meters] max step length (radius =~ 0.42 [m])
+        y_length_max = 0.15#0.2 # [meters]
 
         # yaw angle of robot
         theta0 = -start_orientation[2] #copy.copy(start_orientation[2])       
@@ -499,23 +538,35 @@ class AP_WalkingMode(WalkingMode):
         #self._Update_tf_BDI_odom(state)
         self._BDI_state = copy.copy(state)
         command = 0
-        #print(state.step_feedback.status_flags)
-        # When the robot status_flags are 1 (SWAYING), you can publish the next step command.
-        if (state.step_feedback.status_flags == 1 and not self._bIsSwaying):
-            command = self.HandleStateMsg(state)
-        elif (state.step_feedback.status_flags == 2 and self._bIsSwaying):
-            self._bIsSwaying = False
-            #print("step done")
-        if (0 != command):
-            self._command = command
-            self._bIsSwaying = True
-        
-        if(0 == state.current_behavior and 0 != self._command):
-            #print self._command
-            self._command.k_effort = self._k_effort
-            self.asi_command.publish(self._command)
-            self._command = 0
-            print("step start")
+        if (self._isDynamic):
+            if(self._StepIndex < state.walk_feedback.next_step_index_needed):
+                print "START Dynamic WALK"
+                command = self.HandleStateMsg(state)
+            if (0 != command):
+                #print("Step",self._StepIndex,command)
+                self._bRobotIsStatic = False
+                self.asi_command.publish(command)
+                self._StepIndex = self._StepIndex+1
+        else:
+            #self._Update_tf_BDI_odom(state)
+            self._BDI_state = copy.copy(state)
+            command = 0
+            #print(state.step_feedback.status_flags)
+            # When the robot status_flags are 1 (SWAYING), you can publish the next step command.
+            if (state.step_feedback.status_flags == 1 and not self._bIsSwaying):
+                command = self.HandleStateMsg(state)
+            elif (state.step_feedback.status_flags == 2 and self._bIsSwaying):
+                self._bIsSwaying = False
+                #print("step done")
+            if (0 != command):
+                self._command = command
+                self._bIsSwaying = True
+            
+            if(0 == state.current_behavior and 0 != self._command):
+                #print self._command
+                self.asi_command.publish(self._command)
+                self._command = 0
+                print("step start")
 
     # def _odom_cb(self,odom):
     #     if self._bRobotIsStatic:
