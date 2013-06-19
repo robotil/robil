@@ -26,6 +26,7 @@
   <depend package="sensor_msgs"/>
   <depend package="LidarObstacleDetection"/>
   <depend package="C0_RobilTask"/>
+  <depend package="C42_State"/>
 </package>
 
 

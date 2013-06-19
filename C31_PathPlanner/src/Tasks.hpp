@@ -114,7 +114,25 @@ public:
 			c31_PathPublisher.publish(res_path);
 		}
     }
-    void publish_special_plan_firstAndLast(ros::Publisher& output_path){
+    bool publish_transits_as_plan(ros::Publisher& c31_PathPublisher){
+	bool sent = false;
+    	PathPlanning::EditSession session = _planner.startEdit();
+    	//if(c31_PathPublisher.getNumSubscribers()>0){
+			ROS_INFO("PUBLISH CALCULATED GLOBAL PATH FROM TRANSITS");
+			GPSPath path = session.constraints.gps_transits ;//get_calculated_path();
+			session.aborted();
+			C31_PathPlanner::C31_Waypoints res_path;
+			for( size_t i=0;i<path.size();i++ ){
+			  C31_PathPlanner::C31_Location loc; loc.x=path[i].x; loc.y=path[i].y;
+			  res_path.points.push_back(loc);
+			}
+		if(c31_PathPublisher.getNumSubscribers()>0 && session.constraints.gps_transits.size()>0){
+			sent = true;
+			c31_PathPublisher.publish(res_path);
+		}
+	return sent;
+    }
+   void publish_special_plan_firstAndLast(ros::Publisher& output_path){
     	//if(output_path.getNumSubscribers()>0){
 			ROS_INFO("PUBLISH SPECIAL PATH ( just first and last points )");
 			GPSPath path = get_calculated_path();
@@ -326,28 +344,32 @@ public:
 					map_and_location_gotten();
 
 			UNLOCK( locker )
+			
+					if( ! publish_transits_as_plan(c31_PathPublisher) ){
 
-					SET_CURRENT_TIME(statistic.time_plan_startPlanning);
-					ROS_INFO("%s: plan path", _name.c_str());
-					if( _planner.plan() ){
-						publish_new_plan(c31_PathPublisher);
-						check_terrain(
-								C42_walk_notification_mud,
-								C42_walk_notification_debris,
-								c42_Quadruped_path_mud,
-								c42_Quadruped_path_debris,
-								c42_Quadruped_path_hills
-						);
-					}else{
-						throw_exception(C31_PathPlanner::C31_Exception::TYPE_NOSOLUTIONFORPLAN, "No solution for plan found.");
+					    SET_CURRENT_TIME(statistic.time_plan_startPlanning);
+					    ROS_INFO("%s: plan path", _name.c_str());
+					    if( _planner.plan() ){
+						    publish_new_plan(c31_PathPublisher);
+						    check_terrain(
+								    C42_walk_notification_mud,
+								    C42_walk_notification_debris,
+								    c42_Quadruped_path_mud,
+								    c42_Quadruped_path_debris,
+								    c42_Quadruped_path_hills
+						    );
+					    }else{
+						    throw_exception(C31_PathPlanner::C31_Exception::TYPE_NOSOLUTIONFORPLAN, "No solution for plan found.");
+					    }
+					    SET_CURRENT_TIME(statistic.time_plan_stopPlanning);
 					}
-					SET_CURRENT_TIME(statistic.time_plan_stopPlanning);
 
             }else{
 
             UNLOCK( locker )
 
             		ROS_INFO("%s: wait for new data (map, location, target, constraints, etc.)%s", _name.c_str(), (targetDefined?"":", target still not defined"));
+            		publish_transits_as_plan(c31_PathPublisher);
 
             }
 
@@ -418,7 +440,7 @@ public:
     	TIME_T now = NOW;
     	double duration = DURATION(statistic.time_map_lastReceive, now);
     	//ROS_INFO("requestNewMapNeeded : %s",STR("Now="<<TIME_STR(now)<<", lastReceive="<<TIME_STR(statistic.time_map_lastReceive)<<", duration="<<duration<<"s"));
-    	return duration > 5;
+    	return duration > 30;
 #else
     	return false;
 #endif
@@ -782,14 +804,16 @@ public:
     void onNewTransitPoints(const std::vector<GPSPoint> points){
     	PathPlanning::EditSession session = _planner.startEdit();
    		session.constraints.gps_transits = points;
-    	session.constraints.transits = _planner.castToTransits(session.constraints.gps_transits);
-		ROS_INFO("GPS_GRID_CASTING: Transits: (from NewTransitPoints)");
-		for(size_t i=0;i<session.constraints.transits.size();i++){
-			ROS_INFO("... gps(%f,%f) -> wp(%i,%i)",
-				(float) session.constraints.gps_transits[i].x, (float)session.constraints.gps_transits[i].y,
-				(int) session.constraints.transits[i].x, (int) session.constraints.transits[i].y
-			);
-		}
+   		if(exists_new_map_or_location()){
+			session.constraints.transits = _planner.castToTransits(session.constraints.gps_transits);
+			ROS_INFO("GPS_GRID_CASTING: Transits: (from NewTransitPoints)");
+			for(size_t i=0;i<session.constraints.transits.size();i++){
+				ROS_INFO("... gps(%f,%f) -> wp(%i,%i)",
+					(float) session.constraints.gps_transits[i].x, (float)session.constraints.gps_transits[i].y,
+					(int) session.constraints.transits[i].x, (int) session.constraints.transits[i].y
+				);
+			}
+   		}
     }
     void onNewConstraints(const Constraints& constr){
     	PathPlanning::EditSession session = _planner.startEdit();
