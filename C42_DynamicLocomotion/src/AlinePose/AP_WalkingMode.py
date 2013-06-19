@@ -62,15 +62,30 @@ class AP_WalkingMode(WalkingMode):
         self._BDI_Static_pose = Pose()
         self._started_to_walk = False
         self._target_pose = None
-        self._isDynamic = True#False
+        self._isDynamic = False
         self._StepIndex = 1
-        ## USING parameters:
-        # if ((None != parameters) and ('Motion' in parameters)):
-        #     DesiredMotion = parameters['Motion']
-        #     if "Dynamic" == DesiredMotion:
-        #         self._isDynamic = True
-        #     else:
-        #         self._isDynamic = False
+
+        # parameters to tune (see also 'Motion' task parameters):
+        self._err_rot = 0.018#0.10 # [rad]
+        self._err_trans = 0.02# 0.1 # [meters]
+
+        ## USING task parameters:
+        if ((None != parameters) and ('Motion' in parameters)):
+            DesiredMotion = parameters['Motion']
+            if "Dynamic" == DesiredMotion: # Dynamic parameters
+                self._isDynamic = True
+                self._stepWidth = 0.2#0.3 # Width of stride
+                self._theta_max = 0.15#0.35 # max turning angle per step
+                self._x_length_max = 0.02#0.25 # [meters] max step length (radius =~ 0.42 [m])
+                self._y_length_max = 0.15#0.2 # [meters]               
+        else: # Quasi-Static parameters (default)
+            self._isDynamic = False
+            self._stepWidth = 0.25 # Width of stride
+            self._theta_max = 0.30 # max turning angle per step
+            self._x_length_max = 0.25 # [meters] max step length (radius =~ 0.42 [m])
+            self._y_length_max = 0.15 # [meters]
+        self._R = self._stepWidth/2 # Radius of turn, turn in place
+
         # parameter 'Object' uses service to get delta alignment to target object 
         if ((None != parameters) and ('Object' in parameters)):
             self._DesiredObject = parameters['Object']
@@ -222,11 +237,6 @@ class AP_WalkingMode(WalkingMode):
 
     
     def _RequestTargetPose(self,desired_object):
-        err_rot = 0.018#0.10 # [rad]
-        err_trans = 0.02# 0.1 # [meters]
-        self._stepWidth = 0.2#0.3 # Width of stride
-        self._R = self._stepWidth/2 # Radius of turn, turn in place
-
         # Perform a service request from FP
         try:
             # Handle preemption?
@@ -250,15 +260,15 @@ class AP_WalkingMode(WalkingMode):
             start_position = copy.copy(self._BDI_Static_pose.position)
             start_orientation = euler_from_quaternion([self._BDI_Static_pose.orientation.x, self._BDI_Static_pose.orientation.y, self._BDI_Static_pose.orientation.z, self._BDI_Static_pose.orientation.w])
             self._foot_placement_path = []
-            if math.fabs(delta_yaw) > err_rot:
+            if math.fabs(delta_yaw) > self._err_rot:
                 self._foot_placement_path = self._foot_placement_path + self._GetRotationDeltaFP_Path(delta_yaw,start_position,start_orientation)
                 self._started_to_walk = True
-            if self._DistanceXY(delta_trans) > err_trans:
+            if self._DistanceXY(delta_trans) > self._err_trans:
                 self._foot_placement_path = self._foot_placement_path + self._GetTranslationDeltaFP_Path(delta_yaw,delta_trans,start_position,start_orientation)
                 self._started_to_walk = True
 
             #listSteps = []
-            # if (math.fabs(delta_yaw) <= err_rot) and (self._DistanceXY(delta_trans) <= err_trans): # finished task
+            # if (math.fabs(delta_yaw) <= self._err_rot) and (self._DistanceXY(delta_trans) <= self._err_trans): # finished task
             if [] == self._foot_placement_path and self._started_to_walk: # 1 == resp.done:
                 self._WalkingModeStateMachine.PerformTransition("Finished")
                 # if big error need to finish with error (didn't reach goal)
@@ -353,7 +363,7 @@ class AP_WalkingMode(WalkingMode):
         print ("_GetRotationDeltaFP_Path yaw:",delta_yaw, "start ori:",start_orientation )
         foot_placement_path = []
         
-        theta_max = 0.018#0.35 # max turning angle per step
+        theta_max = self._theta_max # max turning angle per step
 
         ### Turn in place (pivot):
         Num_seq = int(math.floor(math.fabs(delta_yaw)/theta_max))
@@ -412,8 +422,8 @@ class AP_WalkingMode(WalkingMode):
     def _GetTranslationDeltaFP_Path(self,delta_yaw,delta_trans,start_position,start_orientation):
         print ("_GetTranslationDeltaFP_Path deltaXY:",delta_trans, "start ori:",start_orientation)
         foot_placement_path = []
-        x_length_max = 0.02#0.25 # [meters] max step length (radius =~ 0.42 [m])
-        y_length_max = 0.15#0.2 # [meters]
+        x_length_max = self._x_length_max # [meters] max step length (radius =~ 0.42 [m])
+        y_length_max = self._y_length_max # [meters]
 
         # yaw angle of robot
         theta0 = -start_orientation[2] #copy.copy(start_orientation[2])       

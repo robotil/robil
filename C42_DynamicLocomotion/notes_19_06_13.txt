@@ -45,6 +45,8 @@ To run Walker:
        $ rosrun C42_DynamicLocomotion WalkerNode.py <Trans or Rot> # for translation or rotation
 
     2. run task using C0 task_tester:
+      * TO RUN DYNAMIC STEPS type (else default is STATIC STEPS):
+       $ rosrun C0_RobilTask task_tester WalkerNode_Translation args=IsDynamic=Yes,<Translate_X=1.0,Translate_Y=0.0 OR Rotate=-1.57>
       For Translation:
        $ rosrun C0_RobilTask task_tester WalkerNode_Translation args="Translate_X=1.0,Translate_Y=0.0"
        Translate_X and Translate_Y are optional, defaulting to 0.0 in locla frame coordiantes
