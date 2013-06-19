@@ -1,6 +1,7 @@
 <plan descriptions="./plans/TaskDescriptions.xml">
-   <par name="@1" x="431.1252299203104" y="29.563012172907406" collapsed="false" id="49b87a37-f452-47bc-8ef2-b02eeea48ac7"> 
-         <tsk name="LocalizationTrack" x="230.73237277745307" y="180.18801217290707" test_time="0" test_result="true" id="8e1c34b3-9fd0-412f-afa4-fc499d9c31d5" />
-         <tsk name="WalkerNode_Continuous" x="581.8015824045237" y="317.7014358190779" test_time="0" test_result="true" id="2955b13a-60e6-4b55-9990-50670a9987c0" />
+   <par name="@1" x="469.1252299203104" y="41.563012172907406" collapsed="false" id="49b87a37-f452-47bc-8ef2-b02eeea48ac7"> 
+         <tsk name="LocalizationTrack" x="268.73237277745307" y="192.18801217290707" test_time="0" test_result="true" id="8e1c34b3-9fd0-412f-afa4-fc499d9c31d5" />
+         <tsk name="WalkerNode_Continuous" x="412.80158240452374" y="309.7014358190779" test_time="0" test_result="true" id="2955b13a-60e6-4b55-9990-50670a9987c0" />
+         <tsk name="PathPlanning" x="601.5" y="179.5" test_time="0" test_result="true" id="e192acf7-5f3b-4dfb-b673-d4c34dfc9a67" />
    </par>
 </plan>
