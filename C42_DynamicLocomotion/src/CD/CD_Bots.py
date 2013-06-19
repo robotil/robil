@@ -42,6 +42,10 @@ class CD_Robot(object):
         
     def GetIndex(self):
         return self._index 
+    
+    def IsEndOfPath(self):
+        return self._LPP.IsEndOfPath()
+    
 ###################################################################################
 #-------------------------------- Actual Bot --------------------------------------
 ###################################################################################
@@ -66,10 +70,6 @@ class CD_ActualRobot(CD_Robot):
         self._StepQueue.popleft()
         self._index+=1
         return command
-    
-
-    def IsEndOfPath(self):
-        return self._LPP.IsEndOfPath()
     
     def GetPathError(self):
         return self._LPP.GetPathError()
@@ -96,7 +96,7 @@ class CD_PhantomRobot(CD_Robot):
         self._Odometer = odometer
         
         # Parameters
-        self._StepWidth = 0.1
+        self._StepWidth = 0.15
         self._Duration = 0.63
         self._SwingHeight  = 0.2
         self._MinimalCorrection = 0.02
@@ -120,7 +120,8 @@ class CD_PhantomRobot(CD_Robot):
 
     def PrepareNextSegment(self):
         if (self._LPP.IsEndOfPath()):
-            self.AddFinalSteps()
+            self._AddIdleSteps()
+            #self.AddFinalSteps()
         else:
             self._Pivot(self._LPP.GetAngleToNextSegment())
             self._LPP.PromoteSegment()
