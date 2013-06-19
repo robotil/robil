@@ -26,6 +26,9 @@ class CD_Robot(object):
         self._LPP = pathPlanner
         self._StepQueue = stepQueue
         self._index = 0
+        
+        # Parameters
+        self._StepLength = 0.3
 
     def Initialize(self,stepQueue,index):
         self._StepQueue = stepQueue
@@ -52,10 +55,14 @@ class CD_ActualRobot(CD_Robot):
         self._Yaw = 0
 
     def Step(self):
-        command = AtlasSimInterfaceCommand()
-        command.behavior = AtlasSimInterfaceCommand.WALK
-        for i in range(4):
-            command.walk_params.step_queue[i] = self._StepQueue[i]
+        if (3<len(self._StepQueue)):
+            command = AtlasSimInterfaceCommand()
+            command.behavior = AtlasSimInterfaceCommand.WALK
+            for i in range(4):
+                command.walk_params.step_queue[i] = self._StepQueue[i]
+        else:
+            print("Sending STAND Command")
+            command = AtlasSimInterfaceCommand(None,AtlasSimInterfaceCommand.STAND, None, None, None, None, [0]*28)
         self._StepQueue.popleft()
         self._index+=1
         return command
@@ -74,7 +81,7 @@ class CD_ActualRobot(CD_Robot):
         self._LPP.PromoteSegment()
 
     def SetPosition(self,x,y):
-        self._LPP.UpdatePosition(x,y,0.2)
+        self._LPP.UpdatePosition(x,y,0*self._StepLength)
     
 ###################################################################################
 #-------------------------------- Phantom Bot -------------------------------------
@@ -89,7 +96,6 @@ class CD_PhantomRobot(CD_Robot):
         self._Odometer = odometer
         
         # Parameters
-        self._StepLength = 0.3
         self._StepWidth = 0.15
         self._Duration = 0.63
         self._SwingHeight  = 0.2
@@ -114,6 +120,8 @@ class CD_PhantomRobot(CD_Robot):
 
     def PrepareNextSegment(self):
         if (self._LPP.IsEndOfPath()):
+            self._AddIdleSteps()
+            self._AddIdleSteps()
             self._AddIdleSteps()
         else:
             self._Pivot(self._LPP.GetAngleToNextSegment())
@@ -144,6 +152,15 @@ class CD_PhantomRobot(CD_Robot):
         turningAngle = self._LPP.GetTargetYaw() - self._Odometer.GetYaw()
         self._Pivot(turningAngle)
         self._AddIdleSteps()
+        
+    def AddFinalSteps(self):
+        originalStepWidth = self._StepWidth
+        self._StepWidth = 0.15
+        print("adding final steps")
+        self._AddIdleSteps()
+        self._AddIdleSteps()
+        self._AddIdleSteps()
+        self._StepWidth = originalStepWidth
 
     def _PrepareStepData(self):
         self._index  += 1
