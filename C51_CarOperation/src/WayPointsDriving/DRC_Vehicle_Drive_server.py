@@ -20,7 +20,7 @@ import time
 from datetime import datetime, timedelta
 from C25_GlobalPosition.msg import C25C0_ROP
 from C25_GlobalPosition.srv import C25BDI
-from C42_State.msg import MotionType
+#from C42_State.msg import MotionType
 from C31_PathPlanner.msg import C31_Waypoints
 from C31_PathPlanner.srv import C31_GetPath
 import Tkinter
@@ -149,9 +149,9 @@ class Drive(object):
         
         self.sub = rospy.Subscriber('/C25/publish', C25C0_ROP,self.MyLocation_callback) #get atlas location by subscribing to C25 module       
         #self.sub = rospy.Subscriber('/ground_truth_odom', Odometry,self.MyLocation_callback2) #get atlas location by subscribing to C25 module   
-        self.MotionTypeMSG = MotionType()
-        self.MotionTypeMSG.motion =5        
-        self.motionTypePublisher = rospy.Publisher("/motion_state/motion_type", MotionType)        
+#        self.MotionTypeMSG = MotionType()
+#        self.MotionTypeMSG.motion =5        
+#        self.motionTypePublisher = rospy.Publisher("/motion_state/motion_type", MotionType)        
 
         
 
@@ -290,7 +290,7 @@ class Drive(object):
         
         return ([flag, b, m])
     def DriveCallback(self, goal):
-        self.motionTypePublisher.publish(self.MotionTypeMSG)
+        #self.motionTypePublisher.publish(self.MotionTypeMSG)
         num = Int32(0)
         rospy.wait_for_service('/C25/BDIswitch')
         try:
@@ -300,7 +300,7 @@ class Drive(object):
             print "Service /C25/BDISwitch call failed: %s"%e
             log.info("Might be driving without Global Position")
         gasP=Gas() #gas pedal online
-        brakeP=Brake() #gas pedal online
+        #brakeP=Brake() #gas pedal online
         #Steer=SW()      #steering wheel online        
         self._result.success = 1
              
@@ -315,13 +315,13 @@ class Drive(object):
         
         self.C31_path = numpy.array([])
         self.sub = rospy.Subscriber('/path', C31_Waypoints,self.getPath) #get atlas location by subscribing to C25 module        
-        self.path=  [(51,0), (97,0), (102, 5),(113, 13.5),  (146.5, 46.35), (148, 56.45), (148, 92), (160.45, 102), (198, 102) ]#self.C31_path#(5, -1.5), (18, -1.5),
+        self.path= self.C31_path#(5, -1.5), (18, -1.5), [(51,0), (97,0), (102, 5),(113, 13.5),  (146.5, 46.35), (148, 56.45), (148, 92), (160.45, 102), (198, 102) ]#
         DATA=LOG()
         DATA.StartDrive = DATA.getTime()
         
         while not rospy.is_shutdown():
             i=0
-            brakeP.brake(0)
+            #brakeP.brake(0)
             if not self.path:
                 flag=0
                 while (not self.path and flag!=10):
@@ -337,8 +337,8 @@ class Drive(object):
                         success = False
                         rospy.loginfo('%s: Preempted' % self._action_name)
                         self._as.set_preempted()
-                        gasP.gas(0)
-                        brakeP.brake(1)
+                        #gasP.gas(0)
+                        #brakeP.brake(1)
                         self.exit_Drive(DATA, 1)
                         return
                     DATA.WayPoint(object)
@@ -357,7 +357,7 @@ class Drive(object):
                                 rospy.loginfo('%s: Preempted' % self._action_name)
                                 self._as.set_preempted()
                                 gasP.gas(0)
-                                brakeP.brake(1)
+                                #brakeP.brake(1)
                                 self.exit_Drive(DATA, 1)
                                 return
                             DATA.MyPath(self.xPosition, self.yPosition)
@@ -378,13 +378,13 @@ class Drive(object):
                             
                             #rospy.sleep(0.05)
                             #dSpeed = 0.5
-                            [  acc, brk] = self.SpeedController(dSpeed/2.5)
+                            #[  acc, brk] = self.SpeedController(dSpeed/2.5)
                             Cspeed = Cspeed*pi
                             #print brk, acc
                             #rospy.sleep(0.5)
                             
                             gasP.gas(acc)
-                            brakeP.brake(brk)
+                            #brakeP.brake(brk)
                             while not wheel_Q.empty():
                                 a = wheel_Q.get()
                             #print "sending"
@@ -416,19 +416,19 @@ class Drive(object):
                     i+=1
                     
             self.path=self.C31_path #[]#
-            try:
-                if (sqrt((self.path[-1][0]-self.xPosition)*(self.path[-1][0]-self.xPosition) +(self.path[-1][1]-self.yPosition)*(self.path[-1][1]-self.yPosition))<0.5):
-                    print "get out!!!!!!!!!!!!!!!!!!!!!!", self.path[-1], self.xPosition, self.yPosition
-                    gasP.gas(0)
-                    brakeP.brake(1)
-                    self.exit_Drive(DATA, 0)
-                    break   
-            except:
-                print "path array is empty", self.path
-                gasP.gas(0)
-                brakeP.brake(1)
-                self.exit_Drive(DATA, 0)
-                break   
+#            try:
+#                if (sqrt((self.path[-1][0]-self.xPosition)*(self.path[-1][0]-self.xPosition) +(self.path[-1][1]-self.yPosition)*(self.path[-1][1]-self.yPosition))<0.5):
+#                    print "get out!!!!!!!!!!!!!!!!!!!!!!", self.path[-1], self.xPosition, self.yPosition
+#                    gasP.gas(0)
+#                    brakeP.brake(1)
+#                    self.exit_Drive(DATA, 0)
+#                    break   
+#            except:
+#                print "path array is empty", self.path
+#                gasP.gas(0)
+#                brakeP.brake(1)
+#                self.exit_Drive(DATA, 0)
+#                break   
             
         gasP.gas(0)
         rospy.loginfo('Finished Driving!! Please run "FinishDrive" client, in order to pull hand brake.')
@@ -566,26 +566,30 @@ class Gas:
     pub=0
     sub=0
     def __init__(self):
-        self.pub = rospy.Publisher(car+'/gas_pedal/cmd', Float64)
-        self.sub = rospy.Subscriber('/'+car+'/gas_pedal/state', Float64, self.gasCallback)
+        self.pub = rospy.Publisher('PedalsManipulation/move_right_pedal', Float64)
+#        self.pub = rospy.Publisher(car+'/gas_pedal/cmd', Float64)
+#        self.sub = rospy.Subscriber('/'+car+'/gas_pedal/state', Float64, self.gasCallback)
     def gasCallback(self, data):
         self.status=data.data
 
     def gas(self, num):
-        self.pub.publish(num)
+        s = Float64(num*10)
+        self.pub.publish(s)
 
 class Brake:
     status=-11
     pub=0
     sub=0
     def __init__(self):
-        self.pub = rospy.Publisher(car+'/brake_pedal/cmd', Float64)
-        self.sub = rospy.Subscriber('/'+car+'/brake_pedal/state', Float64, self.brakeCallback)
+        self.pub = rospy.Publisher('PedalsManipulation/move_right_pedal', Float64)        
+        #self.pub = rospy.Publisher(car+'/brake_pedal/cmd', Float64)
+        #self.sub = rospy.Subscriber('/'+car+'/brake_pedal/state', Float64, self.brakeCallback)
     def brakeCallback(self, data):
         self.status=data.data
 
     def brake(self, num):
-        self.pub.publish(num)
+        s = Float64(num*100)
+        self.pub.publish(s)
 
 class SW:
     status=0
