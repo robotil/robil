@@ -14,10 +14,11 @@ from DW.DW_WalkingMode import *
 from CD.CD_WalkingMode import *
 from AlinePose.AP_WalkingMode import *
 from Trans.Trans_WalkingMode import *
+from Trans10.Trans10_WalkingMode import *
 from Rot.Rot_WalkingMode import *
 
 class WalkingModeChooserEnum:
-    DontCare,CD,QS,DD,DW,AP,Rot,Trans = range(8)
+    DontCare,CD,QS,DD,DW,AP,Rot,Trans,Trans10 = range(9)
 
 class WalkingModeChooser(WalkingModeChooserInterface):
 
@@ -33,7 +34,7 @@ class WalkingModeChooser(WalkingModeChooserInterface):
         self._EnumDictionary = {'CD':WalkingModeChooserEnum.CD,'QS':WalkingModeChooserEnum.QS,\
                                 'DD':WalkingModeChooserEnum.DD,'DW':WalkingModeChooserEnum.DW,\
                                 'AP':WalkingModeChooserEnum.AP,'Rot':WalkingModeChooserEnum.Rot,\
-                                'Trans':WalkingModeChooserEnum.Trans}
+                                'Trans':WalkingModeChooserEnum.Trans,'Trans10':WalkingModeChooserEnum.Trans10}
 
         self._ConstructWalkingModes(iTf)
         
@@ -103,5 +104,7 @@ class WalkingModeChooser(WalkingModeChooserInterface):
             self._Modes = {'Rot':Rot_WalkingMode(iTf)}
         elif self._Preferred in ('Trans'):
             self._Modes = {'Trans':Trans_WalkingMode(iTf)}
+        elif self._Preferred in ('Trans10'):
+            self._Modes = {'Trans10':Trans10_WalkingMode(iTf)}
         else:
             print("WalkingModeChooser::ConstructWalkingModes: failed")
