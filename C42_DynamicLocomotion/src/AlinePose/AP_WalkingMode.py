@@ -62,8 +62,12 @@ class AP_WalkingMode(WalkingMode):
         self._BDI_Static_pose = Pose()
         self._started_to_walk = False
         self._target_pose = None
-        self._isDynamic = False
         self._StepIndex = 1
+        self._isDynamic = False
+        self._stepWidth = 0.25 # Width of stride
+        self._theta_max = 0.30 # max turning angle per step
+        self._x_length_max = 0.25 # [meters] max step length (radius =~ 0.42 [m])
+        self._y_length_max = 0.15 # [meters]
 
         # parameters to tune (see also 'Motion' task parameters):
         self._err_rot = 0.018#0.10 # [rad]
@@ -77,7 +81,13 @@ class AP_WalkingMode(WalkingMode):
                 self._stepWidth = 0.2#0.3 # Width of stride
                 self._theta_max = 0.15#0.35 # max turning angle per step
                 self._x_length_max = 0.02#0.25 # [meters] max step length (radius =~ 0.42 [m])
-                self._y_length_max = 0.15#0.2 # [meters]               
+                self._y_length_max = 0.15#0.2 # [meters]
+            if "Dynamic10" == DesiredMotion: # Dynamic parameters
+                self._isDynamic = True
+                self._stepWidth = 0.2 #0.3 # Width of stride
+                self._theta_max = 0.15 #0.35 # max turning angle per step
+                self._x_length_max = 0.10 #0.25 # [meters] max step length (radius =~ 0.42 [m])
+                self._y_length_max = 0.10 #0.2 # [meters]                         
         else: # Quasi-Static parameters (default)
             self._isDynamic = False
             self._stepWidth = 0.25 # Width of stride

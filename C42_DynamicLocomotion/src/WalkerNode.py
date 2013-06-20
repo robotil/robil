@@ -25,6 +25,7 @@ class WalkerNode:
         print " AP for Align Pose mode"
         print " Rot for Rotation"
         print " Trans for Translation"
+        print " Trans for Translation 10cm"
 
 if __name__ == '__main__':
     wn = WalkerNode()
@@ -81,6 +82,12 @@ if __name__ == '__main__':
         walkingModeChooser = WalkingModeChooser(walkingMode)
         node = DynamicLocomotion("WalkerNode_Translation",walkingModeChooser)
         print "WalkerNode_Translation created"
+        rospy.spin()
+    elif walkingMode in ('Trans10'):
+        rospy.init_node('WalkerNode_Translation10')
+        walkingModeChooser = WalkingModeChooser(walkingMode)
+        node = DynamicLocomotion("WalkerNode_Translation10",walkingModeChooser)
+        print "WalkerNode_Translation10 created"
         rospy.spin()
     else:
         wn.PrintHelp()
