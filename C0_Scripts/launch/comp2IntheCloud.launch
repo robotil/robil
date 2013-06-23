@@ -1,0 +1,8 @@
+<launch>
+
+	<include file="$(find C45_PostureControl)/launch/C45_PostureControl.launch" />
+	<include file="$(find C0_Scripts)/launch/dm.launch" />
+	
+	<include file="$(find C0_Scripts)/launch/walking.launch" />
+
+</launch>

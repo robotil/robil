@@ -536,7 +536,7 @@ void C11_Agent_Node::ExecuterStackSubscriber(const std_msgs::StringConstPtr& sta
 //	cout<<"ExecuterStackUpdate: "<< stack << "\n";
 //	cout<<endl<<endl<<endl<<endl<<endl<<endl;
 	QString str(stack->data.data());
-	pIAgentInterface->SendExecuterStack(str);
+//	pIAgentInterface->SendExecuterStack(str);
 //	cout<<"ExecuterStackUpdate: "<< str.toStdString() << "\n";
 
 }

@@ -9,6 +9,6 @@
 	<node pkg="C42_DynamicLocomotion" type="DWStandUp.py" name="DWStand" output="log" respawn="true" />
    <node pkg="C42_DynamicLocomotion" type="WalkerNode.py" name="Trans" args="Trans" output="log" respawn="true" />
    <node pkg="C42_DynamicLocomotion" type="WalkerNode.py" name="Rot"  args="Rot" output="log" respawn="true" />
-   <node pkg="C42_DynamicLocomotion" type="WalkerNode.py" name="Trans" args="Trans10" output="log" respawn="true" />
+   <node pkg="C42_DynamicLocomotion" type="WalkerNode.py" name="Trans10" args="Trans10" output="log" respawn="true" />
   
 </launch>

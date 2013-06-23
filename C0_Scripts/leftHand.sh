@@ -2,13 +2,13 @@
 #This script should start the posture modules
 
 echo "Start  PoseController"
-rosservice call /PoseController/start "{}" 
+#rosservice call /PoseController/start "{}" 
 echo "Started"
 #rosservice call /PoseController/neck_movement "neck_ay: 0.0"
 echo "Move head position 0: rosservice call /PoseController/back_lbz_neck_ay 'back_lbz: 0.0 
 neck_ay: 0.7'"
-rosservice call /PoseController/back_lbz_neck_ay "back_lbz: 0.0
-neck_ay: 0.7"
+#rosservice call /PoseController/back_lbz_neck_ay "back_lbz: 0.0
+#neck_ay: 0.7"
 
 echo "Done"
 echo "Left hand position 0"
