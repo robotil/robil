@@ -1,6 +1,6 @@
 <launch>
 	<!-- Run the viso2_ros package -->
-	<node pkg="viso2_ros" type="stereo_odometer" name="stereo_odometer" respawn="true">
+	<node pkg="viso2_ros" type="stereo_odometer" name="stereo_odometer" output="log" respawn="true">
 		<remap from="stereo" to="/multisense_sl/camera"/>
 		<remap from="image" to="image_rect_color"/>
 	</node>
