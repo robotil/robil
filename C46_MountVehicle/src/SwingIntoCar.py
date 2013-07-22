@@ -1,5 +1,6 @@
 #! /usr/bin/env python
-import roslib; roslib.load_manifest('C46_MountVehicle')
+#import roslib; roslib.load_manifest('C46_MountVehicle')
+import roslib; roslib.load_manifest('SwingIntoCar')
 import math, rospy, os, rosparam
 import tf
 from sensor_msgs.msg import JointState
