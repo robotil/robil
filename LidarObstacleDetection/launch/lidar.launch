@@ -1,3 +1,4 @@
  <launch>
- <node name="lidar" pkg="LidarObstacleDetection" type="Lidar" respawn="true"/>
+ <node name="lidar" pkg="LidarObstacleDetection" type="Lidar"/>
+  <!--  name="lidar" pkg="LidarObstacleDetection" type="Lidar" respawn="true"/ !-->
  </launch>
