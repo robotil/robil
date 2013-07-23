@@ -24,13 +24,14 @@ class MountVehicleServer(RobilTask):
 		#pub.publish()
 
 		SwingIntoCar.do_main_thing()
-
+		#STC_Controller()
+		#SwingIntoCar.main()
 
 		#Task succeeded
 		return RTResult_SUCCESSED("Finished in Success")
 
 if __name__ == '__main__':
 	rospy.init_node('C46_MountVehicle')
-	SwingIntoCar.do_main_thing()
+	#SwingIntoCar.do_main_thing()
 	MountVehicleServer()
 	rospy.spin()

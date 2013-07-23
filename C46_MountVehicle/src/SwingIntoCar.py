@@ -1,6 +1,6 @@
 #! /usr/bin/env python
-#import roslib; roslib.load_manifest('C46_MountVehicle')
-import roslib; roslib.load_manifest('SwingIntoCar')
+import roslib; roslib.load_manifest('C46_MountVehicle')
+#import roslib; roslib.load_manifest('SwingIntoCar')
 import math, rospy, os, rosparam
 import tf
 from sensor_msgs.msg import JointState
@@ -646,7 +646,8 @@ class STC_Controller(object):
 ######################### USAGE EXAMPLE ##########################
 ##################################################################
 
-if __name__=='__main__':
+#if __name__=='__main__':
+def do_main_thing():
     STC = STC_Controller([])
 
     rospy.sleep(0.5)
