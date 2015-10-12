@@ -864,10 +864,12 @@ namespace move_base {
 			PathPlanAlphaBetaFilter::Path current_path = PathPlanAlphaBetaFilter::path_from_pose_stamped_vector_path(*controller_plan_);
 
 
-		    if (!ros::param::getCached("dampening/alpha", dampening_alpha)) {
+			ros::NodeHandle node("~");
+
+		    if (!node.getParamCached("dampening/alpha", dampening_alpha)) {
 				dampening_alpha = 0.5;
 			}
-			if (!ros::param::getCached("dampening/smooth_resolution", dampening_smooth_resolution)) {
+			if (!node.getParamCached("dampening/smooth_resolution", dampening_smooth_resolution)) {
 				dampening_smooth_resolution = 0.5;
 			}
 
