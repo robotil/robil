@@ -1,0 +1,2 @@
+int32 resulution_width
+int32 resulution_height
