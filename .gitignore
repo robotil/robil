@@ -16,6 +16,7 @@ install/*
 src/CMakeLists.txt
 *.idea*
 /src/monitoring/plp_waypoint/nbproject/private/
+.metadata/*
 
 # Eclipse files
 .cproject
