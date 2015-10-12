@@ -206,9 +206,9 @@ PathPlanAlphaBetaFilter::Path
 	double np_len = len(new_path);
 	double min_len = fmin(op_len, np_len);
 
-	if(min_len<5) return old_path;
+	if(min_len<smooth_resolution) return old_path;
 
-	int num_of_points = min_len/5.0;
+	int num_of_points = min_len/smooth_resolution;
 
 	old_path = approx(old_path, op_len/num_of_points);
 	new_path = approx(new_path, np_len/num_of_points);
@@ -218,7 +218,7 @@ PathPlanAlphaBetaFilter::Path
 		Point p = old_path[i]*Point(alpha) + new_path[i]*Point(1.0-alpha);
 		resulted_path.push_back(p);
 	}
-	return approx( resulted_path, 30 );
+	return approx( resulted_path, result_path_step );
 }
 
 

@@ -44,6 +44,9 @@
 #include <geometry_msgs/Twist.h>
 
 #include <move_base/PathPlanAlphaBetaFilter.h>
+#include <tf/LinearMath/Quaternion.h>
+
+#include <fstream>
 
 namespace move_base {
 
@@ -78,6 +81,8 @@ namespace move_base {
 
     private_nh.param("oscillation_timeout", oscillation_timeout_, 0.0);
     private_nh.param("oscillation_distance", oscillation_distance_, 0.5);
+
+
 
     //set up plan triple buffer
     planner_plan_ = new std::vector<geometry_msgs::PoseStamped>();
@@ -836,7 +841,7 @@ namespace move_base {
 
 		for (int i = 0; i < controller_plan_->size(); ++i) {
 			//copy all the points.
-			original_path.poses = std::vector<geometry_msgs::PoseStamped>(*controller_plan_);
+			original_path.poses.push_back(controller_plan_->at(i));
 		}
 
 		original_global_path_publisher_.publish(original_path);
@@ -844,7 +849,7 @@ namespace move_base {
 
 		//currently, last_path holds the last published plan, and controller_plan holds the new plan.
 		if(last_path_plan!=NULL){
-			//perform dampening
+			//perform dampening of current path with last path.
 
 			tf::Stamped<tf::Pose> global_pose;
 			planner_costmap_ros_->getRobotPose(global_pose);
@@ -858,56 +863,108 @@ namespace move_base {
 			PathPlanAlphaBetaFilter::Path old_path = PathPlanAlphaBetaFilter::path_from_pose_stamped_vector_path(*last_path_plan);
 			PathPlanAlphaBetaFilter::Path current_path = PathPlanAlphaBetaFilter::path_from_pose_stamped_vector_path(*controller_plan_);
 
+
+		    if (!ros::param::getCached("dampening/alpha", dampening_alpha)) {
+				dampening_alpha = 0.5;
+			}
+			if (!ros::param::getCached("dampening/smooth_resolution", dampening_smooth_resolution)) {
+				dampening_smooth_resolution = 0.5;
+			}
+
+			dampening_result_path_step = 0.3; //TODO: distance between first and second points
+
+
+
+			static std::ofstream dampening_file("/tmp/dampening.log");
+			static boost::posix_time::ptime start_sys_time = boost::posix_time::second_clock::local_time();
+			#define NOW double((double)(boost::posix_time::second_clock::local_time() - start_sys_time).total_microseconds()/(double)1000000.0)
+
+			dampening_file<< " start: " << NOW;
 			std::vector<PathPlanAlphaBetaFilter::Point> dampening_plan =
 					dampening_filter.update(
 							rob_point,
 							old_path,
 							current_path,
-							0.5,
-							5,
-							5
+							dampening_alpha,
+							dampening_result_path_step, //0.3
+							dampening_smooth_resolution //0.5
 					);
 
+			dampening_file<< "\t end: " << NOW << "\n";
+
+			dampening_file.flush();
+			#undef NOW
+
+
+			///////////////////////////////
+			////// write to file
+			//////////////////////////////
+			static std::ofstream file("/tmp/path.log");
+			static long path_id=0;
+
+			file << "id = " << (path_id++) << " -------- " << std::endl;
+			file << "   prev.  path : "<<std::endl;
+			for(size_t i=0;i<old_path.size();i++)
+				file <<"      "<<old_path[i].x << ", "<<old_path[i].y << std::endl;
+			file << "   new.   path : "<<std::endl;
+			for(size_t i=0;i<current_path.size();i++)
+				file <<"      "<<current_path[i].x << ", "<<current_path[i].y << std::endl;
+
+
+
+			file << "   result path : "<<std::endl;
+			for(size_t i=0;i<dampening_plan.size();i++)
+				file <<"      "<<dampening_plan[i].x << ", "<<dampening_plan[i].y << std::endl;
+
+			file.flush();
+
+			///////////////////////////////
+			////// END OF write to file
+			//////////////////////////////
+
+
+
 			//copy the dampening plan into the current path plan
-			//TODO: assign all the pose with orientation
-			//TODO: also assign header.
+			std_msgs::Header points_header = controller_plan_->at(0).header;
 			controller_plan_->clear();
+
 			for(int i=0; i<dampening_plan.size(); ++i){
 				geometry_msgs::PoseStamped point;
 
-				PathPlanAlphaBetaFilter::Point current = dampening_plan.at(i);
-				point.pose.position.x = current.x;
-				point.pose.position.y = current.y;
+				point.pose.position.x = dampening_plan.at(i).x;
+				point.pose.position.y = dampening_plan.at(i).y;
+
+				point.header = points_header;
+
+				//assign the orientation according to the next point.
 				if(i< dampening_plan.size()-1){
 					//this point has a "next point", to calculate angle from.
+					geometry_msgs::Point diff_from_next_point;
+					diff_from_next_point.x = dampening_plan.at(i+1).x - point.pose.position.x;
+					diff_from_next_point.y = dampening_plan.at(i+1).y - point.pose.position.y;
+
+					double yaw = atan2(diff_from_next_point.y, diff_from_next_point.x);
+					tf::Quaternion orientation =  tf::Quaternion(yaw, 0, 0);
+					point.pose.orientation.x =orientation.x();
+					point.pose.orientation.y =orientation.y();
+					point.pose.orientation.z =orientation.z();
+					point.pose.orientation.w =orientation.w();
 				} else {
 					//this point has no "next point" to calculate angle from. take the goal as angle.
+					point.pose.orientation = goal.pose.orientation;
 				}
 
-
+				controller_plan_->push_back(point);
 			}
-
-
-
 
 			//clear last path, and save the new one
 			last_path_plan->clear();
 			last_path_plan = controller_plan_;
 		} else {
-			//do not perform dampening, and take only the new plan.
+			//this is the first plan - do not perform dampening, and take only the new plan.
 			//no need for clearing.
 			last_path_plan = controller_plan_;
 		}
-
-
-
-      /*for(int i=0 ; i< controller_plan_->size(); ++i){
-    	  controller_plan_->at(i).pose.position.x += ((float)i ) / 5;
-      }*/
-
-
-
-
 
 
 

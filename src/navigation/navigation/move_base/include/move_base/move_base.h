@@ -206,6 +206,11 @@ namespace move_base {
       std::vector<geometry_msgs::PoseStamped>* last_path_plan;
       PathPlanAlphaBetaFilter dampening_filter;
 
+      //dampening / smoothing  parameters.
+	double dampening_alpha, dampening_result_path_step, dampening_smooth_resolution;
+
+
+
       MoveBaseState state_;
       RecoveryTrigger recovery_trigger_;
 

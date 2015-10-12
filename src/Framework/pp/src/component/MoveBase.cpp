@@ -905,17 +905,20 @@ void MoveBase::on_goal(const geometry_msgs::PoseStamped& robil_goal){
 	double distance_to_gaol = hypot( gotten_location.pose.pose.position.x-robil_goal_x , gotten_location.pose.pose.position.y-robil_goal_y);
 	static int rejection_counter=0;
 	if(
+
+//		true
+
 //		last_nav_goal.goal.target_pose.pose.position.x == robil_goal_x and
 //		last_nav_goal.goal.target_pose.pose.position.y == robil_goal_y
 	  
 		( rejection_counter < 50 and distance_prev_and_new_goal < 1.5 )
-		or 
+		or
 		distance_to_gaol > 90
-		
+
 	){
 	    if( distance_prev_and_new_goal > 0.5 )
 	    {
-		DBG_INFO_ONCE("Navigation: goal is rejected. the goal is "<<(distance_prev_and_new_goal<1.5?" same one.":"")<<(distance_to_gaol > 90?"too far":"")<<" goal="<<robil_goal_x<<","<<robil_goal_y);
+		//DBG_INFO_ONCE("Navigation: goal is rejected. the goal is "<<(distance_prev_and_new_goal<1.5?" same one.":"")<<(distance_to_gaol > 90?"too far":"")<<" goal="<<robil_goal_x<<","<<robil_goal_y);
 	    }
 	    rejection_counter++;
 	    return;
@@ -937,8 +940,9 @@ void MoveBase::on_goal(const geometry_msgs::PoseStamped& robil_goal){
 	ps_goal.header = goal.header;
 
 	std::stringstream sid ;
+	static long send_counter=0; send_counter++;
 	sid<<"[i] goal #"<< boost::lexical_cast<std::string>(goal_counter) <<": "
-					 << ps_goal.pose.position.x<<","<<ps_goal.pose.position.y;
+					 << ps_goal.pose.position.x<<","<<ps_goal.pose.position.y<<";"<<send_counter;
 	goal.goal_id.id = sid.str();
 	goal.goal_id.stamp = goal.header.stamp;
 	
@@ -947,6 +951,8 @@ void MoveBase::on_goal(const geometry_msgs::PoseStamped& robil_goal){
 	//DBG_INFO("Navigation: set new goal : "<<ps_goal.pose.position.x<<","<<ps_goal.pose.position.y);
 	last_nav_goal_id = goal.goal_id;
 	last_nav_goal = goal;
+
+//	goalCancelPublisher.publish(last_nav_goal_id);
 	goalPublisher.publish(goal);
 
 
